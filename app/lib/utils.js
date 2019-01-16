@@ -315,6 +315,7 @@ module.exports.convertJMI = function(from, to, data, field = '_id') {
 
 /**
  * @description Parse option string into option objects.
+ * Error is thrown for nvalid options.
  * Note: Boolean strings are converted to booleans
  *          ex. "true" => true
  *       string seperated commas are converted to arrays
@@ -326,6 +327,21 @@ module.exports.convertJMI = function(from, to, data, field = '_id') {
  * the object's data type as values. ex. populate: 'array'
  */
 module.exports.parseOptions = function(options, validOptions) {
+  // Check option is defined
+  if (!options) {
+    // No options, return empty object
+    return {};
+  }
+
+  // Loop through all options
+  Object.keys(options).forEach(function(key) {
+    // Check options are valid
+    if (!validOptions.hasOwnProperty(key)) {
+      // Invalid key, throw error
+      throw new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+    }
+  });
+
   // Define parsed option object
   const parsedOptions = {};
   // Loop through all options

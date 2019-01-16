@@ -217,11 +217,12 @@ function getOrgs(req, res) {
   let arrOrgID;
   let options;
 
-  // Define valid option type
+  // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    subtree: 'boolean'
+    subtree: 'boolean',
+    orgIDs: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -230,28 +231,27 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate', 'orgIDs'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-    // Check query for orgIDs
-    if (req.query.hasOwnProperty('orgIDs')) {
-      arrOrgID = req.query.orgIDs.split(',');
-    }
-    // No IDs include in query, check body
-    else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
-      arrOrgID = req.body;
-    }
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
-    const options = utils.parseOptions(req.query, validOptions);
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
+  // Check query for orgIDs
+  if (options.orgIDs){
+    arrOrgID = options.orgID;
+    delete options['orgIDs'];
+  }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')){
+    // No IDs include in options, check body
+    arrOrgID = req.body;
+  }
+  console.log(arrOrgID);
+  console.log(options);
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes req.user.
   OrgController.find(req.user, arrOrgID, options)
@@ -296,18 +296,14 @@ function postOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Create organizations in request body
@@ -345,18 +341,14 @@ function patchOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Update the specified orgs
@@ -418,6 +410,7 @@ function getOrg(req, res) {
   let options;
   const validOptions = {
     populate: 'array',
+    archived: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -426,18 +419,14 @@ function getOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Find the org from it's id
@@ -454,7 +443,10 @@ function getOrg(req, res) {
     return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -1588,12 +1580,17 @@ function whoami(req, res) {
  * @return {Object} res response object with elements
  */
 function getElements(req, res) {
+  // Define array ID
+  // Note: Intended to be undefined if not set
+  let arrElemID;
   let options;
-  // Define valid option type
+
+  // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    subtree: 'boolean'
+    subtree: 'boolean',
+    orgIDs: null
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1602,18 +1599,23 @@ function getElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  if (req.query) {
-    // Check if invalid key passed in
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (!['archived', 'populate', 'subtree'].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
-
+  // Attempt to parse query options
+  try {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
+  }
+  catch(error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check query for orgIDs
+  if (req.query && req.query.hasOwnProperty('elementIDs')) {
+    arrElemID = req.query.orgIDs.split(',');
+  }
+  // No IDs include in query, check body
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+    arrElemID = req.body;
   }
 
   // Default branch to master
@@ -1622,7 +1624,7 @@ function getElements(req, res) {
   // Find all elements from it's org.id and project.id
   // NOTE: find() sanitizes req.params.orgid and req.params.projectid
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.params.elementid, options)
+    branchid, arrElemID, options)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
