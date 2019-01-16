@@ -136,7 +136,7 @@ function postElement(done) {
   resFunctions(res);
   req.query = {
     populate: 'contains'
-  }
+  };
   // Verifies the response data
   res.send = function send(_data) {
     const postedElem = JSON.parse(_data);
@@ -299,7 +299,7 @@ function patchElements(done) {
     testData.elements[1],
     testData.elements[2],
     testData.elements[3]
-  ]
+  ];
 
   // Create objects to update elements
   const arrUpdateObjects = arrElemData.map(p => ({
@@ -321,7 +321,8 @@ function patchElements(done) {
   res.send = function send(_data) {
     const arrPatchedElem = JSON.parse(_data);
     chai.expect(arrPatchedElem.map(e => e.name)).to.have.members(
-      arrUpdateObjects.map(e => e.name));
+      arrUpdateObjects.map(e => e.name)
+    );
     done();
   };
 
@@ -372,7 +373,7 @@ function deleteElements(done) {
     testData.elements[9].id,
     testData.elements[11].id,
     testData.elements[10].id
-  ]
+  ];
 
   const params = { orgid: org.id, projectid: projID };
   const method = 'DELETE';
@@ -389,7 +390,8 @@ function deleteElements(done) {
     const arrDeletedElem = JSON.parse(_data);
     chai.expect(arrDeletedElem.length).to.equal(body.length);
     chai.expect(arrDeletedElem.map(e => e.id)).to.have.members(
-      body.map(e => e.id));
+      body.map(e => e.id)
+    );
     done();
   };
 

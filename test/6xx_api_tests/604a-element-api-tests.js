@@ -131,7 +131,6 @@ function postElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const createdElement = JSON.parse(body);
-    console.log(createdElement)
 
 
     // Verify element created properly
@@ -165,7 +164,7 @@ function postElement(done) {
 
     // Verify specific fields not returned
     chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy',  '__v', '_id']);
+      'archivedBy', '__v', '_id']);
     done();
   });
 }
@@ -237,7 +236,7 @@ function postElements(done) {
 
       // Verify specific fields not returned
       chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy',  '__v', '_id']);
+        'archivedBy', '__v', '_id']);
     });
     done();
   });
@@ -295,7 +294,7 @@ function getElement(done) {
 
     // Verify specific fields not returned
     chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy',  '__v', '_id']);
+      'archivedBy', '__v', '_id']);
     done();
   });
 }
@@ -368,7 +367,7 @@ function getElements(done) {
 
       // Verify specific fields not returned
       chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy',  '__v', '_id']);
+        'archivedBy', '__v', '_id']);
     });
     done();
   });
@@ -431,7 +430,7 @@ function patchElement(done) {
 
     // Verify specific fields not returned
     chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy',  '__v', '_id']);
+      'archivedBy', '__v', '_id']);
     done();
   });
 }
@@ -508,7 +507,7 @@ function patchElements(done) {
 
       // Verify specific fields not returned
       chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy',  '__v', '_id']);
+        'archivedBy', '__v', '_id']);
     });
     done();
   });

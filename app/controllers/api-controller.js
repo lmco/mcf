@@ -24,12 +24,13 @@ const multer = require('multer');
 const upload = multer().single('file');
 
 // MBEE Modules
+const ArtifactController = M.require('controllers.artifact-controller');
 const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const WebhookController = M.require('controllers.webhook-controller');
-const ArtifactController = M.require('controllers.artifact-controller');
+const Webhook = M.require('models.webhook');
 const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -417,7 +418,7 @@ function getOrg(req, res) {
   // Define valid option type
   let options;
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -639,14 +640,11 @@ function getOrgMember(req, res) {
     // Returns 200: OK and the users roles
     res.header('Content-Type', 'application/json');
     const userPermissionObj = {};
-    userPermissionObj[req.params.username] = org.permissions[req.params.username]
+    userPermissionObj[req.params.username] = org.permissions[req.params.username];
     return res.status(200).send(formatJSON(userPermissionObj));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error)
-    res.status(error.status).send(error)
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -1749,10 +1747,7 @@ function patchElements(req, res) {
     return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error)
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /*
@@ -1899,10 +1894,7 @@ function postElement(req, res) {
     return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error)
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -1964,10 +1956,7 @@ function patchElement(req, res) {
     return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error)
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -2001,10 +1990,7 @@ function deleteElement(req, res) {
     // Return 200: OK and deleted element
     return res.status(200).send(formatJSON(utils.parseID(element[0]).pop()));
   })
-  .catch((error) => {
-    console.log(error)
-    res.status(error.status).send(error)
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /* -----------------------( Webhooks API Endpoints )------------------------- */
@@ -2025,31 +2011,17 @@ function getWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if archived was provided in the request query
-  if (req.query && req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
-  }
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
 
   // Find the webhook from it's webhook.id, project.id, and org.id
-  // NOTE: find() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
+  // NOTE: find() sanitizes req.params.projectid, req.params.orgid, and req.params.webhookid
   WebhookController.find(req.user, req.params.orgid,
-    req.params.projectid, req.params.webhookid, archived)
-  .then((webhook) => {
+    req.params.projectid, req.params.webhookid, options)
+  .then((webhooks) => {
     // Return a 200: OK and the webhook
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(webhook.getPublicData()));
+    return res.status(200).send(formatJSON(webhooks[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -2082,13 +2054,16 @@ function postWebhook(req, res) {
   // Set id in request body
   req.body.id = req.params.webhookid;
 
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, { populate: 'array' });
+
   // Create webhook with provided parameters
-  // NOTE: creat() sanitizes req.body
-  WebhookController.create(req.user, req.params.orgid, req.params.projectid, req.body)
-  .then((webhook) => {
+  // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and req.body
+  WebhookController.create(req.user, req.params.orgid, req.params.projectid, req.body, options)
+  .then((webhooks) => {
     // Return 200: OK and created webhook
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(webhook.getPublicData()));
+    return res.status(200).send(formatJSON(webhooks[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -2113,15 +2088,19 @@ function patchWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Extract options from request query
+  const options = utils.parseOptions(req.query, { populate: 'array' });
+
+  // Set id in request body
+  req.body.id = req.params.webhookid;
+
   // Update the specified webhook
-  // NOTE: updateWebhook() sanitizes req.params.orgid, req.params.projectid,
-  // and req.params.webhookid
-  WebhookController.update(req.user, req.params.orgid,
-    req.params.projectid, req.params.webhookid, req.body)
-  .then((webhook) => {
+  // NOTE: updateWebhook() sanitizes req.params.orgid, req.params.projectid, and req.body
+  WebhookController.update(req.user, req.params.orgid, req.params.projectid, req.body, options)
+  .then((webhooks) => {
     // Return 200: OK and the updated webhook
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(webhook.getPublicData()));
+    return res.status(200).send(formatJSON(webhooks[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -2136,7 +2115,7 @@ function patchWebhook(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with success boolean
+ * @return {Object} res response object with deleted webhook ids
  */
 function deleteWebhook(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -2145,15 +2124,18 @@ function deleteWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Define options object, none are currently supported
+  const options = {};
+
   // Remove the specified webhook
   // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.webhookid
   WebhookController.remove(req.user, req.params.orgid,
-    req.params.projectid, req.params.webhookid)
-  .then((success) => {
+    req.params.projectid, req.params.webhookid, options)
+  .then((webhookIDs) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and success
-    return res.status(200).send(formatJSON(success));
+    return res.status(200).send(formatJSON(utils.parseID(webhookIDs[0]).pop()));
   })
   .catch((error) => res.status(error.status).send(error));
 }
@@ -2175,23 +2157,23 @@ function postIncomingWebhook(req, res) {
   const webhookUID = Buffer.from(req.params.webhookid, 'base64').toString();
 
   // Find the webhook
-  WebhookController.findWebhooksQuery({ _id: sani.sanitize(webhookUID), archived: false })
-  .then((foundWebhook) => {
+  Webhook.Webhook.find({ _id: sani.sanitize(webhookUID), archived: false })
+  .then((foundWebhooks) => {
     // If no webhooks are found, return a 404 Not Found
-    if (foundWebhook.length === 0) {
+    if (foundWebhooks.length === 0) {
       return res.status(404).send('Not Found');
     }
 
     // If a token is specified in the webhook
-    if (foundWebhook[0].token) {
+    if (foundWebhooks[0].token) {
       // Verify the same token is provided in the request headers
-      if (!foundWebhook[0].verifyAuthority(req.headers[foundWebhook[0].tokenLocation])) {
+      if (!foundWebhooks[0].verifyAuthority(req.headers[foundWebhooks[0].tokenLocation])) {
         return res.status(401).send('Unauthorized');
       }
     }
 
     // For each webhook trigger
-    foundWebhook[0].triggers.forEach((trigger) => {
+    foundWebhooks[0].triggers.forEach((trigger) => {
       // Emit an event, and pass along request body
       events.emit(trigger, req.body);
     });
