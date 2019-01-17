@@ -102,7 +102,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH an org', patchOrg);
   it('should DELETE an org', deleteOrg);
   it('should DELETE orgs', deleteOrgs);
-
 });
 
 /* --------------------( Tests )-------------------- */
@@ -172,9 +171,11 @@ function postOrgMember(done) {
   res.send = function send(_data) {
     const postedPermissions = JSON.parse(_data);
     chai.expect(postedPermissions[testData.users[1].username]).to.have.members(
-      ['read', 'write']);
+      ['read', 'write']
+    );
     chai.expect(postedPermissions[adminUser.username]).to.have.members(
-      ['read', 'write', 'admin']);
+      ['read', 'write', 'admin']
+    );
     done();
   };
 
@@ -370,7 +371,6 @@ function getOrgs(done) {
     testData.orgs[0]
   ];
   // Create request object
-  const body = {};
   const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, orgData, method);

@@ -567,7 +567,6 @@ function deleteElements(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const deletedElementIDs = JSON.parse(body);
-
     chai.expect(deletedElementIDs).to.have.members(elemData.map(p => p.id));
     done();
   });
