@@ -20,6 +20,8 @@ const assert = require('assert');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
+const multer = require('multer');
+const upload = multer().single('file');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -88,6 +90,8 @@ module.exports = {
   postArtifact,
   patchArtifact,
   deleteArtifact,
+  getArtifacts,
+  getArtifactBlob,
   invalidRoute
 };
 /* ------------------------( API Helper Function )--------------------------- */
@@ -215,26 +219,26 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Get all organizations the requesting user has access to
   // NOTE: findOrgs() sanitizes req.user.
-  OrgController.findOrgs(req.user, softDeleted)
+  OrgController.findOrgs(req.user, archived)
   .then((orgs) => {
     // Return only public organization data
     const orgsPublicData = orgs.map(o => o.getPublicData());
@@ -409,25 +413,25 @@ function getOrg(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the org from it's id
   // NOTE: findOrg() sanitizes req.params.orgid
-  OrgController.findOrg(req.user, req.params.orgid, softDeleted)
+  OrgController.findOrg(req.user, req.params.orgid, archived)
   .then((org) => {
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
@@ -534,26 +538,9 @@ function deleteOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified organization
   // NOTE: removeOrg() sanitizes req.params.orgid
-  OrgController.removeOrg(req.user, req.params.orgid, hardDelete)
+  OrgController.removeOrg(req.user, req.params.orgid)
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
@@ -727,25 +714,25 @@ function getProjects(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Get all projects the requesting user has access to
   // NOTE: findProjects() sanitizes req.user and org.id.
-  ProjectController.findProjects(req.user, req.params.orgid, softDeleted)
+  ProjectController.findProjects(req.user, req.params.orgid, archived)
   .then((projects) => {
     // Return only public project data
     const projectPublicData = [];
@@ -898,25 +885,25 @@ function getProject(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the project from it's project.id and org.id
   // NOTE: findProject() sanitizes req.params.projectid and req.params.orgid
-  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, softDeleted)
+  ProjectController.findProject(req.user, req.params.orgid, req.params.projectid, archived)
   .then((project) => {
     // Return a 200: OK and the project's public data
     res.header('Content-Type', 'application/json');
@@ -1023,26 +1010,9 @@ function deleteProject(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified project
   // NOTE: removeProject() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid, hardDelete)
+  ProjectController.removeProject(req.user, req.params.orgid, req.params.projectid)
   .then((project) => {
     // Return 200: OK and the deleted project
     res.header('Content-Type', 'application/json');
@@ -1351,49 +1321,8 @@ function deleteUsers(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['users', 'hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
-  // Initialize the delete query object
-  let deleteQuery = {};
-
-  // No users provided, return an error
-  if (!req.body.hasOwnProperty('users')) {
-    const error = new M.CustomError('Array of users not provided in body.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-  // User objects provided, delete all
-  if (req.body.users.every(u => typeof u === 'object')) {
-    // Query finds all users by their username
-    deleteQuery = { username: { $in: sani.sanitize(req.body.users.map(u => u.username)) } };
-  }
-  // Usernames provided, delete all
-  else if (req.body.users.every(u => typeof u === 'string')) {
-    // Query finds all users by their username
-    deleteQuery = { username: { $in: sani.sanitize(req.body.users) } };
-  }
-  // No valid user data was provided, reject
-  else {
-    const error = new M.CustomError('User array contains invalid types.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Remove the specified users
-  UserController.removeUsers(req.user, deleteQuery, hardDelete)
+  UserController.removeUsers(req.user, req.body)
   .then((users) => {
     res.header('Content-Type', 'application/json');
 
@@ -1575,25 +1504,25 @@ function getElements(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find all elements from it's org.id and project.id
   // NOTE: findElements() sanitizes req.params.orgid and req.params.projectid
-  ElementController.findElements(req.user, req.params.orgid, req.params.projectid, softDeleted)
+  ElementController.findElements(req.user, req.params.orgid, req.params.projectid, archived)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
@@ -1742,19 +1671,11 @@ function deleteElements(req, res) {
   // Check if invalid key passed in
   Object.keys(req.body).forEach((key) => {
     // If invalid key, reject
-    if (!['elements', 'hardDelete'].includes(key)) {
+    if (!['elements'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
 
   // Initialize the delete query object
   let deleteQuery = {};
@@ -1790,7 +1711,7 @@ function deleteElements(req, res) {
   }
 
   // Remove the specified elements
-  ElementController.removeElements(req.user, deleteQuery, hardDelete)
+  ElementController.removeElements(req.user, deleteQuery)
   .then((elements) => {
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
@@ -1818,26 +1739,26 @@ function getElement(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the element from it's element.id, project.id, and org.id
   // NOTE: findElement() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
   ElementController.findElement(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid, softDeleted)
+    req.params.projectid, req.params.elementid, archived)
   .then((element) => {
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
@@ -1948,28 +1869,11 @@ function deleteElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified element
   // NOTE: removeElement() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.elementid
   ElementController.removeElement(req.user, req.params.orgid,
-    req.params.projectid, req.params.elementid, hardDelete)
+    req.params.projectid, req.params.elementid)
   .then((element) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element
@@ -1997,26 +1901,26 @@ function getWebhook(req, res) {
   }
 
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
 
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the webhook from it's webhook.id, project.id, and org.id
   // NOTE: findWebhook() sanitizes req.params.webhookid, req.params.projectid, req.params.orgid
   WebhookController.findWebhook(req.user, req.params.orgid,
-    req.params.projectid, req.params.webhookid, softDeleted)
+    req.params.projectid, req.params.webhookid, archived)
   .then((webhook) => {
     // Return a 200: OK and the webhook
     res.header('Content-Type', 'application/json');
@@ -2116,28 +2020,11 @@ function deleteWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified webhook
   // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.webhookid
   WebhookController.removeWebhook(req.user, req.params.orgid,
-    req.params.projectid, req.params.webhookid, hardDelete)
+    req.params.projectid, req.params.webhookid)
   .then((success) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and success
@@ -2163,7 +2050,7 @@ function postIncomingWebhook(req, res) {
   const webhookUID = Buffer.from(req.params.webhookid, 'base64').toString();
 
   // Find the webhook
-  WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), deleted: false })
+  WebhookController.findWebhooksQuery({ id: sani.sanitize(webhookUID), archived: false })
   .then((foundWebhook) => {
     // If no webhooks are found, return a 404 Not Found
     if (foundWebhook.length === 0) {
@@ -2208,32 +2095,92 @@ function getArtifact(req, res) {
     return res.status(error.status).send(error);
   }
   // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
+  Object.keys(req.query).forEach((key) => {
     // If invalid key, reject
-    if (!['softDeleted'].includes(key)) {
+    if (!['archived'].includes(key)) {
       const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
       return res.status(error.status).send(error);
     }
   });
-  // Define the optional softDelete flag
-  let softDeleted = false;
+  // Define the optional archived flag
+  let archived = false;
 
-  // Check if softDeleted was provided in the request body
-  if (req.body.hasOwnProperty('softDeleted')) {
-    softDeleted = req.body.softDeleted;
+  // Check if archived was provided in the request query
+  if (req.query.hasOwnProperty('archived')) {
+    archived = (req.query.archived === 'true');
   }
 
   // Find the artifact from it's artifact.id, project.id, and org.id
   // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
   ArtifactController.findArtifact(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, softDeleted)
+    req.params.projectid, req.params.artifactid, archived)
   .then((artifact) => {
     // Return a 200: OK and the artifact
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(artifact.getPublicData()));
+
+    const publicData = artifact.getPublicData();
+    return res.status(200).send(formatJSON(publicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts
+ *
+ * @description Takes an orgid and projectid in the URI and returns all artifacts
+ * of the project.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with artifacts
+ */
+function getArtifacts(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Check if invalid key passed in
+  Object.keys(req.body).forEach((key) => {
+    // If invalid key, reject
+    if (!['archived'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+
+  // Define the optional archived flag
+  let archived = false;
+
+  // Check if archived was provided in the request body
+  if (req.body.hasOwnProperty('archived')) {
+    archived = req.body.archived;
+  }
+
+  // Find all artifacts from it's org.id and project.id
+  // NOTE: findArtifacts() sanitizes req.params.orgid and req.params.projectid
+  ArtifactController.findArtifacts(req.user, req.params.orgid, req.params.projectid, archived)
+  .then((artifacts) => {
+    // Return only public artifact data
+    const artifactsPublicData = artifacts.map(a => a.getPublicData());
+
+    // Verify artifacts public data array is not empty
+    if (artifactsPublicData.length === 0) {
+      const error = new M.CustomError('No artifacts found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    // Return a 200: OK and public artifact data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(artifactsPublicData));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => {
+    res.status(error.status).send(error);
+  });
 }
 
 /**
@@ -2248,32 +2195,52 @@ function getArtifact(req, res) {
  * @return {Object} res response object with created artifact
  */
 function postArtifact(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
+  upload(req, res, function(err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      res.status(500).send(err);
+    }
+    else if (err) {
+      // An unknown error occurred when uploading.
+      res.status(500).send(err);
+    }
 
-  // If artifact ID was provided in the body, ensure it matches artifact ID in params
-  if (req.body.hasOwnProperty('id') && (req.params.artifactid !== req.body.id)) {
-    const error = new M.CustomError('Artifact ID in the body does not match ID in the params.', 400);
-    return res.status(error.status).send(error);
-  }
+    // Sanity Check: originalname/mimitype are required fields
+    if (!(Object.prototype.hasOwnProperty.call(req.file, 'originalname')
+      && Object.prototype.hasOwnProperty.call(req.file, 'mimetype'))) {
+      const error = new M.CustomError('Bad request. File not defined.', 400, 'warn');
+      return res.status(error.status).send(error);
+    }
 
-  // Set id in request body
-  req.body.id = req.params.artifactid;
+    // Extract file meta data
+    req.body.filename = req.file.originalname;
+    req.body.contentType = req.file.mimetype;
 
-  // Create artifact with provided parameters
-  // NOTE: createArtifact() sanitizes req.body
-  ArtifactController.createArtifact(req.user, req.params.orgid, req.params.projectid, req.body)
-  .then((artifact) => {
-    // Return 200: OK and created artifact
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(artifact.getPublicData()));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => {
-    res.status(error.status).send(error);
+    // Sanity Check: there should always be a user in the request
+    if (!req.user) {
+      const error = new M.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    // If artifact ID was provided in the body, ensure it matches artifact ID in params
+    if (Object.prototype.hasOwnProperty.call('id') && (req.params.artifactid !== req.body.id)) {
+      const error = new M.CustomError('Artifact ID in the body does not match ID in the params.', 400);
+      return res.status(error.status).send(error);
+    }
+
+    // Create artifact with provided parameters
+    // NOTE: createArtifact() sanitizes req.body
+    ArtifactController.createArtifact(req.user, req.params.orgid,
+      req.params.projectid, req.params.artifactid, req.body, req.file.buffer)
+    .then((artifact) => {
+      // Return 200: OK and created artifact
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(formatJSON(artifact.getPublicData()));
+    })
+    // If an error was thrown, return it and its status
+    .catch((error) => {
+      res.status(error.status).send(error);
+    });
   });
 }
 
@@ -2290,24 +2257,39 @@ function postArtifact(req, res) {
  * @return {Object} res response object with updated artifact
  */
 function patchArtifact(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
+  upload(req, res, function(err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      res.status(500).send(err);
+    }
+    else if (err) {
+      // An unknown error occurred when uploading.
+      res.status(500).send(err);
+    }
 
-  // Update the specified artifact
-  // NOTE: updateArtifact() sanitizes req.params.orgid, req.params.projectid,
-  // and req.params.artifactid
-  ArtifactController.updateArtifact(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, req.body)
-  .then((artifact) => {
-    // Return 200: OK and the updated artifact
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(artifact.getPublicData()));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+    // Extract file meta data
+    req.body.filename = req.file.originalname;
+    req.body.contentType = req.file.mimetype;
+
+    // Sanity Check: there should always be a user in the request
+    if (!req.user) {
+      const error = new M.CustomError('Request Failed.', 500, 'critical');
+      return res.status(error.status).send(error);
+    }
+
+    // Update the specified artifact
+    // NOTE: updateArtifact() sanitizes req.params.orgid, req.params.projectid,
+    // and req.params.artifactid
+    ArtifactController.updateArtifact(req.user, req.params.orgid,
+      req.params.projectid, req.params.artifactid, req.body, req.file.buffer)
+    .then((artifact) => {
+      // Return 200: OK and the updated artifact
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(formatJSON(artifact.getPublicData()));
+    })
+    // If an error was thrown, return it and its status
+    .catch((error) => res.status(error.status).send(error));
+  });
 }
 
 /**
@@ -2328,33 +2310,55 @@ function deleteArtifact(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['hardDelete'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-
-  // Initialize hardDelete variable
-  let hardDelete = false;
-
-  // If hardDelete flag was provided, set the variable hardDelete
-  if (req.body.hasOwnProperty('hardDelete')) {
-    hardDelete = req.body.hardDelete;
-  }
-
   // Remove the specified artifact
   // NOTE: removeArtifact() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.artifactid
   ArtifactController.removeArtifact(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, hardDelete)
+    req.params.projectid, req.params.artifactid)
   .then((success) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and success
     return res.status(200).send(formatJSON(success));
   })
+  .catch((error) => res.status(error.status).send(error));
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ *
+ * @description Gets an artifact binary file by its artifact.id, project.id, and org.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} res response object with found artifact
+ */
+function getArtifactBlob(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+  // Check if invalid key passed in
+  Object.keys(req.query).forEach((key) => {
+    // If invalid key, reject
+    if (!['archived'].includes(key)) {
+      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+  });
+  // Find the artifact from it's artifact.id, project.id, and org.id
+  // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
+  ArtifactController.getArtifactBlob(req.user, req.params.orgid,
+    req.params.projectid, req.params.artifactid)
+  .then((artifact) => {
+    // Return a 200: OK and the artifact
+    // res.header('Content-Type', 'application/octet-stream');
+    res.header('Content-Type', `${artifact.artifactMeta.contentType}`);
+    res.header('Content-Disposition', `attachment; filename='${artifact.artifactMeta.filename}'`);
+    return res.status(200).send(artifact.artifactBlob);
+  })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
 }
 

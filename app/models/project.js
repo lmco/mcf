@@ -48,9 +48,8 @@ const extensions = M.require('models.plugin.extensions');
  * write access
  * @property {User} permissions.admin - An array of references to Users who have
  * admin access
- * @property {Date} deletedOn - The date a project was soft deleted or null if
- * not soft deleted
- * @property {Boolean} deleted - Indicates if a project has been soft deleted.
+ * @property {Date} archivedOn - The date the project was archived or null
+ * @property {Boolean} archived - Indicates if a project has been archived.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
  * @property {String} visibility - The visibility level of a project defining
  * its permissions behaviour.
@@ -171,7 +170,7 @@ ProjectSchema.methods.getPermissionLevels = function() {
  * @memberof ProjectSchema
  */
 ProjectSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom'];
+  return ['name', 'custom', 'archived'];
 };
 
 /**
@@ -241,7 +240,7 @@ ProjectSchema.statics.validateObjectKeys = function(object) {
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the project model
-      if (!Object.keys(ProjectSchema.obj).includes(key)) {
+      if (!Object.keys(ProjectSchema.paths).includes(key)) {
         // Key is not in project model, return false
         returnBool = false;
       }

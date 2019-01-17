@@ -62,7 +62,7 @@ function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     User.findOne({
       username: username,
-      deletedOn: null
+      archivedOn: null
     }, (findUserErr, user) => {
       // Check for errors
       if (findUserErr) {
@@ -126,7 +126,7 @@ function handleTokenAuth(req, res, token) {
       // Not expired, find user
       User.findOne({
         username: sani.sanitize(decryptedToken.username),
-        deletedOn: null
+        archivedOn: null
       }, (findUserTokenErr, user) => {
         if (findUserTokenErr) {
           return reject(findUserTokenErr);
@@ -181,7 +181,7 @@ function doLogin(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to verify
+ * @param {String} password - Password to validate.
  * @returns {Boolean} - If password is correctly validated
  */
 function validatePassword(password) {

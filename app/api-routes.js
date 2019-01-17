@@ -233,18 +233,7 @@ api.route('/version')
  *         required: true
  *         schema:
  *           type: object
- *           required:
- *             - orgs
- *           properties:
- *             orgs:
- *               type: object
- *               description: An array of orgs to delete. Can either be the
- *                            org objects or the ids of the orgs.
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the org should be hard
- *                            deleted or not. The user must be a global admin
- *                            to hard delete. Defaults to false.
+ *           description: An array of orgs objects to delete.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE orgs returns deleted orgs' data.
@@ -405,18 +394,6 @@ api.route('/orgs')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the organization should be hard deleted or
- *                            not. The user must be a global admin to hard delete. Defaults to
- *                            false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE org return deleted org data.
@@ -476,11 +453,11 @@ api.route('/orgs/:orgid')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if soft deleted projects are returned. The user
- *                            must be a global admin or an admin on the organization to find soft
- *                            deleted projects.
+ *               description: The boolean indicating if archived projects are returned. The user
+ *                            must be a global admin or an admin on the organization to find
+ *                            archived projects.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects returns org data.
@@ -634,11 +611,11 @@ api.route('/orgs/:orgid/projects')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if a soft deleted project is returned. The user
- *                            must be a global admin or an admin on the organization to find a soft
- *                            deleted project.
+ *               description: The boolean indicating if a archived project is returned. The user
+ *                            must be a global admin or an admin on the organization to find an
+ *                            archived project.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET project returns project data.
@@ -781,18 +758,6 @@ api.route('/orgs/:orgid/projects')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the project should be hard deleted or
- *                            not. The user must be a global admin to hard delete.
- *                            Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE project return deleted project data.
@@ -1304,11 +1269,11 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if a soft deleted element is returned. The user
- *                            must be a global admin or an admin on the project to find a soft
- *                            deleted elements.
+ *               description: The boolean indicating if a archived element is returned. The user
+ *                            must be a global admin or an admin on the project to find archived
+ *                            elements.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements returns elements data
@@ -1432,11 +1397,6 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *                            element objects or the ids of the elements. If the
  *                            list is not provided, all elements under the
  *                            project will be deleted.
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the element should be
- *                            hard deleted or not. The user must be a global
- *                            admin to hard delete. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE elements, returns elements data
@@ -1507,11 +1467,11 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if the soft deleted element is returned. The
+ *               description: The boolean indicating if the archived element is returned. The
  *                            user must be a global admin or an admin on the project to
- *                            find a soft deleted element.
+ *                            find a archived element.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET element returns element data.
@@ -1659,18 +1619,6 @@ api.route('/orgs/:orgid/projects/:projectid/elements')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the element should be hard deleted or
- *                            not. The user must be a global admin to hard delete.
- *                            Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE element returns element data.
@@ -1815,10 +1763,6 @@ api.route('/orgs/:orgid/projects/:projectid/elements/:elementid')
  *               type: object
  *               description: An array of users to delete. Can either be a list
  *                            of user objects or of usernames.
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the users should be hard
- *                            deleted or not. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE users return users data.
@@ -2106,11 +2050,11 @@ api.route('/users/:username')
  *         schema:
  *           type: object
  *           properties:
- *             softDeleted:
+ *             archived:
  *               type: boolean
- *               description: The boolean indicating if the soft deleted webhook
+ *               description: The boolean indicating if the archived webhook
  *                            is returned. The user must be a global admin or an
- *                            admin on the project to find a soft deleted
+ *                            admin on the project to find an archived
  *                            webhook.
  *     responses:
  *       200:
@@ -2277,18 +2221,6 @@ api.route('/users/:username')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing delete options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             hardDelete:
- *               type: boolean
- *               description: The boolean indicating if the webhook should be
- *                            hard deleted or not. The user must be a global
- *                            admin to hard delete. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE webhook, returns true.
@@ -2429,27 +2361,13 @@ api.route('/webhooks/:webhookid')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: metaData
- *         description: The artifact meta data.
- *         in: body
- *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - id
- *             - filename
- *           properties:
- *             id:
- *               type: string
- *               description: The ID of the artifact. If this is provided, it
- *                            must match the artifact ID provided in the URI.
- *             filename:
- *               type: string
- *               description: The name for the artifact file.
- *       - name: artifactBlob
- *         description: The artifact blob data.
- *         in: body
- *         required: true
+ *       - in: formData
+ *         name: id
+ *         type: string
+ *         description: The ID of the artifact
+ *       - in: file
+ *         type: file
+ *         description: The file to upload.
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST artifact, returns artifact data.
@@ -2552,11 +2470,6 @@ api.route('/webhooks/:webhookid')
  *         in: URI
  *         required: true
  *         type: string
- *       - name: hardDelete
- *         type: boolean
- *         description: The boolean indicating if the artifact should be
- *                      hard deleted or not. The user must be a global
- *                      admin to hard delete. Defaults to false.
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifact, returns true.
@@ -2596,6 +2509,116 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteArtifact
+);
+
+/**
+ * @swagger
+ * /api/orgs/:orgid/projects/:projectid/artifacts:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns a list of all artifacts and their public data from a project
+ *                  a user has access to.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose artifacts to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project whose artifacts to get.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: The object containing get artifact options.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             archived:
+ *               type: boolean
+ *               description: The boolean indicating if archived artifacts are returned.
+ *                            The user must be a global admin or an admin on the organization
+ *                            to find archived artifacts.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifacts returns org data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifacts due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifacts due to not being logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifacts due to not having permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifacts due to artifacts not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifacts due to a server side issue.
+ *
+ */
+api.route('/orgs/:orgid/projects/:projectid/artifacts')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getArtifacts
+);
+
+/**
+ * @swagger
+ * /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid/download:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Finds and returns the artifact's arbitrary binary.
+ *     produces:
+ *       - application/octet-stream
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to return.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      correct permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid/download')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getArtifactBlob
 );
 
 // Catches any invalid api route not defined above.

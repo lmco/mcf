@@ -113,6 +113,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should POST an artifact', postArtifact);
   it('should GET the previously created Artifact', getArtifact);
+  it('should GET the Artifacts binary', getArtifactBlob);
   it('should PATCH the previously created Artifact', patchArtifact);
   it('should reject a POST with an existing id field', rejectExistingPostArtifact);
   it('should reject a GET of a non-existing Artifact', rejectGetArtifact);
@@ -128,27 +129,29 @@ describe(M.getModuleName(module.filename), () => {
  * creates an artifact.
  */
 function postArtifact(done) {
-  // Define new artifact
-  const artifact = {
-    id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename)
-  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
 
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define form data
+  const fileData = {
+    file: {
+      value: fs.createReadStream(imgPath),
+      options: {
+        filename: imgPath,
+        contentType: null
+
+      }
+    }
   };
+
   request({
     url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(bodyRequest)
+    formData: fileData
   },
   (err, response, body) => {
     // Expect no error
@@ -163,12 +166,12 @@ function postArtifact(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * finds and returns the previously created Artifact.
  */
 function getArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -186,30 +189,76 @@ function getArtifact(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid/download
+ * finds and returns the Artifact binary.
+ */
+function getArtifactBlob(done) {
+  request({
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}/download`,
+    headers: getHeaders(),
+    ca: readCaFile(),
+    method: 'GET',
+    encoding: null
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify content type
+    chai.expect(response.headers['content-type']).to.equal('image/png');
+
+    // Get png test file
+    const imgPath = path.join(
+      M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+    );
+
+    try {
+      // Read original file
+      const originalBinary = fs.readFileSync(imgPath);
+      // Original file NOT equal with file response
+      if (Buffer.compare(originalBinary, body) !== 0) {
+        // Should not execute, force test to fail
+        chai.assert(true === false);
+      }
+    }
+    catch (error) {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error.message).to.equal(null);
+    }
+    done();
+  });
+}
+
+/**
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * updates an Artifact.
  */
 function patchArtifact(done) {
-  // Define artifact fields to update
-  const artifact = {
-    filename: testData.artifacts[2].filename,
-    contentType: path.extname(testData.artifacts[2].filename)
-  };
   // Get png test file
   const imgPath = path.join(
-    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+    M.root, testData.artifacts[2].location, testData.artifacts[2].filename
   );
 
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define form data
+  const fileData = {
+    file: {
+      value: fs.createReadStream(imgPath),
+      options: {
+        filename: imgPath,
+        contentType: null
+      }
+    }
   };
+
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(bodyRequest)
+    formData: fileData
+
   },
   (err, response, body) => {
     // Expect no error
@@ -224,31 +273,33 @@ function patchArtifact(done) {
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
- * Fails to creates an Artifact with an existing ID.
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ * Fails to create an Artifact with an existing ID.
  */
 function rejectExistingPostArtifact(done) {
-  // Define new artifact
-  const artifact = {
-    id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename)
-  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
 
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define form data
+  const fileData = {
+    id: testData.artifacts[0].id,
+    file: {
+      value: fs.createReadStream(imgPath),
+      options: {
+        filename: imgPath,
+        contentType: null
+      }
+    }
   };
+
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'POST',
-    body: JSON.stringify(bodyRequest)
+    formData: fileData
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -263,12 +314,12 @@ function rejectExistingPostArtifact(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * fails to find a non-existing Artifact.
  */
 function rejectGetArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'GET'
@@ -286,31 +337,33 @@ function rejectGetArtifact(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * fails to update an immutable Artifact id field.
  */
 function rejectPatchArtifact(done) {
-  // Define artifact fields to update
-  const artifact = {
-    id: testData.artifacts[2].id,
-    filename: testData.artifacts[2].filename,
-    contentType: path.extname(testData.artifacts[2].filename)
-  };
   // Get png test file
   const imgPath = path.join(
-    M.root, testData.artifacts[0].location, testData.artifacts[2].filename
+    M.root, testData.artifacts[2].location, testData.artifacts[2].filename
   );
 
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Define form data
+  const fileData = {
+    id: testData.artifacts[0].id,
+    file: {
+      value: fs.createReadStream(imgPath),
+      options: {
+        filename: imgPath,
+        contentType: null
+      }
+    }
   };
+
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
     method: 'PATCH',
-    body: JSON.stringify(bodyRequest)
+    formData: fileData
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -325,18 +378,15 @@ function rejectPatchArtifact(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * fails to delete a non-existing Artifact.
  */
 function rejectDeleteNonExistingArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[1].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[1].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -351,18 +401,15 @@ function rejectDeleteNonExistingArtifact(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/Artifacts/:Artifactid
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  * deletes the previously created Artifact.
  */
 function deleteArtifact(done) {
   request({
-    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/Artifacts/${testData.artifacts[0].id}`,
+    url: `${M.config.test.url}/api/orgs/${org.id}/projects/${projID}/artifacts/${testData.artifacts[0].id}`,
     headers: getHeaders(),
     ca: readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify({
-      hardDelete: true
-    })
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error
@@ -381,7 +428,7 @@ function getHeaders() {
   const c = `${testData.users[0].adminUsername}:${testData.users[0].adminPassword}`;
   const s = `Basic ${Buffer.from(`${c}`).toString('base64')}`;
   return {
-    'Content-Type': 'application/json',
+    'Content-Type': 'multipart/form-data',
     authorization: s
   };
 }

@@ -24,7 +24,8 @@
 module.exports = {
   handleBasicAuth,
   handleTokenAuth,
-  doLogin
+  doLogin,
+  validatePassword
 };
 
 // Node modules
@@ -356,4 +357,15 @@ function ldapSync(ldapUserObj) {
       .catch(saveErr => reject(saveErr));
     });
   });
+}
+
+/**
+ * @description Validates a users password with set rules.
+ *
+ * @param {String} password - Password to validate.
+ * @returns {Boolean} - If password is correctly validated
+ */
+function validatePassword(password) {
+  // LDAP does not require local password validation, return true
+  return true;
 }

@@ -107,6 +107,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should POST an artifact', postArtifact);
   it('should GET an artifact', getArtifact);
+  it('should GET an artifacts blob', getArtifactBlob);
   it('should PATCH an artifact', patchArtifact);
   it('should DELETE an artifact', deleteArtifact);
 });
@@ -115,21 +116,19 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies mock POST request to create an artifact.
  */
 function postArtifact(done) {
-  // Define new artifact
-  const artifact = {
-    id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename)
-  };
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
+  // Define new artifact
+  const body = {
+    contentType: path.extname(testData.artifacts[0].filename)
+  };
 
-  // Create request body
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  const file = {
+    buffer: fs.readFileSync(imgPath),
+    originalname: testData.artifacts[0].filename,
+    mimetype: 'image/png'
   };
 
   // Define params
@@ -138,9 +137,9 @@ function postArtifact(done) {
     projectid: projID,
     artifactid: testData.artifacts[0].id
   };
-  const method = 'POST';
-  const req = getReq(params, bodyRequest, method);
 
+  const method = 'POST';
+  const req = getReq(params, body, file, method);
   // Set response as empty object
   const res = {};
 
@@ -195,29 +194,27 @@ function getArtifact(done) {
  * @description Verifies mock PATCH request to update an artifact.
  */
 function patchArtifact(done) {
-  // Create request object
-  const artifact = {
-    filename: testData.artifacts[2].filename,
-    contentType: path.extname(testData.artifacts[2].filename)
-  };
-
   // Get png test file
   const imgPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[2].filename
   );
 
-  // Form body
-  const bodyRequest = {
-    metaData: artifact,
-    artifactBlob: fs.readFileSync(imgPath)
+  // Form body, no body fields to update
+  const body = {};
+
+  const file = {
+    buffer: fs.readFileSync(imgPath),
+    originalname: testData.artifacts[2].filename,
+    mimetype: 'image/png'
   };
+
   const params = {
     orgid: org.id,
     projectid: projID,
     artifactid: testData.artifacts[0].id
   };
   const method = 'PATCH';
-  const req = getReq(params, bodyRequest, method);
+  const req = getReq(params, body, file, method);
 
   // Set response as empty object
   const res = {};
@@ -241,7 +238,7 @@ function patchArtifact(done) {
  */
 function deleteArtifact(done) {
   // Create request object
-  const body = { hardDelete: true };
+  const body = {};
   const params = {
     orgid: org.id,
     projectid: projID,
@@ -267,17 +264,49 @@ function deleteArtifact(done) {
   apiController.deleteArtifact(req, res);
 }
 
+/**
+ * @description Verifies mock GET request to get an artifact's binaries.
+ */
+function getArtifactBlob(done) {
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    artifactid: testData.artifacts[0].id
+  };
+  const method = 'GET';
+  const req = getReq(params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  resFunctions(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
+    done();
+  };
+
+  // GETs an artifact
+  apiController.getArtifactBlob(req, res);
+}
+
 /* ----------( Helper Functions )----------*/
 /**
  * @description Helper function for setting the request parameters.
  *
  * @param {Object} params - Parameters for API req
  * @param {Object} body - Body for API req
+ * @param {Object} body - File data for API req
  * @param {String} method - API method of req
+ * @param {Object} query - Object containing query parameters
  *
  * @returns {Object} req - Request Object
  */
-function getReq(params, body, method) {
+function getReq(params, body, file, method, query = {}) {
   // Error-Check
   if (typeof params !== 'object') {
     throw M.CustomError('params is not of type object.');
@@ -291,6 +320,8 @@ function getReq(params, body, method) {
     method: method,
     params: params,
     body: body,
+    query: query,
+    file: file,
     user: adminUser,
     session: {}
   };

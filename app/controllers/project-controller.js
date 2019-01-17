@@ -59,9 +59,10 @@ const utils = M.require('lib.utils');
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {Boolean} softDeleted - The optional flag to denote searching for deleted projects
+ * @param {Boolean} archived - The optional flag to denote also searching for
+ *                             archived projects
  *
- * @return {Array} array of found project objects
+ * @return {Promise} array of found project objects
  *
  * @example
  * findProjects({User}, 'orgID', false)
@@ -72,12 +73,12 @@ const utils = M.require('lib.utils');
  *   M.log.error(error);
  * });
  */
-function findProjects(reqUser, organizationID, softDeleted = false) {
+function findProjects(reqUser, organizationID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -86,19 +87,19 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
     // Sanitize query inputs
     const orgID = sani.sanitize(organizationID);
 
-    const searchParams = { id: { $regex: `^${orgID}:` }, deleted: false };
+    const searchParams = { id: { $regex: `^${orgID}:` }, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted projects
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived projects
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // softDeleted flag true, remove deleted: false
-    if (softDeleted) {
-      delete searchParams.deleted;
+    // archived flag true, remove archived: false
+    if (archived) {
+      delete searchParams.archived;
     }
 
     // Error Check - ensure the organization exists
-    OrgController.findOrg(reqUser, organizationID, softDeleted)
+    OrgController.findOrg(reqUser, organizationID, archived)
     // Find projects
     .then(() => findProjectsQuery(searchParams))
     .then((projects) => resolve(projects
@@ -114,7 +115,7 @@ function findProjects(reqUser, organizationID, softDeleted = false) {
  * @param {String} organizationID - The ID of the organization to add projects to.
  * @param {Object} arrProjects - The object containing project data to create.
  *
- * @return {Array} Array of created projects
+ * @return {Promise} Array of created projects
  *
  * @example
  * createProjects({User}, 'orgID', [{Proj1}, {Proj2}, ...])
@@ -335,7 +336,8 @@ function updateProjects(reqUser, organizationID, arrProjects) {
 
           // Update that field on the project
           // If field is Mixed data type, combine new data with original obj
-          if (Project.schema.obj[key].type.schemaName === 'Mixed') {
+          if (Project.schema.obj.hasOwnProperty(key)
+            && Project.schema.obj[key].type.schemaName === 'Mixed') {
             // If mixed data is not an object, fail with explicit error message
             if (typeof update[key] !== 'object') {
               const msg = `Field ${key} must be an object`;
@@ -354,6 +356,18 @@ function updateProjects(reqUser, organizationID, arrProjects) {
           // Else, field is not mixed data. Sanitize it and update.
           else {
             objProjects[updateId][key] = sani.sanitize(update[key]);
+
+            // Set archivedBy if archived field is being changed
+            if (key === 'archived') {
+              // If the project is being archived
+              if (update[key] && !objProjects[updateId][key]) {
+                update.archivedBy = reqUser._id;
+              }
+              // If the project is being unarchived
+              else if (!update[key] && objProjects[updateId][key]) {
+                update.archivedBy = null;
+              }
+            }
           }
 
           // Update the last-modified by info
@@ -389,7 +403,7 @@ function updateProjects(reqUser, organizationID, arrProjects) {
  * @param {String} _organizationID - The projects organization id.
  * @param {Array} _arrProjects - Array of project objects to delete.
  *
- * @return {Array} array of deleted projects
+ * @return {Promise} array of deleted projects
  *
  * @example
  * removeProjects({User}, { uid: 'org:proj' }, false)
@@ -475,9 +489,9 @@ function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
  * @param {String} projectID - The project ID of the Project which is being searched for.
- * @param {Boolean} softDeleted - The flag to control whether or not to find softDeleted projects.
+ * @param {Boolean} archived - The flag to control whether or not to find archived projects.
  *
- * @return {Project} The found project
+ * @return {Promise} The found project
  *
  * @example
  * findProject({User}, 'orgID', 'projectID', false)
@@ -488,13 +502,13 @@ function removeProjects(_reqUser, _organizationID, _arrProjects = []) {
  *   M.log.error(error);
  * });
  */
-function findProject(reqUser, organizationID, projectID, softDeleted = false) {
+function findProject(reqUser, organizationID, projectID, archived = false) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof softDeleted === 'boolean', 'Soft deleted flag is not a boolean.');
+      assert.ok(typeof archived === 'boolean', 'Archived flag is not a boolean.');
     }
     catch (error) {
       throw new M.CustomError(error.message, 400, 'warn');
@@ -504,16 +518,16 @@ function findProject(reqUser, organizationID, projectID, softDeleted = false) {
     const orgID = sani.sanitize(organizationID);
     const projID = utils.createID(orgID, sani.sanitize(projectID));
 
-    // Set search Params for projUID and deleted = false
-    const searchParams = { id: projID, deleted: false };
+    // Set search Params for projUID and archived: false
+    const searchParams = { id: projID, archived: false };
 
-    // Error Check: Ensure user has permissions to find deleted projects
-    if (softDeleted && !reqUser.admin) {
+    // Error Check: Ensure user has permissions to find archived projects
+    if (archived && !reqUser.admin) {
       throw new M.CustomError('User does not have permissions.', 403, 'warn');
     }
-    // softDeleted flag true, remove deleted: false
-    if (softDeleted) {
-      delete searchParams.deleted;
+    // archived flag true, remove archived: false
+    if (archived) {
+      delete searchParams.archived;
     }
 
     // Find projects
@@ -566,7 +580,7 @@ function findProjectsQuery(query) {
   return new Promise((resolve, reject) => {
     // Find projects
     Project.find(query)
-    .populate('org permissions.read permissions.write permissions.admin')
+    .populate('org permissions.read permissions.write permissions.admin archivedBy lastModifiedBy')
     .then((projects) => resolve(projects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -735,8 +749,14 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
 
     // Find project
     // Note: organizationID and projectID is sanitized in findProject()
-    findProject(reqUser, organizationID, projectID)
+    findProject(reqUser, organizationID, projectID, true)
     .then((project) => {
+      // Error Check: if project is currently archived, it must first be unarchived
+      if (project.archived && projectUpdated.archived !== false) {
+        throw new M.CustomError('Project is archived. Archived objects cannot be'
+          + ' modified.', 403, 'warn');
+      }
+
       // Error Check: ensure reqUser is a project admin or global admin
       if (!project.getPermissions(reqUser).admin && !reqUser.admin) {
         // reqUser does NOT have admin permissions or NOT global admin, reject error
@@ -767,7 +787,8 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
         }
 
         // Check if updateField type is 'Mixed'
-        if (Project.schema.obj[updateField].type.schemaName === 'Mixed') {
+        if (Project.schema.obj.hasOwnProperty(updateField)
+          && Project.schema.obj[updateField].type.schemaName === 'Mixed') {
           // Only objects should be passed into mixed data
           if (typeof projectUpdated[updateField] !== 'object') {
             throw new M.CustomError(`${updateField} must be an object`, 400, 'warn');
@@ -784,6 +805,18 @@ function updateProject(reqUser, organizationID, projectID, projectUpdated) {
           project.markModified(updateField);
         }
         else {
+          // Set archivedBy if archived field is being changed
+          if (updateField === 'archived') {
+            // If the project is being archived
+            if (projectUpdated[updateField] && !project[updateField]) {
+              project.archivedBy = reqUser;
+            }
+            // If the project is being unarchived
+            else if (!projectUpdated[updateField] && project[updateField]) {
+              project.archivedBy = null;
+            }
+          }
+
           // Schema type is not mixed
           // Sanitize field and update field in project object
           project[updateField] = sani.sanitize(projectUpdated[updateField]);
@@ -824,18 +857,17 @@ function removeProject(reqUser, organizationID, projectID) {
   return new Promise((resolve, reject) => {
     // Error Check: ensure input parameters are valid
     try {
+      assert.ok(reqUser.admin, 'User does not have permission to permanently delete a project.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
     }
     catch (error) {
-      throw new M.CustomError(error.message, 400, 'warn');
-    }
-
-    // Error Check: if hard deleting, ensure user is global admin
-    if (!reqUser.admin) {
-      throw new M.CustomError(
-        'User does not have permission to permanently delete a project.', 403, 'warn'
-      );
+      let statusCode = 400;
+      // Return a 403 if request is permissions related
+      if (error.message.includes('permission')) {
+        statusCode = 403;
+      }
+      throw new M.CustomError(error.message, statusCode, 'warn');
     }
 
     // Define foundProject
@@ -851,9 +883,9 @@ function removeProject(reqUser, organizationID, projectID) {
       const elementDeleteQuery = { project: project._id };
 
       // Delete all elements on the project
-      return ElementController.removeElements(reqUser, elementDeleteQuery, true);
+      return ElementController.removeElements(reqUser, elementDeleteQuery);
     })
-    // If hard delete, delete project, otherwise update project
+    // Delete project
     .then(() => Project.deleteOne({ id: foundProject.id }))
     .then(() => resolve(foundProject))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -865,7 +897,7 @@ function removeProject(reqUser, organizationID, projectID) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {String} projectID - The project ID.
  *
  * @return {Promise} Returns a promise that resolves an object where the keys
  * are usernames and the values are permissions objects. The returned object
@@ -928,7 +960,7 @@ function findAllPermissions(reqUser, organizationID, projectID) {
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} searchedUsername - The string containing the username to be searched for.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {String} projectID - The project id.
  *
  * @return {Promise} Returns a promise that resolves an Object containing the
  * searched user's permissions on the project. This is returned in the form:
@@ -973,7 +1005,7 @@ function findPermissions(reqUser, searchedUsername, organizationID, projectID) {
  *
  * @param {User} reqUser - The object containing the requesting user.
  * @param {String} organizationID - The organization ID for the org the project belongs to.
- * @param {String} projectID - The project ID of the Project which is being deleted.
+ * @param {String} projectID - The project id.
  * @param {String} setUsername - The username of the user who's permissions are being set.
  * @param {String} role - The permission level or type being set for the use
  *
