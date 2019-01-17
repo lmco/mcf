@@ -542,9 +542,11 @@ function update(requestingUser, orgs, options) {
               // Loop through each user provided
               Object.keys(updateOrg[key]).forEach((user) => {
                 let permValue = updateOrg[key][user];
+                // Ensure user is not updating own permissions
                 if (user === reqUser.username) {
                   throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
                 }
+                
                 // Value must be an string containing highest permissions
                 if (typeof permValue !== 'string') {
                   throw new M.CustomError(`Permission for ${user} must be a string.`, 400, 'warn');
