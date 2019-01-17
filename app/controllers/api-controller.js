@@ -16,7 +16,6 @@
 
 // Node.js Modules
 const path = require('path');
-const assert = require('assert');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -274,10 +273,7 @@ function getOrgs(req, res) {
     return res.status(200).send(formatJSON(orgsPublicData));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -367,10 +363,7 @@ function patchOrgs(req, res) {
     return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -405,10 +398,7 @@ function deleteOrgs(req, res) {
     return res.status(200).send(formatJSON(orgIDs));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -563,10 +553,7 @@ function patchOrg(req, res) {
     return res.status(200).send(formatJSON(org[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -596,10 +583,7 @@ function deleteOrg(req, res) {
     return res.status(200).send(org[0]);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -636,10 +620,7 @@ function getOrgMember(req, res) {
     return res.status(200).send(formatJSON(userPermissionObj));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
@@ -688,10 +669,7 @@ function postOrgMember(req, res) {
     ));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**

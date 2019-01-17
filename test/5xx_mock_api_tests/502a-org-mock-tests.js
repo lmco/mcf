@@ -371,7 +371,6 @@ function getOrgs(done) {
     testData.orgs[0]
   ];
   // Create request object
-  const body = {};
   const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, orgData, method);
