@@ -252,6 +252,9 @@ function getOrgs(req, res) {
     // No IDs include in options, check body
     arrOrgID = req.body;
   }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    arrOrgID = req.body.map(p => p.id);
+  }
 
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes req.user.
@@ -383,6 +386,9 @@ function deleteOrgs(req, res) {
     msg = 'Request Failed.';
     err = new M.CustomError(msg, 500, 'critical');
     return res.status(err.status).send(err);
+  }
+  if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    req.body = req.body.map(p => p.id);
   }
 
   // Remove the specified orgs
@@ -578,7 +584,7 @@ function deleteOrg(req, res) {
   .then((org) => {
     // Return 200: OK and the deleted org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(org);
+    return res.status(200).send(org[0]);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status).send(error));
@@ -665,10 +671,14 @@ function postOrgMember(req, res) {
   .then((org) => {
     // Return 200: Ok and updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org[0].getPublicData()));
+    return res.status(200).send(formatJSON(
+      org[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -702,11 +712,12 @@ function deleteOrgMember(req, res) {
   .then((orgs) => {
     // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
-
+    console.log(orgs);
     return res.status(200).send(formatJSON(orgs[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
+    console.log(error);
     res.status(error.status).send(error);
   });
 }
@@ -775,6 +786,9 @@ function getProjects(req, res) {
   // If project ids provided in array in request body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     projectIDs = req.body;
+  }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    projectIDs = req.body.map(p => p.id);
   }
 
   // Get all projectIDs the requesting user has access to
@@ -1268,6 +1282,9 @@ function getUsers(req, res) {
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     usernames = req.body;
   }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    usernames = req.body.map(p => p.id);
+  }
 
   // Get all users in MBEE
   UserController.find(req.user, usernames, options)
@@ -1603,6 +1620,9 @@ function getElements(req, res) {
     // No IDs include in options, check body
     arrElemID = req.body;
   }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    arrElemID = req.body.map(p => p.id);
+  }
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
@@ -1755,7 +1775,6 @@ function deleteElements(req, res) {
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body)
   .then((elements) => {
-    console.log(elements);
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements.map(p => utils.parseID(p).pop())));

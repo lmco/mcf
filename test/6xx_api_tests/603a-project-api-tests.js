@@ -649,7 +649,7 @@ function deleteProjects(done) {
     // Verify response body
     const deletedIDs = JSON.parse(body);
 
-    // Verify correct project found
+    // Verify correct project deleted
     chai.expect(deletedIDs).to.have.members(projData.map(p => p.id));
     done();
   });

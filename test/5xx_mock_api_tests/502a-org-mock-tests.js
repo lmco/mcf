@@ -109,7 +109,7 @@ describe(M.getModuleName(module.filename), () => {
 function postOrg(done) {
   // Create request object
   const body = testData.orgs[0];
-  const params = { orgid: testData.orgs[0].id };
+  const params = { orgid: body.id };
   const method = 'POST';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -122,12 +122,17 @@ function postOrg(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const json = JSON.parse(_data);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
-    chai.expect(json.name).to.equal(testData.orgs[0].name);
+    // TODO: Check all fields for all test createdBy, lastModifiedBy, createdOn
+    // TODO: updateOn, etc.
+    // Not expecting _id, __v, archivedBy, archivedOn, archived
+    chai.expect(json.id).to.equal(body.id);
+    chai.expect(json.name).to.equal(body.name);
     chai.expect(json.permissions.read).to.include(adminUser.username);
     chai.expect(json.permissions.write).to.include(adminUser.username);
     chai.expect(json.permissions.admin).to.include(adminUser.username);
-    chai.expect(json.custom.leader).to.equal(testData.orgs[0].custom.leader);
+    chai.expect(json.custom).to.deep.equal(body.custom);
+    chai.expect(json).to.not.have.keys(
+      ['_id', '__v', 'archivedBy', 'archivedOn', 'archived']);
     done();
   };
 
