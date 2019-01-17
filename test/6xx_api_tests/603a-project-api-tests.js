@@ -270,23 +270,16 @@ function getProjects(done) {
     testData.projects[1],
     testData.projects[2],
     testData.projects[3],
-    testData.projects[4],
-    {
-      name: 'broken'
-    }
-
+    testData.projects[4]
   ];
   const projIDs = projData.map(p => p.id).join(',');
   request({
-    //url: `${test.url}/api/orgs/${org.id}/projects?projectIDs=${projIDs}`,
-    url: `${test.url}/api/orgs/${org.id}/projects`,
+    url: `${test.url}/api/orgs/${org.id}/projects?projectIDs=${projIDs}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: 'GET',
-    body: JSON.stringify(projData)
+    method: 'GET'
   },
   (err, response, body) => {
-    console.log(body);
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
@@ -656,7 +649,7 @@ function deleteProjects(done) {
     // Verify response body
     const deletedIDs = JSON.parse(body);
 
-    // Verify correct project found
+    // Verify correct project deleted
     chai.expect(deletedIDs).to.have.members(projData.map(p => p.id));
     done();
   });

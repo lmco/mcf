@@ -29,12 +29,14 @@ const path = require('path');
 
 // MBEE modules
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = testUtils.importTestData('test_data.json');
 const test = M.config.test;
+let adminUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -52,7 +54,9 @@ describe(M.getModuleName(module.filename), () => {
     db.connect()
     // Create test admin
     .then(() => testUtils.createTestAdmin())
-    .then(() => {
+    .then((_adminUser) => {
+      // Set global admin user
+      adminUser = _adminUser;
       done();
     })
     .catch((error) => {
@@ -80,22 +84,21 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+
   it('should POST an organization', postOrg);
   it('should POST multiple orgs', postOrgs);
   it('should GET posted organization', getOrg);
+  it('should GET existing organizations', getOrgs);
   it('should PATCH an update to posted organization', patchOrg);
   it('should PATCH an update to multiple orgs', patchMultipleOrgs);
   it('should GET a user\'s roles in an organization', getMemberRoles);
-  it('should GET existing organizations', getOrgs);
-  /*
   it('should GET all existing organizations', getAllOrgs);
   it('should POST member role', postMemberRole);
-
   it('should GET member role', getMemberRole);
   it('should DELETE member role', deleteMemberRole);
   it('should DELETE organization', deleteOrg);
   it('should DELETE multiple organizations', deleteOrgs);
-  */
+
 
 
 });
@@ -118,9 +121,23 @@ function postOrg(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
-    chai.expect(json.name).to.equal(testData.orgs[0].name);
+    const postedOrg = JSON.parse(body);
+    chai.expect(postedOrg.id).to.equal(testData.orgs[0].id);
+    chai.expect(postedOrg.name).to.equal(testData.orgs[0].name);
+    chai.expect(postedOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
+    chai.expect(postedOrg.permissions.read).to.include(adminUser.username);
+    chai.expect(postedOrg.permissions.write).to.include(adminUser.username);
+    chai.expect(postedOrg.permissions.admin).to.include(adminUser.username);
+
+    // Verify additional properties
+    chai.expect(postedOrg.createdBy).to.equal(adminUser.username);
+    chai.expect(postedOrg.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(postedOrg.createdOn).to.not.equal(null);
+    chai.expect(postedOrg.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(postedOrg).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
     done();
   });
 }
@@ -146,8 +163,33 @@ function postOrgs(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json.length).to.equal(orgData.length);
+    const postedOrgs = JSON.parse(body);
+    chai.expect(postedOrgs.length).to.equal(orgData.length);
+
+    // Convert foundProjects to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
+    // Loop through each project data object
+    postedOrgs.forEach((orgDataObject) => {
+      const foundOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify project created properly
+      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+      // Verify additional properties
+      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.createdOn).to.not.equal(null);
+      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
     done();
   });
 }
@@ -168,8 +210,23 @@ function getOrg(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json.name).to.equal(testData.orgs[0].name);
+    const foundOrg = JSON.parse(body);
+    chai.expect(foundOrg.id).to.equal(testData.orgs[0].id);
+    chai.expect(foundOrg.name).to.equal(testData.orgs[0].name);
+    chai.expect(foundOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
+    chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+    chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+    chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+    // Verify additional properties
+    chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+    chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundOrg.createdOn).to.not.equal(null);
+    chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
     done();
   });
 }
@@ -191,10 +248,25 @@ function patchOrg(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+
     // Verify response body
-    const json = JSON.parse(body);
-    chai.expect(json.id).to.equal(testData.orgs[0].id);
-    chai.expect(json.name).to.equal(testData.orgs[1].name);
+    const patchedOrg = JSON.parse(body);
+    chai.expect(patchedOrg.id).to.equal(testData.orgs[0].id);
+    chai.expect(patchedOrg.name).to.equal(testData.orgs[1].name);
+    chai.expect(patchedOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
+    chai.expect(patchedOrg.permissions.read).to.include(adminUser.username);
+    chai.expect(patchedOrg.permissions.write).to.include(adminUser.username);
+    chai.expect(patchedOrg.permissions.admin).to.include(adminUser.username);
+
+    // Verify additional properties
+    chai.expect(patchedOrg.createdBy).to.equal(adminUser.username);
+    chai.expect(patchedOrg.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(patchedOrg.createdOn).to.not.equal(null);
+    chai.expect(patchedOrg.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(patchedOrg).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
     done();
   });
 }
@@ -223,17 +295,36 @@ function patchMultipleOrgs(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const json = JSON.parse(body);
-    // Verify correct number of orgs returned
-    chai.expect(json.length).to.equal(2);
 
-    // Declare org0
-    const org0 = json.filter(o => o.id === testData.orgs[2].id)[0];
-    // Check org0 properties
-    chai.expect(org0.custom.leader).to.equal(testData.orgs[2].custom.leader);
-    chai.expect(org0.custom.department).to.equal('Space');
-    chai.expect(org0.custom.location.country).to.equal('USA');
+    // Verify response body
+    const postedOrgs = JSON.parse(body);
+    chai.expect(postedOrgs.length).to.equal(orgData.length);
+
+    // Convert foundProjects to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
+    // Loop through each project data object
+    postedOrgs.forEach((orgDataObject) => {
+      const foundOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify project created properly
+      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      chai.expect(foundOrg.custom.department).to.equal('Space');
+      chai.expect(foundOrg.custom.location.country).to.equal('USA');
+      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+      // Verify additional properties
+      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.createdOn).to.not.equal(null);
+      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
     done();
   });
 }
@@ -272,10 +363,9 @@ function getOrgs(done) {
   ];
   const orgIDs = orgData.map(p => p.id).join(',');
   request({
-    url: `${test.url}/api/orgs`,
+    url: `${test.url}/api/orgs?orgIDs=${orgIDs}`,
     ca: testUtils.readCaFile(),
-    headers: testUtils.getHeaders(),
-    body: JSON.stringify(orgIDs)
+    headers: testUtils.getHeaders()
   },
   (err, response, body) => {
     // Expect no error (request succeeds)
@@ -284,8 +374,34 @@ function getOrgs(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verifies length of response body
     const foundOrgs = JSON.parse(body);
-    console.log(foundOrgs);
     chai.expect(foundOrgs.length).to.equal(orgData.length);
+
+    // Convert foundOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs, 'id');
+
+    // Loop through each org data object
+    orgData.forEach((orgDataObject) => {
+      const foundOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify org created properly
+      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+      // Verify additional properties
+      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.createdOn).to.not.equal(null);
+      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+
     done();
   });
 }
@@ -295,6 +411,10 @@ function getOrgs(done) {
  * the user belongs to.
  */
 function getAllOrgs(done) {
+  const orgData = [
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
   request({
     url: `${test.url}/api/orgs`,
     ca: testUtils.readCaFile(),
@@ -306,9 +426,32 @@ function getAllOrgs(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verifies length of response body
-    const json = JSON.parse(body);
-    //console.log(json);
-    chai.expect(json.length).to.equal(4);
+    const foundOrgs = JSON.parse(body);
+
+    // Convert foundOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs, 'id');
+
+    // Loop through each org data object
+    orgData.forEach((orgDataObject) => {
+      const foundOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify org created properly
+      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+      // Verify additional properties
+      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.createdOn).to.not.equal(null);
+      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
     done();
   });
 }
@@ -318,41 +461,95 @@ function getAllOrgs(done) {
  * Sets or updates a users permissions on an organization.
  */
 function postMemberRole(done) {
+  const permission = 'admin';
   request({
-      url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
-      headers: testUtils.getHeaders(),
-      ca: testUtils.readCaFile(),
-      method: 'POST',
-      body: JSON.stringify(testData.orgs[0])
-    },
-    (err, response, body) => {
-      console.log(body);
-      // Expect no error
-      chai.expect(err).to.equal(null);
-      // Expect response status: 200 OK
-      chai.expect(response.statusCode).to.equal(200);
-      // Verify response body
-      const json = JSON.parse(body);
-      chai.expect(json.id).to.equal(testData.orgs[0].id);
-      chai.expect(json.name).to.equal(testData.orgs[0].name);
-      done();
-    });
-}
-/**
- * @description Verifies DELETE /api/orgs/:orgid deletes an organization.
- */
-function deleteOrg(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
-    headers: testUtils.getHeaders(),
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
+    headers: testUtils.getHeaders('text/plain'),
     ca: testUtils.readCaFile(),
-    method: 'DELETE'
+    method: 'POST',
+    body: permission
   },
-  function(err, response) {
+  (err, response, body) => {
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const retPermission = JSON.parse(body);
+    chai.expect(retPermission[testData.adminUser.username]).to.have.members(
+      ['read', 'write', 'admin']);
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/members/:username
+ * Returns the permissions a user has on an organization.
+ */
+function getMemberRole(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
+    headers: testUtils.getHeaders('text/plain'),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const retPermission = JSON.parse(body);
+    chai.expect(retPermission[testData.adminUser.username]).to.have.members(
+      ['read', 'write', 'admin']);
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST /api/orgs/:orgid/members/:username
+ * Removes all permissions of a user from an organization.
+ */
+function deleteMemberRole(done) {
+  request({
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'DELETE'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const retPermission = JSON.parse(body);
+    console.log(retPermission);
+    chai.expect(retPermission[testData.adminUser.username]).to.have.members(
+      ['read', 'write', 'admin']);
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE /api/orgs/:orgid deletes an organization.
+ */
+function deleteOrg(done) {
+  const orgData = testData.orgs[0];
+  request({
+    url: `${test.url}/api/orgs/${orgData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'DELETE'
+  },
+  function(err, response, body) {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+
+    // Verify correct org deleted
+    chai.expect(body).to.equal(orgData.id);
     done();
   });
 }
@@ -361,18 +558,27 @@ function deleteOrg(done) {
  * @description Verifies DELETE /api/orgs deletes multiple organizations.
  */
 function deleteOrgs(done) {
+  const orgData = [
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
   request({
     url: `${test.url}/api/orgs`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'DELETE',
-    body: JSON.stringify([testData.orgs[2], testData.orgs[3]])
+    body: JSON.stringify(orgData)
   },
-  function(err, response) {
+  function(err, response, body) {
     // Expect no error
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const deletedIDs = JSON.parse(body);
+
+    // Verify correct orgs deleted
+    chai.expect(deletedIDs).to.have.members(orgData.map(p => p.id));
     done();
   });
 }
