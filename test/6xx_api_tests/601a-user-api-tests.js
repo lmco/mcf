@@ -84,7 +84,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should get the requesting users data', whoami);
+  it('should GET the requesting users data', whoami);
   it('should POST a user', postUser);
   it('should POST multiple users', postUsers);
   it('should GET a user', getUser);

@@ -7,8 +7,11 @@
  *
  * @license LMPI - Lockheed Martin Proprietary Information
  *
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ *
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Austin J Bieber <austin.j.bieber@lmco.com>
  *
  * @description Defines the HTTP Rest API interface file. This file tightly
  * couples with the app/api-routes.js file.
@@ -34,7 +37,7 @@ const events = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
-// Expose `ElementController`
+// Expose `API Controller functions`
 module.exports = {
   swaggerJSON,
   login,
@@ -94,6 +97,12 @@ module.exports = {
   getArtifactBlob,
   invalidRoute
 };
+
+// TODO: Change arr variable names to objects ending in s... EX: arrOrgs -> orgs
+
+// TODO: Have consistent options declarations
+
+// TODO: Surround all query parser calls with a try/catch
 /* ------------------------( API Helper Function )--------------------------- */
 /**
  * @description This is a utility function that formats an object as JSON.
@@ -202,18 +211,18 @@ function version(req, res) {
  * GET /api/orgs
  *
  * @description Gets an array of all organizations that a user has access to.
- * Returns an empty array if the user has access to none.
+ * Returns a 404 error in no organizations are found.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res - Response object with orgs' public data
+ * @return {Object} Response object with orgs' public data
  *
  * NOTE: All users are members of the 'default' org, should always have
  * access to at least this organization.
  */
 function getOrgs(req, res) {
-  // Define array ID
+  // Define arrOrgID
   // Note: Intended to be undefined if not set
   let arrOrgID;
   let options;
@@ -222,7 +231,6 @@ function getOrgs(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    subtree: 'boolean',
     orgIDs: 'array'
   };
 
@@ -247,33 +255,31 @@ function getOrgs(req, res) {
     arrOrgID = options.orgIDs;
     delete options.orgIDs;
   }
+  // No IDs include in options, check body for IDs
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
-    // No IDs include in options, check body
     arrOrgID = req.body;
   }
+  // No IDs in options or body, check body for org objects
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    arrOrgID = req.body.map(p => p.id);
+    arrOrgID = req.body.map(o => o.id);
   }
 
   // Get all organizations the requesting user has access to
-  // NOTE: find() sanitizes req.user.
+  // NOTE: find() sanitizes arrOrgID.
   OrgController.find(req.user, arrOrgID, options)
   .then((orgs) => {
-    // Return only public organization data
-    const orgsPublicData = orgs.map(o => o.getPublicData());
-
-    // Verify orgs public data array is not empty
-    if (orgsPublicData.length === 0) {
+    // Verify orgs array is not empty
+    if (orgs.length === 0) {
       const error = new M.CustomError('No orgs found.', 404, 'warn');
       return res.status(error.status).send(error);
     }
 
     // Return 200: OK and public org data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgsPublicData));
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -284,7 +290,7 @@ function getOrgs(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res - Response object with orgs' public data
+ * @return {Object} Response object with orgs' public data
  */
 function postOrgs(req, res) {
   let options;
@@ -310,7 +316,7 @@ function postOrgs(req, res) {
   }
 
   // Create organizations in request body
-  // NOTE: create() sanitizes req.body.orgs
+  // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and created orgs
@@ -318,7 +324,7 @@ function postOrgs(req, res) {
     return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -329,7 +335,7 @@ function postOrgs(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res - Response object with orgs' public data
+ * @return {Object} Response object with orgs' public data
  */
 function patchOrgs(req, res) {
   let options;
@@ -355,7 +361,7 @@ function patchOrgs(req, res) {
   }
 
   // Update the specified orgs
-  // NOTE: update() sanitizes req.body.update
+  // NOTE: update() sanitizes req.body
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and the updated orgs
@@ -363,42 +369,44 @@ function patchOrgs(req, res) {
     return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
  * DELETE /api/orgs
  *
- * @description Deletes multiple orgs from an array of objects.
+ * @description Deletes multiple orgs from an array of org IDs or array of org
+ * objects.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res - Response object with orgs' public data
+ * @return {Object} Response object with array of deleted org IDs.
  */
 function deleteOrgs(req, res) {
-  let msg = null;
-  let err = null;
+  let options;
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    msg = 'Request Failed.';
-    err = new M.CustomError(msg, 500, 'critical');
-    return res.status(err.status).send(err);
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
   }
+
+  // If req.body contains objects, grab the org IDs from the objects
   if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    req.body = req.body.map(p => p.id);
+    req.body = req.body.map(o => o.id);
   }
 
   // Remove the specified orgs
-  OrgController.remove(req.user, req.body)
-  // Return 200: OK and the deleted orgs
+  OrgController.remove(req.user, req.body, options)
+  // Return 200: OK and the deleted org IDs
   .then((orgIDs) => {
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgIDs));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -409,7 +417,7 @@ function deleteOrgs(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with search org's public data
+ * @return {Object} Response object with org's public data
  */
 function getOrg(req, res) {
   // Define valid option type
@@ -438,20 +446,18 @@ function getOrg(req, res) {
   // Find the org from it's id
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid, options)
-  .then((org) => {
+  .then((orgs) => {
     // Check if orgs are found
-    if (org.length === 0) {
+    if (orgs.length === 0) {
       // Return error
-      return res.status(404).send('No organization found.');
+      return res.status(404).send('No orgs found.');
     }
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org[0].getPublicData()));
+    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -463,7 +469,7 @@ function getOrg(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with created org
+ * @return {Object} Response object with org's public data
  */
 function postOrg(req, res) {
   let options;
@@ -496,28 +502,31 @@ function postOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Set the org ID in the body equal req.params.orgid
+  req.body.id = req.params.orgid;
+
   // Create the organization with provided parameters
-  // NOTE: create() sanitizes req.params.org.id and req.body.name
+  // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
-  .then((org) => {
+  .then((orgs) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org[0].getPublicData()));
+    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
  * PATCH /api/orgs/:orgid
  *
- * @description Updates the org specified in the URI. Takes an id in the URI and
- * updated properties of the org in the request body.
+ * @description Updates the specified org. Takes an id in the URI and update
+ * object in the body, and update the org.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated org
+ * @return {Object} Response object with updated org
  */
 function patchOrg(req, res) {
   let options;
@@ -532,6 +541,14 @@ function patchOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
+    const error = new M.CustomError(
+      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -541,33 +558,36 @@ function patchOrg(req, res) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
+
   // Set body org id
   req.body.id = req.params.orgid;
 
   // Update the specified organization
   // NOTE: update() sanitizes req.body
   OrgController.update(req.user, req.body, options)
-  .then((org) => {
+  .then((orgs) => {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(org[0].getPublicData()));
+    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
  * DELETE /api/orgs/:orgid
  *
- * @description Takes an orgid in the URI and delete options in the body and
- * deletes the corresponding organization.
+ * @description Takes an orgid in the URI and deletes the corresponding org.
+ * NOTE: This function is for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with deleted org
+ * @return {Object} Response object with deleted org ID.
  */
 function deleteOrg(req, res) {
+  let options;
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -576,14 +596,14 @@ function deleteOrg(req, res) {
 
   // Remove the specified organization
   // NOTE: remove() sanitizes req.params.orgid
-  OrgController.remove(req.user, [req.params.orgid])
-  .then((org) => {
-    // Return 200: OK and the deleted org
+  OrgController.remove(req.user, req.params.orgid, options)
+  .then((orgIDs) => {
+    // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(org[0]);
+    return res.status(200).send(orgIDs[0]);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -595,7 +615,7 @@ function deleteOrg(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with searched org and roles
+ * @return {Object} Response object with searched users roles
  */
 function getOrgMember(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -604,7 +624,7 @@ function getOrgMember(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Find the permissions the foundUser has within the organization
+  // Find the org specified in the URI
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid)
   .then((orgs) => {
@@ -620,7 +640,7 @@ function getOrgMember(req, res) {
     return res.status(200).send(formatJSON(userPermissionObj));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -628,16 +648,15 @@ function getOrgMember(req, res) {
  * PATCH /api/orgs/:orgid/members/:username
  *
  * @description Takes an orgid and username in the URI and updates a given
- * members role within the organization. Requires a role in the body
+ * members role within an organization. Requires a role in the body
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated org
+ * @return {Object} Response object with updated permissions
  *
- * NOTE: In the case of setPermissions(), setting a users role does the same
- * thing as updating a users role, thus both POST and PATCH map to this
- * function.
+ * NOTE: In the case of updating permissions POST and PATCH have the same
+ * functionality.
  */
 function postOrgMember(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -659,17 +678,15 @@ function postOrgMember(req, res) {
   update.permissions[req.params.username] = req.body;
 
   // Set permissions of given user
-  // NOTE: update() sanitizes req.params.orgid and req.params.username
+  // NOTE: update() sanitizes update
   OrgController.update(req.user, update)
-  .then((org) => {
-    // Return 200: Ok and updated org
+  .then((orgs) => {
+    // Return 200: Ok and updated org permissions
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(
-      org[0].permissions
-    ));
+    return res.status(200).send(formatJSON(orgs[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -681,7 +698,7 @@ function postOrgMember(req, res) {
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} res response object with updated org
+ * @return {Object} Response object with updated org permissions.
  */
 function deleteOrgMember(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -698,15 +715,15 @@ function deleteOrgMember(req, res) {
   update.permissions[req.params.username] = 'remove_all';
 
   // Remove permissions of given user
-  // NOTE: update() sanitizes req.params.orgid
+  // NOTE: update() sanitizes update
   OrgController.update(req.user, update)
   .then((orgs) => {
-    // Return 200: OK and updated org
+    // Return 200: OK and updated org permissions
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgs[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -718,7 +735,7 @@ function deleteOrgMember(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with roles of members on search org
+ * @return {Object} Response object with roles of members on given org
  */
 function getOrgMembers(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -730,25 +747,26 @@ function getOrgMembers(req, res) {
   // Get permissions of all users in given org
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid)
-  .then((members) => {
-    // Return 200: OK and permissions of all members in given org
+  .then((orgs) => {
+    // Return 200: OK and permissions of all members in found org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(members[0].permissions));
+    return res.status(200).send(formatJSON(orgs[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /* -----------------------( Project API Endpoints )-------------------------- */
 /**
  * GET /api/org/:orgid/projects
  *
- * @description Gets an array of all projects that a user has access to.
+ * @description Gets an array of all projects that a user has access to or an
+ * array of specified projects.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res - Response object with projects' public data
+ * @return {Object} Response object with projects' public data
  */
 function getProjects(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -774,32 +792,27 @@ function getProjects(req, res) {
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     projectIDs = req.body;
   }
+  // If project objects provided in array in request body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
     projectIDs = req.body.map(p => p.id);
   }
 
-  // Get all projectIDs the requesting user has access to
-  // NOTE: find() sanitizes req.user and org.id.
+  // Get all projects the requesting user has access to
+  // NOTE: find() sanitizes req.params.orgid and projectIDs
   ProjectController.find(req.user, req.params.orgid, projectIDs, options)
   .then((projects) => {
-    // Return only public project data
-    const projectPublicData = [];
-    for (let i = 0; i < projects.length; i++) {
-      projectPublicData.push(projects[i].getPublicData());
-    }
-
-    // Verify project public data array is not empty
-    if (projectPublicData.length === 0) {
-      const error = new M.CustomError('No projectIDs found.', 404, 'warn');
+    // Verify project array is not empty
+    if (projects.length === 0) {
+      const error = new M.CustomError('No projects found.', 404, 'warn');
       return res.status(error.status).send(error);
     }
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projectPublicData));
+    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -810,7 +823,7 @@ function getProjects(req, res) {
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} res response object with created projects.
+ * @return {Object} Response object with created projects.
  */
 function postProjects(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -819,25 +832,19 @@ function postProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: check if projects array included in req.body
-  if (!Array.isArray(req.body)) {
-    const error = new M.CustomError('Request body is not an array.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Extract options from request query
   const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
 
   // Create the specified projects
-  // NOTE: create() sanitizes req.params.orgid and the projects
+  // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and the new projects
+    // Return 200: OK and the created projects
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -848,7 +855,7 @@ function postProjects(req, res) {
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} res response object with updated projects.
+ * @return {Object} Response object with updated projects.
  */
 function patchProjects(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -857,17 +864,11 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: ensure update was provided in body
-  if (!Array.isArray(req.body)) {
-    const error = new M.CustomError('Request body is not an array.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Extract options from request query
   const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
 
   // Update the specified projects
-  // NOTE: update() sanitizes req.params.orgid
+  // NOTE: update() sanitizes req.params.orgid req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     // Return 200: OK and the updated projects
@@ -875,18 +876,19 @@ function patchProjects(req, res) {
     return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
  * DELETE /api/org/:orgid/projects
  *
  * @description This function deletes multiple projects.
+ * NOTE: This function is for system-wide admins ONLY.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} res response object with deleted projects.
+ * @return {Object} Response object with deleted project IDs.
  */
 function deleteProjects(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -895,14 +897,13 @@ function deleteProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Error Check: ensure update was provided in body
-  if (!Array.isArray(req.body)) {
-    const error = new M.CustomError('Request body is not an array.', 400, 'warn');
-    return res.status(error.status).send(error);
-  }
-
   // Define the options object, no supported options
   const options = {};
+
+  // If req.body contains objects, grab the project IDs from the objects
+  if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    req.body = req.body.map(p => p.id);
+  }
 
   // Remove the specified projects
   ProjectController.remove(req.user, req.params.orgid, req.body, options)
@@ -912,7 +913,7 @@ function deleteProjects(req, res) {
     return res.status(200).send(formatJSON(projectIDs.map(p => utils.parseID(p).pop())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -923,7 +924,7 @@ function deleteProjects(req, res) {
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} res response object with search project
+ * @return {Object} Response object with found project
  */
 function getProject(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -935,13 +936,13 @@ function getProject(req, res) {
   // Extract options from request query
   const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
 
-  // Find the project from it's project.id and org.id
+  // Find the project
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
   .then((projects) => {
     // If no projects returned, return a 404 error
     if (projects.length === 0) {
-      return res.status(404).send('Project not found.');
+      return res.status(404).send('No projects found.');
     }
 
     // Return a 200: OK and the found project
@@ -955,13 +956,13 @@ function getProject(req, res) {
 /**
  * POST /api/orgs/:orgid/projects/:projectid
  *
- * @description Takes an organization ID and project ID in the URI along with
- * the request body to create the project.
+ * @description Takes an organization ID and project ID in the URI and project
+ * data in the request body, and creates a project.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with created project
+ * @return {Object} Response object with created project.
  */
 function postProject(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -985,7 +986,7 @@ function postProject(req, res) {
   const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Create project with provided parameters
-  // NOTE: create() sanitizes req.params.projectid, req.params.orgid and req.body.name
+  // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     // Return 200: OK and created project
@@ -993,7 +994,7 @@ function postProject(req, res) {
     return res.status(200).send(formatJSON(projects[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1004,7 +1005,7 @@ function postProject(req, res) {
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} res response object with updated project
+ * @return {Object} Response object with updated project.
  */
 function patchProject(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1028,7 +1029,7 @@ function patchProject(req, res) {
   const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Update the specified project
-  // NOTE: update() sanitizes req.params.orgid and req.params.projectid
+  // NOTE: update() sanitizes req.params.orgid and req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     // Return 200: OK and the updated project
@@ -1036,35 +1037,25 @@ function patchProject(req, res) {
     return res.status(200).send(formatJSON(projects[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
- * DELETE /api/orgs/:orgid/projects:projectid
+ * DELETE /api/orgs/:orgid/projects/:projectid
  *
  * @description Takes an orgid and projectid in the URI and deletes a project.
+ * NOTE: This function is for system-wide admins ONLY.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} res response object with deleted project
+ * @return {Object} Response object with deleted project ID.
  */
 function deleteProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
-  }
-
-  // Check if invalid key passed in
-  if (req.query) {
-    Object.keys(req.query).forEach((key) => {
-      // If invalid key, reject
-      if (![].includes(key)) {
-        const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-        return res.status(error.status).send(error);
-      }
-    });
   }
 
   // Define the options object, no supported options
@@ -1079,11 +1070,11 @@ function deleteProject(req, res) {
     return res.status(200).send(formatJSON(utils.parseID(projectIDs[0]).pop()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
- * GET /orgs/:orgid/members/
+ * GET /api/orgs/:orgid/projects/:projectid/members
  *
  * @description Takes an orgid and projectid in the URI and returns all
  * members of a given project and their permissions.
@@ -1091,7 +1082,7 @@ function deleteProject(req, res) {
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} res response object with roles of members in a project
+ * @return {Object} Response object with roles of members in a project.
  */
 function getProjMembers(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1100,7 +1091,7 @@ function getProjMembers(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Get permissions of all users in given org
+  // Get specified project
   // NOTE: find() sanitizes req.params.orgid and req.params.projectid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid)
   .then((foundProjects) => {
@@ -1109,19 +1100,19 @@ function getProjMembers(req, res) {
     return res.status(200).send(formatJSON(foundProjects[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
  * GET /api/orgs/:orgid/projects/:projectid/members/:username
  *
  * @description Takes an orgid, projectid and username in the URI and returns
- * an object specifying which roles the user has within the project.
+ * an object specifying which roles the user has within the given project.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with project member roles
+ * @return {Object} Response object with project member roles.
  */
 function getProjMember(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1130,12 +1121,12 @@ function getProjMember(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Find the permissions the foundUser has within the project
+  // Find the specified project
   // NOTE: find() sanitizes req.params.orgid and req.params.projectid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid)
   .then((projects) => {
     const project = projects[0];
-    if (!project.permissions[req.params.username]) {
+    if (!project || !project.permissions[req.params.username]) {
       return res.status(404).send('User not on project.');
     }
     // Create object with just the user requested and their roles.
@@ -1147,7 +1138,7 @@ function getProjMember(req, res) {
     return res.status(200).send(formatJSON(retObj));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1160,11 +1151,10 @@ function getProjMember(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated project
+ * @return {Object} Response object with updated project's permissions
  *
- * NOTE: In the case of setPermissions(), setting a users role does the same
- * thing as updating a users role, thus both POST and PATCH map to this
- * function.
+ * NOTE: In the case of updating permissions POST and PATCH have the same
+ * functionality.
  */
 function postProjMember(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1185,16 +1175,16 @@ function postProjMember(req, res) {
   };
   update.permissions[req.params.username] = req.body;
 
-  // Add user to project
+  // Change user roles on project
   // NOTE: update() sanitizes req.params.orgid and update
   ProjectController.update(req.user, req.params.orgid, update)
   .then((projects) => {
-    // Return 200: Ok and permissions
+    // Return 200: Ok and updated permissions
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projects[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1206,7 +1196,7 @@ function postProjMember(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated project
+ * @return {Object} Response object with updated project permissions.
  */
 function deleteProjMember(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1231,8 +1221,10 @@ function deleteProjMember(req, res) {
     return res.status(200).send(formatJSON(projects[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
+
+// TODO: LEFT OFF HERE
 
 /* -----------------------( User API Endpoints )------------------------------*/
 /**
