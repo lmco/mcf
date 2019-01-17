@@ -87,8 +87,8 @@ function find(requestingUser, users, options) {
       }
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters
@@ -224,8 +224,8 @@ function create(requestingUser, users, options) {
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -295,8 +295,8 @@ function create(requestingUser, users, options) {
         index++;
       });
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
     }
 
     // Create searchQuery to search for any existing, conflicting users
@@ -422,8 +422,8 @@ function update(requestingUser, users, options) {
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -495,8 +495,8 @@ function update(requestingUser, users, options) {
         index++;
       });
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
     }
 
     // Create searchQuery
@@ -641,8 +641,8 @@ function remove(requestingUser, users, options) {
       }
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables

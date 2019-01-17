@@ -89,8 +89,8 @@ function find(requestingUser, orgs, options) {
       }
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters
@@ -219,8 +219,8 @@ function create(requestingUser, orgs, options) {
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters
@@ -290,8 +290,8 @@ function create(requestingUser, orgs, options) {
         index++;
       });
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
     }
 
     // Create searchQuery to search for any existing, conflicting orgs
@@ -397,8 +397,8 @@ function update(requestingUser, orgs, options) {
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and function-wide variables
@@ -471,8 +471,8 @@ function update(requestingUser, orgs, options) {
         index++;
       });
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
     }
 
     // Create searchQuery
@@ -667,8 +667,8 @@ function remove(requestingUser, orgs, options) {
       }
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and function-wide variables

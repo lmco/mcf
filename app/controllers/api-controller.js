@@ -238,17 +238,17 @@ function getOrgs(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
 
   // Check query for orgIDs
-  if (options.orgIDs){
-    arrOrgID = options.orgIDs;
-    delete options['orgIDs'];
+  if (options.orgIDs) {
+    arrOrgID = options.orgID;
+    delete options.orgIDs;
   }
-  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')){
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     // No IDs include in options, check body
     arrOrgID = req.body;
   }
@@ -305,7 +305,7 @@ function postOrgs(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -350,7 +350,7 @@ function patchOrgs(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -431,7 +431,7 @@ function getOrg(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -451,7 +451,7 @@ function getOrg(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -492,7 +492,7 @@ function postOrg(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -538,7 +538,7 @@ function patchOrg(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -556,7 +556,7 @@ function patchOrg(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -626,7 +626,7 @@ function getOrgMember(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -1606,17 +1606,17 @@ function getElements(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
 
   // Check query for orgIDs
-  if (options.elementIDs){
+  if (options.elementIDs) {
     arrElemID = options.elementIDs;
-    delete options['elementIDs'];
+    delete options.elementIDs;
   }
-  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')){
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     // No IDs include in options, check body
     arrElemID = req.body;
   }
@@ -1677,7 +1677,7 @@ function postElements(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -1731,7 +1731,7 @@ function patchElements(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -1813,7 +1813,7 @@ function getElement(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -1863,7 +1863,7 @@ function postElement(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
@@ -1915,7 +1915,7 @@ function patchElement(req, res) {
     // Extract options from request query
     options = utils.parseOptions(req.query, validOptions);
   }
-  catch(error) {
+  catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }

@@ -100,8 +100,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       }
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters
@@ -312,8 +312,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -409,8 +409,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         index++;
       });
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 403, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
     }
 
     // Find the project to verify existence and permissions
@@ -663,8 +663,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -959,8 +959,8 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       }
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
