@@ -22,7 +22,6 @@
  */
 
 // Node modules
-const fs = require('fs');
 const chai = require('chai');
 const request = require('request');
 const path = require('path');
@@ -37,6 +36,7 @@ const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = testUtils.importTestData('test_data.json');
 const test = M.config.test;
 let adminUser = null;
+let nonAdminUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -57,6 +57,13 @@ describe(M.getModuleName(module.filename), () => {
     .then((_adminUser) => {
       // Set global admin user
       adminUser = _adminUser;
+
+      // Create non-admin user
+      return testUtils.createNonAdminUser();
+
+    })
+    .then((_nonAdminUser) => {
+      nonAdminUser = _nonAdminUser;
       done();
     })
     .catch((error) => {
@@ -84,7 +91,6 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-
   it('should POST an organization', postOrg);
   it('should POST multiple orgs', postOrgs);
   it('should GET posted organization', getOrg);
@@ -99,8 +105,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should DELETE organization', deleteOrg);
   it('should DELETE multiple organizations', deleteOrgs);
 
-
-
 });
 
 /* --------------------( Tests )-------------------- */
@@ -108,12 +112,13 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies POST /api/orgs/:orgid creates an organization.
  */
 function postOrg(done) {
+  const orgData = testData.orgs[0];
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
+    url: `${test.url}/api/orgs/${orgData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'POST',
-    body: JSON.stringify(testData.orgs[0])
+    body: JSON.stringify(orgData)
   },
   (err, response, body) => {
     // Expect no error
@@ -122,9 +127,9 @@ function postOrg(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const postedOrg = JSON.parse(body);
-    chai.expect(postedOrg.id).to.equal(testData.orgs[0].id);
-    chai.expect(postedOrg.name).to.equal(testData.orgs[0].name);
-    chai.expect(postedOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
+    chai.expect(postedOrg.id).to.equal(orgData.id);
+    chai.expect(postedOrg.name).to.equal(orgData.name);
+    chai.expect(postedOrg.custom).to.deep.equal(orgData.custom || {});
     chai.expect(postedOrg.permissions.read).to.include(adminUser.username);
     chai.expect(postedOrg.permissions.write).to.include(adminUser.username);
     chai.expect(postedOrg.permissions.admin).to.include(adminUser.username);
@@ -169,7 +174,7 @@ function postOrgs(done) {
     // Convert foundProjects to JMI type 2 for easier lookup
     const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
     // Loop through each project data object
-    postedOrgs.forEach((orgDataObject) => {
+    orgData.forEach((orgDataObject) => {
       const foundOrg = jmi2Orgs[orgDataObject.id];
 
       // Verify project created properly
@@ -281,7 +286,7 @@ function patchMultipleOrgs(done) {
   ];
   const arrUpdateOrg = orgData.map((p) => ({
     id: p.id,
-    custom: { department: 'Space', location: { country: 'USA' } }
+    name: testData.orgs[1].name
   }));
   request({
     url: `${test.url}/api/orgs`,
@@ -303,14 +308,12 @@ function patchMultipleOrgs(done) {
     // Convert foundProjects to JMI type 2 for easier lookup
     const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
     // Loop through each project data object
-    postedOrgs.forEach((orgDataObject) => {
+    orgData.forEach((orgDataObject) => {
       const foundOrg = jmi2Orgs[orgDataObject.id];
-
       // Verify project created properly
       chai.expect(foundOrg.id).to.equal(orgDataObject.id);
-      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
-      chai.expect(foundOrg.custom.department).to.equal('Space');
-      chai.expect(foundOrg.custom.location.country).to.equal('USA');
+      chai.expect(foundOrg.name).to.equal(testData.orgs[1].name);
+      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom);
       chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
       chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
       chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
@@ -437,7 +440,8 @@ function getAllOrgs(done) {
 
       // Verify org created properly
       chai.expect(foundOrg.id).to.equal(orgDataObject.id);
-      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      chai.expect(foundOrg.name).to.equal(testData.orgs[1].name);
+      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
       chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
       chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
       chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
@@ -461,9 +465,9 @@ function getAllOrgs(done) {
  * Sets or updates a users permissions on an organization.
  */
 function postMemberRole(done) {
-  const permission = 'admin';
+  const permission = 'write';
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${nonAdminUser.username}`,
     headers: testUtils.getHeaders('text/plain'),
     ca: testUtils.readCaFile(),
     method: 'POST',
@@ -476,8 +480,8 @@ function postMemberRole(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const retPermission = JSON.parse(body);
-    chai.expect(retPermission[testData.adminUser.username]).to.have.members(
-      ['read', 'write', 'admin']);
+    chai.expect(retPermission[nonAdminUser.username]).to.have.members(
+      ['read', 'write']);
     done();
   });
 }
@@ -488,7 +492,7 @@ function postMemberRole(done) {
  */
 function getMemberRole(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${nonAdminUser.username}`,
     headers: testUtils.getHeaders('text/plain'),
     ca: testUtils.readCaFile(),
     method: 'GET'
@@ -500,8 +504,8 @@ function getMemberRole(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const retPermission = JSON.parse(body);
-    chai.expect(retPermission[testData.adminUser.username]).to.have.members(
-      ['read', 'write', 'admin']);
+    chai.expect(retPermission[nonAdminUser.username]).to.have.members(
+      ['read', 'write']);
     done();
   });
 }
@@ -512,7 +516,7 @@ function getMemberRole(done) {
  */
 function deleteMemberRole(done) {
   request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
+    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${nonAdminUser.username}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'DELETE'
@@ -524,8 +528,8 @@ function deleteMemberRole(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const retPermission = JSON.parse(body);
-    console.log(retPermission);
-    chai.expect(retPermission[testData.adminUser.username]).to.have.members(
+    chai.expect(Object.keys(retPermission).length).to.equal(1);
+    chai.expect(retPermission[adminUser.username]).to.have.members(
       ['read', 'write', 'admin']);
     done();
   });

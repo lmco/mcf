@@ -245,7 +245,7 @@ function getOrgs(req, res) {
 
   // Check query for orgIDs
   if (options.orgIDs) {
-    arrOrgID = options.orgID;
+    arrOrgID = options.orgIDs;
     delete options.orgIDs;
   }
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
@@ -274,7 +274,10 @@ function getOrgs(req, res) {
     return res.status(200).send(formatJSON(orgsPublicData));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -364,7 +367,10 @@ function patchOrgs(req, res) {
     return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -399,7 +405,10 @@ function deleteOrgs(req, res) {
     return res.status(200).send(formatJSON(orgIDs));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -587,7 +596,10 @@ function deleteOrg(req, res) {
     return res.status(200).send(org[0]);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => {
+    console.log(error);
+    res.status(error.status).send(error)
+  });
 }
 
 /**
@@ -712,14 +724,10 @@ function deleteOrgMember(req, res) {
   .then((orgs) => {
     // Return 200: OK and updated org
     res.header('Content-Type', 'application/json');
-    console.log(orgs);
     return res.status(200).send(formatJSON(orgs[0].permissions));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    res.status(error.status).send(error);
-  });
+  .catch((error) => res.status(error.status).send(error));
 }
 
 /**
