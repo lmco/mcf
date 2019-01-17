@@ -102,7 +102,7 @@ module.exports = {
  *
  * @param {Object} obj - An object to convert to JSON-formatted string.
  *
- * @param {string} JSON string of object parameter
+ * @returns {string} JSON string of object parameter
  */
 function formatJSON(obj) {
   return JSON.stringify(obj, null, M.config.server.api.json.indent);
@@ -487,7 +487,7 @@ function postOrg(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
-
+  
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
     const error = new M.CustomError(
