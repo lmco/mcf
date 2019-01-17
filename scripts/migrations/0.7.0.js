@@ -37,11 +37,15 @@ module.exports.down = function() {
 
 /**
  * @description Handles the database migration from version 0.6.0 to 0.7.0. The
- * changes being made are the following: change from ObjectIDs as the _id to a
- * string, removal of the id, uuid, contains, type, deleted, deletedBy and
+ * changes being made are the following: change _id from ObjectIDs to
+ * strings, removal of the id, uuid, contains, type, deleted, deletedBy and
  * deletedOn fields, addition of archived, archivedBy and archivedOn fields,
  * change org and project permissions from arrays to objects with username keys,
  * removal of org name uniqueness, and addition of source/target to base element.
+ *
+ * // TODO: Add limitations to description
+ *
+ * // TODO: Store old ObjectID in user custom data
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -194,33 +198,33 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
     // Delete all currently existing orgs
     mongoose.connection.db.collection('organizations').deleteMany({})
     // Find all indexes in the organizations collections
-      .then(() => mongoose.connection.db.collection('organizations').indexes())
-      .then((indexes) => {
-        const promises = [];
-        // Loop through the found indexes
-        indexes.forEach((index) => {
-          // If unique ID index exists, delete from orgs collection
-          if (index.name === 'id_1') {
-            promises.push(mongoose.connection.db.collection('organizations').dropIndex('id_1'));
-          }
-          // If unique name index exists, delete from orgs collection
-          else if (index.name === 'name_1') {
-            promises.push(mongoose.connection.db.collection('organizations').dropIndex('name_1'));
-          }
-        });
-
-        // Return when all organization indexes have been dropped
-        return Promise.all(promises);
-      })
-      // Insert updated orgs
-      .then(() => {
-        // If there are orgs to add, add them
-        if (orgsToInsert.length > 0) {
-          return mongoose.connection.db.collection('organizations').insertMany(orgsToInsert);
+    .then(() => mongoose.connection.db.collection('organizations').indexes())
+    .then((indexes) => {
+      const promises = [];
+      // Loop through the found indexes
+      indexes.forEach((index) => {
+        // If unique ID index exists, delete from orgs collection
+        if (index.name === 'id_1') {
+          promises.push(mongoose.connection.db.collection('organizations').dropIndex('id_1'));
         }
-      })
-      .then(() => resolve())
-      .catch((error) => reject(error));
+        // If unique name index exists, delete from orgs collection
+        else if (index.name === 'name_1') {
+          promises.push(mongoose.connection.db.collection('organizations').dropIndex('name_1'));
+        }
+      });
+
+      // Return when all organization indexes have been dropped
+      return Promise.all(promises);
+    })
+    // Insert updated orgs
+    .then(() => {
+      // If there are orgs to add, add them
+      if (orgsToInsert.length > 0) {
+        return mongoose.connection.db.collection('organizations').insertMany(orgsToInsert);
+      }
+    })
+    .then(() => resolve())
+    .catch((error) => reject(error));
   });
 }
 

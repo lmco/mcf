@@ -54,6 +54,7 @@ function migrate(args) {
     }
 
     let toVersion = null;
+    // TODO: If --to not provided, updgrade to higest version
 
     // If --to was provided
     if (args.includes('--to')) {
@@ -76,7 +77,7 @@ function migrate(args) {
     }
 
     // Get a list of migrations
-    let migrations = fs.readdirSync(path.join(M.root, 'data', 'migrations'));
+    let migrations = fs.readdirSync(path.join(M.root, 'scripts', 'migrations'));
     // Remove .js from each file
     migrations = migrations.map(f => {
       const parts = f.split('.js');
@@ -111,7 +112,7 @@ function migrate(args) {
     })
     .catch((error) => {
       M.log.debug(error);
-      M.log.warn('Database migration failed...');
+      M.log.warn('Database migration failed. See debug log for more details.');
       process.exit();
     });
   });
@@ -224,7 +225,7 @@ function runMigrations(migrations, move) {
     // Remove first migration from array
     const file = `${migrations.shift()}.js`;
     // eslint-disable-next-line global-require
-    const migrationScript = require(path.join(M.root, 'data', 'migrations', file));
+    const migrationScript = require(path.join(M.root, 'scripts', 'migrations', file));
 
     // If migrating up
     if (move === 1) {
@@ -235,6 +236,7 @@ function runMigrations(migrations, move) {
       }
 
       // Run up migration
+      M.log.info(`Upgrading from version ${file.split('.js')[0]} to ${migrations[0]}.`);
       migrationScript.up()
       .then(() => {
         // If no more migrations left, resolve
