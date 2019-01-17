@@ -60,7 +60,6 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create non-admin user
       return testUtils.createNonAdminUser();
-
     })
     .then((_nonAdminUser) => {
       nonAdminUser = _nonAdminUser;
@@ -104,7 +103,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should DELETE member role', deleteMemberRole);
   it('should DELETE organization', deleteOrg);
   it('should DELETE multiple organizations', deleteOrgs);
-
 });
 
 /* --------------------( Tests )-------------------- */
@@ -350,7 +348,8 @@ function getMemberRoles(done) {
     // Verify the response body
     const json = JSON.parse(body);
     chai.expect(json[testData.adminUser.username]).to.have.members(
-      ['read', 'write', 'admin']);
+      ['read', 'write', 'admin']
+    );
     done();
   });
 }
@@ -481,7 +480,8 @@ function postMemberRole(done) {
     // Verify response body
     const retPermission = JSON.parse(body);
     chai.expect(retPermission[nonAdminUser.username]).to.have.members(
-      ['read', 'write']);
+      ['read', 'write']
+    );
     done();
   });
 }
@@ -505,7 +505,8 @@ function getMemberRole(done) {
     // Verify response body
     const retPermission = JSON.parse(body);
     chai.expect(retPermission[nonAdminUser.username]).to.have.members(
-      ['read', 'write']);
+      ['read', 'write']
+    );
     done();
   });
 }
@@ -530,7 +531,8 @@ function deleteMemberRole(done) {
     const retPermission = JSON.parse(body);
     chai.expect(Object.keys(retPermission).length).to.equal(1);
     chai.expect(retPermission[adminUser.username]).to.have.members(
-      ['read', 'write', 'admin']);
+      ['read', 'write', 'admin']
+    );
     done();
   });
 }

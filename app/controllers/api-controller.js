@@ -276,7 +276,7 @@ function getOrgs(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -369,7 +369,7 @@ function patchOrgs(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -407,7 +407,7 @@ function deleteOrgs(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -487,7 +487,7 @@ function postOrg(req, res) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
-  
+
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
     const error = new M.CustomError(
@@ -598,7 +598,7 @@ function deleteOrg(req, res) {
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
@@ -684,12 +684,13 @@ function postOrgMember(req, res) {
     // Return 200: Ok and updated org
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(
-      org[0].permissions));
+      org[0].permissions
+    ));
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     console.log(error);
-    res.status(error.status).send(error)
+    res.status(error.status).send(error);
   });
 }
 
