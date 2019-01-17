@@ -160,9 +160,8 @@ function sixToSeven() {
       return resolve();
     })
     .catch((error) => {
-      M.log.critical(error);
-      db.disconnect()
-      .then(() => reject(new M.CustomError('Database failed to migrate.', 500, 'warn')));
+      db.disconnect();
+      return reject(new M.CustomError('Database failed to migrate.', 500, 'warn'));
     });
   });
 }
@@ -181,6 +180,10 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
 
     // For each org
     orgs.forEach((org) => {
+      // Check if org is already in 0.7.0 format
+      if (org.hasOwnProperty('archived')) {
+        throw new M.CustomError('Database already migrated to v0.7.0.', 500, 'warn');
+      }
       // Change the org _id to a string, rather than ObjectID
       org._id = org.id;
       // Set archive fields
