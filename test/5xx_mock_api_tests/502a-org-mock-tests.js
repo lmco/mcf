@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.502-org-mock-tests
+ * @module  test.502a-org-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -13,7 +13,9 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
  * GET, POST, PATCH, and DELETE organizations.
@@ -90,16 +92,16 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   it('should POST an org', postOrg);
+  it('should POST multiple orgs', postOrgs);
+  it('should GET an org', getOrg);
+  it('should GET multiple multiple orgs', getOrgs);
+  it('should GET all orgs', getAllOrgs);
   it('should POST an org member', postOrgMember);
   it('should GET an org member', getOrgMember);
   it('should GET all org members', getOrgMembers);
   it('should DELETE an org member', deleteOrgMember);
-  it('should GET the posted org', getOrg);
-  it('should GET multiple orgs user has access to', getOrgs);
-  it('should GET all orgs user has access to', getAllOrgs);
-  it('should POST multiple orgs', postOrgs);
-  it('should PATCH multiple orgs', patchOrgs);
   it('should PATCH an org', patchOrg);
+  it('should PATCH multiple orgs', patchOrgs);
   it('should DELETE an org', deleteOrg);
   it('should DELETE orgs', deleteOrgs);
 });
@@ -147,6 +149,218 @@ function postOrg(done) {
 
   // POSTs an org
   apiController.postOrg(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create multiple organizations.
+ */
+function postOrgs(done) {
+  // Create request object
+  const orgData = [
+    testData.orgs[1],
+    testData.orgs[2]
+  ];
+  const params = {};
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, orgData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const postedOrgs = JSON.parse(_data);
+    chai.expect(postedOrgs.length).to.equal(orgData.length);
+
+    // Convert foundProjects to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
+    // Loop through each project data object
+    orgData.forEach((orgDataObject) => {
+      const foundOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify project created properly
+      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+      // Verify additional properties
+      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.createdOn).to.not.equal(null);
+      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  };
+
+  // POSTs multiple orgs
+  apiController.postOrgs(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an organization.
+ */
+function getOrg(done) {
+  // Create request object
+  const body = {};
+  const params = { orgid: testData.orgs[0].id };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const foundOrg = JSON.parse(_data);
+    chai.expect(foundOrg.id).to.equal(testData.orgs[0].id);
+    chai.expect(foundOrg.name).to.equal(testData.orgs[0].name);
+    chai.expect(foundOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
+    chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+    chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+    chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+    // Verify additional properties
+    chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+    chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundOrg.createdOn).to.not.equal(null);
+    chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
+    done();
+  };
+
+  // GETs an org
+  apiController.getOrg(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get multiple organizations.
+ */
+function getOrgs(done) {
+  const orgData = [
+    testData.orgs[0]
+  ];
+  // Create request object
+  const params = {};
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, orgData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verifies length of response body
+    const foundOrgs = JSON.parse(_data);
+    chai.expect(foundOrgs.length).to.equal(orgData.length);
+
+    // Convert foundOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs, 'id');
+
+    // Loop through each org data object
+    orgData.forEach((orgDataObject) => {
+      const foundOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify org created properly
+      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+      // Verify additional properties
+      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.createdOn).to.not.equal(null);
+      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+      done();
+    });
+  };
+
+  // GETs all orgs
+  apiController.getOrgs(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get all organizations.
+ */
+function getAllOrgs(done) {
+  const orgData = [
+    testData.orgs[0]
+  ];
+
+  // Create request object
+  const body = {};
+  const params = {};
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verifies length of response body
+    const foundOrgs = JSON.parse(_data);
+
+    // Convert foundOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs, 'id');
+
+    // Loop through each org data object
+    orgData.forEach((orgDataObject) => {
+      const foundOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify org created properly
+      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
+      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
+      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+
+      // Verify additional properties
+      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundOrg.createdOn).to.not.equal(null);
+      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+      done();
+    });
+  };
+
+  // GETs all orgs
+  apiController.getOrgs(req, res);
 }
 
 /**
@@ -279,49 +493,6 @@ function deleteOrgMember(done) {
 }
 
 /**
- * @description Verifies mock GET request to get an organization.
- */
-function getOrg(done) {
-  // Create request object
-  const body = {};
-  const params = { orgid: testData.orgs[0].id };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verify response body
-    const foundOrg = JSON.parse(_data);
-    chai.expect(foundOrg.id).to.equal(testData.orgs[0].id);
-    chai.expect(foundOrg.name).to.equal(testData.orgs[0].name);
-    chai.expect(foundOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
-    chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-    chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-    chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
-
-    // Verify additional properties
-    chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
-    chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(foundOrg.createdOn).to.not.equal(null);
-    chai.expect(foundOrg.updatedOn).to.not.equal(null);
-
-    // Verify specific fields not returned
-    chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
-    done();
-  };
-
-  // GETs an org
-  apiController.getOrg(req, res);
-}
-
-/**
  * @description Verifies mock PATCH request to update an organization.
  */
 function patchOrg(done) {
@@ -361,201 +532,6 @@ function patchOrg(done) {
 
   // PATCHs an org
   apiController.patchOrg(req, res);
-}
-
-/**
- * @description Verifies mock GET request to get multiple organizations.
- */
-function getOrgs(done) {
-  const orgData = [
-    testData.orgs[0]
-  ];
-  // Create request object
-  const params = {};
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, orgData, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verifies length of response body
-    const foundOrgs = JSON.parse(_data);
-    chai.expect(foundOrgs.length).to.equal(orgData.length);
-
-    // Convert foundOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs, 'id');
-
-    // Loop through each org data object
-    orgData.forEach((orgDataObject) => {
-      const foundOrg = jmi2Orgs[orgDataObject.id];
-
-      // Verify org created properly
-      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
-      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
-      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
-      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
-
-      // Verify additional properties
-      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.createdOn).to.not.equal(null);
-      chai.expect(foundOrg.updatedOn).to.not.equal(null);
-
-      // Verify specific fields not returned
-      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
-      done();
-    });
-  };
-
-  // GETs all orgs
-  apiController.getOrgs(req, res);
-}
-
-/**
- * @description Verifies mock GET request to get all organizations.
- */
-function getAllOrgs(done) {
-  const orgData = [
-    testData.orgs[0]
-  ];
-
-  // Create request object
-  const body = {};
-  const params = {};
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verifies length of response body
-    const foundOrgs = JSON.parse(_data);
-
-    // Convert foundOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs, 'id');
-
-    // Loop through each org data object
-    orgData.forEach((orgDataObject) => {
-      const foundOrg = jmi2Orgs[orgDataObject.id];
-
-      // Verify org created properly
-      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
-      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
-      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
-      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
-
-      // Verify additional properties
-      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.createdOn).to.not.equal(null);
-      chai.expect(foundOrg.updatedOn).to.not.equal(null);
-
-      // Verify specific fields not returned
-      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
-      done();
-    });
-  };
-
-  // GETs all orgs
-  apiController.getOrgs(req, res);
-}
-
-/**
- * @description Verifies mock DELETE request to delete an organization.
- */
-function deleteOrg(done) {
-  // Create request object
-  const body = {};
-  const params = { orgid: testData.orgs[0].id };
-  const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    chai.expect(_data).to.equal(testData.orgs[0].id);
-    done();
-  };
-
-  // DELETEs an org
-  apiController.deleteOrg(req, res);
-}
-
-/**
- * @description Verifies mock POST request to create multiple organizations.
- */
-function postOrgs(done) {
-  // Create request object
-  const orgData = [
-    testData.orgs[1],
-    testData.orgs[2]
-  ];
-  const params = {};
-  const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, orgData, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verify response body
-    const postedOrgs = JSON.parse(_data);
-    chai.expect(postedOrgs.length).to.equal(orgData.length);
-
-    // Convert foundProjects to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
-    // Loop through each project data object
-    orgData.forEach((orgDataObject) => {
-      const foundOrg = jmi2Orgs[orgDataObject.id];
-
-      // Verify project created properly
-      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
-      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
-      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
-      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
-
-      // Verify additional properties
-      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.createdOn).to.not.equal(null);
-      chai.expect(foundOrg.updatedOn).to.not.equal(null);
-
-      // Verify specific fields not returned
-      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
-    });
-    done();
-  };
-
-  // POSTs multiple orgs
-  apiController.postOrgs(req, res);
 }
 
 /**
@@ -616,6 +592,32 @@ function patchOrgs(done) {
 
   // PATCHs multiple orgs
   apiController.patchOrgs(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete an organization.
+ */
+function deleteOrg(done) {
+  // Create request object
+  const body = {};
+  const params = { orgid: testData.orgs[0].id };
+  const method = 'DELETE';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    chai.expect(_data).to.equal(testData.orgs[0].id);
+    done();
+  };
+
+  // DELETEs an org
+  apiController.deleteOrg(req, res);
 }
 
 /**

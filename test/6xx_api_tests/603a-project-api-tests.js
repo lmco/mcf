@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.603a-project-api-tests
+ * @module test.603a-project-api-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -106,7 +106,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET multiple projects', getProjects);
   it('should GET all projects', getAllProjects);
   it('should POST a project member', postProjectMember);
-  it('should GET a project role', getProjectMember);
+  it('should GET a project member', getProjectMember);
   it('should GET all project members', getProjectMembers);
   it('should DELETE a project member', deleteProjectMember);
   it('should PATCH a project', patchProject);

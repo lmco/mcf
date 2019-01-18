@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.402a-org-controller-tests
+ * @module test.402a-org-controller-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

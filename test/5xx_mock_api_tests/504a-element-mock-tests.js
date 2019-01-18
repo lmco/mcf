@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.504-element-mock-tests
+ * @module  test.504a-element-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -13,7 +13,9 @@
  * EXPORT CONTROL WARNING: This software may be subject to applicable export
  * control laws. Contact legal and export compliance prior to distribution.
  *
- * @author  Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
  * GET, POST, PATCH, and DELETE elements.
@@ -105,11 +107,12 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   it('should POST an element', postElement);
-  it('should GET an element', getElement);
   it('should POST multiple elements', postElements);
+  it('should GET an element', getElement);
   it('should GET multiple elements', getElements);
-  it('should PATCH multiple elements', patchElements);
+  // TODO: Add a getAllElements test
   it('should PATCH an element', patchElement);
+  it('should PATCH multiple elements', patchElements);
   it('should DELETE an element', deleteElement);
   it('should DELETE multiple elements', deleteElements);
 });
@@ -180,172 +183,6 @@ function postElement(done) {
 
   // POSTs an element
   apiController.postElement(req, res);
-}
-
-
-/**
- * @description Verifies mock GET request to get an element.
- */
-function getElement(done) {
-  const elemData = testData.elements[0];
-  // Create request object
-  const body = {};
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    elementid: elemData.id
-  };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verify response body
-    const foundElement = JSON.parse(_data);
-
-    // Verify element created properly
-    chai.expect(foundElement.id).to.equal(elemData.id);
-    chai.expect(foundElement.name).to.equal(elemData.name);
-    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
-    chai.expect(foundElement.project).to.equal(projID);
-
-    // If documentation was provided, verify it
-    if (elemData.hasOwnProperty('documentation')) {
-      chai.expect(foundElement.documentation).to.equal(elemData.documentation);
-    }
-    // If source was provided, verify it
-    if (elemData.hasOwnProperty('source')) {
-      chai.expect(foundElement.source).to.equal(elemData.source);
-    }
-    // If target was provided, verify it
-    if (elemData.hasOwnProperty('target')) {
-      chai.expect(foundElement.target).to.equal(elemData.target);
-    }
-    // If parent was provided, verify it
-    if (elemData.hasOwnProperty('parent')) {
-      chai.expect(foundElement.parent).to.equal(elemData.parent);
-    }
-
-    // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(foundElement.createdOn).to.not.equal(null);
-    chai.expect(foundElement.updatedOn).to.not.equal(null);
-
-    // Verify specific fields not returned
-    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
-    done();
-  };
-
-  // GETs an element
-  apiController.getElement(req, res);
-}
-
-/**
- * @description Verifies mock PATCH request to update an element.
- */
-function patchElement(done) {
-  const elemData = testData.elements[0];
-  // Create updated elem object
-  const updateObj = {
-    id: elemData.id,
-    name: `${elemData.name}_edit`
-  };
-
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    elementid: testData.elements[0].id
-  };
-  const method = 'PATCH';
-  const req = testUtils.createRequest(adminUser, params, updateObj, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verify response body
-    const updatedElement = JSON.parse(_data);
-
-    // Verify element updated properly
-    chai.expect(updatedElement.id).to.equal(elemData.id);
-    chai.expect(updatedElement.name).to.equal(updateObj.name);
-    chai.expect(updatedElement.custom).to.deep.equal(elemData.custom);
-    chai.expect(updatedElement.project).to.equal(projID);
-
-    // If documentation was provided, verify it
-    if (elemData.hasOwnProperty('documentation')) {
-      chai.expect(updatedElement.documentation).to.equal(elemData.documentation);
-    }
-    // If source was provided, verify it
-    if (elemData.hasOwnProperty('source')) {
-      chai.expect(updatedElement.source).to.equal(elemData.source);
-    }
-    // If target was provided, verify it
-    if (elemData.hasOwnProperty('target')) {
-      chai.expect(updatedElement.target).to.equal(elemData.target);
-    }
-    // If parent was provided, verify it
-    if (elemData.hasOwnProperty('parent')) {
-      chai.expect(updatedElement.parent).to.equal(elemData.parent);
-    }
-
-    // Verify additional properties
-    chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(updatedElement.createdOn).to.not.equal(null);
-    chai.expect(updatedElement.updatedOn).to.not.equal(null);
-
-    // Verify specific fields not returned
-    chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
-    done();
-  };
-
-  // PATCHs an element
-  apiController.patchElement(req, res);
-}
-
-/**
- * @description Verifies mock DELETE request to delete an element.
- */
-function deleteElement(done) {
-  // Create request object
-  const body = {};
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    elementid: testData.elements[0].id
-  };
-  const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const elementid = JSON.parse(_data);
-    chai.expect(elementid).to.equal(testData.elements[0].id);
-    done();
-  };
-
-  // DELETEs an element
-  apiController.deleteElement(req, res);
 }
 
 /**
@@ -422,6 +259,218 @@ function postElements(done) {
 
   // POSTs multiple elements
   apiController.postElements(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an element.
+ */
+function getElement(done) {
+  const elemData = testData.elements[0];
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: elemData.id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const foundElement = JSON.parse(_data);
+
+    // Verify element created properly
+    chai.expect(foundElement.id).to.equal(elemData.id);
+    chai.expect(foundElement.name).to.equal(elemData.name);
+    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.project).to.equal(projID);
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(foundElement.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(foundElement.source).to.equal(elemData.source);
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(foundElement.target).to.equal(elemData.target);
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(foundElement.parent).to.equal(elemData.parent);
+    }
+
+    // Verify additional properties
+    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdOn).to.not.equal(null);
+    chai.expect(foundElement.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
+    done();
+  };
+
+  // GETs an element
+  apiController.getElement(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get multiple elements.
+ */
+function getElements(done) {
+  const elemData = [
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
+  ];
+
+  // Create request object
+  const params = { orgid: org.id, projectid: projID };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, elemData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const foundElements = JSON.parse(_data);
+
+    // Expect foundElements not to be empty
+    chai.expect(foundElements.length).to.equal(elemData.length);
+
+    // Convert foundElements to JMI type 2 for easier lookup
+    const jmi2Elements = utils.convertJMI(1, 2, foundElements, 'id');
+    // Loop through each element data object
+    elemData.forEach((elemObj) => {
+      const foundElement = jmi2Elements[elemObj.id];
+
+      // Verify elements created properly
+      chai.expect(foundElement.id).to.equal(elemObj.id);
+      chai.expect(foundElement.name).to.equal(elemObj.name);
+      chai.expect(foundElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(foundElement.project).to.equal(projID);
+
+      // If documentation was provided, verify it
+      if (elemObj.hasOwnProperty('documentation')) {
+        chai.expect(foundElement.documentation).to.equal(elemObj.documentation);
+      }
+      // If source was provided, verify it
+      if (elemObj.hasOwnProperty('source')) {
+        chai.expect(foundElement.source).to.equal(elemObj.source);
+      }
+      // If target was provided, verify it
+      if (elemObj.hasOwnProperty('target')) {
+        chai.expect(foundElement.target).to.equal(elemObj.target);
+      }
+      // If parent was provided, verify it
+      if (elemObj.hasOwnProperty('parent')) {
+        chai.expect(foundElement.parent).to.equal(elemObj.parent);
+      }
+
+      // Verify additional properties
+      chai.expect(foundElement.createdBy).to.equal(adminUser.username);
+      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElement.createdOn).to.not.equal(null);
+      chai.expect(foundElement.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  };
+
+  // GETs multiple elements
+  apiController.getElements(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update an element.
+ */
+function patchElement(done) {
+  const elemData = testData.elements[0];
+  // Create updated elem object
+  const updateObj = {
+    id: elemData.id,
+    name: `${elemData.name}_edit`
+  };
+
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: testData.elements[0].id
+  };
+  const method = 'PATCH';
+  const req = testUtils.createRequest(adminUser, params, updateObj, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const updatedElement = JSON.parse(_data);
+
+    // Verify element updated properly
+    chai.expect(updatedElement.id).to.equal(elemData.id);
+    chai.expect(updatedElement.name).to.equal(updateObj.name);
+    chai.expect(updatedElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(updatedElement.project).to.equal(projID);
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(updatedElement.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(updatedElement.source).to.equal(elemData.source);
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(updatedElement.target).to.equal(elemData.target);
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(updatedElement.parent).to.equal(elemData.parent);
+    }
+
+    // Verify additional properties
+    chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
+    chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedElement.createdOn).to.not.equal(null);
+    chai.expect(updatedElement.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
+    done();
+  };
+
+  // PATCHs an element
+  apiController.patchElement(req, res);
 }
 
 /**
@@ -509,22 +558,18 @@ function patchElements(done) {
 }
 
 /**
- * @description Verifies mock GET request to get multiple elements.
+ * @description Verifies mock DELETE request to delete an element.
  */
-function getElements(done) {
-  const elemData = [
-    testData.elements[1],
-    testData.elements[2],
-    testData.elements[3],
-    testData.elements[4],
-    testData.elements[5],
-    testData.elements[6]
-  ];
-
+function deleteElement(done) {
   // Create request object
-  const params = { orgid: org.id, projectid: projID };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, elemData, method);
+  const body = {};
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: testData.elements[0].id
+  };
+  const method = 'DELETE';
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
@@ -534,56 +579,13 @@ function getElements(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    // Verify response body
-    const foundElements = JSON.parse(_data);
-
-    // Expect foundElements not to be empty
-    chai.expect(foundElements.length).to.equal(elemData.length);
-
-    // Convert foundElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, foundElements, 'id');
-    // Loop through each element data object
-    elemData.forEach((elemObj) => {
-      const foundElement = jmi2Elements[elemObj.id];
-
-      // Verify elements created properly
-      chai.expect(foundElement.id).to.equal(elemObj.id);
-      chai.expect(foundElement.name).to.equal(elemObj.name);
-      chai.expect(foundElement.custom).to.deep.equal(elemObj.custom);
-      chai.expect(foundElement.project).to.equal(projID);
-
-      // If documentation was provided, verify it
-      if (elemObj.hasOwnProperty('documentation')) {
-        chai.expect(foundElement.documentation).to.equal(elemObj.documentation);
-      }
-      // If source was provided, verify it
-      if (elemObj.hasOwnProperty('source')) {
-        chai.expect(foundElement.source).to.equal(elemObj.source);
-      }
-      // If target was provided, verify it
-      if (elemObj.hasOwnProperty('target')) {
-        chai.expect(foundElement.target).to.equal(elemObj.target);
-      }
-      // If parent was provided, verify it
-      if (elemObj.hasOwnProperty('parent')) {
-        chai.expect(foundElement.parent).to.equal(elemObj.parent);
-      }
-
-      // Verify additional properties
-      chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundElement.createdOn).to.not.equal(null);
-      chai.expect(foundElement.updatedOn).to.not.equal(null);
-
-      // Verify specific fields not returned
-      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
-    });
+    const elementid = JSON.parse(_data);
+    chai.expect(elementid).to.equal(testData.elements[0].id);
     done();
   };
 
-  // GETs multiple elements
-  apiController.getElements(req, res);
+  // DELETEs an element
+  apiController.deleteElement(req, res);
 }
 
 /**
