@@ -54,7 +54,6 @@ function migrate(args) {
     }
 
     let toVersion = null;
-    // TODO: If --to not provided, updgrade to higest version
 
     // If --to was provided
     if (args.includes('--to')) {
@@ -87,6 +86,11 @@ function migrate(args) {
     // Sort migrations from oldest to newest
     const sortedMigrations = sortVersions(migrations, versionComp);
 
+    // If toVersion is null, set it to highest version
+    if (toVersion === null) {
+      toVersion = sortedMigrations[sortedMigrations.length - 1].split('.js')[0];
+    }
+
     // If no migration exists for the toVersion
     if (toVersion !== null && !sortedMigrations.includes(toVersion)) {
       M.log.warn(`No migration script exists for version ${toVersion}`);
@@ -105,7 +109,7 @@ function migrate(args) {
     const migrationsToRun = sortedMigrations.slice(fromMigrationIndex + 1, toMigrationIndex + 1);
 
     // Run the migrations
-    runMigrations(migrationsToRun, versionComp)
+    runMigrations(fromVersion, migrationsToRun, versionComp)
     .then(() => {
       M.log.info('Database migration complete.');
       process.exit();
@@ -151,6 +155,11 @@ function validateVersion(version) {
  * values are as follows: -1 (from > to), 0 (from = to), 1 (from < to)
  */
 function compareVersions(from, to) {
+  // If to is null, upgrading to highest version, return 1
+  if (to === null) {
+    return 1;
+  }
+
   // Split versions by '.'
   const fromNumbers = from.split('.').map(n => Number(n));
   const toNumbers = to.split('.').map(n => Number(n));
@@ -215,12 +224,13 @@ function sortVersions(versions, order) {
  * @description A non-exposed helper function which recursively runs a list of
  * migrations in order.
  *
+ * @param {string} from - The current version migrating from.
  * @param {string[]} migrations - The list of migrations to run.
  * @param {number} move - Either 1 (migrate up) or -1 (migrate down)
  *
  * @return {Promise}
  */
-function runMigrations(migrations, move) {
+function runMigrations(from, migrations, move) {
   return new Promise((resolve, reject) => {
     // Remove first migration from array
     const file = `${migrations.shift()}.js`;
@@ -236,16 +246,17 @@ function runMigrations(migrations, move) {
       }
 
       // Run up migration
-      M.log.info(`Upgrading from version ${file.split('.js')[0]} to ${migrations[0]}.`);
+      M.log.info(`Upgrading from version ${from} to ${file.split('.js')[0]}.`);
       migrationScript.up()
       .then(() => {
+        M.log.info(`Successfully migrated to version ${file.split('.js')[0]}.`);
         // If no more migrations left, resolve
         if (migrations.length === 0) {
           return resolve();
         }
 
         // Migrations are left, run function again
-        return runMigrations(migrations, move);
+        return runMigrations(file.split('.js')[0], migrations, move);
       })
       .then(() => resolve())
       .catch((error) => reject(error));

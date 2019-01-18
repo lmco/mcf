@@ -18,6 +18,10 @@
  * @description Migration script for version 0.7.0.
  */
 
+// Node Modules
+const fs = require('fs');
+const path = require('path');
+
 // NPM Modules
 const mongoose = require('mongoose');
 
@@ -30,9 +34,7 @@ const utils = M.require('lib.utils');
  * versions is currently not supported.
  */
 module.exports.down = function() {
-  return new Promise((resolve) => {
-    return resolve();
-  });
+  return new Promise((resolve) => resolve());
 };
 
 /**
@@ -43,9 +45,13 @@ module.exports.down = function() {
  * change org and project permissions from arrays to objects with username keys,
  * removal of org name uniqueness, and addition of source/target to base element.
  *
- * // TODO: Add limitations to description
- *
- * // TODO: Store old ObjectID in user custom data
+ * NOTE: There are some limitations with this migration. If the database is too
+ * large, node may run out of memory while processing the new objects. It is
+ * recommended that you do not proceed if you have more than 100,000 objects in
+ * a collection. Additionally, all users will be required to reset their
+ * passwords due to change in salt when password is hashed. If for some reason a
+ * migration fails, any data removed from the database will be added to the
+ * ./data directory.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -60,68 +66,84 @@ module.exports.up = function() {
     let jmiUsers = [];
     let existingCollections = [];
 
+    // If data directory doesn't exist, create it
+    if (!fs.existsSync(path.join(M.root, 'data'))) {
+      fs.mkdirSync(path.join(M.root, 'data'));
+    }
+
     // Connect to the database
     db.connect()
     // Find all orgs
-      .then(() => mongoose.connection.db.collection('organizations').find({}).toArray())
-      .then((foundOrgs) => {
-        orgs = foundOrgs;
-        jmiOrgs = utils.convertJMI(1, 2, orgs);
-        // Find all projects
-        return mongoose.connection.db.collection('projects').find({}).toArray();
-      })
-      .then((foundProjects) => {
-        projects = foundProjects;
-        jmiProjects = utils.convertJMI(1, 2, projects);
-        // Find all elements
-        return mongoose.connection.db.collection('elements').find({}).toArray();
-      })
-      .then((foundElements) => {
-        elements = foundElements;
-        jmiElements = utils.convertJMI(1, 2, elements);
-        // Find all users
-        return mongoose.connection.db.collection('users').find({}).toArray();
-      })
-      .then((foundUsers) => {
-        users = foundUsers;
-        jmiUsers = utils.convertJMI(1, 2, users);
+    .then(() => mongoose.connection.db.collection('organizations').find({}).toArray())
+    .then((foundOrgs) => {
+      orgs = foundOrgs;
+      jmiOrgs = utils.convertJMI(1, 2, orgs);
 
-        // Find all currently existing collections
-        return mongoose.connection.db.collections();
-      })
-      .then((collections) => {
-        // Set the existing collections array
-        existingCollections = collections.map(c => c.s.name);
+      // Write contents to temporary file
+      return fs.writeFile(path.join(M.root, 'data', 'orgs.json'), JSON.stringify(orgs));
+    })
+    // Find all projects
+    .then(() => mongoose.connection.db.collection('projects').find({}).toArray())
+    .then((foundProjects) => {
+      projects = foundProjects;
+      jmiProjects = utils.convertJMI(1, 2, projects);
 
-        // If the orgs collection exists, run the helper function
-        if (existingCollections.includes('organizations')) {
-          return sixToSevenOrgHelper(orgs, jmiUsers);
-        }
-      })
-      .then(() => {
-        // If the projects collection exists, run the helper function
-        if (existingCollections.includes('projects')) {
-          return sixToSevenProjectHelper(projects, jmiUsers, jmiOrgs);
-        }
-      })
-      .then(() => {
-        // If the elements collection exists, run the helper function
-        if (existingCollections.includes('elements')) {
-          return sixToSevenElementHelper(elements, jmiUsers, jmiProjects, jmiElements);
-        }
-      })
-      .then(() => {
-        // If the users collection exists, run the helper function
-        if (existingCollections.includes('users')) {
-          return sixToSevenUserHelper(users, jmiUsers);
-        }
-      })
-      .then(() => db.disconnect())
-      .then(() => resolve())
-      .catch((error) => {
-        db.disconnect();
-        return reject(error);
-      });
+      // Write contents to temporary file
+      return fs.writeFile(path.join(M.root, 'data', 'projects.json'), JSON.stringify(projects));
+    })
+    // Find all elements
+    .then(() => mongoose.connection.db.collection('elements').find({}).toArray())
+    .then((foundElements) => {
+      elements = foundElements;
+      jmiElements = utils.convertJMI(1, 2, elements);
+
+      // Write contents to temporary file
+      return fs.writeFile(path.join(M.root, 'data', 'elements.json'), JSON.stringify(elements));
+    })
+    // Find all users
+    .then(() => mongoose.connection.db.collection('users').find({}).toArray())
+    .then((foundUsers) => {
+      users = foundUsers;
+      jmiUsers = utils.convertJMI(1, 2, users);
+
+      // Write contents to temporary file
+      return fs.writeFile(path.join(M.root, 'data', 'users.json'), JSON.stringify(users));
+    })
+    // Find all currently existing collections
+    .then(() => mongoose.connection.db.collections())
+    .then((collections) => {
+      // Set the existing collections array
+      existingCollections = collections.map(c => c.s.name);
+
+      // If the orgs collection exists, run the helper function
+      if (existingCollections.includes('organizations')) {
+        return sixToSevenOrgHelper(orgs, jmiUsers);
+      }
+    })
+    .then(() => {
+      // If the projects collection exists, run the helper function
+      if (existingCollections.includes('projects')) {
+        return sixToSevenProjectHelper(projects, jmiUsers, jmiOrgs);
+      }
+    })
+    .then(() => {
+      // If the elements collection exists, run the helper function
+      if (existingCollections.includes('elements')) {
+        return sixToSevenElementHelper(elements, jmiUsers, jmiProjects, jmiElements);
+      }
+    })
+    .then(() => {
+      // If the users collection exists, run the helper function
+      if (existingCollections.includes('users')) {
+        return sixToSevenUserHelper(users, jmiUsers);
+      }
+    })
+    .then(() => db.disconnect())
+    .then(() => resolve())
+    .catch((error) => {
+      db.disconnect();
+      return reject(error);
+    });
   });
 };
 
@@ -223,6 +245,11 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
         return mongoose.connection.db.collection('organizations').insertMany(orgsToInsert);
       }
     })
+    .then(() => {
+      if (fs.existsSync(path.join(M.root, 'data', 'orgs.json'))) {
+        fs.unlink(path.join(M.root, 'data', 'orgs.json'));
+      }
+    })
     .then(() => resolve())
     .catch((error) => reject(error));
   });
@@ -304,23 +331,28 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
     // Delete all projects
     mongoose.connection.db.collection('projects').deleteMany({})
     // Find all indexes in the projects collections
-      .then(() => mongoose.connection.db.collection('projects').indexes())
-      .then((indexes) => {
-        const indexNames = indexes.map(i => i.name);
-        // If unique ID index exists, delete from projects collection
-        if (indexNames.includes('id_1')) {
-          return mongoose.connection.db.collection('projects').dropIndex('id_1');
-        }
-      })
-      // Insert updated projects
-      .then(() => {
-        // If there are projects to add, add them
-        if (projectsToInsert.length > 0) {
-          mongoose.connection.db.collection('projects').insertMany(projectsToInsert);
-        }
-      })
-      .then(() => resolve())
-      .catch((error) => reject(error));
+    .then(() => mongoose.connection.db.collection('projects').indexes())
+    .then((indexes) => {
+      const indexNames = indexes.map(i => i.name);
+      // If unique ID index exists, delete from projects collection
+      if (indexNames.includes('id_1')) {
+        return mongoose.connection.db.collection('projects').dropIndex('id_1');
+      }
+    })
+    // Insert updated projects
+    .then(() => {
+      // If there are projects to add, add them
+      if (projectsToInsert.length > 0) {
+        mongoose.connection.db.collection('projects').insertMany(projectsToInsert);
+      }
+    })
+    .then(() => {
+      if (fs.existsSync(path.join(M.root, 'data', 'projects.json'))) {
+        fs.unlink(path.join(M.root, 'data', 'projects.json'));
+      }
+    })
+    .then(() => resolve())
+    .catch((error) => reject(error));
   });
 }
 
@@ -401,33 +433,38 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
     // Delete all elements in the database
     mongoose.connection.db.collection('elements').deleteMany({})
     // Find all indexes in the elements collections
-      .then(() => mongoose.connection.db.collection('elements').indexes())
-      .then((indexes) => {
-        const promises = [];
-        // Loop through the found indexes
-        indexes.forEach((index) => {
-          // If unique UUID index exists, delete from elements collection
-          if (index.name === 'uuid_1') {
-            promises.push(mongoose.connection.db.collection('elements').dropIndex('uuid_1'));
-          }
-          // If unique ID index exists, delete from elements collection
-          else if (index.name === 'id_1') {
-            promises.push(mongoose.connection.db.collection('elements').dropIndex('id_1'));
-          }
-        });
-
-        // Return when all element indexes have been dropped
-        return Promise.all(promises);
-      })
-      // Insert updated elements
-      .then(() => {
-        // If there are elements to add, add them
-        if (elementsToInsert.length > 0) {
-          mongoose.connection.db.collection('elements').insertMany(elementsToInsert);
+    .then(() => mongoose.connection.db.collection('elements').indexes())
+    .then((indexes) => {
+      const promises = [];
+      // Loop through the found indexes
+      indexes.forEach((index) => {
+        // If unique UUID index exists, delete from elements collection
+        if (index.name === 'uuid_1') {
+          promises.push(mongoose.connection.db.collection('elements').dropIndex('uuid_1'));
         }
-      })
-      .then(() => resolve())
-      .catch((error) => reject(error));
+        // If unique ID index exists, delete from elements collection
+        else if (index.name === 'id_1') {
+          promises.push(mongoose.connection.db.collection('elements').dropIndex('id_1'));
+        }
+      });
+
+      // Return when all element indexes have been dropped
+      return Promise.all(promises);
+    })
+    // Insert updated elements
+    .then(() => {
+      // If there are elements to add, add them
+      if (elementsToInsert.length > 0) {
+        mongoose.connection.db.collection('elements').insertMany(elementsToInsert);
+      }
+    })
+    .then(() => {
+      if (fs.existsSync(path.join(M.root, 'data', 'elements.json'))) {
+        fs.unlink(path.join(M.root, 'data', 'elements.json'));
+      }
+    })
+    .then(() => resolve())
+    .catch((error) => reject(error));
   });
 }
 
@@ -444,6 +481,18 @@ function sixToSevenUserHelper(users, jmi2Users) {
 
     // For each user
     users.forEach((user) => {
+      // If the user has a password, add the ObjectID to the custom data
+      if (user.password) {
+        if (user.custom) {
+          user.custom.objectID = user._id;
+        }
+        else {
+          user.custom = {
+            objectID: user._id
+          };
+        }
+      }
+
       // Change the user _id to a string, rather than ObjectID
       user._id = user.username;
       user.archived = user.deleted;
@@ -477,13 +526,18 @@ function sixToSevenUserHelper(users, jmi2Users) {
     // Delete all users in the database
     mongoose.connection.db.collection('users').deleteMany({})
     // Insert updated users
-      .then(() => {
-        // If there are users to add, add them
-        if (usersToInsert.length > 0) {
-          mongoose.connection.db.collection('users').insertMany(usersToInsert);
-        }
-      })
-      .then(() => resolve())
-      .catch((error) => reject(error));
+    .then(() => {
+      // If there are users to add, add them
+      if (usersToInsert.length > 0) {
+        mongoose.connection.db.collection('users').insertMany(usersToInsert);
+      }
+    })
+    .then(() => {
+      if (fs.existsSync(path.join(M.root, 'data', 'users.json'))) {
+        return fs.unlink(path.join(M.root, 'data', 'users.json'));
+      }
+    })
+    .then(() => resolve())
+    .catch((error) => reject(error));
   });
 }

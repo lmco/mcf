@@ -23,9 +23,7 @@
  * versions is currently not supported.
  */
 module.exports.down = function() {
-  return new Promise((resolve) => {
-    return resolve();
-  });
+  return new Promise((resolve) => resolve());
 };
 
 /**
@@ -33,7 +31,5 @@ module.exports.down = function() {
  * in versions is currently not supported.
  */
 module.exports.up = function() {
-  return new Promise((resolve) => {
-    return resolve();
-  });
+  return new Promise((resolve) => resolve());
 };
