@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.406-webhook-controller-tests
+ * @module test.406a-webhook-controller-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

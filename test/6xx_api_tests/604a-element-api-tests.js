@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.604a-element-api-tests
+ * @module test.604a-element-api-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,7 +15,7 @@
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests the element API controller functionality:
  * GET, POST, PATCH, and DELETE of an element.

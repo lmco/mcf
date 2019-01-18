@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.506-webhook-mock-tests
+ * @module test.506a-webhook-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
