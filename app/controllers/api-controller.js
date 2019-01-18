@@ -294,7 +294,7 @@ function postOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -342,7 +342,7 @@ function patchOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -734,6 +734,7 @@ function postOrgMember(req, res) {
  *
  * @description Takes an orgid and username in the URI and removes a user
  * from the given org.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
@@ -1091,7 +1092,7 @@ function postProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1150,7 +1151,7 @@ function patchProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1358,6 +1359,7 @@ function postProjMember(req, res) {
  *
  * @description Takes a projectid, orgid and username in the URI and removes a
  * user from the given project.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1448,6 +1450,7 @@ function getUsers(req, res) {
   }
 
   // Get all users in MBEE
+  // NOTE: find() sanitizes req.usernames
   UserController.find(req.user, usernames, options)
   .then((users) => {
     // Return 200: OK and public user data
@@ -1462,7 +1465,8 @@ function getUsers(req, res) {
 /**
  * POST /api/users
  *
- * @description Creates multiple users. System-wide admin only.
+ * @description Creates multiple users.
+ * NOTE: System-wide admin only.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1476,7 +1480,7 @@ function postUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1511,8 +1515,8 @@ function postUsers(req, res) {
 /**
  * PATCH /api/users
  *
- * @description Updates multiple users
- * NOTE: Admin only.
+ * @description Updates multiple users.
+ * NOTE: System-wide admin only.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1526,7 +1530,7 @@ function patchUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1546,7 +1550,7 @@ function patchUsers(req, res) {
   }
 
   // Update the specified users
-  // NOTE: update() sanitizes req.body.update
+  // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
     // Return 200: OK and the updated users
@@ -1561,8 +1565,8 @@ function patchUsers(req, res) {
 /**
  * DELETE /api/users
  *
- * @description Deletes multiple users
- * NOTE: Admin only.
+ * @description Deletes multiple users.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1594,6 +1598,7 @@ function deleteUsers(req, res) {
   }
 
   // Remove the specified users
+  // NOTE: remove() sanitizes req.body
   UserController.remove(req.user, req.body, options)
   .then((usernames) => {
     // Return 200: OK and deleted usernames
@@ -1670,7 +1675,7 @@ function postUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1715,8 +1720,8 @@ function postUser(req, res) {
 /**
  * PATCH /api/users/:username
  *
- * @description Updates the user specified in the URI. Takes a username in the
- * URI and updated properties of the user in the request body.
+ * @description Updates the user specified in the URI. Takes a username object
+ * in the request body.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1730,7 +1735,7 @@ function patchUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1774,8 +1779,8 @@ function patchUser(req, res) {
 /**
  * DELETE /api/users/:username
  *
- * @description Takes a username in the URI along with delete options in the
- * body and deletes the corresponding user.
+ * @description Takes a username in the URI and deletes that user.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1844,8 +1849,8 @@ function whoami(req, res) {
 /**
  * GET /api/orgs/:orgid/projects/:projectid/elements
  *
- * @description Takes an orgid and projectid in the URI and returns all elements
- * of the project.
+ * @description Takes an orgid and projectid in the URI and returns all
+ * elements of the project.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1899,7 +1904,7 @@ function getElements(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Find all elements from it's org.id and project.id
-  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
+  // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, ElemIDs, options)
   .then((elements) => {
@@ -1923,7 +1928,7 @@ function getElements(req, res) {
 /**
  * POST /api/orgs/:orgid/projects/:projectid/elements
  *
- * @description Creates multiple projects at a time.
+ * @description Creates multiple projects.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1960,7 +1965,7 @@ function postElements(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Create the specified elements
-  // NOTE: create() sanitizes req.params.orgid, req.params.projectid and the elements
+  // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
@@ -1980,7 +1985,7 @@ function postElements(req, res) {
 /**
  * PATCH /api/orgs/:orgid/projects/:projectid/elements
  *
- * @description Updates multiple projects at a time.
+ * @description Updates multiple projects.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2017,7 +2022,7 @@ function patchElements(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Update the specified projects
-  // NOTE: update() sanitizes req.body.update
+  // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
@@ -2029,10 +2034,11 @@ function patchElements(req, res) {
   .catch((error) => res.status(error.status || 500).send(error));
 }
 
-/*
+/**
  * DELETE /api/orgs/:orgid/projects/:projectid/elements
  *
- * @description Deletes multiple elements at the same time
+ * @description Deletes multiple elements.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2066,8 +2072,9 @@ function deleteElements(req, res) {
   }
 
   // Remove the specified elements
+  // NOTE: remove() sanitizes input params
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body)
+    branchid, req.body, options)
   .then((elements) => {
     // Return 200: OK and the deleted elements
     res.header('Content-Type', 'application/json');
@@ -2119,7 +2126,7 @@ function getElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Find the element from it's element.id, project.id, and org.id
-  // NOTE: find() sanitizes req.params.elementid, req.params.projectid, req.params.orgid
+  // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, req.params.elementid, options)
   .then((element) => {
@@ -2172,8 +2179,7 @@ function postElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Create element with provided parameters
-  // NOTE: create() sanitizes req.body.name
-  // function create(requestingUser, organizationID, projectID, branch, elements, options) {
+  // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((element) => {
@@ -2227,8 +2233,7 @@ function patchElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Update the specified element
-  // NOTE: updateElement() sanitizes req.params.orgid, req.params.projectid,
-  // and req.params.elementid
+  // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((element) => {
@@ -2245,6 +2250,7 @@ function patchElement(req, res) {
  *
  * @description Takes an orgid, projectid, elementid in the URI along with delete
  * options in the body and deletes the corresponding element.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2279,10 +2285,9 @@ function deleteElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Remove the specified element
-  // NOTE: removeElement() sanitizes req.params.orgid, req.params.projectid, and
-  // req.params.elementid
+  // NOTE: remove() sanitizes input params
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
-    branchid, [req.params.elementid])
+    branchid, [req.params.elementid], options)
   .then((element) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element
@@ -2330,7 +2335,7 @@ function getWebhook(req, res) {
   }
 
   // Find the webhook from it's webhook.id, project.id, and org.id
-  // NOTE: find() sanitizes req.params.projectid, req.params.orgid, and req.params.webhookid
+  // NOTE: find() sanitizes input params
   WebhookController.find(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid, options)
   .then((webhooks) => {
@@ -2360,7 +2365,7 @@ function postWebhook(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2389,7 +2394,7 @@ function postWebhook(req, res) {
   req.body.id = req.params.webhookid;
 
   // Create webhook with provided parameters
-  // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and req.body
+  // NOTE: create() sanitizes input params
   WebhookController.create(req.user, req.params.orgid, req.params.projectid, req.body, options)
   .then((webhooks) => {
     // Return 200: OK and created webhook
@@ -2419,7 +2424,7 @@ function patchWebhook(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2442,7 +2447,7 @@ function patchWebhook(req, res) {
   req.body.id = req.params.webhookid;
 
   // Update the specified webhook
-  // NOTE: updateWebhook() sanitizes req.params.orgid, req.params.projectid, and req.body
+  // NOTE: update() sanitizes input params
   WebhookController.update(req.user, req.params.orgid, req.params.projectid, req.body, options)
   .then((webhooks) => {
     // Return 200: OK and the updated webhook
@@ -2458,6 +2463,7 @@ function patchWebhook(req, res) {
  *
  * @description Takes an orgid, projectid, webhookid in the URI along with delete
  * options in the body and deletes the corresponding webhook.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2471,7 +2477,7 @@ function deleteWebhook(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2491,8 +2497,7 @@ function deleteWebhook(req, res) {
   }
 
   // Remove the specified webhook
-  // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
-  // req.params.webhookid
+  // NOTE: remove() sanitizes input params
   WebhookController.remove(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid, options)
   .then((webhookIDs) => {
@@ -2520,6 +2525,7 @@ function postIncomingWebhook(req, res) {
   const webhookUID = Buffer.from(req.params.webhookid, 'base64').toString();
 
   // Find the webhook
+  // NOTE: find() sanitizes input params
   Webhook.Webhook.find({ _id: sani.sanitize(webhookUID), archived: false })
   .then((foundWebhooks) => {
     // If no webhooks are found, return a 404 Not Found
@@ -2586,7 +2592,7 @@ function getArtifact(req, res) {
   }
 
   // Find the artifact from it's artifact.id, project.id, and org.id
-  // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
+  // NOTE: find() sanitizes input params
   ArtifactController.findArtifact(req.user, req.params.orgid,
     req.params.projectid, req.params.artifactid, options)
   .then((artifact) => {
@@ -2655,7 +2661,7 @@ function getArtifacts(req, res) {
   }
 
   // Find all artifacts from it's org.id and project.id
-  // NOTE: findArtifacts() sanitizes req.params.orgid and req.params.projectid
+  // NOTE: find() sanitizes input params
   ArtifactController.findArtifacts(req.user, req.params.orgid, artIDs, options)
   .then((artifacts) => {
     // Return only public artifact data
@@ -2696,7 +2702,7 @@ function postArtifact(req, res) {
 
     // Define valid option and its parsed type
     const validOptions = {
-      populate: 'array',
+      populate: 'array'
     };
 
     if (err instanceof multer.MulterError) {
@@ -2742,7 +2748,7 @@ function postArtifact(req, res) {
     }
 
     // Create artifact with provided parameters
-    // NOTE: createArtifact() sanitizes req.body
+    // NOTE: create() sanitizes input params
     ArtifactController.createArtifact(req.user, req.params.orgid,
       req.params.projectid, req.params.artifactid, req.body, req.file.buffer, options)
     .then((artifact) => {
@@ -2777,7 +2783,7 @@ function patchArtifact(req, res) {
 
     // Define valid option and its parsed type
     const validOptions = {
-      populate: 'array',
+      populate: 'array'
     };
 
     if (err instanceof multer.MulterError) {
@@ -2810,8 +2816,7 @@ function patchArtifact(req, res) {
     }
 
     // Update the specified artifact
-    // NOTE: updateArtifact() sanitizes req.params.orgid, req.params.projectid,
-    // and req.params.artifactid
+    // NOTE: update() sanitizes input params
     ArtifactController.updateArtifact(req.user, req.params.orgid,
       req.params.projectid, req.params.artifactid, req.body, req.file.buffer, options)
     .then((artifact) => {
@@ -2829,6 +2834,7 @@ function patchArtifact(req, res) {
  *
  * @description Takes an orgid, projectid, artifactid in the URI along with delete
  * options in the body and deletes the corresponding artifact.
+ * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2860,8 +2866,7 @@ function deleteArtifact(req, res) {
   }
 
   // Remove the specified artifact
-  // NOTE: removeArtifact() sanitizes req.params.orgid, req.params.projectid, and
-  // req.params.artifactid
+  // NOTE: remove() sanitizes input params
   ArtifactController.removeArtifact(req.user, req.params.orgid,
     req.params.projectid, req.params.artifactid, options)
   .then((success) => {
@@ -2915,7 +2920,7 @@ function getArtifactBlob(req, res) {
   }
 
   // Find the artifact from it's artifact.id, project.id, and org.id
-  // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
+  // NOTE: find() sanitizes input params
   ArtifactController.getArtifactBlob(req.user, req.params.orgid,
     req.params.projectid, req.params.artifactid, options)
   .then((artifact) => {

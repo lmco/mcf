@@ -110,7 +110,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple elements', postElements);
   it('should GET an element', getElement);
   it('should GET multiple elements', getElements);
-  // TODO: Add a getAllElements test
+  it('should GET ALL elements', getAllElements);
   it('should PATCH an element', patchElement);
   it('should PATCH multiple elements', patchElements);
   it('should DELETE an element', deleteElement);
@@ -357,6 +357,84 @@ function getElements(done) {
 
     // Expect foundElements not to be empty
     chai.expect(foundElements.length).to.equal(elemData.length);
+
+    // Convert foundElements to JMI type 2 for easier lookup
+    const jmi2Elements = utils.convertJMI(1, 2, foundElements, 'id');
+    // Loop through each element data object
+    elemData.forEach((elemObj) => {
+      const foundElement = jmi2Elements[elemObj.id];
+
+      // Verify elements created properly
+      chai.expect(foundElement.id).to.equal(elemObj.id);
+      chai.expect(foundElement.name).to.equal(elemObj.name);
+      chai.expect(foundElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(foundElement.project).to.equal(projID);
+
+      // If documentation was provided, verify it
+      if (elemObj.hasOwnProperty('documentation')) {
+        chai.expect(foundElement.documentation).to.equal(elemObj.documentation);
+      }
+      // If source was provided, verify it
+      if (elemObj.hasOwnProperty('source')) {
+        chai.expect(foundElement.source).to.equal(elemObj.source);
+      }
+      // If target was provided, verify it
+      if (elemObj.hasOwnProperty('target')) {
+        chai.expect(foundElement.target).to.equal(elemObj.target);
+      }
+      // If parent was provided, verify it
+      if (elemObj.hasOwnProperty('parent')) {
+        chai.expect(foundElement.parent).to.equal(elemObj.parent);
+      }
+
+      // Verify additional properties
+      chai.expect(foundElement.createdBy).to.equal(adminUser.username);
+      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElement.createdOn).to.not.equal(null);
+      chai.expect(foundElement.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  };
+
+  // GETs multiple elements
+  apiController.getElements(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get all elements.
+ */
+function getAllElements(done) {
+  const elemData = [
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
+  ];
+
+  // Create request object
+  const params = { orgid: org.id, projectid: projID };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const foundElements = JSON.parse(_data);
+
+    // Expect foundElements not to be empty
+    chai.expect(foundElements.length).to.be.at.least(elemData.length);
 
     // Convert foundElements to JMI type 2 for easier lookup
     const jmi2Elements = utils.convertJMI(1, 2, foundElements, 'id');
