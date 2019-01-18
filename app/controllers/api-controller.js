@@ -98,11 +98,6 @@ module.exports = {
   invalidRoute
 };
 
-// TODO: Change arr variable names to objects ending in s... EX: arrOrgs -> orgs
-
-// TODO: Have consistent options declarations
-
-// TODO: Surround all query parser calls with a try/catch
 /* ------------------------( API Helper Function )--------------------------- */
 /**
  * @description This is a utility function that formats an object as JSON.
@@ -145,7 +140,7 @@ function swaggerSpec() {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with swagger JSON
+ * @return {Object} Response object with swagger JSON
  */
 function swaggerJSON(req, res) {
   // Return swagger specification
@@ -161,7 +156,7 @@ function swaggerJSON(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with session token
+ * @return {Object} Response object with session token
  */
 function login(req, res) {
   res.header('Content-Type', 'application/json');
@@ -176,7 +171,7 @@ function login(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with 200 status code
+ * @return {Object} Response object with 200 status code
  */
 function test(req, res) {
   res.header('Content-Type', 'application/json');
@@ -191,7 +186,7 @@ function test(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with version
+ * @return {Object} Response object with version
  */
 function version(req, res) {
   // Create version object
@@ -222,9 +217,9 @@ function version(req, res) {
  * access to at least this organization.
  */
 function getOrgs(req, res) {
-  // Define arrOrgID
-  // Note: Intended to be undefined if not set
-  let arrOrgID;
+  // Define options and ids
+  // Note: Undefined if not set
+  let orgIDs;
   let options;
 
   // Define valid option and its parsed type
@@ -252,21 +247,21 @@ function getOrgs(req, res) {
 
   // Check query for orgIDs
   if (options.orgIDs) {
-    arrOrgID = options.orgIDs;
+    orgIDs = options.orgIDs;
     delete options.orgIDs;
   }
   // No IDs include in options, check body for IDs
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
-    arrOrgID = req.body;
+    orgIDs = req.body;
   }
   // No IDs in options or body, check body for org objects
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    arrOrgID = req.body.map(o => o.id);
+    orgIDs = req.body.map(o => o.id);
   }
 
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
-  OrgController.find(req.user, arrOrgID, options)
+  OrgController.find(req.user, orgIDs, options)
   .then((orgs) => {
     // Verify orgs array is not empty
     if (orgs.length === 0) {
@@ -293,10 +288,13 @@ function getOrgs(req, res) {
  * @return {Object} Response object with orgs' public data
  */
 function postOrgs(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
-  // Define valid option type
+
+  // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
   };
 
   // Sanity Check: there should always be a user in the request
@@ -338,10 +336,13 @@ function postOrgs(req, res) {
  * @return {Object} Response object with orgs' public data
  */
 function patchOrgs(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
-  // Define valid option type
+
+  // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
   };
 
   // Sanity Check: there should always be a user in the request
@@ -385,7 +386,22 @@ function patchOrgs(req, res) {
  * @return {Object} Response object with array of deleted org IDs.
  */
 function deleteOrgs(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -420,8 +436,11 @@ function deleteOrgs(req, res) {
  * @return {Object} Response object with org's public data
  */
 function getOrg(req, res) {
-  // Define valid option type
+  // Define options
+  // Note: Undefined if not set
   let options;
+
+  // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean'
@@ -472,8 +491,11 @@ function getOrg(req, res) {
  * @return {Object} Response object with org's public data
  */
 function postOrg(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
-  // Define valid option type
+
+  // Define valid option and its parsed type
   const validOptions = {
     populate: 'array'
   };
@@ -529,8 +551,11 @@ function postOrg(req, res) {
  * @return {Object} Response object with updated org
  */
 function patchOrg(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
-  // Define valid option type
+
+  // Define valid option and its parsed type
   const validOptions = {
     populate: 'array'
   };
@@ -586,7 +611,22 @@ function patchOrg(req, res) {
  * @return {Object} Response object with deleted org ID.
  */
 function deleteOrg(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -769,18 +809,33 @@ function getOrgMembers(req, res) {
  * @return {Object} Response object with projects' public data
  */
 function getProjects(req, res) {
+  // Define options and ids
+  // Note: Undefined if not set
+  let projectIDs;
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    projectIDs: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array',
-    archived: 'boolean',
-    projectIDs: 'array' });
-
-  let projectIDs;
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Check if projectIDs was provided in the request query
   if (options.projectIDs) {
@@ -826,14 +881,31 @@ function getProjects(req, res) {
  * @return {Object} Response object with created projects.
  */
 function postProjects(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Create the specified projects
   // NOTE: create() sanitizes req.params.orgid and req.body
@@ -858,14 +930,31 @@ function postProjects(req, res) {
  * @return {Object} Response object with updated projects.
  */
 function patchProjects(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Update the specified projects
   // NOTE: update() sanitizes req.params.orgid req.body
@@ -891,14 +980,28 @@ function patchProjects(req, res) {
  * @return {Object} Response object with deleted project IDs.
  */
 function deleteProjects(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Define the options object, no supported options
-  const options = {};
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // If req.body contains objects, grab the project IDs from the objects
   if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
@@ -927,14 +1030,31 @@ function deleteProjects(req, res) {
  * @return {Object} Response object with found project
  */
 function getProject(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Find the project
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
@@ -965,6 +1085,15 @@ function getProject(req, res) {
  * @return {Object} Response object with created project.
  */
 function postProject(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -979,11 +1108,18 @@ function postProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
-
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Create project with provided parameters
   // NOTE: create() sanitizes req.params.orgid and req.body
@@ -1008,6 +1144,15 @@ function postProject(req, res) {
  * @return {Object} Response object with updated project.
  */
 function patchProject(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -1022,11 +1167,18 @@ function patchProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
-
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Update the specified project
   // NOTE: update() sanitizes req.params.orgid and req.body
@@ -1052,14 +1204,28 @@ function patchProject(req, res) {
  * @return {Object} Response object with deleted project ID.
  */
 function deleteProject(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Define the options object, no supported options
-  const options = {};
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Remove the specified project
   // NOTE: remove() sanitizes req.params.orgid and req.params.projectid
@@ -1235,19 +1401,35 @@ function deleteProjMember(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with users' public data
+ * @return {Object} Response object with users' public data
  */
 function getUsers(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    usernames: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array',
-    archived: 'boolean',
-    usernames: 'array' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Set usernames to undefined
   let usernames;
@@ -1274,7 +1456,7 @@ function getUsers(req, res) {
     return res.status(200).send(formatJSON(publicUsers));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1285,17 +1467,33 @@ function getUsers(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with users' public data
+ * @return {Object} Response object with users' public data
  */
 function postUsers(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Create users
   // NOTE: create() sanitizes req.body
@@ -1307,7 +1505,7 @@ function postUsers(req, res) {
     return res.status(200).send(formatJSON(publicUsers));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1319,17 +1517,33 @@ function postUsers(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with users' public data
+ * @return {Object} Response object with users' public data
  */
 function patchUsers(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Update the specified users
   // NOTE: update() sanitizes req.body.update
@@ -1341,7 +1555,7 @@ function patchUsers(req, res) {
     return res.status(200).send(formatJSON(publicUsers));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1353,17 +1567,31 @@ function patchUsers(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with users' public data
+ * @return {Object} Response object with users' public data
  */
 function deleteUsers(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Define options query, no supported params
-  const options = {};
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Remove the specified users
   UserController.remove(req.user, req.body, options)
@@ -1373,7 +1601,7 @@ function deleteUsers(req, res) {
     return res.status(200).send(formatJSON(usernames));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1384,17 +1612,34 @@ function deleteUsers(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with search user's public data
+ * @return {Object} Response object with search user's public data
  */
 function getUser(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Find the member from it's username
   // NOTE: find() sanitizes req.params.username
@@ -1405,7 +1650,7 @@ function getUser(req, res) {
     return res.status(200).send(formatJSON(user[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1416,9 +1661,18 @@ function getUser(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with created user
+ * @return {Object} Response object with created user
  */
 function postUser(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -1436,8 +1690,15 @@ function postUser(req, res) {
   // Set the username in req.body in case it wasn't provided
   req.body.username = req.params.username;
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Create user with provided parameters
   // NOTE: create() sanitizes req.body
@@ -1448,7 +1709,7 @@ function postUser(req, res) {
     return res.status(200).send(formatJSON(users[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1460,9 +1721,18 @@ function postUser(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated user
+ * @return {Object} Response object with updated user
  */
 function patchUser(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -1476,11 +1746,19 @@ function patchUser(req, res) {
     );
     return res.status(error.status).send(error);
   }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
   // Set body username
   req.body.username = req.params.username;
-
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Update the specified user
   // NOTE: update() sanitizes req.body
@@ -1490,7 +1768,7 @@ function patchUser(req, res) {
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(users[0].getPublicData()));
   })
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1502,17 +1780,31 @@ function patchUser(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with deleted user
+ * @return {Object} Response object with deleted user
  */
 function deleteUser(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Define options query, no supported params
-  const options = {};
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Remove the specified user
   // NOTE: remove() sanitizes req.params.username
@@ -1523,7 +1815,7 @@ function deleteUser(req, res) {
     return res.status(200).send(formatJSON(usernames[0]));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1558,12 +1850,12 @@ function whoami(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with elements
+ * @return {Object} Response object with elements
  */
 function getElements(req, res) {
-  // Define array ID
-  // Note: Intended to be undefined if not set
-  let arrElemID;
+  // Define options and ids
+  // Note: Undefined if not set
+  let ElemIDs;
   let options;
 
   // Define valid option and its parsed type
@@ -1592,15 +1884,15 @@ function getElements(req, res) {
 
   // Check query for orgIDs
   if (options.elementIDs) {
-    arrElemID = options.elementIDs;
+    ElemIDs = options.elementIDs;
     delete options.elementIDs;
   }
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     // No IDs include in options, check body
-    arrElemID = req.body;
+    ElemIDs = req.body;
   }
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    arrElemID = req.body.map(p => p.id);
+    ElemIDs = req.body.map(p => p.id);
   }
 
   // Default branch to master
@@ -1609,7 +1901,7 @@ function getElements(req, res) {
   // Find all elements from it's org.id and project.id
   // NOTE: find() sanitizes req.params.orgid and req.params.projectid
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    branchid, arrElemID, options)
+    branchid, ElemIDs, options)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
@@ -1625,7 +1917,7 @@ function getElements(req, res) {
     return res.status(200).send(formatJSON(elementsPublicData));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1636,10 +1928,13 @@ function getElements(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with created elements
+ * @return {Object} Response object with created elements
  */
 function postElements(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
+
   // Define valid option type
   const validOptions = {
     populate: 'array'
@@ -1679,7 +1974,7 @@ function postElements(req, res) {
     return res.status(200).send(formatJSON(data));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1690,10 +1985,13 @@ function postElements(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated elements
+ * @return {Object} Response object with updated elements
  */
 function patchElements(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
+
   // Define valid option type
   const validOptions = {
     populate: 'array'
@@ -1728,7 +2026,7 @@ function patchElements(req, res) {
     return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /*
@@ -1738,9 +2036,16 @@ function patchElements(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @return {Object} res response object with elements
+ * @return {Object} Response object with elements
  */
 function deleteElements(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -1749,6 +2054,16 @@ function deleteElements(req, res) {
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Remove the specified elements
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
@@ -1759,7 +2074,7 @@ function deleteElements(req, res) {
     return res.status(200).send(formatJSON(elements.map(p => utils.parseID(p).pop())));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1770,10 +2085,13 @@ function deleteElements(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with searched element
+ * @return {Object} Response object with searched element
  */
 function getElement(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
+
   // Define valid option type
   const validOptions = {
     populate: 'array',
@@ -1810,7 +2128,7 @@ function getElement(req, res) {
     return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1822,10 +2140,13 @@ function getElement(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with created element
+ * @return {Object} Response object with created element
  */
 function postElement(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
+
   // Define valid option type
   const validOptions = {
     populate: 'array'
@@ -1861,7 +2182,7 @@ function postElement(req, res) {
     return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1874,10 +2195,13 @@ function postElement(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated element
+ * @return {Object} Response object with updated element
  */
 function patchElement(req, res) {
+  // Define options
+  // Note: Undefined if not set
   let options;
+
   // Define valid option type
   const validOptions = {
     populate: 'array'
@@ -1913,7 +2237,7 @@ function patchElement(req, res) {
     return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1925,12 +2249,29 @@ function patchElement(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with deleted element
+ * @return {Object} Response object with deleted element
  */
 function deleteElement(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
 
@@ -1947,7 +2288,7 @@ function deleteElement(req, res) {
     // Return 200: OK and deleted element
     return res.status(200).send(formatJSON(utils.parseID(element[0]).pop()));
   })
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /* -----------------------( Webhooks API Endpoints )------------------------- */
@@ -1959,17 +2300,34 @@ function deleteElement(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with found webhook
+ * @return {Object} Response object with found webhook
  */
 function getWebhook(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array', archived: 'boolean' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Find the webhook from it's webhook.id, project.id, and org.id
   // NOTE: find() sanitizes req.params.projectid, req.params.orgid, and req.params.webhookid
@@ -1981,7 +2339,7 @@ function getWebhook(req, res) {
     return res.status(200).send(formatJSON(webhooks[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -1993,9 +2351,18 @@ function getWebhook(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with created webhook
+ * @return {Object} Response object with created webhook
  */
 function postWebhook(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -2008,11 +2375,18 @@ function postWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
   // Set id in request body
   req.body.id = req.params.webhookid;
-
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array' });
 
   // Create webhook with provided parameters
   // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and req.body
@@ -2023,7 +2397,7 @@ function postWebhook(req, res) {
     return res.status(200).send(formatJSON(webhooks[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -2036,17 +2410,33 @@ function postWebhook(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated webhook
+ * @return {Object} Response object with updated webhook
  */
 function patchWebhook(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Extract options from request query
-  const options = utils.parseOptions(req.query, { populate: 'array' });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Set id in request body
   req.body.id = req.params.webhookid;
@@ -2060,7 +2450,7 @@ function patchWebhook(req, res) {
     return res.status(200).send(formatJSON(webhooks[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -2072,17 +2462,33 @@ function patchWebhook(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with deleted webhook ids
+ * @return {Object} Response object with deleted webhook ids
  */
 function deleteWebhook(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Define options object, none are currently supported
-  const options = {};
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
   // Remove the specified webhook
   // NOTE: removeWebhook() sanitizes req.params.orgid, req.params.projectid, and
@@ -2094,7 +2500,7 @@ function deleteWebhook(req, res) {
     // Return 200: OK and success
     return res.status(200).send(formatJSON(utils.parseID(webhookIDs[0]).pop()));
   })
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -2107,7 +2513,7 @@ function deleteWebhook(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object
+ * @return {Object} Response object
  */
 function postIncomingWebhook(req, res) {
   // Decrypt webhookID
@@ -2138,7 +2544,7 @@ function postIncomingWebhook(req, res) {
     // Return a 200 status
     return res.status(200).send();
   })
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /* -----------------------( Artifacts API Endpoints )------------------------- */
@@ -2150,34 +2556,39 @@ function postIncomingWebhook(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with found artifact
+ * @return {Object} Response object with found artifact
  */
 function getArtifact(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
-  // Check if invalid key passed in
-  Object.keys(req.query).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
-  // Define the optional archived flag
-  let archived = false;
 
-  // Check if archived was provided in the request query
-  if (req.query && req.query.hasOwnProperty('archived')) {
-    archived = (req.query.archived === 'true');
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
   }
 
   // Find the artifact from it's artifact.id, project.id, and org.id
   // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
   ArtifactController.findArtifact(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, archived)
+    req.params.projectid, req.params.artifactid, options)
   .then((artifact) => {
     // Return a 200: OK and the artifact
     res.header('Content-Type', 'application/json');
@@ -2186,7 +2597,7 @@ function getArtifact(req, res) {
     return res.status(200).send(formatJSON(publicData));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -2198,35 +2609,54 @@ function getArtifact(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with artifacts
+ * @return {Object} Response object with artifacts
  */
 function getArtifacts(req, res) {
+  // Define options and ids
+  // Note: Undefined if not set
+  let artIDs;
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    artIDs: 'array'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
-  // Check if invalid key passed in
-  Object.keys(req.body).forEach((key) => {
-    // If invalid key, reject
-    if (!['archived'].includes(key)) {
-      const error = new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
-      return res.status(error.status).send(error);
-    }
-  });
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
 
-  // Define the optional archived flag
-  let archived = false;
-
-  // Check if archived was provided in the request body
-  if (req.body.hasOwnProperty('archived')) {
-    archived = req.body.archived;
+  // Check query for orgIDs
+  if (options.artIDs) {
+    artIDs = options.artIDs;
+    delete options.artIDs;
+  }
+  // No IDs include in options, check body for IDs
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+    artIDs = req.body;
+  }
+  // No IDs in options or body, check body for org objects
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    artIDs = req.body.map(o => o.id);
   }
 
   // Find all artifacts from it's org.id and project.id
   // NOTE: findArtifacts() sanitizes req.params.orgid and req.params.projectid
-  ArtifactController.findArtifacts(req.user, req.params.orgid, req.params.projectid, archived)
+  ArtifactController.findArtifacts(req.user, req.params.orgid, artIDs, options)
   .then((artifacts) => {
     // Return only public artifact data
     const artifactsPublicData = artifacts.map(a => a.getPublicData());
@@ -2256,10 +2686,19 @@ function getArtifacts(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with created artifact
+ * @return {Object} Response object with created artifact
  */
 function postArtifact(req, res) {
   upload(req, res, function(err) {
+    // Define options
+    // Note: Undefined if not set
+    let options;
+
+    // Define valid option and its parsed type
+    const validOptions = {
+      populate: 'array',
+    };
+
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.
       res.status(500).send(err);
@@ -2292,10 +2731,20 @@ function postArtifact(req, res) {
       return res.status(error.status).send(error);
     }
 
+    // Attempt to parse query options
+    try {
+      // Extract options from request query
+      options = utils.parseOptions(req.query, validOptions);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      return res.status(error.status).send(error);
+    }
+
     // Create artifact with provided parameters
     // NOTE: createArtifact() sanitizes req.body
     ArtifactController.createArtifact(req.user, req.params.orgid,
-      req.params.projectid, req.params.artifactid, req.body, req.file.buffer)
+      req.params.projectid, req.params.artifactid, req.body, req.file.buffer, options)
     .then((artifact) => {
       // Return 200: OK and created artifact
       res.header('Content-Type', 'application/json');
@@ -2318,10 +2767,19 @@ function postArtifact(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with updated artifact
+ * @return {Object} Response object with updated artifact
  */
 function patchArtifact(req, res) {
   upload(req, res, function(err) {
+    // Define options
+    // Note: Undefined if not set
+    let options;
+
+    // Define valid option and its parsed type
+    const validOptions = {
+      populate: 'array',
+    };
+
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.
       res.status(500).send(err);
@@ -2341,18 +2799,28 @@ function patchArtifact(req, res) {
       return res.status(error.status).send(error);
     }
 
+    // Attempt to parse query options
+    try {
+      // Extract options from request query
+      options = utils.parseOptions(req.query, validOptions);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      return res.status(error.status).send(error);
+    }
+
     // Update the specified artifact
     // NOTE: updateArtifact() sanitizes req.params.orgid, req.params.projectid,
     // and req.params.artifactid
     ArtifactController.updateArtifact(req.user, req.params.orgid,
-      req.params.projectid, req.params.artifactid, req.body, req.file.buffer)
+      req.params.projectid, req.params.artifactid, req.body, req.file.buffer, options)
     .then((artifact) => {
       // Return 200: OK and the updated artifact
       res.header('Content-Type', 'application/json');
       return res.status(200).send(formatJSON(artifact.getPublicData()));
     })
     // If an error was thrown, return it and its status
-    .catch((error) => res.status(error.status).send(error));
+    .catch((error) => res.status(error.status || 500).send(error));
   });
 }
 
@@ -2365,12 +2833,29 @@ function patchArtifact(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with success boolean
+ * @return {Object} Response object with success boolean
  */
 function deleteArtifact(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
 
@@ -2378,13 +2863,13 @@ function deleteArtifact(req, res) {
   // NOTE: removeArtifact() sanitizes req.params.orgid, req.params.projectid, and
   // req.params.artifactid
   ArtifactController.removeArtifact(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid)
+    req.params.projectid, req.params.artifactid, options)
   .then((success) => {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and success
     return res.status(200).send(formatJSON(success));
   })
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -2395,9 +2880,16 @@ function deleteArtifact(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response object with found artifact
+ * @return {Object} Response object with found artifact
  */
 function getArtifactBlob(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {};
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -2411,10 +2903,21 @@ function getArtifactBlob(req, res) {
       return res.status(error.status).send(error);
     }
   });
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
   // Find the artifact from it's artifact.id, project.id, and org.id
   // NOTE: findArtifact() sanitizes req.params.artifactid, req.params.projectid, req.params.orgid
   ArtifactController.getArtifactBlob(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid)
+    req.params.projectid, req.params.artifactid, options)
   .then((artifact) => {
     // Return a 200: OK and the artifact
     // res.header('Content-Type', 'application/octet-stream');
@@ -2423,7 +2926,7 @@ function getArtifactBlob(req, res) {
     return res.status(200).send(artifact.artifactBlob);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status).send(error));
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
@@ -2435,7 +2938,7 @@ function getArtifactBlob(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} res response error message
+ * @return {Object} Response error message
  */
 function invalidRoute(req, res) {
   return res.status(404).send('Invalid Route or Method.');
