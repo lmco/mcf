@@ -82,7 +82,7 @@ module.exports.org = {
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.project = {
-  id: M.config.validators.project_id ||`^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`,
+  id: M.config.validators.project_id || `^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`,
   name: M.config.validators.project_name || '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
 };
 
@@ -134,8 +134,8 @@ module.exports.element = {
  */
 module.exports.user = {
   username: M.config.validators.user_username || '^([a-z])([a-z0-9_]){0,}$',
-  email:  M.config.validators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
-  fname: M.config.validators.user_fname ||'^(([a-zA-Z])([-a-zA-Z ])*)?$',
+  email: M.config.validators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
+  fname: M.config.validators.user_fname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
   lname: M.config.validators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$'
 };
 
@@ -182,7 +182,7 @@ module.exports.url = {
 
 module.exports.artifact = {
   filename: M.config.validators.artifact_filename || '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$',
-  id: M.config.validators.artifact_id ||`^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  id: M.config.validators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
 
 /**
