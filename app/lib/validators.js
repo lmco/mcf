@@ -22,8 +22,11 @@
 // MBEE modules
 const utils = M.require('lib.utils');
 
+// If validators isn't defined, just set custom to an empty object.
+const customValidators = M.config.validators || {};
+
 // This ID is used as the common regex for other ID fields in this module
-const id = '([_a-z0-9])([-_a-z0-9]){0,}';
+const id = customValidators.id || '([a-z0-9])([-_a-z0-9]){0,}';
 
 /**
  * @description Regular Expressions to validate organization data
@@ -52,7 +55,7 @@ const id = '([_a-z0-9])([-_a-z0-9]){0,}';
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.org = {
-  id: `^(?!(css|js|img|login|logout|about|assets|static|public|api|organizations|projects|users))${id}$`
+  id: customValidators.org_id || `^(?!(css|js|img|login|logout|about|assets|static|public|api|organizations|projects|users))${id}$`
 };
 
 /**
@@ -71,7 +74,7 @@ module.exports.org = {
  *      - myProject [invalid - cannot use uppercase characters]
  */
 module.exports.project = {
-  id: `^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`
+  id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`
 };
 
 
@@ -91,7 +94,7 @@ module.exports.project = {
  *      - my-element [invalid - must contain org and proj segments]
  */
 module.exports.element = {
-  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  id: customValidators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
 
 /**
@@ -108,10 +111,10 @@ module.exports.element = {
  *   - MUST only contain lowercase letters, uppercase letters, '-', or whitespace
  */
 module.exports.user = {
-  username: '^([a-z])([a-z0-9_]){0,}$',
-  email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
-  fname: '^(([a-zA-Z])([-a-zA-Z ])*)?$',
-  lname: '^(([a-zA-Z])([-a-zA-Z ])*)?$'
+  username: customValidators.user_username || '^([a-z])([a-z0-9_]){0,}$',
+  email: customValidators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
+  fname: customValidators.user_fname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
+  lname: customValidators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$'
 };
 
 /**
@@ -125,7 +128,7 @@ module.exports.user = {
  */
 module.exports.url = {
   // starts with one and only one '/'
-  next: '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
+  next: customValidators.url_next || '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
 };
 
 /**
@@ -156,8 +159,8 @@ module.exports.url = {
  */
 
 module.exports.artifact = {
-  filename: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$',
-  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  filename: customValidators.artifact_filename || '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$',
+  id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
 
 /**
@@ -176,5 +179,5 @@ module.exports.artifact = {
  *      - my-webhook [invalid - must contain org and proj segments]
  */
 module.exports.webhook = {
-  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  id: customValidators.webhook_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
