@@ -148,7 +148,10 @@ function find(requestingUser, organizationID, projects, options) {
 
     // Define searchQuery
     const searchQuery = { archived: false };
-    searchQuery[`permissions.${reqUser._id}`] = 'read';
+    // If not system admin, add permissions check
+    if (!reqUser.admin) {
+      searchQuery[`permissions.${reqUser._id}`] = 'read';
+    }
     // If the archived field is true, remove it from the query
     if (archived) {
       delete searchQuery.archived;
@@ -320,7 +323,8 @@ function create(requestingUser, organizationID, projects, options) {
       // Verify user has write permissions on the org
       if (!foundOrg.permissions[reqUser._id]
         || (!foundOrg.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
-        return resolve([]);
+        throw new M.CustomError('User does not have permission to create'
+          + ` projects on the org ${foundOrg._id}.`, 403, 'warn');
       }
 
       // Find any existing, conflicting projects
@@ -529,7 +533,10 @@ function update(requestingUser, organizationID, projects, options) {
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
-    searchQuery[`permissions.${reqUser._id}`] = 'admin';
+    // If not system admin, add permissions check
+    if (!reqUser.admin) {
+      searchQuery[`permissions.${reqUser._id}`] = 'admin';
+    }
 
     // Find the projects to update
     Project.find(searchQuery)

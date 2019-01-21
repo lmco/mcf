@@ -143,7 +143,10 @@ function find(requestingUser, orgs, options) {
 
     // Define searchQuery
     const searchQuery = { archived: false };
-    searchQuery[`permissions.${reqUser._id}`] = 'read';
+    // If not system admin, add permissions check
+    if (!reqUser.admin) {
+      searchQuery[`permissions.${reqUser._id}`] = 'read';
+    }
     // If the archived field is true, remove it from the query
     if (archived) {
       delete searchQuery.archived;
@@ -477,7 +480,10 @@ function update(requestingUser, orgs, options) {
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
-    searchQuery[`permissions.${reqUser._id}`] = 'admin';
+    // If not system admin, add permissions check
+    if (!reqUser.admin) {
+      searchQuery[`permissions.${reqUser._id}`] = 'admin';
+    }
 
     // Find the orgs to update
     Organization.find(searchQuery)

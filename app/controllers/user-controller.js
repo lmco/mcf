@@ -499,6 +499,11 @@ function update(requestingUser, users, options) {
       throw new M.CustomError(err.message, 403, 'warn');
     }
 
+    // Ensure user cannot update others, unless sys-admin
+    if (!reqUser.admin && (arrUsernames.length > 1 || arrUsernames[0] !== reqUser.username)) {
+      throw new M.CustomError('Cannot update other users unless admin.', 403, 'warn');
+    }
+
     // Create searchQuery
     const searchQuery = { _id: { $in: arrUsernames } };
     // Find the users to update

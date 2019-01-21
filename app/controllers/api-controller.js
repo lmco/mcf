@@ -1392,8 +1392,6 @@ function deleteProjMember(req, res) {
   .catch((error) => res.status(error.status || 500).send(error));
 }
 
-// TODO: LEFT OFF HERE
-
 /* -----------------------( User API Endpoints )------------------------------*/
 /**
  * GET /api/users
