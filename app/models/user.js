@@ -208,7 +208,7 @@ UserSchema.pre('save', function(next) {
 
   // Hash plaintext password
   if (this.password) {
-    crypto.pbkdf2(this.password, this._id.toString(), 1000, 64, 'sha256', (err, derivedKey) => {
+    crypto.pbkdf2(this.password, this._id.toString(), 1000, 32, 'sha256', (err, derivedKey) => {
       // If an error occurred, throw it
       if (err) throw err;
 
@@ -232,7 +232,7 @@ UserSchema.pre('save', function(next) {
 UserSchema.methods.verifyPassword = function(pass) {
   return new Promise((resolve, reject) => {
     // Hash the input plaintext password
-    crypto.pbkdf2(pass, this._id.toString(), 1000, 64, 'sha256', (err, derivedKey) => {
+    crypto.pbkdf2(pass, this._id.toString(), 1000, 32, 'sha256', (err, derivedKey) => {
       // If err, reject it
       if (err) reject(err);
 

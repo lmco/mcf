@@ -164,7 +164,7 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
       // Change the org _id to a string, rather than ObjectID
       org._id = org.id;
       // Set archive fields
-      org.archived = org.deleted;
+      org.archived = org.deleted || false;
       org.archivedOn = org.deletedOn;
       org.archivedBy = org.deletedBy;
       // deleted, deletedOn and deletedBy fields have been removed
@@ -272,7 +272,7 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
       // Change the project _id to a string, rather than ObjectID
       project._id = project.id;
       // Set archive fields
-      project.archived = project.deleted;
+      project.archived = project.deleted || false;
       project.archivedOn = project.deletedOn;
       project.archivedBy = project.deletedBy;
       // deleted, deletedOn and deletedBy fields have been removed
@@ -319,7 +319,7 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
       }
 
       // Change the org reference from ObjectID to string
-      project.org = jmi2Orgs[project.org].id;
+      project.org = jmi2Orgs[project.org]._id;
 
       // Add the project to be inserted later
       projectsToInsert.push(project);
@@ -374,7 +374,7 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
       // Change the element _id to a string, rather than ObjectID
       element._id = element.id;
       // Set archive fields
-      element.archived = element.deleted;
+      element.archived = element.deleted || false;
       element.archivedOn = element.deletedOn;
       element.archivedBy = element.deletedBy;
       // contains, type, uuid, deleted, deletedOn and deletedBy fields have been removed
@@ -402,7 +402,7 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
       }
 
       // Change the project reference from ObjectID to string
-      element.project = jmi2Projects[element.project].id;
+      element.project = jmi2Projects[element.project]._id;
 
       // Change parent, source and target from ObjectID to string
       if (element.parent) {
@@ -481,21 +481,9 @@ function sixToSevenUserHelper(users, jmi2Users) {
 
     // For each user
     users.forEach((user) => {
-      // If the user has a password, add the ObjectID to the custom data
-      if (user.password) {
-        if (user.custom) {
-          user.custom.objectID = user._id;
-        }
-        else {
-          user.custom = {
-            objectID: user._id
-          };
-        }
-      }
-
       // Change the user _id to a string, rather than ObjectID
       user._id = user.username;
-      user.archived = user.deleted;
+      user.archived = user.deleted || false;
       user.archivedOn = user.deletedOn;
       user.archivedBy = user.deletedBy;
       // deleted, deletedOn and deletedBy fields have been removed
