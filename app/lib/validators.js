@@ -23,7 +23,7 @@
 const utils = M.require('lib.utils');
 
 // If validators isn't defined, just set custom to an empty object.
-customValidators = M.config.validators || {};
+const customValidators = M.config.validators || {};
 
 // This ID is used as the common regex for other ID fields in this module
 const id = customValidators.id || '([a-z0-9])([-_a-z0-9]){0,}';
