@@ -23,7 +23,7 @@
 const utils = M.require('lib.utils');
 
 // This ID is used as the common regex for other ID fields in this module
-const id = '([a-z0-9])([-_a-z0-9]){0,}';
+const id = M.config.validators.id || '([a-z0-9])([-_a-z0-9]){0,}';
 
 /**
  * @description Regular Expressions to validate organization data
@@ -52,8 +52,8 @@ const id = '([a-z0-9])([-_a-z0-9]){0,}';
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.org = {
-  id: `^(?!(css|js|img|login|logout|about|assets|static|public|api|organizations|projects|users))${id}$`,
-  name: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
+  id: M.config.validators.org_id || `^(?!(css|js|img|login|logout|about|assets|static|public|api|organizations|projects|users))${id}$`,
+  name: M.config.validators.org_name || '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
 };
 
 /**
@@ -82,8 +82,8 @@ module.exports.org = {
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.project = {
-  id: `^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`,
-  name: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
+  id: M.config.validators.project_id ||`^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`,
+  name: M.config.validators.project_name || '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
 };
 
 
@@ -114,9 +114,9 @@ module.exports.project = {
  *
  */
 module.exports.element = {
-  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
-  name: '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
-  uuid: '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
+  id: M.config.validators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  name: M.config.validators.element_name || '^(([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,})?$',
+  uuid: M.config.validators.element_uuid || '([a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12})'
 };
 
 /**
@@ -133,10 +133,10 @@ module.exports.element = {
  *   - MUST only contain lowercase letters, uppercase letters, '-', or whitespace
  */
 module.exports.user = {
-  username: '^([a-z])([a-z0-9_]){0,}$',
-  email: '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
-  fname: '^(([a-zA-Z])([-a-zA-Z ])*)?$',
-  lname: '^(([a-zA-Z])([-a-zA-Z ])*)?$'
+  username: M.config.validators.user_username || '^([a-z])([a-z0-9_]){0,}$',
+  email:  M.config.validators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
+  fname: M.config.validators.user_fname ||'^(([a-zA-Z])([-a-zA-Z ])*)?$',
+  lname: M.config.validators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$'
 };
 
 /**
@@ -150,7 +150,7 @@ module.exports.user = {
  */
 module.exports.url = {
   // starts with one and only one '/'
-  next: '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
+  next: M.config.validators.url_next || '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
 };
 
 /**
@@ -181,8 +181,8 @@ module.exports.url = {
  */
 
 module.exports.artifact = {
-  filename: '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$',
-  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  filename: M.config.validators.artifact_filename || '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$',
+  id: M.config.validators.artifact_id ||`^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
 
 /**
@@ -201,5 +201,5 @@ module.exports.artifact = {
  *      - my-webhook [invalid - must contain org and proj segments]
  */
 module.exports.webhook = {
-  id: `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  id: M.config.validators.webhook_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
