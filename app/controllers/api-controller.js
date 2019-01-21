@@ -1445,18 +1445,18 @@ function getUsers(req, res) {
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     usernames = req.body;
   }
+  // Check user object in body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
     usernames = req.body.map(p => p.id);
   }
 
-  // Get all users in MBEE
+  // Get Users
   // NOTE: find() sanitizes req.usernames
   UserController.find(req.user, usernames, options)
   .then((users) => {
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    const publicUsers = users.map(u => u.getPublicData());
-    return res.status(200).send(formatJSON(publicUsers));
+    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1505,8 +1505,7 @@ function postUsers(req, res) {
   .then((users) => {
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    const publicUsers = users.map(u => u.getPublicData());
-    return res.status(200).send(formatJSON(publicUsers));
+    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1555,8 +1554,7 @@ function patchUsers(req, res) {
   .then((users) => {
     // Return 200: OK and the updated users
     res.header('Content-Type', 'application/json');
-    const publicUsers = users.map(u => u.getPublicData());
-    return res.status(200).send(formatJSON(publicUsers));
+    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1571,7 +1569,7 @@ function patchUsers(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with users' public data
+ * @return {Object} Response object with usernames
  */
 function deleteUsers(req, res) {
   // Define options
@@ -1612,12 +1610,12 @@ function deleteUsers(req, res) {
 /**
  * GET /api/users/:username
  *
- * @description Gets user by its username.
+ * @description Gets user by their username.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with search user's public data
+ * @return {Object} Response object with user's public data
  */
 function getUser(req, res) {
   // Define options
@@ -1662,6 +1660,7 @@ function getUser(req, res) {
  * POST /api/users/:username
  *
  * @description Creates a new user.
+ * NOTE: System-wide admin only.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1720,8 +1719,8 @@ function postUser(req, res) {
 /**
  * PATCH /api/users/:username
  *
- * @description Updates the user specified in the URI. Takes a username object
- * in the request body.
+ * @description Updates the user.
+ * NOTE: System-wide admin only. Non admin can only edit themselves.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1779,13 +1778,13 @@ function patchUser(req, res) {
 /**
  * DELETE /api/users/:username
  *
- * @description Takes a username in the URI and deletes that user.
+ * @description Deletes a user.
  * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with deleted user
+ * @return {Object} Response object with deleted username
  */
 function deleteUser(req, res) {
   // Define options
@@ -1831,7 +1830,7 @@ function deleteUser(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return res response object with user's public data
+ * @return {Object} Response object with user's public data
  */
 function whoami(req, res) {
   // Sanity check: there should always be a user in the request
@@ -1847,10 +1846,9 @@ function whoami(req, res) {
 
 /* -----------------------( Elements API Endpoints )------------------------- */
 /**
- * GET /api/orgs/:orgid/projects/:projectid/elements
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
- * @description Takes an orgid and projectid in the URI and returns all
- * elements of the project.
+ * @description Gets all elements or get specified elements.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1860,7 +1858,7 @@ function whoami(req, res) {
 function getElements(req, res) {
   // Define options and ids
   // Note: Undefined if not set
-  let ElemIDs;
+  let elemIDs;
   let options;
 
   // Define valid option and its parsed type
@@ -1887,26 +1885,27 @@ function getElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check query for orgIDs
+  // Check query for element IDs
   if (options.elementIDs) {
-    ElemIDs = options.elementIDs;
+    elemIDs = options.elementIDs;
     delete options.elementIDs;
   }
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     // No IDs include in options, check body
-    ElemIDs = req.body;
+    elemIDs = req.body;
   }
+  // Check element object in body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    ElemIDs = req.body.map(p => p.id);
+    elemIDs = req.body.map(p => p.id);
   }
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
-  // Find all elements from it's org.id and project.id
+  // Find elements
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    branchid, ElemIDs, options)
+    branchid, elemIDs, options)
   .then((elements) => {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
@@ -1926,9 +1925,9 @@ function getElements(req, res) {
 }
 
 /**
- * POST /api/orgs/:orgid/projects/:projectid/elements
+ * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
- * @description Creates multiple projects.
+ * @description Creates specified elements.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1969,23 +1968,18 @@ function postElements(req, res) {
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
-    const data = [];
-    for (let i = 0; i < elements.length; i++) {
-      data.push(elements[i].getPublicData());
-    }
-
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(data));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
- * PATCH /api/orgs/:orgid/projects/:projectid/elements
+ * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
- * @description Updates multiple projects.
+ * @description Updates specified elements.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2021,7 +2015,7 @@ function patchElements(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
-  // Update the specified projects
+  // Update the specified elements
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
@@ -2035,14 +2029,14 @@ function patchElements(req, res) {
 }
 
 /**
- * DELETE /api/orgs/:orgid/projects/:projectid/elements
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Deletes multiple elements.
  * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @return {Object} Response object with elements
+ * @return {Object} Response object with element ids.
  */
 function deleteElements(req, res) {
   // Define options
@@ -2076,23 +2070,23 @@ function deleteElements(req, res) {
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
-    // Return 200: OK and the deleted elements
+    // Return 200: OK and the deleted element ids
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(p => utils.parseID(p).pop())));
+    return res.status(200).send(formatJSON(elements.map(e => utils.parseID(e).pop())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
- * GET /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
- * @description Gets an element by its element.id, project.id, and org.id.
+ * @description Gets an element.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with searched element
+ * @return {Object} Response object with element
  */
 function getElement(req, res) {
   // Define options
@@ -2125,7 +2119,7 @@ function getElement(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
-  // Find the element from it's element.id, project.id, and org.id
+  // Find the element
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, req.params.elementid, options)
@@ -2139,10 +2133,9 @@ function getElement(req, res) {
 }
 
 /**
- * POST /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
- * @description Takes an organization ID, project ID, and element ID in the URI
- * along with the request body to create the elements.
+ * @description Creates an element.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2192,11 +2185,9 @@ function postElement(req, res) {
 }
 
 /**
- * PATCH /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
- * @description Updates the element specified in the URI. Takes an org id,
- * project id, and element id in the URI and updated properties of the element
- * in the request body.
+ * @description Updates the specified element.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2232,7 +2223,7 @@ function patchElement(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
-  // Update the specified element
+  // Updates the specified element
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
@@ -2246,16 +2237,15 @@ function patchElement(req, res) {
 }
 
 /**
- * DELETE /api/orgs/:orgid/projects/:projectid/elements/:elementid
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
- * @description Takes an orgid, projectid, elementid in the URI along with delete
- * options in the body and deletes the corresponding element.
+ * @description Deletes an element.
  * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with deleted element
+ * @return {Object} Response object with deleted element id.
  */
 function deleteElement(req, res) {
   // Define options
@@ -2300,7 +2290,7 @@ function deleteElement(req, res) {
 /**
  * GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
  *
- * @description Gets a webhook by its webhook.id, project.id, and org.id.
+ * @description Get a webhook.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2334,7 +2324,7 @@ function getWebhook(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Find the webhook from it's webhook.id, project.id, and org.id
+  // Find the webhook
   // NOTE: find() sanitizes input params
   WebhookController.find(req.user, req.params.orgid,
     req.params.projectid, req.params.webhookid, options)
@@ -2350,8 +2340,7 @@ function getWebhook(req, res) {
 /**
  * POST /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
  *
- * @description Takes an organization ID, project ID, and webhook ID in the URI
- * along with the request body to create a webhook.
+ * @description Creates a webhook.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2408,9 +2397,7 @@ function postWebhook(req, res) {
 /**
  * PATCH /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
  *
- * @description Updates the webhook specified in the URI. Takes an org id,
- * project id, and webhook id in the URI and updated properties of the webhook
- * in the request body.
+ * @description Updates the specifed webhook.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2430,6 +2417,12 @@ function patchWebhook(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If webhook ID was provided in the body, ensure it matches webhook ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.webhookid !== req.body.id)) {
+    const error = new M.CustomError('Webhook ID in the body does not match ID in the params.', 400);
     return res.status(error.status).send(error);
   }
 
@@ -2461,14 +2454,13 @@ function patchWebhook(req, res) {
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
  *
- * @description Takes an orgid, projectid, webhookid in the URI along with delete
- * options in the body and deletes the corresponding webhook.
+ * @description Deletes a webhook.
  * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with deleted webhook ids
+ * @return {Object} Response object with deleted webhook id
  */
 function deleteWebhook(req, res) {
   // Define options
@@ -2476,9 +2468,7 @@ function deleteWebhook(req, res) {
   let options;
 
   // Define valid option and its parsed type
-  const validOptions = {
-    populate: 'array'
-  };
+  const validOptions = {};
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -2502,7 +2492,7 @@ function deleteWebhook(req, res) {
     req.params.projectid, req.params.webhookid, options)
   .then((webhookIDs) => {
     res.header('Content-Type', 'application/json');
-    // Return 200: OK and success
+    // Return 200: OK and deleted webhook id
     return res.status(200).send(formatJSON(utils.parseID(webhookIDs[0]).pop()));
   })
   .catch((error) => res.status(error.status || 500).send(error));
