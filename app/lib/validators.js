@@ -85,7 +85,7 @@ module.exports.org = {
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.project = {
-  id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}(?!(edit))${id}$`,
+  id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`,
   name: customValidators.project_name || '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$'
 };
 

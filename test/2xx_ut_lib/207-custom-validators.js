@@ -1,13 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.206b-custom-validators
+ * @module  test.207-custom-validators
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI
  *
- * @maintainer Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
