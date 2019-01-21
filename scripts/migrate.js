@@ -25,13 +25,20 @@ const fs = require('fs');
 const path = require('path');
 const process = require('process');
 
+// NPM modules
+const mongoose = require('mongoose');
+
+// MBEE modules
+const db = M.require('lib.db');
+
 /**
  * @description Handles database migrations from a specific version, to a
  * specific version
  */
 function migrate(args) {
   // eslint-disable-next-line no-console
-  console.log('Are you sure you want to migrate database versions? Press any key to continue.');
+  console.log('Are you sure you want to migrate database versions? Press any key to continue. ' +
+    'Press ^C to cancel.');
 
   // Get user input
   const userInput = process.stdin;
@@ -103,13 +110,40 @@ function migrate(args) {
       process.exit();
     }
 
-    // Split up migrations list into only migrations needed
-    const fromMigrationIndex = sortedMigrations.indexOf(fromVersion);
-    const toMigrationIndex = sortedMigrations.indexOf(toVersion);
-    const migrationsToRun = sortedMigrations.slice(fromMigrationIndex + 1, toMigrationIndex + 1);
+    // Remove migrations below fromVersion
+    while (sortedMigrations[0] !== fromVersion) {
+      sortedMigrations.shift();
+    }
+    // If upgrading, remove the first migration one more time
+    if (versionComp === 1) {
+      sortedMigrations.shift();
+    }
 
+    // Remove migrations after toVersion
+    while (sortedMigrations[sortedMigrations.length-1] !== toVersion) {
+      sortedMigrations.pop();
+    }
+    // If downgrading, remove the last migration one more time
+    if (versionComp === -1) {
+      sortedMigrations.pop();
+    }
+
+    // Get te server data documents
+    db.connect()
+    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    .then((serverData) => {
+      // Restrict collection to one document
+      if (serverData.length > 1) {
+        throw new Error('Cannot have more than one document in the server_data collection.');
+      }
+      // One document exists, read and compare versions
+      if (serverData.length !== 0 && serverData[0].version === toVersion) {
+        M.log.info('Database already up to date.');
+        process.exit();
+      }
+    })
     // Run the migrations
-    runMigrations(fromVersion, migrationsToRun, versionComp)
+    .then(() => runMigrations(fromVersion, sortedMigrations, versionComp))
     .then(() => {
       M.log.info('Database migration complete.');
       process.exit();

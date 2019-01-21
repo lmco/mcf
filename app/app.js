@@ -48,6 +48,7 @@ module.exports = app;
  * default admin and default organization if needed.
  */
 db.connect()
+.then(() => getDatabaseVersion())
 .then(() => createDefaultAdmin())
 .then(() => createDefaultOrganization())
 .then(() => initApp())
@@ -207,4 +208,38 @@ function createDefaultAdmin() {
     // Catch and reject error
     .catch(error => reject(error));
   });
+}
+
+function getDatabaseVersion() {
+  return new Promise((resolve, reject) => {
+    // Get all collections in the DB
+    mongoose.connection.db.collections()
+    .then((collections) => {
+      // Get all collection names
+      const existingCollections = collections.map(c => c.s.name);
+      // Create the server_data collection if it doesn't exist
+      if (!existingCollections.includes('server_data')) {
+        return mongoose.connection.db.createCollection('server_data');
+      }
+    })
+    // Get all documents from the server data
+    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    .then((serverData) => {
+      // Restrict collection to one document
+      if (serverData.length > 1) {
+        throw new Error('Cannot have more than one document in the server_data collection.');
+      }
+      // If no server data currently exists, create the document
+      if (serverData.length === 0) {
+        return mongoose.connection.db.collection('server_data').insertOne({version: M.version});
+      }
+      // One document exists, read and compare versions
+      else if (serverData[0].version !== M.version) {
+        throw new Error(`Please run 'node mbee migrate --from ${serverData[0].version} ` +
+          ` --to ${M.version}' to migrate the database.`);
+      }
+    })
+    .then(() => resolve())
+    .catch((error) => reject(error));
+  })
 }
