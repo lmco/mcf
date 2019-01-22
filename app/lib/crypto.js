@@ -26,7 +26,7 @@ const crypto = require('crypto');  // NOTE: Refers to standard node crypto libra
  * encrypted data as a base64 encoded string.
  *
  * @params {Object} data - Data to be encrypted
- * @return {String} encrypted data
+ * @param {string} encrypted data
  */
 module.exports.encrypt = function encrypt(data) {
   const secret = M.config.server.secret;
@@ -45,7 +45,7 @@ module.exports.encrypt = function encrypt(data) {
  * @description Decrypts data with AES-256. It expects data to be in the same
  * base64 encoded string format returned by encrypt().
  *
- * @params {String} data - Data to be decrypted
+ * @param {string} data - Data to be decrypted
  * @return {Object} decrypted data
  */
 module.exports.decrypt = function decrypt(data) {
@@ -80,7 +80,7 @@ module.exports.decrypt = function decrypt(data) {
  * @description Generates token from user data.
  *
  * @params {Object} data - Data to generate token
- * @return {String} encrypted token
+ * @param {string} encrypted token
  */
 module.exports.generateToken = function generateToken(data) {
   // Return encrypted input
@@ -90,7 +90,7 @@ module.exports.generateToken = function generateToken(data) {
 /**
  * @description Inspects user token.
  *
- * @params {String} data - Data to inspect token
+ * @param {string} data - Data to inspect token
  * @return {Object} decrypted token
  */
 module.exports.inspectToken = function inspectToken(token) {
@@ -102,7 +102,7 @@ module.exports.inspectToken = function inspectToken(token) {
  * @description Performs md5 hash with hex encoding.
  *
  * @params {Object} data - Data to md5 hash
- * @return {String} hash of data
+ * @param {string} hash of data
  */
 module.exports.md5Hash = function md5Hash(data) {
   // hash input data and return it
@@ -113,7 +113,7 @@ module.exports.md5Hash = function md5Hash(data) {
  * @description Performs sha256 hash with hex encoding.
  *
  * @params {Object} data - Data to sha256 hash
- * @return {String} hash of data
+ * @param {string} hash of data
  */
 module.exports.sha256Hash = function sha256Hash(data) {
   // hash input data and return it

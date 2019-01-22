@@ -111,7 +111,7 @@ function organizationList(req, res) {
     res.redirect('/login');
   }
   // get all organizations the user is a member of
-  OrgController.findOrgs(req.user)
+  OrgController.find(req.user)
   // Render the organization page with the list of orgs
   .then(orgs => utils.render(req, res, 'organization-list', {
     orgs: orgs,
@@ -135,7 +135,7 @@ function organization(req, res) {
     res.redirect('/login');
   }
   // Find organization
-  OrgController.findOrg(req.user, req.params.orgid)
+  OrgController.find(req.user, req.params.orgid)
   // Render organization page including nav-sidebar
   .then(org => utils.render(req, res, 'organization', {
     name: 'organization',
@@ -178,7 +178,7 @@ function organizationEdit(req, res) {
     res.redirect('/login');
   }
   // Find organization
-  OrgController.findOrg(req.user, req.params.orgid)
+  OrgController.find(req.user, req.params.orgid)
   .then(org => {
     // Check if user is NOT admin
     if (!req.user.admin
@@ -212,7 +212,7 @@ function projectList(req, res) {
     res.redirect('/login');
   }
   // Find the requesting user
-  UserController.findUser(req.user, req.user.username)
+  UserController.find(req.user, req.user.username)
   // Render the project page with the list of projects
   .then(foundUser => {
     // Create list of projects
@@ -247,11 +247,11 @@ function project(req, res) {
   let proj = null;
   let elements = null;
   // Find organization
-  ProjController.findProject(req.user, req.params.orgid, req.params.projectid)
+  ProjController.find(req.user, req.params.orgid, req.params.projectid)
   // Render organization page including nav-sidebar
   .then(foundProject => {
     proj = foundProject;
-    return ElementController.findElements(req.user, req.params.orgid, req.params.projectid);
+    return ElementController.find(req.user, req.params.orgid, req.params.projectid);
   })
   .then(foundElements => {
     elements = foundElements;
@@ -305,7 +305,7 @@ function projectEdit(req, res) {
     res.redirect('/login');
   }
   // Find Project
-  ProjController.findProject(req.user, req.params.orgid, req.params.projectid)
+  ProjController.find(req.user, req.params.orgid, req.params.projectid)
   .then(foundProject => {
     // Check if user is NOT admin
     if (!req.user.admin
@@ -341,7 +341,7 @@ function whoami(req, res) {
   }
 
   // get all organizations the user is a member of
-  UserController.findUser(req.user, req.user.username)
+  UserController.find(req.user, req.user.username)
   // Render the project page with the list of projects
   .then(foundUser => {
     utils.render(req, res, 'user', {

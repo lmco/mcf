@@ -33,12 +33,8 @@ const validators = M.require('lib.validators');
  */
 describe(M.getModuleName(module.filename), () => {
   it('should verify valid and invalid org ids', verifyOrgID);
-  it('should verify valid and invalid org names', verifyOrgName);
   it('should verify valid and invalid project ids', verifyProjectID);
-  it('should verify valid and invalid project names', verifyProjectName);
   it('should verify valid and invalid element ids', verifyElementID);
-  it('should verify valid and invalid element names', verifyElementName);
-  it('should verify valid and invalid element uuids', verifyElementUUID);
   it('should verify valid and invalid user usernames', verifyUserUsername);
   it('should verify valid and invalid user emails', verifyUserEmail);
   it('should verify valid and invalid user names', verifyUserName);
@@ -65,22 +61,6 @@ function verifyOrgID(done) {
 }
 
 /**
- * @description Verifies valid and invalid org names
- */
-function verifyOrgName(done) {
-  // Valid names
-  chai.expect(RegExp(validators.org.name).test('Lockheed Martin')).to.equal(true);
-  chai.expect(RegExp(validators.org.name).test('my org name')).to.equal(true);
-  chai.expect(RegExp(validators.org.name).test('3 numbers 45-')).to.equal(true);
-
-  // Invalid names
-  chai.expect(RegExp(validators.org.name).test('special*')).to.equal(false);
-  chai.expect(RegExp(validators.org.name).test(' space first')).to.equal(false);
-  chai.expect(RegExp(validators.org.name).test('')).to.equal(false);
-  done();
-}
-
-/**
  * @description Verifies valid and invalid project IDs
  */
 function verifyProjectID(done) {
@@ -92,22 +72,6 @@ function verifyProjectID(done) {
   chai.expect(RegExp(validators.project.id).test('Proj3')).to.equal(false);
   chai.expect(RegExp(validators.project.id).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.project.id).test('')).to.equal(false);
-  done();
-}
-
-/**
- * @description Verifies valid and invalid project names
- */
-function verifyProjectName(done) {
-  // Valid names
-  chai.expect(RegExp(validators.project.name).test('Lockheed Martin')).to.equal(true);
-  chai.expect(RegExp(validators.project.name).test('my proj name')).to.equal(true);
-  chai.expect(RegExp(validators.project.name).test('3 numbers 45-')).to.equal(true);
-
-  // Invalid names
-  chai.expect(RegExp(validators.project.name).test('special*')).to.equal(false);
-  chai.expect(RegExp(validators.project.name).test(' space first')).to.equal(false);
-
   done();
 }
 
@@ -124,39 +88,6 @@ function verifyElementID(done) {
   chai.expect(RegExp(validators.element.id).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.element.id).test('')).to.equal(false);
   chai.expect(RegExp(validators.element.id).test('elem3')).to.equal(false);
-  done();
-}
-
-/**
- * @description Verifies valid and invalid element names
- */
-function verifyElementName(done) {
-  // Valid names
-  chai.expect(RegExp(validators.element.name).test('Lockheed Martin')).to.equal(true);
-  chai.expect(RegExp(validators.element.name).test('my elem name')).to.equal(true);
-  chai.expect(RegExp(validators.element.name).test('3 numbers 45-')).to.equal(true);
-  chai.expect(RegExp(validators.element.name).test('')).to.equal(true);
-
-  // Invalid names
-  chai.expect(RegExp(validators.element.name).test('special*')).to.equal(false);
-  chai.expect(RegExp(validators.element.name).test(' space first')).to.equal(false);
-  done();
-}
-
-/**
- * @description Verifies valid and invalid element UUIDs
- */
-function verifyElementUUID(done) {
-  const uuidPattern = RegExp(validators.element.uuid);
-
-  // Valid UUIDs
-  chai.expect(uuidPattern.test('f81d4fae-7dec-11d0-a765-00a0c91e6bf6')).to.equal(true);
-
-  // Invalid UUIDS
-  chai.expect(uuidPattern.test('f81d4fae7dec11d0a76500a0c91e6bf6')).to.equal(false);
-  chai.expect(uuidPattern.test('f81d4fae-7dec-11d0-00a0c91e6bf6')).to.equal(false);
-  chai.expect(uuidPattern.test('F81D4FAE-7DEC-11D0-A765-00A0C91E6BF6')).to.equal(false);
-  chai.expect(uuidPattern.test('invalid uuid')).to.equal(false);
   done();
 }
 

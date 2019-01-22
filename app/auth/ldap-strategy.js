@@ -35,8 +35,8 @@ const ldap = require('ldapjs');
 
 // MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
+const Organization = M.require('models.organization');
 const User = M.require('models.user');
-const UserController = M.require('controllers.user-controller');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -50,8 +50,8 @@ const ldapConfig = M.config.auth.ldap;
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} username - Username to authenticate via LDAP AD
- * @param {String} password - Password to authenticate via LDAP AD
+ * @param {string} username - Username to authenticate via LDAP AD
+ * @param {string} password - Password to authenticate via LDAP AD
  * @returns {Promise} resolve - authenticated user object
  *                    reject - an error
  *
@@ -95,7 +95,7 @@ function handleBasicAuth(req, res, username, password) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} token - Token user authentication token, encrypted
+ * @param {string} token - Token user authentication token, encrypted
  * @returns {Promise} resolve - local user object
  *                    reject - an error
  *
@@ -152,13 +152,13 @@ function ldapConnect() {
     // Now if it's not an array, fail
     if (!Array.isArray(ldapCA)) {
       M.log.error('Failed to load LDAP CA certificates (invalid type)');
-      return reject(new M.CustomError('An error occured.', 500));
+      return reject(new M.CustomError('An error occurred.', 500));
     }
 
     // If any items in the array are not strings, fail
     if (!utils.checkType(ldapCA, 'string')) {
       M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
-      return reject(new M.CustomError('An error occured.', 500));
+      return reject(new M.CustomError('An error occurred.', 500));
     }
 
     M.log.verbose('Reading LDAP server CAs ...');
@@ -198,7 +198,7 @@ function ldapConnect() {
  * @description Searches for and resolve a user from LDAP server.
  *
  * @param {Object} ldapClient - LDAP client
- * @param {String} username - Username to find LDAP user
+ * @param {string} username - Username to find LDAP user
  * @returns {Promise} resolve - LDAP user information
  *                    reject - an error
  */
@@ -228,7 +228,7 @@ function ldapSearch(ldapClient, username) {
         ldapConfig.attributes.username,
         ldapConfig.attributes.firstName,
         ldapConfig.attributes.lastName,
-        ldapConfig.attributes.eMail
+        ldapConfig.attributes.email
       ]
     };
 
@@ -279,7 +279,7 @@ function ldapSearch(ldapClient, username) {
  *
  * @param {Object} ldapClient - LDAP client
  * @param {Object} user - LDAP user
- * @param {String} password - Password to verify LDAP user
+ * @param {string} password - Password to verify LDAP user
  * @returns {Promise} resolve - authenticated user's information
  *                    reject - an error
  */
@@ -315,47 +315,59 @@ function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
   // Define and return promise
   return new Promise((resolve, reject) => {
-    // Search for user in database
-    UserController.findUser({ admin: true }, ldapUserObj[ldapConfig.attributes.username])
-    .then(foundUser => {
-      // User exists, update database with LDAP information
-      const userSave = foundUser;
-      userSave.fname = ldapUserObj[ldapConfig.attributes.firstName];
-      userSave.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
-      userSave.lname = ldapUserObj[ldapConfig.attributes.lastName];
-      userSave.email = ldapUserObj[ldapConfig.attributes.eMail];
+    // Store user object function-wide
+    let userObject = {};
 
-      // Save updated user to database
-      foundUser.save()
-      // Save successful, resolve user model object
-      .then(userSaveUpdate => resolve(userSaveUpdate))
-      // Save failed, reject error
-      .catch(saveErr => reject(saveErr));
-    })
-    .catch(findUserErr => {
-      // Find user failed, check error message NOT 'Not Found'
-      if (findUserErr.message !== 'Not Found') {
-        // Error message NOT 'Not Found', reject error
-        return reject(findUserErr);
+    // Search for user in database
+    User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] })
+    .then(foundUser => {
+      // If the user was found, update with LDAP info
+      if (foundUser) {
+        // User exists, update database with LDAP information
+        foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
+        foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
+        foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
+        foundUser.email = ldapUserObj[ldapConfig.attributes.email];
+
+        // Save updated user to database
+        return foundUser.save();
       }
-      // Error message 'Not Found', create user in database
+      // User not found, create a new one
+
       // Initialize userData with LDAP information
       const initData = new User({
-        username: ldapUserObj[ldapConfig.attributes.username],
+        _id: ldapUserObj[ldapConfig.attributes.username],
         fname: ldapUserObj[ldapConfig.attributes.firstName],
         preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
         lname: ldapUserObj[ldapConfig.attributes.lastName],
-        email: ldapUserObj[ldapConfig.attributes.eMail],
+        email: ldapUserObj[ldapConfig.attributes.email],
         provider: 'ldap'
       });
 
-      // Save ldap user
-      return initData.save()
-      // Save successful, resolve user model object
-      .then(userSaveNew => resolve(userSaveNew))
-      // Save failed, reject error
-      .catch(saveErr => reject(saveErr));
-    });
+        // Save ldap user
+      return initData.save();
+    })
+    .then(savedUser => {
+      // Save user to function-wide variable
+      userObject = savedUser;
+
+      // Find the default org
+      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+    })
+    .then((defaultOrg) => {
+      // Add the user to the default org
+      defaultOrg.permissions[userObject._id] = ['read', 'write'];
+
+      // Mark permissions as modified, required for 'mixed' fields
+      defaultOrg.markModified('permissions');
+
+      // Save the updated default org
+      return defaultOrg.save();
+    })
+    // Return the new user
+    .then(() => resolve(userObject))
+    // Save failed, reject error
+    .catch(saveErr => reject(saveErr));
   });
 }
 

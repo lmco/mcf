@@ -38,8 +38,8 @@ const utils = M.require('lib.utils');
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} username - Username to authenticate
- * @param {String} password - Password to authenticate
+ * @param {string} username - Username to authenticate
+ * @param {string} password - Password to authenticate
  * @returns {Promise} resolve - authenticated user object
  *                    reject - an error
  *
@@ -78,7 +78,7 @@ function handleBasicAuth(req, res, username, password) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} token - User authentication token, encrypted
+ * @param {string} token - User authentication token, encrypted
  * @returns {Promise} resolve - local user object
  *                    reject - an error
  *
@@ -109,7 +109,7 @@ function handleTokenAuth(req, res, token) {
     if (Date.now() < Date.parse(decryptedToken.expires)) {
       // Not expired, find user
       User.findOne({
-        username: sani.sanitize(decryptedToken.username),
+        _id: sani.sanitize(decryptedToken.username),
         archivedOn: null
       }, (findUserTokenErr, user) => {
         if (findUserTokenErr) {

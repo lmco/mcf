@@ -35,7 +35,6 @@ const flash = require('express-flash');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
-const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 
@@ -49,8 +48,8 @@ module.exports = app;
  */
 db.connect()
 .then(() => getDatabaseVersion())
-.then(() => createDefaultAdmin())
 .then(() => createDefaultOrganization())
+.then(() => createDefaultAdmin())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
@@ -68,10 +67,11 @@ function initApp() {
     app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
 
     // for parsing application/json
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({ limit: '50mb' }));
+    app.use(bodyParser.text());
 
     // for parsing application/xwww-form-urlencoded
-    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
     // Trust proxy for IP logging
     app.enable('trust proxy');
@@ -129,20 +129,28 @@ function createDefaultOrganization() {
     let userIDs = null;
 
     // Find all users
-    UserController.findUsers({ admin: true })
+    User.find({})
     .then(users => {
       // Set userIDs to the _id of the users array
       userIDs = users.map(u => u._id);
       // Find the default organization
-      return Organization.findOne({ id: M.config.server.defaultOrganizationId });
+      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
     })
     .then(org => {
       // Check if org is NOT null
       if (org !== null) {
         // Default organization exists, prune user permissions to only include
-        // active users.
-        org.permissions.read = userIDs;
-        org.permissions.write = userIDs;
+        // users currently in the database.
+        Object.keys(org.permissions).forEach((user) => {
+          if (!userIDs.includes(user)) {
+            delete org.permissions.user;
+          }
+        });
+
+        // Mark the permissions field modified, require for 'mixed' fields
+        org.markModified('permissions');
+
+        // Save the update organization
         return org.save();
       }
       // Set createdOrg to true
@@ -150,13 +158,15 @@ function createDefaultOrganization() {
       // Default organization does NOT exist, create it and add all active users
       // to permissions list
       const defaultOrg = new Organization({
-        id: M.config.server.defaultOrganizationId,
-        name: M.config.server.defaultOrganizationName,
-        permissions: {
-          read: userIDs,
-          write: userIDs
-        }
+        _id: M.config.server.defaultOrganizationId,
+        name: M.config.server.defaultOrganizationName
       });
+
+      // Add each existing user to default org
+      userIDs.forEach((user) => {
+        defaultOrg.permissions[user] = ['read', 'write'];
+      });
+
       // Save new default organization
       return defaultOrg.save();
     })
@@ -190,13 +200,23 @@ function createDefaultAdmin() {
       // No global admin exists, create local user as global admin
       const adminUserData = new User({
         // Set username and password of global admin user from configuration.
-        username: M.config.server.defaultAdminUsername,
+        _id: M.config.server.defaultAdminUsername,
         password: M.config.server.defaultAdminPassword,
         provider: 'local',
         admin: true
       });
       // Save new global admin user
       return adminUserData.save();
+    })
+    .then(() => Organization.findOne({ _id: M.config.server.defaultOrganizationId }))
+    .then((defaultOrg) => {
+      // Add default admin to default org
+      defaultOrg.permissions[M.config.server.defaultAdminUsername] = ['read', 'write'];
+
+      defaultOrg.markModified('permissions');
+
+      // Save the updated default org
+      return defaultOrg.save();
     })
     // Resolve on success of saved admin
     .then(() => {

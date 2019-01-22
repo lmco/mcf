@@ -98,14 +98,14 @@ function cleanDB(done) {
  * @description Creates the default org if it doesn't already exist
  */
 function createDefaultOrg(done) {
-  Organization.findOne({ id: M.config.server.defaultOrganizationId })
+  Organization.findOne({ _id: M.config.server.defaultOrganizationId })
   .then((org) => {
     // Verify return statement
     chai.expect(org).to.equal(null);
 
     // Create default org object
     const defOrg = new Organization({
-      id: M.config.server.defaultOrganizationId,
+      _id: M.config.server.defaultOrganizationId,
       name: M.config.server.defaultOrganizationName,
       createdBy: null,
       lastModifiedBy: null

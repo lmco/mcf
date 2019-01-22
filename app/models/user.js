@@ -37,54 +37,31 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the User Schema
  *
- * @property {String} username - The Users unique name.
- * @property {String} password - The Users password.
- * @property {String} email - The Users email.
- * @property {String} fname - The Users first name.
- * @property {String} preferredName - The Users preferred first name.
- * @property {String} lname - The Users last name.
+ * @property {string} _id - The Users unique name.
+ * @property {string} password - The Users password.
+ * @property {string} email - The Users email.
+ * @property {string} fname - The Users first name.
+ * @property {string} preferredName - The Users preferred first name.
+ * @property {string} lname - The Users last name.
  * @property {Boolean} admin - Indicates if the User is a global admin.
- * @property {String} provider - Defines the authentication provider for the
+ * @property {string} provider - Defines the authentication provider for the
  * User.
- * @property {Date} createdOn - The date which a User was created.
- * @property {Date} updatedOn - The date which an User was updated.
- * @property {Date} archivedOn - The date the user was archived or null
- * @property {Boolean} archived - Indicates if a user has been archived.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
  * @property {virtual} name - The users full name.
- * @property {virtual} orgs.read - A list of Orgs the User has read access to.
- * @property {virtual} orgs.write - A list of Orgs the User has write access to.
- * @property {virtual} orgs.admin - A list of Orgs the User has admin access to.
- * @property {virtual} project.read - A list of Projects the User has read
- * access to.
- * @property {virtual} project.write - A list of Projects the User has write
- * access to.
- * @property {virtual} project.admin - A list of Projects the User has admin
- * access to.
+ * @property {virtual} username - The users _id, with friendly title.
  *
  */
 const UserSchema = new mongoose.Schema({
-  username: {
+  _id: {
     type: String,
     required: true,
-    index: true,
-    unique: true,
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
-    match: RegExp(validators.user.username),
-    set: function(_username) {
-      // Check value undefined
-      if (typeof this.username === 'undefined') {
-        // Return value to set it
-        return _username;
-      }
-      // Check value NOT equal to db value
-      if (_username !== this.username) {
-        // Immutable field, return error
-        M.log.warn('Username cannot be changed.');
-      }
-      // No change, return the value
-      return this.username;
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.user.username).test(v);
+      },
+      message: `${this._id} is not a valid username.`
     }
   },
   password: {
@@ -126,45 +103,13 @@ const UserSchema = new mongoose.Schema({
     default: {}
   }
 });
-UserSchema.virtual('orgs.read', {
-  ref: 'Organization',
-  localField: '_id',
-  foreignField: 'permissions.read',
-  justOne: false
-});
-UserSchema.virtual('orgs.write', {
-  ref: 'Organization',
-  localField: '_id',
-  foreignField: 'permissions.write',
-  justOne: false
-});
-UserSchema.virtual('orgs.admin', {
-  ref: 'Organization',
-  localField: '_id',
-  foreignField: 'permissions.admin',
-  justOne: false
-});
-UserSchema.virtual('proj.read', {
-  ref: 'Project',
-  localField: '_id',
-  foreignField: 'permissions.read',
-  justOne: false
-});
-UserSchema.virtual('proj.write', {
-  ref: 'Project',
-  localField: '_id',
-  foreignField: 'permissions.write',
-  justOne: false
-});
-UserSchema.virtual('proj.admin', {
-  ref: 'Project',
-  localField: '_id',
-  foreignField: 'permissions.admin',
-  justOne: false
-});
 UserSchema.virtual('name')
 .get(function() {
   return `${this.fname} ${this.lname}`;
+});
+UserSchema.virtual('username')
+.get(function() {
+  return this._id;
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
@@ -172,26 +117,6 @@ UserSchema.virtual('name')
 UserSchema.plugin(extensions);
 
 /* ---------------------------( User Middleware )---------------------------- */
-/**
- * @description Run our pre-defined setters on find.
- * @memberOf UserSchema
- */
-UserSchema.pre('find', function(next) {
-  // Populate virtual fields prior to find
-  this.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin');
-  next();
-});
-
-/**
- * @description Run our pre-defined setters on findOne.
- * @memberOf UserSchema
- */
-UserSchema.pre('findOne', function(next) {
-  // Populate virtual fields prior to findOne
-  this.populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin');
-  next();
-});
-
 /**
  * @description Run our pre-defined setters on save.
  * @memberOf UserSchema
@@ -226,7 +151,7 @@ UserSchema.pre('save', function(next) {
 /**
  * @description Verifies a password matches the stored hashed password.
  *
- * @param {String} pass  The password to be compared with the stored password.
+ * @param {string} pass  The password to be compared with the stored password.
  * @memberOf UserSchema
  */
 UserSchema.methods.verifyPassword = function(pass) {
@@ -251,20 +176,82 @@ UserSchema.methods.getValidUpdateFields = function() {
   return ['fname', 'preferredName', 'lname', 'email', 'custom', 'archived'];
 };
 
+UserSchema.statics.getValidUpdateFields = function() {
+  return UserSchema.methods.getValidUpdateFields();
+};
+
+/**
+ * @description Returns a list of fields a requesting user can populate
+ * @memberOf UserSchema
+ */
+UserSchema.methods.getValidPopulateFields = function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy'];
+};
+
+UserSchema.statics.getValidPopulateFields = function() {
+  return UserSchema.methods.getValidPopulateFields();
+};
+
 /**
  * @description Returns a user's public data.
  * @memberOf UserSchema
  */
 UserSchema.methods.getPublicData = function() {
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+
+  // If this.createdBy is defined
+  if (this.createdBy) {
+    // If this.createdBy is populated
+    if (typeof this.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = this.createdBy.getPublicData();
+    }
+    else {
+      createdBy = this.createdBy;
+    }
+  }
+
+  // If this.lastModifiedBy is defined
+  if (this.lastModifiedBy) {
+    // If this.lastModifiedBy is populated
+    if (typeof this.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = this.lastModifiedBy;
+    }
+  }
+
+  // If this.archivedBy is defined
+  if (this.archivedBy) {
+    // If this.archivedBy is populated
+    if (typeof this.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = this.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = this.archivedBy;
+    }
+  }
+
   return {
-    username: this.username,
+    username: this._id,
     name: this.name,
     fname: this.fname,
     preferredName: this.preferredName,
     lname: this.lname,
     email: this.email,
+    custom: this.custom,
     createdOn: this.createdOn,
+    createdBy: createdBy,
     updatedOn: this.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (this.archived) ? true : undefined,
+    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
+    archivedBy: archivedBy,
     admin: this.admin
   };
 };
