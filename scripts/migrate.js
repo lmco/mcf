@@ -55,6 +55,9 @@ function migrate(args) {
       throw new Error('Cannot have more than one document in the server_data collection.');
     }
 
+    // eslint-disable-next-line no-console
+    console.log('Post-connect');
+
     // If --to was provided
     if (args.includes('--to')) {
       // Get argument after --to, which should be a version
@@ -130,6 +133,8 @@ function migrate(args) {
       sortedMigrations.pop();
     }
   })
+  // eslint-disable-next-line no-console
+  console.log('Pre-migrate');
 
   // Run the migrations
   .then(() => runMigrations(fromVersion, sortedMigrations, versionComp))
