@@ -56,12 +56,11 @@ Object.defineProperty(M, 'build', {
 });
 
 /**
- * Defines the 4-digit version number by combining the 3-digit version number
- * and appending the build number. If the build number does not exist, zero
- * is used.
+ * Defines the schema version by pulling the schemaVersion field from
+ * the package.json.
  */
-Object.defineProperty(M, 'version4', {
-  value: RegExp('[0-9]+').test(M.build) ? `${M.version}.${M.build}` : `${M.version}.0`,
+Object.defineProperty(M, 'schemaVersion', {
+  value: pkg.schemaVersion,
   writable: false,
   enumerable: true
 });

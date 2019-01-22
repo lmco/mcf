@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module data.migrations.0.7.0
+ * @module data.migrations.0.6.0.1
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -15,7 +15,7 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description Migration script for version 0.7.0.
+ * @description Migration script for version 0.6.0.1.
  */
 
 // Node Modules
@@ -30,7 +30,7 @@ const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
 /**
- * @description Handles the database migration from 0.7.0 to 0.6.0. This drop in
+ * @description Handles the database migration from 0.6.0.1 to 0.6.0. This drop in
  * versions is currently not supported.
  */
 module.exports.down = function() {
@@ -49,7 +49,7 @@ module.exports.down = function() {
       }
 
       return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { version: '0.6.0' });
+      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.6.0' } });
     })
     .then(() => db.disconnect())
     .then(() => resolve())
@@ -61,7 +61,7 @@ module.exports.down = function() {
 };
 
 /**
- * @description Handles the database migration from version 0.6.0 to 0.7.0. The
+ * @description Handles the database migration from version 0.6.0 to 0.6.0.1. The
  * changes being made are the following: change _id from ObjectIDs to
  * strings, removal of the id, uuid, contains, type, deleted, deletedBy and
  * deletedOn fields, addition of archived, archivedBy and archivedOn fields,
@@ -170,11 +170,11 @@ module.exports.up = function() {
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.7.0' });
+        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.6.0.1' });
       }
 
       return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { version: '0.7.0' });
+      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.6.0.1' } });
     })
     .then(() => db.disconnect())
     .then(() => resolve())
@@ -187,7 +187,7 @@ module.exports.up = function() {
 
 
 /**
- * @description Helper function for 0.6.0 to 0.7.0 migration. Handles all
+ * @description Helper function for 0.6.0 to 0.6.0.1 migration. Handles all
  * updates to the organization collection.
  *
  * @param {Array} orgs - The organizations being updated.
@@ -294,7 +294,7 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
 }
 
 /**
- * @description Helper function for 0.6.0 to 0.7.0 migration. Handles all
+ * @description Helper function for 0.6.0 to 0.6.0.1 migration. Handles all
  * updates to the project collection.
  *
  * @param {Array} projects - The projects being updated.
@@ -395,7 +395,7 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
 }
 
 /**
- * @description Helper function for 0.6.0 to 0.7.0 migration. Handles all
+ * @description Helper function for 0.6.0 to 0.6.0.1 migration. Handles all
  * updates to the element collection.
  *
  * @param {Array} elements - The elements being updated.
@@ -507,7 +507,7 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
 }
 
 /**
- * @description Helper function for 0.6.0 to 0.7.0 migration. Handles all
+ * @description Helper function for 0.6.0 to 0.6.0.1 migration. Handles all
  * updates to the user collection.
  *
  * @param {Array} users - The users being updated.

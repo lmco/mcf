@@ -44,7 +44,7 @@ module.exports.down = function() {
       }
 
       return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { version: '0.5.0' });
+      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.5.0' } });
     })
     .then(() => db.disconnect())
     .then(() => resolve())
@@ -75,7 +75,7 @@ module.exports.up = function() {
       }
 
       return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { version: '0.6.0' });
+      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.6.0' } });
     })
     .then(() => db.disconnect())
     .then(() => resolve())

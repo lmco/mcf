@@ -229,14 +229,10 @@ function getDatabaseVersion() {
       if (serverData.length > 1) {
         throw new Error('Cannot have more than one document in the server_data collection.');
       }
-      // If no server data currently exists, create the document
-      if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({ version: M.version });
-      }
       // One document exists, read and compare versions
-      if (serverData[0].version !== M.version) {
-        throw new Error(`Please run 'node mbee migrate --from ${serverData[0].version} `
-          + ` --to ${M.version}' to migrate the database.`);
+      if (serverData.length === 0 || serverData[0].version !== M.schemaVersion) {
+        throw new Error('Please run \'node mbee migrate\' to migrate the '
+          + 'database.');
       }
     })
     .then(() => resolve())

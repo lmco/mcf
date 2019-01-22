@@ -188,7 +188,7 @@ function version(req, res) {
   // Create version object
   const obj = {
     version: M.version,
-    version4: M.version4,
+    schemaVersion: M.schemaVersion,
     build: `${M.build}`
   };
 

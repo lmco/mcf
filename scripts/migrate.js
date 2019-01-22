@@ -36,6 +36,12 @@ const db = M.require('lib.db');
  * specific version
  */
 function migrate(args) {
+  let toVersion = null;
+  // Set fromVersion to earliest version
+  let fromVersion = '0.6.0';
+  let sortedMigrations = null;
+  let versionComp = null;
+
   // eslint-disable-next-line no-console
   console.log('Are you sure you want to migrate database versions? Press any key to continue. '
     + 'Press ^C to cancel.');
@@ -45,89 +51,6 @@ function migrate(args) {
   userInput.setEncoding('utf-8');
 
   userInput.on('data', () => {
-    // Ensure --from was included
-    if (!args.includes('--from')) {
-      M.log.warn('Argument \'--from\' required.');
-      process.exit();
-    }
-
-    // Get argument after --from, which should be a version
-    const fromVersion = args[args.indexOf('--from') + 1];
-
-    // Check if fromVersion is a valid version
-    if (!validateVersion(fromVersion)) {
-      M.log.warn(`${fromVersion} is not a valid version number.`);
-      process.exit();
-    }
-
-    let toVersion = null;
-
-    // If --to was provided
-    if (args.includes('--to')) {
-      // Get argument after --to, which should be a version
-      toVersion = args[args.indexOf('--to') + 1];
-      // Check if toVersion is a valid version
-      if (!validateVersion(toVersion)) {
-        M.log.warn(`${toVersion} is not a valid version number.`);
-        process.exit();
-      }
-    }
-
-    // Get version comparison value
-    const versionComp = compareVersions(fromVersion, toVersion);
-
-    // If versions are the same, return
-    if (versionComp === 0) {
-      M.log.info('Database migration complete.');
-      process.exit();
-    }
-
-    // Get a list of migrations
-    let migrations = fs.readdirSync(path.join(M.root, 'scripts', 'migrations'));
-    // Remove .js from each file
-    migrations = migrations.map(f => {
-      const parts = f.split('.js');
-      return parts[0];
-    });
-
-    // Sort migrations from oldest to newest
-    const sortedMigrations = sortVersions(migrations, versionComp);
-
-    // If toVersion is null, set it to highest version
-    if (toVersion === null) {
-      toVersion = sortedMigrations[sortedMigrations.length - 1].split('.js')[0];
-    }
-
-    // If no migration exists for the toVersion
-    if (toVersion !== null && !sortedMigrations.includes(toVersion)) {
-      M.log.warn(`No migration script exists for version ${toVersion}`);
-      process.exit();
-    }
-
-    // If no migration exists for the fromVersion
-    if (fromVersion !== null && !sortedMigrations.includes(fromVersion)) {
-      M.log.warn(`No migration script exists for version ${fromVersion}`);
-      process.exit();
-    }
-
-    // Remove migrations below fromVersion
-    while (sortedMigrations[0] !== fromVersion) {
-      sortedMigrations.shift();
-    }
-    // If upgrading, remove the first migration one more time
-    if (versionComp === 1) {
-      sortedMigrations.shift();
-    }
-
-    // Remove migrations after toVersion
-    while (sortedMigrations[sortedMigrations.length - 1] !== toVersion) {
-      sortedMigrations.pop();
-    }
-    // If downgrading, remove the last migration one more time
-    if (versionComp === -1) {
-      sortedMigrations.pop();
-    }
-
     // Get te server data documents
     db.connect()
     .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
@@ -136,10 +59,80 @@ function migrate(args) {
       if (serverData.length > 1) {
         throw new Error('Cannot have more than one document in the server_data collection.');
       }
+
+      // If --to was provided
+      if (args.includes('--to')) {
+        // Get argument after --to, which should be a version
+        toVersion = args[args.indexOf('--to') + 1];
+        // Check if toVersion is a valid version
+        if (!validateVersion(toVersion)) {
+          M.log.warn(`${toVersion} is not a valid version number.`);
+          process.exit();
+        }
+      }
+      else {
+        // Set the toVersion to the most recent schema version
+        toVersion = M.schemaVersion;
+      }
+
       // One document exists, read and compare versions
       if (serverData.length !== 0 && serverData[0].version === toVersion) {
         M.log.info('Database already up to date.');
         process.exit();
+      }
+      // Set fromVersion to the current schema version
+      else if (serverData.length !== 0 && serverData[0].version) {
+        fromVersion = serverData[0].version;
+      }
+
+      // Get version comparison value
+      versionComp = compareVersions(fromVersion, toVersion);
+
+      // If versions are the same, return
+      if (versionComp === 0) {
+        M.log.info('Database migration complete.');
+        process.exit();
+      }
+
+      // Get a list of migrations
+      let migrations = fs.readdirSync(path.join(M.root, 'scripts', 'migrations'));
+      // Remove .js from each file
+      migrations = migrations.map(f => {
+        const parts = f.split('.js');
+        return parts[0];
+      });
+
+      // Sort migrations from oldest to newest
+      sortedMigrations = sortVersions(migrations, versionComp);
+
+      // If no migration exists for the toVersion
+      if (toVersion !== null && !sortedMigrations.includes(toVersion)) {
+        M.log.warn(`No migration script exists for version ${toVersion}`);
+        process.exit();
+      }
+
+      // If no migration exists for the fromVersion
+      if (fromVersion !== null && !sortedMigrations.includes(fromVersion)) {
+        M.log.warn(`No migration script exists for version ${fromVersion}`);
+        process.exit();
+      }
+
+      // Remove migrations below fromVersion
+      while (sortedMigrations[0] !== fromVersion) {
+        sortedMigrations.shift();
+      }
+      // If upgrading, remove the first migration one more time
+      if (versionComp === 1) {
+        sortedMigrations.shift();
+      }
+
+      // Remove migrations after toVersion
+      while (sortedMigrations[sortedMigrations.length - 1] !== toVersion) {
+        sortedMigrations.pop();
+      }
+      // If downgrading, remove the last migration one more time
+      if (versionComp === -1) {
+        sortedMigrations.pop();
       }
     })
     // Run the migrations
@@ -311,7 +304,7 @@ function runMigrations(from, migrations, move) {
         }
 
         // Migrations are left, run function again
-        return runMigrations(migrations, move);
+        return runMigrations(file.split('.js')[0], migrations, move);
       })
       .then(() => resolve())
       .catch((error) => reject(error));
