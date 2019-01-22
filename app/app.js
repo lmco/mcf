@@ -35,6 +35,7 @@ const flash = require('express-flash');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
+const migrate = M.require('lib.migrate');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 
@@ -47,7 +48,7 @@ module.exports = app;
  * default admin and default organization if needed.
  */
 db.connect()
-.then(() => getDatabaseVersion())
+.then(() => getSchemaVersion())
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
 .then(() => initApp())
@@ -230,7 +231,11 @@ function createDefaultAdmin() {
   });
 }
 
-function getDatabaseVersion() {
+/**
+ * @description Gets the schema version from the database. Runs the migrate
+ * function if no schema version exists.
+ */
+function getSchemaVersion() {
   return new Promise((resolve, reject) => {
     // Get all collections in the DB
     mongoose.connection.db.collections()
@@ -248,6 +253,11 @@ function getDatabaseVersion() {
       // Restrict collection to one document
       if (serverData.length > 1) {
         throw new Error('Cannot have more than one document in the server_data collection.');
+      }
+      // No server data found, automatically upgrade versions
+      if (serverData.length === 0) {
+        M.log.info('No server data found, automatically migrating.');
+        return migrate.migrate([]);
       }
       // One document exists, read and compare versions
       if (serverData.length === 0 || serverData[0].version !== M.schemaVersion) {
