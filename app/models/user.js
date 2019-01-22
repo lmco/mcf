@@ -54,7 +54,7 @@ const extensions = M.require('models.plugin.extensions');
 const UserSchema = new mongoose.Schema({
   _id: {
     type: String,
-    required: true,
+    required: [true, 'Username is required.'],
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
     validate: {
@@ -117,6 +117,7 @@ UserSchema.virtual('username')
 UserSchema.plugin(extensions);
 
 /* ---------------------------( User Middleware )---------------------------- */
+// TODO: Consider adding UserSchema.validateUserData() function
 /**
  * @description Run our pre-defined setters on save.
  * @memberOf UserSchema
