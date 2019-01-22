@@ -70,6 +70,9 @@ describe(M.getModuleName(module.filename), () => {
  */
 function cleanDB(done) {
   mongoose.connection.db.dropDatabase()
+  .then(() => mongoose.connection.db.createCollection('server_data'))
+  .then(() => mongoose.connection.db.collection('server_data')
+  .insertOne({ version: M.schemaVersion }))
   .then(() => done())
   .catch(error => {
     M.log.error(error);

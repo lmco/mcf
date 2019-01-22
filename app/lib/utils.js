@@ -315,10 +315,10 @@ module.exports.convertJMI = function(from, to, data, field = '_id') {
 
 /**
  * @description Parse option string into option objects.
- * Error is thrown for nvalid options.
+ * Error is thrown for invalid options.
  * Note: Boolean strings are converted to booleans
  *          ex. "true" => true
- *       string seperated commas are converted to arrays
+ *       string separated commas are converted to arrays
  *          ex. "createdBy, modifiedBy" => {["createdBy", "modifiedBy"]}
  *
  * @param {options} - An optional parameter that provides supported
