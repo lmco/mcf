@@ -42,10 +42,13 @@ function migrate(args) {
   let sortedMigrations = null;
   let versionComp = null;
 
-  // Prompt the user for input
-  prompt(args)
-  .then(() => db.connect())
+
+
   // Connect to the database
+  db.connect()
+  // Prompt the user for input
+  .then(() => prompt(args))
+  // Get the server_data collection
   .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
   .then((serverData) => {
     // Restrict collection to one document
@@ -144,10 +147,13 @@ function migrate(args) {
 
 
 /**
- * @description Prompt function
+ * @description Prompts the user for approval to migrate the database
+ *
+ * @param {string[]} args - List of command line arguments
  */
 function prompt(args) {
   return new Promise((resolve) => {
+    // If arg -y provided, resolve9)
     if (args.includes('-y')) {
       return resolve();
     }
@@ -160,6 +166,7 @@ function prompt(args) {
     const userInput = process.stdin;
     userInput.setEncoding('utf-8');
 
+    // If user hits any key other than ^C, resolve
     userInput.on('data', () => resolve());
   });
 }
