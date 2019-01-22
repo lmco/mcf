@@ -132,10 +132,10 @@ function migrate(args) {
     if (versionComp === -1) {
       sortedMigrations.pop();
     }
-  })
-  // eslint-disable-next-line no-console
-  console.log('Pre-migrate');
 
+    // eslint-disable-next-line no-console
+    console.log('Pre-migrate');
+  })
   // Run the migrations
   .then(() => runMigrations(fromVersion, sortedMigrations, versionComp))
   .then(() => db.disconnect())
