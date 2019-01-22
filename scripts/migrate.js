@@ -43,7 +43,6 @@ function migrate(args) {
   let versionComp = null;
 
 
-
   // Connect to the database
   db.connect()
   // Prompt the user for input
@@ -134,14 +133,20 @@ function migrate(args) {
 
   // Run the migrations
   .then(() => runMigrations(fromVersion, sortedMigrations, versionComp))
+  .then(() => db.disconnect())
   .then(() => {
     M.log.info('Database migration complete.');
     process.exit();
   })
   .catch((error) => {
-    M.log.debug(error);
-    M.log.warn('Database migration failed. See debug log for more details.');
-    process.exit();
+    db.disconnect()
+    .then(() => {
+      // eslint-disable-next-line no-console
+      console.log(error);
+      M.log.debug(error);
+      M.log.warn('Database migration failed. See debug log for more details.');
+      process.exit();
+    });
   });
 }
 
