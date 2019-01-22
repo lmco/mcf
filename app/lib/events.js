@@ -26,8 +26,8 @@ class CustomEmitter extends EventEmitter {
    * @description Overrides the events 'emit' class. On emit, finds all webhooks
    * that contain that event, and calls Webhook.sendRequests()
    *
-   * @param {String} event - The event name that was triggered
-   * @param {Array} args - An arbitrary number of arguments to be passed to
+   * @param {string} event - The event name that was triggered
+   * @param {Object[]} args - An arbitrary number of arguments to be passed to
    * listener callback functions.
    */
   emit(event, ...args) {

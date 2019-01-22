@@ -25,7 +25,7 @@ const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData();
+const testData = testUtils.importTestData('test_data.json');
 
 /* --------------------( Main )-------------------- */
 /**
@@ -74,8 +74,10 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates a user via model and save it to the database.
  */
 function createUser(done) {
+  const userData = testData.users[1];
+  userData._id = userData.username;
   // Create a new User object
-  const user = new User(testData.users[1]);
+  const user = new User(userData);
   // Save user object to the database
   user.save()
   .then(() => done())
@@ -93,7 +95,7 @@ function createUser(done) {
  */
 function getUser(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[1].username })
+  User.findOne({ _id: testData.users[1].username })
   .then((user) => {
     // Check first, last, and preferred name
     chai.expect(user.fname).to.equal(testData.users[1].fname);
@@ -117,7 +119,7 @@ function getUser(done) {
  */
 function verifyValidPassword(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[1].username })
+  User.findOne({ _id: testData.users[1].username })
   // Verify the user's password
   .then((user) => user.verifyPassword(testData.users[1].password))
   .then((result) => {
@@ -139,7 +141,7 @@ function verifyValidPassword(done) {
  */
 function verifyInvalidPassword(done) {
   // Find the created user from the previous createUser test.
-  User.findOne({ username: testData.users[1].username })
+  User.findOne({ _id: testData.users[1].username })
   // Attempt to verify the user's incorrect password
   .then((user) => user.verifyPassword('incorrectPassword'))
   .then((result) => {
@@ -161,7 +163,7 @@ function verifyInvalidPassword(done) {
  */
 function updateUser(done) {
   // Define query
-  const query = { username: testData.users[1].username };
+  const query = { _id: testData.users[1].username };
 
   // Define newUserData
   const newUserData = {
@@ -173,7 +175,7 @@ function updateUser(done) {
   User.updateOne(query, newUserData)
   .then(() => User.findOne(query))
   .then((updatedUser) => {
-    chai.expect(updatedUser.username).to.equal(testData.users[1].username);
+    chai.expect(updatedUser._id).to.equal(testData.users[1].username);
     chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);
     chai.expect(updatedUser.lname).to.equal(testData.users[1].lname);
     chai.expect(updatedUser.name).to.equal(`${testData.users[1].fname}edit ${testData.users[1].lname}`);
@@ -197,7 +199,7 @@ function archiveUser(done) {
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
 
   // Define query
-  const query = { username: testData.users[1].username };
+  const query = { _id: testData.users[1].username };
 
   // Define updateObject
   const updateObject = {
@@ -227,7 +229,7 @@ function archiveUser(done) {
  */
 function deleteUser(done) {
   // Find the previously created user from the createUser test.
-  User.findOne({ username: testData.users[1].username })
+  User.findOne({ _id: testData.users[1].username })
   // Delete the user
   .then(user => user.remove())
   .then(() => done())

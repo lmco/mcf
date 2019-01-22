@@ -21,7 +21,7 @@
 /**
  * @description Sanitizes database queries and scripting tags.
  *
- * @return {String} sanitized user input
+ * @param {string} sanitized user input
  */
 module.exports.sanitize = function(userInput) {
   return module.exports.mongo(module.exports.html(userInput));
@@ -61,16 +61,7 @@ module.exports.mongo = function(userInput) {
  * |   &   | &amp            |
  * |   <   | &lt             |
  * |   >   | &gt             |
- * |   "   | &quot           |
- * |   `   | &grave          |
- * |   =   | &equals         |
- * |   /   | &sol            |
- * |   \   | &bsol           |
- * |   %   | &percnt         |
- * |   (   | &lpar           |
- * |   )   | &rpar           |
- * |   #   | &num            |
- * |   ^   | &Hat            |
+ * |   "   | &quot           |  |
  * |   '   | &#039           |
  * +-------+-----------------+
  *
@@ -84,15 +75,6 @@ module.exports.html = function(userInput) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/`/g, '&grave;')
-    .replace(/=/g, '&equals;')
-    .replace(/\//g, '&sol;')
-    .replace(/\\/g, '&bsol;')
-    .replace(/%/g, '&percnt;')
-    .replace(/\(/g, '&lpar;')
-    .replace(/\)/g, '&rpar;')
-    .replace(/#/g, '&num;')
-    .replace(/\^/g, '&Hat;')
     .replace(/'/g, '&#039;');
   }
 

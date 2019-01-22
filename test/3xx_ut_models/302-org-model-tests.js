@@ -32,7 +32,7 @@ let userAdmin = null;
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData();
+const testData = testUtils.importTestData('test_data.json');
 
 /* --------------------( Main )-------------------- */
 /**
@@ -49,7 +49,7 @@ describe(M.getModuleName(module.filename), () => {
   before((done) => {
     db.connect()
     // Create admin user
-    .then(() => testUtils.createAdminUser())
+    .then(() => testUtils.createTestAdmin())
     .then((user) => {
       userAdmin = user;
       done();
@@ -68,7 +68,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Remove admin user
-    testUtils.removeAdminUser()
+    testUtils.removeTestAdmin()
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -95,7 +95,7 @@ describe(M.getModuleName(module.filename), () => {
 function createOrg(done) {
   // Create an organization from the Organization model object
   const org = new Org({
-    id: testData.orgs[0].id,
+    _id: testData.orgs[0].id,
     name: testData.orgs[0].name,
     permissions: {
       admin: [userAdmin._id],
@@ -119,10 +119,11 @@ function createOrg(done) {
  */
 function findOrg(done) {
   // Find the created organization from the previous createOrg() test
-  Org.findOne({ id: testData.orgs[0].id, name: testData.orgs[0].name })
+  Org.findOne({ _id: testData.orgs[0].id })
   .then((org) => {
     // Verify correct org is returned
     chai.expect(org.id).to.equal(testData.orgs[0].id);
+    chai.expect(org._id).to.equal(testData.orgs[0].id);
     chai.expect(org.name).to.equal(testData.orgs[0].name);
     done();
   })
@@ -139,7 +140,7 @@ function findOrg(done) {
  */
 function updateOrg(done) {
   // Find and update the org created in the previous createOrg() test
-  Org.findOne({ id: testData.orgs[0].id })
+  Org.findOne({ _id: testData.orgs[0].id })
   .then((foundOrg) => {
     foundOrg.name = testData.orgs[0].name;
     return foundOrg.save();
@@ -163,7 +164,7 @@ function updateOrg(done) {
  */
 function findOrgPermissions(done) {
   // Finds permissions on the org created in the previous createOrg() test
-  Org.findOne({ id: testData.orgs[0].id })
+  Org.findOne({ _id: testData.orgs[0].id })
   .then((org) => {
     // Confirming user permissions are in organization
     chai.expect(org.permissions.write[0].toString()).to.equal(userAdmin._id.toString());
@@ -187,7 +188,7 @@ function archiveOrg(done) {
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
 
   // Find the previously created organization from createOrg.
-  Org.findOne({ id: testData.orgs[0].id })
+  Org.findOne({ _id: testData.orgs[0].id })
   .then((org) => {
     // Set the archived field of the organization to true
     org.archived = true;
@@ -195,7 +196,7 @@ function archiveOrg(done) {
     return org.save();
   })
   // Find the previously updated organization
-  .then((org) => Org.findOne({ id: org.id }))
+  .then((org) => Org.findOne({ _id: org.id }))
   .then((org) => {
     // Verify the organization has been archived.
     chai.expect(org.archivedOn).to.not.equal(null);
@@ -215,7 +216,7 @@ function archiveOrg(done) {
  */
 function deleteOrg(done) {
   // find and remove the organization
-  Org.findOneAndRemove({ id: testData.orgs[0].id })
+  Org.findOneAndRemove({ _id: testData.orgs[0].id })
   .then(() => done())
   .catch((error) => {
     M.log.error(error);

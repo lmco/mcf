@@ -75,7 +75,7 @@ function test(_args) {
   // Add default grep command to define which tests to run
   if (!_args.includes('--grep')) {
     _args.push('--grep');
-    _args.push('"^[0-9]"');
+    _args.push('^[0-9]');
   }
 
   // Allocate options variable for mocha

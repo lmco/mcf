@@ -34,7 +34,7 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
-const testData = testUtils.importTestData();
+const testData = testUtils.importTestData('test_data.json');
 let org = null;
 
 /* --------------------( Main )-------------------- */
@@ -54,7 +54,7 @@ describe(M.getModuleName(module.filename), () => {
     .then(() => {
       // Create a parent organization before creating any projects
       org = new Org({
-        id: testData.orgs[0].id,
+        _id: testData.orgs[0].id,
         name: testData.orgs[0].name
       });
 
@@ -79,7 +79,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete the org
-    Org.findOneAndRemove({ id: org.id })
+    Org.findOneAndRemove({ _id: org._id })
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -95,7 +95,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a project', findProject);
   it('should update a project', updateProject);
   it('should delete a project', deleteProject);
-  it('should fail creating a project with a long ID', verifyProjectFieldMaxChar);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -106,7 +105,7 @@ describe(M.getModuleName(module.filename), () => {
 function createProject(done) {
   // Create a project model object
   const newProject = new Project({
-    id: utils.createID(org.id, testData.projects[0].id),
+    _id: utils.createID(org._id, testData.projects[0].id),
     name: testData.projects[0].name,
     org: org._id
   });
@@ -126,7 +125,7 @@ function createProject(done) {
  */
 function findProject(done) {
   // Find the project
-  Project.findOne({ id: utils.createID(org.id, testData.projects[0].id) })
+  Project.findOne({ _id: utils.createID(org._id, testData.projects[0].id) })
   .then((proj) => {
     // Ensure project data is correct
     chai.expect(proj.name).to.equal(testData.projects[0].name);
@@ -146,11 +145,11 @@ function findProject(done) {
 function updateProject(done) {
   // Find and update project previously created in createProject test
   Project.findOneAndUpdate({
-    id: utils.createID(org.id, testData.projects[0].id) },
+    _id: utils.createID(org._id, testData.projects[0].id) },
   { name: testData.projects[1].name })
   // Find previously updated project
   .then(() => Project.findOne({
-    id: utils.createID(org.id, testData.projects[0].id)
+    _id: utils.createID(org._id, testData.projects[0].id)
   }))
   .then((proj) => {
     // Ensure project name was successfully updated
@@ -170,8 +169,8 @@ function updateProject(done) {
  */
 function deleteProject(done) {
   // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ id: utils.createID(org.id, testData.projects[0].id) })
-  .then(() => Project.find({ id: utils.createID(org.id, testData.projects[0].id) }))
+  Project.findOneAndRemove({ _id: utils.createID(org._id, testData.projects[0].id) })
+  .then(() => Project.find({ _id: utils.createID(org._id, testData.projects[0].id) }))
   .then((projects) => {
     // Expect to find no projects
     chai.expect(projects.length).to.equal(0);
@@ -181,31 +180,6 @@ function deleteProject(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Verifies invalid field string with over 36 characters when creating a project.
- * Expected error thrown: 'Project validation failed: id: Too many characters in username'
- */
-function verifyProjectFieldMaxChar(done) {
-  // Create a new model project
-  const newProject = new Project({
-    id: utils.createID(org.id, testData.projects[3].id),
-    name: testData.projects[3].name,
-    org: org._id
-  });
-
-  // Save project model object to database
-  newProject.save()
-  .then(() => {
-    chai.assert(true === false, 'Fail, project should not have been created.');
-    done();
-  })
-  .catch((error) => {
-    // Expected error thrown: 'Project validation failed: id: Too many characters in username'
-    chai.expect(error.message).to.equal('Project validation failed: id: Too many characters in username');
     done();
   });
 }

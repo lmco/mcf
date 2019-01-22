@@ -57,8 +57,8 @@ const ProjController = M.require('controllers.project-controller');
  * @description This function creates an Artifact.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {String} orgID - The organization ID for the org the project belongs to.
- * @param {String} projID - The project ID of the Project which is being searched for.
+ * @param {string} orgID - The organization ID for the org the project belongs to.
+ * @param {string} projID - The project ID of the Project which is being searched for.
  * @param {Object} artData - The JSON object containing the Artifact data
  * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  *ƒ
@@ -74,6 +74,11 @@ function createArtifact(reqUser, orgID, projID, artID, artData, artifactBlob) {
       assert.ok(typeof artID === 'string', 'Artifact ID is not a string.');
       assert.ok(Artifact.validateObjectKeys(artData),
         'Artifact metadata contains invalid keys.');
+
+      // If _id provided, ensure it matches the id
+      if (artData._id !== undefined) {
+        assert.ok(artData._id === artData.id, '_id and id do not match.');
+      }
     }
     catch (error) {
       return reject(new M.CustomError(error.message, 400, 'warn'));
@@ -94,7 +99,7 @@ function createArtifact(reqUser, orgID, projID, artID, artData, artifactBlob) {
     let foundProj = null;
 
     // Error Check: make sure the project exists
-    ProjController.findProject(reqUser, orgID, projID)
+    ProjController.find(reqUser, orgID, projID)
     .then((proj) => {
       // Error check: make sure user has write permission on project
       if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
@@ -105,7 +110,7 @@ function createArtifact(reqUser, orgID, projID, artID, artData, artifactBlob) {
       foundProj = proj;
 
       // Error check - check if the artifact already exists
-      return findArtifactsQuery({ id: artifactFullId });
+      return findArtifactsQuery({ _id: artifactFullId });
     })
     .then((_artifact) => {
       // Error Check: ensure no artifact were found
@@ -131,7 +136,7 @@ function createArtifact(reqUser, orgID, projID, artID, artData, artifactBlob) {
 
       // Create the new Artifact
       const artifact = new Artifact({
-        id: artifactFullId,
+        _id: artifactFullId,
         filename: artData.filename,
         contentType: artData.contentType,
         history: historyData,
@@ -166,9 +171,9 @@ function createArtifact(reqUser, orgID, projID, artID, artData, artifactBlob) {
  * @description This function updates an existing Artifact.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {String} orgID - The organization ID for the org the project belongs to.
- * @param {String} projID - The project ID of the Project which is being searched for.
- * @param {String} artifactID - The Artifact ID
+ * @param {string} orgID - The organization ID for the org the project belongs to.
+ * @param {string} projID - The project ID of the Project which is being searched for.
+ * @param {string} artifactID - The Artifact ID
  * @param {Object} artToUpdate - JSON object containing updated Artifact data
  * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  *
@@ -252,7 +257,7 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate, artifac
       // Get list of parameters which can be updated from model
       const validUpdateFields = _artifact.getValidUpdateFields();
 
-      // Loop through all updateable fields
+      // Loop through all updatable fields
       for (let i = 0; i < artifactUpdateFields.length; i++) {
         const updateField = artifactUpdateFields[i];
         // Error Check: Check if field can be updated
@@ -305,9 +310,9 @@ function updateArtifact(reqUser, orgID, projID, artifactID, artToUpdate, artifac
  * @description This function removes an Artifact.
  *
  * @param {User} reqUser  The user object of the requesting user.
- * @param {String} orgID - The organization ID for the org the project belongs to.
- * @param {String} projID - The project ID of the Project which is being searched for.
- * @param {String} artifactID - The Artifact ID
+ * @param {string} orgID - The organization ID for the org the project belongs to.
+ * @param {string} projID - The project ID of the Project which is being searched for.
+ * @param {string} artifactID - The Artifact ID
  *
  * @return {Promise} resolve
  *                   reject - error
@@ -384,9 +389,9 @@ function removeArtifact(reqUser, orgID, projID, artifactID) {
  * @description This function finds an artifact based on artifact full id.
  *
  * @param {User} reqUser - The requesting user
- * @param {String} orgID - The organization ID for the org the project belongs to.
- * @param {String} projID - The project ID of the Project which is being searched for.
- * @param {String} artifactID - The Artifact ID
+ * @param {string} orgID - The organization ID for the org the project belongs to.
+ * @param {string} projID - The project ID of the Project which is being searched for.
+ * @param {string} artifactID - The Artifact ID
  * @param {Boolean} archived - A boolean value indicating whether to also search
  *                             for archived artifacts.
  *
@@ -414,7 +419,7 @@ function findArtifact(reqUser, orgID, projID, artifactID, archived = false) {
 
     // Define the search params
     const searchParams = {
-      id: artifactFullID,
+      _id: artifactFullID,
       archived: false
     };
 
@@ -478,8 +483,8 @@ function findArtifactsQuery(artifactQuery) {
  * @description This function returns all artifacts attached to the project.
  *
  * @param {User} reqUser - The user object of the requesting user.
- * @param {String} organizationID - The organization ID.
- * @param {String} projectID - The project ID.
+ * @param {string} organizationID - The organization ID.
+ * @param {string} projectID - The project ID.
  * @param {Boolean} archived - A boolean value indicating whether to archived.
  *
  * @return {Promise} resolve - artifact
@@ -509,7 +514,7 @@ function findArtifacts(reqUser, organizationID, projectID, archived = false) {
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     const projectUID = utils.createID(orgID, projID);
-    const searchParams = { id: { $regex: `^${projectUID}:` }, archived: false };
+    const searchParams = { _id: { $regex: `^${projectUID}:` }, archived: false };
 
     // Error Check: Ensure user has permissions to find deleted artifacts
     if (archived && !reqUser.admin) {
@@ -574,7 +579,7 @@ function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
 /**
  * @description This function adds the artifact blob file to the file system.
  *
- * @param {String} hashedName - hash name of the file
+ * @param {string} hashedName - hash name of the file
  * @param {Binary} artifactBlob - A binary large object artifact
  */
 function addArtifactOS(hashedName, artifactBlob) {
@@ -628,7 +633,7 @@ function addArtifactOS(hashedName, artifactBlob) {
  * @description This function removes the artifact blob file and sub folder
  * from the file system.
  *
- * @param {String} hashedName - hash name of the file
+ * @param {string} hashedName - hash name of the file
  */
 function removeArtifactOS(hashedName) {
   return new Promise((resolve) => {

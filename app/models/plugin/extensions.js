@@ -20,22 +20,22 @@
  * archivedOn, updatedOn, and archived.
  */
 
-// NPM modules
-const mongoose = require('mongoose');
-
 module.exports = function extensionPlugin(schema) {
   schema.add({
     archivedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      type: String,
+      ref: 'User',
+      default: null
     },
     createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      type: String,
+      ref: 'User',
+      default: null
     },
     lastModifiedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      type: String,
+      ref: 'User',
+      default: null
     },
     createdOn: {
       type: Date,
@@ -46,7 +46,8 @@ module.exports = function extensionPlugin(schema) {
       default: null
     },
     updatedOn: {
-      type: Date
+      type: Date,
+      default: null
     },
     archived: {
       type: Boolean,
@@ -61,10 +62,6 @@ module.exports = function extensionPlugin(schema) {
   });
 
   schema.pre('save', function(next) {
-    // updateOn is protected
-    if (this.isModified('updatedOn')) {
-      next(new M.CustomError('updatedOn is protected and cannot be changed.', 400, 'warn'));
-    }
     // createdOn cannot be changed
     if (this.isModified('createdOn')) {
       next(new M.CustomError('createdOn is protected and cannot be changed.', 400, 'warn'));

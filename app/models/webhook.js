@@ -30,17 +30,16 @@ const validators = M.require('lib.validators');
  *
  * @description Defines the Webhook Schema
  *
- * @property {String} id - The webhooks unique ID.
- * @property {String} name - The webhooks name.
+ * @property {string} id - The webhooks unique ID.
+ * @property {string} name - The webhooks name.
  * @property {Project} project - A reference to a webhook's project.
  * @property {Array} triggers - The events that trigger this webhook.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
  */
 const WebhookSchema = new mongoose.Schema({
-  id: {
+  _id: {
     type: String,
     required: true,
-    unique: true,
     match: RegExp(validators.webhook.id)
   },
   name: {
@@ -48,7 +47,7 @@ const WebhookSchema = new mongoose.Schema({
     required: true
   },
   project: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: 'Project',
     set: function(_proj) {
@@ -118,8 +117,8 @@ const OutgoingWebhookSchema = new mongoose.Schema({
  * extends webhooks by adding a token and token location used to authorize
  * incoming requests.
  *
- * @property {String} token - The token to validate incoming requests against.
- * @property {String} tokenLocation - The location of the incoming requests
+ * @property {string} token - The token to validate incoming requests against.
+ * @property {string} tokenLocation - The location of the incoming requests
  * token to validate against.
  *
  */
@@ -165,31 +164,66 @@ IncomingWebhookSchema.methods.verifyAuthority = function(value) {
 };
 
 /**
- * @description Returns an outgoing webhooks's public data.
- * @memberOf OutgoingWebhookSchema
+ * @description Returns a webhooks's public data.
+ * @memberOf WebhookSchema
  */
-OutgoingWebhookSchema.methods.getPublicData = function() {
-  return {
-    id: utils.parseID(this.id)[2],
-    name: this.name,
-    triggers: this.triggers,
-    responses: this.responses,
-    custom: this.custom
-  };
-};
+WebhookSchema.methods.getPublicData = function() {
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
 
-/**
- * @description Returns an incoming webhooks's public data.
- * @memberOf IncomingWebhookSchema
- */
-IncomingWebhookSchema.methods.getPublicData = function() {
+  // If this.createdBy is defined
+  if (this.createdBy) {
+    // If this.createdBy is populated
+    if (typeof this.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = this.createdBy.getPublicData();
+    }
+    else {
+      createdBy = this.createdBy;
+    }
+  }
+
+  // If this.lastModifiedBy is defined
+  if (this.lastModifiedBy) {
+    // If this.lastModifiedBy is populated
+    if (typeof this.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = this.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = this.lastModifiedBy;
+    }
+  }
+
+  // If this.archivedBy is defined
+  if (this.archivedBy) {
+    // If this.archivedBy is populated
+    if (typeof this.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = this.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = this.archivedBy;
+    }
+  }
+
   return {
-    id: utils.parseID(this.id)[2],
+    id: utils.parseID(this._id).pop(),
     name: this.name,
+    project: utils.parseID(this.project).pop(),
     triggers: this.triggers,
-    token: this.token,
-    tokenLocation: this.tokenLocation,
-    custom: this.custom
+    responses: (this.responses) ? this.responses : undefined,
+    token: (this.token) ? this.token : undefined,
+    tokenLocation: (this.tokenLocation) ? this.tokenLocation : undefined,
+    custom: this.custom,
+    createdOn: this.createdOn,
+    createdBy: createdBy,
+    updatedOn: this.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (this.archived) ? true : undefined,
+    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
+    archivedBy: archivedBy
   };
 };
 
@@ -197,10 +231,29 @@ IncomingWebhookSchema.methods.getPublicData = function() {
  * @description Returns webhook fields that can be changed
  * @memberof WebhookSchema
  */
-WebhookSchema.methods.getValidUpdateFields = function() {
+WebhookSchema.statics.getValidUpdateFields = function() {
   return ['name', 'custom', 'archived'];
 };
 
+/**
+ * @description Returns valid webhook types
+ * @memberOf WebhookSchema
+ */
+WebhookSchema.statics.getValidTypes = function() {
+  return ['Incoming', 'Outgoing'];
+};
+
+/**
+ * @description Returns a list of fields a requesting user can populate
+ * @memberOf WebhookSchema
+ */
+WebhookSchema.methods.getValidPopulateFields = function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
+};
+
+WebhookSchema.statics.getValidPopulateFields = function() {
+  return WebhookSchema.methods.getValidPopulateFields();
+};
 
 /**
  * @description Validates an object to ensure that it only contains keys
@@ -222,6 +275,7 @@ WebhookSchema.statics.validateObjectKeys = function(object) {
     );
     validKeys = validKeys.filter((elem, pos) => validKeys.indexOf(elem) === pos);
     validKeys.push('type');
+    validKeys.push('id');
     // Loop through each key of the object
     Object.keys(object).forEach(key => {
       // Check if the object key is a key in the webhook model

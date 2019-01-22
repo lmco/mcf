@@ -282,9 +282,10 @@ function authenticate(req, res, next) {
  * Note: If validatePassword() function is NOT defined in custom strategy then
  * validation will fail.
  *
- * @param {String} password - Password to validate.
- * @param {String} provider - the type of authentication strategy (ldap, local, etc.)
- * @returns {Boolean} - If password is correctly validated
+ * @param {string} password - Password to validate
+ * @param {string} provider - the type of authentication strategy (ldap, local, etc.)
+ *
+ * @returns {boolean} - If password is correctly validated
  */
 function validatePassword(password, provider) {
   // Check if custom validate password rules exist in auth strategy
