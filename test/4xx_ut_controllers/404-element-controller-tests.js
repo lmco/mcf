@@ -85,20 +85,20 @@ describe(M.getModuleName(module.filename), () => {
    * After: Remove Organization and project.
    * Close database connection.
    */
-  // after((done) => {
-  //   // Remove organization
-  //   // Note: Projects under organization will also be removed
-  //   testUtils.removeOrganization(adminUser)
-  //   .then(() => testUtils.removeAdminUser())
-  //   .then(() => db.disconnect())
-  //   .then(() => done())
-  //   .catch((error) => {
-  //     M.log.error(error);
-  //     // Expect no error
-  //     chai.expect(error).to.equal(null);
-  //     done();
-  //   });
-  // });
+  after((done) => {
+    // Remove organization
+    // Note: Projects under organization will also be removed
+    testUtils.removeOrganization(adminUser)
+    .then(() => testUtils.removeAdminUser())
+    .then(() => db.disconnect())
+    .then(() => done())
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
+  });
 
   /* Execute the tests */
   it('should create a package', createPackage);
@@ -119,7 +119,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should delete an element', deleteElement);
   it('should archive all elements', archiveAllElements);
   it('should find all non-archived elements', verifyFindNonArchivedElem);
-  // it('should delete all elements', deleteAllElements);
+  it('should delete all elements', deleteAllElements);
 });
 
 /* --------------------( Tests )-------------------- */

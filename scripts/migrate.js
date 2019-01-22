@@ -37,8 +37,8 @@ const db = M.require('lib.db');
  */
 function migrate(args) {
   // eslint-disable-next-line no-console
-  console.log('Are you sure you want to migrate database versions? Press any key to continue. ' +
-    'Press ^C to cancel.');
+  console.log('Are you sure you want to migrate database versions? Press any key to continue. '
+    + 'Press ^C to cancel.');
 
   // Get user input
   const userInput = process.stdin;
@@ -120,7 +120,7 @@ function migrate(args) {
     }
 
     // Remove migrations after toVersion
-    while (sortedMigrations[sortedMigrations.length-1] !== toVersion) {
+    while (sortedMigrations[sortedMigrations.length - 1] !== toVersion) {
       sortedMigrations.pop();
     }
     // If downgrading, remove the last migration one more time

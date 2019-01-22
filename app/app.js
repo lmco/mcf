@@ -231,15 +231,15 @@ function getDatabaseVersion() {
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({version: M.version});
+        return mongoose.connection.db.collection('server_data').insertOne({ version: M.version });
       }
       // One document exists, read and compare versions
-      else if (serverData[0].version !== M.version) {
-        throw new Error(`Please run 'node mbee migrate --from ${serverData[0].version} ` +
-          ` --to ${M.version}' to migrate the database.`);
+      if (serverData[0].version !== M.version) {
+        throw new Error(`Please run 'node mbee migrate --from ${serverData[0].version} `
+          + ` --to ${M.version}' to migrate the database.`);
       }
     })
     .then(() => resolve())
     .catch((error) => reject(error));
-  })
+  });
 }

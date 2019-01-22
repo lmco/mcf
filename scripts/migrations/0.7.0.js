@@ -45,19 +45,18 @@ module.exports.down = function() {
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({version: '0.6.0'});
+        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.6.0' });
       }
-      else {
-        return mongoose.connection.db.collection('server_data')
-          .updateMany({_id: serverData[0]._id}, {version: '0.6.0'});
-      }
+
+      return mongoose.connection.db.collection('server_data')
+      .updateMany({ _id: serverData[0]._id }, { version: '0.6.0' });
     })
     .then(() => db.disconnect())
     .then(() => resolve())
     .catch((error) => {
       db.disconnect();
       return reject(error);
-    })
+    });
   });
 };
 
@@ -171,12 +170,11 @@ module.exports.up = function() {
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({version: '0.7.0'});
+        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.7.0' });
       }
-      else {
-        return mongoose.connection.db.collection('server_data')
-          .updateMany({_id: serverData[0]._id}, {version: '0.7.0'});
-      }
+
+      return mongoose.connection.db.collection('server_data')
+      .updateMany({ _id: serverData[0]._id }, { version: '0.7.0' });
     })
     .then(() => db.disconnect())
     .then(() => resolve())
