@@ -36,7 +36,8 @@ function migrate(args) {
   .then(() => libMigrate.migrate(args))
   .then(() => db.disconnect())
   .then(() => process.exit(0))
-  .catch(() => {
+  .catch((error) => {
+    M.log.critical(error);
     db.disconnect();
     process.exit(1);
   });
