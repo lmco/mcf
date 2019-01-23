@@ -91,6 +91,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find all users', findAllUsers);
   it('should update a user', updateUser);
   it('should update multiple users', updateUsers);
+  it('should update a users password', updateUserPassword);
   it('should delete a user', deleteUser);
   it('should delete multiple users', deleteUsers);
 });
@@ -477,6 +478,15 @@ function updateUsers(done) {
     chai.expect(error.message).to.equal(null);
     done();
   });
+}
+
+/**
+ * @description Updates a users password using the user controller.
+ */
+function updateUserPassword(done) {
+  const userData = adminUser;
+
+
 }
 
 /**

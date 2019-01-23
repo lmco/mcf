@@ -2189,6 +2189,55 @@ api.route('/users/:username')
 
 /**
  * @swagger
+ * /api/users/:username/password:
+ *   patch:
+ *     tags:
+ *       - users
+ *     description: Updates an existing users password.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to update.
+ *         required: true
+ *         type: string
+ *         in: URI
+ *       - name: body
+ *         description: The object containing the updated user data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - oldPassword
+ *             - newPassword
+ *           properties:
+ *             oldPassword:
+ *               type: string
+ *               description: The user's old password.
+ *             newPassword:
+ *               type: string
+ *               description: The user's new password.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH user returns public user data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH user due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH user due to not being logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH user due updating an immutable field.
+ */
+api.route('/users/:username/password')
+  .patch(
+    AuthController.authenticate,
+    Middleware.logRoute,
+    Middleware.disableUserAPI,
+    APIController.patchPassword
+  );
+
+/**
+ * @swagger
  * /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid:
  *   get:
  *     tags:
