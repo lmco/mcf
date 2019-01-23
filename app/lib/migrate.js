@@ -27,9 +27,6 @@ const process = require('process');
 // NPM modules
 const mongoose = require('mongoose');
 
-// MBEE modules
-const db = M.require('lib.db');
-
 /**
  * @description Handles database migrations from a specific version, to a
  * specific version
