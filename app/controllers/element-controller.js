@@ -271,6 +271,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * provided, the parameter source is required.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
+ * @param {string} [elements.type] - An optional type string.
  * @param {Object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
@@ -619,6 +620,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * update element parents in bulk.
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
+ * @param {string} [elements.type] - An optional type string.
  * @param {Object} [elements.custom] - The additions or changes to existing
  * custom data. If the key/value pair already exists, the value will be changed.
  * If the key/value pair does not exist, it will be added.
