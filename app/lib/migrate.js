@@ -127,7 +127,7 @@ module.exports.migrate = function(args) {
     })
     .then((statusCode) => {
       if (statusCode) {
-        M.log.info(statusCode)
+        M.log.info(statusCode);
       }
       else {
         M.log.info('Database migration complete.');
