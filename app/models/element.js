@@ -123,6 +123,11 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  type: {
+    type: String,
+    index: true,
+    default: ''
+  },
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -149,7 +154,7 @@ ElementSchema.plugin(extensions);
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived', 'parent'];
+  return ['name', 'documentation', 'custom', 'archived', 'parent', 'type'];
 };
 
 ElementSchema.statics.getValidUpdateFields = function() {
@@ -161,7 +166,7 @@ ElementSchema.statics.getValidUpdateFields = function() {
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidBulkUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived'];
+  return ['name', 'documentation', 'custom', 'archived', 'type'];
 };
 
 ElementSchema.statics.getValidBulkUpdateFields = function() {
@@ -276,6 +281,7 @@ ElementSchema.methods.getPublicData = function() {
     parent: parent,
     source: source,
     target: target,
+    type: this.type,
     documentation: this.documentation,
     custom: this.custom,
     createdOn: this.createdOn,
