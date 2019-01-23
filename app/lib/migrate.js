@@ -43,10 +43,8 @@ module.exports.migrate = function(args) {
     let versionComp = null;
 
 
-    // Connect to the database
-    db.connect()
     // Prompt the user for input
-    .then(() => prompt(args))
+    prompt(args)
     // Get the server_data collection
     .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
     .then((serverData) => {
@@ -132,18 +130,14 @@ module.exports.migrate = function(args) {
     })
     // Run the migrations
     .then(() => runMigrations(fromVersion, sortedMigrations, versionComp))
-    .then(() => db.disconnect())
     .then(() => {
       M.log.info('Database migration complete.');
       return resolve();
     })
     .catch((error) => {
-      db.disconnect()
-      .then(() => {
-        M.log.debug(error);
-        M.log.warn('Database migration failed. See debug log for more details.');
-        return reject(error);
-      });
+      M.log.debug(error);
+      M.log.warn('Database migration failed. See debug log for more details.');
+      return reject(error);
     });
   });
 };

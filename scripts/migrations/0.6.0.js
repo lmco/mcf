@@ -21,18 +21,14 @@
 // Node modules
 const mongoose = require('mongoose');
 
-// MBEE modules
-const db = M.require('lib.db');
-
 /**
  * @description Handles the database migration from 0.6.0 to 0.5.0. This drop in
  * versions is currently not supported.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
-    db.connect()
     // Get all documents from the server data
-    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    mongoose.connection.db.collection('server_data').find({}).toArray()
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
@@ -46,12 +42,8 @@ module.exports.down = function() {
       return mongoose.connection.db.collection('server_data')
       .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.5.0' } });
     })
-    .then(() => db.disconnect())
     .then(() => resolve())
-    .catch((error) => {
-      db.disconnect();
-      return reject(error);
-    });
+    .catch((error) => reject(error));
   });
 };
 
@@ -61,9 +53,8 @@ module.exports.down = function() {
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
-    db.connect()
     // Get all documents from the server data
-    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    mongoose.connection.db.collection('server_data').find({}).toArray()
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
@@ -77,11 +68,7 @@ module.exports.up = function() {
       return mongoose.connection.db.collection('server_data')
       .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.6.0' } });
     })
-    .then(() => db.disconnect())
     .then(() => resolve())
-    .catch((error) => {
-      db.disconnect();
-      return reject(error);
-    });
+    .catch((error) => reject(error));
   });
 };
