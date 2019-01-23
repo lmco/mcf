@@ -204,6 +204,10 @@ function createElements(done) {
       if (elemObj.hasOwnProperty('documentation')) {
         chai.expect(createdElem.documentation).to.equal(elemObj.documentation);
       }
+      // If type was provided, verify it
+      if (elemObj.hasOwnProperty('type')) {
+        chai.expect(createdElem.type).to.equal(elemObj.type);
+      }
       // If source was provided, verify it
       if (elemObj.hasOwnProperty('source')) {
         chai.expect(createdElem.source).to.equal(utils.createID(org.id, projID, elemObj.source));
