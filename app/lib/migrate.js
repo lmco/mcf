@@ -57,7 +57,7 @@ module.exports.migrate = function(args) {
         // Check if toVersion is a valid version
         if (!validateVersion(toVersion)) {
           M.log.warn(`${toVersion} is not a valid version number.`);
-          return resolve();
+          return;
         }
       }
       else {
@@ -67,8 +67,7 @@ module.exports.migrate = function(args) {
 
       // One document exists, read and compare versions
       if (serverData.length !== 0 && serverData[0].version === toVersion) {
-        M.log.info('Database already up to date.');
-        return resolve();
+        return 'Database already up to date.';
       }
       // Set fromVersion to the current schema version
       if (serverData.length !== 0 && serverData[0].version) {
@@ -80,8 +79,7 @@ module.exports.migrate = function(args) {
 
       // If versions are the same, return
       if (versionComp === 0) {
-        M.log.info('Database migration complete.');
-        return resolve();
+        return 'Database migration complete.';
       }
 
       // Get a list of migrations
@@ -98,13 +96,13 @@ module.exports.migrate = function(args) {
       // If no migration exists for the toVersion
       if (toVersion !== null && !sortedMigrations.includes(toVersion)) {
         M.log.warn(`No migration script exists for version ${toVersion}`);
-        return resolve();
+        return;
       }
 
       // If no migration exists for the fromVersion
       if (fromVersion !== null && !sortedMigrations.includes(fromVersion)) {
         M.log.warn(`No migration script exists for version ${fromVersion}`);
-        return resolve();
+        return;
       }
 
       // Remove migrations below fromVersion
@@ -124,11 +122,16 @@ module.exports.migrate = function(args) {
       if (versionComp === -1) {
         sortedMigrations.pop();
       }
+      // Run the migrations
+      return runMigrations(fromVersion, sortedMigrations, versionComp);
     })
-    // Run the migrations
-    .then(() => runMigrations(fromVersion, sortedMigrations, versionComp))
-    .then(() => {
-      M.log.info('Database migration complete.');
+    .then((statusCode) => {
+      if (statusCode) {
+        M.log.info(statusCode);
+      }
+      else {
+        M.log.info('Database migration complete.');
+      }
       return resolve();
     })
     .catch((error) => {
