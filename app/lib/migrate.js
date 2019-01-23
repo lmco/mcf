@@ -124,9 +124,9 @@ module.exports.migrate = function(args) {
       if (versionComp === -1) {
         sortedMigrations.pop();
       }
+      // Run the migrations
+      return runMigrations(fromVersion, sortedMigrations, versionComp);
     })
-    // Run the migrations
-    .then(() => runMigrations(fromVersion, sortedMigrations, versionComp))
     .then(() => {
       M.log.info('Database migration complete.');
       return resolve();
