@@ -137,6 +137,7 @@
       "name": "Batch Element 1",
       "parent": "model",
       "documentation": "Element #1",
+      "type": "package",
       "custom": {}
     },
     {

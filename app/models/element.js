@@ -65,6 +65,7 @@ const extensions = M.require('models.plugin.extensions');
  * @property {Element} target - A reference to the target element if the base
  * element is a relationship. NOTE: If target is provided, source is required.
  * @property {string} documentation - The element documentation.
+ * @property {string} type - An optional type string.
  * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
  * @property {virtual} contains - A list of elements whose parent is the base
  * element.
@@ -123,6 +124,11 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  type: {
+    type: String,
+    index: true,
+    default: ''
+  },
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -149,7 +155,7 @@ ElementSchema.plugin(extensions);
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived', 'parent'];
+  return ['name', 'documentation', 'custom', 'archived', 'parent', 'type'];
 };
 
 ElementSchema.statics.getValidUpdateFields = function() {
@@ -161,7 +167,7 @@ ElementSchema.statics.getValidUpdateFields = function() {
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidBulkUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived'];
+  return ['name', 'documentation', 'custom', 'archived', 'type'];
 };
 
 ElementSchema.statics.getValidBulkUpdateFields = function() {
@@ -276,6 +282,7 @@ ElementSchema.methods.getPublicData = function() {
     parent: parent,
     source: source,
     target: target,
+    type: this.type,
     documentation: this.documentation,
     custom: this.custom,
     createdOn: this.createdOn,
