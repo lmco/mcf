@@ -336,9 +336,10 @@ module.exports.createResponse = function(res) {
  * @description Helper function for setting the request headers.
  *
  * @param {string} contentType - The content type. Defaults to application/json.
+ * @param {object} user - The requesting user. Must contains a username and password.
  */
-module.exports.getHeaders = function(contentType = 'application/json') {
-  const formattedCreds = `${testData.adminUser.username}:${testData.adminUser.password}`;
+module.exports.getHeaders = function(contentType = 'application/json', user = testData.adminUser) {
+  const formattedCreds = `${user.username}:${user.password}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'Content-Type': contentType,

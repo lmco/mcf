@@ -753,12 +753,12 @@ function remove(requestingUser, users, options) {
  * @param {string} newPasswordConfirm - The new password entered a second time
  * to confirm they match.
  *
- * @return {Promise} Boolean value, true if password updated correctly.
+ * @return {Promise} The updated user object.
  *
  * @example
  * updatePassword({User}, 'oldPass', 'newPass', 'newPass')
- * .then(function(success) {
- *   // Do something
+ * .then(function(updatedUser) {
+ *   // Do something with the updated user
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -785,6 +785,7 @@ function updatePassword(requestingUser, oldPassword, newPassword, newPasswordCon
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUser = null;
 
+    // TODO: Do we need to take a second password?
     // // Check if newPassword and newPasswordConfirm match
     // if (newPasswordConfirm !== newPassword) {
     //   throw new M.CustomError('Passwords do not match.', 400, 'warn');
@@ -801,7 +802,7 @@ function updatePassword(requestingUser, oldPassword, newPassword, newPasswordCon
       }
 
       // Verify the old password matches
-      return foundUser.verifyPassword(oldPassword)
+      return foundUser.verifyPassword(oldPassword);
     })
     .then((verified) => {
       // Ensure old password was verified
@@ -816,7 +817,7 @@ function updatePassword(requestingUser, oldPassword, newPassword, newPasswordCon
       // new password.
       return foundUser.save();
     })
-    .then(() => resolve(true))
+    .then((updatedUser) => resolve(updatedUser))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

@@ -1851,7 +1851,7 @@ function whoami(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with success boolean.
+ * @return {Object} Response object with updated user public data.
  */
 function patchPassword(req, res) {
   // Sanity Check: there should always be a user in the request
@@ -1874,16 +1874,13 @@ function patchPassword(req, res) {
 
   // Update the password
   UserController.updatePassword(req.user, req.body.oldPassword, req.body.newPassword)
-  .then((success) => {
-    // Returns 200: OK and the success boolean
+  .then((updatedUser) => {
+    // Returns 200: OK and the updated user's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(success));
+    return res.status(200).send(formatJSON(updatedUser.getPublicData()));
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    return res.status(error.status || 500).send(error)
-  });
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /* -----------------------( Elements API Endpoints )------------------------- */

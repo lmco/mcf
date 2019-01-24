@@ -2229,12 +2229,12 @@ api.route('/users/:username')
  *         description: Forbidden, Failed to PATCH user due updating an immutable field.
  */
 api.route('/users/:username/password')
-  .patch(
-    AuthController.authenticate,
-    Middleware.logRoute,
-    Middleware.disableUserAPI,
-    APIController.patchPassword
-  );
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  Middleware.disableUserAPI,
+  APIController.patchPassword
+);
 
 /**
  * @swagger
