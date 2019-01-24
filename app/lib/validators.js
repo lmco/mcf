@@ -19,6 +19,9 @@
  * helper functions - used to validate data within MBEE.
  */
 
+// Node modules
+const assert = require('assert');
+
 // MBEE modules
 const utils = M.require('lib.utils');
 
@@ -181,3 +184,20 @@ module.exports.artifact = {
 module.exports.webhook = {
   id: customValidators.webhook_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
+
+/**
+ * @description A function to validates a running config to ensure it's valid
+ */
+module.exports.validateConfig = function(configFile = M.config) {
+  try {
+    // Validate auth section
+    assert.ok(configFile.hasOwnProperty('auth'),
+      'Running config does not have an auth section.');
+    assert.ok(configFile.auth.hasOwnProperty('strategy'),
+      'Running config does not have an auth.strategy section.');
+    assert.ok(typeof configFile.auth.strategy === 'string')
+  }
+  catch (err) {
+    throw new M.CustomError(err.message, 500, 'critical');
+  }
+}
