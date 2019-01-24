@@ -1867,13 +1867,20 @@ function patchPassword(req, res) {
   }
 
   // Ensure new password was provided
-  if (!req.body.newPassword) {
+  if (!req.body.password) {
     const error = new M.CustomError('New password not in request body.', 400, 'critical');
     return res.status(error.status).send(error);
   }
 
+  // Ensure confirmed password was provided
+  if (!req.body.confirmPassword) {
+    const error = new M.CustomError('Confirmed password not in request body.', 400, 'critical');
+    return res.status(error.status).send(error);
+  }
+
   // Update the password
-  UserController.updatePassword(req.user, req.body.oldPassword, req.body.newPassword)
+  UserController.updatePassword(req.user, req.body.oldPassword,
+    req.body.password, req.body.confirmPassword)
   .then((updatedUser) => {
     // Returns 200: OK and the updated user's public data
     res.header('Content-Type', 'application/json');

@@ -482,7 +482,8 @@ function patchUserPassword(done) {
   // Create request object
   const userData = testData.users[0];
   const updateObj = {
-    newPassword: 'NewPass1234?',
+    password: 'NewPass1234?',
+    confirmPassword: 'NewPass1234?',
     oldPassword: userData.password
   };
   request({

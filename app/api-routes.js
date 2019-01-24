@@ -2210,14 +2210,19 @@ api.route('/users/:username')
  *           type: object
  *           required:
  *             - oldPassword
- *             - newPassword
+ *             - password
+ *             - confirmPassword
  *           properties:
  *             oldPassword:
  *               type: string
  *               description: The user's old password.
- *             newPassword:
+ *             password:
  *               type: string
  *               description: The user's new password.
+ *             confirmPassword:
+ *               type: string
+ *               description: The users new password a second time, to confirm
+ *                            they match.
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH user returns public user data.

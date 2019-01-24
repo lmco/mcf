@@ -750,7 +750,7 @@ function remove(requestingUser, users, options) {
  * This is the users whose password is being changed.
  * @param {string} oldPassword - The old password to confirm.
  * @param {string} newPassword - THe new password the user would like to set.
- * @param {string} newPasswordConfirm - The new password entered a second time
+ * @param {string} confirmPassword - The new password entered a second time
  * to confirm they match.
  *
  * @return {Promise} The updated user object.
@@ -764,7 +764,7 @@ function remove(requestingUser, users, options) {
  *   M.log.error(error);
  * });
  */
-function updatePassword(requestingUser, oldPassword, newPassword, newPasswordConfirm) {
+function updatePassword(requestingUser, oldPassword, newPassword, confirmPassword) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
@@ -772,10 +772,11 @@ function updatePassword(requestingUser, oldPassword, newPassword, newPasswordCon
       assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
       assert.ok(requestingUser._id, 'Requesting user is not populated.');
+
+      // Ensure all provided passwords are strings
       assert.ok(typeof oldPassword === 'string', 'Old Password is not a string.');
       assert.ok(typeof newPassword === 'string', 'New Password is not a string.');
-      // TODO: What should this error look like?
-      // assert.ok(typeof newPasswordConfirm === 'string', 'Passwords do not match.');
+      assert.ok(typeof confirmPassword === 'string', 'Passwords do not match.');
     }
     catch (err) {
       throw new M.CustomError(err.message, 400, 'warn');
@@ -785,11 +786,10 @@ function updatePassword(requestingUser, oldPassword, newPassword, newPasswordCon
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUser = null;
 
-    // TODO: Do we need to take a second password?
-    // // Check if newPassword and newPasswordConfirm match
-    // if (newPasswordConfirm !== newPassword) {
-    //   throw new M.CustomError('Passwords do not match.', 400, 'warn');
-    // }
+    // Check if newPassword and confirmPassword match
+    if (confirmPassword !== newPassword) {
+      throw new M.CustomError('Passwords do not match.', 400, 'warn');
+    }
 
     // Find the requesting user
     User.findOne({ _id: reqUser._id })
