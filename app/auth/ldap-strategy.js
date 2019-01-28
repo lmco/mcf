@@ -38,7 +38,6 @@ const LocalStrategy = M.require('auth.local-strategy');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
-const utils = M.require('lib.utils');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -148,6 +147,10 @@ function ldapConnect() {
     if (typeof ldapCA === 'string') {
       ldapCA = [ldapCA];
     }
+    // If no CA is provided.
+    else if (typeof ldapCA === 'undefined') {
+      ldapCA = [];
+    }
 
     // Now if it's not an array, fail
     if (!Array.isArray(ldapCA)) {
@@ -156,7 +159,7 @@ function ldapConnect() {
     }
 
     // If any items in the array are not strings, fail
-    if (!utils.checkType(ldapCA, 'string')) {
+    if (!ldapCA.every(c => typeof c === 'string')) {
       M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
       return reject(new M.CustomError('An error occurred.', 500));
     }
