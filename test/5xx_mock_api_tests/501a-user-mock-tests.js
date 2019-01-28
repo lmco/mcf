@@ -90,6 +90,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET all users', getAllUsers);
   it('should PATCH a user', patchUser);
   it('should PATCH multiple users', patchUsers);
+  it('should PATCH a users password', patchUserPassword);
   it('should DELETE a user', deleteUser);
   it('should DELETE multiple users', deleteUsers);
 });
@@ -487,6 +488,54 @@ function patchUsers(done) {
 
   // PATCHs multiple users
   APIController.patchUsers(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update a users password.
+ */
+function patchUserPassword(done) {
+  // Create request object
+  const userData = testData.users[0];
+  userData._id = userData.username;
+  const body = {
+    password: 'NewPass1234?',
+    confirmPassword: 'NewPass1234?',
+    oldPassword: userData.password
+  };
+  const params = { username: userData.username };
+  const method = 'PATCH';
+  const req = testUtils.createRequest(userData, params, body, method);
+
+  // Create response object
+  const res = {};
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Convert response to JSON
+    const updatedUser = JSON.parse(_data);
+
+    // Verify expected response
+    chai.expect(updatedUser.username).to.equal(userData.username);
+    chai.expect(updatedUser.fname).to.equal('Updated First Name');
+    chai.expect(updatedUser.lname).to.equal(userData.lname);
+    chai.expect(updatedUser.preferredName).to.equal(userData.preferredName);
+    chai.expect(updatedUser.email).to.equal(userData.email);
+    chai.expect(updatedUser.custom).to.deep.equal(userData.custom);
+    chai.expect(updatedUser.admin).to.equal(userData.admin);
+    chai.expect(updatedUser).to.not.have.any.keys('password', '_id', '__v');
+
+    // Verify extra properties
+    chai.expect(updatedUser.createdOn).to.not.equal(null);
+    chai.expect(updatedUser.updatedOn).to.not.equal(null);
+    chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+    done();
+  };
+
+  // PATCHs a users password
+  APIController.patchPassword(req, res);
 }
 
 /**

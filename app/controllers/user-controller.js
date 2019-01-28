@@ -29,7 +29,8 @@ module.exports = {
   find,
   create,
   update,
-  remove
+  remove,
+  updatePassword
 };
 
 // Node.js Modules
@@ -403,6 +404,7 @@ function create(requestingUser, users, options) {
  *   M.log.error(error);
  * });
  */
+// TODO: Allow admins to update the admin field.
 function update(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
@@ -737,6 +739,86 @@ function remove(requestingUser, users, options) {
     .then(() => User.deleteMany(searchQuery))
     // Return the deleted users
     .then(() => resolve(foundUsernames))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
+ * @description Updates a users password given that the old password matches the
+ * currently stored password.
+ *
+ * @param {Object} requestingUser - The object containing the requesting user.
+ * This is the users whose password is being changed.
+ * @param {string} oldPassword - The old password to confirm.
+ * @param {string} newPassword - THe new password the user would like to set.
+ * @param {string} confirmPassword - The new password entered a second time
+ * to confirm they match.
+ *
+ * @return {Promise} The updated user object.
+ *
+ * @example
+ * updatePassword({User}, 'oldPass', 'newPass', 'newPass')
+ * .then(function(updatedUser) {
+ *   // Do something with the updated user
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function updatePassword(requestingUser, oldPassword, newPassword, confirmPassword) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+
+      // Ensure all provided passwords are strings
+      assert.ok(typeof oldPassword === 'string', 'Old Password is not a string.');
+      assert.ok(typeof newPassword === 'string', 'New Password is not a string.');
+      assert.ok(typeof confirmPassword === 'string', 'Passwords do not match.');
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
+    }
+
+    // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    let foundUser = null;
+
+    // Check if newPassword and confirmPassword match
+    if (confirmPassword !== newPassword) {
+      throw new M.CustomError('Passwords do not match.', 400, 'warn');
+    }
+
+    // Find the requesting user
+    User.findOne({ _id: reqUser._id })
+    .then((user) => {
+      foundUser = user;
+
+      // Ensure the user was found
+      if (user === null) {
+        throw new M.CustomError('User not found.', 404, 'warn');
+      }
+
+      // Verify the old password matches
+      return foundUser.verifyPassword(oldPassword);
+    })
+    .then((verified) => {
+      // Ensure old password was verified
+      if (!verified) {
+        throw new M.CustomError('Old password is incorrect.', 403, 'warn');
+      }
+
+      // Update password on requesting user
+      foundUser.password = newPassword;
+
+      // Save the requesting user, forcing pre-save middleware to hash
+      // new password.
+      return foundUser.save();
+    })
+    .then((updatedUser) => resolve(updatedUser))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

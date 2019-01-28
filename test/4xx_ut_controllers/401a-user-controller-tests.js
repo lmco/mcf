@@ -91,6 +91,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find all users', findAllUsers);
   it('should update a user', updateUser);
   it('should update multiple users', updateUsers);
+  it('should update a users password', updateUserPassword);
   it('should delete a user', deleteUser);
   it('should delete multiple users', deleteUsers);
 });
@@ -391,7 +392,7 @@ function updateUser(done) {
     chai.expect(updatedUsers.length).to.equal(1);
     const updatedUser = updatedUsers[0];
 
-    // Verify user created properly
+    // Verify user updated properly
     chai.expect(updatedUser._id).to.equal(userData.username);
     chai.expect(updatedUser.username).to.equal(userData.username);
     chai.expect(updatedUser.preferredName).to.equal(updateObj.preferredName);
@@ -449,7 +450,7 @@ function updateUsers(done) {
     userDataObjects.forEach((userDataObject) => {
       const updatedUser = jmi2Users[userDataObject.username];
 
-      // Verify user created properly
+      // Verify user updated properly
       chai.expect(updatedUser._id).to.equal(userDataObject.username);
       chai.expect(updatedUser.username).to.equal(userDataObject.username);
       chai.expect(updatedUser.preferredName).to.equal('Name Updated');
@@ -469,6 +470,58 @@ function updateUsers(done) {
       chai.expect(updatedUser.updatedOn).to.not.equal(null);
       chai.expect(updatedUser.archivedOn).to.equal(null);
     });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Updates a users password using the user controller.
+ */
+function updateUserPassword(done) {
+  const userData = testData.users[0];
+  const newPassword = 'NewPass1234?';
+  let foundUser = null;
+
+  // Get the user object
+  UserController.find(adminUser, userData.username)
+  .then((user) => {
+    foundUser = user[0];
+    // Update the password via the controller
+    return UserController.updatePassword(foundUser, userData.password, newPassword, newPassword);
+  })
+  .then((updatedUser) => {
+    // Verify user updated properly
+    chai.expect(updatedUser._id).to.equal(userData.username);
+    chai.expect(updatedUser.username).to.equal(userData.username);
+    chai.expect(updatedUser.preferredName).to.equal('Name Updated');
+    chai.expect(updatedUser.fname).to.equal(userData.fname);
+    chai.expect(updatedUser.lname).to.equal(userData.lname);
+    chai.expect(updatedUser.admin).to.equal(userData.admin);
+    chai.expect(updatedUser.custom).to.deep.equal(userData.custom);
+
+    // Expect the password to be hashed
+    chai.expect(updatedUser.password).to.not.equal(userData.password);
+
+    // Verify additional properties
+    chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.archivedBy).to.equal(null);
+    chai.expect(updatedUser.createdOn).to.not.equal(null);
+    chai.expect(updatedUser.updatedOn).to.not.equal(null);
+    chai.expect(updatedUser.archivedOn).to.equal(null);
+
+    // Verify the new password is correct
+    return updatedUser.verifyPassword(newPassword);
+  })
+  .then((success) => {
+    // Expect success to be true, meaning password is correct
+    chai.expect(success).to.equal(true);
     done();
   })
   .catch((error) => {

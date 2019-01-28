@@ -76,6 +76,7 @@ module.exports = {
   patchUser,
   deleteUser,
   whoami,
+  patchPassword,
   getElements,
   postElements,
   patchElements,
@@ -1840,6 +1841,53 @@ function whoami(req, res) {
   // Returns 200: OK and the users public data
   res.header('Content-Type', 'application/json');
   return res.status(200).send(formatJSON(req.user.getPublicData()));
+}
+
+/**
+ * PATCH /api/users/:username/password
+ *
+ * @description Updates a users password.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with updated user public data.
+ */
+function patchPassword(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Ensure old password was provided
+  if (!req.body.oldPassword) {
+    const error = new M.CustomError('Old password not in request body.', 400, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Ensure new password was provided
+  if (!req.body.password) {
+    const error = new M.CustomError('New password not in request body.', 400, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Ensure confirmed password was provided
+  if (!req.body.confirmPassword) {
+    const error = new M.CustomError('Confirmed password not in request body.', 400, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Update the password
+  UserController.updatePassword(req.user, req.body.oldPassword,
+    req.body.password, req.body.confirmPassword)
+  .then((updatedUser) => {
+    // Returns 200: OK and the updated user's public data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(updatedUser.getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /* -----------------------( Elements API Endpoints )------------------------- */
