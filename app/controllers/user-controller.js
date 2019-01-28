@@ -404,6 +404,7 @@ function create(requestingUser, users, options) {
  *   M.log.error(error);
  * });
  */
+// TODO: Allow admins to update the admin field.
 function update(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
