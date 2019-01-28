@@ -34,7 +34,6 @@ const flash = require('express-flash');
 // MBEE modules
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
-const validators = M.require('lib.validators');
 const middleware = M.require('lib.middleware');
 const migrate = M.require('lib.migrate');
 const Organization = M.require('models.organization');
@@ -49,7 +48,6 @@ module.exports = app;
  * default admin and default organization if needed.
  */
 db.connect()
-.then(() => validators.validateConfig())
 .then(() => getSchemaVersion())
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
