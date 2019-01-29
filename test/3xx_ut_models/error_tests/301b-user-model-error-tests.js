@@ -96,8 +96,8 @@ function usernameTooShort(done) {
     }
     else {
       // Ensure error message is correct
-      chai.expect(error.message).to.equal('User validation failed: _id: ' +
-        'Too few characters in username');
+      chai.expect(error.message).to.equal('User validation failed: _id: '
+        + 'Too few characters in username');
       done();
     }
   });
@@ -128,8 +128,8 @@ function usernameTooLong(done) {
     }
     else {
       // Ensure error message is correct
-      chai.expect(error.message).to.equal('User validation failed: _id: ' +
-        'Too many characters in username');
+      chai.expect(error.message).to.equal('User validation failed: _id: '
+        + 'Too many characters in username');
       done();
     }
   });
@@ -161,8 +161,8 @@ function fnameTooLong(done) {
     }
     else {
       // Ensure error message is correct
-      chai.expect(error.message).to.equal('User validation failed: fname: ' +
-        'Too many characters in first name');
+      chai.expect(error.message).to.equal('User validation failed: fname: '
+        + 'Too many characters in first name');
       done();
     }
   });
@@ -194,8 +194,8 @@ function lnameTooLong(done) {
     }
     else {
       // Ensure error message is correct
-      chai.expect(error.message).to.equal('User validation failed: lname: ' +
-        'Too many characters in last name');
+      chai.expect(error.message).to.equal('User validation failed: lname: '
+        + 'Too many characters in last name');
       done();
     }
   });
@@ -227,8 +227,8 @@ function preferredNameTooLong(done) {
     }
     else {
       // Ensure error message is correct
-      chai.expect(error.message).to.equal('User validation failed: ' +
-        'preferredName: Too many characters in preferred name');
+      chai.expect(error.message).to.equal('User validation failed: '
+        + 'preferredName: Too many characters in preferred name');
       done();
     }
   });
@@ -260,8 +260,8 @@ function adminNotBoolean(done) {
     }
     else {
       // Ensure error message is correct
-      chai.expect(error.message).to.equal('User validation failed: admin: ' +
-        'Cast to Boolean failed for value "123" at path "admin"');
+      chai.expect(error.message).to.equal('User validation failed: admin: '
+        + 'Cast to Boolean failed for value "123" at path "admin"');
       done();
     }
   });
@@ -293,8 +293,8 @@ function providerNotString(done) {
     }
     else {
       // Ensure error message is correct
-      chai.expect(error.message).to.equal('User validation failed: provider: ' +
-        'Cast to String failed for value "{}" at path "provider"');
+      chai.expect(error.message).to.equal('User validation failed: provider: '
+        + 'Cast to String failed for value "{}" at path "provider"');
       done();
     }
   });
@@ -311,21 +311,20 @@ function usernameNotProvided(done) {
 
   // Save user
   userObject.save()
-    .then(() => {
-      // Should not succeed, force to fail
-      chai.assert.fail(true, false, 'User created successfully.');
-    })
-    .catch((error) => {
-      // If user created successfully, fail the test
-      if (error.message === 'User created successfully.') {
-        done(error);
-      }
-      else {
-        // Ensure error message is correct
-        chai.expect(error.message).to.equal('User validation failed: _id: ' +
-          'Username is required.');
-        done();
-      }
-    });
+  .then(() => {
+    // Should not succeed, force to fail
+    chai.assert.fail(true, false, 'User created successfully.');
+  })
+  .catch((error) => {
+    // If user created successfully, fail the test
+    if (error.message === 'User created successfully.') {
+      done(error);
+    }
+    else {
+      // Ensure error message is correct
+      chai.expect(error.message).to.equal('User validation failed: _id: '
+          + 'Username is required.');
+      done();
+    }
+  });
 }
-

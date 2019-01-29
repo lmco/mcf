@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.301-user-model-tests
+ * @module  test.301a-user-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -118,21 +118,21 @@ function getUser(done) {
 function getUserPublicData(done) {
   // Find the created user from the previous createUser test.
   User.findOne({ _id: testData.users[1].username })
-    .then((user) => {
-      // Check first, last, and preferred name
-      chai.expect(user.fname).to.equal(testData.users[1].fname);
-      chai.expect(user.lname).to.equal(testData.users[1].lname);
-      chai.expect(user.preferredName).to.equal(testData.users[1].preferredName);
-      // Check the name
-      chai.expect(user.name).to.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
-      done();
-    })
-    .catch((error) => {
-      M.log.error(error);
-      // Expect no error
-      chai.expect(error).to.equal(null);
-      done();
-    });
+  .then((user) => {
+    // Check first, last, and preferred name
+    chai.expect(user.fname).to.equal(testData.users[1].fname);
+    chai.expect(user.lname).to.equal(testData.users[1].lname);
+    chai.expect(user.preferredName).to.equal(testData.users[1].preferredName);
+    // Check the name
+    chai.expect(user.name).to.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+    done();
+  });
 }
 
 /**
