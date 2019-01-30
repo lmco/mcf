@@ -387,7 +387,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         elem._id = elem.id;
 
         // Set the element parent if null
-        if (!elem.hasOwnProperty('parent') || elem.parent === null) {
+        if (!elem.hasOwnProperty('parent') || elem.parent === null || elem.parent === '') {
           elem.parent = 'model';
         }
         assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
