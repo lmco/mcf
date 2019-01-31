@@ -468,6 +468,50 @@ api.route('/orgs/:orgid')
   APIController.deleteOrg
 );
 
+
+/**
+ * @swagger
+ * /api/projects:
+ *   get:
+ *     tags:
+ *       - projects
+ *     description: Returns a list of all projects and their public data that
+ *                  the requesting user has access to.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched through.
+ *         in: query
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET projects returns org data.
+ *       400:
+ *         description: Bad Request, Failed to GET projects due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET projects due to not being logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET projects due to not having permissions.
+ *       404:
+ *         description: Not Found, Failed to GET projects due to projects not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET projects due to a server side issue.
+ */
+api.route('/projects')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getAllProjects
+);
+
+
 /**
  * @swagger
  * /api/orgs/:orgid/projects:

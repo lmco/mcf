@@ -103,7 +103,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple projects', postProjects);
   it('should GET a project', getProject);
   it('should GET multiple projects', getProjects);
-  it('should GET all projects', getAllProjects);
+  it('should GET all projects on an organization', getAllProjectsOnOrg);
+  it('should GET all projects a user has access to', getAllProjects);
   it('should POST a project member', postProjectMember);
   it('should GET a project role', getProjectMember);
   it('should GET all project members', getProjectMembers);
@@ -343,7 +344,7 @@ function getProjects(done) {
 /**
  * @description Verifies mock GET request to find all projects in an org.
  */
-function getAllProjects(done) {
+function getAllProjectsOnOrg(done) {
   // Create request object
   const projData = [
     testData.projects[0],
@@ -402,6 +403,68 @@ function getAllProjects(done) {
 
   // GETs multiple projects
   APIController.getProjects(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to find all projects a user has access
+ * to.
+ */
+function getAllProjects(done) {
+  // Create request object
+  const projData = [
+    testData.projects[0],
+    testData.projects[1],
+    testData.projects[2],
+    testData.projects[3],
+    testData.projects[4]
+  ];
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, {}, {}, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundProjects = JSON.parse(_data);
+    chai.expect(Array.isArray(foundProjects)).to.equal(true);
+    chai.expect(foundProjects.length).to.equal(projData.length);
+
+    // Convert foundProjects to JMI type 2 for easier lookup
+    const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
+    // Loop through each project data object
+    projData.forEach((projDataObject) => {
+      const foundProject = jmi2Projects[projDataObject.id];
+
+      // Verify correct project found
+      chai.expect(foundProject.id).to.equal(projDataObject.id);
+      chai.expect(foundProject.name).to.equal(projDataObject.name);
+      chai.expect(foundProject.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(foundProject.permissions.read).to.include(adminUser.username);
+      chai.expect(foundProject.permissions.write).to.include(adminUser.username);
+      chai.expect(foundProject.permissions.admin).to.include(adminUser.username);
+      chai.expect(foundProject.org).to.equal(org.id);
+      chai.expect(foundProject.visibility).to.equal(projDataObject.visibility || 'private');
+
+      // Verify additional properties
+      chai.expect(foundProject.createdBy).to.equal(adminUser.username);
+      chai.expect(foundProject.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProject.createdOn).to.not.equal(null);
+      chai.expect(foundProject.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  };
+
+  // GETs multiple projects
+  APIController.getAllProjects(req, res);
 }
 
 /**
