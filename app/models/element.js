@@ -76,14 +76,11 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.element.id),
-    maxlength: [64, 'Element ID is too long'],
-    minlength: [2, 'Element ID is too short']
+    maxlength: [110, 'Too many characters in ID'],
+    minlength: [8, 'Too few characters in ID']
   },
   name: {
-    type: String,
-    required: false,
-    maxlength: [64, 'Element name is too long'],
-    minlength: [0, 'Element name is too short']
+    type: String
   },
   project: {
     type: String,
@@ -97,6 +94,7 @@ const ElementSchema = new mongoose.Schema({
       }
       // Check value NOT equal to db value
       if (_proj !== this.project) {
+        // TODO: We need to do more than warn and return old value, causes unexpected behavior
         // Immutable field, return error
         M.log.warn('Assigned project cannot be changed.');
       }
@@ -106,9 +104,8 @@ const ElementSchema = new mongoose.Schema({
   },
   parent: {
     type: String,
-    required: false,
-    default: null,
-    ref: 'Element'
+    ref: 'Element',
+    default: null
   },
   source: {
     type: String,

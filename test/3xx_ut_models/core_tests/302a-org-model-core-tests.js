@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.302-org-model-tests
+ * @module  test.302a-org-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

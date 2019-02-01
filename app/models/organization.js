@@ -47,7 +47,8 @@ const OrganizationSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.org.id),
-    maxlength: [64, 'Too many characters in ID']
+    maxlength: [36, 'Too many characters in ID'],
+    minlength: [2, 'Too few characters in ID']
   },
   name: {
     type: String,

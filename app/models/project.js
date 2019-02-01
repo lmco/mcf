@@ -50,7 +50,8 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.project.id),
-    maxlength: [255, 'Too many characters in username']
+    maxlength: [73, 'Too many characters in ID'],
+    minlength: [5, 'Too few characters in ID']
   },
   org: {
     type: String,
@@ -63,9 +64,10 @@ const ProjectSchema = new mongoose.Schema({
         return _org;
       }
       // Check value NOT equal to db value
+      // TODO: NOt a user friendly error, find a better way to fail. Possibly pre('validate') hook?
       if (_org !== this.org) {
         // Immutable field, return error
-        M.log.warn('Assigned org cannot be changed.');
+        throw new M.CustomError('Assigned org cannot be changed.', 403, 'warn');
       }
       // No change, return the value
       return this.org;

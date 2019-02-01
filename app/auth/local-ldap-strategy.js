@@ -132,6 +132,7 @@ function doLogin(req, res, next) {
  *
  * @returns {Boolean} - If password is correctly validated
  */
+// TODO: Consider changing name of function, since it also validates provider field.
 function validatePassword(password, provider) {
   // Use the appropriate provider rules
   switch (provider) {
@@ -144,6 +145,6 @@ function validatePassword(password, provider) {
     default:
       // Unknown provider, failed validation
       // Explicitly NOT logging error to avoid password logging
-      return false;
+      throw new M.CustomError(`Unknown provider: ${provider}`, 400, 'warn');
   }
 }

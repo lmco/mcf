@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.301-user-model-tests
+ * @module  test.301a-user-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -62,10 +62,9 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should create a user', createUser);
   it('should verify a valid password', verifyValidPassword);
-  it('should NOT verify an invalid password', verifyInvalidPassword);
   it('should get a user from the database', getUser);
+  it('should get a users public data', getUserPublicData);
   it('should update a user', updateUser);
-  it('should archive a user', archiveUser);
   it('should delete a user', deleteUser);
 });
 
@@ -114,17 +113,18 @@ function getUser(done) {
 }
 
 /**
- * @description Checks that a user password was properly stored and can be
- * authenticated.
+ * @description Gets a users public data.
  */
-function verifyValidPassword(done) {
+function getUserPublicData(done) {
   // Find the created user from the previous createUser test.
   User.findOne({ _id: testData.users[1].username })
-  // Verify the user's password
-  .then((user) => user.verifyPassword(testData.users[1].password))
-  .then((result) => {
-    // expected - verifyPassword() returned true
-    chai.expect(result).to.equal(true);
+  .then((user) => {
+    // Check first, last, and preferred name
+    chai.expect(user.fname).to.equal(testData.users[1].fname);
+    chai.expect(user.lname).to.equal(testData.users[1].lname);
+    chai.expect(user.preferredName).to.equal(testData.users[1].preferredName);
+    // Check the name
+    chai.expect(user.name).to.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
     done();
   })
   .catch((error) => {
@@ -136,17 +136,17 @@ function verifyValidPassword(done) {
 }
 
 /**
- * @description Checks that verifyPassword returns false when verifying an
- * incorrect password.
+ * @description Checks that a user password was properly stored and can be
+ * authenticated.
  */
-function verifyInvalidPassword(done) {
+function verifyValidPassword(done) {
   // Find the created user from the previous createUser test.
   User.findOne({ _id: testData.users[1].username })
-  // Attempt to verify the user's incorrect password
-  .then((user) => user.verifyPassword('incorrectPassword'))
+  // Verify the user's password
+  .then((user) => user.verifyPassword(testData.users[1].password))
   .then((result) => {
-    // expected - verifyPassword returned false
-    chai.expect(result).to.equal(false);
+    // expected - verifyPassword() returned true
+    chai.expect(result).to.equal(true);
     done();
   })
   .catch((error) => {
@@ -179,41 +179,6 @@ function updateUser(done) {
     chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);
     chai.expect(updatedUser.lname).to.equal(testData.users[1].lname);
     chai.expect(updatedUser.name).to.equal(`${testData.users[1].fname}edit ${testData.users[1].lname}`);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
-/**
- * @description Checks that a user can be archived,
- */
-function archiveUser(done) {
-  // LM: Changed from findOneAndUpdate to a findOne and Save
-  // Note: findOneAndUpdate does not call setters, and was causing strange
-  // behavior with the archived and archivedOn fields.
-  // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
-
-  // Define query
-  const query = { _id: testData.users[1].username };
-
-  // Define updateObject
-  const updateObject = {
-    archived: true,
-    archivedOn: Date.now()
-  };
-  // Find the user previously created and updated in createUser and updateUser
-  // tests.
-  User.updateOne(query, updateObject)
-  .then(() => User.findOne(query))
-  .then((archivedUser) => {
-    // Verify the archive was successful
-    chai.expect(archivedUser.archivedOn).to.not.equal(null);
-    chai.expect(archivedUser.archived).to.equal(true);
     done();
   })
   .catch((error) => {
