@@ -333,7 +333,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Initialize valid options
     let populateString = 'contains ';
-    let populate = false;
 
     // Ensure options are valid
     if (options) {
@@ -357,7 +356,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         });
 
         populateString += options.populate.join(' ');
-        populate = true;
       }
     }
 
@@ -574,27 +572,23 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       return Element.insertMany(elementObjects);
     })
     .then((createdElements) => {
-      if (populate) {
-        const promises = [];
-        const createdIDs = createdElements.map(e => e._id);
+      const promises = [];
+      const createdIDs = createdElements.map(e => e._id);
 
-        // Find elements in batches
-        for (let i = 0; i < createdIDs.length / 50000; i++) {
-          // Split elementIDs list into batches of 50000
-          const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
+      // Find elements in batches
+      for (let i = 0; i < createdIDs.length / 50000; i++) {
+        // Split elementIDs list into batches of 50000
+        const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
-          // Add find operation to promises array
-          promises.push(Element.find(tmpQuery).populate(populateString)
-          .then((_foundElements) => {
-            populatedElements = populatedElements.concat(_foundElements);
-          }));
-        }
-
-        // Return when all elements have been found
-        return Promise.all(promises);
+        // Add find operation to promises array
+        promises.push(Element.find(tmpQuery).populate(populateString)
+        .then((_foundElements) => {
+          populatedElements = populatedElements.concat(_foundElements);
+        }));
       }
 
-      return resolve(createdElements);
+      // Return when all elements have been found
+      return Promise.all(promises);
     })
     .then(() => resolve(populatedElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
