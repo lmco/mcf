@@ -339,12 +339,15 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
         delete project.deletedBy;
 
         // Change the permissions from ObjectIDs to strings
-        project.permissions.read = project.permissions.read.map((u) => jmi2Users[u].username) || [];
-        project.permissions.write = project.permissions.write.map((u) => jmi2Users[u].username) || [];
-        project.permissions.admin = project.permissions.admin.map((u) => jmi2Users[u].username) || [];
+        project.permissions.read = project.permissions.read
+        .map((u) => jmi2Users[u].username) || [];
+        project.permissions.write = project.permissions.write
+        .map((u) => jmi2Users[u].username) || [];
+        project.permissions.admin = project.permissions.admin
+        .map((u) => jmi2Users[u].username) || [];
 
         const newPermissions = {};
-        // Convert permissions from arrays to objects with usernames as the keys,
+        // Convert permissions from arrays to objects with username as the keys,
         // permissions as the values
         project.permissions.read.forEach((user) => {
           if (project.permissions.admin.includes(user)) {
