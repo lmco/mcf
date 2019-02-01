@@ -138,9 +138,7 @@ function postElement(done) {
 
   // Verifies status code and headers
   testUtils.createResponse(res);
-  req.query = {
-    populate: 'contains'
-  };
+
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body

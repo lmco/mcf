@@ -120,7 +120,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
     // Initialize valid options
     let archived = false;
-    let populateString = '';
+    let populateString = 'contains ';
     let subtree = false;
 
     // Ensure options are valid
@@ -152,7 +152,12 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           }
         });
 
-        populateString = options.populate.join(' ');
+        // Add 'contains' to options
+        if (!options.populate.includes('contains')) {
+          options.populate.push('contains');
+        }
+
+        populateString += options.populate.join(' ');
       }
 
       // If the option 'subtree' is supplied ensure it's a boolean
@@ -327,7 +332,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     let populatedElements = [];
 
     // Initialize valid options
-    let populateString = '';
+    let populateString = 'contains ';
     let populate = false;
 
     // Ensure options are valid
@@ -351,7 +356,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           }
         });
 
-        populateString = options.populate.join(' ');
+        populateString += options.populate.join(' ');
         populate = true;
       }
     }
@@ -682,7 +687,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const arrIDs = [];
 
     // Initialize valid options
-    let populateString = '';
+    let populateString = 'contains ';
 
     // Ensure options are valid
     if (options) {
@@ -705,7 +710,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           }
         });
 
-        populateString = options.populate.join(' ');
+        populateString += options.populate.join(' ');
       }
     }
 
