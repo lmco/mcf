@@ -80,7 +80,8 @@ function find(requestingUser, organizationID, projects, options) {
       assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
       assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok((typeof organizationID === 'string') || (organizationID === null),
+        'Organization ID is not a string.');
 
       const projectTypes = ['undefined', 'object', 'string'];
       const optionsTypes = ['undefined', 'object'];
@@ -105,7 +106,8 @@ function find(requestingUser, organizationID, projects, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
     // Set options if no projects were provided, but options were
-    if (typeof projects === 'object' && projects !== null && !Array.isArray(projects)) {
+    if (((typeof projects === 'object' && projects !== null && !Array.isArray(projects))
+      || (orgID === null)) && options === undefined) {
       options = projects; // eslint-disable-line no-param-reassign
     }
 
@@ -155,6 +157,9 @@ function find(requestingUser, organizationID, projects, options) {
     // If the archived field is true, remove it from the query
     if (archived) {
       delete searchQuery.archived;
+    }
+    if (orgID !== null) {
+      searchQuery.org = orgID;
     }
 
     // Check the type of the projects parameter

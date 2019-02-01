@@ -55,6 +55,7 @@ module.exports = {
   postOrgMember,
   deleteOrgMember,
   getOrgMembers,
+  getAllProjects,
   getProjects,
   postProjects,
   patchProjects,
@@ -800,10 +801,64 @@ function getOrgMembers(req, res) {
 
 /* -----------------------( Project API Endpoints )-------------------------- */
 /**
+ * GET /api/projects
+ *
+ * @description Gets all projects a user has access to across all orgs.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with projects' public data
+ */
+function getAllProjects(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Get all projects the requesting user has access to
+  ProjectController.find(req.user, null, undefined, options)
+  .then((projects) => {
+    // Verify project array is not empty
+    if (projects.length === 0) {
+      const error = new M.CustomError('No projects found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    // Return 200: OK and public project data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * GET /api/org/:orgid/projects
  *
- * @description Gets an array of all projects that a user has access to or an
- * array of specified projects.
+ * @description Gets an array of all projects that a user has access to on
+ * a specified org or an array of specified projects on the specified org.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -854,7 +909,7 @@ function getProjects(req, res) {
     projectIDs = req.body.map(p => p.id);
   }
 
-  // Get all projects the requesting user has access to
+  // Get all projects the requesting user has access to in a specified org
   // NOTE: find() sanitizes req.params.orgid and projectIDs
   ProjectController.find(req.user, req.params.orgid, projectIDs, options)
   .then((projects) => {

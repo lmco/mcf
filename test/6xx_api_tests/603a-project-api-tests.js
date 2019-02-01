@@ -104,7 +104,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple projects', postProjects);
   it('should GET a project', getProject);
   it('should GET multiple projects', getProjects);
-  it('should GET all projects', getAllProjects);
+  it('should GET all projects on an organization', getAllProjectsOnOrg);
+  it('should GET all projects a user has access to', getAllProjects);
   it('should POST a project member', postProjectMember);
   it('should GET a project member', getProjectMember);
   it('should GET all project members', getProjectMembers);
@@ -322,7 +323,7 @@ function getProjects(done) {
  * @description Verifies GET /api/orgs/:orgid/projects finds all projects in
  * an org when no body or query parameters are provided.
  */
-function getAllProjects(done) {
+function getAllProjectsOnOrg(done) {
   const projData = [
     testData.projects[0],
     testData.projects[1],
@@ -332,6 +333,63 @@ function getAllProjects(done) {
   ];
   request({
     url: `${test.url}/api/orgs/${org.id}/projects`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundProjects = JSON.parse(body);
+    chai.expect(foundProjects.length).to.equal(projData.length);
+
+    // Convert foundProjects to JMI type 2 for easier lookup
+    const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
+    // Loop through each project data object
+    projData.forEach((projDataObject) => {
+      const foundProj = jmi2Projects[projDataObject.id];
+
+      // Verify project created properly
+      chai.expect(foundProj.id).to.equal(projDataObject.id);
+      chai.expect(foundProj.name).to.equal(projDataObject.name);
+      chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(foundProj.permissions.read).to.include(adminUser.username);
+      chai.expect(foundProj.permissions.write).to.include(adminUser.username);
+      chai.expect(foundProj.permissions.admin).to.include(adminUser.username);
+      chai.expect(foundProj.org).to.equal(org.id);
+      chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
+
+      // Verify additional properties
+      chai.expect(foundProj.createdBy).to.equal(adminUser.username);
+      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProj.createdOn).to.not.equal(null);
+      chai.expect(foundProj.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET /api/projects finds all projects a user has access
+ * to.
+ */
+function getAllProjects(done) {
+  const projData = [
+    testData.projects[0],
+    testData.projects[1],
+    testData.projects[2],
+    testData.projects[3],
+    testData.projects[4]
+  ];
+  request({
+    url: `${test.url}/api/projects`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'GET'
