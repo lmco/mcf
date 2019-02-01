@@ -95,7 +95,12 @@ module.exports.up = function() {
       jmiOrgs = utils.convertJMI(1, 2, orgs);
 
       // Write contents to temporary file
-      return fs.writeFile(path.join(M.root, 'data', 'orgs.json'), JSON.stringify(orgs));
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', 'orgs.json'), JSON.stringify(orgs), function(err) {
+          if (err) rej(err);
+          else res();
+        });
+      });
     })
     // Find all projects
     .then(() => mongoose.connection.db.collection('projects').find({}).toArray())
@@ -104,7 +109,13 @@ module.exports.up = function() {
       jmiProjects = utils.convertJMI(1, 2, projects);
 
       // Write contents to temporary file
-      return fs.writeFile(path.join(M.root, 'data', 'projects.json'), JSON.stringify(projects));
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', 'project.json'),
+          JSON.stringify(projects), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+      });
     })
     // Find all elements
     .then(() => mongoose.connection.db.collection('elements').find({}).toArray())
@@ -113,7 +124,13 @@ module.exports.up = function() {
       jmiElements = utils.convertJMI(1, 2, elements);
 
       // Write contents to temporary file
-      return fs.writeFile(path.join(M.root, 'data', 'elements.json'), JSON.stringify(elements));
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', 'elements.json'),
+          JSON.stringify(elements), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+      });
     })
     // Find all users
     .then(() => mongoose.connection.db.collection('users').find({}).toArray())
@@ -122,7 +139,13 @@ module.exports.up = function() {
       jmiUsers = utils.convertJMI(1, 2, users);
 
       // Write contents to temporary file
-      return fs.writeFile(path.join(M.root, 'data', 'users.json'), JSON.stringify(users));
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', 'users.json'),
+          JSON.stringify(users), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+      });
     })
     // Find all currently existing collections
     .then(() => mongoose.connection.db.collections())
@@ -187,55 +210,57 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
 
     // For each org
     orgs.forEach((org) => {
-      // Change the org _id to a string, rather than ObjectID
-      org._id = org.id;
-      // Set archive fields
-      org.archived = org.deleted || false;
-      org.archivedOn = org.deletedOn;
-      org.archivedBy = org.deletedBy;
-      // deleted, deletedOn and deletedBy fields have been removed
-      delete org.deleted;
-      delete org.deletedOn;
-      delete org.deletedBy;
+      // If the _id is an ObjectId, run the migration
+      if (mongoose.Types.ObjectId.isValid(org._id)) {
+        // Change the org _id to a string, rather than ObjectID
+        org._id = org.id;
+        // Set archive fields
+        org.archived = org.deleted || false;
+        org.archivedOn = org.deletedOn;
+        org.archivedBy = org.deletedBy;
+        // deleted, deletedOn and deletedBy fields have been removed
+        delete org.deleted;
+        delete org.deletedOn;
+        delete org.deletedBy;
 
-      // Change the permissions from ObjectIDs to strings
-      org.permissions.read = org.permissions.read.map((u) => jmi2Users[u].username) || [];
-      org.permissions.write = org.permissions.write.map((u) => jmi2Users[u].username) || [];
-      org.permissions.admin = org.permissions.admin.map((u) => jmi2Users[u].username) || [];
+        // Change the permissions from ObjectIDs to strings
+        org.permissions.read = org.permissions.read.map((u) => jmi2Users[u].username) || [];
+        org.permissions.write = org.permissions.write.map((u) => jmi2Users[u].username) || [];
+        org.permissions.admin = org.permissions.admin.map((u) => jmi2Users[u].username) || [];
 
-      const newPermissions = {};
-      // Convert permissions from arrays to objects with usernames as the keys,
-      // permissions as the values
-      org.permissions.read.forEach((user) => {
-        if (org.permissions.admin.includes(user)) {
-          newPermissions[user] = ['read', 'write', 'admin'];
+        const newPermissions = {};
+        // Convert permissions from arrays to objects with usernames as the keys,
+        // permissions as the values
+        org.permissions.read.forEach((user) => {
+          if (org.permissions.admin.includes(user)) {
+            newPermissions[user] = ['read', 'write', 'admin'];
+          }
+          else if (org.permissions.write.includes(user)) {
+            newPermissions[user] = ['read', 'write'];
+          }
+          else {
+            newPermissions[user] = ['read'];
+          }
+        });
+
+        org.permissions = newPermissions;
+
+        // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
+        if (org.createdBy) {
+          org.createdBy = jmi2Users[org.createdBy].username;
         }
-        else if (org.permissions.write.includes(user)) {
-          newPermissions[user] = ['read', 'write'];
+        if (org.archivedBy) {
+          org.archivedBy = jmi2Users[org.archivedBy].username;
         }
-        else {
-          newPermissions[user] = ['read'];
+        if (org.lastModifiedBy) {
+          org.lastModifiedBy = jmi2Users[org.lastModifiedBy].username;
         }
-      });
 
-      org.permissions = newPermissions;
-
-      // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
-      if (org.createdBy) {
-        org.createdBy = jmi2Users[org.createdBy].username;
+        // updatedOn is now set when org is created by default
+        if (!org.updatedOn) {
+          org.updatedOn = org.createdOn;
+        }
       }
-      if (org.archivedBy) {
-        org.archivedBy = jmi2Users[org.archivedBy].username;
-      }
-      if (org.lastModifiedBy) {
-        org.lastModifiedBy = jmi2Users[org.lastModifiedBy].username;
-      }
-
-      // updatedOn is now set when org is created by default
-      if (!org.updatedOn) {
-        org.updatedOn = org.createdOn;
-      }
-
       // Add the org to be inserted later
       orgsToInsert.push(org);
     });
@@ -273,7 +298,12 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
     })
     .then(() => {
       if (fs.existsSync(path.join(M.root, 'data', 'orgs.json'))) {
-        fs.unlink(path.join(M.root, 'data', 'orgs.json'));
+        return new Promise(function(res, rej) {
+          fs.unlink(path.join(M.root, 'data', 'orgs.json'), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+        });
       }
     })
     .then(() => resolve())
@@ -295,57 +325,63 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
 
     // For each project
     projects.forEach((project) => {
-      // Change the project _id to a string, rather than ObjectID
-      project._id = project.id;
-      // Set archive fields
-      project.archived = project.deleted || false;
-      project.archivedOn = project.deletedOn;
-      project.archivedBy = project.deletedBy;
-      // deleted, deletedOn and deletedBy fields have been removed
-      delete project.deleted;
-      delete project.deletedOn;
-      delete project.deletedBy;
+      // If the _id is an ObjectId, run the migration
+      if (mongoose.Types.ObjectId.isValid(project._id)) {
+        // Change the project _id to a string, rather than ObjectID
+        project._id = project.id;
+        // Set archive fields
+        project.archived = project.deleted || false;
+        project.archivedOn = project.deletedOn;
+        project.archivedBy = project.deletedBy;
+        // deleted, deletedOn and deletedBy fields have been removed
+        delete project.deleted;
+        delete project.deletedOn;
+        delete project.deletedBy;
 
-      // Change the permissions from ObjectIDs to strings
-      project.permissions.read = project.permissions.read.map((u) => jmi2Users[u].username) || [];
-      project.permissions.write = project.permissions.write.map((u) => jmi2Users[u].username) || [];
-      project.permissions.admin = project.permissions.admin.map((u) => jmi2Users[u].username) || [];
+        // Change the permissions from ObjectIDs to strings
+        project.permissions.read = project.permissions.read
+        .map((u) => jmi2Users[u].username) || [];
+        project.permissions.write = project.permissions.write
+        .map((u) => jmi2Users[u].username) || [];
+        project.permissions.admin = project.permissions.admin
+        .map((u) => jmi2Users[u].username) || [];
 
-      const newPermissions = {};
-      // Convert permissions from arrays to objects with usernames as the keys,
-      // permissions as the values
-      project.permissions.read.forEach((user) => {
-        if (project.permissions.admin.includes(user)) {
-          newPermissions[user] = ['read', 'write', 'admin'];
+        const newPermissions = {};
+        // Convert permissions from arrays to objects with username as the keys,
+        // permissions as the values
+        project.permissions.read.forEach((user) => {
+          if (project.permissions.admin.includes(user)) {
+            newPermissions[user] = ['read', 'write', 'admin'];
+          }
+          else if (project.permissions.write.includes(user)) {
+            newPermissions[user] = ['read', 'write'];
+          }
+          else {
+            newPermissions[user] = ['read'];
+          }
+        });
+
+        project.permissions = newPermissions;
+
+        // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
+        if (project.createdBy) {
+          project.createdBy = jmi2Users[project.createdBy].username;
         }
-        else if (project.permissions.write.includes(user)) {
-          newPermissions[user] = ['read', 'write'];
+        if (project.archivedBy) {
+          project.archivedBy = jmi2Users[project.archivedBy].username;
         }
-        else {
-          newPermissions[user] = ['read'];
+        if (project.lastModifiedBy) {
+          project.lastModifiedBy = jmi2Users[project.lastModifiedBy].username;
         }
-      });
 
-      project.permissions = newPermissions;
+        // updatedOn is now set when project is created by default
+        if (!project.updatedOn) {
+          project.updatedOn = project.createdOn;
+        }
 
-      // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
-      if (project.createdBy) {
-        project.createdBy = jmi2Users[project.createdBy].username;
+        // Change the org reference from ObjectID to string
+        project.org = jmi2Orgs[project.org]._id;
       }
-      if (project.archivedBy) {
-        project.archivedBy = jmi2Users[project.archivedBy].username;
-      }
-      if (project.lastModifiedBy) {
-        project.lastModifiedBy = jmi2Users[project.lastModifiedBy].username;
-      }
-
-      // updatedOn is now set when project is created by default
-      if (!project.updatedOn) {
-        project.updatedOn = project.createdOn;
-      }
-
-      // Change the org reference from ObjectID to string
-      project.org = jmi2Orgs[project.org]._id;
 
       // Add the project to be inserted later
       projectsToInsert.push(project);
@@ -374,7 +410,12 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
     })
     .then(() => {
       if (fs.existsSync(path.join(M.root, 'data', 'projects.json'))) {
-        fs.unlink(path.join(M.root, 'data', 'projects.json'));
+        return new Promise(function(res, rej) {
+          fs.unlink(path.join(M.root, 'data', 'projects.json'), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+        });
       }
     })
     .then(() => resolve())
@@ -397,56 +438,59 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
 
     // For each element
     elements.forEach((element) => {
-      // Change the element _id to a string, rather than ObjectID
-      element._id = element.id;
-      // Set archive fields
-      element.archived = element.deleted || false;
-      element.archivedOn = element.deletedOn;
-      element.archivedBy = element.deletedBy;
-      // contains, type, uuid, deleted, deletedOn and deletedBy fields have been removed
-      delete element.contains;
-      delete element.type;
-      delete element.uuid;
-      delete element.deleted;
-      delete element.deletedOn;
-      delete element.deletedBy;
+      // If the _id is an ObjectId, run the migration
+      if (mongoose.Types.ObjectId.isValid(element._id)) {
+        // Change the element _id to a string, rather than ObjectID
+        element._id = element.id;
+        // Set archive fields
+        element.archived = element.deleted || false;
+        element.archivedOn = element.deletedOn;
+        element.archivedBy = element.deletedBy;
+        // contains, type, uuid, deleted, deletedOn and deletedBy fields have been removed
+        delete element.contains;
+        delete element.type;
+        delete element.uuid;
+        delete element.deleted;
+        delete element.deletedOn;
+        delete element.deletedBy;
 
-      // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
-      if (element.createdBy) {
-        element.createdBy = jmi2Users[element.createdBy].username;
-      }
-      if (element.archivedBy) {
-        element.archivedBy = jmi2Users[element.archivedBy].username;
-      }
-      if (element.lastModifiedBy) {
-        element.lastModifiedBy = jmi2Users[element.lastModifiedBy].username;
-      }
+        // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
+        if (element.createdBy) {
+          element.createdBy = jmi2Users[element.createdBy].username;
+        }
+        if (element.archivedBy) {
+          element.archivedBy = jmi2Users[element.archivedBy].username;
+        }
+        if (element.lastModifiedBy) {
+          element.lastModifiedBy = jmi2Users[element.lastModifiedBy].username;
+        }
 
-      // updatedOn is now set when element is created by default
-      if (!element.updatedOn) {
-        element.updatedOn = element.createdOn;
-      }
+        // updatedOn is now set when element is created by default
+        if (!element.updatedOn) {
+          element.updatedOn = element.createdOn;
+        }
 
-      // Change the project reference from ObjectID to string
-      element.project = jmi2Projects[element.project]._id;
+        // Change the project reference from ObjectID to string
+        element.project = jmi2Projects[element.project]._id;
 
-      // Change parent, source and target from ObjectID to string
-      if (element.parent) {
-        element.parent = jmi2Elements[element.parent].id;
-      }
-      if (element.source) {
-        element.source = jmi2Elements[element.source].id;
-      }
-      else {
-        // Every element now has a source, set default to null
-        element.source = null;
-      }
-      if (element.target) {
-        element.target = jmi2Elements[element.target].id;
-      }
-      else {
-        // Every element now has a target, set default to null
-        element.target = null;
+        // Change parent, source and target from ObjectID to string
+        if (element.parent) {
+          element.parent = jmi2Elements[element.parent].id;
+        }
+        if (element.source) {
+          element.source = jmi2Elements[element.source].id;
+        }
+        else {
+          // Every element now has a source, set default to null
+          element.source = null;
+        }
+        if (element.target) {
+          element.target = jmi2Elements[element.target].id;
+        }
+        else {
+          // Every element now has a target, set default to null
+          element.target = null;
+        }
       }
 
       // Add the element to be inserted later
@@ -486,7 +530,12 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
     })
     .then(() => {
       if (fs.existsSync(path.join(M.root, 'data', 'elements.json'))) {
-        fs.unlink(path.join(M.root, 'data', 'elements.json'));
+        return new Promise(function(res, rej) {
+          fs.unlink(path.join(M.root, 'data', 'elements.json'), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+        });
       }
     })
     .then(() => resolve())
@@ -507,30 +556,33 @@ function sixToSevenUserHelper(users, jmi2Users) {
 
     // For each user
     users.forEach((user) => {
-      // Change the user _id to a string, rather than ObjectID
-      user._id = user.username;
-      user.archived = user.deleted || false;
-      user.archivedOn = user.deletedOn;
-      user.archivedBy = user.deletedBy;
-      // deleted, deletedOn and deletedBy fields have been removed
-      delete user.deleted;
-      delete user.deletedOn;
-      delete user.deletedBy;
+      // If the _id is an ObjectId, run the migration
+      if (mongoose.Types.ObjectId.isValid(user._id)) {
+        // Change the user _id to a string, rather than ObjectID
+        user._id = user.username;
+        user.archived = user.deleted || false;
+        user.archivedOn = user.deletedOn;
+        user.archivedBy = user.deletedBy;
+        // deleted, deletedOn and deletedBy fields have been removed
+        delete user.deleted;
+        delete user.deletedOn;
+        delete user.deletedBy;
 
-      // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
-      if (user.createdBy) {
-        user.createdBy = jmi2Users[user.createdBy].username;
-      }
-      if (user.archivedBy) {
-        user.archivedBy = jmi2Users[user.archivedBy].username;
-      }
-      if (user.lastModifiedBy) {
-        user.lastModifiedBy = jmi2Users[user.lastModifiedBy].username;
-      }
+        // Change createBy, archivedBy and lastModifiedBy from ObjectIDs to strings
+        if (user.createdBy) {
+          user.createdBy = jmi2Users[user.createdBy].username;
+        }
+        if (user.archivedBy) {
+          user.archivedBy = jmi2Users[user.archivedBy].username;
+        }
+        if (user.lastModifiedBy) {
+          user.lastModifiedBy = jmi2Users[user.lastModifiedBy].username;
+        }
 
-      // updatedOn is now set when user is created by default
-      if (!user.updatedOn) {
-        user.updatedOn = user.createdOn;
+        // updatedOn is now set when user is created by default
+        if (!user.updatedOn) {
+          user.updatedOn = user.createdOn;
+        }
       }
 
       // Add the user to be inserted later
@@ -548,7 +600,12 @@ function sixToSevenUserHelper(users, jmi2Users) {
     })
     .then(() => {
       if (fs.existsSync(path.join(M.root, 'data', 'users.json'))) {
-        return fs.unlink(path.join(M.root, 'data', 'users.json'));
+        return new Promise(function(res, rej) {
+          fs.unlink(path.join(M.root, 'data', 'users.json'), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+        });
       }
     })
     .then(() => resolve())
