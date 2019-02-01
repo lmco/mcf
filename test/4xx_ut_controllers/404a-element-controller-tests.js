@@ -81,24 +81,24 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-  /**
-   * After: Remove Organization and project.
-   * Close database connection.
-   */
-  after((done) => {
-    // Remove organization
-    // Note: Projects under organization will also be removed
-    testUtils.removeTestOrg(adminUser)
-    .then(() => testUtils.removeTestAdmin())
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
-      M.log.error(error);
-      // Expect no error
-      chai.expect(error).to.equal(null);
-      done();
-    });
-  });
+  // /**
+  //  * After: Remove Organization and project.
+  //  * Close database connection.
+  //  */
+  // after((done) => {
+  //   // Remove organization
+  //   // Note: Projects under organization will also be removed
+  //   testUtils.removeTestOrg(adminUser)
+  //   .then(() => testUtils.removeTestAdmin())
+  //   .then(() => db.disconnect())
+  //   .then(() => done())
+  //   .catch((error) => {
+  //     M.log.error(error);
+  //     // Expect no error
+  //     chai.expect(error).to.equal(null);
+  //     done();
+  //   });
+  // });
 
   /* Execute the tests */
   it('should create an element', createElement);
@@ -108,8 +108,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should find all elements', findAllElements);
   it('should update an element', updateElement);
   it('should update multiple elements', updateElements);
-  it('should delete an element', deleteElement);
-  it('should delete multiple elements', deleteElements);
+  // it('should delete an element', deleteElement);
+  // it('should delete multiple elements', deleteElements);
 });
 
 /* --------------------( Tests )-------------------- */
