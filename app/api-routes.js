@@ -377,7 +377,7 @@ api.route('/orgs')
  *         required: true
  *         type: string
  *       - name: org
- *         description: The object containing the organization data.
+ *         description: The object containing the new organization data.
  *         in: body
  *         required: true
  *         schema:
@@ -424,11 +424,11 @@ api.route('/orgs')
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the existing organization to update.
+ *         description: The ID of the organization to update.
  *         in: path
  *         required: true
  *         type: string
- *       - name: content
+ *       - name: update
  *         description: The object containing the updated organization data.
  *         in: body
  *         required: true
@@ -446,7 +446,6 @@ api.route('/orgs')
  *                      of the object.
  *         in: query
  *         type: string
- *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH org, returns updated org public
@@ -814,17 +813,18 @@ api.route('/orgs/:orgid/projects')
  *   get:
  *     tags:
  *       - projects
- *     description: Returns a project's public data.
+ *     description: Finds and returns a projects public data if the user has
+ *                  read permissions on that project.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The organization ID the project is in.
+ *         description: The ID of the organization the project is a part of.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project to get.
+ *         description: The ID of the project to find.
  *         in: path
  *         required: true
  *         type: string
@@ -840,22 +840,27 @@ api.route('/orgs/:orgid/projects')
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET project returns project data.
+ *         description: OK, Succeeded to GET project, returns project public
+ *                      data.
  *       400:
- *         description: Bad Request, Failed to GET project due to invalid id field.
+ *         description: Bad Request, Failed to GET project due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET project due to not not being logged in.
+ *         description: Unauthorized, Failed to GET project due to not not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET project due to not having permissions.
+ *         description: Forbidden, Failed to GET project due to not having
+ *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET project due to project with given id not existing.
+ *         description: Not Found, Failed to GET project due to project with
+ *                      specified id not existing.
  *       500:
- *         description: Internal Server Error, Failed to GET project due to a server side issue.
- *
+ *         description: Internal Server Error, Failed to GET project due to a
+ *                      server side issue.
  *   post:
  *     tags:
  *       - projects
- *     description: Creates a new project.
+ *     description: Creates a new project from the given data in the request
+ *                  body.
  *     produces:
  *       - application/json
  *     parameters:
@@ -865,41 +870,30 @@ api.route('/orgs/:orgid/projects')
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the new project. A valid project ID must consist
- *                      of only lowercase letters, numbers, and dashes (e.g.
- *                      "-") and must begin with a letter.
+ *         description: The ID of the project to create.
  *         in: path
  *         required: true
  *         type: string
- *       - name: body
+ *       - name: project
  *         description: The object containing the new project data.
  *         in: body
  *         required: true
  *         schema:
  *           type: object
  *           required:
- *             - id
  *             - name
  *           properties:
  *             id:
  *               type: string
- *               description: The ID of the project. If this is provided, it must
- *                      match the project ID provided in the path. A valid
- *                      project ID must consist of only lowercase letters,
- *                      numbers, and dashes (e.g. "-") and must begin with a
- *                      letter.
+ *               description: Must match the id in the request parameters.
  *             name:
  *               type: string
- *               description: The name of the new project. A valid project name can
- *                      only consist of only letters, numbers, and dashes
- *                      (e.g. "-").
  *             custom:
  *               type: object
- *               description: Custom JSON data that can be added to a project.
  *             visibility:
  *               type: string
- *               description: Indicates the visibility of the project. Can be either
- *                            private or internal. Defaults to private if not included.
+ *               default: private
+ *               enum: [internal, private]
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -908,27 +902,35 @@ api.route('/orgs/:orgid/projects')
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST project return project data.
+ *         description: OK, Succeeded to POST project, return project public
+ *                      data.
  *       400:
- *         description: Bad Request, Failed to POST project due to invalid project data.
+ *         description: Bad Request, Failed to POST project due to invalid
+ *                      project data.
  *       401:
- *         description: Unauthorized, Failed to POST project due to not being logged in.
+ *         description: Unauthorized, Failed to POST project due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST project due posting with an already existing id.
+ *         description: Forbidden, Failed to POST project due posting with an
+ *                      already existing id.
  *       404:
- *         description: Not Found, Failed to POST project due to org not being found.
+ *         description: Not Found, Failed to POST project due to org not being
+ *                      found.
  *       500:
- *         description: Internal Server Error, Failed to POST project due to a server side issue.
- *
+ *         description: Internal Server Error, Failed to POST project due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - projects
- *     description: Updates an existing project.
+ *     description: Updates an existing project. The following fields can be
+ *                  updated [name, custom, archived]. Projects that are
+ *                  currently archived must first be unarchived before making
+ *                  any other updates.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project to update.
+ *         description: The ID of the organization containing the project.
  *         in: path
  *         required: true
  *         type: string
@@ -937,8 +939,8 @@ api.route('/orgs/:orgid/projects')
  *         in: path
  *         required: true
  *         type: string
- *       - name: body
- *         description:
+ *       - name: update
+ *         description: The object containing the updated project data.
  *         in: body
  *         required: true
  *         schema:
@@ -946,34 +948,40 @@ api.route('/orgs/:orgid/projects')
  *           properties:
  *             name:
  *               type: string
- *               description: The updated name for the project.
  *             custom:
  *               type: object
- *               description: The updated custom data for the project.
+ *             archived:
+ *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
  *         in: query
  *         type: string
- *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PATCH project returns updated project data.
+ *         description: OK, Succeeded to PATCH project, return updated project
+ *                      public data.
  *       400:
- *         description: Bad Request, Failed to PATCH project due to invalid update data.
+ *         description: Bad Request, Failed to PATCH project due to invalid
+ *                      update request data.
  *       401:
- *         description: Unauthorized, Failed to PATCH project due to not being logged in.
+ *         description: Unauthorized, Failed to PATCH project due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to PATCH project due to updating an immutable field.
+ *         description: Forbidden, Failed to PATCH project due to updating an
+ *                      immutable field.
  *       404:
- *         description: Not Found, Failed to PATCH project due to not finding project.
+ *         description: Not Found, Failed to PATCH project due to not finding
+ *                      project.
  *       500:
- *         description: Internal Server Error, Failed to PATCH project due to a server side issue.
- *
+ *         description: Internal Server Error, Failed to PATCH project due to a
+ *                      server side issue.
  *   delete:
  *     tags:
  *       - projects
- *     description: Deletes a project.
+ *     description: Deletes the specified project and any elements, webhooks and
+ *                  artifacts name-spaced under the project. NOTE this endpoint
+ *                  
  *     produces:
  *       - application/json
  *     parameters:
