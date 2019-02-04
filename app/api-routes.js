@@ -324,20 +324,21 @@ api.route('/orgs')
   APIController.deleteOrgs
 );
 
-
+// TODO: Consider changing response from DELETE /orgs/:orgid, doesn't return valid JSON
 /**
  * @swagger
- * /api/orgs/:orgid:
+ * /api/orgs/{orgid}:
  *   get:
  *     tags:
  *       - organizations
- *     description: Returns an organization's public data.
+ *     description: Finds and returns an organizations public data if the user
+ *                  has read permissions on that org.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization to get
- *         in: URI
+ *         description: The ID of the organization to find.
+ *         in: path
  *         required: true
  *         type: string
  *       - name: populate
@@ -352,30 +353,31 @@ api.route('/orgs')
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET org returns org data.
+ *         description: OK, Succeeded to GET org, returns org public data.
  *       400:
  *         description: Bad Request, Failed to GET org due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET org due to not being logged in.
+ *         description: Unauthorized, Failed to GET org due to not being logged
+ *                      in.
  *       404:
- *         description: Not Found, Failed to GET org due an existing org with same id.
+ *         description: Not Found, Failed to GET org due to org not existing.
  *       500:
- *         description: Internal Server Error, Failed to GET org due to a server side issue.
+ *         description: Internal Server Error, Failed to GET org due to a server
+ *                      side issue.
  *   post:
  *     tags:
  *       - organizations
- *     description: Create a new organization.
+ *     description: Create a new organization from the given data in the request
+ *                  body. This endpoint is reserved for system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization to create. A valid orgid must
- *                      only contain lowercase letters, numbers, and dashes
- *                      ("-") and must begin with a letter.
- *         in: URI
+ *         description: The ID of the organization to create.
+ *         in: path
  *         required: true
  *         type: string
- *       - name: body
+ *       - name: org
  *         description: The object containing the organization data.
  *         in: body
  *         required: true
@@ -384,19 +386,13 @@ api.route('/orgs')
  *           required:
  *             - name
  *           properties:
- *             name:
- *               type: string
- *               description: The name of the organization. A valid organization name
- *                            can only contain letters, numbers, dashes ("-"), and
- *                            spaces.
  *             id:
  *               type: string
- *               description: The ID of the organization to create. A valid id must
- *                            only contain lowercase letters, numbers, and dashes
- *                            ("-") and must begin with a letter.
+ *               description: Must match the id in the request parameters.
+ *             name:
+ *               type: string
  *             custom:
  *               type: object
- *               description: Custom JSON data that can be added to an organization
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -405,26 +401,32 @@ api.route('/orgs')
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST org returns org data.
+ *         description: OK, Succeeded to POST org, returns org public data.
  *       400:
- *         description: Bad Request, Failed to POST org due to invalid field in data.
+ *         description: Bad Request, Failed to POST org due to invalid field in
+ *                      request data.
  *       401:
- *         description: Unauthorized, Failed to POST org due to not being logged in.
+ *         description: Unauthorized, Failed to POST org due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST org due to an existing org with same id.
+ *         description: Forbidden, Failed to POST org due to an existing org
+ *                      with same id.
  *       500:
- *         description: Internal Server Error, Failed to POST org due to a server side issue.
- *
+ *         description: Internal Server Error, Failed to POST org due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - organizations
- *     description: Updates an existing organization.
+ *     description: Updates an existing organization. The following fields can
+ *                  be updated [name, custom, archived]. Orgs that are currently
+ *                  archived must first be unarchived before making any other
+ *                  updates.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the existing organization to update.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: content
@@ -436,10 +438,10 @@ api.route('/orgs')
  *           properties:
  *             name:
  *               type: string
- *               description: The updated name of the organization.
  *             custom:
  *               type: object
- *               description: The updated custom JSON data of the organization.
+ *             archived:
+ *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -448,43 +450,52 @@ api.route('/orgs')
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PATCH org returns updated org data.
+ *         description: OK, Succeeded to PATCH org, returns updated org public
+ *                      data.
  *       400:
- *         description: Bad Request, FAILED to PATCH org due to invalid update data.
+ *         description: Bad Request, FAILED to PATCH org due to invalid
+ *                      update request data.
  *       401:
- *         description: Unauthorized, FAILED to PATCH org due to not being logged in.
+ *         description: Unauthorized, FAILED to PATCH org due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, FAILED to PATCH org due to updating an immutable field.
+ *         description: Forbidden, FAILED to PATCH org due to updating an
+ *                      immutable field.
  *       404:
  *         description: Not Found, FAILED to PATCH org due to not finding org.
  *       500:
- *         description: Internal Server Error, Failed to PATCH org due to a server side issue.
- *
+ *         description: Internal Server Error, Failed to PATCH org due to a
+ *                      server side issue.
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes the organization.
+ *     description: Deletes the specified organization and any projects,
+ *                  elements, webhooks and artifacts name-spaced under the org.
+ *                  NOTE this endpoint is reserved for system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization to delete.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE org return deleted org data.
+ *         description: OK, Succeeded to DELETE org, return deleted org ID.
  *       400:
  *         description: Bad Request, Failed to DELETE org due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to DELETE org due to not being logged in.
+ *         description: Unauthorized, Failed to DELETE org due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to DELETE org due to not having permissions.
+ *         description: Forbidden, Failed to DELETE org due to not having
+ *                      permissions.
  *       404:
  *         description: Not Found, Failed to DELETE org due to not finding org.
  *       500:
- *         description: Internal Server Error, Failed to DELETE org due to a server side issue.
+ *         description: Internal Server Error, Failed to DELETE org due to a
+ *                      server side issue.
  */
 api.route('/orgs/:orgid')
 .get(
@@ -527,22 +538,28 @@ api.route('/orgs/:orgid')
  *         type: string
  *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived objects will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET projects returns org data.
+ *         description: OK, Succeeded to GET projects, returns project public
+ *                      data.
  *       400:
  *         description: Bad Request, Failed to GET projects due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET projects due to not being logged in.
+ *         description: Unauthorized, Failed to GET projects due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET projects due to not having permissions.
+ *         description: Forbidden, Failed to GET projects due to not having
+ *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET projects due to projects not existing.
+ *         description: Not Found, Failed to GET projects due to projects not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET projects due to a server side issue.
+ *         description: Internal Server Error, Failed to GET projects due to a
+ *                      server side issue.
  */
 api.route('/projects')
 .get(
@@ -554,7 +571,7 @@ api.route('/projects')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects:
+ * /api/orgs/{orgid}/projects:
  *   get:
  *     tags:
  *       - projects
@@ -576,7 +593,7 @@ api.route('/projects')
  *                      has access to are found.
  *       - name: orgid
  *         description: The ID of the organization whose projects to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: populate
@@ -612,7 +629,7 @@ api.route('/projects')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization whose projects to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: content
@@ -679,7 +696,7 @@ api.route('/projects')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization whose projects to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -724,7 +741,7 @@ api.route('/orgs/:orgid/projects')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid:
+ * /api/orgs/{orgid}/projects/{projectid}:
  *   get:
  *     tags:
  *       - projects
@@ -734,12 +751,12 @@ api.route('/orgs/:orgid/projects')
  *     parameters:
  *       - name: orgid
  *         description: The organization ID the project is in.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: populate
@@ -775,14 +792,14 @@ api.route('/orgs/:orgid/projects')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the new project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the new project. A valid project ID must consist
  *                      of only lowercase letters, numbers, and dashes (e.g.
  *                      "-") and must begin with a letter.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -798,7 +815,7 @@ api.route('/orgs/:orgid/projects')
  *             id:
  *               type: string
  *               description: The ID of the project. If this is provided, it must
- *                      match the project ID provided in the URI. A valid
+ *                      match the project ID provided in the path. A valid
  *                      project ID must consist of only lowercase letters,
  *                      numbers, and dashes (e.g. "-") and must begin with a
  *                      letter.
@@ -843,12 +860,12 @@ api.route('/orgs/:orgid/projects')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project to update.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to update.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -893,12 +910,12 @@ api.route('/orgs/:orgid/projects')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project to be deleted.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to delete.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -940,7 +957,7 @@ api.route('/orgs/:orgid/projects/:projectid')
 
 /**
  * @swagger
- * /api/orgs/:orgid/members:
+ * /api/orgs/{orgid}/members:
  *   get:
  *     tags:
  *       - organizations
@@ -950,7 +967,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization to get members permissions from.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -977,7 +994,7 @@ api.route('/orgs/:orgid/members')
 
 /**
  * @swagger
- * /api/orgs/:orgid/members/:username:
+ * /api/orgs/{orgid}/members/{username}:
  *   get:
  *     tags:
  *       - organizations
@@ -987,12 +1004,12 @@ api.route('/orgs/:orgid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization to get a users permissions on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the user to return permissions on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -1018,12 +1035,12 @@ api.route('/orgs/:orgid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization to set or update user permission on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the user to set up update permissions on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1055,12 +1072,12 @@ api.route('/orgs/:orgid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization to set or update user permission on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the user to set up update permissions on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1092,12 +1109,12 @@ api.route('/orgs/:orgid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization to remove the user from.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the user to remove from the organization.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -1141,7 +1158,7 @@ api.route('/orgs/:orgid/members/:username')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/members:
+ * /api/orgs/{orgid}/projects/{projectid}/members:
  *   get:
  *     tags:
  *       - projects
@@ -1151,12 +1168,12 @@ api.route('/orgs/:orgid/members/:username')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to get members permissions from.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -1183,7 +1200,7 @@ api.route('/orgs/:orgid/projects/:projectid/members')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/members/:username:
+ * /api/orgs/{orgid}/projects/{projectid}/members/{username}:
  *   get:
  *     tags:
  *       - projects
@@ -1193,17 +1210,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to get a users permissions on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the user to return permissions for.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -1230,17 +1247,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to set or update a user's permissions on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the user to set permissions for.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1272,17 +1289,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to set or update a user's permissions on.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the user to set permissions for.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1314,17 +1331,17 @@ api.route('/orgs/:orgid/projects/:projectid/members')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project to remove the user from.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: username
  *         description: The username of the user to remove from the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -1367,7 +1384,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements:
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements:
  *   get:
  *     tags:
  *       - elements
@@ -1388,17 +1405,17 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *                      has access to are found.
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: populate
@@ -1439,17 +1456,17 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the elements.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1488,17 +1505,17 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1537,17 +1554,17 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization whose projects to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project whose elements to delete.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1596,7 +1613,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid:
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/{elementid}:
  *   get:
  *     tags:
  *       - elements
@@ -1606,22 +1623,22 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element to return.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: populate
@@ -1661,22 +1678,22 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element to be created.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1692,7 +1709,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *             id:
  *               type: string
  *               description: The ID of the element. If this is provided, it must
- *                      match the element ID provided in the URI.
+ *                      match the element ID provided in the path.
  *             name:
  *               type: string
  *               description: The name for the element.
@@ -1742,22 +1759,22 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element to be updated.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: body
@@ -1811,22 +1828,22 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the element.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
  *         description: The ID of the element to delete.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -2063,7 +2080,7 @@ api.route('/users/whoami')
 
 /**
  * @swagger
- * /api/users/:username:
+ * /api/users/{username}:
  *   get:
  *     tags:
  *       - users
@@ -2075,7 +2092,7 @@ api.route('/users/whoami')
  *         description: The username of the user to return
  *         required: true
  *         type: string
- *         in: URI
+ *         in: path
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -2111,7 +2128,7 @@ api.route('/users/whoami')
  *         description: The username of the user to create.
  *         required: true
  *         type: string
- *         in: URI
+ *         in: path
  *       - name: body
  *         description: The object containing the new user data.
  *         in: body
@@ -2125,7 +2142,7 @@ api.route('/users/whoami')
  *             username:
  *               type: string
  *               description: The username of the user to create. If provided, this
- *                            must match the username provided in the URI.
+ *                            must match the username provided in the path.
  *             password:
  *               type: string
  *               description: The password of the user being created. This field
@@ -2174,7 +2191,7 @@ api.route('/users/whoami')
  *         description: The username of the user to update.
  *         required: true
  *         type: string
- *         in: URI
+ *         in: path
  *       - name: body
  *         description: The object containing the updated user data.
  *         in: body
@@ -2230,7 +2247,7 @@ api.route('/users/whoami')
  *         description: The username of the user to delete.
  *         required: true
  *         type: string
- *         in: URI
+ *         in: path
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE user returns user public data.
@@ -2273,7 +2290,7 @@ api.route('/users/:username')
 
 /**
  * @swagger
- * /api/users/:username/password:
+ * /api/users/{username}/password:
  *   patch:
  *     tags:
  *       - users
@@ -2285,7 +2302,7 @@ api.route('/users/:username')
  *         description: The username of the user to update.
  *         required: true
  *         type: string
- *         in: URI
+ *         in: path
  *       - name: body
  *         description: The object containing the updated user data.
  *         in: body
@@ -2327,7 +2344,7 @@ api.route('/users/:username/password')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid:
+ * /api/orgs/{orgid}/projects/{projectid}/webhooks/{webhookid}:
  *   get:
  *     tags:
  *       - webhooks
@@ -2337,17 +2354,17 @@ api.route('/users/:username/password')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the webhook.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: webhookid
  *         description: The ID of the webhook to return.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: content
@@ -2399,17 +2416,17 @@ api.route('/users/:username/password')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the webhook.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: webhookid
  *         description: The ID of the webhook to be created.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: content
@@ -2426,7 +2443,7 @@ api.route('/users/:username/password')
  *             id:
  *               type: string
  *               description: The ID of the webhook. If this is provided, it
- *                            must match the webhook ID provided in the URI.
+ *                            must match the webhook ID provided in the path.
  *             name:
  *               type: string
  *               description: The name for the webhook.
@@ -2477,17 +2494,17 @@ api.route('/users/:username/password')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the webhook.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: webhookid
  *         description: The ID of the webhook to be updated.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: content
@@ -2537,17 +2554,17 @@ api.route('/users/:username/password')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the webhook.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: webhookid
  *         description: The ID of the webhook to delete.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -2593,7 +2610,7 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks/:webhookid')
 
 /**
  * @swagger
- * /api/webhooks/:webhookid:
+ * /api/webhooks/{webhookid}:
  *   post:
  *     tags:
  *       - webhooks
@@ -2603,7 +2620,7 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks/:webhookid')
  *     parameters:
  *       - name: webhookid
  *         description: The ID of the webhook, encoded in base64.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -2627,7 +2644,7 @@ api.route('/webhooks/:webhookid')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid:
+ * /api/orgs/{orgid}/projects/{projectid}/artifacts/{artifactid}:
  *   get:
  *     tags:
  *       - artifacts
@@ -2637,17 +2654,17 @@ api.route('/webhooks/:webhookid')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the artifact.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: artifactid
  *         description: The ID of the artifact to return.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -2677,17 +2694,17 @@ api.route('/webhooks/:webhookid')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the artifact.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: artifactid
  *         description: The ID of the artifact to be created.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - in: formData
@@ -2724,17 +2741,17 @@ api.route('/webhooks/:webhookid')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the artifact.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: artifactid
  *         description: The ID of the artifact to be updated.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: metaData
@@ -2786,17 +2803,17 @@ api.route('/webhooks/:webhookid')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the artifact.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: artifactid
  *         description: The ID of the artifact to delete.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
@@ -2842,7 +2859,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/artifacts:
+ * /api/orgs/{orgid}/projects/{projectid}/artifacts:
  *   get:
  *     tags:
  *       - artifacts
@@ -2853,17 +2870,17 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/:artifactid')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization whose artifacts to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project whose artifacts to get.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: artifactid
  *         description: The artifact ID.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: content
@@ -2902,7 +2919,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid/download:
+ * /api/orgs/{orgid}/projects/{projectid}/artifacts/{artifactid}/download:
  *   get:
  *     tags:
  *       - artifacts
@@ -2912,17 +2929,17 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts')
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the project.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the artifact.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: artifactid
  *         description: The ID of the artifact to return.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *     responses:
