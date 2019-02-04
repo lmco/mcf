@@ -120,7 +120,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
     // Initialize valid options
     let archived = false;
-    let populateString = '';
+    let populateString = 'contains ';
     let subtree = false;
 
     // Ensure options are valid
@@ -152,7 +152,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           }
         });
 
-        populateString = options.populate.join(' ');
+        populateString += options.populate.join(' ');
       }
 
       // If the option 'subtree' is supplied ensure it's a boolean
@@ -327,8 +327,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     let populatedElements = [];
 
     // Initialize valid options
-    let populateString = '';
-    let populate = false;
+    let populateString = 'contains ';
 
     // Ensure options are valid
     if (options) {
@@ -351,8 +350,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           }
         });
 
-        populateString = options.populate.join(' ');
-        populate = true;
+        populateString += options.populate.join(' ');
       }
     }
 
@@ -569,27 +567,23 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       return Element.insertMany(elementObjects);
     })
     .then((createdElements) => {
-      if (populate) {
-        const promises = [];
-        const createdIDs = createdElements.map(e => e._id);
+      const promises = [];
+      const createdIDs = createdElements.map(e => e._id);
 
-        // Find elements in batches
-        for (let i = 0; i < createdIDs.length / 50000; i++) {
-          // Split elementIDs list into batches of 50000
-          const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
+      // Find elements in batches
+      for (let i = 0; i < createdIDs.length / 50000; i++) {
+        // Split elementIDs list into batches of 50000
+        const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
-          // Add find operation to promises array
-          promises.push(Element.find(tmpQuery).populate(populateString)
-          .then((_foundElements) => {
-            populatedElements = populatedElements.concat(_foundElements);
-          }));
-        }
-
-        // Return when all elements have been found
-        return Promise.all(promises);
+        // Add find operation to promises array
+        promises.push(Element.find(tmpQuery).populate(populateString)
+        .then((_foundElements) => {
+          populatedElements = populatedElements.concat(_foundElements);
+        }));
       }
 
-      return resolve(createdElements);
+      // Return when all elements have been found
+      return Promise.all(promises);
     })
     .then(() => resolve(populatedElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -682,7 +676,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const arrIDs = [];
 
     // Initialize valid options
-    let populateString = '';
+    let populateString = 'contains ';
 
     // Ensure options are valid
     if (options) {
@@ -705,7 +699,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           }
         });
 
-        populateString = options.populate.join(' ');
+        populateString += options.populate.join(' ');
       }
     }
 
