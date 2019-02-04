@@ -94,7 +94,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST an org', postOrg);
   it('should POST multiple orgs', postOrgs);
   it('should GET an org', getOrg);
-  it('should GET multiple multiple orgs', getOrgs);
+  it('should GET multiple orgs', getOrgs);
   it('should GET all orgs', getAllOrgs);
   it('should POST an org member', postOrgMember);
   it('should GET an org member', getOrgMember);

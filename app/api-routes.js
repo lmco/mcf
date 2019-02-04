@@ -42,7 +42,7 @@ const Middleware = M.require('lib.middleware');
  *        connection can be established.
  *     responses:
  *       200:
- *         description: OK, Succeeded to test the API is up.
+ *         description: OK, the API is up.
  */
 api.get('/test', Middleware.logRoute, APIController.test);
 
@@ -62,6 +62,7 @@ api.get('/test', Middleware.logRoute, APIController.test);
  */
 api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
 
+
 /**
  * @swagger
  * /api/login:
@@ -69,34 +70,19 @@ api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
  *     tags:
  *       - general
  *     description: Logs the user into the application.
- *     parameters:
- *       - name: Content
- *         description: The object containing username and password
- *         in: body
- *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - username
- *             - password
- *           properties:
- *             username:
- *               type: string
- *             password:
- *               type: string
  *     produces:
- *       - application/json
- *     consumes:
  *       - application/json
  *     responses:
  *       200:
- *         description: OK, Succeeded to login returns session token data.
+ *         description: OK, Succeeded to login user, returns session token data.
  *       400:
  *         description: Bad Request, Failed to login due to invalid credentials.
  *       401:
- *         description: Unauthorized, Failed to login due to not having permissions.
+ *         description: Unauthorized, Failed to login due to not having
+ *                      permissions.
  *       500:
- *         description: Internal Server Error, Failed to login due to a server side issue.
+ *         description: Internal Server Error, Failed to login due to a server
+ *                      side issue.
  */
 api.route('/login')
 .post(
@@ -118,11 +104,13 @@ api.route('/login')
  *       - application/json
  *     responses:
  *       200:
- *         description: OK, Succeeded to get version returns version.
+ *         description: OK, Succeeded to get version.
  *       401:
- *         description: Unauthorized, Failed to get version due to not having permissions.
+ *         description: Unauthorized, Failed to get version due to not being
+ *                      logged in.
  *       500:
- *         description: Internal Server Error, Failed to get version due to a server side issue.
+ *         description: Internal Server Error, Failed to get version due to
+ *                      server side issue.
  */
 api.route('/version')
 .get(
@@ -131,94 +119,135 @@ api.route('/version')
   APIController.version
 );
 
+
 /**
  * @swagger
  * /api/orgs:
  *   get:
  *     tags:
  *       - organizations
- *     description: Returns an array of organizations that the requesting user is a member of.
- *         If the user is not a member of any organizations, an empty array is returned.
+ *     description: Returns an array of organizations the requesting user has
+ *                  read access to. By default, returns all organizations the
+ *                  user has read access to. Optionally, an array of ID's can be
+ *                  provided in the request body or a comma separated list in
+ *                  the request parameters to find multiple, specific orgs.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: orgIDs
+ *       - in: body
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: An array of object IDs to search for. If both query
+ *                      parameter and body are not provided, all objects the
+ *                      user has access to are found.
+ *       - name: ids
  *         description: Comma separated list of IDs to search for. If both the
  *                      query parameter and body are not provided, all objects
  *                      the user has access to are found.
  *         in: query
  *         type: string
- *         required: false
- *       - name: body
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the user
- *                      has access to are found.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
  *         in: query
  *         type: string
- *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived objects will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET orgs returns orgs' data.
+ *         description: OK, Succeeded to GET orgs, returns public org data.
  *       400:
- *         description: Bad Request, Failed to GET orgs due to invalid data.
+ *         description: Bad Request, Failed to GET orgs due to invalid request
+ *                      format.
  *       401:
- *         description: Unauthorized, Failed to GET orgs due to not being logged in.
+ *         description: Unauthorized, Failed to GET orgs due to not being logged
+ *                      in.
  *       404:
  *         description: Not Found, Failed to GET orgs due to orgs not existing.
  *       500:
- *         description: Internal Server Error, Failed to GET orgs due to a server side issue.
+ *         description: Internal Server Error, Failed to GET orgs due to a
+ *                      server side issue.
  *   post:
  *     tags:
  *       - organizations
  *     description: Creates multiple organizations from the data provided in the
- *                  request body.
+ *                  request body. Returns the created organization's public
+ *                  data. This endpoint is ADMIN ONLY.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: body
- *         description: An array of objects containing organization data.
- *         in: body
- *         required: true
+ *       - in: body
+ *         name: orgs
  *         schema:
  *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               custom:
+ *                 type: object
+ *         description: An array of objects containing organization data.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
  *         in: query
  *         type: string
- *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST orgs returns orgs' data.
+ *         description: OK, Succeeded to POST orgs, returns orgs' public data.
  *       400:
- *         description: Bad Request, Failed to POST orgs due to invalid field in orgs' data.
+ *         description: Bad Request, Failed to POST orgs due to invalid field in
+ *                      request body.
  *       401:
- *         description: Unauthorized, Failed to POST orgs due to not being logged in.
+ *         description: Unauthorized, Failed to POST orgs due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST orgs due to an already existing orgs with same id.
+ *         description: Forbidden, Failed to POST orgs due to already existing
+ *                      orgs with same id.
  *       500:
- *         description: Internal Server Error, Failed to POST orgs due to a server side issue.
+ *         description: Internal Server Error, Failed to POST orgs due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - organizations
  *     description: Updates multiple organizations from the data provided in the
- *                  request body.
+ *                  request body. Orgs that are currently archived must first be
+ *                  unarchived before making any other updates. The following
+ *                  fields can be updated [name, custom, archived]. NOTE, the
+ *                  id is required in the request body, but CANNOT be updated.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: body
+ *       - in: body
+ *         name: orgs
  *         description: An array of objects containing updates to multiple orgs.
- *         in: body
- *         required: true
  *         schema:
  *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: The current ID of the org, cannot be updated.
+ *               name:
+ *                 type: string
+ *               custom:
+ *                 type: object
+ *               archived:
+ *                 type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -227,40 +256,51 @@ api.route('/version')
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PATCH orgs returns orgs' data.
+ *         description: OK, Succeeded to PATCH orgs, returns orgs' public data.
  *       400:
  *         description: Bad Request, Failed to PATCH orgs due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to PATCH orgs due to not being logged in.
+ *         description: Unauthorized, Failed to PATCH orgs due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to PATCH orgs due to an already existing org with same id.
+ *         description: Forbidden, Failed to PATCH orgs due to org already being
+ *                      archived.
  *       500:
- *         description: Internal Server Error, Failed to PATCH orgs due to a server side issue.
+ *         description: Internal Server Error, Failed to PATCH orgs due to a
+ *                      server side issue.
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes multiple organizations from the data provided in the
- *                  request body.
+ *     description: Deletes multiple organizations and any projects, elements,
+ *                  webhooks and artifacts name-spaced under the specified orgs.
+ *                  NOTE this endpoint can be used by system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: body
- *         description: An array of organization IDs to delete
+ *       - name: orgIDs
+ *         description: An array of organization IDs to delete. Can optionally
+ *                      be an array of objects containing id key/value pairs.
  *         in: body
  *         required: true
  *         schema:
  *           type: array
+ *           items:
+ *             type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE orgs returns deleted orgs' data.
+ *         description: OK, Succeeded to DELETE orgs, returns deleted orgs' ids.
  *       400:
- *         description: Bad Request, Failed to DELETE orgs due to invalid orgs' data.
+ *         description: Bad Request, Failed to DELETE orgs due to invalid data
+ *                      in the request body.
  *       401:
- *         description: Unauthorized, Failed to DELETE orgs due to not being logged in.
+ *         description: Unauthorized, Failed to DELETE orgs due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to DELETE orgs due to not having permissions.
+ *         description: Forbidden, Failed to DELETE orgs due to not having
+ *                      correct permissions.
  *       500:
- *         description: Internal Server Error, Failed to PATCH org due to a server side issue.
+ *         description: Internal Server Error, Failed to PATCH org due to a
+ *                      server side issue.
  */
 api.route('/orgs')
 .get(
@@ -523,7 +563,7 @@ api.route('/projects')
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: projectIDs
+ *       - name: ids
  *         description: Comma separated list of IDs to search for. If both the
  *                      query parameter and body are not provided, all objects
  *                      the user has access to are found.
@@ -1335,7 +1375,7 @@ api.route('/orgs/:orgid/projects/:projectid/members/:username')
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: elementIDs
+ *       - name: ids
  *         description: Comma separated list of IDs to search for. If both the
  *                      query parameter and body are not provided, all objects
  *                      the user has access to are found.

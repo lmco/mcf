@@ -285,7 +285,7 @@ function getElement(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const foundElement = JSON.parse(_data);
+    const foundElement = JSON.parse(_data)[0];
 
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);

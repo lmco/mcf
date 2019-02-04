@@ -275,7 +275,7 @@ function getProjects(done) {
   ];
   const projIDs = projData.map(p => p.id).join(',');
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects?projectIDs=${projIDs}`,
+    url: `${test.url}/api/orgs/${org.id}/projects?ids=${projIDs}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'GET'

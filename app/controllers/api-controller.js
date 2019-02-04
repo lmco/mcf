@@ -221,14 +221,14 @@ function version(req, res) {
 function getOrgs(req, res) {
   // Define options and ids
   // Note: Undefined if not set
-  let orgIDs;
+  let ids;
   let options;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    orgIDs: 'array'
+    ids: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -247,23 +247,23 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check query for orgIDs
-  if (options.orgIDs) {
-    orgIDs = options.orgIDs;
-    delete options.orgIDs;
+  // Check query for ids
+  if (options.ids) {
+    ids = options.ids;
+    delete options.ids;
   }
   // No IDs include in options, check body for IDs
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
-    orgIDs = req.body;
+    ids = req.body;
   }
   // No IDs in options or body, check body for org objects
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    orgIDs = req.body.map(o => o.id);
+    ids = req.body.map(o => o.id);
   }
 
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
-  OrgController.find(req.user, orgIDs, options)
+  OrgController.find(req.user, ids, options)
   .then((orgs) => {
     // Verify orgs array is not empty
     if (orgs.length === 0) {
@@ -868,14 +868,14 @@ function getAllProjects(req, res) {
 function getProjects(req, res) {
   // Define options and ids
   // Note: Undefined if not set
-  let projectIDs;
+  let ids;
   let options;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    projectIDs: 'array'
+    ids: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -894,24 +894,24 @@ function getProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if projectIDs was provided in the request query
-  if (options.projectIDs) {
-    // Split the string by comma, add strings to projectIDs
-    projectIDs = options.projectIDs;
-    delete options.projectIDs;
+  // Check if ids was provided in the request query
+  if (options.ids) {
+    // Split the string by comma, add strings to ids
+    ids = options.ids;
+    delete options.ids;
   }
   // If project ids provided in array in request body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
-    projectIDs = req.body;
+    ids = req.body;
   }
   // If project objects provided in array in request body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    projectIDs = req.body.map(p => p.id);
+    ids = req.body.map(p => p.id);
   }
 
   // Get all projects the requesting user has access to in a specified org
-  // NOTE: find() sanitizes req.params.orgid and projectIDs
-  ProjectController.find(req.user, req.params.orgid, projectIDs, options)
+  // NOTE: find() sanitizes req.params.orgid and ids
+  ProjectController.find(req.user, req.params.orgid, ids, options)
   .then((projects) => {
     // Verify project array is not empty
     if (projects.length === 0) {
@@ -1967,7 +1967,7 @@ function getElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     subtree: 'boolean',
-    elementIDs: 'array'
+    ids: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1987,9 +1987,9 @@ function getElements(req, res) {
   }
 
   // Check query for element IDs
-  if (options.elementIDs) {
-    elemIDs = options.elementIDs;
-    delete options.elementIDs;
+  if (options.ids) {
+    elemIDs = options.ids;
+    delete options.ids;
   }
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     // No IDs include in options, check body
@@ -2224,10 +2224,10 @@ function getElement(req, res) {
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, req.params.elementid, options)
-  .then((element) => {
+  .then((elements) => {
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element[0].getPublicData()));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2737,7 +2737,7 @@ function getArtifacts(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check query for orgIDs
+  // Check query for ids
   if (options.artIDs) {
     artIDs = options.artIDs;
     delete options.artIDs;

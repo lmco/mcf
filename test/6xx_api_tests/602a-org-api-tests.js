@@ -248,7 +248,7 @@ function getOrgs(done) {
   ];
   const orgIDs = orgData.map(p => p.id).join(',');
   request({
-    url: `${test.url}/api/orgs?orgIDs=${orgIDs}`,
+    url: `${test.url}/api/orgs?ids=${orgIDs}`,
     ca: testUtils.readCaFile(),
     headers: testUtils.getHeaders()
   },

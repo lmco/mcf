@@ -261,7 +261,7 @@ function getElement(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const foundElement = JSON.parse(body);
+    const foundElement = JSON.parse(body)[0];
 
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
