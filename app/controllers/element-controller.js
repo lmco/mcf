@@ -152,11 +152,6 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           }
         });
 
-        // Add 'contains' to options
-        if (!options.populate.includes('contains')) {
-          options.populate.push('contains');
-        }
-
         populateString += options.populate.join(' ');
       }
 
