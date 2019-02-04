@@ -62,7 +62,7 @@ api.get('/test', Middleware.logRoute, APIController.test);
  */
 api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
 
-
+// TODO: Address deprecation warning on login
 /**
  * @swagger
  * /api/login:
@@ -128,7 +128,7 @@ api.route('/version')
  *       - organizations
  *     description: Returns an array of organizations the requesting user has
  *                  read access to. By default, returns all organizations the
- *                  user has read access to. Optionally, an array of ID's can be
+ *                  user has read access to. Optionally, an array of IDs can be
  *                  provided in the request body or a comma separated list in
  *                  the request parameters to find multiple, specific orgs.
  *     produces:
@@ -253,7 +253,6 @@ api.route('/version')
  *                      of the object.
  *         in: query
  *         type: string
- *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH orgs, returns orgs' public data.
@@ -568,76 +567,103 @@ api.route('/projects')
   APIController.getAllProjects
 );
 
-
+// TODO: Try it out not sending request body in batch GET operation
 /**
  * @swagger
  * /api/orgs/{orgid}/projects:
  *   get:
  *     tags:
  *       - projects
- *     description: Returns a list of all projects and their public data that the requesting
- *                  user has access to within an organization.
+ *     description: Returns an array of projects the requesting user has read
+ *                  on a specified org. By default, returns all projects on the
+ *                  specified org that the user has read access to. Optionally,
+ *                  an array of IDs can be provided in the request body or a
+ *                  comma separated list in the request parameters to find
+ *                  multiple, specific projects.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: ids
- *         description: Comma separated list of IDs to search for. If both the
- *                      query parameter and body are not provided, all objects
- *                      the user has access to are found.
- *         in: query
- *         type: string
- *         required: false
- *       - name: body
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the user
- *                      has access to are found.
  *       - name: orgid
- *         description: The ID of the organization whose projects to get.
+ *         description: The ID of the organization which contains the searched
+ *                      projects.
  *         in: path
  *         required: true
+ *       - in: body
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: An array of object IDs to search for. If both query
+ *                      parameter and body are not provided, all objects the
+ *                      user has access to (under the specified org) are found.
+ *       - name: ids
+ *         description: Comma separated list of IDs to search for. If both query
+ *                      parameter and body are not provided, all objects the
+ *                      user has access to (under the specified org) are found.
+ *         in: query
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
  *         in: query
  *         type: string
- *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived objects will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET projects returns org data.
+ *         description: OK, Succeeded to GET projects, returns project public
+ *                      data.
  *       400:
  *         description: Bad Request, Failed to GET projects due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET projects due to not being logged in.
+ *         description: Unauthorized, Failed to GET projects due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET projects due to not having permissions.
+ *         description: Forbidden, Failed to GET projects due to not having
+ *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET projects due to projects not existing.
+ *         description: Not Found, Failed to GET projects due to projects not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET projects due to a server side issue.
- *
+ *         description: Internal Server Error, Failed to GET projects due to a
+ *                      server side issue.
  *   post:
  *     tags:
  *       - projects
- *     description: Creates multiple projects from the supplied data in the body.
+ *     description: Creates multiple projects from the supplied data in the
+ *                  request body. Returns the created projects' public data.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose projects to get.
+ *         description: The ID of the organization whose projects to create.
  *         in: path
  *         required: true
  *         type: string
- *       - name: content
- *         description: An array of objects containing project data.
+ *       - name: projects
  *         in: body
- *         required: true
+ *         description: An array of objects containing project data.
  *         schema:
  *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               custom:
+ *                 type: object
+ *               visibility:
+ *                 type: string
+ *                 default: private
+ *                 enum: [internal, private]
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -646,51 +672,85 @@ api.route('/projects')
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST projects returns project data
+ *         description: OK, Succeeded to POST projects, returns project public
+ *                      data.
  *       400:
- *         description: Bad Request, Failed to POST projects due to invalid project data.
+ *         description: Bad Request, Failed to POST projects due to invalid
+ *                      project data.
  *       401:
- *         description: Unauthorized, Failed to POST projects due to not being logged in.
+ *         description: Unauthorized, Failed to POST projects due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST projects due to project ids already existing.
+ *         description: Forbidden, Failed to POST projects due to project ids
+ *                      already existing.
  *       500:
- *         description: Internal Server Error, Failed to POST projects due to a server side issue.
+ *         description: Internal Server Error, Failed to POST projects due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - projects
  *     description: Updates multiple projects from the data provided in the
- *                  request body.
+ *                  request body. Projects that are currently archived must
+ *                  first be unarchived before making any other updates. The
+ *                  following fields can be updated [name, custom, archived].
+ *                  NOTE, the id is required in the request body, but CANNOT be
+ *                  updated.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: body
- *         description: An array of objects containing updates to individual projects.
- *         in: body
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to update.
+ *         in: path
  *         required: true
+ *         type: string
+ *       - in: body
+ *         name: projects
+ *         description: An array of objects containing updates to multiple
+ *                      projects.
  *         schema:
  *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: The current ID of the project, cannot be
+ *                              updated.
+ *               name:
+ *                 type: string
+ *               custom:
+ *                 type: object
+ *               archived:
+ *                 type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
  *         in: query
  *         type: string
- *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PATCH project returns project data.
+ *         description: OK, Succeeded to PATCH project, returns project public
+ *                      data.
  *       400:
- *         description: Bad Request, Failed to PATCH project due to invalid data.
+ *         description: Bad Request, Failed to PATCH project due to invalid
+ *                      request data.
  *       401:
- *         description: Unauthorized, Failed to PATCH project due to not being logged in.
+ *         description: Unauthorized, Failed to PATCH project due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to PATCH project due to updating an immutable field.
+ *         description: Forbidden, Failed to PATCH project due to updating an
+ *                      immutable field.
  *       500:
- *         description: Internal Server Error, Failed to PATCH project due to server side issue.
+ *         description: Internal Server Error, Failed to PATCH project due to
+ *                      server side issue.
  *   delete:
  *     tags:
  *       - projects
- *     description: Deletes multiple projects either by the organization or by
- *                  a supplied list in the body of the request.
+ *     description: Deletes multiple projects and any elements, webhooks and
+ *                  artifacts name-spaced under the specified project. NOTE this
+ *                  endpoint can be used by system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -699,23 +759,31 @@ api.route('/projects')
  *         in: path
  *         required: true
  *         type: string
- *       - name: body
- *         description: An array of project IDs to delete.
+ *       - name: projectIDs
+ *         description: An array of project IDs to delete. Can optionally be an
+ *                      array of objects containing id key/value pairs.
  *         in: body
  *         required: false
  *         schema:
  *           type: array
+ *           items:
+ *             type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE projects return deleted project data.
+ *         description: OK, Succeeded to DELETE projects, return deleted
+ *                      projects' ids.
  *       400:
- *         description: Bad Request, Failed to DELETE project due to invalid data.
+ *         description: Bad Request, Failed to DELETE project due to invalid
+ *                      data.
  *       401:
- *         description: Unauthorized, Failed to DELETE project due to not being logged in.
+ *         description: Unauthorized, Failed to DELETE project due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to DELETE project due to not having permissions on org.
+ *         description: Forbidden, Failed to DELETE project due to not having
+ *                      permissions.
  *       500:
- *         description: Internal Server Error, Failed to DELETE org due to a server side issue.
+ *         description: Internal Server Error, Failed to DELETE org due to a
+ *                      server side issue.
  */
 api.route('/orgs/:orgid/projects')
 .get(
@@ -738,6 +806,7 @@ api.route('/orgs/:orgid/projects')
   Middleware.logRoute,
   APIController.deleteProjects
 );
+
 
 /**
  * @swagger
