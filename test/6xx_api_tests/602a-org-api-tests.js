@@ -570,9 +570,11 @@ function deleteOrg(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const deletedID = JSON.parse(body);
 
-    // Verify correct org deleted
-    chai.expect(body).to.equal(orgData.id);
+    // Verify correct orgs deleted
+    chai.expect(deletedID).to.equal(orgData.id);
     done();
   });
 }

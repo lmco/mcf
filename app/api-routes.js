@@ -323,7 +323,7 @@ api.route('/orgs')
   APIController.deleteOrgs
 );
 
-// TODO: Consider changing response from DELETE /orgs/:orgid, doesn't return valid JSON
+
 /**
  * @swagger
  * /api/orgs/{orgid}:
@@ -469,7 +469,7 @@ api.route('/orgs')
  *       - organizations
  *     description: Deletes the specified organization and any projects,
  *                  elements, webhooks and artifacts name-spaced under the org.
- *                  NOTE this endpoint is reserved for system-admins ONLY.
+ *                  NOTE this endpoint is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -981,12 +981,13 @@ api.route('/orgs/:orgid/projects')
  *       - projects
  *     description: Deletes the specified project and any elements, webhooks and
  *                  artifacts name-spaced under the project. NOTE this endpoint
- *                  
+ *                  is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project to be deleted.
+ *         description: The ID of the organization containing the project
+ *                      to be deleted.
  *         in: path
  *         required: true
  *         type: string
@@ -997,17 +998,23 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE project return deleted project data.
+ *         description: OK, Succeeded to DELETE project, return deleted project
+ *                      ID.
  *       400:
- *         description: Bad Request, Failed to DELETE project due to invalid project data.
+ *         description: Bad Request, Failed to DELETE project due to invalid
+ *                      project data.
  *       401:
- *         description: Unauthorized, Failed to DELETE project due to not being logged in.
+ *         description: Unauthorized, Failed to DELETE project due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to DELETE project due to not having permissions on org.
+ *         description: Forbidden, Failed to DELETE project due to not having
+ *                      permissions on org.
  *       404:
- *         description: Not Found, Failed to DELETE project due to not finding project.
+ *         description: Not Found, Failed to DELETE project due to not finding
+ *                      project.
  *       500:
- *         description: Internal Server Error, Failed to DELETE project due to server side issue.
+ *         description: Internal Server Error, Failed to DELETE project due to
+ *                      server side issue.
  */
 api.route('/orgs/:orgid/projects/:projectid')
 .get(

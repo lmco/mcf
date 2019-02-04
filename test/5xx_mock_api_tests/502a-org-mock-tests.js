@@ -612,7 +612,11 @@ function deleteOrg(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    chai.expect(_data).to.equal(testData.orgs[0].id);
+    // Parse the JSON response
+    const deletedID = JSON.parse(_data);
+
+    // Verify correct org deleted
+    chai.expect(deletedID).to.equal(testData.orgs[0].id);
     done();
   };
 

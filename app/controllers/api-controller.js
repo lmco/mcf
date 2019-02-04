@@ -642,7 +642,7 @@ function deleteOrg(req, res) {
   .then((orgIDs) => {
     // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(orgIDs[0]);
+    return res.status(200).send(formatJSON(orgIDs[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
