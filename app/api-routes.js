@@ -1045,28 +1045,35 @@ api.route('/orgs/:orgid/projects/:projectid')
  *   get:
  *     tags:
  *       - organizations
- *     description: Returns a list of users roles who are members of an organization.
+ *     description: Returns a list of users who are members of an organization
+ *                  and their roles.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization to get members permissions from.
+ *         description: The ID of the organization to get members from.
  *         in: path
  *         required: true
  *         type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET members from org returns list of members.
+ *         description: OK, Succeeded to GET members from org, returns list of
+ *                      members usernames and roles.
  *       400:
- *         description: Bad Request, Failed to GET members due to invalid org data.
+ *         description: Bad Request, Failed to GET members due to invalid org
+ *                      data.
  *       401:
- *         description: Unauthorized, Failed to GET members due to not being logged in.
+ *         description: Unauthorized, Failed to GET members due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET members due to not having permissions on org.
+ *         description: Forbidden, Failed to GET members due to not having
+ *                      permissions on org.
  *       404:
- *         description: Not Found, Failed to GET members from org due to org not existing.
+ *         description: Not Found, Failed to GET members from org due to org not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET members due to a server side issue.
+ *         description: Internal Server Error, Failed to GET members due to a
+ *                      server side issue.
  */
 api.route('/orgs/:orgid/members')
 .get(
