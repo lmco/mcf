@@ -433,7 +433,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         .then((foundElements) => {
           if (foundElements.length > 0) {
             // Get array of the foundElements's ids
-            const foundElementIDs = foundElements.map(e => e._id);
+            const foundElementIDs = foundElements.map(e => utils.parseID(e._id).pop());
 
             // There are one or more elements with conflicting IDs
             throw new M.CustomError('Elements with the following IDs already exist'
@@ -804,7 +804,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Verify the same number of elements are found as desired
       if (foundElements.length !== arrIDs.length) {
         const foundIDs = foundElements.map(e => e._id);
-        const notFound = arrIDs.filter(e => !foundIDs.includes(e));
+        const notFound = arrIDs.filter(e => !foundIDs.includes(e)).map(e => utils.parseID(e).pop());
         throw new M.CustomError(
           `The following elements were not found: [${notFound.toString()}].`, 404, 'warn'
         );

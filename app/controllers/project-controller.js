@@ -340,7 +340,7 @@ function create(requestingUser, organizationID, projects, options) {
       // If there are any foundProjects, there is a conflict
       if (foundProjects.length > 0) {
         // Get arrays of the foundProjects's ids and names
-        const foundProjectIDs = foundProjects.map(p => p._id);
+        const foundProjectIDs = foundProjects.map(p => utils.parseID(p._id).pop());
 
         // There are one or more projects with conflicting IDs
         throw new M.CustomError('Projects with the following IDs already exist'
