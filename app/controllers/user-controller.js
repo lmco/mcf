@@ -579,10 +579,12 @@ function update(requestingUser, users, options) {
             // If the user is being archived
             if (updateUser[key] && !user[key]) {
               updateUser.archivedBy = reqUser._id;
+              updateUser.archivedOn = Date.now();
             }
             // If the user is being unarchived
             else if (!updateUser[key] && user[key]) {
               updateUser.archivedBy = null;
+              updateUser.archivedOn = null;
             }
           }
         });

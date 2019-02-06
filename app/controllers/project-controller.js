@@ -665,10 +665,12 @@ function update(requestingUser, organizationID, projects, options) {
             // If the proj is being archived
             if (updateProj[key] && !proj[key]) {
               updateProj.archivedBy = reqUser._id;
+              updateProj.archivedOn = Date.now();
             }
             // If the proj is being unarchived
             else if (!updateProj[key] && proj[key]) {
               updateProj.archivedBy = null;
+              updateProj.archivedOn = null;
             }
           }
         });

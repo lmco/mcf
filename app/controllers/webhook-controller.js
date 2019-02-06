@@ -628,10 +628,12 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
             // If the webhook is being archived
             if (updateWebhook[key] && !webhook[key]) {
               updateWebhook.archivedBy = reqUser._id;
+              updateWebhook.archivedOn = Date.now();
             }
             // If the webhook is being unarchived
             else if (!updateWebhook[key] && webhook[key]) {
               updateWebhook.archivedBy = null;
+              updateWebhook.archivedOn = null;
             }
           }
         });

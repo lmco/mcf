@@ -859,10 +859,12 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             // If the element is being archived
             if (updateElement[key] && !element[key]) {
               updateElement.archivedBy = reqUser._id;
+              updateElement.archivedOn = Date.now();
             }
             // If the element is being unarchived
             else if (!updateElement[key] && element[key]) {
               updateElement.archivedBy = null;
+              updateElement.archivedOn = null;
             }
           }
         });

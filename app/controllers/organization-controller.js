@@ -605,10 +605,12 @@ function update(requestingUser, orgs, options) {
             // If the org is being archived
             if (updateOrg[key] && !org[key]) {
               updateOrg.archivedBy = reqUser._id;
+              updateOrg.archivedOn = Date.now();
             }
             // If the org is being unarchived
             else if (!updateOrg[key] && org[key]) {
               updateOrg.archivedBy = null;
+              updateOrg.archivedOn = null;
             }
           }
         });
