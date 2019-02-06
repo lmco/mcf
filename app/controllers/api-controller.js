@@ -468,11 +468,14 @@ function getOrg(req, res) {
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid, options)
   .then((orgs) => {
-    // Check if orgs are found
+    // If no orgs found, return 404 error
     if (orgs.length === 0) {
-      // Return error
-      return res.status(404).send('No orgs found.');
+      const error = new M.CustomError(
+        `Organization [${req.params.orgid}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
     }
+
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgs[0].getPublicData()));
@@ -1117,9 +1120,12 @@ function getProject(req, res) {
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
   .then((projects) => {
-    // If no projects returned, return a 404 error
+    // If no projects found, return 404 error
     if (projects.length === 0) {
-      return res.status(404).send('No projects found.');
+      const error = new M.CustomError(
+        `Project [${req.params.projectid}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
     }
 
     // Return a 200: OK and the found project
@@ -2239,6 +2245,13 @@ function getElement(req, res) {
         `Element [${req.params.elementid}] not found.`, 404, 'warn'
       );
       return res.status(error.status).send(error);
+    }
+
+    // If subtree option was provided, return array of elements
+    if (options.subtree) {
+      // Return a 200: OK and the elements
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
     }
 
     // Return a 200: OK and the element
