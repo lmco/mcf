@@ -356,6 +356,7 @@ function create(requestingUser, organizationID, projects, options) {
         projObj.lastModifiedBy = reqUser._id;
         projObj.createdBy = reqUser._id;
         projObj.updatedOn = Date.now();
+        projObj.archivedBy = (projObj.archived) ? reqUser._id : null;
         return projObj;
       });
 
@@ -375,7 +376,9 @@ function create(requestingUser, organizationID, projects, options) {
         lastModifiedBy: reqUser._id,
         createdBy: reqUser._id,
         createdOn: Date.now(),
-        updatedOn: Date.now()
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
       }));
 
         // Create the elements

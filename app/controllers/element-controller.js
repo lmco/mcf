@@ -451,6 +451,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         elemObj.lastModifiedBy = reqUser._id;
         elemObj.createdBy = reqUser._id;
         elemObj.updatedOn = Date.now();
+        elemObj.archivedBy = (elemObj.archived) ? reqUser._id : null;
 
         // Add hidden fields
         elemObj.$parent = utils.createID(orgID, projID, e.parent);

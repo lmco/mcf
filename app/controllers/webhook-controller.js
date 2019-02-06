@@ -385,6 +385,7 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
         webhookObj.lastModifiedBy = reqUser._id;
         webhookObj.createdBy = reqUser._id;
         webhookObj.updatedOn = Date.now();
+        webhookObj.archivedBy = (webhookObj.archived) ? reqUser._id : null;
         return webhookObj;
       });
 

@@ -321,6 +321,7 @@ function create(requestingUser, orgs, options) {
         orgObj.lastModifiedBy = reqUser._id;
         orgObj.createdBy = reqUser._id;
         orgObj.updatedOn = Date.now();
+        orgObj.archivedBy = (orgObj.archived) ? reqUser._id : null;
         return orgObj;
       });
 

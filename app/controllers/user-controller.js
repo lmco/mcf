@@ -322,6 +322,7 @@ function create(requestingUser, users, options) {
         userObj.lastModifiedBy = reqUser._id;
         userObj.createdBy = reqUser._id;
         userObj.updatedOn = Date.now();
+        userObj.archivedBy = (userObj.archived) ? reqUser._id : null;
         return userObj;
       });
 
