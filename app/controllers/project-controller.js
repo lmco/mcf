@@ -549,9 +549,10 @@ function update(requestingUser, organizationID, projects, options) {
       // Verify the same number of projects are found as desired
       if (_foundProjects.length !== arrIDs.length) {
         const foundIDs = _foundProjects.map(p => p._id);
-        const notFound = arrIDs.filter(p => !foundIDs.includes(p));
+        const notFound = arrIDs.filter(p => !foundIDs.includes(p)).map(p => utils.parseID(p).pop());
         throw new M.CustomError(
-          `The following projects were not found: [${notFound.toString()}].`, 404, 'warn'
+          `The following projects [${notFound.toString()}] were not found in `
+            + `the org [${orgID}].`, 404, 'warn'
         );
       }
       // Set function-wide foundProjects
