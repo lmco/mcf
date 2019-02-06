@@ -2288,6 +2288,14 @@ function postElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
+    const error = new M.CustomError(
+      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -2297,6 +2305,9 @@ function postElement(req, res) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
+
+  // Set the element ID in the body equal req.params.elementid
+  req.body.id = req.params.elementid;
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
@@ -2340,6 +2351,14 @@ function patchElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
+    const error = new M.CustomError(
+      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -2349,6 +2368,9 @@ function patchElement(req, res) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
+
+  // Set the element ID in the body equal req.params.elementid
+  req.body.id = req.params.elementid;
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
