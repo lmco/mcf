@@ -419,7 +419,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       if (!foundProject.permissions[reqUser._id]
         || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to create'
-            + ` elements on the project ${foundProject._id}.`, 403, 'warn');
+            + ' elements on the project '
+            + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
       }
 
       const promises = [];
