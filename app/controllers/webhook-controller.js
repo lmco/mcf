@@ -39,6 +39,7 @@ const Project = M.require('models.project');
 const Webhook = M.require('models.webhook');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /**
  * @description This function finds one or many webhooks. Depending on the given
@@ -603,6 +604,16 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
           if (!validFields.includes(key)) {
             throw new M.CustomError(`Webhook property [${key}] cannot `
                 + 'be changed.', 400, 'warn');
+          }
+
+          // Get validator for field if one exists
+          if (validators.webhook.hasOwnProperty(key)) {
+            // If validation fails, throw error
+            if (!RegExp(validators.webhook[key]).test(updateWebhook[key])) {
+              throw new M.CustomError(
+                `Invalid ${key}: [${updateWebhook[key]}]`, 403, 'warn'
+              );
+            }
           }
 
           // If the type of field is mixed

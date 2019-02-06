@@ -42,6 +42,7 @@ const Element = M.require('models.element');
 const Project = M.require('models.project');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /**
  * @description This function finds one or many elements. Depending on the
@@ -834,6 +835,16 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           if (!validFields.includes(key)) {
             throw new M.CustomError(`Element property [${key}] cannot `
                 + 'be changed.', 400, 'warn');
+          }
+
+          // Get validator for field if one exists
+          if (validators.element.hasOwnProperty(key)) {
+            // If validation fails, throw error
+            if (!RegExp(validators.element[key]).test(updateElement[key])) {
+              throw new M.CustomError(
+                `Invalid ${key}: [${updateElement[key]}]`, 403, 'warn'
+              );
+            }
           }
 
           // If the type of field is mixed
