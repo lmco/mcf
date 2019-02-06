@@ -866,8 +866,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateElement.lastModifiedBy = reqUser._id;
+        updateElement.updatedOn = Date.now();
 
         // Update the element
         bulkArray.push({

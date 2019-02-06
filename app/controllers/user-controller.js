@@ -586,8 +586,9 @@ function update(requestingUser, users, options) {
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateUser.lastModifiedBy = reqUser._id;
+        updateUser.updatedOn = Date.now();
 
         // Update the user
         bulkArray.push({

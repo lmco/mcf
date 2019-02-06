@@ -612,8 +612,9 @@ function update(requestingUser, orgs, options) {
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateOrg.lastModifiedBy = reqUser._id;
+        updateOrg.updatedOn = Date.now();
 
         // Update the org
         bulkArray.push({

@@ -669,8 +669,9 @@ function update(requestingUser, organizationID, projects, options) {
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateProj.lastModifiedBy = reqUser._id;
+        updateProj.updatedOn = Date.now();
 
         // Update the project
         bulkArray.push({

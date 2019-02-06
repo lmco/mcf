@@ -635,8 +635,9 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateWebhook.lastModifiedBy = reqUser._id;
+        updateWebhook.updatedOn = Date.now();
 
         // Update the project
         bulkArray.push({
