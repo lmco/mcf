@@ -1702,6 +1702,14 @@ function getUser(req, res) {
   // NOTE: find() sanitizes req.params.username
   UserController.find(req.user, req.params.username, options)
   .then((user) => {
+    // If no user found, return 404 error
+    if (user.length === 0) {
+      const error = new M.CustomError(
+        `User [${req.params.username}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
+    }
+
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(user[0].getPublicData()));
@@ -2224,10 +2232,18 @@ function getElement(req, res) {
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, req.params.elementid, options)
-  .then((element) => {
+  .then((elements) => {
+    // If no element found, return 404 error
+    if (elements.length === 0) {
+      const error = new M.CustomError(
+        `Element [${req.params.elementid}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
+    }
+
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element[0].getPublicData()));
+    return res.status(200).send(formatJSON(elements[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
