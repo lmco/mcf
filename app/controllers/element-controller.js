@@ -776,8 +776,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           index++;
         });
       }
-      catch (msg) {
-        throw new M.CustomError(msg, 403, 'warn');
+      catch (err) {
+        throw new M.CustomError(err.message, 403, 'warn');
       }
 
       const promises = [];

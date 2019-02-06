@@ -555,8 +555,8 @@ function update(requestingUser, organizationID, projectID, webhooks, options) {
           index++;
         });
       }
-      catch (msg) {
-        throw new M.CustomError(msg, 403, 'warn');
+      catch (err) {
+        throw new M.CustomError(err.message, 403, 'warn');
       }
 
       // Create searchQuery
