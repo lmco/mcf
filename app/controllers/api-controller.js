@@ -1931,19 +1931,25 @@ function patchPassword(req, res) {
 
   // Ensure old password was provided
   if (!req.body.oldPassword) {
-    const error = new M.CustomError('Old password not in request body.', 400, 'critical');
+    const error = new M.CustomError('Old password not in request body.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
   // Ensure new password was provided
   if (!req.body.password) {
-    const error = new M.CustomError('New password not in request body.', 400, 'critical');
+    const error = new M.CustomError('New password not in request body.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
   // Ensure confirmed password was provided
   if (!req.body.confirmPassword) {
-    const error = new M.CustomError('Confirmed password not in request body.', 400, 'critical');
+    const error = new M.CustomError('Confirmed password not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Ensure user is not trying to change another user's password
+  if (req.user.username !== req.params.username) {
+    const error = new M.CustomError('Cannot change another user\'s password.', 403, 'warn');
     return res.status(error.status).send(error);
   }
 
