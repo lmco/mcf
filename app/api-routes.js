@@ -177,7 +177,7 @@ api.route('/version')
  *       - organizations
  *     description: Creates multiple organizations from the data provided in the
  *                  request body. Returns the created organization's public
- *                  data. This endpoint is ADMIN ONLY.
+ *                  data. This endpoint is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1679,21 +1679,27 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *   get:
  *     tags:
  *       - users
- *     description: Returns an array of all user's public data.
+ *     description: Returns an array of users. By default, returns all users.
+ *                  Optionally, an array of usernames can be provided in the
+ *                  request body or a comma separated list in the request
+ *                  parameters to find multiple, specific users.
  *     produces:
  *       - application/json
  *     parameters:
+ *       - in: body
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: An array of usernames to search for. If both query
+ *                      parameter and body are not provided, all users are
+ *                      found.
  *       - name: usernames
- *         description: Comma separated list of IDs to search for. If both the
- *                      query parameter and body are not provided, all objects
- *                      the user has access to are found.
+ *         description: Comma separated list of usernames to search for. If both
+ *                      the query parameter and body are not provided, all
+ *                      users are found.
  *         in: query
  *         type: string
- *         required: false
- *       - name: body
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the user
- *                      has access to are found.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1701,36 +1707,69 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: string
  *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived users will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET users returns public user data.
+ *         description: OK, Succeeded to GET users, returns user public data.
  *       400:
  *         description: Bad Request, Failed to GET users due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET users due to not being logged in.
+ *         description: Unauthorized, Failed to GET users due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET users due to not having permissions.
+ *         description: Forbidden, Failed to GET users due to not having
+ *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET users due to not finding any users.
+ *         description: Not Found, Failed to GET users due to users not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET users due to server side issue.
- *
+ *         description: Internal Server Error, Failed to GET users due to
+ *                      server side issue.
  *   post:
  *     tags:
  *       - users
- *     description: Creates multiple users from the supplied data in the body.
+ *     description: Creates multiple users from the data provided in the request
+ *                  body. Returns the created user's public data. NOTE This
+ *                  endpoint is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: body
+ *       - in: body
+ *         name: users
  *         description: An array of objects containing new user data.
- *         in: body
- *         required: true
  *         schema:
  *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - username
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 description: Required unless running LDAP auth.
+ *               fname:
+ *                 type: string
+ *                 description: User's first name.
+ *               lname:
+ *                 type: string
+ *                 description: User's last name.
+ *               preferredName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               provider:
+ *                 type: string
+ *                 default: 'local'
+ *               admin:
+ *                 type: boolean
+ *                 description: If true, user is system-wide admin.
+ *               custom:
+ *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1743,24 +1782,54 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *       400:
  *         description: Bad Request, Failed to POST users due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to POST users due to not being logged in.
+ *         description: Unauthorized, Failed to POST users due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST users due to not having permissions.
+ *         description: Forbidden, Failed to POST users due to not having
+ *                      permissions.
  *       500:
- *         description: Internal Server Error, Failed to POST users due to server side issue.
+ *         description: Internal Server Error, Failed to POST users due to
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - users
- *     description: Updates multiple users from the supplied list in the body.
+ *     description: Updates multiple users from the data provided in the request
+ *                  body. Users that are currently archived must first be
+ *                  unarchived before making any other updates. The following
+ *                  fields can be updated [custom, archived, fname, lname,
+ *                  preferredName, email]. NOTE, the username is required in the
+ *                  request body, but CANNOT be updated. This endpoint is
+ *                  reserved for admins only, unless user is updating self.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: body
- *         description: An array of objects containing individual updates to users.
- *         in: body
- *         required: true
+ *       - in: body
+ *         name: users
+ *         description: An array of objects containing updates to multiple
+ *                      users.
  *         schema:
  *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - username
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The current username of the user, cannot be
+ *                              updated.
+ *               fname:
+ *                 type: string
+ *               lname:
+ *                 type: string
+ *               preferredName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               custom:
+ *                 type: object
+ *               archived:
+ *                 type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1769,7 +1838,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PATCH users, returns public users data.
+ *         description: OK, Succeeded to PATCH users, returns user's public
+ *                      data.
  *       400:
  *         description: Bad Request, Failed to PATCH users due to invalid data.
  *       401:
@@ -1784,27 +1854,36 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *   delete:
  *     tags:
  *       - users
- *     description: Deletes multiple users from the supplied list in the body.
+ *     description: Deletes multiple users. Removes them from any orgs or
+ *                  projects which they have permissions on. NOTE this endpoint
+ *                  is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: body
- *         description: An array of usernames to delete.
+ *       - name: usernames
+ *         description: An array of usernames to delete. Can optionally be an
+ *                      array of objects containing id key/value pairs.
  *         in: body
  *         required: true
  *         schema:
  *           type: array
+ *           items:
+ *             type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE users return users data.
+ *         description: OK, Succeeded to DELETE users, return deleted user's
+ *                      usernames.
  *       400:
  *         description: Bad Request, Failed to DELETE users due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to DELETE users due to not being logged in.
+ *         description: Unauthorized, Failed to DELETE users due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to DELETE users due to not having permissions.
+ *         description: Forbidden, Failed to DELETE users due to not having
+ *                      permissions.
  *       500:
- *         description: Internal Server Error, Failed to DELETE users due to server side issue.
+ *         description: Internal Server Error, Failed to DELETE users due to
+ *                      server side issue.
  */
 api.route('/users')
 .get(
@@ -1838,21 +1917,12 @@ api.route('/users')
  *   get:
  *     tags:
  *       - users
- *     description: Returns the currently logged in user's public information
+ *     description: Returns the currently logged in user's public information.
  *     produces:
  *       - application/json
- *     parameters:
- *       - name: populate
- *         description: Comma separated list of values to be populated on return
- *                      of the object.
- *         in: query
- *         type: string
- *         required: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET current user information returns user public data.
- *       400:
- *         description: Bad Request, Failed to GET current user information due to invalid data.
  *       401:
  *         description: Unauthorized, Failed to GET user information due to not being logged in.
  *       403:
@@ -1875,12 +1945,12 @@ api.route('/users/whoami')
  *   get:
  *     tags:
  *       - users
- *     description: Returns a user's public information.
+ *     description: Finds and returns a users public data.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: username
- *         description: The username of the user to return
+ *         description: The username of the user to find.
  *         required: true
  *         type: string
  *         in: path
@@ -1891,27 +1961,31 @@ api.route('/users/whoami')
  *         type: string
  *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived objects will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET user returns user public data.
+ *         description: OK, Succeeded to GET user, returns user's public data.
  *       400:
  *         description: Bad Request, Failed to GET user due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET user due to not being logged in.
+ *         description: Unauthorized, Failed to GET user due to not being logged
+ *                      in.
  *       403:
- *         description: Forbidden, Failed to GET user due to not having permissions.
+ *         description: Forbidden, Failed to GET user due to not having
+ *                      permissions.
  *       404:
  *         description: Not Found, Failed to GET user due to user not existing.
  *       500:
- *         description: Internal Server Error, Failed to GET user due to server side issue.
- *
+ *         description: Internal Server Error, Failed to GET user due to server
+ *                      side issue.
  *   post:
  *     tags:
  *       - users
- *     description: Creates a new user.
+ *     description: Create a new user from the given data in the request body.
+ *                  This endpoint is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1920,39 +1994,36 @@ api.route('/users/whoami')
  *         required: true
  *         type: string
  *         in: path
- *       - name: body
+ *       - name: user
  *         description: The object containing the new user data.
  *         in: body
  *         required: true
  *         schema:
  *           type: object
- *           required:
- *             - username
- *             - password
  *           properties:
  *             username:
  *               type: string
- *               description: The username of the user to create. If provided, this
- *                            must match the username provided in the path.
+ *               description: The username of the user to create. If provided,
+ *                            this must match the username provided in the path.
  *             password:
  *               type: string
  *               description: The password of the user being created. This field
  *                            is required unless LDAP authentication is used.
  *             fname:
  *               type: string
- *               description: The user's first name.
  *             lname:
  *               type: string
- *               description: The user's last name.
  *             preferredName:
  *               type: string
- *               description: The user's preferred first name.
  *             email:
  *               type: string
- *               description: The user's email address.
+ *             provider:
+ *               type: string
+ *               default: 'local'
+ *             admin:
+ *               type: boolean
  *             custom:
  *               type: object
- *               description: Custom JSON data that can be added to a user.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1961,20 +2032,25 @@ api.route('/users/whoami')
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST user returns public user data.
+ *         description: OK, Succeeded to POST user, return user's public data.
  *       400:
- *         description: Bad Request, Failed to POST user due to invalid information.
+ *         description: Bad Request, Failed to POST user due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to POST user due to not being logged in.
+ *         description: Unauthorized, Failed to POST user due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST user due to using username that already exists.
+ *         description: Forbidden, Failed to POST user due to using username
+ *                      that already exists.
  *       500:
- *         description: Internal Server Error, Failed to POST user due to server side issue.
- *
+ *         description: Internal Server Error, Failed to POST user due to server
+ *                      side issue.
  *   patch:
  *     tags:
  *       - users
- *     description: Updates an existing user.
+ *     description: Updates an existing user. The following fields can be
+ *                  updated [fname, lname, preferredName, email, custom,
+ *                  archived]. Users that are currently archived must first be
+ *                  unarchived before making any other updates.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1983,75 +2059,79 @@ api.route('/users/whoami')
  *         required: true
  *         type: string
  *         in: path
- *       - name: body
+ *       - name: update
  *         description: The object containing the updated user data.
  *         in: body
  *         required: true
  *         schema:
  *           type: object
- *           required:
- *             - username
  *           properties:
  *             fname:
  *               type: string
- *               description: The user's updated first name.
  *             lname:
  *               type: string
- *               description: The user's updated last name.
  *             preferredName:
  *               type: string
- *               description: The user's updated preferred first name.
  *             email:
  *               type: string
- *               description: The user's updated email address.
  *             custom:
  *               type: object
- *               description: The updated custom JSON data for the user.
+ *             archived:
+ *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
  *         in: query
  *         type: string
- *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PATCH user returns public user data.
+ *         description: OK, Succeeded to PATCH user, return user's public data.
  *       400:
  *         description: Bad Request, Failed to PATCH user due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to PATCH user due to not being logged in.
+ *         description: Unauthorized, Failed to PATCH user due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to PATCH user due updating an immutable field.
+ *         description: Forbidden, Failed to PATCH user due updating an
+ *                      immutable field.
  *       404:
- *         description: Not Found, Failed ot PATCH user due to user not existing.
+ *         description: Not Found, Failed ot PATCH user due to user not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed ot PATCH user due to server side issue.
- *
+ *         description: Internal Server Error, Failed ot PATCH user due to
+ *                      server side issue.
  *   delete:
  *     tags:
  *       - users
- *     description: Deletes a user.
+ *     description: Deletes the specified user. Removes them from any orgs or
+ *                  projects which they have permissions on. NOTE this endpoint
+ *                  is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: username
  *         description: The username of the user to delete.
+ *         in: path
  *         required: true
  *         type: string
- *         in: path
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE user returns user public data.
+ *         description: OK, Succeeded to DELETE user, returns deleted user's
+ *                      username.
  *       400:
  *         description: Bad Request, Failed to DELETE user due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to DELETE user due to not being logged in.
+ *         description: Unauthorized, Failed to DELETE user due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to DELETE user due to not having permissions.
+ *         description: Forbidden, Failed to DELETE user due to not having
+ *                      permissions.
  *       404:
- *         description: Not Found, Failed to DELETE user due to user not existing.
+ *         description: Not Found, Failed to DELETE user due to user not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to DELETE user due to server side issues.
+ *         description: Internal Server Error, Failed to DELETE user due to
+ *                      server side issues.
  */
 api.route('/users/:username')
 .get(
@@ -2085,7 +2165,8 @@ api.route('/users/:username')
  *   patch:
  *     tags:
  *       - users
- *     description: Updates an existing users password.
+ *     description: Updates an existing users password. Users can only update
+ *                  their own password.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2094,9 +2175,9 @@ api.route('/users/:username')
  *         required: true
  *         type: string
  *         in: path
- *       - name: body
+ *       - in: body
  *         description: The object containing the updated user data.
- *         in: body
+ *         name: passwordInfo
  *         required: true
  *         schema:
  *           type: object
@@ -2121,9 +2202,14 @@ api.route('/users/:username')
  *       400:
  *         description: Bad Request, Failed to PATCH user due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to PATCH user due to not being logged in.
+ *         description: Unauthorized, Failed to PATCH user due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to PATCH user due updating an immutable field.
+ *         description: Forbidden, Failed to PATCH user due updating an
+ *                      immutable field.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE user due to
+ *                      server side issues.
  */
 api.route('/users/:username/password')
 .patch(
@@ -2139,38 +2225,26 @@ api.route('/users/:username/password')
  *   get:
  *     tags:
  *       - webhooks
- *     description: Finds and returns a webhook.
+ *     description: Finds and returns a webhook's public data.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the specified
+ *                      project.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project containing the webhook.
+ *         description: The ID of the project containing the searched webhook.
  *         in: path
  *         required: true
  *         type: string
  *       - name: webhookid
- *         description: The ID of the webhook to return.
+ *         description: The ID of the webhook to find.
  *         in: path
  *         required: true
  *         type: string
- *       - name: content
- *         description: The object containing get webhook options.
- *         in: body
- *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             archived:
- *               type: boolean
- *               description: The boolean indicating if the archived webhook
- *                            is returned. The user must be a global admin or an
- *                            admin on the project to find an archived
- *                            webhook.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -2178,12 +2252,14 @@ api.route('/users/:username/password')
  *         type: string
  *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived objects will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET webhook, returns webhook data.
+ *         description: OK, Succeeded to GET webhook, returns webhook's public
+ *                      data.
  *       400:
  *         description: Bad Request, Failed to GET webhook due to invalid data.
  *       401:
@@ -2206,12 +2282,13 @@ api.route('/users/:username/password')
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the specified
+ *                      project.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project containing the webhook.
+ *         description: The ID of the project containing the new webhook.
  *         in: path
  *         required: true
  *         type: string
@@ -2239,9 +2316,11 @@ api.route('/users/:username/password')
  *               type: string
  *               description: The name for the webhook.
  *             triggers:
- *               type: object
+ *               type: array
+ *               items:
+ *                 type: string
  *               description: An array of events on which the webhook will be
- *                            triggered. The events should all be strings.
+ *                            triggered.
  *             responses:
  *               type: object
  *               description: An array of objects, each containing a URL
