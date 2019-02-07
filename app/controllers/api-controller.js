@@ -22,7 +22,6 @@ const path = require('path');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
-const multer = require('multer');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
