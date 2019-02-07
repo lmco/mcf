@@ -577,7 +577,6 @@ api.route('/projects')
   APIController.getAllProjects
 );
 
-// TODO: Try it out not sending request body in batch GET operation
 /**
  * @swagger
  * /api/orgs/{orgid}/projects:
