@@ -353,7 +353,8 @@ api.route('/orgs')
  *         type: string
  *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived objects will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *     responses:
@@ -852,7 +853,8 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived objects will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *     responses:
@@ -1921,15 +1923,20 @@ api.route('/users')
  *       - application/json
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET current user information returns user public data.
+ *         description: OK, Succeeded to GET current user information returns
+ *                      user public data.
  *       401:
- *         description: Unauthorized, Failed to GET user information due to not being logged in.
+ *         description: Unauthorized, Failed to GET user information due to not
+ *                      being logged in.
  *       403:
- *         description: Forbidden, Failed to GET user information due to not having permissions.
+ *         description: Forbidden, Failed to GET user information due to not
+ *                      having permissions.
  *       404:
- *         description: Not Found, Failed to GET current user information due to not finding user.
+ *         description: Not Found, Failed to GET current user information due to
+ *                      not finding user.
  *       500:
- *         description: Internal Server Error, Failed to GET user info due to server side issue.
+ *         description: Internal Server Error, Failed to GET user info due to
+ *                      server side issue.
  */
 api.route('/users/whoami')
 .get(
