@@ -33,7 +33,6 @@ const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
-const Webhook = M.require('models.webhook');
 const utils = M.require('lib.utils');
 const testData = require(path.join(M.root, 'test', 'test_data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
@@ -225,8 +224,6 @@ module.exports.removeTestOrg = function() {
 
     // Delete elements
     Element.deleteMany(ownedQuery)
-    // Delete any webhooks in the org
-    .then(() => Webhook.Webhook.deleteMany(ownedQuery))
     // Delete any projects in the org
     .then(() => Project.deleteMany({ org: testData.orgs[0].id }))
     // Delete the orgs
