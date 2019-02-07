@@ -1378,27 +1378,28 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *   get:
  *     tags:
  *       - elements
- *     description: Returns an element.
+ *     description: Returns an elements public data on a specified branch.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the specified
+ *                      project.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project containing the element.
+ *         description: The ID of the project containing the specified branch.
  *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
- *         description: The ID of the branch containing the element.
+ *         description: The ID of the branch containing the searched element.
  *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
- *         description: The ID of the element to return.
+ *         description: The ID of the element to find.
  *         in: path
  *         required: true
  *         type: string
@@ -1409,51 +1410,59 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         type: string
  *         required: false
  *       - name: archived
- *         description: If true, archived objects will be also be searched through.
+ *         description: If true, archived objects will be also be searched
+ *                      through.
  *         in: query
  *         type: boolean
  *       - name: subtree
- *         description: If true, returns all elements in the search elements subtree.
+ *         description: If true, returns all elements in the search elements
+ *                      subtree. If true, returns an array of elements rather
+ *                      than a single object.
  *         in: query
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET element returns element data.
+ *         description: OK, Succeeded to GET element, returns element public
+ *                      data.
  *       400:
  *         description: Bad Request, Failed to GET element due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET element due to not being logged in.
+ *         description: Unauthorized, Failed to GET element due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET element due to not having permissions.
+ *         description: Forbidden, Failed to GET element due to not having
+ *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET element due to element not existing.
+ *         description: Not Found, Failed to GET element due to element not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET element due to server side issue.
- *
+ *         description: Internal Server Error, Failed to GET element due to
+ *                      server side issue.
  *   post:
  *     tags:
  *       - elements
- *     description: Creates a new element.
+ *     description: Creates a new element from given data in the request body.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the specified
+ *                      project.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project containing the element.
+ *         description: The ID of the project containing the specified branch.
  *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
- *         description: The ID of the branch containing the element.
+ *         description: The ID of the branch containing the new element.
  *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
- *         description: The ID of the element to be created.
+ *         description: The ID of the element to create.
  *         in: path
  *         required: true
  *         type: string
@@ -1463,19 +1472,16 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         required: false
  *         schema:
  *           type: object
- *           required:
- *             - id
- *             - name
  *           properties:
  *             id:
  *               type: string
- *               description: The ID of the element. If this is provided, it must
+ *               description: The ID of the element. If provided, it must
  *                      match the element ID provided in the path.
  *             name:
  *               type: string
- *               description: The name for the element.
  *             parent:
  *               type: string
+ *               default: 'model'
  *               description: The ID of the parent of the new element.
  *             source:
  *               type: string
@@ -1487,10 +1493,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                            element. If provided, source is required.
  *             documentation:
  *               type: string
+ *               default: ''
  *               description: The documentation for the element.
+ *             type:
+ *               type: string
+ *               default: ''
  *             custom:
  *               type: object
- *               description: Custom JSON data that can be added to the element.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1499,46 +1508,55 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST element returns element data.
+ *         description: OK, Succeeded to POST element, returns element public
+ *                      data.
  *       400:
  *         description: Bad Request, Failed to POST element due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to POST element due to not being logged in.
+ *         description: Unauthorized, Failed to POST element due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST element due to not having permissions.
+ *         description: Forbidden, Failed to POST element due to not having
+ *                      permissions.
  *       404:
- *         description: Not Found, Failed to POST element due to project/org not existing.
+ *         description: Not Found, Failed to POST element due to branch, project
+ *                      or org not existing.
  *       500:
- *         description: Internal Server Error, Failed to POST element due to server side issue.
- *
+ *         description: Internal Server Error, Failed to POST element due to
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - elements
- *     description: Updates an existing element.
+ *     description: Updates an existing element. The following fields can be
+ *                  updated [name, custom, archived, parent, documentation,
+ *                  type]. Elements that are currently archived must first be
+ *                  unarchived before making any other updates.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the specified
+ *                      project.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project containing the element.
+ *         description: The ID of the project containing the specified branch.
  *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
- *         description: The ID of the branch containing the element.
+ *         description: The ID of the branch containing the element to be
+ *                      updated.
  *         in: path
  *         required: true
  *         type: string
  *       - name: elementid
- *         description: The ID of the element to be updated.
+ *         description: The ID of the element to update.
  *         in: path
  *         required: true
  *         type: string
- *       - name: body
+ *       - name: update
  *         description: The object containing the updated element data.
  *         in: body
  *         required: true
@@ -1547,19 +1565,16 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *           properties:
  *             name:
  *               type: string
- *               description: The updated name for the element.
  *             parent:
  *               type: string
- *               description: The ID of the parent of the new element.
  *             documentation:
  *               type: string
- *               description: The updated documentation for the element.
+ *             type:
+ *               type: string
  *             custom:
  *               type: object
- *               description: The updated custom JSON data for the element.
  *             archived:
  *               type: boolean
- *               description: The soft-deletion of an object.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1568,37 +1583,46 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         required: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PATCH element returns element data.
+ *         description: OK, Succeeded to PATCH element, returns element public
+ *                      data.
  *       400:
- *         description: Bad Request, Failed to PATCH element due to invalid data.
+ *         description: Bad Request, Failed to PATCH element due to invalid
+ *                      data.
  *       401:
- *         description: Unauthorized, Failed to PATCH element due to not being logged in.
+ *         description: Unauthorized, Failed to PATCH element due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to PATCH element due to updating an immutable field.
+ *         description: Forbidden, Failed to PATCH element due to updating an
+ *                      immutable field.
  *       404:
- *         description: Not Found, Failed to PATCH element due to element not existing.
+ *         description: Not Found, Failed to PATCH element due to element not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to PATCH element due to server side issue.
- *
+ *         description: Internal Server Error, Failed to PATCH element due to
+ *                      server side issue.
  *   delete:
  *     tags:
  *       -  elements
- *     description: Deletes an element.
+ *     description: Deletes the specified element and all elements in the
+ *                  specified elements subtree. NOTE this endpoint is reserved
+ *                  for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization containing the project.
+ *         description: The ID of the organization containing the specified
+ *                      project.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project containing the element.
+ *         description: The ID of the project containing the specified branch.
  *         in: path
  *         required: true
  *         type: string
  *       - name: branchid
- *         description: The ID of the branch containing the element.
+ *         description: The ID of the branch containing the element to be
+ *                      deleted.
  *         in: path
  *         required: true
  *         type: string
@@ -1609,17 +1633,23 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE element returns element data.
+ *         description: OK, Succeeded to DELETE element, returns deleted
+ *                      element's id.
  *       400:
- *         description: Bad Request, Failed to DELETE element due to invalid data.
+ *         description: Bad Request, Failed to DELETE element due to invalid
+ *                      data.
  *       401:
- *         description: Unauthorized, Failed to DELETE element due to not being logged in.
+ *         description: Unauthorized, Failed to DELETE element due to not being
+ *                      logged in.
  *       403:
- *         description: Forbidden, Failed to DELETE element due to not having permissions.
+ *         description: Forbidden, Failed to DELETE element due to not having
+ *                      permissions.
  *       404:
- *         description: Not Found, Failed to DELETE element due to element not existing.
+ *         description: Not Found, Failed to DELETE element due to element not
+ *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to DELETE element due to server side issue.
+ *         description: Internal Server Error, Failed to DELETE element due to
+ *                      server side issue.
  */
 api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid')
 .get(
