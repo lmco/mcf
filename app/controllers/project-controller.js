@@ -40,7 +40,6 @@ const assert = require('assert');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
-const Webhook = M.require('models.webhook');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
@@ -787,8 +786,6 @@ function remove(requestingUser, organizationID, projects, options) {
       // Delete any elements in the project
       return Element.deleteMany(ownedQuery);
     })
-    // Delete any webhooks in the project
-    .then(() => Webhook.Webhook.deleteMany(ownedQuery))
     // Delete the projects
     .then(() => Project.deleteMany(searchQuery))
     .then((retQuery) => {
