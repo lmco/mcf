@@ -47,6 +47,7 @@
     "clean": "node mbee clean",
     "docker": "node mbee docker",
     "lint": "node mbee lint",
+    "migrate": "node mbee migrate",
     "start": "node mbee start",
     "test": "node mbee test"
   }

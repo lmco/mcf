@@ -44,10 +44,6 @@ module.exports = {
   postOrg,
   patchOrg,
   deleteOrg,
-  getOrgMember,
-  postOrgMember,
-  deleteOrgMember,
-  getOrgMembers,
   getAllProjects,
   getProjects,
   postProjects,
@@ -57,10 +53,6 @@ module.exports = {
   postProject,
   patchProject,
   deleteProject,
-  getProjMembers,
-  getProjMember,
-  postProjMember,
-  deleteProjMember,
   getUsers,
   postUsers,
   patchUsers,
@@ -203,14 +195,14 @@ function version(req, res) {
 function getOrgs(req, res) {
   // Define options and ids
   // Note: Undefined if not set
-  let orgIDs;
+  let ids;
   let options;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    orgIDs: 'array'
+    ids: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -229,23 +221,23 @@ function getOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check query for orgIDs
-  if (options.orgIDs) {
-    orgIDs = options.orgIDs;
-    delete options.orgIDs;
+  // Check query for ids
+  if (options.ids) {
+    ids = options.ids;
+    delete options.ids;
   }
   // No IDs include in options, check body for IDs
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
-    orgIDs = req.body;
+    ids = req.body;
   }
   // No IDs in options or body, check body for org objects
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    orgIDs = req.body.map(o => o.id);
+    ids = req.body.map(o => o.id);
   }
 
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
-  OrgController.find(req.user, orgIDs, options)
+  OrgController.find(req.user, ids, options)
   .then((orgs) => {
     // Verify orgs array is not empty
     if (orgs.length === 0) {
@@ -624,158 +616,7 @@ function deleteOrg(req, res) {
   .then((orgIDs) => {
     // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(orgIDs[0]);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
-}
-
-/**
- * GET /api/orgs/:orgid/members/:username
- *
- * @description Takes an orgid and username in the URI and returns
- * an object specifying which roles the user has within the organization.
- *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- *
- * @return {Object} Response object with searched users roles
- */
-function getOrgMember(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
-
-  // Find the org specified in the URI
-  // NOTE: find() sanitizes req.params.orgid
-  OrgController.find(req.user, req.params.orgid)
-  .then((orgs) => {
-    const org = orgs[0];
-    if (!org || !org.permissions[req.params.username]) {
-      return res.status(404).send('User not on organization.');
-    }
-
-    // Returns 200: OK and the users roles
-    res.header('Content-Type', 'application/json');
-    const userPermissionObj = {};
-    userPermissionObj[req.params.username] = org.permissions[req.params.username];
-    return res.status(200).send(formatJSON(userPermissionObj));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
-}
-
-/**
- * POST /api/orgs/:orgid/members/:username
- * PATCH /api/orgs/:orgid/members/:username
- *
- * @description Takes an orgid and username in the URI and updates a given
- * members role within an organization. Requires a role in the body
- *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- *
- * @return {Object} Response object with updated permissions
- *
- * NOTE: In the case of updating permissions POST and PATCH have the same
- * functionality.
- */
-function postOrgMember(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
-
-  // Ensure request body is a string
-  if (typeof req.body !== 'string') {
-    return res.status(400).send('Request body is not a string.');
-  }
-
-  // Create update object
-  const update = {
-    id: req.params.orgid,
-    permissions: {}
-  };
-  update.permissions[req.params.username] = req.body;
-
-  // Set permissions of given user
-  // NOTE: update() sanitizes update
-  OrgController.update(req.user, update)
-  .then((orgs) => {
-    // Return 200: Ok and updated org permissions
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs[0].permissions));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
-}
-
-/**
- * DELETE /api/orgs/:orgid/members/:username
- *
- * @description Takes an orgid and username in the URI and removes a user
- * from the given org.
- * NOTE: This function is system-admin ONLY.
- *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
- *
- * @return {Object} Response object with updated org permissions.
- */
-function deleteOrgMember(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
-
-  // Create update object
-  const update = {
-    id: req.params.orgid,
-    permissions: {}
-  };
-  update.permissions[req.params.username] = 'remove_all';
-
-  // Remove permissions of given user
-  // NOTE: update() sanitizes update
-  OrgController.update(req.user, update)
-  .then((orgs) => {
-    // Return 200: OK and updated org permissions
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs[0].permissions));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
-}
-
-/**
- * GET /orgs/:orgid/members/
- *
- * @description Takes an orgid in the URI and returns all members of the given
- * org and their permissions.
- *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- *
- * @return {Object} Response object with roles of members on given org
- */
-function getOrgMembers(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
-
-  // Get permissions of all users in given org
-  // NOTE: find() sanitizes req.params.orgid
-  OrgController.find(req.user, req.params.orgid)
-  .then((orgs) => {
-    // Return 200: OK and permissions of all members in found org
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs[0].permissions));
+    return res.status(200).send(formatJSON(orgIDs[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -850,14 +691,14 @@ function getAllProjects(req, res) {
 function getProjects(req, res) {
   // Define options and ids
   // Note: Undefined if not set
-  let projectIDs;
+  let ids;
   let options;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    projectIDs: 'array'
+    ids: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -876,24 +717,24 @@ function getProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check if projectIDs was provided in the request query
-  if (options.projectIDs) {
-    // Split the string by comma, add strings to projectIDs
-    projectIDs = options.projectIDs;
-    delete options.projectIDs;
+  // Check if ids was provided in the request query
+  if (options.ids) {
+    // Split the string by comma, add strings to ids
+    ids = options.ids;
+    delete options.ids;
   }
   // If project ids provided in array in request body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
-    projectIDs = req.body;
+    ids = req.body;
   }
   // If project objects provided in array in request body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
-    projectIDs = req.body.map(p => p.id);
+    ids = req.body.map(p => p.id);
   }
 
   // Get all projects the requesting user has access to in a specified org
-  // NOTE: find() sanitizes req.params.orgid and projectIDs
-  ProjectController.find(req.user, req.params.orgid, projectIDs, options)
+  // NOTE: find() sanitizes req.params.orgid and ids
+  ProjectController.find(req.user, req.params.orgid, ids, options)
   .then((projects) => {
     // Verify project array is not empty
     if (projects.length === 0) {
@@ -1273,158 +1114,6 @@ function deleteProject(req, res) {
     // Return 200: OK and the deleted project ID
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(utils.parseID(projectIDs[0]).pop()));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
-}
-
-/**
- * GET /api/orgs/:orgid/projects/:projectid/members
- *
- * @description Takes an orgid and projectid in the URI and returns all
- * members of a given project and their permissions.
- *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
- *
- * @return {Object} Response object with roles of members in a project.
- */
-function getProjMembers(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
-
-  // Get specified project
-  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.find(req.user, req.params.orgid, req.params.projectid)
-  .then((foundProjects) => {
-    // Returns 200: OK and the users roles
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(foundProjects[0].permissions));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
-}
-
-/**
- * GET /api/orgs/:orgid/projects/:projectid/members/:username
- *
- * @description Takes an orgid, projectid and username in the URI and returns
- * an object specifying which roles the user has within the given project.
- *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- *
- * @return {Object} Response object with project member roles.
- */
-function getProjMember(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
-
-  // Find the specified project
-  // NOTE: find() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.find(req.user, req.params.orgid, req.params.projectid)
-  .then((projects) => {
-    const project = projects[0];
-    if (!project || !project.permissions[req.params.username]) {
-      return res.status(404).send('User not on project.');
-    }
-    // Create object with just the user requested and their roles.
-    const retObj = {};
-    retObj[req.params.username] = project.permissions[req.params.username];
-
-    // Return 200: OK and users permissions
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(retObj));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
-}
-
-/**
- * POST /api/orgs/:orgid/projects/:project/members/:username
- * PATCH /api/orgs/:orgid/projects/:project/members/:username
- *
- * @description Takes an orgid, projectid, and username in the URI and updates a
- * given members role within the project. Requires a role in the body.
- *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- *
- * @return {Object} Response object with updated project's permissions
- *
- * NOTE: In the case of updating permissions POST and PATCH have the same
- * functionality.
- */
-function postProjMember(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
-
-  // Ensure request body is a string
-  if (typeof req.body !== 'string') {
-    return res.status(400).send('Request body is not a string.');
-  }
-
-  // Create update object
-  const update = {
-    id: req.params.projectid,
-    permissions: {}
-  };
-  update.permissions[req.params.username] = req.body;
-
-  // Change user roles on project
-  // NOTE: update() sanitizes req.params.orgid and update
-  ProjectController.update(req.user, req.params.orgid, update)
-  .then((projects) => {
-    // Return 200: Ok and updated permissions
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].permissions));
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
-}
-
-/**
- * DELETE /api/orgs/:orgid/projects/:project/members/:username
- *
- * @description Takes a projectid, orgid and username in the URI and removes a
- * user from the given project.
- * NOTE: This function is system-admin ONLY.
- *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- *
- * @return {Object} Response object with updated project permissions.
- */
-function deleteProjMember(req, res) {
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
-  }
-
-  // Create update object
-  const update = {
-    id: req.params.projectid,
-    permissions: {}
-  };
-  update.permissions[req.params.username] = 'remove_all';
-
-  // Remove permissions of given user
-  // NOTE: update() sanitizes req.params.orgid and update
-  ProjectController.update(req.user, req.params.orgid, update)
-  .then((projects) => {
-    // Return 200: OK and updated permissions
-    res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].permissions));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1949,7 +1638,7 @@ function getElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     subtree: 'boolean',
-    elementIDs: 'array'
+    ids: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1969,9 +1658,9 @@ function getElements(req, res) {
   }
 
   // Check query for element IDs
-  if (options.elementIDs) {
-    elemIDs = options.elementIDs;
-    delete options.elementIDs;
+  if (options.ids) {
+    elemIDs = options.ids;
+    delete options.ids;
   }
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     // No IDs include in options, check body
@@ -2206,10 +1895,10 @@ function getElement(req, res) {
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, req.params.elementid, options)
-  .then((element) => {
+  .then((elements) => {
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element[0].getPublicData()));
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2368,7 +2057,6 @@ function deleteElement(req, res) {
   })
   .catch((error) => res.status(error.status || 500).send(error));
 }
-
 
 /**
  * ALL /api/*
