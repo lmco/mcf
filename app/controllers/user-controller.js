@@ -299,6 +299,9 @@ function create(requestingUser, users, options) {
         // Ensure each user has a username and that its a string
         assert.ok(user.hasOwnProperty('username'), `User #${index} does not have a username`);
         assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);
+        // Check if user with same username is already being created
+        assert.ok(!arrUsernames.includes(user.username), 'Multiple users with '
+          + `the same username [${user.username}] cannot be created.`);
         arrUsernames.push(user.username);
         user._id = user.username;
         index++;

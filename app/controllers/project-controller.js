@@ -312,6 +312,9 @@ function create(requestingUser, organizationID, projects, options) {
         assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
         assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
         proj.id = utils.createID(orgID, proj.id);
+        // Check if project with same ID is already being created
+        assert.ok(!arrIDs.includes(proj.id), 'Multiple projects with the same '
+          + `ID [${utils.parseID(proj.id).pop()}] cannot be created.`);
         arrIDs.push(proj.id);
         proj._id = proj.id;
         index++;

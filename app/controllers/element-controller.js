@@ -396,6 +396,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
         assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
         elem.id = utils.createID(orgID, projID, elem.id);
+        // Check if elem with same ID is already being created
+        assert.ok(!arrIDs.includes(elem.id), 'Multiple elements with the same '
+          + `ID [${utils.parseID(elem.id).pop()}] cannot be created.`);
         arrIDs.push(elem.id);
         elem._id = elem.id;
 

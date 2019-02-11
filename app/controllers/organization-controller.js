@@ -294,6 +294,9 @@ function create(requestingUser, orgs, options) {
         // Ensure each org has an id and that its a string
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+        // Check if org with same ID is already being created
+        assert.ok(!arrIDs.includes(org.id), 'Multiple orgs with the same ID '
+            + `[${org.id}] cannot be created.`);
         arrIDs.push(org.id);
         // Set the _id equal to the id
         org._id = org.id;
