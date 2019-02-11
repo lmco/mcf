@@ -867,6 +867,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
+            // Error Check: ensure user cannot archive the root model element
+            if (element._id === utils.createID(orgID, projID, 'model')) {
+              throw new M.CustomError('User cannot archive the root model element.', 403, 'warn');
+            }
+
             // If the element is being archived
             if (updateElement[key] && !element[key]) {
               updateElement.archivedBy = reqUser._id;
@@ -1001,6 +1006,11 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     .then((_foundIDs) => {
       foundIDs = _foundIDs;
       const promises = [];
+
+      // Error Check: ensure user cannot delete root model element
+      if (foundIDs.includes(utils.createID(orgID, projID, 'model'))) {
+        throw new M.CustomError('User cannot delete the root model element.', 403, 'warn');
+      }
 
       // Split elements into batches of 50000 or less
       for (let i = 0; i < foundIDs.length / 50000; i++) {
