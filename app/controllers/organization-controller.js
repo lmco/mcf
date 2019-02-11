@@ -488,24 +488,30 @@ function update(requestingUser, orgs, options) {
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
-    // If not system admin, add permissions check
-    if (!reqUser.admin) {
-      searchQuery[`permissions.${reqUser._id}`] = 'admin';
-    }
 
     // Find the orgs to update
     Organization.find(searchQuery)
     .then((_foundOrgs) => {
+      // Set function-wide foundOrgs
+      foundOrgs = _foundOrgs;
+
+      // Check that the user has admin permissions
+      foundOrgs.forEach((org) => {
+        if (!org.permissions[reqUser._id]
+          || (!org.permissions[reqUser._id].includes('admin') && !reqUser.admin)) {
+          throw new M.CustomError('User does not have permission to update'
+            + ` the org [${org._id}].`, 403, 'warn');
+        }
+      });
+
       // Verify the same number of orgs are found as desired
-      if (_foundOrgs.length !== arrIDs.length) {
-        const foundIDs = _foundOrgs.map(o => o._id);
+      if (foundOrgs.length !== arrIDs.length) {
+        const foundIDs = foundOrgs.map(o => o._id);
         const notFound = arrIDs.filter(o => !foundIDs.includes(o));
         throw new M.CustomError(
           `The following orgs were not found: [${notFound.toString()}].`, 404, 'warn'
         );
       }
-      // Set function-wide foundOrgs
-      foundOrgs = _foundOrgs;
 
       // Convert orgsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, orgsToUpdate);

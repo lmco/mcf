@@ -548,25 +548,31 @@ function update(requestingUser, organizationID, projects, options) {
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
-    // If not system admin, add permissions check
-    if (!reqUser.admin) {
-      searchQuery[`permissions.${reqUser._id}`] = 'admin';
-    }
 
     // Find the projects to update
     Project.find(searchQuery)
     .then((_foundProjects) => {
+      // Set function-wide foundProjects
+      foundProjects = _foundProjects;
+
+      // Check that the user has admin permissions
+      foundProjects.forEach((proj) => {
+        if (!proj.permissions[reqUser._id]
+          || (!proj.permissions[reqUser._id].includes('admin') && !reqUser.admin)) {
+          throw new M.CustomError('User does not have permission to update'
+            + ` the project [${utils.parseID(proj._id).pop()}].`, 403, 'warn');
+        }
+      });
+
       // Verify the same number of projects are found as desired
-      if (_foundProjects.length !== arrIDs.length) {
-        const foundIDs = _foundProjects.map(p => p._id);
+      if (foundProjects.length !== arrIDs.length) {
+        const foundIDs = foundProjects.map(p => p._id);
         const notFound = arrIDs.filter(p => !foundIDs.includes(p)).map(p => utils.parseID(p).pop());
         throw new M.CustomError(
           `The following projects [${notFound.toString()}] were not found in `
             + `the org [${orgID}].`, 404, 'warn'
         );
       }
-      // Set function-wide foundProjects
-      foundProjects = _foundProjects;
 
       // Convert projectsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, projectsToUpdate);
