@@ -38,7 +38,6 @@ const testData = testUtils.importTestData('test_data.json');
 const test = M.config.test;
 let org = null;
 let adminUser = null;
-let nonAdminUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -60,13 +59,7 @@ describe(M.getModuleName(module.filename), () => {
       // Set global admin user
       adminUser = _adminUser;
 
-      // Create non-admin user
-      return testUtils.createNonAdminUser();
-    })
-    .then((_nonAdminUser) => {
-      nonAdminUser = _nonAdminUser;
-
-      // Create tes org
+      // Create test org
       return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
@@ -88,7 +81,6 @@ describe(M.getModuleName(module.filename), () => {
     // Removing the test organization
     testUtils.removeTestOrg(adminUser)
     .then(() => testUtils.removeTestAdmin())
-    .then(() => testUtils.removeNonAdminUser())
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -106,10 +98,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET multiple projects', getProjects);
   it('should GET all projects on an organization', getAllProjectsOnOrg);
   it('should GET all projects a user has access to', getAllProjects);
-  it('should POST a project member', postProjectMember);
-  it('should GET a project member', getProjectMember);
-  it('should GET all project members', getProjectMembers);
-  it('should DELETE a project member', deleteProjectMember);
   it('should PATCH a project', patchProject);
   it('should PATCH multiple projects', patchProjects);
   it('should DELETE a project', deleteProject);
@@ -275,7 +263,7 @@ function getProjects(done) {
   ];
   const projIDs = projData.map(p => p.id).join(',');
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects?projectIDs=${projIDs}`,
+    url: `${test.url}/api/orgs/${org.id}/projects?ids=${projIDs}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'GET'
@@ -432,118 +420,6 @@ function getAllProjects(done) {
     done();
   });
 }
-
-/**
- * Verifies POST /api/orgs/:orgid/projects/:projectid/members/:username adds
- * a user to a project.
- */
-function postProjectMember(done) {
-  const projData = testData.projects[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}/members/${nonAdminUser.username}`,
-    headers: testUtils.getHeaders('text/plain'),
-    ca: testUtils.readCaFile(),
-    method: 'POST',
-    body: 'write'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const foundPermissions = JSON.parse(body);
-
-    // Expect there to be two users on the project
-    chai.expect(Object.keys(foundPermissions).length).to.equal(2);
-    chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
-    chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
-    done();
-  });
-}
-
-/**
- * Verifies GET /api/orgs/:orgid/projects/:projectid/members/:username finds
- * a user roles within a project.
- */
-function getProjectMember(done) {
-  const projData = testData.projects[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}/members/${nonAdminUser.username}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const foundPermissions = JSON.parse(body);
-
-    // Expect response to contain only requested user
-    chai.expect(Object.keys(foundPermissions).length).to.equal(1);
-    chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
-    done();
-  });
-}
-
-/**
- * Verifies GET /api/orgs/:orgid/projects/:projectid/members finds all users
- * roles within a project.
- */
-function getProjectMembers(done) {
-  const projData = testData.projects[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}/members`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const foundPermissions = JSON.parse(body);
-
-    // Expect there to be two users on the project
-    chai.expect(Object.keys(foundPermissions).length).to.equal(2);
-    chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
-    chai.expect(foundPermissions[nonAdminUser.username]).to.have.members(['read', 'write']);
-    done();
-  });
-}
-
-/**
- * Verifies DELETE /api/orgs/:orgid/projects/:projectid/members/:username
- * removes a user from a project.
- */
-function deleteProjectMember(done) {
-  const projData = testData.projects[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}/members/${nonAdminUser.username}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'DELETE'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const foundPermissions = JSON.parse(body);
-
-    // Expect there to be two users on the project
-    chai.expect(Object.keys(foundPermissions).length).to.equal(1);
-    chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
-    done();
-  });
-}
-
 
 /**
  * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid updates a

@@ -19,10 +19,8 @@
     "express-session": "^1.15.6",
     "ldapjs": "^1.0.2",
     "mongoose": "^5.2.17",
-    "multer": "^1.4.1",
     "request": "^2.86.0",
     "swagger-jsdoc": "^1.9.7",
-    "uuid": "^3.3.2",
     "winston": "^3.0.0",
     "yarn": "^1.9.4"
   },
@@ -49,6 +47,7 @@
     "clean": "node mbee clean",
     "docker": "node mbee docker",
     "lint": "node mbee lint",
+    "migrate": "node mbee migrate",
     "start": "node mbee start",
     "test": "node mbee test"
   }

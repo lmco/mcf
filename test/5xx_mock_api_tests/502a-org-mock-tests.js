@@ -35,7 +35,6 @@ const utils = M.require('lib.utils');
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
-let newUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -55,14 +54,6 @@ describe(M.getModuleName(module.filename), () => {
     .then(() => testUtils.createTestAdmin())
     .then((reqUser) => {
       adminUser = reqUser;
-
-      return testUtils.createNonAdminUser();
-    })
-    .then((nonadminUser) => {
-      newUser = nonadminUser;
-      chai.expect(newUser.username).to.equal(testData.users[1].username);
-      chai.expect(newUser.fname).to.equal(testData.users[1].fname);
-      chai.expect(newUser.lname).to.equal(testData.users[1].lname);
       done();
     })
     .catch((error) => {
@@ -77,9 +68,8 @@ describe(M.getModuleName(module.filename), () => {
    * After: Delete admin user.
    */
   after((done) => {
-    // Removing non-admin user
-    testUtils.removeNonAdminUser()
-    .then(() => testUtils.removeTestAdmin())
+    // Remove admin user
+    testUtils.removeTestAdmin()
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -94,12 +84,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST an org', postOrg);
   it('should POST multiple orgs', postOrgs);
   it('should GET an org', getOrg);
-  it('should GET multiple multiple orgs', getOrgs);
+  it('should GET multiple orgs', getOrgs);
   it('should GET all orgs', getAllOrgs);
-  it('should POST an org member', postOrgMember);
-  it('should GET an org member', getOrgMember);
-  it('should GET all org members', getOrgMembers);
-  it('should DELETE an org member', deleteOrgMember);
   it('should PATCH an org', patchOrg);
   it('should PATCH multiple orgs', patchOrgs);
   it('should DELETE an org', deleteOrg);
@@ -364,135 +350,6 @@ function getAllOrgs(done) {
 }
 
 /**
- * @description Verifies mock POST request to add a user to an organization.
- */
-function postOrgMember(done) {
-  // Create request object
-  const body = 'write';
-  const params = {
-    orgid: testData.orgs[0].id,
-    username: testData.users[1].username };
-  const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const postedPermissions = JSON.parse(_data);
-    chai.expect(postedPermissions[testData.users[1].username]).to.have.members(
-      ['read', 'write']
-    );
-    chai.expect(postedPermissions[adminUser.username]).to.have.members(
-      ['read', 'write', 'admin']
-    );
-    done();
-  };
-
-  // POSTs an org role
-  apiController.postOrgMember(req, res);
-}
-
-/**
- * @description Verifies mock GET a users role within an organization.
- */
-function getOrgMember(done) {
-  // Create request object
-  const body = {};
-  const params = {
-    orgid: testData.orgs[0].id,
-    username: testData.users[1].username
-  };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const foundPermissions = JSON.parse(_data);
-    chai.expect(foundPermissions[testData.users[1].username]).to.have.members(
-      ['read', 'write']
-    );
-    done();
-  };
-
-  // GETs an org member role
-  apiController.getOrgMember(req, res);
-}
-
-/**
- * @description Verifies mock GET request to get all organization roles.
- */
-function getOrgMembers(done) {
-  // Create request object
-  const body = {};
-  const params = { orgid: testData.orgs[0].id };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Parse the JSON response
-    const foundPermissions = JSON.parse(_data);
-    // Expect there to be two users on the project
-    chai.expect(Object.keys(foundPermissions).length).to.equal(2);
-    chai.expect(foundPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
-    chai.expect(foundPermissions[testData.users[1].username]).to.have.members(['read', 'write']);
-
-    done();
-  };
-
-  // GETs all org member roles
-  apiController.getOrgMembers(req, res);
-}
-
-/**
- * @description Verifies mock DELETE request to remove a user from an
- * organization.
- */
-function deleteOrgMember(done) {
-  // Create request object
-  const body = {};
-  const params = {
-    orgid: testData.orgs[0].id,
-    username: testData.users[1].username
-  };
-  const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const deletedPermissions = JSON.parse(_data);
-    chai.expect(Object.keys(deletedPermissions).length).to.equal(1);
-    chai.expect(deletedPermissions[adminUser.username]).to.have.members(['read', 'write', 'admin']);
-    done();
-  };
-
-  // DELETEs an org role
-  apiController.deleteOrgMember(req, res);
-}
-
-/**
  * @description Verifies mock PATCH request to update an organization.
  */
 function patchOrg(done) {
@@ -612,7 +469,11 @@ function deleteOrg(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    chai.expect(_data).to.equal(testData.orgs[0].id);
+    // Parse the JSON response
+    const deletedID = JSON.parse(_data);
+
+    // Verify correct org deleted
+    chai.expect(deletedID).to.equal(testData.orgs[0].id);
     done();
   };
 

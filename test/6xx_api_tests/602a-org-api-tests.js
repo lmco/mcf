@@ -37,7 +37,6 @@ const testUtils = require(path.join(M.root, 'test', 'test-utils'));
 const testData = testUtils.importTestData('test_data.json');
 const test = M.config.test;
 let adminUser = null;
-let nonAdminUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -58,12 +57,6 @@ describe(M.getModuleName(module.filename), () => {
     .then((_adminUser) => {
       // Set global admin user
       adminUser = _adminUser;
-
-      // Create non-admin user
-      return testUtils.createNonAdminUser();
-    })
-    .then((_nonAdminUser) => {
-      nonAdminUser = _nonAdminUser;
       done();
     })
     .catch((error) => {
@@ -96,10 +89,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET an org', getOrg);
   it('should GET multiple orgs', getOrgs);
   it('should GET all orgs', getAllOrgs);
-  it('should POST an org member', postMemberRole);
-  it('should GET an org member', getMemberRole);
-  it('should GET all org members', getMemberRoles);
-  it('should DELETE an org member', deleteMemberRole);
   it('should PATCH an org', patchOrg);
   it('should PATCH multiple orgs', patchOrgs);
   it('should DELETE an org', deleteOrg);
@@ -248,7 +237,7 @@ function getOrgs(done) {
   ];
   const orgIDs = orgData.map(p => p.id).join(',');
   request({
-    url: `${test.url}/api/orgs?orgIDs=${orgIDs}`,
+    url: `${test.url}/api/orgs?ids=${orgIDs}`,
     ca: testUtils.readCaFile(),
     headers: testUtils.getHeaders()
   },
@@ -351,108 +340,6 @@ function getAllOrgs(done) {
       chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
-    done();
-  });
-}
-
-/**
- * @description Verifies POST /api/orgs/:orgid/members/:username
- * Sets or updates a users permissions on an organization.
- */
-function postMemberRole(done) {
-  const permission = 'write';
-  request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${nonAdminUser.username}`,
-    headers: testUtils.getHeaders('text/plain'),
-    ca: testUtils.readCaFile(),
-    method: 'POST',
-    body: permission
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const retPermission = JSON.parse(body);
-    chai.expect(retPermission[nonAdminUser.username]).to.have.members(
-      ['read', 'write']
-    );
-    done();
-  });
-}
-
-/**
- * @description Verifies POST /api/orgs/:orgid/members/:username
- * Returns the permissions a user has on an organization.
- */
-function getMemberRole(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${nonAdminUser.username}`,
-    headers: testUtils.getHeaders('text/plain'),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const retPermission = JSON.parse(body);
-    chai.expect(retPermission[nonAdminUser.username]).to.have.members(
-      ['read', 'write']
-    );
-    done();
-  });
-}
-
-/**
- * @description Verifies GET /api/orgs/:orgid/members/:username returns an
- * object containing that user's roles in the organization.
- */
-function getMemberRoles(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${testData.adminUser.username}`,
-    ca: testUtils.readCaFile(),
-    headers: testUtils.getHeaders()
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify the response body
-    const json = JSON.parse(body);
-    chai.expect(json[testData.adminUser.username]).to.have.members(
-      ['read', 'write', 'admin']
-    );
-    done();
-  });
-}
-
-/**
- * @description Verifies POST /api/orgs/:orgid/members/:username
- * Removes all permissions of a user from an organization.
- */
-function deleteMemberRole(done) {
-  request({
-    url: `${test.url}/api/orgs/${testData.orgs[0].id}/members/${nonAdminUser.username}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'DELETE'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const retPermission = JSON.parse(body);
-    chai.expect(Object.keys(retPermission).length).to.equal(1);
-    chai.expect(retPermission[adminUser.username]).to.have.members(
-      ['read', 'write', 'admin']
-    );
     done();
   });
 }
@@ -570,9 +457,11 @@ function deleteOrg(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const deletedID = JSON.parse(body);
 
-    // Verify correct org deleted
-    chai.expect(body).to.equal(orgData.id);
+    // Verify correct orgs deleted
+    chai.expect(deletedID).to.equal(orgData.id);
     done();
   });
 }
