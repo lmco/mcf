@@ -39,6 +39,7 @@ const assert = require('assert');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
+const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -414,9 +415,11 @@ function update(requestingUser, orgs, options) {
     // Sanitize input parameters and function-wide variables
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const duplicateCheck = {};
     let foundOrgs = [];
     let orgsToUpdate = [];
-    const duplicateCheck = {};
+    let existingUsers = [];
+    let updatingPermissions = false;
 
     // Initialize valid options
     let populateString = '';
@@ -478,6 +481,12 @@ function update(requestingUser, orgs, options) {
         arrIDs.push(org.id);
         // Set the _id equal to the id
         org._id = org.id;
+
+        // Check if updating user permissions
+        if (org.hasOwnProperty('permissions')) {
+          updatingPermissions = true;
+        }
+
         index++;
       });
     }
@@ -511,6 +520,18 @@ function update(requestingUser, orgs, options) {
           `The following orgs were not found: [${notFound.toString()}].`, 404, 'warn'
         );
       }
+
+      // Find users if updating permissions
+      if (updatingPermissions) {
+        return User.find({});
+      }
+
+      // Return an empty array if not updating permissions
+      return [];
+    })
+    .then((foundUsers) => {
+      // Set existing users
+      existingUsers = foundUsers.map(u => u._id);
 
       // Convert orgsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, orgsToUpdate);
@@ -574,6 +595,11 @@ function update(requestingUser, orgs, options) {
                 // Ensure user is not updating own permissions
                 if (user === reqUser.username) {
                   throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
+                }
+
+                // If user does not exist, throw an error
+                if (!existingUsers.includes(user)) {
+                  throw new M.CustomError(`User [${user}] not found.`, 404, 'warn');
                 }
 
                 // Value must be an string containing highest permissions
