@@ -168,6 +168,12 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((project) => {
+      // Check that the project was found
+      if (!project) {
+        throw new M.CustomError(`Project [${projID}] not found in the `
+        + `organization [${orgID}].`, 404, 'warn');
+      }
+
       // Verify the user has read permissions on the project
       if (!project.permissions[reqUser._id]
         || (!project.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
@@ -416,6 +422,12 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     // Find the project to verify existence and permissions
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((foundProject) => {
+      // Check that the project was found
+      if (!foundProject) {
+        throw new M.CustomError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 404, 'warn');
+      }
+
       // Verify user has write permissions on the project
       if (!foundProject.permissions[reqUser._id]
         || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
@@ -709,10 +721,10 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((foundProject) => {
-      // If project not found
+      // Check that the project was found
       if (!foundProject) {
-        throw new M.CustomError(`Project ${projID} `
-          + `not found in the org ${orgID}.`, 404, 'warn');
+        throw new M.CustomError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 404, 'warn');
       }
 
       // Verify user has write permissions on the project
