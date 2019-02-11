@@ -397,6 +397,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           elem.parent = 'model';
         }
         assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
+        assert.ok(utils.createID(orgID, projID, elem.parent) !== elem._id,
+          'Elements parent cannot be self.');
 
         // If element has a source, ensure it has a target
         if (elem.hasOwnProperty('source')) {
@@ -1154,6 +1156,11 @@ function moveElementCheck(organizationID, projectID, branch, element) {
   return new Promise((resolve, reject) => {
     // Create the name-spaced ID
     const elementID = utils.createID(organizationID, projectID, element.id);
+
+    // Error Check: ensure elements parent is not self
+    if (element.parent === elementID) {
+      throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
+    }
 
     // Define nested helper function
     function findElementParentRecursive(e) {
