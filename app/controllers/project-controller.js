@@ -295,13 +295,19 @@ function create(requestingUser, organizationID, projects, options) {
       throw new M.CustomError('Invalid input for creating projects.', 400, 'warn');
     }
 
-    // Create array of id's for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
+    const validProjKeys = ['id', 'name', 'custom', 'visibility'];
 
     // Check that each project has an id, and add to arrIDs
     try {
       let index = 1;
       projectsToCreate.forEach((proj) => {
+        // Ensure keys are valid
+        Object.keys(proj).forEach((k) => {
+          assert.ok(validProjKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each project has an id and that its a string
         assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
         assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);

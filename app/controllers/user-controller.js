@@ -282,13 +282,20 @@ function create(requestingUser, users, options) {
       throw new M.CustomError('Invalid input for creating users.', 400, 'warn');
     }
 
-    // Create array of usernames for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrUsernames = [];
+    const validUserKeys = ['username', 'password', 'fname', 'lname',
+      'preferredName', 'email', 'admin', 'provdier', 'custom'];
 
     // Check that each user has a username, and add to arrUsernames
     try {
       let index = 1;
       usersToCreate.forEach((user) => {
+        // Ensure keys are valid
+        Object.keys(user).forEach((k) => {
+          assert.ok(validUserKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each user has a username and that its a string
         assert.ok(user.hasOwnProperty('username'), `User #${index} does not have a username`);
         assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);

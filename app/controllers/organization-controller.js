@@ -278,13 +278,19 @@ function create(requestingUser, orgs, options) {
       throw new M.CustomError('Invalid input for creating organizations.', 400, 'warn');
     }
 
-    // Create array of id's for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
+    const validOrgKeys = ['id', 'name', 'custom'];
 
     // Check that each org has an id, and add to arrIDs
     try {
       let index = 1;
       orgsToCreate.forEach((org) => {
+        // Ensure keys are valid
+        Object.keys(org).forEach((k) => {
+          assert.ok(validOrgKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each org has an id and that its a string
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);

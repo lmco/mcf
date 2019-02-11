@@ -378,13 +378,20 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError('Invalid input for creating elements.', 400, 'warn');
     }
 
-    // Create array of id's for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
+    const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
+      'documentation', 'type', 'custom'];
 
     // Check that each element has an id and set the parent if null
     try {
       let index = 1;
       elementsToCreate.forEach((elem) => {
+        // Ensure keys are valid
+        Object.keys(elem).forEach((k) => {
+          assert.ok(validElemKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each element has an id and that it's a string
         assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
         assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);

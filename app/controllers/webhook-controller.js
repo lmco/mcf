@@ -316,14 +316,21 @@ function create(requestingUser, organizationID, projectID, webhooks, options) {
       throw new M.CustomError('Invalid input for creating webhooks.', 400, 'warn');
     }
 
-    // Create array of id's for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
+    const validWebhookKeys = ['id', 'name', 'triggers', 'type', 'custom',
+      'responses', 'token', 'tokenLocation'];
 
     // Check that each webhook has an id and type
     try {
       let index = 1;
       const validTypes = Webhook.Webhook.getValidTypes();
       webhooksToCreate.forEach((webhook) => {
+        // Ensure keys are valid
+        Object.keys(webhook).forEach((k) => {
+          assert.ok(validWebhookKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each webhook has an id and that it's a string
         assert.ok(webhook.hasOwnProperty('id'), `Webhook #${index} does not have an id.`);
         assert.ok(typeof webhook.id === 'string', `Webhook #${index}'s id is not a string.`);
