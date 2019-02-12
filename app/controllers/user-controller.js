@@ -285,7 +285,7 @@ function create(requestingUser, users, options) {
     // Create array of id's for lookup and array of valid keys
     const arrUsernames = [];
     const validUserKeys = ['username', 'password', 'fname', 'lname',
-      'preferredName', 'email', 'admin', 'provdier', 'custom'];
+      'preferredName', 'email', 'admin', 'provider', 'custom'];
 
     // Check that each user has a username, and add to arrUsernames
     try {
@@ -337,11 +337,10 @@ function create(requestingUser, users, options) {
         return userObj;
       });
 
-        // TODO: Do we need to check if provider === local && password === undefined
 
-        // Create the users
-        // NOTE: .create() is being used here instead of.insertMany() so that the
-        // pre save middleware is called for password validation
+      // Create the users
+      // NOTE: .create() is being used here instead of.insertMany() so that the
+      // pre save middleware is called for password validation
       return User.create(userObjects);
     })
     .then((_createdUsers) => {

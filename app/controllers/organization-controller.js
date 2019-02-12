@@ -694,8 +694,8 @@ function update(requestingUser, orgs, options) {
 
 /**
  * @description This function removes one or many organizations as well as the
- * projects, elements, and webhooks that belong to them. This function can be
- * used by system-wide admins ONLY. NOTE: Cannot delete the default org.
+ * projects and elements that belong to them. This function can be used by
+ * system-wide admins ONLY. NOTE: Cannot delete the default org.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} orgs - The organizations to remove. Can either be
@@ -787,8 +787,6 @@ function remove(requestingUser, orgs, options) {
         }
       });
 
-      // TODO: Remove artifacts
-      // TODO: Remove orphaned artifacts via controller
       // Delete any elements in the org
       return Element.deleteMany(ownedQuery);
     })

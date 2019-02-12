@@ -276,9 +276,9 @@ api.route('/version')
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes multiple organizations and any projects, elements,
- *                  webhooks and artifacts name-spaced under the specified orgs.
- *                  NOTE this endpoint can be used by system-admins ONLY.
+ *     description: Deletes multiple organizations and any projects and elements
+ *                  name-spaced under the specified orgs. NOTE this endpoint can
+ *                  be used by system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -479,9 +479,9 @@ api.route('/orgs')
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes the specified organization and any projects,
- *                  elements, webhooks and artifacts name-spaced under the org.
- *                  NOTE this endpoint is reserved for system-wide admins ONLY.
+ *     description: Deletes the specified organization and any projects and
+ *                  elements name-spaced under the org. NOTE this endpoint is
+ *                  reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -764,9 +764,9 @@ api.route('/projects')
  *   delete:
  *     tags:
  *       - projects
- *     description: Deletes multiple projects and any elements, webhooks and
- *                  artifacts name-spaced under the specified project. NOTE this
- *                  endpoint can be used by system-admins ONLY.
+ *     description: Deletes multiple projects and any elements name-spaced under
+ *                  the specified project. NOTE this endpoint can be used by
+ *                  system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1003,9 +1003,9 @@ api.route('/orgs/:orgid/projects')
  *   delete:
  *     tags:
  *       - projects
- *     description: Deletes the specified project and any elements, webhooks and
- *                  artifacts name-spaced under the project. NOTE this endpoint
- *                  is reserved for system-wide admins ONLY.
+ *     description: Deletes the specified project and any elements name-spaced
+ *                  under the project. NOTE this endpoint is reserved for
+ *                  system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
