@@ -682,6 +682,7 @@ function remove(requestingUser, users, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUsers = [];
     let foundUsernames = [];
+    let searchedUsernames = [];
 
     // Define searchQuery and memberQuery
     const searchQuery = {};
@@ -690,10 +691,12 @@ function remove(requestingUser, users, options) {
     // Check the type of the users parameter
     if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'string')) {
       // An array of usernames, remove all
+      searchedUsernames = saniUsers;
       searchQuery._id = { $in: saniUsers };
     }
     else if (typeof saniUsers === 'string') {
       // A single username
+      searchedUsernames = [saniUsers];
       searchQuery._id = saniUsers;
     }
     else {
@@ -707,6 +710,14 @@ function remove(requestingUser, users, options) {
       // Set function-wide foundUsers and foundUsernames
       foundUsers = _foundUsers;
       foundUsernames = foundUsers.map(u => u._id);
+
+      // Check if all users were found
+      const notFoundUsernames = searchedUsernames.filter(u => !foundUsernames.includes(u));
+      // Some users not found, throw an error
+      if (notFoundUsernames.length > 0) {
+        throw new M.CustomError('The following users were not found: '
+          + `[${notFoundUsernames}].`, 404, 'warn');
+      }
 
       // Create memberQuery
       foundUsers.forEach((user) => {

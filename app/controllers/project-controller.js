@@ -804,6 +804,7 @@ function remove(requestingUser, organizationID, projects, options) {
     const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
+    let searchedIDs = [];
 
     // Ensure parameters are valid
     try {
@@ -823,10 +824,12 @@ function remove(requestingUser, organizationID, projects, options) {
     // Check the type of the projects parameter
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'string')) {
       // An array of project ids, remove all
-      searchQuery._id = { $in: saniProjects.map(p => utils.createID(orgID, p)) };
+      searchedIDs = saniProjects.map(p => utils.createID(orgID, p));
+      searchQuery._id = { $in: searchedIDs };
     }
     else if (typeof saniProjects === 'string') {
       // A single project id, remove one
+      searchedIDs = [utils.createID(orgID, saniProjects)];
       searchQuery._id = utils.createID(orgID, saniProjects);
     }
     else {
@@ -839,7 +842,16 @@ function remove(requestingUser, organizationID, projects, options) {
     .then((_foundProjects) => {
       // Set the function-wide foundProjects and create ownedQuery
       foundProjects = _foundProjects;
-      ownedQuery.project = { $in: foundProjects.map(p => p._id) };
+      const foundProjectIDs = foundProjects.map(p => p._id);
+      ownedQuery.project = { $in: foundProjectIDs };
+
+      // Check if all projects were found
+      const notFoundIDs = searchedIDs.filter(p => !foundProjectIDs.includes(p));
+      // Some projects not found, throw an error
+      if (notFoundIDs.length > 0) {
+        throw new M.CustomError('The following projects were not found: '
+          + `[${notFoundIDs.map(p => utils.parseID(p).pop())}].`, 404, 'warn');
+      }
 
       // TODO: Remove artifacts
       // Delete any elements in the project

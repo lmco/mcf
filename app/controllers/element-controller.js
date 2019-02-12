@@ -1025,8 +1025,24 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Invalid parameter, throw an error
       throw new M.CustomError('Invalid input for removing elements.', 400, 'warn');
     }
-    // Find all element IDs and their subtree IDs
-    findElementTree(orgID, projID, 'master', elementsToFind)
+
+    // Find the elements to delete
+    Element.find({ _id: { $in: elementsToFind } })
+    .then((foundElements) => {
+      const foundElementIDs = foundElements.map(e => e._id);
+
+      // Check if all elements were found
+      const notFoundIDs = elementsToFind.filter(e => !foundElementIDs.includes(e));
+      // Some elements not found, throw an error
+      if (notFoundIDs.length > 0) {
+        throw new M.CustomError('The following elements were not found: '
+          + `[${notFoundIDs.map(e => utils.parseID(e)
+          .pop())}].`, 404, 'warn');
+      }
+
+      // Find all element IDs and their subtree IDs
+      return findElementTree(orgID, projID, 'master', elementsToFind);
+    })
     .then((_foundIDs) => {
       foundIDs = _foundIDs;
       const promises = [];

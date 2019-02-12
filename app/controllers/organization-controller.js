@@ -737,6 +737,7 @@ function remove(requestingUser, orgs, options) {
     // Sanitize input parameters and function-wide variables
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     let foundOrgs = [];
+    let searchedIDs = [];
 
     // Define searchQuery and ownedQuery
     const searchQuery = {};
@@ -745,10 +746,12 @@ function remove(requestingUser, orgs, options) {
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'string')) {
       // An array of org ids, remove all
+      searchedIDs = saniOrgs;
       searchQuery._id = { $in: saniOrgs };
     }
     else if (typeof saniOrgs === 'string') {
       // A single org id
+      searchedIDs = [saniOrgs];
       searchQuery._id = saniOrgs;
     }
     else {
@@ -761,8 +764,17 @@ function remove(requestingUser, orgs, options) {
     .then((_foundOrgs) => {
       // Set function-wde foundOrgs and create ownedQuery
       foundOrgs = _foundOrgs;
+      const foundOrgIDs = foundOrgs.map(o => o._id);
       const regexIDs = _foundOrgs.map(o => `/^${o._id}/`);
       ownedQuery._id = { $in: regexIDs };
+
+      // Check if all orgs were found
+      const notFoundIDs = searchedIDs.filter(o => !foundOrgIDs.includes(o));
+      // Some orgs not found, throw an error
+      if (notFoundIDs.length > 0) {
+        throw new M.CustomError('The following orgs were not found: '
+          + `[${notFoundIDs}].`, 404, 'warn');
+      }
 
       // Check that user can remove each org
       foundOrgs.forEach((org) => {
