@@ -501,7 +501,7 @@ function update(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the orgs to update
-    Organization.find(searchQuery)
+    Organization.find(searchQuery).populate('projects')
     .then((_foundOrgs) => {
       // Set function-wide foundOrgs
       foundOrgs = _foundOrgs;
@@ -589,9 +589,6 @@ function update(requestingUser, orgs, options) {
 
             // If the user is updating permissions
             if (key === 'permissions') {
-              // Get a list of valid org permissions
-              const validPermissions = Organization.getPermissionLevels();
-
               // Loop through each user provided
               Object.keys(updateOrg[key]).forEach((user) => {
                 let permValue = updateOrg[key][user];
@@ -613,13 +610,6 @@ function update(requestingUser, orgs, options) {
                 // Lowercase the permission value
                 permValue = permValue.toLowerCase();
 
-                // Value must be valid permission
-                if (!validPermissions.includes(permValue)) {
-                  throw new M.CustomError(
-                    `${permValue} is not a valid permission`, 400, 'warn'
-                  );
-                }
-
                 // Set stored permissions value based on provided permValue
                 switch (permValue) {
                   case 'read':
@@ -631,9 +621,22 @@ function update(requestingUser, orgs, options) {
                   case 'admin':
                     org.permissions[user] = ['read', 'write', 'admin'];
                     break;
-                  // Default case, delete user from org
-                  default:
+                  case 'remove_all':
+                    // If user is still on a project within the org, throw error
+                    org.projects.forEach((p) => {
+                      if (p.permissions.hasOwnProperty(user)) {
+                        throw new M.CustomError('User must be removed from '
+                          + `the project [${utils.parseID(p._id).pop()}] prior`
+                          + ` to being removed from the org [${org._id}].`, 403, 'warn');
+                      }
+                    });
                     delete org.permissions[user];
+                    break;
+                  // Default case, invalid permission
+                  default:
+                    throw new M.CustomError(
+                      `${permValue} is not a valid permission`, 400, 'warn'
+                    );
                 }
 
                 // Copy permissions from org to update object
