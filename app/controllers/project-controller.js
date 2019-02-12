@@ -203,6 +203,10 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {string} [projects.visibility = 'private'] - The visibility of the
  * project being created. If 'internal', users not in the project but in the
  * owning org will be able to view the project.
+ * @param {Object} [projects.permissions] - Any preset permissions on the
+ * project. Keys should be usernames and values should be the highest
+ * permissions the user has. NOTE: The requesting user gets added as an admin by
+ * default.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -246,11 +250,11 @@ function create(requestingUser, organizationID, projects, options) {
     const orgID = sani.sanitize(organizationID);
     const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    let createdProjects = [];
+    let foundOrg = {};
+    let projObjects = [];
 
     // Initialize valid options
     let populateString = '';
-    let populate = false;
 
     // Ensure options are valid
     if (options) {
@@ -274,7 +278,6 @@ function create(requestingUser, organizationID, projects, options) {
         });
 
         populateString = options.populate.join(' ');
-        populate = true;
       }
     }
 
@@ -297,7 +300,7 @@ function create(requestingUser, organizationID, projects, options) {
 
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
-    const validProjKeys = ['id', 'name', 'custom', 'visibility'];
+    const validProjKeys = ['id', 'name', 'custom', 'visibility', 'permissions'];
 
     // Check that each project has an id, and add to arrIDs
     try {
@@ -317,6 +320,15 @@ function create(requestingUser, organizationID, projects, options) {
           + `ID [${utils.parseID(proj.id).pop()}] cannot be created.`);
         arrIDs.push(proj.id);
         proj._id = proj.id;
+
+        // If user not setting permissions, add the field
+        if (!proj.hasOwnProperty('permissions')) {
+          proj.permissions = {};
+        }
+
+        // Add requesting user as admin on project
+        proj.permissions[reqUser._id] = 'admin';
+
         index++;
       });
     }
@@ -329,7 +341,8 @@ function create(requestingUser, organizationID, projects, options) {
 
     // Find the organization to verify existence and permissions
     Organization.findOne({ _id: orgID })
-    .then((foundOrg) => {
+    .then((_foundOrg) => {
+      foundOrg = _foundOrg;
       // If the org was not found
       if (foundOrg === null) {
         throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
@@ -353,16 +366,53 @@ function create(requestingUser, organizationID, projects, options) {
 
         // There are one or more projects with conflicting IDs
         throw new M.CustomError('Projects with the following IDs already exist'
-            + ` [${foundProjectIDs.toString()}].`, 403, 'warn');
+          + ` [${foundProjectIDs.toString()}].`, 403, 'warn');
       }
 
+      // Get all existing users for permissions
+      return User.find({});
+    })
+    .then((foundUsers) => {
+      // Create array of usernames
+      const foundUsernames = foundUsers.map(u => u.username);
+      const promises = [];
       // For each object of project data, create the project object
-      const projObjects = projectsToCreate.map((p) => {
+      projObjects = projectsToCreate.map((p) => {
         const projObj = new Project(p);
         // Set org
         projObj.org = orgID;
         // Set permissions
-        projObj.permissions[reqUser._id] = ['read', 'write', 'admin'];
+        Object.keys(projObj.permissions).forEach((u) => {
+          // If user does not exist, throw an error
+          if (!foundUsernames.includes(u)) {
+            throw new M.CustomError(`User [${u}] not found.`, 404, 'warn');
+          }
+
+          const permission = projObj.permissions[u];
+
+          // Change permission level to array of permissions
+          switch (permission) {
+            case 'read':
+              projObj.permissions[u] = ['read'];
+              break;
+            case 'write':
+              projObj.permissions[u] = ['read', 'write'];
+              break;
+            case 'admin':
+              projObj.permissions[u] = ['read', 'write', 'admin'];
+              break;
+            default:
+              throw new M.CustomError(`Invalid permission [${permission}].`, 400, 'warn');
+          }
+
+          // Check if they have been added to the org
+          if (!foundOrg.permissions.hasOwnProperty(u)) {
+            // Add user to org with read permissions
+            const updateQuery = {};
+            updateQuery[`permissions.${u}`] = ['read'];
+            promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
+          }
+        });
         projObj.lastModifiedBy = reqUser._id;
         projObj.createdBy = reqUser._id;
         projObj.updatedOn = Date.now();
@@ -370,15 +420,15 @@ function create(requestingUser, organizationID, projects, options) {
         return projObj;
       });
 
-        // Create the projects
-      return Project.insertMany(projObjects);
-    })
-    .then((_createdProjects) => {
-      // Set function-wide createdProjects
-      createdProjects = _createdProjects;
+      // Create the projects
+      promises.push(Project.insertMany(projObjects));
 
+      // Return when all promises are complete
+      return Promise.all(promises);
+    })
+    .then(() => {
       // Create a root model element for each project
-      const elemObjects = createdProjects.map((p) => new Element({
+      const elemObjects = projObjects.map((p) => new Element({
         _id: utils.createID(p._id, 'model'),
         name: 'Model',
         parent: null,
@@ -394,14 +444,7 @@ function create(requestingUser, organizationID, projects, options) {
         // Create the elements
       return Element.insertMany(elemObjects);
     })
-    .then(() => {
-      if (populate) {
-        return resolve(Project.find({ _id: { $in: arrIDs } })
-        .populate(populateString));
-      }
-
-      return resolve(createdProjects);
-    })
+    .then(() => resolve(Project.find({ _id: { $in: arrIDs } }).populate(populateString)))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

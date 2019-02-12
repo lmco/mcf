@@ -197,6 +197,10 @@ api.route('/version')
  *                 type: string
  *               custom:
  *                 type: object
+ *               permissions:
+ *                 type: object
+ *                 description: Any preset permissions. Keys are the users
+ *                              usernames, and values are the permission.
  *         description: An array of objects containing organization data.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -399,6 +403,10 @@ api.route('/orgs')
  *               type: string
  *             custom:
  *               type: object
+ *             permissions:
+ *               type: object
+ *               description: Any preset permissions. Keys are the users
+ *                            usernames, and values are the permission.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -675,6 +683,10 @@ api.route('/projects')
  *                 type: string
  *                 default: private
  *                 enum: [internal, private]
+ *               permissions:
+ *                 type: object
+ *                 description: Any preset permissions. Keys are the users
+ *                              usernames, and values are the permission.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -913,6 +925,10 @@ api.route('/orgs/:orgid/projects')
  *               type: string
  *               default: private
  *               enum: [internal, private]
+ *             permissions:
+ *               type: object
+ *               description: Any preset permissions. Keys are the users
+ *                            usernames, and values are the permission.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.

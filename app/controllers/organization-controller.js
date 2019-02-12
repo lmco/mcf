@@ -188,6 +188,9 @@ function find(requestingUser, orgs, options) {
  * @param {string} orgs.name - The organization name.
  * @param {Object} [orgs.custom] - Any additional key/value pairs for an object.
  * Must be proper JSON form.
+ * @param {Object} [orgs.permissions] - Any preset permissions on the org. Keys
+ * should be usernames and values should be the highest permissions the user
+ * has. NOTE: The requesting user gets added as an admin by default.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -280,7 +283,7 @@ function create(requestingUser, orgs, options) {
 
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
-    const validOrgKeys = ['id', 'name', 'custom'];
+    const validOrgKeys = ['id', 'name', 'custom', 'permissions'];
 
     // Check that each org has an id, and add to arrIDs
     try {
@@ -300,6 +303,15 @@ function create(requestingUser, orgs, options) {
         arrIDs.push(org.id);
         // Set the _id equal to the id
         org._id = org.id;
+
+        // If user not setting permissions, add the field
+        if (!org.hasOwnProperty('permissions')) {
+          org.permissions = {};
+        }
+
+        // Add requesting user as admin on org
+        org.permissions[reqUser._id] = 'admin';
+
         index++;
       });
     }
@@ -320,14 +332,42 @@ function create(requestingUser, orgs, options) {
 
         // There are one or more orgs with conflicting IDs
         throw new M.CustomError('Orgs with the following IDs already exist'
-            + ` [${foundOrgIDs.toString()}].`, 403, 'warn');
+          + ` [${foundOrgIDs.toString()}].`, 403, 'warn');
       }
 
+      // Get all existing users for permissions
+      return User.find({});
+    })
+    .then((foundUsers) => {
+      // Create array of usernames
+      const foundUsernames = foundUsers.map(u => u.username);
       // For each object of org data, create the org object
       const orgObjects = orgsToCreate.map((o) => {
         const orgObj = new Organization(o);
         // Set permissions
-        orgObj.permissions[reqUser._id] = ['read', 'write', 'admin'];
+        Object.keys(orgObj.permissions).forEach((u) => {
+          // If user does not exist, throw an error
+          if (!foundUsernames.includes(u)) {
+            throw new M.CustomError(`User [${u}] not found.`, 404, 'warn');
+          }
+
+          const permission = orgObj.permissions[u];
+
+          // Change permission level to array of permissions
+          switch (permission) {
+            case 'read':
+              orgObj.permissions[u] = ['read'];
+              break;
+            case 'write':
+              orgObj.permissions[u] = ['read', 'write'];
+              break;
+            case 'admin':
+              orgObj.permissions[u] = ['read', 'write', 'admin'];
+              break;
+            default:
+              throw new M.CustomError(`Invalid permission [${permission}].`, 400, 'warn');
+          }
+        });
         orgObj.lastModifiedBy = reqUser._id;
         orgObj.createdBy = reqUser._id;
         orgObj.updatedOn = Date.now();
