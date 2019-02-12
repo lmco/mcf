@@ -483,6 +483,7 @@ function update(requestingUser, organizationID, projects, options) {
     let projectsToUpdate = [];
     let existingUsers = [];
     let updatingPermissions = false;
+    let foundOrg = {};
 
     // Initialize valid options
     let populateString = '';
@@ -560,8 +561,20 @@ function update(requestingUser, organizationID, projects, options) {
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
 
-    // Find the projects to update
-    Project.find(searchQuery)
+    // Find the organization containing the projects
+    Organization.findOne({ _id: orgID })
+    .then((_foundOrganization) => {
+      // Check if the organization was found
+      if (_foundOrganization === null) {
+        throw new M.CustomError(`The org [${_foundOrganization._id}] was not found.`, 404, 'warn');
+      }
+
+      // Set function-wide foundOrg
+      foundOrg = _foundOrganization;
+
+      // Find the projects to update
+      return Project.find(searchQuery);
+    })
     .then((_foundProjects) => {
       // Set function-wide foundProjects
       foundProjects = _foundProjects;
@@ -600,6 +613,7 @@ function update(requestingUser, organizationID, projects, options) {
       // Convert projectsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, projectsToUpdate);
       const bulkArray = [];
+      const promises = [];
       // Get array of editable parameters
       const validFields = Project.getValidUpdateFields();
 
@@ -696,6 +710,14 @@ function update(requestingUser, organizationID, projects, options) {
                     );
                 }
 
+                // If not removing a user, check if they have been added to the org
+                if (permValue !== 'remove_all' && !foundOrg.permissions.hasOwnProperty(user)) {
+                  // Add user to org with read permissions
+                  const updateQuery = {};
+                  updateQuery[`permissions.${user}`] = ['read'];
+                  promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
+                }
+
                 // Copy permissions from proj to update object
                 updateProj.permissions = proj.permissions;
               });
@@ -740,7 +762,10 @@ function update(requestingUser, organizationID, projects, options) {
       });
 
       // Update all projects through a bulk write to the database
-      return Project.bulkWrite(bulkArray);
+      promises.push(Project.bulkWrite(bulkArray));
+
+      // Return when all promises have been complete
+      return Promise.all(promises);
     })
     .then(() => Project.find(searchQuery)
     .populate(populateString))
