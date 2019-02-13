@@ -396,9 +396,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
         assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
         elem.id = utils.createID(orgID, projID, elem.id);
-        // Check if elem with same ID is already being created
-        assert.ok(!arrIDs.includes(elem.id), 'Multiple elements with the same '
-          + `ID [${utils.parseID(elem.id).pop()}] cannot be created.`);
         arrIDs.push(elem.id);
         elem._id = elem.id;
 
@@ -429,6 +426,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     }
     catch (err) {
       throw new M.CustomError(err.message, 403, 'warn');
+    }
+
+    // Attempt to convert elements to JMI type 2, to see if duplicate ids exist
+    try {
+      utils.convertJMI(1, 2, elementsToCreate, '_id');
+    }
+    catch (err) {
+      throw new M.CustomError('Cannot create multiple elements with the same ID.', 403, 'warn');
     }
 
     // Find the project to verify existence and permissions
@@ -596,7 +601,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     .then((createdElements) => {
       const promises = [];
       const createdIDs = createdElements.map(e => e._id);
-
       // Find elements in batches
       for (let i = 0; i < createdIDs.length / 50000; i++) {
         // Split elementIDs list into batches of 50000
