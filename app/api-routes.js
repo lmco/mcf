@@ -1062,6 +1062,12 @@ api.route('/orgs/:orgid/projects/:projectid')
   APIController.deleteProject
 );
 
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.searchElements
+);
 
 /**
  * @swagger
