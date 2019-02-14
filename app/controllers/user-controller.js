@@ -42,6 +42,7 @@ const Project = M.require('models.project');
 const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -281,16 +282,26 @@ function create(requestingUser, users, options) {
       throw new M.CustomError('Invalid input for creating users.', 400, 'warn');
     }
 
-    // Create array of usernames for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrUsernames = [];
+    const validUserKeys = ['username', 'password', 'fname', 'lname',
+      'preferredName', 'email', 'admin', 'provider', 'custom'];
 
     // Check that each user has a username, and add to arrUsernames
     try {
       let index = 1;
       usersToCreate.forEach((user) => {
+        // Ensure keys are valid
+        Object.keys(user).forEach((k) => {
+          assert.ok(validUserKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each user has a username and that its a string
         assert.ok(user.hasOwnProperty('username'), `User #${index} does not have a username`);
         assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);
+        // Check if user with same username is already being created
+        assert.ok(!arrUsernames.includes(user.username), 'Multiple users with '
+          + `the same username [${user.username}] cannot be created.`);
         arrUsernames.push(user.username);
         user._id = user.username;
         index++;
@@ -322,14 +333,14 @@ function create(requestingUser, users, options) {
         userObj.lastModifiedBy = reqUser._id;
         userObj.createdBy = reqUser._id;
         userObj.updatedOn = Date.now();
+        userObj.archivedBy = (userObj.archived) ? reqUser._id : null;
         return userObj;
       });
 
-        // TODO: Do we need to check if provider === local && password === undefined
 
-        // Create the users
-        // NOTE: .create() is being used here instead of.insertMany() so that the
-        // pre save middleware is called for password validation
+      // Create the users
+      // NOTE: .create() is being used here instead of.insertMany() so that the
+      // pre save middleware is called for password validation
       return User.create(userObjects);
     })
     .then((_createdUsers) => {
@@ -550,6 +561,16 @@ function update(requestingUser, users, options) {
                 + 'be changed.', 400, 'warn');
           }
 
+          // Get validator for field if one exists
+          if (validators.user.hasOwnProperty(key)) {
+            // If validation fails, throw error
+            if (!RegExp(validators.user[key]).test(updateUser[key])) {
+              throw new M.CustomError(
+                `Invalid ${key}: [${updateUser[key]}]`, 403, 'warn'
+              );
+            }
+          }
+
           // If the type of field is mixed
           if (User.schema.obj[key]
             && User.schema.obj[key].type.schemaName === 'Mixed') {
@@ -578,16 +599,19 @@ function update(requestingUser, users, options) {
             // If the user is being archived
             if (updateUser[key] && !user[key]) {
               updateUser.archivedBy = reqUser._id;
+              updateUser.archivedOn = Date.now();
             }
             // If the user is being unarchived
             else if (!updateUser[key] && user[key]) {
               updateUser.archivedBy = null;
+              updateUser.archivedOn = null;
             }
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateUser.lastModifiedBy = reqUser._id;
+        updateUser.updatedOn = Date.now();
 
         // Update the user
         bulkArray.push({
@@ -657,6 +681,7 @@ function remove(requestingUser, users, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUsers = [];
     let foundUsernames = [];
+    let searchedUsernames = [];
 
     // Define searchQuery and memberQuery
     const searchQuery = {};
@@ -665,10 +690,12 @@ function remove(requestingUser, users, options) {
     // Check the type of the users parameter
     if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'string')) {
       // An array of usernames, remove all
+      searchedUsernames = saniUsers;
       searchQuery._id = { $in: saniUsers };
     }
     else if (typeof saniUsers === 'string') {
       // A single username
+      searchedUsernames = [saniUsers];
       searchQuery._id = saniUsers;
     }
     else {
@@ -682,6 +709,14 @@ function remove(requestingUser, users, options) {
       // Set function-wide foundUsers and foundUsernames
       foundUsers = _foundUsers;
       foundUsernames = foundUsers.map(u => u._id);
+
+      // Check if all users were found
+      const notFoundUsernames = searchedUsernames.filter(u => !foundUsernames.includes(u));
+      // Some users not found, throw an error
+      if (notFoundUsernames.length > 0) {
+        throw new M.CustomError('The following users were not found: '
+          + `[${notFoundUsernames}].`, 404, 'warn');
+      }
 
       // Create memberQuery
       foundUsers.forEach((user) => {

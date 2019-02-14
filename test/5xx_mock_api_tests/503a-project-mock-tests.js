@@ -132,9 +132,7 @@ function postProject(done) {
     chai.expect(createdProj.id).to.equal(projData.id);
     chai.expect(createdProj.name).to.equal(projData.name);
     chai.expect(createdProj.custom).to.deep.equal(projData.custom || {});
-    chai.expect(createdProj.permissions.read).to.include(adminUser.username);
-    chai.expect(createdProj.permissions.write).to.include(adminUser.username);
-    chai.expect(createdProj.permissions.admin).to.include(adminUser.username);
+    chai.expect(createdProj.permissions[adminUser.username]).to.equal('admin');
     chai.expect(createdProj.org).to.equal(org.id);
     chai.expect(createdProj.visibility).to.equal(projData.visibility || 'private');
 
@@ -193,9 +191,7 @@ function postProjects(done) {
       chai.expect(createdProj.id).to.equal(projDataObject.id);
       chai.expect(createdProj.name).to.equal(projDataObject.name);
       chai.expect(createdProj.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(createdProj.permissions.read).to.include(adminUser.username);
-      chai.expect(createdProj.permissions.write).to.include(adminUser.username);
-      chai.expect(createdProj.permissions.admin).to.include(adminUser.username);
+      chai.expect(createdProj.permissions[adminUser.username]).to.equal('admin');
       chai.expect(createdProj.org).to.equal(org.id);
       chai.expect(createdProj.visibility).to.equal(projDataObject.visibility || 'private');
 
@@ -244,9 +240,7 @@ function getProject(done) {
     chai.expect(foundProj.id).to.equal(projData.id);
     chai.expect(foundProj.name).to.equal(projData.name);
     chai.expect(foundProj.custom).to.deep.equal(projData.custom || {});
-    chai.expect(foundProj.permissions.read).to.include(adminUser.username);
-    chai.expect(foundProj.permissions.write).to.include(adminUser.username);
-    chai.expect(foundProj.permissions.admin).to.include(adminUser.username);
+    chai.expect(foundProj.permissions[adminUser.username]).to.equal('admin');
     chai.expect(foundProj.org).to.equal(org.id);
     chai.expect(foundProj.visibility).to.equal(projData.visibility || 'private');
 
@@ -300,26 +294,24 @@ function getProjects(done) {
     const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
-      const foundProject = jmi2Projects[projDataObject.id];
+      const foundProj = jmi2Projects[projDataObject.id];
 
       // Verify correct project found
-      chai.expect(foundProject.id).to.equal(projDataObject.id);
-      chai.expect(foundProject.name).to.equal(projDataObject.name);
-      chai.expect(foundProject.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(foundProject.permissions.read).to.include(adminUser.username);
-      chai.expect(foundProject.permissions.write).to.include(adminUser.username);
-      chai.expect(foundProject.permissions.admin).to.include(adminUser.username);
-      chai.expect(foundProject.org).to.equal(org.id);
-      chai.expect(foundProject.visibility).to.equal(projDataObject.visibility || 'private');
+      chai.expect(foundProj.id).to.equal(projDataObject.id);
+      chai.expect(foundProj.name).to.equal(projDataObject.name);
+      chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(foundProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(foundProj.org).to.equal(org.id);
+      chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(foundProject.createdBy).to.equal(adminUser.username);
-      chai.expect(foundProject.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundProject.createdOn).to.not.equal(null);
-      chai.expect(foundProject.updatedOn).to.not.equal(null);
+      chai.expect(foundProj.createdBy).to.equal(adminUser.username);
+      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProj.createdOn).to.not.equal(null);
+      chai.expect(foundProj.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn',
+      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();
@@ -364,26 +356,24 @@ function getAllProjectsOnOrg(done) {
     const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
-      const foundProject = jmi2Projects[projDataObject.id];
+      const foundProj = jmi2Projects[projDataObject.id];
 
       // Verify correct project found
-      chai.expect(foundProject.id).to.equal(projDataObject.id);
-      chai.expect(foundProject.name).to.equal(projDataObject.name);
-      chai.expect(foundProject.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(foundProject.permissions.read).to.include(adminUser.username);
-      chai.expect(foundProject.permissions.write).to.include(adminUser.username);
-      chai.expect(foundProject.permissions.admin).to.include(adminUser.username);
-      chai.expect(foundProject.org).to.equal(org.id);
-      chai.expect(foundProject.visibility).to.equal(projDataObject.visibility || 'private');
+      chai.expect(foundProj.id).to.equal(projDataObject.id);
+      chai.expect(foundProj.name).to.equal(projDataObject.name);
+      chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(foundProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(foundProj.org).to.equal(org.id);
+      chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(foundProject.createdBy).to.equal(adminUser.username);
-      chai.expect(foundProject.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundProject.createdOn).to.not.equal(null);
-      chai.expect(foundProject.updatedOn).to.not.equal(null);
+      chai.expect(foundProj.createdBy).to.equal(adminUser.username);
+      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProj.createdOn).to.not.equal(null);
+      chai.expect(foundProj.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn',
+      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();
@@ -426,26 +416,24 @@ function getAllProjects(done) {
     const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
-      const foundProject = jmi2Projects[projDataObject.id];
+      const foundProj = jmi2Projects[projDataObject.id];
 
       // Verify correct project found
-      chai.expect(foundProject.id).to.equal(projDataObject.id);
-      chai.expect(foundProject.name).to.equal(projDataObject.name);
-      chai.expect(foundProject.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(foundProject.permissions.read).to.include(adminUser.username);
-      chai.expect(foundProject.permissions.write).to.include(adminUser.username);
-      chai.expect(foundProject.permissions.admin).to.include(adminUser.username);
-      chai.expect(foundProject.org).to.equal(org.id);
-      chai.expect(foundProject.visibility).to.equal(projDataObject.visibility || 'private');
+      chai.expect(foundProj.id).to.equal(projDataObject.id);
+      chai.expect(foundProj.name).to.equal(projDataObject.name);
+      chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(foundProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(foundProj.org).to.equal(org.id);
+      chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(foundProject.createdBy).to.equal(adminUser.username);
-      chai.expect(foundProject.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundProject.createdOn).to.not.equal(null);
-      chai.expect(foundProject.updatedOn).to.not.equal(null);
+      chai.expect(foundProj.createdBy).to.equal(adminUser.username);
+      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProj.createdOn).to.not.equal(null);
+      chai.expect(foundProj.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(foundProject).to.not.have.keys(['archived', 'archivedOn',
+      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();
@@ -487,9 +475,7 @@ function patchProject(done) {
     chai.expect(updatedProj.id).to.equal(projData.id);
     chai.expect(updatedProj.name).to.equal(updateObj.name);
     chai.expect(updatedProj.custom).to.deep.equal(projData.custom || {});
-    chai.expect(updatedProj.permissions.read).to.include(adminUser.username);
-    chai.expect(updatedProj.permissions.write).to.include(adminUser.username);
-    chai.expect(updatedProj.permissions.admin).to.include(adminUser.username);
+    chai.expect(updatedProj.permissions[adminUser.username]).to.equal('admin');
     chai.expect(updatedProj.org).to.equal(org.id);
     chai.expect(updatedProj.visibility).to.equal(projData.visibility || 'private');
 
@@ -547,26 +533,24 @@ function patchProjects(done) {
     const jmi2Projects = utils.convertJMI(1, 2, updateProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
-      const updatedProject = jmi2Projects[projDataObject.id];
+      const updatedProj = jmi2Projects[projDataObject.id];
 
       // Verify correct project updated
-      chai.expect(updatedProject.id).to.equal(projDataObject.id);
-      chai.expect(updatedProject.name).to.equal('Updated Name');
-      chai.expect(updatedProject.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(updatedProject.permissions.read).to.include(adminUser.username);
-      chai.expect(updatedProject.permissions.write).to.include(adminUser.username);
-      chai.expect(updatedProject.permissions.admin).to.include(adminUser.username);
-      chai.expect(updatedProject.org).to.equal(org.id);
-      chai.expect(updatedProject.visibility).to.equal(projDataObject.visibility || 'private');
+      chai.expect(updatedProj.id).to.equal(projDataObject.id);
+      chai.expect(updatedProj.name).to.equal('Updated Name');
+      chai.expect(updatedProj.custom).to.deep.equal(projDataObject.custom || {});
+      chai.expect(updatedProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(updatedProj.org).to.equal(org.id);
+      chai.expect(updatedProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(updatedProject.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedProject.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(updatedProject.createdOn).to.not.equal(null);
-      chai.expect(updatedProject.updatedOn).to.not.equal(null);
+      chai.expect(updatedProj.createdBy).to.equal(adminUser.username);
+      chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedProj.createdOn).to.not.equal(null);
+      chai.expect(updatedProj.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(updatedProject).to.not.have.keys(['archived', 'archivedOn',
+      chai.expect(updatedProj).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();

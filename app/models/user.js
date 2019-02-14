@@ -61,7 +61,7 @@ const UserSchema = new mongoose.Schema({
       validator: function(v) {
         return RegExp(validators.user.username).test(v);
       },
-      message: `${this._id} is not a valid username.`
+      message: 'Not a valid username.'
     }
   },
   password: {
@@ -96,6 +96,11 @@ const UserSchema = new mongoose.Schema({
   },
   provider: {
     type: String,
+    validate: {
+      validator: function(v) {
+        return validators.user.provider(v);
+      }
+    },
     default: 'local'
   },
   custom: {

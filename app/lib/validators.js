@@ -114,7 +114,11 @@ module.exports.user = {
   username: customValidators.user_username || '^([a-z])([a-z0-9_]){0,}$',
   email: customValidators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
   fname: customValidators.user_fname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
-  lname: customValidators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$'
+  lname: customValidators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
+  provider: function(v) {
+    // If the use provider is defined and does not include value, return false
+    return !(customValidators.user_provider && !customValidators.user_provider.includes(v));
+  }
 };
 
 /**
@@ -129,55 +133,4 @@ module.exports.user = {
 module.exports.url = {
   // starts with one and only one '/'
   next: customValidators.url_next || '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
-};
-
-/**
- * @description Regular Expressions to validate artifact data
- *
- * filename:
- *   - MUST start with a letter or number
- *   - MUST ONLY include lowercase letters, uppercase letters, numbers,
- *     '-', or whitespace
- *   - MUST be of length 1 or more
- *   Examples:
- *     - "Org 1" [valid]
- *     - "An organization name - with dashes" [valid]
- *     - "No invalid chars (e.g. ', $, &, etc)" [invalid - no special characters]
- *     - " " [invalid - cannot start with a space]
- *
- * id:
- *   - MUST start with a lowercase letter, number or '_'
- *   - MUST only include lowercase letters, numbers, '_' or '-'
- *   - each segment MUST be of length 1 or more
- *   Examples:
- *      - orgid:projid:artifactid [valid]
- *      - orgid:projid:my-artifact [valid]
- *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
- *      - orgid:projid:-artifact [invalid - must start with a letter or a number]
- *      - orgid:projid:myArtifact [invalid - cannot use uppercase characters]
- *      - my-artifact [invalid - must contain org and proj segments]
- */
-
-module.exports.artifact = {
-  filename: customValidators.artifact_filename || '^([a-zA-Z0-9])([a-zA-Z0-9-\\s]){0,}$',
-  id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
-};
-
-/**
- * @description Regular Expressions to validate webhook data
- *
- * id:
- *   - MUST start with a lowercase letter, number or '_'
- *   - MUST only include lowercase letters, numbers, '_' or '-'
- *   - each segment MUST be of length 1 or more
- *   Examples:
- *      - orgid:projid:webhookid [valid]
- *      - orgid:projid:my-webhook [valid]
- *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
- *      - orgid:projid:-webhook [invalid - must start with a letter or a number]
- *      - orgid:projid:myWebhook [invalid - cannot use uppercase characters]
- *      - my-webhook [invalid - must contain org and proj segments]
- */
-module.exports.webhook = {
-  id: customValidators.webhook_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };

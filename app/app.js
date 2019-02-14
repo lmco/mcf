@@ -44,8 +44,8 @@ const app = express();
 module.exports = app;
 
 /**
- * Connect to database, initialize application, sync webhooks, and create
- * default admin and default organization if needed.
+ * Connect to database, initialize application, and create default admin and
+ * default organization if needed.
  */
 db.connect()
 .then(() => getSchemaVersion())

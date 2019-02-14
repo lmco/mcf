@@ -118,9 +118,7 @@ function postOrg(done) {
     chai.expect(postedOrg.id).to.equal(orgData.id);
     chai.expect(postedOrg.name).to.equal(orgData.name);
     chai.expect(postedOrg.custom).to.deep.equal(orgData.custom || {});
-    chai.expect(postedOrg.permissions.read).to.include(adminUser.username);
-    chai.expect(postedOrg.permissions.write).to.include(adminUser.username);
-    chai.expect(postedOrg.permissions.admin).to.include(adminUser.username);
+    chai.expect(postedOrg.permissions[adminUser.username]).to.equal('admin');
 
     // Verify additional properties
     chai.expect(postedOrg.createdBy).to.equal(adminUser.username);
@@ -164,24 +162,22 @@ function postOrgs(done) {
     const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
     // Loop through each project data object
     orgData.forEach((orgDataObject) => {
-      const foundOrg = jmi2Orgs[orgDataObject.id];
+      const postedOrg = jmi2Orgs[orgDataObject.id];
 
       // Verify project created properly
-      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
-      chai.expect(foundOrg.name).to.equal(orgDataObject.name);
-      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
-      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+      chai.expect(postedOrg.id).to.equal(orgDataObject.id);
+      chai.expect(postedOrg.name).to.equal(orgDataObject.name);
+      chai.expect(postedOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(postedOrg.permissions[adminUser.username]).to.equal('admin');
 
       // Verify additional properties
-      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.createdOn).to.not.equal(null);
-      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+      chai.expect(postedOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(postedOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(postedOrg.createdOn).to.not.equal(null);
+      chai.expect(postedOrg.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+      chai.expect(postedOrg).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();
@@ -208,9 +204,7 @@ function getOrg(done) {
     chai.expect(foundOrg.id).to.equal(testData.orgs[0].id);
     chai.expect(foundOrg.name).to.equal(testData.orgs[0].name);
     chai.expect(foundOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
-    chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-    chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-    chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+    chai.expect(foundOrg.permissions[adminUser.username]).to.equal('admin');
 
     // Verify additional properties
     chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
@@ -261,9 +255,7 @@ function getOrgs(done) {
       chai.expect(foundOrg.id).to.equal(orgDataObject.id);
       chai.expect(foundOrg.name).to.equal(orgDataObject.name);
       chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
-      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+      chai.expect(foundOrg.permissions[adminUser.username]).to.equal('admin');
 
       // Verify additional properties
       chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
@@ -320,9 +312,7 @@ function getAllOrgs(done) {
         chai.expect(foundOrg.id).to.equal(orgDataObject.id);
         chai.expect(foundOrg.name).to.equal(orgDataObject.name);
         chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom || {});
-        chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-        chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-        chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+        chai.expect(foundOrg.permissions[adminUser.username]).to.equal('admin');
 
         // Verify additional properties
         chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
@@ -367,9 +357,7 @@ function patchOrg(done) {
     chai.expect(patchedOrg.id).to.equal(testData.orgs[0].id);
     chai.expect(patchedOrg.name).to.equal('Edited Name');
     chai.expect(patchedOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
-    chai.expect(patchedOrg.permissions.read).to.include(adminUser.username);
-    chai.expect(patchedOrg.permissions.write).to.include(adminUser.username);
-    chai.expect(patchedOrg.permissions.admin).to.include(adminUser.username);
+    chai.expect(patchedOrg.permissions[adminUser.username]).to.equal('admin');
 
     // Verify additional properties
     chai.expect(patchedOrg.createdBy).to.equal(adminUser.username);
@@ -418,23 +406,21 @@ function patchOrgs(done) {
     const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
     // Loop through each project data object
     orgData.forEach((orgDataObject) => {
-      const foundOrg = jmi2Orgs[orgDataObject.id];
+      const patchedOrg = jmi2Orgs[orgDataObject.id];
       // Verify project created properly
-      chai.expect(foundOrg.id).to.equal(orgDataObject.id);
-      chai.expect(foundOrg.name).to.equal('Edited Name');
-      chai.expect(foundOrg.custom).to.deep.equal(orgDataObject.custom);
-      chai.expect(foundOrg.permissions.read).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.write).to.include(adminUser.username);
-      chai.expect(foundOrg.permissions.admin).to.include(adminUser.username);
+      chai.expect(patchedOrg.id).to.equal(orgDataObject.id);
+      chai.expect(patchedOrg.name).to.equal('Edited Name');
+      chai.expect(patchedOrg.custom).to.deep.equal(orgDataObject.custom);
+      chai.expect(patchedOrg.permissions[adminUser.username]).to.equal('admin');
 
       // Verify additional properties
-      chai.expect(foundOrg.createdBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundOrg.createdOn).to.not.equal(null);
-      chai.expect(foundOrg.updatedOn).to.not.equal(null);
+      chai.expect(patchedOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(patchedOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(patchedOrg.createdOn).to.not.equal(null);
+      chai.expect(patchedOrg.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
+      chai.expect(patchedOrg).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();

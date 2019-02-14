@@ -50,7 +50,7 @@ function handleBasicAuth(req, res, username, password) {
     // Search locally for the user
     User.find({
       _id: username,
-      archivedOn: null
+      archived: false
     })
     .exec((findUserErr, users) => {
       // Check for errors

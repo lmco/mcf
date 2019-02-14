@@ -136,7 +136,7 @@ function authenticate(req, res, next) {
 
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(401).send('Unauthorized')
+          ? res.status(401).send(err)
           : res.redirect(`/login?next=${req.originalUrl}`);
       });
     }

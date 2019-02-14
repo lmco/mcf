@@ -40,8 +40,10 @@ const assert = require('assert');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
+const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -201,6 +203,10 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {string} [projects.visibility = 'private'] - The visibility of the
  * project being created. If 'internal', users not in the project but in the
  * owning org will be able to view the project.
+ * @param {Object} [projects.permissions] - Any preset permissions on the
+ * project. Keys should be usernames and values should be the highest
+ * permissions the user has. NOTE: The requesting user gets added as an admin by
+ * default.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -244,11 +250,11 @@ function create(requestingUser, organizationID, projects, options) {
     const orgID = sani.sanitize(organizationID);
     const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    let createdProjects = [];
+    let foundOrg = {};
+    let projObjects = [];
 
     // Initialize valid options
     let populateString = '';
-    let populate = false;
 
     // Ensure options are valid
     if (options) {
@@ -272,7 +278,6 @@ function create(requestingUser, organizationID, projects, options) {
         });
 
         populateString = options.populate.join(' ');
-        populate = true;
       }
     }
 
@@ -293,19 +298,37 @@ function create(requestingUser, organizationID, projects, options) {
       throw new M.CustomError('Invalid input for creating projects.', 400, 'warn');
     }
 
-    // Create array of id's for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
+    const validProjKeys = ['id', 'name', 'custom', 'visibility', 'permissions'];
 
     // Check that each project has an id, and add to arrIDs
     try {
       let index = 1;
       projectsToCreate.forEach((proj) => {
+        // Ensure keys are valid
+        Object.keys(proj).forEach((k) => {
+          assert.ok(validProjKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each project has an id and that its a string
         assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
         assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
         proj.id = utils.createID(orgID, proj.id);
+        // Check if project with same ID is already being created
+        assert.ok(!arrIDs.includes(proj.id), 'Multiple projects with the same '
+          + `ID [${utils.parseID(proj.id).pop()}] cannot be created.`);
         arrIDs.push(proj.id);
         proj._id = proj.id;
+
+        // If user not setting permissions, add the field
+        if (!proj.hasOwnProperty('permissions')) {
+          proj.permissions = {};
+        }
+
+        // Add requesting user as admin on project
+        proj.permissions[reqUser._id] = 'admin';
+
         index++;
       });
     }
@@ -318,7 +341,8 @@ function create(requestingUser, organizationID, projects, options) {
 
     // Find the organization to verify existence and permissions
     Organization.findOne({ _id: orgID })
-    .then((foundOrg) => {
+    .then((_foundOrg) => {
+      foundOrg = _foundOrg;
       // If the org was not found
       if (foundOrg === null) {
         throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
@@ -338,35 +362,73 @@ function create(requestingUser, organizationID, projects, options) {
       // If there are any foundProjects, there is a conflict
       if (foundProjects.length > 0) {
         // Get arrays of the foundProjects's ids and names
-        const foundProjectIDs = foundProjects.map(p => p._id);
+        const foundProjectIDs = foundProjects.map(p => utils.parseID(p._id).pop());
 
         // There are one or more projects with conflicting IDs
         throw new M.CustomError('Projects with the following IDs already exist'
-            + ` [${foundProjectIDs.toString()}].`, 403, 'warn');
+          + ` [${foundProjectIDs.toString()}].`, 403, 'warn');
       }
 
+      // Get all existing users for permissions
+      return User.find({});
+    })
+    .then((foundUsers) => {
+      // Create array of usernames
+      const foundUsernames = foundUsers.map(u => u.username);
+      const promises = [];
       // For each object of project data, create the project object
-      const projObjects = projectsToCreate.map((p) => {
+      projObjects = projectsToCreate.map((p) => {
         const projObj = new Project(p);
         // Set org
         projObj.org = orgID;
         // Set permissions
-        projObj.permissions[reqUser._id] = ['read', 'write', 'admin'];
+        Object.keys(projObj.permissions).forEach((u) => {
+          // If user does not exist, throw an error
+          if (!foundUsernames.includes(u)) {
+            throw new M.CustomError(`User [${u}] not found.`, 404, 'warn');
+          }
+
+          const permission = projObj.permissions[u];
+
+          // Change permission level to array of permissions
+          switch (permission) {
+            case 'read':
+              projObj.permissions[u] = ['read'];
+              break;
+            case 'write':
+              projObj.permissions[u] = ['read', 'write'];
+              break;
+            case 'admin':
+              projObj.permissions[u] = ['read', 'write', 'admin'];
+              break;
+            default:
+              throw new M.CustomError(`Invalid permission [${permission}].`, 400, 'warn');
+          }
+
+          // Check if they have been added to the org
+          if (!foundOrg.permissions.hasOwnProperty(u)) {
+            // Add user to org with read permissions
+            const updateQuery = {};
+            updateQuery[`permissions.${u}`] = ['read'];
+            promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
+          }
+        });
         projObj.lastModifiedBy = reqUser._id;
         projObj.createdBy = reqUser._id;
         projObj.updatedOn = Date.now();
+        projObj.archivedBy = (projObj.archived) ? reqUser._id : null;
         return projObj;
       });
 
-        // Create the projects
-      return Project.insertMany(projObjects);
-    })
-    .then((_createdProjects) => {
-      // Set function-wide createdProjects
-      createdProjects = _createdProjects;
+      // Create the projects
+      promises.push(Project.insertMany(projObjects));
 
+      // Return when all promises are complete
+      return Promise.all(promises);
+    })
+    .then(() => {
       // Create a root model element for each project
-      const elemObjects = createdProjects.map((p) => new Element({
+      const elemObjects = projObjects.map((p) => new Element({
         _id: utils.createID(p._id, 'model'),
         name: 'Model',
         parent: null,
@@ -374,20 +436,15 @@ function create(requestingUser, organizationID, projects, options) {
         lastModifiedBy: reqUser._id,
         createdBy: reqUser._id,
         createdOn: Date.now(),
-        updatedOn: Date.now()
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
       }));
 
         // Create the elements
       return Element.insertMany(elemObjects);
     })
-    .then(() => {
-      if (populate) {
-        return resolve(Project.find({ _id: { $in: arrIDs } })
-        .populate(populateString));
-      }
-
-      return resolve(createdProjects);
-    })
+    .then(() => resolve(Project.find({ _id: { $in: arrIDs } }).populate(populateString)))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -464,9 +521,12 @@ function update(requestingUser, organizationID, projects, options) {
     const orgID = sani.sanitize(organizationID);
     const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const duplicateCheck = {};
     let foundProjects = [];
     let projectsToUpdate = [];
-    const duplicateCheck = {};
+    let existingUsers = [];
+    let updatingPermissions = false;
+    let foundOrg = {};
 
     // Initialize valid options
     let populateString = '';
@@ -528,6 +588,12 @@ function update(requestingUser, organizationID, projects, options) {
         }
         arrIDs.push(proj.id);
         proj._id = proj.id;
+
+        // Check if updating user permissions
+        if (proj.hasOwnProperty('permissions')) {
+          updatingPermissions = true;
+        }
+
         index++;
       });
     }
@@ -537,28 +603,60 @@ function update(requestingUser, organizationID, projects, options) {
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
-    // If not system admin, add permissions check
-    if (!reqUser.admin) {
-      searchQuery[`permissions.${reqUser._id}`] = 'admin';
-    }
 
-    // Find the projects to update
-    Project.find(searchQuery)
-    .then((_foundProjects) => {
-      // Verify the same number of projects are found as desired
-      if (_foundProjects.length !== arrIDs.length) {
-        const foundIDs = _foundProjects.map(p => p._id);
-        const notFound = arrIDs.filter(p => !foundIDs.includes(p));
-        throw new M.CustomError(
-          `The following projects were not found: [${notFound.toString()}].`, 404, 'warn'
-        );
+    // Find the organization containing the projects
+    Organization.findOne({ _id: orgID })
+    .then((_foundOrganization) => {
+      // Check if the organization was found
+      if (_foundOrganization === null) {
+        throw new M.CustomError(`The org [${_foundOrganization._id}] was not found.`, 404, 'warn');
       }
+
+      // Set function-wide foundOrg
+      foundOrg = _foundOrganization;
+
+      // Find the projects to update
+      return Project.find(searchQuery);
+    })
+    .then((_foundProjects) => {
       // Set function-wide foundProjects
       foundProjects = _foundProjects;
+
+      // Check that the user has admin permissions
+      foundProjects.forEach((proj) => {
+        if (!proj.permissions[reqUser._id]
+          || (!proj.permissions[reqUser._id].includes('admin') && !reqUser.admin)) {
+          throw new M.CustomError('User does not have permission to update'
+            + ` the project [${utils.parseID(proj._id).pop()}].`, 403, 'warn');
+        }
+      });
+
+      // Verify the same number of projects are found as desired
+      if (foundProjects.length !== arrIDs.length) {
+        const foundIDs = foundProjects.map(p => p._id);
+        const notFound = arrIDs.filter(p => !foundIDs.includes(p)).map(p => utils.parseID(p).pop());
+        throw new M.CustomError(
+          `The following projects [${notFound.toString()}] were not found in `
+            + `the org [${orgID}].`, 404, 'warn'
+        );
+      }
+
+      // Find users if updating permissions
+      if (updatingPermissions) {
+        return User.find({});
+      }
+
+      // Return an empty array if not updating permissions
+      return [];
+    })
+    .then((foundUsers) => {
+      // Set existing users
+      existingUsers = foundUsers.map(u => u._id);
 
       // Convert projectsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, projectsToUpdate);
       const bulkArray = [];
+      const promises = [];
       // Get array of editable parameters
       const validFields = Project.getValidUpdateFields();
 
@@ -583,6 +681,16 @@ function update(requestingUser, organizationID, projects, options) {
                 + 'be changed.', 400, 'warn');
           }
 
+          // Get validator for field if one exists
+          if (validators.project.hasOwnProperty(key)) {
+            // If validation fails, throw error
+            if (!RegExp(validators.project[key]).test(updateProj[key])) {
+              throw new M.CustomError(
+                `Invalid ${key}: [${updateProj[key]}]`, 403, 'warn'
+              );
+            }
+          }
+
           // If the type of field is mixed
           if (Project.schema.obj[key]
             && Project.schema.obj[key].type.schemaName === 'Mixed') {
@@ -602,6 +710,11 @@ function update(requestingUser, organizationID, projects, options) {
                 // Ensure user is not updating own permissions
                 if (user === reqUser.username) {
                   throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
+                }
+
+                // If user does not exist, throw an error
+                if (!existingUsers.includes(user)) {
+                  throw new M.CustomError(`User [${user}] not found.`, 404, 'warn');
                 }
 
                 // Value must be an string containing highest permissions
@@ -640,6 +753,14 @@ function update(requestingUser, organizationID, projects, options) {
                     );
                 }
 
+                // If not removing a user, check if they have been added to the org
+                if (permValue !== 'remove_all' && !foundOrg.permissions.hasOwnProperty(user)) {
+                  // Add user to org with read permissions
+                  const updateQuery = {};
+                  updateQuery[`permissions.${user}`] = ['read'];
+                  promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
+                }
+
                 // Copy permissions from proj to update object
                 updateProj.permissions = proj.permissions;
               });
@@ -660,16 +781,19 @@ function update(requestingUser, organizationID, projects, options) {
             // If the proj is being archived
             if (updateProj[key] && !proj[key]) {
               updateProj.archivedBy = reqUser._id;
+              updateProj.archivedOn = Date.now();
             }
             // If the proj is being unarchived
             else if (!updateProj[key] && proj[key]) {
               updateProj.archivedBy = null;
+              updateProj.archivedOn = null;
             }
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateProj.lastModifiedBy = reqUser._id;
+        updateProj.updatedOn = Date.now();
 
         // Update the project
         bulkArray.push({
@@ -681,7 +805,10 @@ function update(requestingUser, organizationID, projects, options) {
       });
 
       // Update all projects through a bulk write to the database
-      return Project.bulkWrite(bulkArray);
+      promises.push(Project.bulkWrite(bulkArray));
+
+      // Return when all promises have been complete
+      return Promise.all(promises);
     })
     .then(() => Project.find(searchQuery)
     .populate(populateString))
@@ -692,8 +819,8 @@ function update(requestingUser, organizationID, projects, options) {
 
 /**
  * @description This function removes one or many projects as well as the
- * elements and webhooks that belong to them. This function can be used by
- * system-wide admins ONLY.
+ * elements that belong to them. This function can be used by system-wide admins
+ * ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -745,6 +872,7 @@ function remove(requestingUser, organizationID, projects, options) {
     const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
+    let searchedIDs = [];
 
     // Ensure parameters are valid
     try {
@@ -764,10 +892,12 @@ function remove(requestingUser, organizationID, projects, options) {
     // Check the type of the projects parameter
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'string')) {
       // An array of project ids, remove all
-      searchQuery._id = { $in: saniProjects.map(p => utils.createID(orgID, p)) };
+      searchedIDs = saniProjects.map(p => utils.createID(orgID, p));
+      searchQuery._id = { $in: searchedIDs };
     }
     else if (typeof saniProjects === 'string') {
       // A single project id, remove one
+      searchedIDs = [utils.createID(orgID, saniProjects)];
       searchQuery._id = utils.createID(orgID, saniProjects);
     }
     else {
@@ -780,9 +910,17 @@ function remove(requestingUser, organizationID, projects, options) {
     .then((_foundProjects) => {
       // Set the function-wide foundProjects and create ownedQuery
       foundProjects = _foundProjects;
-      ownedQuery.project = { $in: foundProjects.map(p => p._id) };
+      const foundProjectIDs = foundProjects.map(p => p._id);
+      ownedQuery.project = { $in: foundProjectIDs };
 
-      // TODO: Remove artifacts
+      // Check if all projects were found
+      const notFoundIDs = searchedIDs.filter(p => !foundProjectIDs.includes(p));
+      // Some projects not found, throw an error
+      if (notFoundIDs.length > 0) {
+        throw new M.CustomError('The following projects were not found: '
+          + `[${notFoundIDs.map(p => utils.parseID(p).pop())}].`, 404, 'warn');
+      }
+
       // Delete any elements in the project
       return Element.deleteMany(ownedQuery);
     })

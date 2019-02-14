@@ -305,6 +305,10 @@ module.exports.convertJMI = function(from, to, data, field = '_id') {
 
     const returnObj = {};
     data.forEach((object) => {
+      if (returnObj[object[field]]) {
+        throw new M.CustomError('Invalid object, duplicate keys '
+          + `[${object[field]}] exist.`, 403, 'warn');
+      }
       returnObj[object[field]] = object;
     });
     return returnObj;
