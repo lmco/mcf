@@ -76,6 +76,11 @@ function start(args) {
     else {
       httpServer = http.createServer(app);
     }
+
+    // If a timeout is defined in the config, set it
+    if (M.config.server.requestTimeout) {
+      httpServer.setTimeout(M.config.server.requestTimeout);
+    }
   }
 
   // Create HTTPS Server
@@ -90,11 +95,15 @@ function start(args) {
       cert: certificate
     };
     httpsServer = https.createServer(credentials, app);
+
+    // If a timeout is defined in the config, set it
+    if (M.config.server.requestTimeout) {
+      httpsServer.setTimeout(M.config.server.requestTimeout);
+    }
   }
 
   // Run HTTP Server
   if (M.config.server.http.enabled) {
-    // TODO: Set appropriate timeout (maybe allow to be configurable?)
     httpServer.listen(M.config.server.http.port, () => {
       const port = M.config.server.http.port;
       M.log.info(`MBEE server listening on port ${port}!`);
@@ -103,7 +112,6 @@ function start(args) {
 
   // Run HTTPS Server
   if (M.config.server.https.enabled) {
-    // TODO: Set appropriate timeout (maybe allow to be configurable?)
     httpsServer.listen(M.config.server.https.port, () => {
       const port = M.config.server.https.port;
       M.log.info(`MBEE server listening on port ${port}!`);
