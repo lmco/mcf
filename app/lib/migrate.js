@@ -26,6 +26,8 @@ const mongoose = require('mongoose');
 /**
  * @description Handles database migrations from a specific version, to a
  * specific version
+ *
+ * @params {string[]} args - An array of command line arguments.
  */
 module.exports.migrate = function(args) {
   return new Promise((resolve, reject) => {
@@ -142,7 +144,7 @@ module.exports.migrate = function(args) {
 /**
  * @description Prompts the user for approval to migrate the database
  *
- * @param {string[]} args - List of command line arguments
+ * @param {string[]} args - Array of command line arguments
  */
 function prompt(args) {
   return new Promise((resolve) => {

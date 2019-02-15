@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  controllers.ui-controller
+ * @module controllers.ui-controller
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *

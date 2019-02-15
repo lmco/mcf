@@ -30,12 +30,10 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @property {string} _id - The organization's unique ID.
  * @property {string} name - The organization's name.
- * @property {Schema.Types.Mixed} permissions - An object whose keys identify an
+ * @property {Object} permissions - An object whose keys identify an
  * organization's roles. The keys are usernames and the values are arrays
  * containing the users permissions.
- * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
- * @property {virtual} projects - A virtual field containing an array of Project
- * objects the organization contains.
+ * @property {Object} custom - JSON used to store additional data.
  *
  */
 const OrganizationSchema = new mongoose.Schema({
@@ -74,7 +72,7 @@ OrganizationSchema.plugin(extensions);
 /* -------------------------( Organization Methods )------------------------- */
 /**
  * @description Returns an organization's public data.
- * @memberof OrganizationSchema
+ * @memberOf OrganizationSchema
  */
 OrganizationSchema.methods.getPublicData = function() {
   const permissions = {};
@@ -143,7 +141,7 @@ OrganizationSchema.methods.getPublicData = function() {
 
 /**
  * @description Returns supported permission levels
- * @memberof OrganizationSchema
+ * @memberOf OrganizationSchema
  */
 OrganizationSchema.methods.getPermissionLevels = function() {
   return ['remove_all', 'read', 'write', 'admin'];
@@ -154,7 +152,7 @@ OrganizationSchema.statics.getPermissionLevels = function() {
 
 /**
  * @description Returns organization fields that can be changed
- * @memberof OrganizationSchema
+ * @memberOf OrganizationSchema
  */
 OrganizationSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom', 'archived', 'permissions'];

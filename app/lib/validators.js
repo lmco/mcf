@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  lib.validators
+ * @module lib.validators
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *

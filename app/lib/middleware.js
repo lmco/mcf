@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  lib.middleware
+ * @module lib.middleware
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
@@ -20,7 +20,7 @@
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow.
+ * @param {function} next - Callback to express authentication flow.
  */
 module.exports.logRoute = function logRoute(req, res, next) {
   // Set username to anonymous if req.user is not defined
@@ -35,7 +35,7 @@ module.exports.logRoute = function logRoute(req, res, next) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow.
+ * @param {function} next - Callback to express authentication flow.
  */
 module.exports.logIP = function logIP(req, res, next) {
   // Log the method, url, and ip address for the request
@@ -49,7 +49,7 @@ module.exports.logIP = function logIP(req, res, next) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow.
+ * @param {function} next - Callback to express authentication flow.
  */
 // eslint-disable-next-line consistent-return
 module.exports.disableUserAPI = function disableUserAPI(req, res, next) {

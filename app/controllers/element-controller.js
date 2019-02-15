@@ -52,8 +52,8 @@ const validators = M.require('lib.validators');
  * an array of element ids, a single element id, or not provided, which defaults
  * to every element in a project being found.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  * @param {boolean} [options.subtree] - If true, all elements in the subtree of
@@ -276,8 +276,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of created element objects
  *
@@ -646,8 +646,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {boolean} [elements.archived] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of updated element objects
  *

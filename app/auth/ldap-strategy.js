@@ -47,8 +47,8 @@ const ldapConfig = M.config.auth.ldap;
  * @param {Object} res - Response express object
  * @param {string} username - Username to authenticate via LDAP AD
  * @param {string} password - Password to authenticate via LDAP AD
- * @returns {Promise} resolve - authenticated user object
- *                    reject - an error
+ *
+ * @returns {Promise} Authenticated user object
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -91,8 +91,8 @@ function handleBasicAuth(req, res, username, password) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  * @param {string} token - Token user authentication token, encrypted
- * @returns {Promise} resolve - local user object
- *                    reject - an error
+ *
+ * @returns {Promise} Local user object
  *
  * @example
  * AuthController.handleTokenAuth(req, res, token)
@@ -117,7 +117,7 @@ function handleTokenAuth(req, res, token) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {callback} next - Callback to continue express authentication
+ * @param {function} next - Callback to continue express authentication
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
@@ -128,8 +128,7 @@ function doLogin(req, res, next) {
  * @description Connects to an LDAP server and resolves a client object used
  * to preform search and bind operations.
  *
- * @returns {Promise} resolve - an LDAP client object
- *                    reject - an error
+ * @returns {Promise} An LDAP client object
  */
 function ldapConnect() {
   M.log.debug('Attempting to bind to the LDAP server.');
@@ -198,8 +197,8 @@ function ldapConnect() {
  *
  * @param {Object} ldapClient - LDAP client
  * @param {string} username - Username to find LDAP user
- * @returns {Promise} resolve - LDAP user information
- *                    reject - an error
+ *
+ * @returns {Promise} LDAP user information
  */
 function ldapSearch(ldapClient, username) {
   M.log.debug('Attempting to search for LDAP user.');
@@ -283,8 +282,8 @@ function ldapSearch(ldapClient, username) {
  * @param {Object} ldapClient - LDAP client
  * @param {Object} user - LDAP user
  * @param {string} password - Password to verify LDAP user
- * @returns {Promise} resolve - authenticated user's information
- *                    reject - an error
+ *
+ * @returns {Promise} Authenticated user's information
  */
 function ldapAuth(ldapClient, user, password) {
   M.log.debug(`Authenticating ${user[ldapConfig.attributes.username]} ...`);
@@ -311,8 +310,8 @@ function ldapAuth(ldapClient, user, password) {
  * @description Synchronizes authenticated user's LDAP information with database.
  *
  * @param {Object} ldapUserObj - LDAP user information
- * @returns {Promise} resolve - synchronized user model object
- *                    reject - an error
+ *
+ * @returns {Promise} Synchronized user model object
  */
 function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
@@ -377,8 +376,9 @@ function ldapSync(ldapUserObj) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to validate.
- * @returns {Boolean} - If password is correctly validated
+ * @param {string} password - Password to validate.
+ *
+ * @returns {boolean} If password is correctly validated.
  */
 function validatePassword(password) {
   // LDAP does not require local password validation, return true

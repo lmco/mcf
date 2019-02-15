@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  controllers.project-controller
+ * @module controllers.project-controller
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *

@@ -9,7 +9,7 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Defines sanitization functions.
  */
@@ -17,7 +17,9 @@
 /**
  * @description Sanitizes database queries and scripting tags.
  *
- * @param {string} userInput - sanitized user input
+ * @param {string} userInput - User input to sanitize.
+ *
+ * @return {string} Sanitized string
  */
 module.exports.sanitize = function(userInput) {
   return module.exports.mongo(module.exports.html(userInput));
@@ -61,7 +63,7 @@ module.exports.mongo = function(userInput) {
  * |   '   | &#039           |
  * +-------+-----------------+
  *
- * @param {Object} userInput - User object data to be sanitized.
+ * @param {*} userInput - User input data to be sanitized.
  */
 module.exports.html = function(userInput) {
   // Replace known HTML characters with HTML escape sequences.
@@ -98,7 +100,7 @@ module.exports.html = function(userInput) {
  * |   NUL | \00             |
  * +-------+-----------------+
  *
- * @param {Object} userInput - User object data to be sanitized.
+ * @param {*} userInput - User input data to be sanitized.
  */
 module.exports.ldapFilter = function(userInput) {
   // If string, replace special characters

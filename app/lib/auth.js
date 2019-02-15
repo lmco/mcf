@@ -43,7 +43,7 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {callback} next - Callback to express authentication
+ * @param {function} next - Callback to express authentication
  */
 function authenticate(req, res, next) {
   // Extract authorization metadata
@@ -279,7 +279,8 @@ function authenticate(req, res, next) {
  * validation will fail.
  *
  * @param {string} password - Password to validate
- * @param {string} provider - the type of authentication strategy (ldap, local, etc.)
+ * @param {string} provider - the type of authentication strategy (ldap, local,
+ * etc.)
  *
  * @returns {boolean} - If password is correctly validated
  */

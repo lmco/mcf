@@ -39,12 +39,10 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} fname - The Users first name.
  * @property {string} preferredName - The Users preferred first name.
  * @property {string} lname - The Users last name.
- * @property {Boolean} admin - Indicates if the User is a global admin.
+ * @property {boolean} admin - Indicates if the User is a global admin.
  * @property {string} provider - Defines the authentication provider for the
  * User.
- * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
- * @property {virtual} name - The users full name.
- * @property {virtual} username - The users _id, with friendly title.
+ * @property {Object} custom - JSON used to store additional date.
  *
  */
 const UserSchema = new mongoose.Schema({
