@@ -1,11 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.301a-user-model-tests
+ * @module test.301a-user-model-tests
  *
- * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
  * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

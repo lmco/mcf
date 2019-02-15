@@ -3,15 +3,11 @@
  *
  * @module lib.sanitization
  *
- * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -21,7 +17,7 @@
 /**
  * @description Sanitizes database queries and scripting tags.
  *
- * @param {string} sanitized user input
+ * @param {string} userInput - sanitized user input
  */
 module.exports.sanitize = function(userInput) {
   return module.exports.mongo(module.exports.html(userInput));

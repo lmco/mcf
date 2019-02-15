@@ -1,20 +1,16 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.304a-element-model-tests
+ * @module test.304a-element-model-tests
  *
- * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.<br/>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
- *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests the Element Model functionality. The element
  * model tests create root packages, blocks, and relationships. These tests

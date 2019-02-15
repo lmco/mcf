@@ -3,9 +3,11 @@
  *
  * @module auth.test-strategy
  *
- * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
