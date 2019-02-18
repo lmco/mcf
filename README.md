@@ -22,8 +22,8 @@ MBEE is designed so that the only dependency to get started is Node.js and NPM.
 NPM comes with Node.js, all you need to do is make sure you can install packages
 with NPM and you can get started.
 
-You'll also need an instance MongoDB. If you don't have a database already set
-up, please see the [MongoDB Installation Tutorial](https://docs.mongodb.com/manual/installation/#tutorial-installation)
+You'll also need an instance of MongoDB. If you don't have a database already
+set up, please see the [MongoDB Installation Tutorial](https://docs.mongodb.com/manual/installation/#tutorial-installation)
 and the [MongoDB Getting Started Guide](https://docs.mongodb.com/manual/tutorial/getting-started/)
 for up-to-date documentation on MongoDB.
 
