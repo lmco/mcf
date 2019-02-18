@@ -1,11 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.303b-project-model-tests
+ * @module test.303b-project-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *

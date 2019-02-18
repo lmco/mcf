@@ -5,14 +5,17 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description WARNING! This authentication strategy is insecure and should only be used in
- * isolated testing and development environments. This implements an authentication strategy for
- * testing and development purposes only. This strategy will always log you in as an admin user
- * regardless of the provided username and password.
+ * @description WARNING! This authentication strategy is insecure and should
+ * only be used in isolated testing and development environments. This
+ * implements an authentication strategy for testing and development purposes
+ * only. This strategy will always log you in as an admin user regardless of the
+ * provided username and password.
  */
 
 // Expose auth strategy functions
@@ -40,8 +43,8 @@ const utils = M.require('lib.utils');
  * @param {Object} res - Response express object
  * @param {string} username - Username to authenticate
  * @param {string} password - Password to authenticate
- * @returns {Promise} resolve - authenticated user object
- *                    reject - an error
+ *
+ * @returns {Promise} Authenticated user object
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -79,8 +82,8 @@ function handleBasicAuth(req, res, username, password) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  * @param {string} token - User authentication token, encrypted
- * @returns {Promise} resolve - local user object
- *                    reject - an error
+ *
+ * @returns {Promise} Local user object
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -141,7 +144,7 @@ function handleTokenAuth(req, res, token) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - response express object
- * @param {callback} next - Callback to express authentication
+ * @param {function} next - Callback to express authentication
  */
 function doLogin(req, res, next) {
   // Compute token expiration time
