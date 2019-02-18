@@ -443,11 +443,14 @@ function getOrg(req, res) {
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid, options)
   .then((orgs) => {
-    // Check if orgs are found
+    // If no orgs found, return 404 error
     if (orgs.length === 0) {
-      // Return error
-      return res.status(404).send('No orgs found.');
+      const error = new M.CustomError(
+        `Organization [${req.params.orgid}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
     }
+
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgs[0].getPublicData()));
@@ -941,9 +944,12 @@ function getProject(req, res) {
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
   .then((projects) => {
-    // If no projects returned, return a 404 error
+    // If no projects found, return 404 error
     if (projects.length === 0) {
-      return res.status(404).send('No projects found.');
+      const error = new M.CustomError(
+        `Project [${req.params.projectid}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
     }
 
     // Return a 200: OK and the found project
@@ -1374,6 +1380,14 @@ function getUser(req, res) {
   // NOTE: find() sanitizes req.params.username
   UserController.find(req.user, req.params.username, options)
   .then((user) => {
+    // If no user found, return 404 error
+    if (user.length === 0) {
+      const error = new M.CustomError(
+        `User [${req.params.username}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
+    }
+
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(user[0].getPublicData()));
@@ -1589,19 +1603,25 @@ function patchPassword(req, res) {
 
   // Ensure old password was provided
   if (!req.body.oldPassword) {
-    const error = new M.CustomError('Old password not in request body.', 400, 'critical');
+    const error = new M.CustomError('Old password not in request body.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
   // Ensure new password was provided
   if (!req.body.password) {
-    const error = new M.CustomError('New password not in request body.', 400, 'critical');
+    const error = new M.CustomError('New password not in request body.', 400, 'warn');
     return res.status(error.status).send(error);
   }
 
   // Ensure confirmed password was provided
   if (!req.body.confirmPassword) {
-    const error = new M.CustomError('Confirmed password not in request body.', 400, 'critical');
+    const error = new M.CustomError('Confirmed password not in request body.', 400, 'warn');
+    return res.status(error.status).send(error);
+  }
+
+  // Ensure user is not trying to change another user's password
+  if (req.user.username !== req.params.username) {
+    const error = new M.CustomError('Cannot change another user\'s password.', 403, 'warn');
     return res.status(error.status).send(error);
   }
 
@@ -1956,9 +1976,24 @@ function getElement(req, res) {
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, req.params.elementid, options)
   .then((elements) => {
+    // If no element found, return 404 error
+    if (elements.length === 0) {
+      const error = new M.CustomError(
+        `Element [${req.params.elementid}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
+    }
+
+    // If subtree option was provided, return array of elements
+    if (options.subtree) {
+      // Return a 200: OK and the elements
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    }
+
     // Return a 200: OK and the element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(elements[0].getPublicData()));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1990,6 +2025,14 @@ function postElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
+    const error = new M.CustomError(
+      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -1999,6 +2042,9 @@ function postElement(req, res) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
+
+  // Set the element ID in the body equal req.params.elementid
+  req.body.id = req.params.elementid;
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
@@ -2042,6 +2088,14 @@ function patchElement(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
+    const error = new M.CustomError(
+      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -2051,6 +2105,9 @@ function patchElement(req, res) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
   }
+
+  // Set the element ID in the body equal req.params.elementid
+  req.body.id = req.params.elementid;
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;

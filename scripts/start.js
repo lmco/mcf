@@ -76,6 +76,11 @@ function start(args) {
     else {
       httpServer = http.createServer(app);
     }
+
+    // If a timeout is defined in the config, set it
+    if (M.config.server.requestTimeout) {
+      httpServer.setTimeout(M.config.server.requestTimeout);
+    }
   }
 
   // Create HTTPS Server
@@ -90,6 +95,11 @@ function start(args) {
       cert: certificate
     };
     httpsServer = https.createServer(credentials, app);
+
+    // If a timeout is defined in the config, set it
+    if (M.config.server.requestTimeout) {
+      httpsServer.setTimeout(M.config.server.requestTimeout);
+    }
   }
 
   // Run HTTP Server

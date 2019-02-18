@@ -62,7 +62,7 @@ function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     User.findOne({
       _id: username,
-      archivedOn: null
+      archived: false
     }, (findUserErr, user) => {
       // Check for errors
       if (findUserErr) {

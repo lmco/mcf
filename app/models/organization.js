@@ -81,28 +81,16 @@ OrganizationSchema.plugin(extensions);
  * @memberof OrganizationSchema
  */
 OrganizationSchema.methods.getPublicData = function() {
-  const permissions = {
-    read: [],
-    write: [],
-    admin: []
-  };
-
-  // Map read, write, and admin permissions to arrays
-  Object.keys(this.permissions).forEach(u => {
-    if (this.permissions[u].includes('read')) {
-      permissions.read.push(u);
-    }
-    if (this.permissions[u].includes('write')) {
-      permissions.write.push(u);
-    }
-    if (this.permissions[u].includes('admin')) {
-      permissions.admin.push(u);
-    }
-  });
-
+  const permissions = {};
   let createdBy;
   let lastModifiedBy;
   let archivedBy;
+
+  // Loop through each permission key/value pair
+  Object.keys(this.permissions).forEach((u) => {
+    // Return highest permission
+    permissions[u] = this.permissions[u].pop();
+  });
 
   // If this.createdBy is defined
   if (this.createdBy) {

@@ -43,6 +43,7 @@ const Element = M.require('models.element');
 const Project = M.require('models.project');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /**
  * @description This function finds one or many elements. Depending on the
@@ -168,6 +169,12 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((project) => {
+      // Check that the project was found
+      if (!project) {
+        throw new M.CustomError(`Project [${projID}] not found in the `
+        + `organization [${orgID}].`, 404, 'warn');
+      }
+
       // Verify the user has read permissions on the project
       if (!project.permissions[reqUser._id]
         || (!project.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
@@ -372,13 +379,20 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError('Invalid input for creating elements.', 400, 'warn');
     }
 
-    // Create array of id's for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
+    const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
+      'documentation', 'type', 'custom'];
 
     // Check that each element has an id and set the parent if null
     try {
       let index = 1;
       elementsToCreate.forEach((elem) => {
+        // Ensure keys are valid
+        Object.keys(elem).forEach((k) => {
+          assert.ok(validElemKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each element has an id and that it's a string
         assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
         assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
@@ -391,6 +405,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           elem.parent = 'model';
         }
         assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
+        assert.ok(utils.createID(orgID, projID, elem.parent) !== elem._id,
+          'Elements parent cannot be self.');
 
         // If element has a source, ensure it has a target
         if (elem.hasOwnProperty('source')) {
@@ -413,14 +429,29 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError(err.message, 403, 'warn');
     }
 
+    // Attempt to convert elements to JMI type 2, to see if duplicate ids exist
+    try {
+      utils.convertJMI(1, 2, elementsToCreate, '_id');
+    }
+    catch (err) {
+      throw new M.CustomError('Cannot create multiple elements with the same ID.', 403, 'warn');
+    }
+
     // Find the project to verify existence and permissions
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((foundProject) => {
+      // Check that the project was found
+      if (!foundProject) {
+        throw new M.CustomError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 404, 'warn');
+      }
+
       // Verify user has write permissions on the project
       if (!foundProject.permissions[reqUser._id]
         || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to create'
-            + ` elements on the project ${foundProject._id}.`, 403, 'warn');
+            + ' elements on the project '
+            + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
       }
 
       const promises = [];
@@ -432,7 +463,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         .then((foundElements) => {
           if (foundElements.length > 0) {
             // Get array of the foundElements's ids
-            const foundElementIDs = foundElements.map(e => e._id);
+            const foundElementIDs = foundElements.map(e => utils.parseID(e._id).pop());
 
             // There are one or more elements with conflicting IDs
             throw new M.CustomError('Elements with the following IDs already exist'
@@ -451,6 +482,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         elemObj.lastModifiedBy = reqUser._id;
         elemObj.createdBy = reqUser._id;
         elemObj.updatedOn = Date.now();
+        elemObj.archivedBy = (elemObj.archived) ? reqUser._id : null;
 
         // Add hidden fields
         elemObj.$parent = utils.createID(orgID, projID, e.parent);
@@ -570,7 +602,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     .then((createdElements) => {
       const promises = [];
       const createdIDs = createdElements.map(e => e._id);
-
       // Find elements in batches
       for (let i = 0; i < createdIDs.length / 50000; i++) {
         // Split elementIDs list into batches of 50000
@@ -707,10 +738,10 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) })
     .then((foundProject) => {
-      // If project not found
+      // Check that the project was found
       if (!foundProject) {
-        throw new M.CustomError(`Project ${projID} `
-          + `not found in the org ${orgID}.`, 404, 'warn');
+        throw new M.CustomError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 404, 'warn');
       }
 
       // Verify user has write permissions on the project
@@ -776,8 +807,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           index++;
         });
       }
-      catch (msg) {
-        throw new M.CustomError(msg, 403, 'warn');
+      catch (err) {
+        throw new M.CustomError(err.message, 403, 'warn');
       }
 
       const promises = [];
@@ -802,7 +833,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Verify the same number of elements are found as desired
       if (foundElements.length !== arrIDs.length) {
         const foundIDs = foundElements.map(e => e._id);
-        const notFound = arrIDs.filter(e => !foundIDs.includes(e));
+        const notFound = arrIDs.filter(e => !foundIDs.includes(e)).map(e => utils.parseID(e).pop());
         throw new M.CustomError(
           `The following elements were not found: [${notFound.toString()}].`, 404, 'warn'
         );
@@ -835,6 +866,16 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
                 + 'be changed.', 400, 'warn');
           }
 
+          // Get validator for field if one exists
+          if (validators.element.hasOwnProperty(key)) {
+            // If validation fails, throw error
+            if (!RegExp(validators.element[key]).test(updateElement[key])) {
+              throw new M.CustomError(
+                `Invalid ${key}: [${updateElement[key]}]`, 403, 'warn'
+              );
+            }
+          }
+
           // If the type of field is mixed
           if (Element.schema.obj[key]
             && Element.schema.obj[key].type.schemaName === 'Mixed') {
@@ -855,19 +896,27 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
+            // Error Check: ensure user cannot archive the root model element
+            if (element._id === utils.createID(orgID, projID, 'model')) {
+              throw new M.CustomError('User cannot archive the root model element.', 403, 'warn');
+            }
+
             // If the element is being archived
             if (updateElement[key] && !element[key]) {
               updateElement.archivedBy = reqUser._id;
+              updateElement.archivedOn = Date.now();
             }
             // If the element is being unarchived
             else if (!updateElement[key] && element[key]) {
               updateElement.archivedBy = null;
+              updateElement.archivedOn = null;
             }
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateElement.lastModifiedBy = reqUser._id;
+        updateElement.updatedOn = Date.now();
 
         // Update the element
         bulkArray.push({
@@ -981,11 +1030,32 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Invalid parameter, throw an error
       throw new M.CustomError('Invalid input for removing elements.', 400, 'warn');
     }
-    // Find all element IDs and their subtree IDs
-    findElementTree(orgID, projID, 'master', elementsToFind)
+
+    // Find the elements to delete
+    Element.find({ _id: { $in: elementsToFind } })
+    .then((foundElements) => {
+      const foundElementIDs = foundElements.map(e => e._id);
+
+      // Check if all elements were found
+      const notFoundIDs = elementsToFind.filter(e => !foundElementIDs.includes(e));
+      // Some elements not found, throw an error
+      if (notFoundIDs.length > 0) {
+        throw new M.CustomError('The following elements were not found: '
+          + `[${notFoundIDs.map(e => utils.parseID(e)
+          .pop())}].`, 404, 'warn');
+      }
+
+      // Find all element IDs and their subtree IDs
+      return findElementTree(orgID, projID, 'master', elementsToFind);
+    })
     .then((_foundIDs) => {
       foundIDs = _foundIDs;
       const promises = [];
+
+      // Error Check: ensure user cannot delete root model element
+      if (foundIDs.includes(utils.createID(orgID, projID, 'model'))) {
+        throw new M.CustomError('User cannot delete the root model element.', 403, 'warn');
+      }
 
       // Split elements into batches of 50000 or less
       for (let i = 0; i < foundIDs.length / 50000; i++) {
@@ -1117,6 +1187,11 @@ function moveElementCheck(organizationID, projectID, branch, element) {
   return new Promise((resolve, reject) => {
     // Create the name-spaced ID
     const elementID = utils.createID(organizationID, projectID, element.id);
+
+    // Error Check: ensure elements parent is not self
+    if (element.parent === elementID) {
+      throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
+    }
 
     // Define nested helper function
     function findElementParentRecursive(e) {

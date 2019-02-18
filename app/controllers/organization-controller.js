@@ -39,8 +39,10 @@ const assert = require('assert');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
+const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /**
  * @description This function finds one or many organizations. Depending on the
@@ -186,6 +188,9 @@ function find(requestingUser, orgs, options) {
  * @param {string} orgs.name - The organization name.
  * @param {Object} [orgs.custom] - Any additional key/value pairs for an object.
  * Must be proper JSON form.
+ * @param {Object} [orgs.permissions] - Any preset permissions on the org. Keys
+ * should be usernames and values should be the highest permissions the user
+ * has. NOTE: The requesting user gets added as an admin by default.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -276,19 +281,37 @@ function create(requestingUser, orgs, options) {
       throw new M.CustomError('Invalid input for creating organizations.', 400, 'warn');
     }
 
-    // Create array of id's for lookup
+    // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
+    const validOrgKeys = ['id', 'name', 'custom', 'permissions'];
 
     // Check that each org has an id, and add to arrIDs
     try {
       let index = 1;
       orgsToCreate.forEach((org) => {
+        // Ensure keys are valid
+        Object.keys(org).forEach((k) => {
+          assert.ok(validOrgKeys.includes(k), `Invalid key [${k}].`);
+        });
+
         // Ensure each org has an id and that its a string
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+        // Check if org with same ID is already being created
+        assert.ok(!arrIDs.includes(org.id), 'Multiple orgs with the same ID '
+            + `[${org.id}] cannot be created.`);
         arrIDs.push(org.id);
         // Set the _id equal to the id
         org._id = org.id;
+
+        // If user not setting permissions, add the field
+        if (!org.hasOwnProperty('permissions')) {
+          org.permissions = {};
+        }
+
+        // Add requesting user as admin on org
+        org.permissions[reqUser._id] = 'admin';
+
         index++;
       });
     }
@@ -309,17 +332,46 @@ function create(requestingUser, orgs, options) {
 
         // There are one or more orgs with conflicting IDs
         throw new M.CustomError('Orgs with the following IDs already exist'
-            + ` [${foundOrgIDs.toString()}].`, 403, 'warn');
+          + ` [${foundOrgIDs.toString()}].`, 403, 'warn');
       }
 
+      // Get all existing users for permissions
+      return User.find({});
+    })
+    .then((foundUsers) => {
+      // Create array of usernames
+      const foundUsernames = foundUsers.map(u => u.username);
       // For each object of org data, create the org object
       const orgObjects = orgsToCreate.map((o) => {
         const orgObj = new Organization(o);
         // Set permissions
-        orgObj.permissions[reqUser._id] = ['read', 'write', 'admin'];
+        Object.keys(orgObj.permissions).forEach((u) => {
+          // If user does not exist, throw an error
+          if (!foundUsernames.includes(u)) {
+            throw new M.CustomError(`User [${u}] not found.`, 404, 'warn');
+          }
+
+          const permission = orgObj.permissions[u];
+
+          // Change permission level to array of permissions
+          switch (permission) {
+            case 'read':
+              orgObj.permissions[u] = ['read'];
+              break;
+            case 'write':
+              orgObj.permissions[u] = ['read', 'write'];
+              break;
+            case 'admin':
+              orgObj.permissions[u] = ['read', 'write', 'admin'];
+              break;
+            default:
+              throw new M.CustomError(`Invalid permission [${permission}].`, 400, 'warn');
+          }
+        });
         orgObj.lastModifiedBy = reqUser._id;
         orgObj.createdBy = reqUser._id;
         orgObj.updatedOn = Date.now();
+        orgObj.archivedBy = (orgObj.archived) ? reqUser._id : null;
         return orgObj;
       });
 
@@ -406,9 +458,11 @@ function update(requestingUser, orgs, options) {
     // Sanitize input parameters and function-wide variables
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const duplicateCheck = {};
     let foundOrgs = [];
     let orgsToUpdate = [];
-    const duplicateCheck = {};
+    let existingUsers = [];
+    let updatingPermissions = false;
 
     // Initialize valid options
     let populateString = '';
@@ -470,6 +524,12 @@ function update(requestingUser, orgs, options) {
         arrIDs.push(org.id);
         // Set the _id equal to the id
         org._id = org.id;
+
+        // Check if updating user permissions
+        if (org.hasOwnProperty('permissions')) {
+          updatingPermissions = true;
+        }
+
         index++;
       });
     }
@@ -479,24 +539,42 @@ function update(requestingUser, orgs, options) {
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
-    // If not system admin, add permissions check
-    if (!reqUser.admin) {
-      searchQuery[`permissions.${reqUser._id}`] = 'admin';
-    }
 
     // Find the orgs to update
-    Organization.find(searchQuery)
+    Organization.find(searchQuery).populate('projects')
     .then((_foundOrgs) => {
+      // Set function-wide foundOrgs
+      foundOrgs = _foundOrgs;
+
+      // Check that the user has admin permissions
+      foundOrgs.forEach((org) => {
+        if (!org.permissions[reqUser._id]
+          || (!org.permissions[reqUser._id].includes('admin') && !reqUser.admin)) {
+          throw new M.CustomError('User does not have permission to update'
+            + ` the org [${org._id}].`, 403, 'warn');
+        }
+      });
+
       // Verify the same number of orgs are found as desired
-      if (_foundOrgs.length !== arrIDs.length) {
-        const foundIDs = _foundOrgs.map(o => o._id);
+      if (foundOrgs.length !== arrIDs.length) {
+        const foundIDs = foundOrgs.map(o => o._id);
         const notFound = arrIDs.filter(o => !foundIDs.includes(o));
         throw new M.CustomError(
           `The following orgs were not found: [${notFound.toString()}].`, 404, 'warn'
         );
       }
-      // Set function-wide foundOrgs
-      foundOrgs = _foundOrgs;
+
+      // Find users if updating permissions
+      if (updatingPermissions) {
+        return User.find({});
+      }
+
+      // Return an empty array if not updating permissions
+      return [];
+    })
+    .then((foundUsers) => {
+      // Set existing users
+      existingUsers = foundUsers.map(u => u._id);
 
       // Convert orgsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, orgsToUpdate);
@@ -531,6 +609,16 @@ function update(requestingUser, orgs, options) {
                 + 'be changed.', 400, 'warn');
           }
 
+          // Get validator for field if one exists
+          if (validators.org.hasOwnProperty(key)) {
+            // If validation fails, throw error
+            if (!RegExp(validators.org[key]).test(updateOrg[key])) {
+              throw new M.CustomError(
+                `Invalid ${key}: [${updateOrg[key]}]`, 403, 'warn'
+              );
+            }
+          }
+
           // If the type of field is mixed
           if (Organization.schema.obj[key]
             && Organization.schema.obj[key].type.schemaName === 'Mixed') {
@@ -541,15 +629,17 @@ function update(requestingUser, orgs, options) {
 
             // If the user is updating permissions
             if (key === 'permissions') {
-              // Get a list of valid org permissions
-              const validPermissions = Organization.getPermissionLevels();
-
               // Loop through each user provided
               Object.keys(updateOrg[key]).forEach((user) => {
                 let permValue = updateOrg[key][user];
                 // Ensure user is not updating own permissions
                 if (user === reqUser.username) {
                   throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
+                }
+
+                // If user does not exist, throw an error
+                if (!existingUsers.includes(user)) {
+                  throw new M.CustomError(`User [${user}] not found.`, 404, 'warn');
                 }
 
                 // Value must be an string containing highest permissions
@@ -559,13 +649,6 @@ function update(requestingUser, orgs, options) {
 
                 // Lowercase the permission value
                 permValue = permValue.toLowerCase();
-
-                // Value must be valid permission
-                if (!validPermissions.includes(permValue)) {
-                  throw new M.CustomError(
-                    `${permValue} is not a valid permission`, 400, 'warn'
-                  );
-                }
 
                 // Set stored permissions value based on provided permValue
                 switch (permValue) {
@@ -578,9 +661,22 @@ function update(requestingUser, orgs, options) {
                   case 'admin':
                     org.permissions[user] = ['read', 'write', 'admin'];
                     break;
-                  // Default case, delete user from org
-                  default:
+                  case 'remove_all':
+                    // If user is still on a project within the org, throw error
+                    org.projects.forEach((p) => {
+                      if (p.permissions.hasOwnProperty(user)) {
+                        throw new M.CustomError('User must be removed from '
+                          + `the project [${utils.parseID(p._id).pop()}] prior`
+                          + ` to being removed from the org [${org._id}].`, 403, 'warn');
+                      }
+                    });
                     delete org.permissions[user];
+                    break;
+                  // Default case, invalid permission
+                  default:
+                    throw new M.CustomError(
+                      `${permValue} is not a valid permission`, 400, 'warn'
+                    );
                 }
 
                 // Copy permissions from org to update object
@@ -603,16 +699,19 @@ function update(requestingUser, orgs, options) {
             // If the org is being archived
             if (updateOrg[key] && !org[key]) {
               updateOrg.archivedBy = reqUser._id;
+              updateOrg.archivedOn = Date.now();
             }
             // If the org is being unarchived
             else if (!updateOrg[key] && org[key]) {
               updateOrg.archivedBy = null;
+              updateOrg.archivedOn = null;
             }
           }
         });
 
-        // Update last modified field
+        // Update lastModifiedBy field and updatedOn
         updateOrg.lastModifiedBy = reqUser._id;
+        updateOrg.updatedOn = Date.now();
 
         // Update the org
         bulkArray.push({
@@ -635,8 +734,8 @@ function update(requestingUser, orgs, options) {
 
 /**
  * @description This function removes one or many organizations as well as the
- * projects, elements, and webhooks that belong to them. This function can be
- * used by system-wide admins ONLY. NOTE: Cannot delete the default org.
+ * projects and elements that belong to them. This function can be used by
+ * system-wide admins ONLY. NOTE: Cannot delete the default org.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} orgs - The organizations to remove. Can either be
@@ -681,6 +780,7 @@ function remove(requestingUser, orgs, options) {
     // Sanitize input parameters and function-wide variables
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     let foundOrgs = [];
+    let searchedIDs = [];
 
     // Define searchQuery and ownedQuery
     const searchQuery = {};
@@ -689,10 +789,12 @@ function remove(requestingUser, orgs, options) {
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'string')) {
       // An array of org ids, remove all
+      searchedIDs = saniOrgs;
       searchQuery._id = { $in: saniOrgs };
     }
     else if (typeof saniOrgs === 'string') {
       // A single org id
+      searchedIDs = [saniOrgs];
       searchQuery._id = saniOrgs;
     }
     else {
@@ -705,8 +807,17 @@ function remove(requestingUser, orgs, options) {
     .then((_foundOrgs) => {
       // Set function-wde foundOrgs and create ownedQuery
       foundOrgs = _foundOrgs;
+      const foundOrgIDs = foundOrgs.map(o => o._id);
       const regexIDs = _foundOrgs.map(o => `/^${o._id}/`);
       ownedQuery._id = { $in: regexIDs };
+
+      // Check if all orgs were found
+      const notFoundIDs = searchedIDs.filter(o => !foundOrgIDs.includes(o));
+      // Some orgs not found, throw an error
+      if (notFoundIDs.length > 0) {
+        throw new M.CustomError('The following orgs were not found: '
+          + `[${notFoundIDs}].`, 404, 'warn');
+      }
 
       // Check that user can remove each org
       foundOrgs.forEach((org) => {
@@ -716,8 +827,6 @@ function remove(requestingUser, orgs, options) {
         }
       });
 
-      // TODO: Remove artifacts
-      // TODO: Remove orphaned artifacts via controller
       // Delete any elements in the org
       return Element.deleteMany(ownedQuery);
     })
