@@ -60,7 +60,7 @@ module.exports.render = function(req, res, name, params) {
  * error is thrown. It is assumed the array should always have items in it, if
  * the array is empty an error is thrown.
  *
- * @param {*[]} arrItems - An array of values to check.
+ * @param {*} arrItems - An array of values to check.
  * @param {string} assertType - The type to check. Options: ['string', 'object',
  *                            'number', 'undefined', 'boolean', 'symbol'].
  */
@@ -99,7 +99,7 @@ module.exports.assertType = function(arrItems, assertType) {
  * of the specified type. Otherwise false is returned. Returns false is
  * assertType throws an error.
  *
- * @param {*[]} arrItems - An array of values to check.
+ * @param {*} arrItems - An array of values to check.
  * @param {string} checkType - The type to check. Options: ['string', 'object',
  *                            'number', 'undefined', 'boolean', 'symbol'].
  *
