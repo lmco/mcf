@@ -57,7 +57,7 @@
     "docker": "node mbee docker",
     "lint": "node mbee lint",
     "migrate": "node mbee migrate",
-    "postinstall": "node mbee build",
+    "postinstall": "test $NOPOSTINSTALL -eq 1 || node mbee build",
     "start": "node mbee start",
     "test": "node mbee test"
   }
