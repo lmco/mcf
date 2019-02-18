@@ -106,7 +106,7 @@ function loadPlugins() {
         // Add dependency to node_modules without erasing existing node_modules
         // directory
         const commands = [
-          `yarn add --dev ${dep}@${dependencies[dep]} --modules-folder "${M.root}/node_modules"`
+          `pushd ${pluginPath}; yarn install; popd;`
         ];
         M.log.verbose(`Installing dependency ${dep} ...`);
         const stdout = execSync(commands.join('; '));
