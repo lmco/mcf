@@ -49,7 +49,7 @@ COPY ./package.json package.json
 RUN git config --global url."https://github.com".insteadOf "git://github.com"
 RUN git config --global http.proxy "http://proxy-lmi.global.lmco.com:80"
 RUN git config --global https.proxy "http://proxy-lmi.global.lmco.com:80"
-RUN yarn install
+RUN NOYARNPOSTINSTALL=1 yarn install
 
 # Create project directory structure
 RUN mkdir logs \
