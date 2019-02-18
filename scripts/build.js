@@ -40,6 +40,7 @@ const minify = require('gulp-minify');
 const sass = require('gulp-sass');
 const markdown = require('gulp-markdown');
 const webpack = require('webpack');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 const validators = M.require('lib.validators');
 
 /**
@@ -148,7 +149,13 @@ function build(_args) {
   // Transpile React components
   if (args.includes('--all') || args.includes('--react')) {
     webpack({
-      mode: 'production',
+      mode: 'development',
+      devtool: 'source-map',
+      devServer: {
+        port: 8888,
+        historyApiFallback: true,
+        stats: 'minimal'
+      },
       entry: {
         navbar: path.join(M.root, 'app', 'ui', 'react-components', 'general-components', 'nav.jsx'),
         'home-page': path.join(M.root, 'app', 'ui', 'react-components', 'home-page', 'home-page.jsx'),
@@ -158,7 +165,8 @@ function build(_args) {
       },
       output: {
         path: path.join(M.root, 'build', 'public', 'react-js'),
-        filename: '[name].js'
+        filename: '[name].js',
+        publicPath: '/'
       },
       module: {
         rules: [
@@ -171,7 +179,10 @@ function build(_args) {
             }
           }
         ]
-      }
+      },
+      plugins: [
+        new HtmlWebpackPlugin()
+      ]
     }, (err, stats) => {
       if (err || stats.hasErrors()) {
         // eslint-disable-next-line no-console

@@ -21,6 +21,7 @@
 // Node modules
 const express = require('express');
 const router = express.Router();
+const path = require('path');
 
 // MBEE modules
 const UIController = M.require('controllers.ui-controller');
