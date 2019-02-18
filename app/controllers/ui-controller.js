@@ -23,12 +23,8 @@
 module.exports = {
   home,
   flightManual,
-  organizationList,
-  organization,
-  organizationEdit,
-  projectList,
-  project,
-  projectEdit,
+  organizations,
+  projects,
   whoami,
   swaggerDoc,
   showAboutPage,
@@ -43,12 +39,7 @@ const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules
-const UserController = M.require('controllers.user-controller');
-const OrgController = M.require('controllers.organization-controller');
-const ProjController = M.require('controllers.project-controller');
-const ElementController = M.require('controllers.element-controller');
 const utils = M.require('lib.utils');
-const elementSort = M.require('lib.element-sort');
 const validators = M.require('lib.validators');
 
 /**
@@ -97,231 +88,34 @@ function flightManual(req, res) {
 }
 
 /**
- * @description Renders the organization list page.
- */
-function organizationList(req, res) {
-  // Sanity check: confirm req.user exists
-  if (!req.user) {
-    M.log.critical(new M.CustomError('/organizations executed with invalid req.user object'));
-    // redirect to the login screen
-    res.redirect('/login');
-  }
-  // get all organizations the user is a member of
-  OrgController.find(req.user)
-  // Render the organization page with the list of orgs
-  .then(orgs => utils.render(req, res, 'organization-list', {
-    orgs: orgs,
-    title: 'MBEE | Model-Based Engineering Environment'
-  }))
-  // If error, redirect to home
-  .catch(error => {
-    M.log.error(error);
-    res.redirect('/');
-  });
-}
-
-/**
  * @description Renders an organization page.
  */
-function organization(req, res) {
+function organizations(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
     M.log.critical(new M.CustomError('/:orgid executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
-  // Find organization
-  OrgController.find(req.user, req.params.orgid)
-  // Render organization page including nav-sidebar
-  .then(org => utils.render(req, res, 'organization', {
-    name: 'organization',
-    title: 'MBEE | Model-Based Engineering Environment',
-    org: org,
-    sidebar: {
-      heading: 'Organization',
-      icon: 'fas fa-boxes',
-      list: {
-        Projects: {
-          icon: 'fas fa-box',
-          link: '#projects'
-        },
-        Members: {
-          icon: 'fas fa-users',
-          link: '#members'
-        },
-        Settings: {
-          icon: 'fas fa-cog',
-          link: '#settings'
-        }
-      }
-    }
-  }))
-  // If error, redirect to organization list
-  .catch(err => {
-    M.log.error(err);
-    return res.redirect('/organizations');
-  });
-}
-
-/**
- * @description Renders an organization edit/form page.
- */
-function organizationEdit(req, res) {
-  // Sanity check: confirm req.user exists
-  if (!req.user) {
-    M.log.critical(new M.CustomError('/:orgid/edit executed with invalid req.user object'));
-    // redirect to the login screen
-    res.redirect('/login');
-  }
-  // Find organization
-  OrgController.find(req.user, req.params.orgid)
-  .then(org => {
-    // Check if user is NOT admin
-    if (!req.user.admin
-      && !org.permissions.admin.map(u => u.username).includes(req.user.username)) {
-      // User is NOT admin, redirect to org page
-      return res.redirect(`/${org.id}`);
-    }
-    // Render organization page
-    utils.render(req, res, 'organization-edit', {
-      name: 'organization-edit',
-      title: 'MBEE | Model-Based Engineering Environment',
-      org: org,
-      validators: validators.org
-    });
-  })
-  // If error, redirect to organization list
-  .catch(err => {
-    M.log.error(err);
-    return res.redirect('/organizations');
+  utils.render(req, res, 'organizations', {
+    name: 'organizations',
+    title: 'MBEE | Model-Based Engineering Environment'
   });
 }
 
 /**
  * @description Renders the project list page.
  */
-function projectList(req, res) {
-  // Sanity check: confirm req.user exists
-  if (!req.user) {
-    M.log.critical(new M.CustomError('/projects executed with invalid req.user object'));
-    // redirect to the login screen
-    res.redirect('/login');
-  }
-  // Find the requesting user
-  UserController.find(req.user, req.user.username)
-  // Render the project page with the list of projects
-  .then(foundUser => {
-    // Create list of projects
-    const projects = foundUser.proj.read;
-    // Loop through list and create reference page for each project
-    projects.forEach(proj => {
-      // set ref to split of uid and join with forward slashes
-      proj.ref = utils.parseID(proj.uid).join('/');
-    });
-    utils.render(req, res, 'project-list', {
-      title: 'MBEE | Model-Based Engineering Environment',
-      projects: projects
-    });
-  })
-  // If error, redirect to home
-  .catch(error => {
-    M.log.error(error);
-    res.redirect('/');
-  });
-}
-
-/**
- * @description Renders a project page.
- */
-function project(req, res) {
+function projects(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
     M.log.critical(new M.CustomError('/:orgid/:projectid executed with invalid req.user object'));
     // redirect to the login screen
     res.redirect('/login');
   }
-  let proj = null;
-  let elements = null;
-  // Find organization
-  ProjController.find(req.user, req.params.orgid, req.params.projectid)
-  // Render organization page including nav-sidebar
-  .then(foundProject => {
-    proj = foundProject;
-    return ElementController.find(req.user, req.params.orgid, req.params.projectid);
-  })
-  .then(foundElements => {
-    elements = foundElements;
-    elements.forEach(element => {
-      const uid = utils.parseID(element.id);
-      element.apiRef = `/api/orgs/${uid[0]}/projects/${uid[1]}/elements/${uid[2]}`;
-    });
-    const elementTree = elementSort.createElementsTree(elements);
-    utils.render(req, res, 'project', {
-      name: 'project',
-      title: 'MBEE | Model-Based Engineering Environment',
-      sidebar: {
-        heading: 'Project',
-        icon: 'fas fa-box',
-        list: {
-          Elements: {
-            icon: 'fas fa-project-diagram',
-            link: '#elements'
-          },
-
-          Members: {
-            icon: 'fas fa-users',
-            link: '#members'
-          },
-          Settings: {
-            icon: 'fas fa-cog',
-            link: '#settings'
-          }
-        }
-      },
-      project: proj,
-      elements: elementTree,
-      validators: validators.element
-    });
-  })
-  // If error, redirect to organization list
-  .catch(err => {
-    M.log.error(err);
-    return res.redirect('/projects');
-  });
-}
-
-/**
- * @description Renders a project edit/form page.
- */
-function projectEdit(req, res) {
-  // Sanity check: confirm req.user exists
-  if (!req.user) {
-    M.log.critical(new M.CustomError('/:projectid/edit executed with invalid req.user object'));
-    // redirect to the login screen
-    res.redirect('/login');
-  }
-  // Find Project
-  ProjController.find(req.user, req.params.orgid, req.params.projectid)
-  .then(foundProject => {
-    // Check if user is NOT admin
-    if (!req.user.admin
-      && !foundProject.permissions.admin.map(u => u.username)
-      .includes(req.user.username)) {
-      // User is NOT admin, redirect to project page
-      return res.redirect(`/${foundProject.org.id}/${foundProject.id}`);
-    }
-    // Render project edit page
-    utils.render(req, res, 'project-edit', {
-      name: 'project-edit',
-      title: 'MBEE | Model-Based Engineering Environment',
-      project: foundProject,
-      validators: validators.project
-    });
-  })
-  // If error, redirect to project list
-  .catch(err => {
-    M.log.error(err);
-    return res.redirect('/projects');
+  utils.render(req, res, 'projects', {
+    name: 'projects',
+    title: 'MBEE | Model-Based Engineering Environment'
   });
 }
 
@@ -335,38 +129,9 @@ function whoami(req, res) {
     // redirect to the login screen
     res.redirect('/login');
   }
-
-  // get all organizations the user is a member of
-  UserController.find(req.user, req.user.username)
-  // Render the project page with the list of projects
-  .then(foundUser => {
-    utils.render(req, res, 'user', {
-      name: foundUser.username,
-      title: 'MBEE | Model-Based Engineering Environment',
-      sidebar: {
-        heading: 'User',
-        list: {
-          Organizations: {
-            icon: 'fas fa-boxes',
-            link: '/organizations'
-          },
-          Projects: {
-            icon: 'fas fa-box',
-            link: '/projects'
-          },
-          Settings: {
-            icon: 'fas fa-cog',
-            link: '#settings'
-          }
-        }
-      },
-      user: foundUser
-    });
-  })
-  // If error, redirect to home
-  .catch(error => {
-    M.log.error(error);
-    res.redirect('/');
+  utils.render(req, res, 'user', {
+    name: 'user',
+    title: 'MBEE | Model-Based Engineering Environment'
   });
 }
 

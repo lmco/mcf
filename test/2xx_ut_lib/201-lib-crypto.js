@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.201-lib-crypto
+ * @module test.201-lib-crypto
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *

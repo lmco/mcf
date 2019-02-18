@@ -91,7 +91,7 @@ router.route('/organizations')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.organizationList
+  UIController.organizations
 );
 
 /* This renders the project list page for logged in users */
@@ -99,7 +99,7 @@ router.route('/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.projectList
+  UIController.projects
 );
 
 /**
@@ -126,12 +126,7 @@ router.param('orgid', (req, res, next, orgid) => {
 // Parameter validation for the 'projectid' param
 // eslint-disable-next-line consistent-return
 router.param('projectid', (req, res, next, project) => {
-  if (RegExp(Validators.project.id).test(project)) {
-    next();
-  }
-  else {
-    return res.redirect('/projects');
-  }
+  next();
 });
 
 
@@ -140,7 +135,7 @@ router.route('/:orgid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.organization
+  UIController.organizations
 );
 
 /* This renders an organizations edit form for an admin user */
@@ -148,7 +143,7 @@ router.route('/:orgid/edit')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.organizationEdit
+  UIController.organizations
 );
 
 /* This renders a project for a user */
@@ -156,7 +151,7 @@ router.route('/:orgid/:projectid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.project
+  UIController.projects
 );
 
 /* This renders a project edit form for an admin user */
@@ -164,7 +159,7 @@ router.route('/:orgid/:projectid/edit')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.projectEdit
+  UIController.projects
 );
 
 

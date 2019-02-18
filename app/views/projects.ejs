@@ -2,7 +2,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module views.home
+ * @module views.projects
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
@@ -12,9 +12,10 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description The MBEE home page
+ * @description This page renders the project page.
  */
- %>
-<div id="view" class="view"></div>
+%>
+<div id="main"></div>
 
-<script type="text/javascript" src="/react-js/home-page.js"></script>
+<%- contentFor('scripts') %>
+<script type="text/javascript" src="/react-js/projects.js"></script>

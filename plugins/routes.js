@@ -105,9 +105,8 @@ function loadPlugins() {
         }
         // Add dependency to node_modules without erasing existing node_modules
         // directory
-        // TODO (jk) - We need to handle version management of dependencies
         const commands = [
-          `yarn add --dev ${dep} --modules-folder "${M.root}/node_modules" && yarn remove ${dep}`
+          `yarn add --dev ${dep}@${dependencies[dep]} --modules-folder "${M.root}/node_modules"`
         ];
         M.log.verbose(`Installing dependency ${dep} ...`);
         const stdout = execSync(commands.join('; '));
