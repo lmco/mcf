@@ -57,6 +57,7 @@
     "docker": "node mbee docker",
     "lint": "node mbee lint",
     "migrate": "node mbee migrate",
+    "postinstall": "node mbee build",
     "start": "node mbee start",
     "test": "node mbee test"
   }
