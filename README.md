@@ -14,9 +14,7 @@ software tools. MBEE decreases ambiguity by making a single-source of truth for
 data more achievable through its RESTful API, extensible plugins, and
 distributed services.
 
-## Quick Start
-
-### Prerequisites
+## Prerequisites
 
 MBEE is designed so that the only dependency to get started is Node.js and NPM.
 NPM comes with Node.js, all you need to do is make sure you can install packages
@@ -60,55 +58,10 @@ then specify which authentication module to use in the MBEE config file.
 Alter the `auth.strategy` field in the [default.cfg](config/default.cfg)
 to use your authentication strategy.
 
-### Building MBEE
+## Getting Started
 
-1. Install dependencies by running `NODE_ENV=dev yarn install` or
-`npm install --dev`.
-2. Build MBEE by running `node mbee build`. This will build the client-side
-assets by moving dependencies from `node_modules` into build/public, concatenating and
-minifying client-side JavaScript, processing Sass into CSS, and building JSDoc
-documentation into build/doc.
-
-> How it works: The build command ultimately calls the script `scripts/build.js`
-> and the package.json contains a "build" script definition that also points to
-> this script. You can also build by running `npm build` or `yarn run build`.
-
-#### NPM, Yarn, and mbee.js
-
-NPM is the default package manager that comes with Node.js. MBEE is
-designed so that NPM could be used to build and run MBEE without issues. Yarn
-is used instead because it handles dependency management a bit more effectively
-than NPM with little to no additional effort.
-
-The `package.json` file defines scripts that NPM or Yarn can run. These mostly
-map to either files in the `scripts` directory or to the `mbee.js` script.
-
-The `mbee.js` script supports a number of subcommands that typically map to the
-scripts found in the `scripts` directory. The subcommands are designed to align
-with the script commands in the `package.json` file.
-
-The intention behind this approach is to give you more than one way to
-accomplish the same thing, regardless of your preferred toolset, without seeing
-different behavior between approaches.
-
-In short, you can also build MBEE with `npm run build`, `yarn build`, or
-`node scripts/build.js`. They'll all do the same thing.
-
-It is possible to build individual pieces of MBEE as well. By default, running
-the build script will build all pieces of MBEE, or by providing the subcommand
---all or --copy-deps. Additional subcommands are --sass, --react and --jsdoc to
-build the sass, react and jsdoc files respectively.
-
-### Running MBEE
-
-The fastest and easiest way to run MBEE is to run `node mbee start`. This will
-run the MBEE server based on the [default.cfg](config/default.cfg) by
-default. To run with a different configuration (`production` for example), run
-`NODE_ENV=production node mbee start`.
-
-> How it works: The start command loads the app from the `app/app.js` module
-> and creates (if enabled) the HTTP and HTTPS servers and starts the MBEE
-> servers.
+1. Install dependencies and build by running `yarn install` or `npm install`.
+2. Run MBEE by running `node mbee start`. 
 
 ## Configuration
 
@@ -244,8 +197,10 @@ leaves the system in the same state it started in. For example if you added a
 project, delete it. This allows unit tests to be written without knowledge of
 other test suites or the order of test execution.
 
-
 ## Documentation
+
+### Flight Manual
+TODO
 
 ### API Documentation
 The API's documentation is generated with Swagger with Swagger-JSDoc.
