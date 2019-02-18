@@ -152,7 +152,8 @@ ElementSchema.plugin(extensions);
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived', 'parent', 'type'];
+  return ['name', 'documentation', 'custom', 'archived', 'parent', 'type',
+    'source', 'target'];
 };
 
 ElementSchema.statics.getValidUpdateFields = function() {
@@ -164,7 +165,8 @@ ElementSchema.statics.getValidUpdateFields = function() {
  * @memberof ElementSchema
  */
 ElementSchema.methods.getValidBulkUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived', 'type'];
+  return ['name', 'documentation', 'custom', 'archived', 'type', 'source',
+    'target'];
 };
 
 ElementSchema.statics.getValidBulkUpdateFields = function() {
