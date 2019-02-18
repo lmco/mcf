@@ -20,7 +20,7 @@
  */
 
 // MBEE modules
-const utils = M.require('lib.utils');
+const utils = require('./utils');
 
 // If validators isn't defined, just set custom to an empty object.
 const customValidators = M.config.validators || {};

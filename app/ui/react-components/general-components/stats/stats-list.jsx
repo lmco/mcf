@@ -1,0 +1,82 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module  ui.react-components.general-components.stats
+ *
+ * @copyright Copyright (C) 2019, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ *
+ * @description This renders the stat list.
+ */
+import React, { Component } from 'react';
+
+class StatsList extends Component {
+    constructor(props) {
+        super(props);
+
+        this.ref = React.createRef();
+
+        this.handleResize = this.handleResize.bind(this);
+        this.setChildWidth = this.setChildWidth.bind(this);
+
+        this.state = {
+            width: null
+        };
+    }
+
+    handleResize() {
+        this.setState({ width: this.ref.current.clientWidth })
+    }
+
+    setChildWidth(title, width) {
+        this.setState({[`stat-${title}`]: width})
+    }
+
+    render() {
+        let statsItems = [];
+
+        if (this.state.width) {
+            let totalStatsWidth = 0;
+            statsItems = React.Children.map(this.props.children, child => {
+                const statWidth = this.state[`stat-${child.props.title}`];
+                if (totalStatsWidth + statWidth <= this.state.width ) {
+                    totalStatsWidth += statWidth;
+                    return React.cloneElement(child, {setChildWidth: this.setChildWidth});
+                }
+            });
+        }
+        else {
+            statsItems = React.Children.map(this.props.children, child =>
+                React.cloneElement(child, {setChildWidth: this.setChildWidth})
+            );
+        }
+
+        return(
+            <div className='stats-list' ref={this.ref}>
+                {statsItems}
+            </div>
+        );
+    }
+
+    componentDidMount() {
+        window.addEventListener('resize', this.handleResize);
+        this.handleResize();
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.handleResize);
+    }
+}
+
+export default StatsList;
