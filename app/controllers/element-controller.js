@@ -1231,6 +1231,32 @@ function moveElementCheck(organizationID, projectID, branch, element) {
   });
 }
 
+/**
+ * @description A non-exposed helper function that throws an error if the new
+ * elements parent is in the given elements subtree.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string} query - The text-based query to search the database for.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {boolean} [options.archived] - If true, find results will include
+ * archived objects. The default value is false.
+ *
+ * @return {Promise} An array of found elements.
+ *
+ * @example
+ * search({User}, 'orgID', 'projID', 'branch', 'find these elements')
+ * .then(function(elements) {
+ *   // Do something with the found elements
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
 function search(requestingUser, organizationID, projectID, branch, query, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
@@ -1304,17 +1330,14 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         throw new M.CustomError(`The project [${projID}] on the org ${orgID} `
           + 'was not found.', 404, 'warn');
       }
-      console.log('isAdmin');
-      console.log(reqUser.admin);
-      console.log('isOnProject')
-      console.log(project.permissions[reqUser._id])
+
       // Verify the user has read permissions on the project
       if (!project.permissions[reqUser._id]
         || (!project.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
         throw new M.CustomError('User does not have permission to get'
           + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
       }
-      console.log('Survived')
+
       const searchQuery = { project: project._id, $text: { $search: saniQuery }, archived: false };
       // If the archived field is true, remove it from the query
       if (archived) {
