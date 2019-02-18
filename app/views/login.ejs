@@ -20,50 +20,54 @@
  */
  %>
 
-<div class="container" style="max-width: 450px;" onkeypress="triggerModal(event)">
-  <% if (err.length) { %>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert"
-         style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%);">
-      <%= err %>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-  <% } %>
-  <form id="login-form" action="/login" method="POST" >
-    <div class="form-group" >
-      <label for="username">Username</label>
-      <input id="username" name="username" type="text" class="form-control"
-             aria-describedby="usernameHelp" placeholder="Enter your username ...">
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input id="password" name="password" type="password" class="form-control"  placeholder="Enter your password ...">
-    </div>
-    <div class="form-group">
-      <input id="next" name="next" type="hidden" class="form-control"  value="<%= next %>">
-    </div>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#login-warning">
-      Login
-    </button>
-  </form>
-</div>
-
-<div id="login-warning" class="modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">NOTICE</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+<div id="main">
+  <div id="view" class="view">
+    <div class="container" style="max-width: 450px;" onkeypress="triggerModal(event)">
+      <% if (err.length) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert"
+             style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%);">
+          <%= err %>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      <% } %>
+      <form id="login-form" action="/login" method="POST" >
+        <div class="form-group" >
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" class="form-control"
+                 aria-describedby="usernameHelp" placeholder="Enter your username ...">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" class="form-control"  placeholder="Enter your password ...">
+        </div>
+        <div class="form-group">
+          <input id="next" name="next" type="hidden" class="form-control"  value="<%= next %>">
+        </div>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#login-warning">
+          Login
         </button>
-      </div>
-      <div class="modal-body">
-        <p style="color:#333;">This system is the property of Lockheed Martin and its subsidiaries and affiliates, and is intended for the use of authorized users only. Employees and users of these computing and information resources should have no expectation of privacy with regard to use of these resources. All activities of individuals using this computing system with or without authority, or in excess of their authority, may be monitored and recorded by system personnel or by third parties. Information regarding such monitoring may be provided to law enforcement officials or other third parties for any reason, and/or used for further legal action by this Corporation. Unauthorized use of this system is prohibited and may result in revocation of access, disciplinary action and/or legal action. The Corporation reserves the right to monitor and review user activity, files and electronic messages. Reminder: Information transmitted to a foreign person on this network may be subject to applicable Export Control laws. Contact your Export Coordinator for assistance.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="doLogin();">Accept and Login</button>
+      </form>
+    </div>
+
+    <div id="login-warning" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">NOTICE</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p style="color:#333;">This system is the property of Lockheed Martin and its subsidiaries and affiliates, and is intended for the use of authorized users only. Employees and users of these computing and information resources should have no expectation of privacy with regard to use of these resources. All activities of individuals using this computing system with or without authority, or in excess of their authority, may be monitored and recorded by system personnel or by third parties. Information regarding such monitoring may be provided to law enforcement officials or other third parties for any reason, and/or used for further legal action by this Corporation. Unauthorized use of this system is prohibited and may result in revocation of access, disciplinary action and/or legal action. The Corporation reserves the right to monitor and review user activity, files and electronic messages. Reminder: Information transmitted to a foreign person on this network may be subject to applicable Export Control laws. Contact your Export Coordinator for assistance.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="doLogin();">Accept and Login</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

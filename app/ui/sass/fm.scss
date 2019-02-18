@@ -1,17 +1,35 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module app.ui.sass.fm
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI
+ *
+ * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ *
+ * @description This defines the Sass variables.
+ */
+
+@import 'variables';
 
 #fm {
 
-    color: #d6d7d8;
+    color: $mbee-color;
 
     h1.title {
-        color: #fff;
+        color: $mbee-color;
         font-weight: 100;
         font-size: 56px;
         margin: 40px 15px 0px 15px;
     }
 
     h2.subtitle {
-        color: #d6d7d8;
+        color: $mbee-color;
         font-weight: 100;
         font-size: 14px;
         margin: 0px 15px 40px 15px;
@@ -22,17 +40,18 @@
     }
 
     .nav-pills .nav-link.active {
+        color: $mbee-color;
         background-color: transparent;
         border-bottom: 1px solid #007bff;
     }
 
     .tab-content {
 
-        color: #d6d7d8;
+        color: $mbee-color;
 
         h1, h2, h3, h4, h5, h6 {
             font-weight: 300;
-            color: #fff;
+            color: $mbee-color;
         }
 
         h1 {

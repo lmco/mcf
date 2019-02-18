@@ -1,0 +1,60 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module  ui.react-components.general-components.stats
+ *
+ * @copyright Copyright (C) 2019, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
+ * It is not approved for public release or redistribution.
+ *
+ * EXPORT CONTROL WARNING: This software may be subject to applicable export
+ * control laws. Contact legal and export compliance prior to distribution.
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ *
+ * @description This renders a stat.
+ */
+import React, { Component } from 'react';
+import { UncontrolledTooltip } from 'reactstrap';
+
+class Stat extends Component {
+    constructor(props) {
+        super(props);
+
+        this.ref = React.createRef();
+    }
+
+    componentDidMount() {
+        this.props.setChildWidth(this.props.title, this.ref.current.clientWidth)
+    }
+
+    render() {
+        return (
+            <div className='stats-item' ref={this.ref} id={this.props._key || this.props.title}>
+                <i className={this.props.icon}/>
+                <p>{isNaN(this.props.value)
+                    ? '?'
+                    : this.props.value
+                }
+                </p>
+                <UncontrolledTooltip placement='top'
+                                     target={this.props._key || this.props.title}
+                                     delay={{
+                                         show: 0,
+                                         hide: 0
+                                     }}
+                                     boundariesElement='viewport'
+                >
+                    {this.props.title}
+                </UncontrolledTooltip>
+            </div>
+        )
+    }
+}
+
+export default Stat;

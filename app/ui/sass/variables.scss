@@ -21,17 +21,14 @@
 
 
 /* LM light theme colors */
-$mbee-background: #333;
-$mbee-color: #FFF;
-
-/* Bootstrap dark theme colors*/
-$bs-dark-background: rgb(52,58,64);
+$mbee-background: white;
+$mbee-color: black;
+$mbee-font: "Avenir Next";
 
 /* sizing */
-$banner-height: 24px;
-$navbar-height: 62px;
-$nav-sidebar-full-width: 250px;
-$nav-sidebar-min-width: 50px;
+$banner-height: 20px;
+$sidebar-full-width: 250px;
+$sidebar-min-width: 50px;
 
 /* Swagger Colors */
 $swagger-border-color-get:      #9a9a9a;
