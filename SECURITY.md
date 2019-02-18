@@ -323,7 +323,7 @@ configuration example below:
 ```json
 {
   "auth": {
-    "strategy": "LdapStrategy",
+    "strategy": "ldap-strategy",
     "ldap": {
         // LDAP information
     },

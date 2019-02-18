@@ -5,9 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

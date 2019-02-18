@@ -1,11 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module plugin.routes
+ * @module plugins.routes
  *
- * @copyright  Copyright (c) 2018, Lockheed Martin Corporation
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license  LMPI - Lockheed Martin Proprietary Information
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *

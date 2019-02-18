@@ -5,15 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
- *
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This implements an authentication strategy for local
@@ -46,8 +42,8 @@ const utils = M.require('lib.utils');
  * @param {Object} res - Response express object
  * @param {string} username - Username to authenticate
  * @param {string} password - Password to authenticate
- * @returns {Promise} resolve - authenticated user object
- *                    reject - an error
+ *
+ * @returns {Promise} Authenticated user object
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -95,8 +91,8 @@ function handleBasicAuth(req, res, username, password) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  * @param {string} token - User authentication token, encrypted
- * @returns {Promise} resolve - local user object
- *                    reject - an error
+ *
+ * @returns {Promise} Local user object
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -157,7 +153,7 @@ function handleTokenAuth(req, res, token) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - response express object
- * @param {callback} next - Callback to express authentication
+ * @param {function} next - Callback to express authentication
  */
 function doLogin(req, res, next) {
   // Compute token expiration time
@@ -183,7 +179,7 @@ function doLogin(req, res, next) {
  *
  * @param {string} password - Password to validate.
  *
- * @returns {Boolean} - If password is correctly validated
+ * @returns {boolean} If password is correctly validated
  */
 function validatePassword(password) {
   // No defined password validator, use default
