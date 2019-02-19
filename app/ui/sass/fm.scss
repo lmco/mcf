@@ -68,7 +68,8 @@
         }
 
         h3 {
-            font-weight: 600;
+            margin-top: 25px;
+            margin-bottom: 15px;
             font-size: 22px;
         }
 
@@ -92,6 +93,11 @@
             background: #343a40;
             padding: 4px 4px;
             border: 1px solid #484d53;
+
+            code {
+                max-height: 200px;
+                overflow: scroll;
+            }
         }
 
         img {
