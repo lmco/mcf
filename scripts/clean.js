@@ -46,7 +46,7 @@ const { execSync } = require('child_process');
  * If NO flags are provided, defaults to `--all`
  */
 function clean(_args) {
-  M.log.info('Cleaning MBEE...')
+  M.log.info('Cleaning MBEE...');
   // Assign parameters to args. If no parameters, default to '--all'
   const args = (_args === undefined) ? [] : _args;
 
