@@ -1,11 +1,10 @@
 # Model-Based Engineering Environment
 
-The Model-Based Engineering Environment or MBEE is modeling collaboration tool
+The Model-Based Engineering Environment or MBEE is a modeling collaboration tool
 that integrates system models with multidisciplinary engineering data to enable
 the system model to be a single-source of truth project data. It makes model
-data more accessible via a web-based user interface (UI) for ease of use across
-disciplines and skill sets within an organization. MBEE provides a web-based UI
-for team members to interact with system model data without needing to be a
+data more accessible across disciplines and skill sets by providing a web-based 
+UI for team members to interact with system model data without needing to be a
 systems modeler themselves.
 
 The goal of MBEE is to better communicate data across engineering organizations
@@ -16,21 +15,96 @@ distributed services.
 
 ## Prerequisites
 
+**Node.js**
 MBEE is designed so that the only dependency to get started is Node.js and NPM.
 NPM comes with Node.js, all you need to do is make sure you can install packages
-with NPM and you can get started.
+with NPM and you can get started. See [nodejs.org](https://nodejs.org/en/)
+for information on Node.js.
 
+**MongoDB**
 You'll also need an instance of MongoDB. If you don't have a database already
 set up, please see the [MongoDB Installation Tutorial](https://docs.mongodb.com/manual/installation/#tutorial-installation)
 and the [MongoDB Getting Started Guide](https://docs.mongodb.com/manual/tutorial/getting-started/)
 for up-to-date documentation on MongoDB.
 
-Finally, you need to clone the MBEE code by running:
-`git clone https://gitlab.lmms.lmco.com/mbee/mbee.git `. And enter the directory
-with `cd mbee`.
+**Source Code**
+1. Clone the MBEE code by running: `git clone https://gitlab.lmms.lmco.com/mbee/mbee.git`. 
+2. Enter the directory with `cd mbee`.
 
-### Configuring MBEE
+## Getting Started
 
+1. Install dependencies and build by running `yarn install` or `npm install`.
+2. Run MBEE by running `node mbee start`. 
+
+## Documentation
+
+MBEE has three main documents for capturing in-depth documentation of the 
+software: the Flight Manual, API Documentation, and JSDoc.
+
+The MBEE Flight Manual (source located at [`./doc`](./doc)) is an
+all encompassing user manual for MBEE. It provides all
+ 
+### Flight Manual
+TODO
+
+### API Documentation
+The API's documentation is generated with Swagger with Swagger-JSDoc.
+The API routes, which are defined in [app/api-routes.js](app/api-routes.js),
+are documented via Swagger-JSDoc block comments. All API documentation and
+API definition occurs in that file.
+
+You can view the rendered Swagger documentation at the `/doc` route on a
+running MBEE server.
+
+### Developer Documentation
+Developer documentation created using [JSDoc](http://usejsdoc.org/). When
+writing code, you are expected to document what you're doing to help other
+developers and maintainers understand what you are doing, support code reviews,
+and make it easier for people to understand and work with the project.
+
+The developer documentation is generated and rendered by the
+[MBEE developers plugin](https://gitlab.lmms.lmco.com/mbee/mbee-integrations/plugin-developers.git).
+Ensure this plugin is added to your configuration and you can view the
+rendered developer documentation within that plugin.
+
+Alternatively, you can run
+
+```bash
+node node_modules/jsdoc/jsdoc.js \
+     -u doc app/**/*.js test/**/*.js README.md
+```
+
+### Docker Documentation
+MBEE can be run in a docker container. The docker functionality includes
+getting logs, cleaning, building, and running the docker container. To run the
+commands, use `--[cmd]` after `node mbee docker`.  To run the container, you
+must first build the container image with `--build`. This will build the docker
+image using the dockerfile that is provided in the mbee code. Below is an
+example of how a docker container can be built:
+
+```bash
+node mbee docker --build
+```
+
+After the image is built the docker container can be run using `--run`. The
+container will be detached, but have an interactive processes. If docker
+container unexpectedly exited, the container will restart. The docker image can
+also be run with a specified MBEE environment variable. Below is an example of
+how a docker container can be run:
+
+```bash
+MBEE_ENV=test node mbee docker --run
+```
+
+To get the logs of the docker container, you can use `--get-logs`. This will
+print out the containers logs, which can be useful if an error has occured. If
+the docker container needs to be rebuilt and the previous build needs to be
+removed, use `--clean` to remove the previous docker build.
+
+
+## Advanced Configuration
+
+### Configuration File
 MBEE stores all it's configuration information in the `config` directory. By
 default, it uses the `default.cfg` file, but that can be changed by setting the
 `MBEE_ENV` environment variable. On startup, MBEE will load the configuration
@@ -49,23 +123,17 @@ your configuration.
 
 ### Modular Authentication
 
-MBEE supports modular authentication strategies. These authentication modules
-have well defined interfaces that can be dynamically replaced. This allows you
+MBEE supports modular authentication strategies. These strategies are defined
+in the authentication modules in `/app/auth`. Which authentication strategy is
+used is defined in the config file. The `auth` section contains a field called
+`strategy`. This `auth.strategy` section should be set to the module you which 
+to use.
+ 
+These authentication modules have well defined interfaces that can be 
+dynamically replaced based on the configuration. This allows you
 to write a custom authentication module to accommodate the needs of your
 company or organization without having to make major changes to MBEE. You can
 then specify which authentication module to use in the MBEE config file.
-
-Alter the `auth.strategy` field in the [default.cfg](config/default.cfg)
-to use your authentication strategy.
-
-## Getting Started
-
-1. Install dependencies and build by running `yarn install` or `npm install`.
-2. Run MBEE by running `node mbee start`. 
-
-## Configuration
-
-### Modular Authentication
 
 By default, MBEE provides strategies for local authentication or LDAP
 authentication. Local is used by default because it has fewer dependencies and
@@ -197,62 +265,5 @@ leaves the system in the same state it started in. For example if you added a
 project, delete it. This allows unit tests to be written without knowledge of
 other test suites or the order of test execution.
 
-## Documentation
 
-### Flight Manual
-TODO
-
-### API Documentation
-The API's documentation is generated with Swagger with Swagger-JSDoc.
-The API routes, which are defined in [app/api-routes.js](app/api-routes.js),
-are documented via Swagger-JSDoc block comments. All API documentation and
-API definition occurs in that file.
-
-You can view the rendered Swagger documentation at the `/doc` route on a
-running MBEE server.
-
-### Developer Documentation
-Developer documentation created using [JSDoc](http://usejsdoc.org/). When
-writing code, you are expected to document what you're doing to help other
-developers and maintainers understand what you are doing, support code reviews,
-and make it easier for people to understand and work with the project.
-
-The developer documentation is generated and rendered by the
-[MBEE developers plugin](https://gitlab.lmms.lmco.com/mbee/mbee-integrations/plugin-developers.git).
-Ensure this plugin is added to your configuration and you can view the
-rendered developer documentation within that plugin.
-
-Alternatively, you can run
-
-```bash
-node node_modules/jsdoc/jsdoc.js \
-     -u doc app/**/*.js test/**/*.js README.md
-```
-
-### Docker Documentation
-MBEE can be run in a docker container. The docker functionality includes
-getting logs, cleaning, building, and running the docker container. To run the
-commands, use `--[cmd]` after `node mbee docker`.  To run the container, you
-must first build the container image with `--build`. This will build the docker
-image using the dockerfile that is provided in the mbee code. Below is an
-example of how a docker container can be built:
-
-```bash
-node mbee docker --build
-```
-
-After the image is built the docker container can be run using `--run`. The
-container will be detached, but have an interactive processes. If docker
-container unexpectedly exited, the container will restart. The docker image can
-also be run with a specified MBEE environment variable. Below is an example of
-how a docker container can be run:
-
-```bash
-MBEE_ENV=test node mbee docker --run
-```
-
-To get the logs of the docker container, you can use `--get-logs`. This will
-print out the containers logs, which can be useful if an error has occured. If
-the docker container needs to be rebuilt and the previous build needs to be
-removed, use `--clean` to remove the previous docker build.
 
