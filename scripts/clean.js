@@ -43,6 +43,7 @@ if (module.parent == null || typeof M === 'undefined') {
  */
 function clean(_args) {
   const root = path.join(__dirname, '../');
+  
   // eslint-disable-next-line no-console
   console.log('Cleaning MBEE...');
 
