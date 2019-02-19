@@ -131,8 +131,6 @@ UserSchema.pre('save', function(next) {
     throw new M.CustomError('Password validation failed.', 400, 'warn');
   }
 
-  console.log(this.password); // eslint-disable-line no-console
-  console.log(this._id.toString()); // eslint-disable-line no-console
   // Hash plaintext password
   if (this.password) {
     crypto.pbkdf2(this.password, this._id.toString(), 1000, 32, 'sha256', (err, derivedKey) => {
