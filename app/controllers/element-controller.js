@@ -169,10 +169,10 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       }
 
       // Verify the user has read permissions on the project
-      if (!project.permissions[reqUser._id]
-        || (!project.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.CustomError('User does not have permission to get'
-            + ` elements on the project ${project._id}.`, 403, 'warn');
+            + ` elements on the project [${utils.parseID(project._id).pop()}].`, 403, 'warn');
       }
 
       let elementsToFind = [];
@@ -440,8 +440,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.permissions[reqUser._id]
-        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to create'
             + ' elements on the project '
             + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
@@ -738,10 +738,10 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.permissions[reqUser._id]
-        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to update'
-          + ` elements on the project ${foundProject._id}.`, 403, 'warn');
+          + ` elements on the project [${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
       }
 
       // Check the type of the elements parameter
