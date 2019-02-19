@@ -75,7 +75,7 @@ function flightManual(req, res) {
       const sectionID = section.replace('.html', '');
       const sectionTitle = sectionID.replace(/-/g, ' ');
       sections.push({
-        id: sectionID.replace(/\./g, '-'),
+        id: sectionID.replace(/\./g, '-').replace(':', ''),
         title: utils.toTitleCase(sectionTitle, true),
         content: fs.readFileSync(`${M.root}/build/fm/${section}`)
       });
