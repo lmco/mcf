@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
@@ -47,7 +43,7 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {callback} next - Callback to express authentication
+ * @param {function} next - Callback to express authentication
  */
 function authenticate(req, res, next) {
   // Extract authorization metadata
@@ -136,7 +132,7 @@ function authenticate(req, res, next) {
 
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(401).send('Unauthorized')
+          ? res.status(401).send(err)
           : res.redirect(`/login?next=${req.originalUrl}`);
       });
     }
@@ -279,40 +275,24 @@ function authenticate(req, res, next) {
 
 /**
  * @description Validates a users password with set rules.
+ * Note: If validatePassword() function is NOT defined in custom strategy then
+ * validation will fail.
  *
- * @param {String} password - Password to verify
- * @returns {Boolean} - If password is correctly validated
+ * @param {string} password - Password to validate
+ * @param {string} provider - the type of authentication strategy (ldap, local,
+ * etc.)
+ *
+ * @returns {boolean} - If password is correctly validated
  */
-function validatePassword(password) {
+function validatePassword(password, provider) {
   // Check if custom validate password rules exist in auth strategy
   if (AuthModule.hasOwnProperty('validatePassword')) {
-    return AuthModule.validatePassword(password);
+    return AuthModule.validatePassword(password, provider);
   }
 
-  // validate password not defined, use default password rules
-  try {
-    // At least 8 characters
-    const lengthValidator = (password.length >= 8);
-    // At least 1 digit
-    const digitsValidator = (password.match(/[0-9]/g).length >= 1);
-    // At least 1 lowercase letter
-    const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
-    // At least 1 uppercase letter
-    const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
-    // At least 1 special character
-    const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
-
-    // Return concatenated result
-    return (lengthValidator
-        && digitsValidator
-        && lowercaseValidator
-        && uppercaseValidator
-        && specialCharValidator);
-  }
-  catch (error) {
-    // Explicitly NOT logging error to avoid password logging
-    return false;
-  }
+  // Unknown provider, failed validation
+  // Explicitly NOT logging error to avoid password logging
+  return false;
 }
 
 // Export above functions

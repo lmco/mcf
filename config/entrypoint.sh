@@ -10,4 +10,6 @@ mongod --dbpath /lm/mbee/data/db \
        --logpath /lm/mbee/data/db/log/mbee-db.log
 
 sleep 2
+node mbee migrate -y
+sleep 5
 node mbee start

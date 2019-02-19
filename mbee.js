@@ -6,7 +6,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
-* @license LMPI - Lockheed Martin Proprietary Information
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -56,12 +58,11 @@ Object.defineProperty(M, 'build', {
 });
 
 /**
- * Defines the 4-digit version number by combining the 3-digit version number
- * and appending the build number. If the build number does not exist, zero
- * is used.
+ * Defines the schema version by pulling the schemaVersion field from
+ * the package.json.
  */
-Object.defineProperty(M, 'version4', {
-  value: RegExp('[0-9]+').test(M.build) ? `${M.version}.${M.build}` : `${M.version}.0`,
+Object.defineProperty(M, 'schemaVersion', {
+  value: pkg.schemaVersion,
   writable: false,
   enumerable: true
 });
@@ -172,7 +173,7 @@ function main() {
       + '\n\n  node mbee build\n\n');
     process.exit(0);
   }
-  const tasks = ['clean', 'build', 'lint', 'docker', 'start', 'test'];
+  const tasks = ['clean', 'build', 'lint', 'docker', 'start', 'test', 'migrate'];
   if (tasks.includes(subcommand)) {
     // eslint-disable-next-line global-require
     const task = require(path.join(M.root, 'scripts', subcommand));

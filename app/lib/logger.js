@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -28,6 +24,7 @@
  */
 
 // Node modules
+const path = require('path');
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
 const { execSync } = require('child_process');
@@ -166,18 +163,18 @@ const logger = winston.createLogger({
     new winston.transports.Console(),
     // error log transport - logs error-level and below to error log file
     new winston.transports.File({
-      filename: M.config.log.error_file,
+      filename: path.join(logDir, M.config.log.error_file),
       level: 'error'
     }),
     // combined log transport - logs default-level and below to combined log file
     // NOTE: Default level specified in config file
     new winston.transports.File({
-      filename: M.config.log.file,
+      filename: path.join(logDir, M.config.log.file),
       level: M.config.log.level
     }),
     // debug log transport - logs debug-level and below to debug log file
     new winston.transports.File({
-      filename: M.config.log.debug_file,
+      filename: path.join(logDir, M.config.log.debug_file),
       level: 'debug'
     })
   ],

@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
@@ -24,7 +20,8 @@
 module.exports = {
   handleBasicAuth,
   handleTokenAuth,
-  doLogin
+  doLogin,
+  validatePassword
 };
 
 // Node modules
@@ -34,10 +31,9 @@ const ldap = require('ldapjs');
 
 // MBEE modules
 const LocalStrategy = M.require('auth.local-strategy');
+const Organization = M.require('models.organization');
 const User = M.require('models.user');
-const UserController = M.require('controllers.user-controller');
 const sani = M.require('lib.sanitization');
-const utils = M.require('lib.utils');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -49,10 +45,10 @@ const ldapConfig = M.config.auth.ldap;
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} username - Username to authenticate via LDAP AD
- * @param {String} password - Password to authenticate via LDAP AD
- * @returns {Promise} resolve - authenticated user object
- *                    reject - an error
+ * @param {string} username - Username to authenticate via LDAP AD
+ * @param {string} password - Password to authenticate via LDAP AD
+ *
+ * @returns {Promise} Authenticated user object
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -94,9 +90,9 @@ function handleBasicAuth(req, res, username, password) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} token - Token user authentication token, encrypted
- * @returns {Promise} resolve - local user object
- *                    reject - an error
+ * @param {string} token - Token user authentication token, encrypted
+ *
+ * @returns {Promise} Local user object
  *
  * @example
  * AuthController.handleTokenAuth(req, res, token)
@@ -121,7 +117,7 @@ function handleTokenAuth(req, res, token) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {callback} next - Callback to continue express authentication
+ * @param {function} next - Callback to continue express authentication
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
@@ -132,8 +128,7 @@ function doLogin(req, res, next) {
  * @description Connects to an LDAP server and resolves a client object used
  * to preform search and bind operations.
  *
- * @returns {Promise} resolve - an LDAP client object
- *                    reject - an error
+ * @returns {Promise} An LDAP client object
  */
 function ldapConnect() {
   M.log.debug('Attempting to bind to the LDAP server.');
@@ -147,17 +142,21 @@ function ldapConnect() {
     if (typeof ldapCA === 'string') {
       ldapCA = [ldapCA];
     }
+    // If no CA is provided.
+    else if (typeof ldapCA === 'undefined') {
+      ldapCA = [];
+    }
 
     // Now if it's not an array, fail
     if (!Array.isArray(ldapCA)) {
       M.log.error('Failed to load LDAP CA certificates (invalid type)');
-      return reject(new M.CustomError('An error occured.', 500));
+      return reject(new M.CustomError('An error occurred.', 500));
     }
 
     // If any items in the array are not strings, fail
-    if (!utils.checkType(ldapCA, 'string')) {
+    if (!ldapCA.every(c => typeof c === 'string')) {
       M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
-      return reject(new M.CustomError('An error occured.', 500));
+      return reject(new M.CustomError('An error occurred.', 500));
     }
 
     M.log.verbose('Reading LDAP server CAs ...');
@@ -197,9 +196,9 @@ function ldapConnect() {
  * @description Searches for and resolve a user from LDAP server.
  *
  * @param {Object} ldapClient - LDAP client
- * @param {String} username - Username to find LDAP user
- * @returns {Promise} resolve - LDAP user information
- *                    reject - an error
+ * @param {string} username - Username to find LDAP user
+ *
+ * @returns {Promise} LDAP user information
  */
 function ldapSearch(ldapClient, username) {
   M.log.debug('Attempting to search for LDAP user.');
@@ -227,7 +226,7 @@ function ldapSearch(ldapClient, username) {
         ldapConfig.attributes.username,
         ldapConfig.attributes.firstName,
         ldapConfig.attributes.lastName,
-        ldapConfig.attributes.eMail
+        ldapConfig.attributes.email
       ]
     };
 
@@ -250,6 +249,10 @@ function ldapSearch(ldapClient, username) {
     let person;
     // Execute the search
     ldapClient.search(ldapConfig.base, opts, (err, result) => {
+      if (err) {
+        return reject(new M.CustomError('LDAP Serach Failure.', 500, 'warn'));
+      }
+
       // If search fails, reject error
       result.on('error', (searchErr) => reject(searchErr));
       // If entry found, set person to entry
@@ -278,9 +281,9 @@ function ldapSearch(ldapClient, username) {
  *
  * @param {Object} ldapClient - LDAP client
  * @param {Object} user - LDAP user
- * @param {String} password - Password to verify LDAP user
- * @returns {Promise} resolve - authenticated user's information
- *                    reject - an error
+ * @param {string} password - Password to verify LDAP user
+ *
+ * @returns {Promise} Authenticated user's information
  */
 function ldapAuth(ldapClient, user, password) {
   M.log.debug(`Authenticating ${user[ldapConfig.attributes.username]} ...`);
@@ -307,53 +310,77 @@ function ldapAuth(ldapClient, user, password) {
  * @description Synchronizes authenticated user's LDAP information with database.
  *
  * @param {Object} ldapUserObj - LDAP user information
- * @returns {Promise} resolve - synchronized user model object
- *                    reject - an error
+ *
+ * @returns {Promise} Synchronized user model object
  */
 function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
   // Define and return promise
   return new Promise((resolve, reject) => {
-    // Search for user in database
-    UserController.findUser({ admin: true }, ldapUserObj[ldapConfig.attributes.username])
-    .then(foundUser => {
-      // User exists, update database with LDAP information
-      const userSave = foundUser;
-      userSave.fname = ldapUserObj[ldapConfig.attributes.firstName];
-      userSave.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
-      userSave.lname = ldapUserObj[ldapConfig.attributes.lastName];
-      userSave.email = ldapUserObj[ldapConfig.attributes.eMail];
+    // Store user object function-wide
+    let userObject = {};
 
-      // Save updated user to database
-      foundUser.save()
-      // Save successful, resolve user model object
-      .then(userSaveUpdate => resolve(userSaveUpdate))
-      // Save failed, reject error
-      .catch(saveErr => reject(saveErr));
-    })
-    .catch(findUserErr => {
-      // Find user failed, check error message NOT 'Not Found'
-      if (findUserErr.message !== 'Not Found') {
-        // Error message NOT 'Not Found', reject error
-        return reject(findUserErr);
+    // Search for user in database
+    User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] })
+    .then(foundUser => {
+      // If the user was found, update with LDAP info
+      if (foundUser) {
+        // User exists, update database with LDAP information
+        foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
+        foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
+        foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
+        foundUser.email = ldapUserObj[ldapConfig.attributes.email];
+
+        // Save updated user to database
+        return foundUser.save();
       }
-      // Error message 'Not Found', create user in database
+      // User not found, create a new one
+
       // Initialize userData with LDAP information
       const initData = new User({
-        username: ldapUserObj[ldapConfig.attributes.username],
+        _id: ldapUserObj[ldapConfig.attributes.username],
         fname: ldapUserObj[ldapConfig.attributes.firstName],
         preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
         lname: ldapUserObj[ldapConfig.attributes.lastName],
-        email: ldapUserObj[ldapConfig.attributes.eMail],
+        email: ldapUserObj[ldapConfig.attributes.email],
         provider: 'ldap'
       });
 
-      // Save ldap user
-      return initData.save()
-      // Save successful, resolve user model object
-      .then(userSaveNew => resolve(userSaveNew))
-      // Save failed, reject error
-      .catch(saveErr => reject(saveErr));
-    });
+        // Save ldap user
+      return initData.save();
+    })
+    .then(savedUser => {
+      // Save user to function-wide variable
+      userObject = savedUser;
+
+      // Find the default org
+      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+    })
+    .then((defaultOrg) => {
+      // Add the user to the default org
+      defaultOrg.permissions[userObject._id] = ['read', 'write'];
+
+      // Mark permissions as modified, required for 'mixed' fields
+      defaultOrg.markModified('permissions');
+
+      // Save the updated default org
+      return defaultOrg.save();
+    })
+    // Return the new user
+    .then(() => resolve(userObject))
+    // Save failed, reject error
+    .catch(saveErr => reject(saveErr));
   });
+}
+
+/**
+ * @description Validates a users password with set rules.
+ *
+ * @param {string} password - Password to validate.
+ *
+ * @returns {boolean} If password is correctly validated.
+ */
+function validatePassword(password) {
+  // LDAP does not require local password validation, return true
+  return true;
 }

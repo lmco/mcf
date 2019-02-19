@@ -1,49 +1,21 @@
 <%
-  const customData = user.custom;
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module views.user
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description This page renders the user page.
+ */
 %>
-<div class="container">
+<div id="main"></div>
 
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="/">Home</a></li>
-      <li class="breadcrumb-item active" aria-current="page"><%= name%></li>
-    </ol>
-  </nav>
-
-  <hr class="mb-4">
-
-  <h1 class="display-4">
-    <i class="fas fa-user icon-close">
-      <%= user.name%>
-    </i>
-  </h1>
-
-  <hr class="mb-2">
-
-  <h3 id="users" class="mt-1">User Information</h3>
-
-  <ul class="user-table">
-
-    <table>
-      <tr>
-        <th>Username</th>
-        <th><%= user.username %></th>
-      </tr>
-      <tr>
-        <td>Preferred Name</td>
-        <td><%= user.preferredName %></td>
-      </tr>
-      <tr>
-        <td>Admin</td>
-        <td><%= user.admin %></td>
-      </tr>
-      <% if (customData) { %>
-      <tr>
-      <td>Custom Data</td>
-      <td><%- JSON.stringify(customData, null, 4).replace(/[\{\}\"]/g, " ").replace(/\,/g, "<br>") %></td>
-      </tr>
-      <% } %>
-  </table>
-  </ul>
-
-</div>
+<%- contentFor('scripts') %>
+<script type="text/javascript" src="/react-js/user.js"></script>

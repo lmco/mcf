@@ -6,29 +6,22 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description The header.
  */
  %>
-<header style="width: 100%; height: 24px;"></header>
-<header style="position: fixed;
-            top: 0px;
-            z-index: 1000;
+<div id="header" class="header" style="
             width: 100%;
-            height: 24px;
+            height: 100%;
             text-align: center;
             font-size: 14px;
             color: <%= ui.banner.color || "#333" %>;
             background: <%= ui.banner.background || "#fff" %>;
             font-weight: <%= (ui.banner.bold) ? "bold":"normal"%>;
             border-bottom: <%= (ui.banner.border) || "none" %>;
-            "><%= ui.banner.message %></header>
+            "><%= ui.banner.message %></div>

@@ -5,15 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
- *
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Defines sanitization functions.
  */
@@ -21,7 +17,9 @@
 /**
  * @description Sanitizes database queries and scripting tags.
  *
- * @return {String} sanitized user input
+ * @param {string} userInput - User input to sanitize.
+ *
+ * @return {string} Sanitized string
  */
 module.exports.sanitize = function(userInput) {
   return module.exports.mongo(module.exports.html(userInput));
@@ -61,20 +59,11 @@ module.exports.mongo = function(userInput) {
  * |   &   | &amp            |
  * |   <   | &lt             |
  * |   >   | &gt             |
- * |   "   | &quot           |
- * |   `   | &grave          |
- * |   =   | &equals         |
- * |   /   | &sol            |
- * |   \   | &bsol           |
- * |   %   | &percnt         |
- * |   (   | &lpar           |
- * |   )   | &rpar           |
- * |   #   | &num            |
- * |   ^   | &Hat            |
+ * |   "   | &quot           |  |
  * |   '   | &#039           |
  * +-------+-----------------+
  *
- * @param {Object} userInput - User object data to be sanitized.
+ * @param {*} userInput - User input data to be sanitized.
  */
 module.exports.html = function(userInput) {
   // Replace known HTML characters with HTML escape sequences.
@@ -84,15 +73,6 @@ module.exports.html = function(userInput) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/`/g, '&grave;')
-    .replace(/=/g, '&equals;')
-    .replace(/\//g, '&sol;')
-    .replace(/\\/g, '&bsol;')
-    .replace(/%/g, '&percnt;')
-    .replace(/\(/g, '&lpar;')
-    .replace(/\)/g, '&rpar;')
-    .replace(/#/g, '&num;')
-    .replace(/\^/g, '&Hat;')
     .replace(/'/g, '&#039;');
   }
 
@@ -120,7 +100,7 @@ module.exports.html = function(userInput) {
  * |   NUL | \00             |
  * +-------+-----------------+
  *
- * @param {Object} userInput - User object data to be sanitized.
+ * @param {*} userInput - User input data to be sanitized.
  */
 module.exports.ldapFilter = function(userInput) {
   // If string, replace special characters

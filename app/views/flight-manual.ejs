@@ -6,7 +6,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -14,7 +16,7 @@
  */
 %>
 
-<div class="container-fluid">
+<div class="container">
   <div id="fm" class="row">
     <div class="col-12">
       <h1 class="title">Flight Manual</h1>
@@ -33,9 +35,16 @@
             <%= sections[i].title %>
           </a>
         <% } %>
+        <a class="nav-link" id="api-doc" href="/doc/api" target="_blank">
+          Reference: API Doc
+        </a>
+        <a class="nav-link" id="jsdoc" href="/doc/developers" target="_blank">
+          Reference: JSDoc
+        </a>
       </div>
     </div>
     <div class="col-9">
+      <b>WARNING: This manual is out of date and some sections may need to be updated.</b>
       <div class="tab-content" id="v-pills-tabContent">
         <% for (let i = 0; i < sections.length; i++ ) { %>
         <div class="tab-pane fade <%= (i === 0) ? 'show active': '' %>"

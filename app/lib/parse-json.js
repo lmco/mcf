@@ -5,15 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
- *
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
  * @description This file defines a function which can be used to parse JSON
  * objects.
@@ -26,8 +22,9 @@ const utils = M.require('lib.utils');
  * @description This function removes comments from a string separated by new
  * line characters to convert commented JSON to valid JSON.
  *
- * @params {String} inputString - The name of the file to parse.
- * @return {Array} valid JSON
+ * @param {string} inputString - The name of the file to parse.
+ *
+ * @return {Object} valid JSON
  */
 module.exports.removeComments = function(inputString) {
   // initialize arrStringSep

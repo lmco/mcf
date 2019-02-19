@@ -1,17 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  auth.local-ldap-strategy
+ * @module auth.local-ldap-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -40,19 +36,18 @@ const User = M.require('models.user');
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} username - Username authenticate via locally or LDAP AD
- * @param {String} password - Password to authenticate via locally or LDAP AD
- * @return {Promise} resolve - authenticated user object
- *                   reject - an error
+ * @param {string} username - Username authenticate via locally or LDAP AD
+ * @param {string} password - Password to authenticate via locally or LDAP AD
+ *
+ * @return {Promise} Authenticated user object
  */
 function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     // Search locally for the user
     User.find({
-      username: username,
-      deletedOn: null
+      _id: username,
+      archived: false
     })
-    .populate('orgs.read orgs.write orgs.admin proj.read proj.write proj.admin')
     .exec((findUserErr, users) => {
       // Check for errors
       if (findUserErr) {
@@ -90,9 +85,9 @@ function handleBasicAuth(req, res, username, password) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {String} _token -  Token user is attempting to authenticate with.
- * @returns {Promise} resolve - token authenticated user object
- *                    reject - an error
+ * @param {string} _token -  Token user is attempting to authenticate with.
+ *
+ * @returns {Promise} Token authenticated user object
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -119,7 +114,7 @@ function handleTokenAuth(req, res, _token) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow
+ * @param {function} next - Callback to express authentication flow
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
@@ -128,15 +123,25 @@ function doLogin(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to verify
- * @returns {Boolean} - If password is correctly validated
+ * @param {string} password - Password to validate.
+ * @param {string} provider - the type of authentication strategy
+ *                            (ldap, local, etc.)
+ *
+ * @returns {boolean} If password is correctly validated
  */
-function validatePassword(password) {
-  // Password is undefined, user is LDAP user
-  if (password === undefined) {
-    return true;
+// TODO: Consider changing name of function, since it also validates provider field.
+function validatePassword(password, provider) {
+  // Use the appropriate provider rules
+  switch (provider) {
+    case 'local':
+      // Use default for local provider
+      return LocalStrategy.validatePassword(password);
+    case 'ldap':
+      // LDAP does not require validation locally
+      return LDAPStrategy.validatePassword(password);
+    default:
+      // Unknown provider, failed validation
+      // Explicitly NOT logging error to avoid password logging
+      throw new M.CustomError(`Unknown provider: ${provider}`, 400, 'warn');
   }
-
-  // Local user, validate password
-  return LocalStrategy.validatePassword(password);
 }

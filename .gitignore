@@ -13,4 +13,5 @@ package-lock.json
 *.log
 *.DS_Store
 .idea/
-build
+build/
+data/

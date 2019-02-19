@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.<br/>
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
@@ -78,6 +74,9 @@ describe(M.getModuleName(module.filename), function() {
  */
 function cleanDB(done) {
   mongoose.connection.db.dropDatabase()
+  .then(() => mongoose.connection.db.createCollection('server_data'))
+  .then(() => mongoose.connection.db.collection('server_data')
+  .insertOne({ version: M.schemaVersion }))
   .then(() => done())
   .catch(error => {
     M.log.error(error);
@@ -92,14 +91,14 @@ function cleanDB(done) {
  * @description Creates the default org if it doesn't already exist
  */
 function createDefaultOrg(done) {
-  Organization.findOne({ id: M.config.server.defaultOrganizationId })
+  Organization.findOne({ _id: M.config.server.defaultOrganizationId })
   .then((org) => {
     // Verify return statement
     chai.expect(org).to.equal(null);
 
     // Create default org object
     const defOrg = new Organization({
-      id: M.config.server.defaultOrganizationId,
+      _id: M.config.server.defaultOrganizationId,
       name: M.config.server.defaultOrganizationName,
       createdBy: null,
       lastModifiedBy: null

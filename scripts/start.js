@@ -6,13 +6,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -34,6 +30,9 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+
+// NPM Modules
+const express = require('express');
 
 // MBEE modules
 const app = M.require('app');
@@ -57,7 +56,27 @@ function start(args) {
   // Note: The server is not being run until both the http and https objects
   // have been successfully created
   if (M.config.server.http.enabled) {
-    httpServer = http.createServer(app);
+    // If set to redirect to HTTPS
+    // create an app that redirects all routes to HTTPS
+    if (M.config.server.http.redirectToHTTPS) {
+      const redirectApp = express();
+      redirectApp.use('*', (req, res) => {
+        const host = req.hostname;
+        const port = M.config.server.https.port;
+        const originalRoute = req.originalUrl;
+        res.redirect(`https://${host}:${port}${originalRoute}`);
+      });
+      httpServer = http.createServer(redirectApp);
+    }
+    // Otherwise, use the imported app for HTTP
+    else {
+      httpServer = http.createServer(app);
+    }
+
+    // If a timeout is defined in the config, set it
+    if (M.config.server.requestTimeout) {
+      httpServer.setTimeout(M.config.server.requestTimeout);
+    }
   }
 
   // Create HTTPS Server
@@ -72,6 +91,11 @@ function start(args) {
       cert: certificate
     };
     httpsServer = https.createServer(credentials, app);
+
+    // If a timeout is defined in the config, set it
+    if (M.config.server.requestTimeout) {
+      httpsServer.setTimeout(M.config.server.requestTimeout);
+    }
   }
 
   // Run HTTP Server

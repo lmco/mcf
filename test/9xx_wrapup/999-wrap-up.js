@@ -1,17 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.999-wrap-up
+ * @module test.999-wrap-up
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.<br/>
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
@@ -70,6 +66,9 @@ describe(M.getModuleName(module.filename), () => {
  */
 function cleanDB(done) {
   mongoose.connection.db.dropDatabase()
+  .then(() => mongoose.connection.db.createCollection('server_data'))
+  .then(() => mongoose.connection.db.collection('server_data')
+  .insertOne({ version: M.schemaVersion }))
   .then(() => done())
   .catch(error => {
     M.log.error(error);

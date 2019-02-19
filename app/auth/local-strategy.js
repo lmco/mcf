@@ -5,15 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
- *
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This implements an authentication strategy for local
@@ -44,10 +40,10 @@ const utils = M.require('lib.utils');
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} username - Username to authenticate
- * @param {String} password - Password to authenticate
- * @returns {Promise} resolve - authenticated user object
- *                    reject - an error
+ * @param {string} username - Username to authenticate
+ * @param {string} password - Password to authenticate
+ *
+ * @returns {Promise} Authenticated user object
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -61,8 +57,8 @@ const utils = M.require('lib.utils');
 function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
     User.findOne({
-      username: username,
-      deletedOn: null
+      _id: username,
+      archived: false
     }, (findUserErr, user) => {
       // Check for errors
       if (findUserErr) {
@@ -94,9 +90,9 @@ function handleBasicAuth(req, res, username, password) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {String} token - User authentication token, encrypted
- * @returns {Promise} resolve - local user object
- *                    reject - an error
+ * @param {string} token - User authentication token, encrypted
+ *
+ * @returns {Promise} Local user object
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -125,8 +121,8 @@ function handleTokenAuth(req, res, token) {
     if (Date.now() < Date.parse(decryptedToken.expires)) {
       // Not expired, find user
       User.findOne({
-        username: sani.sanitize(decryptedToken.username),
-        deletedOn: null
+        _id: sani.sanitize(decryptedToken.username),
+        archivedOn: null
       }, (findUserTokenErr, user) => {
         if (findUserTokenErr) {
           return reject(findUserTokenErr);
@@ -157,7 +153,7 @@ function handleTokenAuth(req, res, token) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - response express object
- * @param {callback} next - Callback to express authentication
+ * @param {function} next - Callback to express authentication
  */
 function doLogin(req, res, next) {
   // Compute token expiration time
@@ -181,8 +177,9 @@ function doLogin(req, res, next) {
 /**
  * @description Validates a users password with set rules.
  *
- * @param {String} password - Password to verify
- * @returns {Boolean} - If password is correctly validated
+ * @param {string} password - Password to validate.
+ *
+ * @returns {boolean} If password is correctly validated
  */
 function validatePassword(password) {
   // No defined password validator, use default

@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -26,8 +22,7 @@ const mongoose = require('mongoose');
 /**
  * @description Create connection to database.
  *
- * @return {Promise} resolve - database connected
- *                    reject - an error
+ * @return {Promise}
  */
 module.exports.connect = function() {
   return new Promise((resolve, reject) => {
@@ -53,7 +48,7 @@ module.exports.connect = function() {
     if (M.config.db.ssl) {
       connectURL += '?ssl=true';
       // Retrieve CA file from /certs directory
-      const caPath = path.join(M.root, 'certs', M.config.db.ca);
+      const caPath = path.join(M.root, M.config.db.ca);
       const caFile = fs.readFileSync(caPath, 'utf8');
       options.sslCA = caFile;
     }
@@ -76,6 +71,8 @@ module.exports.connect = function() {
 
 /**
  * @description Closes connection to database.
+ *
+ * @return {Promise}
  */
 module.exports.disconnect = function() {
   return new Promise((resolve, reject) => {
