@@ -46,4 +46,4 @@ Included documentation:
   - API Documentation
   - Developer Documentation
   - Test Framework Documentation
-  - Docker set up documentation
+  - Docker Set Up Documentation
