@@ -45,3 +45,5 @@ Included documentation:
 - Flight Manual
   - API Documentation
   - Developer Documentation
+  - Test Framework Documentation
+  - Docker set up documentation
