@@ -57,7 +57,8 @@
     "docker": "node mbee docker",
     "lint": "node mbee lint",
     "migrate": "node mbee migrate",
-    "postinstall": "test $NOPOSTINSTALL -eq 1 || (node mbee clean && node mbee build)",
+    "postinstall": "test $NOPOSTINSTALL -eq 1 || node mbee build",
+    "preinstall": "test $NOPREINSTALL -eq 1 || node ./scripts/clean.js --all",
     "start": "node mbee start",
     "test": "node mbee test"
   }
