@@ -102,7 +102,6 @@ This file should look as follows:
     }, 
     {
         "parent": "structures", 
-        "type": "block", 
         "id": "part-101", 
         "name": "Satellite Bus",
         "custom": {
@@ -115,7 +114,6 @@ This file should look as follows:
     },
     { 
         "parent": "structures", 
-        "type": "block", 
         "id": "part-102", 
         "name": "Nuts and Bolts",
         "custom": {
@@ -128,7 +126,6 @@ This file should look as follows:
     },
     { 
         "parent": "propulsion", 
-        "type": "block", 
         "id": "part-201", 
         "name": "Rocket Engine",
         "custom": {
@@ -140,8 +137,7 @@ This file should look as follows:
         }
     },
     { 
-        "parent": "propulsion", 
-        "type": "block", 
+        "parent": "propulsion",
         "id": "part-202", 
         "name": "Propellant Tank",
         "custom": {
@@ -153,8 +149,7 @@ This file should look as follows:
         }
     },
     { 
-        "parent": "propulsion", 
-        "type": "block", 
+        "parent": "propulsion",
         "id": "part-203", 
         "name": "Propellant",
         "custom": {
@@ -257,7 +252,7 @@ to the user as JSON.
 
 ```javascript
 // Find all elements in a project
-Element.findElements(req.user, req.params.org, req.params.proj)
+Element.find(req.user, req.params.org, req.params.proj)
 .then(elements => {
     const filtered = elements.filter(e => e.custom['mech-part']);
     const formatted = JSON.stringify(filtered, null, 4);
@@ -302,7 +297,7 @@ app.get('/:org/:proj/mass', authenticate, (req, res) => {
   };
 
   // Find all elements
-  Element.findElements(req.user, req.params.org, req.params.proj)
+  Element.find(req.user, req.params.org, req.params.proj)
   .then(elements => {
     // Filter elements to only mech-parts
     const filtered = elements.filter(e => e.custom['mech-part']);
