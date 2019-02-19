@@ -31,7 +31,7 @@ Below is a list of previous migrations which had implications that required
 additional effort by system administrators. Each section below contains
 instructions for system admins to get the database back to a correct state.
 
-### 0.6.0 -> 0.7.0
+#### 0.6.0 -> 0.7.0
 
 This migration made a significant change to the database and did cause
 breaking changes to users. Due to how users passwords are encrypted and stored,
