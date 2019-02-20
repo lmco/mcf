@@ -374,6 +374,9 @@ module.exports.parseOptions = function(options, validOptions) {
         parsedOptions[option] = [options[option]];
       }
     }
+    else if (validOptions[option] === 'string') {
+      parsedOptions[option] = options[option];
+    }
   });
   return parsedOptions;
 };

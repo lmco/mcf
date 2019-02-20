@@ -1882,14 +1882,16 @@ function deleteElements(req, res) {
  * @return {Object} Response object with elements
  */
 function searchElements(req, res) {
-  // Define options
+  // Define options and query
   // Note: Undefined if not set
   let options;
+  let query = '';
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    query: 'string'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1908,13 +1910,19 @@ function searchElements(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for query
+  if (options.query) {
+    query = options.query;
+    delete options.query;
+  }
+
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Find elements
   // NOTE: search() sanitizes input params
   ElementController.search(req.user, req.params.orgid, req.params.projectid,
-    branchid, 'hundered', options)
+    branchid, query, options)
   .then((elements) => {
     // Verify elements public data array is not empty
     if (elements.length === 0) {

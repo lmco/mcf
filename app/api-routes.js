@@ -1077,15 +1077,15 @@ api.route('/orgs/:orgid/projects/:projectid')
 
 /**
  * @swagger
- * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/search
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/search:
  *   get:
  *     tags:
  *       - elements
  *     description: Finds multiple elements using text based search on the
  *                  documentation, name and id fields. Allows for exact searches
- *                  by quoting the desired field: "exact search", or the ability
- *                  to not include a word in a search by using a dash: -not.
- *                  Returns the element public data.
+ *                  by quoting the desired field "exact search", or the ability
+ *                  to not include a word in a search by using a dash -not.
+ *                  Returns the elements public data.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1105,6 +1105,21 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: path
  *         required: true
  *         type: string
+ *       - name: query
+ *         description: The desired text to be searched for.
+ *         in: query
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public

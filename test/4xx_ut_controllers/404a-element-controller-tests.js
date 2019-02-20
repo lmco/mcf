@@ -100,6 +100,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find an element', findElement);
   it('should find multiple elements', findElements);
   it('should find all elements', findAllElements);
+  it('should find an element through text search', searchElement);
   it('should update an element', updateElement);
   it('should update multiple elements', updateElements);
   it('should delete an element', deleteElement);
@@ -417,6 +418,61 @@ function findAllElements(done) {
       chai.expect(foundElem.updatedOn).to.not.equal(null);
       chai.expect(foundElem.archivedOn).to.equal(null);
     });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds an element through text based search via the element
+ * controller.
+ */
+function searchElement(done) {
+  const elemData = testData.elements[0];
+
+  // Find element via controller
+  ElementController.search(adminUser, org.id, projID, 'master', `"${elemData.name}"`)
+  .then((foundElements) => {
+    // Expect foundElements array to contains 1 element
+    chai.expect(foundElements.length).to.equal(1);
+    const foundElement = foundElements[0];
+
+    // Verify correct element found
+    chai.expect(foundElement.id).to.equal(utils.createID(org.id, projID, elemData.id));
+    chai.expect(foundElement._id).to.equal(utils.createID(org.id, projID, elemData.id));
+    chai.expect(foundElement.name).to.equal(elemData.name);
+    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.project).to.equal(utils.createID(org.id, projID));
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(foundElement.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(foundElement.source).to.equal(utils.createID(org.id, projID, elemData.source));
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(foundElement.target).to.equal(utils.createID(org.id, projID, elemData.target));
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(foundElement.parent).to.equal(utils.createID(org.id, projID, elemData.parent));
+    }
+
+    // Verify additional properties
+    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.archivedBy).to.equal(null);
+    chai.expect(foundElement.createdOn).to.not.equal(null);
+    chai.expect(foundElement.updatedOn).to.not.equal(null);
+    chai.expect(foundElement.archivedOn).to.equal(null);
     done();
   })
   .catch((error) => {

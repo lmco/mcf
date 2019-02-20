@@ -1277,7 +1277,6 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
-    const saniQuery = sani.sanitize(query);
 
     // Initialize valid options
     let archived = false;
@@ -1332,14 +1331,16 @@ function search(requestingUser, organizationID, projectID, branch, query, option
           + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
       }
 
-      const searchQuery = { project: project._id, $text: { $search: saniQuery }, archived: false };
+      const searchQuery = { project: project._id, $text: { $search: query }, archived: false };
       // If the archived field is true, remove it from the query
       if (archived) {
         delete searchQuery.archived;
       }
 
       // Search for the elements
-      return Element.find(searchQuery).populate(populateString);
+      return Element.find(searchQuery, { score: { $meta: 'textScore' } })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(populateString);
     })
     .then((foundElements) => resolve(foundElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
