@@ -36,7 +36,7 @@ const minify = require('gulp-minify');
 const sass = require('gulp-sass');
 const markdown = require('gulp-markdown');
 const webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+var HtmlWebPackPlugin = require('html-webpack-plugin');
 const validators = M.require('lib.validators');
 
 /**
@@ -146,12 +146,6 @@ function build(_args) {
   if (args.includes('--all') || args.includes('--react')) {
     webpack({
       mode: 'development',
-      devtool: 'source-map',
-      devServer: {
-        port: 8888,
-        historyApiFallback: true,
-        stats: 'minimal'
-      },
       entry: {
         navbar: path.join(M.root, 'app', 'ui', 'react-components', 'general-components', 'nav.jsx'),
         'home-page': path.join(M.root, 'app', 'ui', 'react-components', 'home-page', 'home-page.jsx'),
@@ -164,6 +158,9 @@ function build(_args) {
         filename: '[name].js',
         publicPath: '/'
       },
+      devServer: {
+        historyApiFallback: true
+      },
       module: {
         rules: [
           {
@@ -173,11 +170,18 @@ function build(_args) {
             options: {
               presets: ['babel-preset-env', 'babel-preset-react']
             }
+          },
+          {
+            test: /\.html$/,
+            loader: 'html-loader'
           }
         ]
       },
       plugins: [
-        new HtmlWebpackPlugin()
+        new HtmlWebPackPlugin({
+          template: path.join(M.root, 'build', 'public', 'react-js', 'index.html.ejs'),
+          inject: true
+        })
       ]
     }, (err, stats) => {
       if (err || stats.hasErrors()) {

@@ -37,7 +37,7 @@ router.route('/doc/api')
  * the logic of checking for the page parameter.
  */
 router.route('/doc/developers')
-.get(Middleware.logRoute, ((req, res) => res.redirect('/doc/index.html')));
+.get(Middleware.logRoute, ((req, res) => res.redirect('/doc/index.html.ejs')));
 
 /**
  * This renders the MBEE flight manual page.
