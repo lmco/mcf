@@ -39,7 +39,7 @@ RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
 
 # Install modules using yarn from the package.json
 COPY ./package.json package.json
-RUN NOPOSTINSTALL=1 yarn install --production
+RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install --production
 
 # Create project directory structure
 RUN mkdir logs \
