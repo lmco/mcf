@@ -542,8 +542,8 @@ function update(requestingUser, orgs, options) {
 
       // Check that the user has admin permissions
       foundOrgs.forEach((org) => {
-        if (!org.permissions[reqUser._id]
-          || (!org.permissions[reqUser._id].includes('admin') && !reqUser.admin)) {
+        if (!reqUser.admin && (!org.permissions[reqUser._id]
+          || !org.permissions[reqUser._id].includes('admin'))) {
           throw new M.CustomError('User does not have permission to update'
             + ` the org [${org._id}].`, 403, 'warn');
         }
