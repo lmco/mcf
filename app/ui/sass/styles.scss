@@ -5,16 +5,13 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This defines the style and layout for MBEE.
  */
@@ -34,26 +31,53 @@
 /******************************************************************************
 /*                                  General                                   *
 /******************************************************************************/
-html, body {
-    min-height: 100%;
-    min-width: 100%;
+html {
+    height: 100%;
+    min-height: 100vh;
+    min-width: 100vw;
+}
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* make scrollbar transparent */
 }
 
 body {
-    min-height: 100vh;
-    font-weight: 300;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
 }
 
-.container, .container-fluid {
-    min-height: 100%;
+table {
+    width: 60%;
 }
 
-#login-form {
-    margin-top: 20%
+th, td {
+    padding: 5px;
 }
 
-.no-padding {
-    padding: 0;
+th {
+    text-align: left;
+}
+
+hr {
+    border-color: #9c9c9c;
+}
+
+h2 {
+    font-size: 18px;
+}
+
+h3 {
+    font-size: 15px;
+}
+
+.container {
+    padding: 2em;
+    overflow: scroll;
+}
+
+label {
+    font-size: 15px;
 }
 
 /******************************************************************************
@@ -64,201 +88,179 @@ body {
 .mbee-theme {
         background-color: $mbee-background;
         color: $mbee-color;
+        font-family: $mbee-font;
+        height: 100%;
+}
 
-    .form-control{
-        background: #343a40;
-        color: #FFF;
-        border: 1px solid #495057;
 
-        &.is-invalid {
-            border-color: #dc3545
-        }
+/******************************************************************************
+/*                               Grid Definition                              *
+/******************************************************************************/
+#header-footer {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: $banner-height 1fr $banner-height;
+    grid-template-areas:
+        "header"
+        "root"
+        "footer";
+
+    #header {
+        grid-area: header;
     }
 
-    .dropdown-menu {
-        background: $mbee-background;
-        color: $mbee-color;
+    #footer {
+        grid-area: footer;
     }
 }
 
+#root {
+    grid-area: root;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    display: grid;
+    grid-template-rows: auto minmax(10px, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "nav"
+        "main";
+
+
+    #nav {
+        grid-area: nav;
+    }
+
+    #main {
+        grid-area: main;
+        display: grid;
+        grid-template-rows: 1fr;
+        grid-template-columns: auto minmax(10px, 1fr);
+        grid-template-areas:
+            "view view";
+
+        &.main-sidebar {
+            grid-template-areas:
+                "sidebar view";
+        }
+
+        #sidebar {
+            grid-area: sidebar;
+            overflow: hidden;
+        }
+
+        #view {
+            grid-area: view;
+            overflow: scroll;
+        }
+    }
+}
+
+
 /******************************************************************************
-/*                               Navigation Bar                               *
+/*                              Navbar Styling                               *
 /******************************************************************************/
 .navbar {
-    /*height: 40px;*/
-    border-bottom: 1px solid #656565;
-    position: fixed;
     width: 100%;
-    top: 0;
-    z-index: 1000;
-    /*padding: .5rem 1rem .3rem 1rem;*/
-    .navbar-banner {
-        /*height: 40px;*/
-        top: $banner-height;
-    }
+    border-bottom: 1px solid darkgray;
+    padding-top: 5px;
+    padding-bottom: 3px;
+
     .navbar-brand {
-        padding-bottom: 0rem;
+        display:flex;
+        align-items: center;
         img {
-            position: relative;
-            top: -2px;
-        }
-        span {
-            font-family: 'Helvetica Neue', Helvetica, Sans Serif;
-            font-weight: 100;
-            color: #e8e8e8;
-            small {
-                opacity: 0;
-                font-family: inherit;
-                font-weight: inherit;
-                font-size: 20px;
-                color: #FFC610;
-                -webkit-transition: all 1s; /* Safari */
-                transition: all 1s;
-            }
-        }
-    }
-
-    .dropdown-menu {
-        background: white;
-        :hover {
-            background: darken(white, 10)
+            height: 2em;
+            padding-right: .5em;
         }
     }
 }
 
+.navbar-brand img {
+    height: 32px;
+    position: relative;
+    top: -2px;
+}
+
+
 /******************************************************************************
-/*                             Navigation Side-Bar                            *
+/*                              Sidebar Styling                               *
 /******************************************************************************/
-.nav-sidebar {
-    background: darken($mbee-background, 5);
-    color: inherit;
-    position: absolute; /* Fixed Sidebar (stay in place on scroll) */
-    top: $navbar-height;
-    left: 0;
-    bottom: 0;
-    z-index: 1000;
-    overflow: hidden;
-    &.nav-sidebar-banner {
-        top: $banner-height + $navbar-height;
-        bottom: $banner-height
+.sidebar {
+    background: whitesmoke;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: $sidebar-min-width;
+
+    &.sidebar-expanded {
+        width: $sidebar-full-width
     }
-    .nav-sidebar-list {
-        background: darken($mbee-background,5);
-        color: inherit;
-        .nav-sidebar-list-item {
-            border-top: 1px solid rgba(0,0,0,.125);
-            border-bottom: 1px solid rgba(0,0,0,.125);
-            margin-bottom: -1px;
-            a {
-                text-decoration: none;
-                color: inherit;
-            }
+
+    a {
+        display: block;
+        text-decoration: none;
+        color: black;
+        &.active {
             :hover {
-                background: darken($mbee-background, 10);
+                color: grey;
             }
-            .nav-sidebar-item {
-                display: flex;
-                span {
-                    padding-left: 10px;
-                }
-            }
+            color: grey;
+        }
+        :hover {
+            color: #ffc700;
         }
     }
-    // Collapses the sidebar and shows/hides the appropriate icons
-    // NOTE: Order matters, min will override full and so it must come last.
-    &.sidebar-full {
-        width: $nav-sidebar-full-width;
-        .nav-sidebar-header-full {
-            display: flex;
-            height: 70px;
-            justify-content: center;
-            align-items: center;
-        }
-        .nav-sidebar-item-full {
-            display: flex;
-            padding-left: 10px;
-            height: 50px;
-            justify-content: start;
-            align-items: center;
-            img {
-                width: 32px;
-                max-height: 90%;
-            }
-            span {
-                padding-left: 20px;
-            }
-        }
-        .nav-sidebar-header-min {
-            display: none
-        }
-        .nav-sidebar-item-min {
-            display: none
-        }
+
+    hr {
+        margin: .75em;
+        border-color: #9c9c9c;
     }
-    &.sidebar-min {
-        width: $nav-sidebar-min-width;
-        .nav-sidebar-header-min {
-            display: flex;
-            height: 70px;
-            justify-content: center;
-            align-items: center;
-            img {
-                width: 40px;
-                max-height: 90%;
-            }
-        }
-        .nav-sidebar-item-min {
-            display: flex;
-            height: 50px;
-            justify-content: center;
-            align-items: center;
-            img {
-                width: 32px;
-                max-height: 90%;
-            }
-        }
-        .nav-sidebar-header-full {
-            display: none
-        }
-        .nav-sidebar-item-full {
-            display: none
-        }
+
+    .sidebar-links {
+        height: 100vh;
+        overflow: hidden;
     }
-    .sidebar-toggle {
-        position: absolute;
-        bottom: 0;
+
+    .sidebar-item {
         height: 50px;
-        width: 100%;
-        border-top: 1px solid rgba(0,0,0,.125);
-        &:hover {
-            background: darken($mbee-background,10);
+        font-size: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        h4, p {
+            margin: 0 auto 0 0;
+            padding: 10px 10px 10px 20px;
+            font-size: 1.5em;
         }
     }
+
+
 }
 
 /******************************************************************************
-/*                           Main Content Container                           *
+/*                        General Components Styling                          *
 /******************************************************************************/
-.content {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100vw;
-    margin-top: $navbar-height;
-    padding: 10px;
-    overflow-y: scroll;
-    &.content-banner {
-        margin-top: $banner-height + $navbar-height;
-    }
-    // Adjust the margins of the content with the sidebar
-    // NOTE: Order matters, min will override full and so it must come last.
-    &.sidebar-full {
-        padding-left: $nav-sidebar-full-width + 10;
-    }
 
-    &.sidebar-min {
-        padding-left: $nav-sidebar-min-width + 10;
+#login-form {
+    margin-top: 40%;
+
+    button {
+        margin-top: 10px;
+        width: 100%;
     }
+}
+
+.loading {
+    width: 100%;
+    height:100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
 /******************************************************************************
@@ -318,367 +320,181 @@ body {
     }
 }
 
-/******************************************************************************
-/*                       Organization List Page Styling                       *
-/******************************************************************************/
-.mbee-organization-list {
 
-}
 /******************************************************************************
 /*                         Organization Page Styling                          *
 /******************************************************************************/
-.mbee-organization {
-    .org-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+.org-list {
+    padding: 2em;
+
+    h2 {
+        margin-bottom: 1em;
+        font-size: 18px
     }
 
+    .list .list-item .list-header p {
+        font-size: 15px;
+    }
+}
+
+.org-home {
+    padding: 2em;
+}
+
+.org-projects {
+    padding: 2em;
+    .list .list-header p {
+        font-size: 15px;
+    }
+}
+
+.org-users {
+    padding: 2em;
+}
+
+.org-edit {
+    padding: 2em;
+
+    .nested-form {
+        padding-left: 20px;
+    }
 }
 
 /******************************************************************************
-/*                            Project Page Styling                            *
+/*                         Project Page Styling                               *
 /******************************************************************************/
-.mbee-project {
-    .project-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+.project-list {
+    padding: 2em;
+
+    h2 {
+        margin-bottom: 1em;
+        font-size: 18px;
     }
 
+    .list .list-item .list-header p {
+        font-size: 15px;
+    }
+}
+
+.project-home {
+    padding: 2em;
+}
+
+.project-elements {
+    padding: 2em;
+}
+
+.project-user {
+    padding: 2em;
+}
+
+.project-edit {
+    padding: 2em;
+
+    .nested-form {
+        padding-left: 20px;
+        vertical-align: middle;
+        line-height: 34px;
+    }
+}
+
+.element-children {
+    padding-left: 30px;
 }
 
 /******************************************************************************
-/*                            Project Tree Styling                            *
+/*                           User Page Styling                                *
 /******************************************************************************/
-.element-tree-container {
-    background: darken($mbee-background, 10);
+.user-home {
+    padding: 2em;
+}
 
-    .element {
-        padding: 10px;
-        padding-left: 15px;
-        padding-right: 15px;
-        display: flex;
-        flex-direction: column;
+.user-edit {
+    padding: 2em;
+}
 
-        &.type-package {
+/******************************************************************************
+/*                           List Component Styling                           *
+/******************************************************************************/
+.list {
+    padding-left: 1em;
+    padding-right: 1em;
 
+    a {
+        display: block;
+        text-decoration: none;
+        color: black;
+        :hover {
+            background: darken($mbee-background, 10);
         }
+    }
 
-        &.type-block {
-            padding-left: 15px+16px;
-        }
-        &.type-relationship {
-            padding-left: 15px+16px;
-        }
-
-        &.closed {
-            display: none;
-        }
-
-        .element-container {
-            :hover {
-                background: lighten($mbee-background,10);
-                cursor: pointer;
-            }
-            .dropdown-icon {
-                i {
-                    &.closed {
-                        display: none;
-                    }
-                }
-            }
-        }
+    hr {
+        border-color: darkgrey;
+        margin: 0;
     }
 }
 
-.tree-sidebar {
-    position: absolute;
-    top: 0;
-    right: -400px;
-    background: #ffffff;
-    height: 100vh;
-    width: 400px;
-    overflow-y: scroll;
-    &.tree-sidebar-active {
-        right: 0;
-        transition: right .2s;
-    }
-    background: lighten($mbee-background, 5);
-    color: inherit;
-    .close-tree-sidebar {
-        position: absolute;
-        left: 10px;
-        color: #ffc700;
-        cursor: pointer;
-    }
-    .element-header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding-top: 10px;
+.guideline {
+    border-left: 1px solid #eee;
+}
 
-        h2 {
-            padding-left: 10px;
+.list-item {
+    margin: 0;
+    padding: .5em;
+    height: 100%;
+    width: 100%;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stats-list-item {
+    display: grid;
+    grid-template-columns: minmax(auto, 600px) 1fr;
+    grid-template-areas: "header stats";
+    justify-content: space-between;
+    align-items: center;
+
+    .list-header {
+        margin: 1em;
+        grid-area: header;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        p {
+            font-size: 15px;
+            margin: 0;
+            display: inline-block;
+        }
+    }
+
+    .stats-list {
+        grid-area: stats;
+        justify-self: flex-end;
+    }
+}
+
+.stats-list {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+    min-width: 100%;
+    max-width: 100%;
+
+    .stats-item {
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 1em;
+        padding-right: 1em;
+        align-items: center;
+        i {
+            padding-right: .3em;
+        }
+        p {
             margin: 0;
         }
-    }
-    .tree-sidebar-form {
-        padding: 15px
-    }
-    .element-content {
-        .element-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            padding-top: 5px;
-            padding-bottom: 5px;
-            .element-key {
-                color: darken($mbee-color,20);
-                display: flex;
-                width: 40%;
-                justify-content: flex-start;
-            }
-            .element-value {
-                display: flex;
-                width: 60%;
-                justify-content: flex-start;
-            }
-        }
-    }
-}
-
-/******************************************************************************
-/*                              MBEE Card Helper                              *
-/******************************************************************************/
-.card {
-    background: rgba(28, 29, 31, 0.5);
-    margin-bottom: 10px;
-    color: #fff;
-    border-color: #656565;
-
-    [aria-expanded="false"] .icon-open {
-        display: none;
-    }
-    [aria-expanded="false"] .icon-close {
-        display: block;
-    }
-    [aria-expanded="true"] .icon-open {
-        display: block;
-    }
-    [aria-expanded="true"] .icon-close {
-        display: none;
-    }
-    .card-header {
-        padding: 0;
-        height: 65px;
-        :hover {
-            background: darken($mbee-background, 10);
-        }
-        .org-card-header {
-            display: flex;
-            height: 100%;
-            width: 100%;
-            padding: 10px;
-            justify-content: space-between;
-            align-items: center;
-            .org-card-header-title {
-                display: flex;
-                height: 100%;
-                width: 30%;
-                justify-content: start;
-                align-items: center;
-                i {
-                    font-size: 2em;
-                }
-                h4 {
-                    padding-left: 20px;
-                    margin: 0;
-                }
-                a {
-                    color: inherit;
-
-                    :hover {
-                        color: inherit;
-                    }
-                }
-            }
-            .org-card-header-stats {
-                display: flex;
-                height: 100%;
-                width: 40%;
-                justify-content: flex-end;
-                align-items: center;
-                .org-card-header-stats-projects {
-                    display: flex;
-                    width: 30%;
-                    height: 100%;
-                    justify-content: center;
-                    align-items: center;
-                    span {
-                        padding-left: 12px;
-                    }
-                }
-                .org-card-header-stats-members {
-                    display: flex;
-                    width: 30%;
-                    height: 100%;
-                    justify-content: center;
-                    align-items: center;
-                    span {
-                        padding-left: 12px;
-                    }
-                }
-            }
-        }
-    }
-}
-
-/******************************************************************************
-/*                              MBEE List Helper                              *
-/******************************************************************************/
-.mbee-list {
-    .mbee-list-item {
-        border-top: 1px solid rgb(225, 225, 225);
-        border-bottom: 1px solid rgb(225, 225, 225);
-        margin-bottom: -1px;
-        :hover {
-            background: darken($mbee-background, 10);
-            text-decoration: none;
-        }
-        a {
-            color: inherit;
-        }
-        .project-list-item {
-            display: flex;
-            height: 65px;
-            width: 100%;
-            padding: 10px;
-            justify-content: space-between;
-            align-items: center;
-            .project-list-title {
-                display: flex;
-                height: 100%;
-                width: 30%;
-                justify-content: start;
-                align-items: center;
-            }
-            .project-list-stats {
-                display: flex;
-                height: 100%;
-                width: 30%;
-                justify-content: flex-end;
-                align-items: center;
-                .project-list-stats-elements {
-                    display: flex;
-                    width: 30%;
-                    height: 100%;
-                    justify-content: center;
-                    align-items: center;
-                    img {
-                        width: 30px;
-                        max-height: 90%;
-                    }
-                    span {
-                        padding-left: 12px;
-                    }
-                }
-                .project-list-stats-members {
-                    display: flex;
-                    width: 30%;
-                    height: 100%;
-                    justify-content: center;
-                    align-items: center;
-                    img {
-                        width: 30px;
-                        max-height: 90%;
-                    }
-                    span {
-                        padding-left: 12px;
-                    }
-                }
-            }
-        }
-        .element-list-item {
-            display: flex;
-            height: 65px;
-            width: 100%;
-            padding: 10px;
-            justify-content: space-between;
-            align-items: center;
-            .element-list-title {
-                display: flex;
-                height: 100%;
-                width: 30%;
-                justify-content: start;
-                align-items: center;
-            }
-            .element-list-stats {
-                display: flex;
-                height: 100%;
-                width: 30%;
-                justify-content: flex-end;
-                align-items: center;
-            }
-        }
-        .member-list-item {
-            display: flex;
-            height: 65px;
-            width: 100%;
-            padding: 10px;
-            justify-content: space-between;
-            align-items: center;
-            .member-list-title {
-                display: flex;
-                height: 100%;
-                width: 30%;
-                justify-content: start;
-                align-items: center;
-                img {
-                    width: 30px;
-                    max-height: 80%;
-                }
-                span {
-                    padding-left: 20px;
-                    margin: 0;
-                }
-            }
-            .member-list-stats {
-                display: flex;
-                height: 100%;
-                width: 50%;
-                justify-content: flex-end;
-                align-items: center;
-                .member-list-stats-email {
-                    display: flex;
-                    width: 30%;
-                    height: 100%;
-                    justify-content: flex-end;
-                    align-items: center;
-                    img {
-                        width: 30px;
-                        max-height: 90%;
-                    }
-                    span {
-                        padding-left: 12px;
-                    }
-                }
-            }
-        }
-    }
-}
-
-/******************************************************************************
-/*                        User Information Table                              *
-/******************************************************************************/
-.user-table {
-    table {
-        border-collapse: collapse;
-        height: 10px;
-        border-bottom-width: thin;
-        width: 100%;
-    }
-    td {
-        padding: 4px 1;
     }
 }

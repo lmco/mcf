@@ -1,17 +1,11 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  controllers.project-controller
+ * @module controllers.project-controller
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -349,10 +343,10 @@ function create(requestingUser, organizationID, projects, options) {
       }
 
       // Verify user has write permissions on the org
-      if (!foundOrg.permissions[reqUser._id]
-        || (!foundOrg.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
+      if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
+        || !foundOrg.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to create'
-          + ` projects on the org ${foundOrg._id}.`, 403, 'warn');
+          + ` projects on the org [${foundOrg._id}].`, 403, 'warn');
       }
 
       // Find any existing, conflicting projects
@@ -624,8 +618,8 @@ function update(requestingUser, organizationID, projects, options) {
 
       // Check that the user has admin permissions
       foundProjects.forEach((proj) => {
-        if (!proj.permissions[reqUser._id]
-          || (!proj.permissions[reqUser._id].includes('admin') && !reqUser.admin)) {
+        if (!reqUser.admin && (!proj.permissions[reqUser._id]
+          || !proj.permissions[reqUser._id].includes('admin'))) {
           throw new M.CustomError('User does not have permission to update'
             + ` the project [${utils.parseID(proj._id).pop()}].`, 403, 'warn');
         }

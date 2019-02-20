@@ -5,8 +5,7 @@
 #
 # @copyright Copyright (C) 2018, Lockheed Martin Corporation
 #
-# @license LMPI WARNING: This file is Lockheed Martin Proprietary Information.
-# It is not approved for public release or redistribution.
+# @license LMPI - Lockheed Martin Proprietary Information
 #
 # @description This Dockerfile defines the Docker build for MBEE.
 ##
@@ -47,7 +46,10 @@ RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
 
 # Install modules using yarn from the package.json
 COPY ./package.json package.json
-RUN yarn install --production
+RUN git config --global url."https://github.com".insteadOf "git://github.com"
+RUN git config --global http.proxy "http://proxy-lmi.global.lmco.com:80"
+RUN git config --global https.proxy "http://proxy-lmi.global.lmco.com:80"
+RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install
 
 # Create project directory structure
 RUN mkdir logs \

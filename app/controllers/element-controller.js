@@ -5,13 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -59,8 +53,8 @@ const validators = M.require('lib.validators');
  * an array of element ids, a single element id, or not provided, which defaults
  * to every element in a project being found.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  * @param {boolean} [options.subtree] - If true, all elements in the subtree of
@@ -176,10 +170,10 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       }
 
       // Verify the user has read permissions on the project
-      if (!project.permissions[reqUser._id]
-        || (!project.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.CustomError('User does not have permission to get'
-            + ` elements on the project ${project._id}.`, 403, 'warn');
+            + ` elements on the project [${utils.parseID(project._id).pop()}].`, 403, 'warn');
       }
 
       let elementsToFind = [];
@@ -283,8 +277,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of created element objects
  *
@@ -447,8 +441,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.permissions[reqUser._id]
-        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to create'
             + ' elements on the project '
             + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
@@ -653,8 +647,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {boolean} [elements.archived] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of updated element objects
  *
@@ -745,10 +739,10 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.permissions[reqUser._id]
-        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to update'
-          + ` elements on the project ${foundProject._id}.`, 403, 'warn');
+          + ` elements on the project [${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
       }
 
       // Check the type of the elements parameter
