@@ -30,7 +30,6 @@ let adminUser = null;
 let org = null;
 let proj = null;
 let projID = null;
-let jmiElements = {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -78,11 +77,7 @@ describe(M.getModuleName(module.filename), () => {
       ];
       return ElementController.create(adminUser, org.id, projID, 'master', elemDataObjects);
     })
-    .then((retElems) => {
-      // Set JMIElements
-      jmiElements = utils.convertJMI(1, 2, retElems);
-      done();
-    })
+    .then(() => done())
     .catch((error) => {
       M.log.error(error);
       // Expect no error
