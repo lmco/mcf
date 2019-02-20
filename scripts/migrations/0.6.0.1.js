@@ -1,17 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module data.migrations.0.6.0.1
+ * @module script.migrations.0.6.0.1
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *

@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
@@ -26,13 +22,14 @@ module.exports = {
 
 /**
  * @description Takes an array of elements and sorts them so they appear in
- * depth first order according to package hiearchy.
+ * depth first order according to package hierarchy.
+ *
  * @param {Object[]} elementArr - An array of unsorted elements
- * @return {Array} sortedElementArr - The sorted array according to package
- * hierarchy.
+ *
+ * @return {Object[]} The sorted array according to package hierarchy.
  */
 function sortElementsArray(elementArr) {
-  // Initalize sortedElementArr
+  // Initialize sortedElementArr
   const sortedElementArr = [];
 
   // Create elementTree with package hierarchy.
@@ -47,7 +44,10 @@ function sortElementsArray(elementArr) {
  * @description Takes an array of elements in any random order and sorts the
  * element array to a tree structure based on the packages and elements parent/child
  * relationships.
- * @param elementList {Array} - A list of elements that form a valid n-ary tree.
+ *
+ * @param {Object[]} elementList - An array of elements that form a valid n-ary
+ * tree.
+ *
  * @return {Object} - An object representing a nested tree structure. Each key
  * contains the uid of the element. The element field contains the element data,
  * and if the element is a package, the children array contains the child
@@ -132,9 +132,9 @@ function createElementsTree(elementList) {
 /**
  * @description Traverses and elementTree created by createElementsTree() and
  * appends each element objects to an array in depth first order.
- * @param tree {Object} - An elementTree created by createElementsTree()
- * @param array {Array} - The array containing the depth first traversal of the
- * elementTree.
+ * @param {Object} tree - An elementTree created by createElementsTree()
+ * @param {Object[]} array - The array containing the depth first traversal of
+ * the elementTree.
  */
 function depthFirstTreeTraversal(tree, array) {
   // Push the element to the array

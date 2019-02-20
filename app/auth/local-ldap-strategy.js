@@ -1,17 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  auth.local-ldap-strategy
+ * @module auth.local-ldap-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -42,8 +38,8 @@ const User = M.require('models.user');
  * @param {Object} res - Response express object
  * @param {string} username - Username authenticate via locally or LDAP AD
  * @param {string} password - Password to authenticate via locally or LDAP AD
- * @return {Promise} resolve - authenticated user object
- *                   reject - an error
+ *
+ * @return {Promise} Authenticated user object
  */
 function handleBasicAuth(req, res, username, password) {
   return new Promise((resolve, reject) => {
@@ -90,8 +86,8 @@ function handleBasicAuth(req, res, username, password) {
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
  * @param {string} _token -  Token user is attempting to authenticate with.
- * @returns {Promise} resolve - token authenticated user object
- *                    reject - an error
+ *
+ * @returns {Promise} Token authenticated user object
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -118,7 +114,7 @@ function handleTokenAuth(req, res, _token) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow
+ * @param {function} next - Callback to express authentication flow
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
@@ -128,9 +124,10 @@ function doLogin(req, res, next) {
  * @description Validates a users password with set rules.
  *
  * @param {string} password - Password to validate.
- * @param {string} provider - the type of authentication strategy (ldap, local, etc.)
+ * @param {string} provider - the type of authentication strategy
+ *                            (ldap, local, etc.)
  *
- * @returns {Boolean} - If password is correctly validated
+ * @returns {boolean} If password is correctly validated
  */
 // TODO: Consider changing name of function, since it also validates provider field.
 function validatePassword(password, provider) {
