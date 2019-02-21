@@ -97,6 +97,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple elements', postElements);
   it('should GET an element', getElement);
   it('should GET multiple elements', getElements);
+  it('should GET an element through text search', searchElement);
   it('should PATCH an element', patchElement);
   it('should PATCH multiple elements', patchElements);
   it('should DELETE an element', deleteElement);
@@ -363,6 +364,67 @@ function getElements(done) {
       chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search
+ * searches for elements using text based search.
+ */
+function searchElement(done) {
+  const elemData = testData.elements[0];
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/search?query="${elemData.name}"`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const resp = JSON.parse(body);
+
+    // Expect resp array to contains 1 element
+    chai.expect(resp.length).to.equal(1);
+    const foundElement = resp[0];
+
+    // Verify element created properly
+    chai.expect(foundElement.id).to.equal(elemData.id);
+    chai.expect(foundElement.name).to.equal(elemData.name);
+    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.project).to.equal(projID);
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(foundElement.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(foundElement.source).to.equal(elemData.source);
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(foundElement.target).to.equal(elemData.target);
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(foundElement.parent).to.equal(elemData.parent);
+    }
+
+    // Verify additional properties
+    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdOn).to.not.equal(null);
+    chai.expect(foundElement.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
     done();
   });
 }

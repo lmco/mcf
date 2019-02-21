@@ -22,7 +22,8 @@ module.exports = {
   find,
   create,
   update,
-  remove
+  remove,
+  search
 };
 
 // Disable eslint rule for logic in nested promises
@@ -1272,5 +1273,129 @@ function moveElementCheck(organizationID, projectID, branch, element) {
     findElementParentRecursive(element)
     .then(() => resolve())
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description A function which searches elements within a certain projects
+ * using mongo's built in text search. Returns any elements that match the text
+ * search, in order of the best matches to the worst. Searches the _id, name,
+ * documentation, parent, source and target fields.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string} query - The text-based query to search the database for.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {boolean} [options.archived] - If true, find results will include
+ * archived objects. The default value is false.
+ *
+ * @return {Promise} An array of found elements.
+ *
+ * @example
+ * search({User}, 'orgID', 'projID', 'branch', 'find these elements')
+ * .then(function(elements) {
+ *   // Do something with the found elements
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function search(requestingUser, organizationID, projectID, branch, query, options) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
+      assert.ok(typeof query === 'string', 'Query is not a string.');
+      // Ensure user is on the master branch
+      assert.ok(branch === 'master', 'User must be on the master branch.');
+
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
+    }
+
+    // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.sanitize(organizationID);
+    const projID = sani.sanitize(projectID);
+
+    // Initialize valid options
+    let archived = false;
+    let populateString = 'contains ';
+
+    // Ensure options are valid
+    if (options) {
+      // If the option 'archived' is supplied, ensure it's a boolean
+      if (options.hasOwnProperty('archived')) {
+        if (typeof options.archived !== 'boolean') {
+          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
+        }
+        archived = options.archived;
+      }
+
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+        }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Element.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString += options.populate.join(' ');
+      }
+    }
+
+    // Ensure the project exists
+    Project.findOne({ _id: utils.createID(orgID, projID) })
+    .then((project) => {
+      // Ensure the project was found
+      if (project === null) {
+        throw new M.CustomError(`The project [${projID}] on the org ${orgID} `
+          + 'was not found.', 404, 'warn');
+      }
+
+      // Verify the user has read permissions on the project
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('read'))) {
+        throw new M.CustomError('User does not have permission to get'
+          + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
+      }
+
+      const searchQuery = { project: project._id, $text: { $search: query }, archived: false };
+      // If the archived field is true, remove it from the query
+      if (archived) {
+        delete searchQuery.archived;
+      }
+
+      // Search for the elements
+      return Element.find(searchQuery, { score: { $meta: 'textScore' } })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(populateString);
+    })
+    .then((foundElements) => resolve(foundElements))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
