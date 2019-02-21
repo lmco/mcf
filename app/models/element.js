@@ -331,10 +331,18 @@ ElementSchema.statics.validateObjectKeys = function(object) {
 /* ---------------------------( Element Indexes )---------------------------- */
 
 /**
- * @description Adds a compound index on the name and documentation fields.
+ * @description Adds a compound text index on the name, documentation, _id,
+ * source, target and parent fields.
  * @memberOf ElementSchema
  */
-ElementSchema.index({ name: 'text', documentation: 'text' });
+ElementSchema.index({
+  name: 'text',
+  documentation: 'text',
+  _id: 'text',
+  source: 'text',
+  target: 'text',
+  parent: 'text'
+});
 
 
 /* -----------------------( Organization Properties )------------------------ */

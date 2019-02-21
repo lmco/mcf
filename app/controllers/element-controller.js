@@ -1376,8 +1376,8 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       }
 
       // Verify the user has read permissions on the project
-      if (!project.permissions[reqUser._id]
-        || (!project.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.CustomError('User does not have permission to get'
           + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
       }
