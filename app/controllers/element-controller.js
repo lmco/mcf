@@ -637,6 +637,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} [elements.name] - The updated name of the element.
  * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
  * update element parents in bulk.
+ * @param {string} [elements.source] - The ID of the source element.
+ * @param {string} [elements.target] - The ID of the target element.
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
  * @param {string} [elements.type] - An optional type string.
@@ -696,9 +698,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     let foundElements = [];
     let elementsToUpdate = [];
     let searchQuery = {};
+    let sourceTargetQuery = {};
     const duplicateCheck = {};
     let foundUpdatedElements = [];
     const arrIDs = [];
+    const sourceTargetIDs = [];
 
     // Initialize valid options
     let populateString = 'contains ';
@@ -797,6 +801,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           }
           arrIDs.push(elem.id);
           elem._id = elem.id;
+
+          // If updating source, add ID to sourceTargetIDs
+          if (elem.source) {
+            elem.source = utils.createID(orgID, projID, elem.source);
+            sourceTargetIDs.push(elem.source);
+          }
+
+          // If updating target, add ID to sourceTargetIDs
+          if (elem.target) {
+            elem.target = utils.createID(orgID, projID, elem.target);
+            sourceTargetIDs.push(elem.target);
+          }
+
           index++;
         });
       }
@@ -806,6 +823,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
       const promises = [];
       searchQuery = { project: utils.createID(orgID, projID) };
+      sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
 
       // Find elements in batches
       for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
@@ -826,14 +844,20 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Verify the same number of elements are found as desired
       if (foundElements.length !== arrIDs.length) {
         const foundIDs = foundElements.map(e => e._id);
-        const notFound = arrIDs.filter(e => !foundIDs.includes(e)).map(e => utils.parseID(e).pop());
+        const notFound = arrIDs.filter(e => !foundIDs.includes(e))
+        .map(e => utils.parseID(e).pop());
         throw new M.CustomError(
           `The following elements were not found: [${notFound.toString()}].`, 404, 'warn'
         );
       }
 
+      return Element.find(sourceTargetQuery);
+    })
+    .then((foundSourceTarget) => {
       // Convert elementsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, elementsToUpdate);
+      // Convert foundSourceTarget to JMI type 2
+      const sourceTargetJMI2 = utils.convertJMI(1, 2, foundSourceTarget);
       const bulkArray = [];
       // Get array of editable parameters
       const validFields = Element.getValidUpdateFields();
@@ -866,6 +890,33 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
               throw new M.CustomError(
                 `Invalid ${key}: [${updateElement[key]}]`, 403, 'warn'
               );
+            }
+          }
+
+          // If updating the source or target
+          if (key === 'source' || key === 'target') {
+            // If the source/target is the element id, throw error
+            if (updateElement[key] === element._id) {
+              throw new M.CustomError(`Element's ${key} cannot be self`
+                + ` [${utils.parseID(element._id).pop()}].`, 403, 'warn');
+            }
+
+            // If source/target does not exist, throw error
+            if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
+              throw new M.CustomError(`The ${key} element `
+                + `[${utils.parseID(updateElement[key]).pop()}] was not found.`, 404, 'warn');
+            }
+
+            // If no target exists and is not being updated, throw error
+            if (key === 'source' && !(updateElement.target || element.target)) {
+              throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
+                + ' target is required if source is provided.', 403, 'warn');
+            }
+
+            // If no source exists and is not being updated, throw error
+            if (key === 'target' && !(updateElement.source || element.source)) {
+              throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
+                + ' source is required if target is provided.', 403, 'warn');
             }
           }
 
