@@ -100,7 +100,6 @@ function start(args) {
 
   // Run HTTP Server
   if (M.config.server.http.enabled) {
-    httpServer.setTimeout(180000);
     httpServer.listen(M.config.server.http.port, () => {
       const port = M.config.server.http.port;
       M.log.info(`MBEE server listening on port ${port}!`);
