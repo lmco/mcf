@@ -86,6 +86,14 @@ router.route('/whoami')
   UIController.whoami
 );
 
+/* This renders the user page for logged in users */
+router.route('/whoami/edit')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.whoami
+);
+
 
 /* This renders the organization list page for logged in users */
 router.route('/organizations')
@@ -139,7 +147,23 @@ router.route('/:orgid')
   UIController.organizations
 );
 
-/* This renders an organizations edit form for an admin user */
+/* This renders an organization's member page for a user */
+router.route('/:orgid/users')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.organizations
+);
+
+/* This renders an organization's projects page for a user */
+router.route('/:orgid/projects')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.organizations
+);
+
+/* This renders an organization's edit form for an admin user */
 router.route('/:orgid/edit')
 .get(
   AuthController.authenticate,
@@ -149,6 +173,22 @@ router.route('/:orgid/edit')
 
 /* This renders a project for a user */
 router.route('/:orgid/:projectid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.projects
+);
+
+/* This renders a project members page form for a user */
+router.route('/:orgid/:projectid/users')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.projects
+);
+
+/* This renders a project's element page for a user */
+router.route('/:orgid/:projectid/elements')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,

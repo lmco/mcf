@@ -36,7 +36,6 @@ const minify = require('gulp-minify');
 const sass = require('gulp-sass');
 const markdown = require('gulp-markdown');
 const webpack = require('webpack');
-var HtmlWebPackPlugin = require('html-webpack-plugin');
 const validators = M.require('lib.validators');
 
 /**
@@ -155,8 +154,7 @@ function build(_args) {
       },
       output: {
         path: path.join(M.root, 'build', 'public', 'react-js'),
-        filename: '[name].js',
-        publicPath: '/'
+        filename: '[name].js'
       },
       devServer: {
         historyApiFallback: true
@@ -170,19 +168,9 @@ function build(_args) {
             options: {
               presets: ['babel-preset-env', 'babel-preset-react']
             }
-          },
-          {
-            test: /\.html$/,
-            loader: 'html-loader'
           }
         ]
-      },
-      plugins: [
-        new HtmlWebPackPlugin({
-          template: path.join(M.root, 'build', 'public', 'react-js', 'index.html.ejs'),
-          inject: true
-        })
-      ]
+      }
     }, (err, stats) => {
       if (err || stats.hasErrors()) {
         // eslint-disable-next-line no-console
