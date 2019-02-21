@@ -1353,7 +1353,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                              updated.
  *               name:
  *                 type: string
- *               parent:
+ *               source:
+ *                 type: string
+ *               target:
  *                 type: string
  *               documentation:
  *                 type: string
@@ -1651,6 +1653,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *             name:
  *               type: string
  *             parent:
+ *               type: string
+ *             source:
+ *               type: string
+ *             target:
  *               type: string
  *             documentation:
  *               type: string
