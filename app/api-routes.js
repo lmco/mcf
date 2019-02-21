@@ -1082,10 +1082,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *     tags:
  *       - elements
  *     description: Finds multiple elements using text based search on the
- *                  documentation, name and id fields. Allows for exact searches
- *                  by quoting the desired field "exact search", or the ability
- *                  to not include a word in a search by using a dash -not.
- *                  Returns the elements public data.
+ *                  documentation, name, id, parent, source and target fields.
+ *                  Allows for exact searches by quoting the desired field
+ *                  "exact search", or the ability to not include a word in a
+ *                  search by using a dash -not. Returns the elements public
+ *                  data.
  *     produces:
  *       - application/json
  *     parameters:
