@@ -5,14 +5,10 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
-
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Defines the custom error class.
@@ -25,10 +21,10 @@ module.exports.CustomError = class CustomError extends Error {
    * and can optionally take a status and level. If not provided, the status
    * defaults to 500 and the level to null.
    *
-   * @param {string} description  The custom error description.
-   * @param {Number} status  The HTTP status code. Defaults to 500.
-   * @param {string} level  The errors logger level. If provided,
-   *         will cause the logger to log automatically. Defaults to null.
+   * @param {string} description - The custom error description.
+   * @param {number} status - The HTTP status code. Defaults to 500.
+   * @param {string} level - The errors logger level. If provided, will cause
+   * the logger to log automatically. Defaults to null.
    */
   constructor(description, status = 500, level = null) {
     super();
@@ -45,7 +41,8 @@ module.exports.CustomError = class CustomError extends Error {
   /**
    * @description Returns a HTTP message based on the status code.
    *
-   * @param {string} message
+   * @return {string} HTTP error message
+   *
    * +-------------+-------------------------+
    * | Status Code |         Message         |
    * +-------------+-------------------------+
@@ -59,7 +56,7 @@ module.exports.CustomError = class CustomError extends Error {
    * | 418         | 'I'm a teapot'          |
    * | 500         | 'Internal Server Error' |
    * | 501         | 'Not Implemented'       |
-   * | 503         | 'Service Unavaliable'   |
+   * | 503         | 'Service Unavailable'   |
    * | default     | 'Internal Server Error' |
    * +-------------+-------------------------+
    */
@@ -95,7 +92,7 @@ module.exports.CustomError = class CustomError extends Error {
   /**
    * @description Logs the error based on the input level.
    *
-   * @param {string} level  The optional level parameter.
+   * @param {string} level - The optional level parameter.
    */
   log(level = 'warn') {
     switch (level.toLowerCase()) {

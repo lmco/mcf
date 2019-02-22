@@ -5,13 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -28,7 +22,8 @@ module.exports = {
   find,
   create,
   update,
-  remove
+  remove,
+  search
 };
 
 // Disable eslint rule for logic in nested promises
@@ -58,8 +53,8 @@ const validators = M.require('lib.validators');
  * an array of element ids, a single element id, or not provided, which defaults
  * to every element in a project being found.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
  * @param {boolean} [options.subtree] - If true, all elements in the subtree of
@@ -175,10 +170,10 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       }
 
       // Verify the user has read permissions on the project
-      if (!project.permissions[reqUser._id]
-        || (!project.permissions[reqUser._id].includes('read') && !reqUser.admin)) {
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.CustomError('User does not have permission to get'
-            + ` elements on the project ${project._id}.`, 403, 'warn');
+            + ` elements on the project [${utils.parseID(project._id).pop()}].`, 403, 'warn');
       }
 
       let elementsToFind = [];
@@ -282,8 +277,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of created element objects
  *
@@ -446,8 +441,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.permissions[reqUser._id]
-        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to create'
             + ' elements on the project '
             + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
@@ -643,6 +638,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} [elements.name] - The updated name of the element.
  * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
  * update element parents in bulk.
+ * @param {string} [elements.source] - The ID of the source element.
+ * @param {string} [elements.target] - The ID of the target element.
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
  * @param {string} [elements.type] - An optional type string.
@@ -652,8 +649,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {boolean} [elements.archived] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of updated element objects
  *
@@ -702,9 +699,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     let foundElements = [];
     let elementsToUpdate = [];
     let searchQuery = {};
+    let sourceTargetQuery = {};
     const duplicateCheck = {};
     let foundUpdatedElements = [];
     const arrIDs = [];
+    const sourceTargetIDs = [];
 
     // Initialize valid options
     let populateString = 'contains ';
@@ -744,10 +743,10 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Verify user has write permissions on the project
-      if (!foundProject.permissions[reqUser._id]
-        || (!foundProject.permissions[reqUser._id].includes('write') && !reqUser.admin)) {
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to update'
-          + ` elements on the project ${foundProject._id}.`, 403, 'warn');
+          + ` elements on the project [${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
       }
 
       // Check the type of the elements parameter
@@ -803,6 +802,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           }
           arrIDs.push(elem.id);
           elem._id = elem.id;
+
+          // If updating source, add ID to sourceTargetIDs
+          if (elem.source) {
+            elem.source = utils.createID(orgID, projID, elem.source);
+            sourceTargetIDs.push(elem.source);
+          }
+
+          // If updating target, add ID to sourceTargetIDs
+          if (elem.target) {
+            elem.target = utils.createID(orgID, projID, elem.target);
+            sourceTargetIDs.push(elem.target);
+          }
+
           index++;
         });
       }
@@ -812,6 +824,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
       const promises = [];
       searchQuery = { project: utils.createID(orgID, projID) };
+      sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
 
       // Find elements in batches
       for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
@@ -832,14 +845,20 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Verify the same number of elements are found as desired
       if (foundElements.length !== arrIDs.length) {
         const foundIDs = foundElements.map(e => e._id);
-        const notFound = arrIDs.filter(e => !foundIDs.includes(e)).map(e => utils.parseID(e).pop());
+        const notFound = arrIDs.filter(e => !foundIDs.includes(e))
+        .map(e => utils.parseID(e).pop());
         throw new M.CustomError(
           `The following elements were not found: [${notFound.toString()}].`, 404, 'warn'
         );
       }
 
+      return Element.find(sourceTargetQuery);
+    })
+    .then((foundSourceTarget) => {
       // Convert elementsToUpdate to JMI type 2
       const jmiType2 = utils.convertJMI(1, 2, elementsToUpdate);
+      // Convert foundSourceTarget to JMI type 2
+      const sourceTargetJMI2 = utils.convertJMI(1, 2, foundSourceTarget);
       const bulkArray = [];
       // Get array of editable parameters
       const validFields = Element.getValidUpdateFields();
@@ -872,6 +891,33 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
               throw new M.CustomError(
                 `Invalid ${key}: [${updateElement[key]}]`, 403, 'warn'
               );
+            }
+          }
+
+          // If updating the source or target
+          if (key === 'source' || key === 'target') {
+            // If the source/target is the element id, throw error
+            if (updateElement[key] === element._id) {
+              throw new M.CustomError(`Element's ${key} cannot be self`
+                + ` [${utils.parseID(element._id).pop()}].`, 403, 'warn');
+            }
+
+            // If source/target does not exist, throw error
+            if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
+              throw new M.CustomError(`The ${key} element `
+                + `[${utils.parseID(updateElement[key]).pop()}] was not found.`, 404, 'warn');
+            }
+
+            // If no target exists and is not being updated, throw error
+            if (key === 'source' && !(updateElement.target || element.target)) {
+              throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
+                + ' target is required if source is provided.', 403, 'warn');
+            }
+
+            // If no source exists and is not being updated, throw error
+            if (key === 'target' && !(updateElement.source || element.source)) {
+              throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
+                + ' source is required if target is provided.', 403, 'warn');
             }
           }
 
@@ -1227,5 +1273,129 @@ function moveElementCheck(organizationID, projectID, branch, element) {
     findElementParentRecursive(element)
     .then(() => resolve())
     .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description A function which searches elements within a certain projects
+ * using mongo's built in text search. Returns any elements that match the text
+ * search, in order of the best matches to the worst. Searches the _id, name,
+ * documentation, parent, source and target fields.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string} query - The text-based query to search the database for.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {boolean} [options.archived] - If true, find results will include
+ * archived objects. The default value is false.
+ *
+ * @return {Promise} An array of found elements.
+ *
+ * @example
+ * search({User}, 'orgID', 'projID', 'branch', 'find these elements')
+ * .then(function(elements) {
+ *   // Do something with the found elements
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function search(requestingUser, organizationID, projectID, branch, query, options) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
+      assert.ok(typeof query === 'string', 'Query is not a string.');
+      // Ensure user is on the master branch
+      assert.ok(branch === 'master', 'User must be on the master branch.');
+
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
+    }
+
+    // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.sanitize(organizationID);
+    const projID = sani.sanitize(projectID);
+
+    // Initialize valid options
+    let archived = false;
+    let populateString = 'contains ';
+
+    // Ensure options are valid
+    if (options) {
+      // If the option 'archived' is supplied, ensure it's a boolean
+      if (options.hasOwnProperty('archived')) {
+        if (typeof options.archived !== 'boolean') {
+          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
+        }
+        archived = options.archived;
+      }
+
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+        }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Element.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString += options.populate.join(' ');
+      }
+    }
+
+    // Ensure the project exists
+    Project.findOne({ _id: utils.createID(orgID, projID) })
+    .then((project) => {
+      // Ensure the project was found
+      if (project === null) {
+        throw new M.CustomError(`The project [${projID}] on the org ${orgID} `
+          + 'was not found.', 404, 'warn');
+      }
+
+      // Verify the user has read permissions on the project
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('read'))) {
+        throw new M.CustomError('User does not have permission to get'
+          + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
+      }
+
+      const searchQuery = { project: project._id, $text: { $search: query }, archived: false };
+      // If the archived field is true, remove it from the query
+      if (archived) {
+        delete searchQuery.archived;
+      }
+
+      // Search for the elements
+      return Element.find(searchQuery, { score: { $meta: 'textScore' } })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(populateString);
+    })
+    .then((foundElements) => resolve(foundElements))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

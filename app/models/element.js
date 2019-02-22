@@ -1,17 +1,13 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module models.elements
+ * @module models.element
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -58,17 +54,15 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} _id - The elements non-unique element ID.
  * or taken from another source if imported.
  * @property {string} name - THe elements non-unique name.
- * @property {Project} project - A reference to an element's project.
- * @property {Element} parent - The parent element which contains the element
- * @property {Element} source - A reference to the source element if the base
+ * @property {string} project - A reference to an element's project.
+ * @property {string} parent - The parent element which contains the element
+ * @property {string} source - A reference to the source element if the base
  * element is a relationship. NOTE: If source is provided, target is required.
- * @property {Element} target - A reference to the target element if the base
+ * @property {string} target - A reference to the target element if the base
  * element is a relationship. NOTE: If target is provided, source is required.
  * @property {string} documentation - The element documentation.
  * @property {string} type - An optional type string.
- * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
- * @property {virtual} contains - A list of elements whose parent is the base
- * element.
+ * @property {Object} custom - JSON used to store additional date.
  *
  */
 const ElementSchema = new mongoose.Schema({
@@ -149,10 +143,11 @@ ElementSchema.plugin(extensions);
 
 /**
  * @description Returns element fields that can be changed
- * @memberof ElementSchema
+ * @memberOf ElementSchema
  */
 ElementSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived', 'parent', 'type'];
+  return ['name', 'documentation', 'custom', 'archived', 'parent', 'type',
+    'source', 'target'];
 };
 
 ElementSchema.statics.getValidUpdateFields = function() {
@@ -161,10 +156,11 @@ ElementSchema.statics.getValidUpdateFields = function() {
 
 /**
  * @description Returns element fields that can be changed in bulk
- * @memberof ElementSchema
+ * @memberOf ElementSchema
  */
 ElementSchema.methods.getValidBulkUpdateFields = function() {
-  return ['name', 'documentation', 'custom', 'archived', 'type'];
+  return ['name', 'documentation', 'custom', 'archived', 'type', 'source',
+    'target'];
 };
 
 ElementSchema.statics.getValidBulkUpdateFields = function() {
@@ -335,10 +331,18 @@ ElementSchema.statics.validateObjectKeys = function(object) {
 /* ---------------------------( Element Indexes )---------------------------- */
 
 /**
- * @description Adds a compound index on the name and documentation fields.
- * @memberof ElementSchema
+ * @description Adds a compound text index on the name, documentation, _id,
+ * source, target and parent fields.
+ * @memberOf ElementSchema
  */
-ElementSchema.index({ name: 'text', documentation: 'text' });
+ElementSchema.index({
+  name: 'text',
+  documentation: 'text',
+  _id: 'text',
+  source: 'text',
+  target: 'text',
+  parent: 'text'
+});
 
 
 /* -----------------------( Organization Properties )------------------------ */

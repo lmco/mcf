@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.<br/>
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
@@ -22,13 +18,12 @@
  * improve CI testing.
  */
 
-// Node modules
-const chai = require('chai');
-
 // NPM modules
 const mongoose = require('mongoose');
+const chai = require('chai');
 
 // MBEE modules
+const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const db = M.require('lib.db');
 
@@ -81,6 +76,8 @@ function cleanDB(done) {
   .then(() => mongoose.connection.db.createCollection('server_data'))
   .then(() => mongoose.connection.db.collection('server_data')
   .insertOne({ version: M.schemaVersion }))
+  // Ensure element indexes are created prior to running other tests
+  .then(() => Element.ensureIndexes())
   .then(() => done())
   .catch(error => {
     M.log.error(error);

@@ -1,17 +1,11 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.401a-user-controller-tests
+ * @module test.401a-user-controller-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.<br/>
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *

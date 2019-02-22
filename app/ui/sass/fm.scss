@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -64,6 +64,28 @@
             border-bottom: 1px solid #5c6166;
             padding-bottom: 2px;
             margin-bottom: 18px;
+            font-size: 24px;
+        }
+
+        h3 {
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        h4 {
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+        h5 {
+            font-weight: 600;
+            font-size: 18px
+        }
+
+        h6 {
+            font-weight: 600;
+            font-size: 16px;
         }
 
         pre {
@@ -71,13 +93,15 @@
             background: #343a40;
             padding: 4px 4px;
             border: 1px solid #484d53;
+
+            code {
+                max-height: 200px;
+                overflow: scroll;
+            }
         }
 
         img {
             max-width: 80%;
         }
     }
-
-
-
 }

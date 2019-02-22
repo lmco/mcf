@@ -1,17 +1,11 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.504a-element-mock-tests
+ * @module test.504a-element-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.<br/>
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -111,6 +105,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET an element', getElement);
   it('should GET multiple elements', getElements);
   it('should GET ALL elements', getAllElements);
+  it('should GET an element through text search', searchElement);
   it('should PATCH an element', patchElement);
   it('should PATCH multiple elements', patchElements);
   it('should DELETE an element', deleteElement);
@@ -478,6 +473,76 @@ function getAllElements(done) {
 
   // GETs multiple elements
   apiController.getElements(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to search elements.
+ */
+function searchElement(done) {
+  const elemData = testData.elements[0];
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: elemData.id
+  };
+  const query = { query: `"${elemData.name}"` };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method, query);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const response = JSON.parse(_data);
+
+    // Expect response array to contains 1 element
+    chai.expect(response.length).to.equal(1);
+    const foundElement = response[0];
+
+    // Verify element created properly
+    chai.expect(foundElement.id).to.equal(elemData.id);
+    chai.expect(foundElement.name).to.equal(elemData.name);
+    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.project).to.equal(projID);
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(foundElement.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(foundElement.source).to.equal(elemData.source);
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(foundElement.target).to.equal(elemData.target);
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(foundElement.parent).to.equal(elemData.parent);
+    }
+
+    // Verify additional properties
+    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdOn).to.not.equal(null);
+    chai.expect(foundElement.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
+    done();
+  };
+
+  // GETs elements through text search
+  apiController.searchElements(req, res);
 }
 
 /**

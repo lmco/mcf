@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -30,6 +26,8 @@ const mongoose = require('mongoose');
 /**
  * @description Handles database migrations from a specific version, to a
  * specific version
+ *
+ * @params {string[]} args - An array of command line arguments.
  */
 module.exports.migrate = function(args) {
   return new Promise((resolve, reject) => {
@@ -146,7 +144,7 @@ module.exports.migrate = function(args) {
 /**
  * @description Prompts the user for approval to migrate the database
  *
- * @param {string[]} args - List of command line arguments
+ * @param {string[]} args - Array of command line arguments
  */
 function prompt(args) {
   return new Promise((resolve) => {

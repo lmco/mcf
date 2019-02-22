@@ -1,19 +1,15 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  lib.middleware
+ * @module lib.middleware
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
- *
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
  * @description This file defines middleware functions which can be used by
  * express to perform actions during requests.
@@ -24,7 +20,7 @@
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow.
+ * @param {function} next - Callback to express authentication flow.
  */
 module.exports.logRoute = function logRoute(req, res, next) {
   // Set username to anonymous if req.user is not defined
@@ -39,7 +35,7 @@ module.exports.logRoute = function logRoute(req, res, next) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow.
+ * @param {function} next - Callback to express authentication flow.
  */
 module.exports.logIP = function logIP(req, res, next) {
   // Log the method, url, and ip address for the request
@@ -53,7 +49,7 @@ module.exports.logIP = function logIP(req, res, next) {
  *
  * @param {Object} req - Request object from express
  * @param {Object} res - Response object from express
- * @param {callback} next - Callback to express authentication flow.
+ * @param {function} next - Callback to express authentication flow.
  */
 // eslint-disable-next-line consistent-return
 module.exports.disableUserAPI = function disableUserAPI(req, res, next) {

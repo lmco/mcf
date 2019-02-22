@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
@@ -47,7 +43,7 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {callback} next - Callback to express authentication
+ * @param {function} next - Callback to express authentication
  */
 function authenticate(req, res, next) {
   // Extract authorization metadata
@@ -283,7 +279,8 @@ function authenticate(req, res, next) {
  * validation will fail.
  *
  * @param {string} password - Password to validate
- * @param {string} provider - the type of authentication strategy (ldap, local, etc.)
+ * @param {string} provider - the type of authentication strategy (ldap, local,
+ * etc.)
  *
  * @returns {boolean} - If password is correctly validated
  */

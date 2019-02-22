@@ -3,6 +3,7 @@
 **Contents**
 - [Disclosure Policy](#disclosure-policy)
 - [Security Update Policy](#security-update-policy)
+- [Known Gaps and Issues](#known-gaps-and-issues)
 - [Security Related Configuration](#security-related-configuration)
   - [Plugins and Integrations](#plugins-and-integrations)
   - [Ports](#ports)
@@ -96,26 +97,26 @@ open source version of MBEE. This might be as simple as a security mailing list.
 
 ## Known Gaps and Issues
 
-#### Gulp-React Warnings
-One Dev-Dependencies, [gulp-react](https://www.npmjs.com/package/gulp-react),
-is currently dependent on two deprecated modules known as
-[gulp-util](https://www.npmjs.com/package/gulp-util) and
-[react-tools](https://www.npmjs.com/package/react-tools). As of now, gulp-react
-has yet to update their module to remove these dependencies and thus, warnings
-occur. These warnings have no impact on MBEE or production code as the module
-is only used to build the application. If gulp-react is updated in the future,
-the module will be updated.
-
 #### MBEE Tests
-The MBEE tests should not be ran in production because the tests will create
+The MBEE tests should not be run in production because the tests will create
 an arbitrary admin user in the database.
 
 It's important to ensure that all test users are deleted from the database.
 
+#### Asynchronous Build Script 
+
+Some components in the build script are asynchronous and the build script will 
+print out a message that build is complete before build has finished.
+
+#### UI Refresh
+Refreshing some UI pages causes issues with page rendering due to client-side
+applications mapping to server-side routes.
+
+
+
 ## Security Related Configuration
 
 ### Plugins and Integrations
-
 There are a few ways of writing applications that interact with MBEE. Client
 applications and service-based integrations interact with MBEE via its API
 and don't require much discussion here. However, understanding plugins is
@@ -323,7 +324,7 @@ configuration example below:
 ```json
 {
   "auth": {
-    "strategy": "LdapStrategy",
+    "strategy": "ldap-strategy",
     "ldap": {
         // LDAP information
     },

@@ -5,16 +5,12 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
- *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author  Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
  * @description Defines the user data model.
  */
@@ -43,12 +39,10 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} fname - The Users first name.
  * @property {string} preferredName - The Users preferred first name.
  * @property {string} lname - The Users last name.
- * @property {Boolean} admin - Indicates if the User is a global admin.
+ * @property {boolean} admin - Indicates if the User is a global admin.
  * @property {string} provider - Defines the authentication provider for the
  * User.
- * @property {Schema.Types.Mixed} custom - JSON used to store additional date.
- * @property {virtual} name - The users full name.
- * @property {virtual} username - The users _id, with friendly title.
+ * @property {Object} custom - JSON used to store additional date.
  *
  */
 const UserSchema = new mongoose.Schema({

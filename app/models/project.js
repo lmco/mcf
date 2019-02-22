@@ -5,13 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
@@ -35,12 +31,12 @@ const extensions = M.require('models.plugin.extensions');
  * @description Defines the Project Schema
  *
  * @property {string} _id - The project's non-unique id.
- * @property {Organization} org - A reference to the project's organization.
+ * @property {string} org - A reference to the project's organization.
  * @property {string} name - The project's non-unique project name.
- * @property {Schema.Types.Mixed} permissions - An object whose keys identify a
+ * @property {Object} permissions - An object whose keys identify a
  * projects's roles. The keys are the users username, and values are arrays of
  * given permissions.
- * @property {Schema.Types.Mixed} custom - JSON used to store additional data.
+ * @property {Object} custom - JSON used to store additional data.
  * @property {string} visibility - The visibility level of a project defining
  * its permissions behaviour.
  *
@@ -99,7 +95,7 @@ ProjectSchema.plugin(extensions);
 
 /**
  * @description Returns a project's public data.
- * @memberof ProjectSchema
+ * @memberOf ProjectSchema
  */
 ProjectSchema.methods.getPublicData = function() {
   const permissions = {};
@@ -169,7 +165,7 @@ ProjectSchema.methods.getPublicData = function() {
 
 /**
  * @description Returns supported permission levels
- * @memberof ProjectSchema
+ * @memberOf ProjectSchema
  */
 ProjectSchema.methods.getPermissionLevels = function() {
   return ['remove_all', 'read', 'write', 'admin'];
@@ -180,7 +176,7 @@ ProjectSchema.statics.getPermissionLevels = function() {
 
 /**
  * @description Returns project fields that can be changed
- * @memberof ProjectSchema
+ * @memberOf ProjectSchema
  */
 ProjectSchema.methods.getValidUpdateFields = function() {
   return ['name', 'custom', 'archived', 'permissions'];
@@ -191,7 +187,7 @@ ProjectSchema.statics.getValidUpdateFields = function() {
 
 /**
  * @description Returns supported visibility levels
- * @memberof ProjectSchema
+ * @memberOf ProjectSchema
  */
 ProjectSchema.methods.getVisibilityLevels = function() {
   return ['internal', 'private'];

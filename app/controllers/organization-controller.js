@@ -5,13 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -548,8 +542,8 @@ function update(requestingUser, orgs, options) {
 
       // Check that the user has admin permissions
       foundOrgs.forEach((org) => {
-        if (!org.permissions[reqUser._id]
-          || (!org.permissions[reqUser._id].includes('admin') && !reqUser.admin)) {
+        if (!reqUser.admin && (!org.permissions[reqUser._id]
+          || !org.permissions[reqUser._id].includes('admin'))) {
           throw new M.CustomError('User does not have permission to update'
             + ` the org [${org._id}].`, 403, 'warn');
         }

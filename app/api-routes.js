@@ -5,15 +5,12 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This file defines the MBEE API routes.
  *
@@ -1078,6 +1075,78 @@ api.route('/orgs/:orgid/projects/:projectid')
   APIController.deleteProject
 );
 
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/search:
+ *   get:
+ *     tags:
+ *       - elements
+ *     description: Finds multiple elements using text based search on the
+ *                  documentation, name, id, parent, source and target fields.
+ *                  Allows for exact searches by quoting the desired field
+ *                  "exact search", or the ability to not include a word in a
+ *                  search by using a dash -not. Returns the elements public
+ *                  data.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the searched elements.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: query
+ *         description: The desired text to be searched for.
+ *         in: query
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET elements, returns elements public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET elements due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET elements due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET elements due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET elements due to a non-existent
+ *                      org, project or branch.
+ *       500:
+ *         description: Internal Server Error, Failed to GET elements due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.searchElements
+);
+
 
 /**
  * @swagger
@@ -1285,7 +1354,9 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                              updated.
  *               name:
  *                 type: string
- *               parent:
+ *               source:
+ *                 type: string
+ *               target:
  *                 type: string
  *               documentation:
  *                 type: string
@@ -1583,6 +1654,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *             name:
  *               type: string
  *             parent:
+ *               type: string
+ *             source:
+ *               type: string
+ *             target:
  *               type: string
  *             documentation:
  *               type: string
