@@ -143,6 +143,7 @@ function build(_args) {
 
   // Transpile React components
   if (args.includes('--all') || args.includes('--react')) {
+    M.log.info('  + Building react ...');
     webpack({
       mode: 'production',
       entry: {

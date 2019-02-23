@@ -18,6 +18,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Modal, ModalBody } from 'reactstrap';
 
+import Tile from './tile.jsx';
 import Space from '../general-components/space/space.jsx';
 
 class HomePage extends Component {
@@ -68,47 +69,18 @@ class HomePage extends Component {
                 </div>
                 <div className="mbee-home">
                     <div className="row align-items-center">
-                        <div className="col-md-2">
-                        </div>
-                        <div className="col-md-8" style={{'text-align': 'center'}}>
-                            <div className="row align-items-center splash-row">
-                                <div className="col-5" style={{'text-align': 'right'}}>
-                                    <img src="/img/logo.png" height="180" alt=""
-                                         style={{'margin-bottom': '20px'}} />
-                                </div>
-                                <div className="col-7" style={{'text-align': 'left'}}>
-                                    <h1>MBEE</h1>
-                                    <h2>Model-Based Engineering Environment</h2>
-                                </div>
-                            </div>
-                            <div className="home-links">
-                                <a href="/organizations" className="home-link">
-                                    <div className="home-link-icon">
-                                        <i className="fas fa-boxes"></i>
-                                    </div>
-                                    <div className="home-link-label">
-                                        <p>Your Organizations</p>
-                                    </div>
-                                </a>
-                                <a href="/projects" className="home-link">
-                                    <div className="home-link-icon">
-                                        <i className="fas fa-box"></i>
-                                    </div>
-                                    <div className="home-link-label">
-                                        <p>Your Projects</p>
-                                    </div>
-                                </a>
-                                <a href="/whoami" className="home-link">
-                                    <div className="home-link-icon">
-                                        <i className="fas fa-user-secret"></i>
-                                    </div>
-                                    <div className="home-link-label">
-                                        <p>You</p>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div className="col-md-2">
+                        <div className="home-links">
+                            <div className="col-md-2"></div>
+                            <Tile href={'/organizations'} icon={'fas fa-cubes'}>
+                                Organizations
+                            </Tile>
+                            <Tile href={'/projects'} icon={'fas fa-box'}>
+                                Projects
+                            </Tile>
+                            <Tile href={'/whoami'} icon={'fas fa-user-alt'}>
+                                User Settings
+                            </Tile>
+                            <div className="col-md-2"></div>
                         </div>
                     </div>
                 </div>
