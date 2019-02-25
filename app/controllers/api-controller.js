@@ -43,6 +43,7 @@ module.exports = {
   deleteOrgs,
   getOrg,
   postOrg,
+  putOrg,
   patchOrg,
   deleteOrg,
   getAllProjects,
@@ -558,6 +559,66 @@ function postOrg(req, res) {
   // Create the organization with provided parameters
   // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
+  .then((orgs) => {
+    // Return 200: OK and created org
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/orgs/:orgid
+ *
+ * @description Takes an organization in the request body and an
+ * organization ID in the URI and creates or replaces the organization.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with org's public data
+ */
+function putOrg(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
+    const error = new M.CustomError(
+      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the org ID in the body equal req.params.orgid
+  req.body.id = req.params.orgid;
+
+  // Create or replace the organization with provided parameters
+  // NOTE: createOrReplace() sanitizes req.body
+  OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');

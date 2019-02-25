@@ -29,6 +29,8 @@ module.exports = {
 
 // Node.js Modules
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
 // MBEE Modules
 const Element = M.require('models.element');
@@ -414,9 +416,6 @@ function create(requestingUser, orgs, options) {
  * org will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
- * the found objects. By default, no fields are populated.
- * @param {boolean} [options.replace = false] - A boolean value that if true,
- * replaces the entire object and ignores invalid update fields.
  *
  * @return {Promise} Array of updated organization objects
  *
@@ -460,7 +459,6 @@ function update(requestingUser, orgs, options) {
     let orgsToUpdate = [];
     let existingUsers = [];
     let updatingPermissions = false;
-    let replace = false;
 
     // Initialize valid options
     let populateString = '';
@@ -487,14 +485,6 @@ function update(requestingUser, orgs, options) {
         });
 
         populateString = options.populate.join(' ');
-      }
-
-      // If the option 'replace' is supplies, ensure it's a boolean
-      if (options.hasOwnProperty('replace')) {
-        if (typeof options.replace !== 'string') {
-          throw new M.CustomError('The option \'replace\' is not a boolean.', 400, 'warn');
-        }
-        replace = options.replace;
       }
     }
 
@@ -602,7 +592,7 @@ function update(requestingUser, orgs, options) {
         }
 
         // Error Check: if org is currently archived, it must first be unarchived
-        if (org.archived && updateOrg.archived !== false && !replace) {
+        if (org.archived && updateOrg.archived !== false) {
           throw new M.CustomError(`Organization [${org._id}] is archived. `
               + 'Archived objects cannot be modified.', 403, 'warn');
         }
@@ -610,7 +600,7 @@ function update(requestingUser, orgs, options) {
         // For each key in the updated object
         Object.keys(updateOrg).forEach((key) => {
           // Check if the field is valid to update
-          if (!validFields.includes(key) && !replace) {
+          if (!validFields.includes(key)) {
             throw new M.CustomError(`Organization property [${key}] cannot `
                 + 'be changed.', 400, 'warn');
           }
@@ -635,17 +625,6 @@ function update(requestingUser, orgs, options) {
 
             // If the user is updating permissions
             if (key === 'permissions') {
-              // Remove all users not-specified if replacing
-              if (replace) {
-                Object.keys(org.permissions).forEach((k) => {
-                  // Don't delete the requesting users permissions
-                  // TODO: Figure this one out...
-                  if (k !== reqUser.username) {
-                    delete org.permissions[k];
-                  }
-                });
-              }
-
               // Loop through each user provided
               Object.keys(updateOrg[key]).forEach((user) => {
                 let permValue = updateOrg[key][user];
@@ -791,10 +770,9 @@ function createOrReplace(requestingUser, orgs, options) {
     // Sanitize input parameters and function-wide variables
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const duplicateCheck = {};
+    let foundOrgs = [];
     let orgsToLoopUp = [];
-    let orgsToCreate = [];
-    let orgsToUpdate = [];
-    let returnOrgs = [];
+    let createdOrgs = [];
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
@@ -840,32 +818,40 @@ function createOrReplace(requestingUser, orgs, options) {
     // Find the orgs to update
     Organization.find(searchQuery)
     .then((_foundOrgs) => {
+      foundOrgs = _foundOrgs;
+
+      // Write contents to temporary file
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', 'replaced_orgs.json'),
+          JSON.stringify(_foundOrgs), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+      });
+    })
+    .then(() => {
       // Create an array of found org IDs
-      const foundOrgIDs = _foundOrgs.map(o => o._id);
-
-      // Create an array of orgs which were found, to be updated
-      orgsToUpdate = orgsToLoopUp.filter(o => foundOrgIDs.includes(o.id));
-      // Create an array of orgs which were not found, to be created
-      orgsToCreate = orgsToLoopUp.filter(o => !foundOrgIDs.includes(o.id));
-
-      // Create the new orgs
-      return create(requestingUser, orgsToCreate, options);
+      const foundOrgIDs = foundOrgs.map(o => o._id);
+      
+      // Delete orgs from database
+      return Organization.deleteMany({ _id: foundOrgIDs });
     })
-    .then((createdOrgs) => {
-      // Add created orgs to return
-      returnOrgs = returnOrgs.concat(createdOrgs);
+    // Create the new orgs
+    .then(() => create(requestingUser, orgsToLoopUp, options))
+    .then((_createdOrgs) => {
+      createdOrgs = _createdOrgs;
 
-      // Update the existing orgs
-      options.replace = true;
-      return update(requestingUser, orgsToUpdate, options);
+      // Delete the temporary file.
+      if (fs.existsSync(path.join(M.root, 'data', 'replaced_orgs.json'))) {
+        return new Promise(function(res, rej) {
+          fs.unlink(path.join(M.root, 'data', 'replaced_orgs.json'), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+        });
+      }
     })
-    .then((updatedOrgs) => {
-      // Add updated orgs to return
-      returnOrgs = returnOrgs.concat(updatedOrgs);
-
-      // Return the created/updated orgs
-      return resolve(returnOrgs);
-    })
+    .then(() => resolve(createdOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

@@ -80,6 +80,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should POST an org', postOrg);
   it('should POST multiple orgs', postOrgs);
+  it('should PUT an org', putOrg);
   it('should PUT multiple orgs', putOrgs);
   it('should GET an org', getOrg);
   it('should GET multiple orgs', getOrgs);
@@ -179,6 +180,43 @@ function postOrgs(done) {
 }
 
 /**
+ * @description Verifies PUT /api/org/:orgid creates/replaces an organization.
+ */
+function putOrg(done) {
+  const orgData = testData.orgs[0];
+  request({
+    url: `${test.url}/api/orgs/${orgData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PUT',
+    body: JSON.stringify(orgData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const replacedOrg = JSON.parse(body);
+    chai.expect(replacedOrg.id).to.equal(orgData.id);
+    chai.expect(replacedOrg.name).to.equal(orgData.name);
+    chai.expect(replacedOrg.custom).to.deep.equal(orgData.custom || {});
+    chai.expect(replacedOrg.permissions[adminUser.username]).to.equal('admin');
+
+    // Verify additional properties
+    chai.expect(replacedOrg.createdBy).to.equal(adminUser.username);
+    chai.expect(replacedOrg.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedOrg.createdOn).to.not.equal(null);
+    chai.expect(replacedOrg.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(replacedOrg).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
+    done();
+  });
+}
+
+/**
  * @description Verifies PUT /api/orgs creates/replaces multiple organizations.
  */
 function putOrgs(done) {
@@ -200,29 +238,29 @@ function putOrgs(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const _putOrgs = JSON.parse(body);
-    chai.expect(_putOrgs.length).to.equal(orgData.length);
+    const replacedOrgs = JSON.parse(body);
+    chai.expect(replacedOrgs.length).to.equal(orgData.length);
 
-    // Convert _putOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, _putOrgs, 'id');
+    // Convert replacedOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, replacedOrgs, 'id');
     // Loop through each org data object
     orgData.forEach((orgDataObject) => {
-      const putOrg = jmi2Orgs[orgDataObject.id];
+      const replacedOrg = jmi2Orgs[orgDataObject.id];
 
       // Verify org created/replaced properly
-      chai.expect(putOrg.id).to.equal(orgDataObject.id);
-      chai.expect(putOrg.name).to.equal(orgDataObject.name);
-      chai.expect(putOrg.custom).to.deep.equal(orgDataObject.custom || {});
-      chai.expect(putOrg.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(replacedOrg.id).to.equal(orgDataObject.id);
+      chai.expect(replacedOrg.name).to.equal(orgDataObject.name);
+      chai.expect(replacedOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(replacedOrg.permissions[adminUser.username]).to.equal('admin');
 
       // Verify additional properties
-      chai.expect(putOrg.createdBy).to.equal(adminUser.username);
-      chai.expect(putOrg.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(putOrg.createdOn).to.not.equal(null);
-      chai.expect(putOrg.updatedOn).to.not.equal(null);
+      chai.expect(replacedOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(replacedOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedOrg.createdOn).to.not.equal(null);
+      chai.expect(replacedOrg.updatedOn).to.not.equal(null);
 
       // Verify specific fields not returned
-      chai.expect(putOrg).to.not.have.keys(['archived', 'archivedOn',
+      chai.expect(replacedOrg).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();

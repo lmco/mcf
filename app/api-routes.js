@@ -481,6 +481,62 @@ api.route('/orgs')
  *       500:
  *         description: Internal Server Error, Failed to POST org due to a
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - organizations
+ *     description: Creates or replaces an organization from the given data in
+ *                  the request body. If the organization already exists it is
+ *                  replaced, otherwise it is created. This endpoint is reserved
+ *                  for system-admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: org
+ *         description: The object containing the new organization data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: Must match the id in the request parameters.
+ *             name:
+ *               type: string
+ *             custom:
+ *               type: object
+ *             permissions:
+ *               type: object
+ *               description: Any preset permissions. Keys are the users
+ *                            usernames, and values are the permission.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST org, returns org public data.
+ *       400:
+ *         description: Bad Request, Failed to POST org due to invalid field in
+ *                      request data.
+ *       401:
+ *         description: Unauthorized, Failed to POST org due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST org due to an existing org
+ *                      with same id.
+ *       500:
+ *         description: Internal Server Error, Failed to POST org due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - organizations
@@ -578,6 +634,11 @@ api.route('/orgs/:orgid')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postOrg
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putOrg
 )
 .patch(
   AuthController.authenticate,
