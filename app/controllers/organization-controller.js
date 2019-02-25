@@ -730,16 +730,7 @@ function update(requestingUser, orgs, options) {
 
 /**
  * @description This function creates one or many orgs. If orgs with matching
- * ids already exist, this function updates those orgs. Multiple fields in
- * multiple orgs can be updated at once, provided that the fields are allowed to
- * be updated. If updating org permissions, to add one or more users, provide
- * a permissions object containing key/value pairs where the username of the
- * user is the key, and the value is the role the user is given. To remove a
- * user, the value should be 'remove_all'. If updating the custom data on an
- * org, and key/value pairs that exist in the update object that don't exist in
- * the current custom data, the key/value pair will be added. If the key/value
- * pairs do exist, the value will be changed. If an org is archived, it
- * must first be unarchived before any other updates occur. This function is
+ * ids already exist, this function updates those orgs. This function is
  * restricted to system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
