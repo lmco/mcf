@@ -19,8 +19,6 @@ import React, { Component } from 'react';
 
 // MBEE Modules
 import { getRequest } from "../helper-functions/getRequest";
-
-// MBEE JSX Modules
 import List from '../general-components/list/list.jsx';
 import ListItem from '../general-components/list/list-item.jsx';
 
@@ -137,7 +135,7 @@ class ElementList extends Component {
 
 
     render() {
-        // Render the element tree
+        // Renders the element tree
         return (
             <List className='guideline'>
                 {this.state.elementChildren}
@@ -147,5 +145,5 @@ class ElementList extends Component {
 }
 
 
-// Export the component
+// Export component
 export default ElementList

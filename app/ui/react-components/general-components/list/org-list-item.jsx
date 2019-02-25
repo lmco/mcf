@@ -14,22 +14,29 @@
  *
  * @description This renders the organization list items.
  */
+
+// React Modules
 import React, { Component } from 'react';
 
+// MBEE Modules
 import StatsList from '../stats/stats-list.jsx';
 import Stat from '../stats/stat.jsx';
 
+// Define OrgListItem Component
 class OrgListItem extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
 
-        this.ref = React.createRef();
-
-        this.handleResize = this.handleResize.bind(this);
-
+        // Initialize state props
         this.state = {
             width: 0,
         };
+
+        // Create reference
+        this.ref = React.createRef();
+
+        this.handleResize = this.handleResize.bind(this);
     }
 
     componentDidMount() {
