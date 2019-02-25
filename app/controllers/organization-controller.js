@@ -741,6 +741,35 @@ function update(requestingUser, orgs, options) {
  * pairs do exist, the value will be changed. If an org is archived, it
  * must first be unarchived before any other updates occur. This function is
  * restricted to system-wide admins ONLY.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {(Object|Object[])} orgs - Either an array of objects containing
+ * updates/new data for organizations, or a single object containing updates.
+ * @param {string} orgs.id - The ID of the org being updated/created. Field
+ * cannot be updated but is required to find/created org.
+ * @param {string} [orgs.name] - The updated/new name of the organization.
+ * @param {Object} [orgs.permissions] - An object of key value pairs, where the
+ * key is the username, and the value is the role which the user is to have in
+ * the org.
+ * @param {Object} [orgs.custom] - The additions or changes to existing custom
+ * data. If the key/value pair already exists, the value will be changed. If the
+ * key/value pair does not exist, it will be added.
+ * @param {boolean} [orgs.archived] - The archived field. If true, the org will
+ * not be able to be found until unarchived.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on
+ * return.
+ *
+ * @return {Promise} Array of replaced/created organization objects
+ *
+ * @example
+ * createOrReplace({User}, [{Updated Org 1}, {Updated Org 2}...])
+ * .then(function(orgs) {
+ *   // Do something with the newly replaced/created orgs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
  */
 function createOrReplace(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
@@ -832,7 +861,7 @@ function createOrReplace(requestingUser, orgs, options) {
     .then(() => {
       // Create an array of found org IDs
       const foundOrgIDs = foundOrgs.map(o => o._id);
-      
+
       // Delete orgs from database
       return Organization.deleteMany({ _id: foundOrgIDs });
     })

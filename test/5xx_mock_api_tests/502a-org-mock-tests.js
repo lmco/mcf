@@ -77,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should POST an org', postOrg);
   it('should POST multiple orgs', postOrgs);
-  it('should PUT an org', putOrg)
+  it('should PUT an org', putOrg);
   it('should PUT multiple orgs', putOrgs);
   it('should GET an org', getOrg);
   it('should GET multiple orgs', getOrgs);
