@@ -23,8 +23,9 @@ class ElementList extends Component {
         super(props);
 
         this.state = {
-            elementChildren: null
-        }
+            elementChildren: null,
+            error: null
+        };
 
         this.constructListItem = this.constructListItem.bind(this);
     }
@@ -89,7 +90,7 @@ class ElementList extends Component {
                 .then((listItem) => {
                     listItems.push(listItem);
                 })
-                .catch((err) => console.log(err))
+                .catch((err) => this.setState({ error: err}))
             )
         }
 
@@ -98,7 +99,7 @@ class ElementList extends Component {
             this.setState({ elementChildren: listItems})
         })
         .catch(err => {
-            console.log(err);
+            this.setState({ error: err});
         })
     }
 
@@ -107,7 +108,10 @@ class ElementList extends Component {
     render() {
         return (
             <List className='guideline'>
-                {this.state.elementChildren}
+                {(!this.state.elementChildren)
+                    ? <div className="loading"> {this.state.error || 'Loading the project elements...'} </div>
+                    : (this.state.elementChildren)
+                }
             </List>
         )
     }
