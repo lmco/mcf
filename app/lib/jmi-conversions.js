@@ -32,10 +32,10 @@ const path = require('path');
 module.exports.convertJMI = function(from, to, data, field = '_id') {
   // Convert JMI type 1 to type 2
   if (from === 1 && to === 2) {
-    jmi12(data, field);
+    return jmi12(data, field);
   }
   else if (from === 1 && to === 3) {
-    jmi13(data, field);
+    return jmi13(data, field);
   }
 
   throw new M.CustomError('JMI conversion not yet implemented.', 501, 'warn');
@@ -77,7 +77,7 @@ function jmi13(data, field) {
     const parent = jmi2Obj[key].parent;
 
     // If no parent is found or does not exist, set as root
-    if (!parent || !jmi2Obj[parent] ) {
+    if (!parent || !jmi2Obj[parent]) {
       roots.push(jmi2Obj[key]);
     }
   });
@@ -91,12 +91,17 @@ function jmi13(data, field) {
     delete jmi2Obj[root.id];
 
     // Creating the tree with jmi3Helper function
-    tree[root.id].contains = jmi3Helper(tree, jmi2Obj, root.id);
+    tree[root.id].contains = jmi3Helper(jmi2Obj, root.id);
   });
 
+  if (Object.keys(jmi2Obj).length > 0) {
+    throw new M.CustomError('Circular reference.', 403, 'warn');
+  }
+
+  return tree;
 }
 
-function jmi3Helper(tree, jmi2, id) {
+function jmi3Helper(jmi2, id) {
   const children = [];
   const childrenObj = {};
 
@@ -111,10 +116,6 @@ function jmi3Helper(tree, jmi2, id) {
     }
   });
 
-  if (children.length === 0) {
-    return childrenObj;
-  }
-
   // Looping through children to create tree
   children.forEach((child) => {
     // Initializing child object in tree
@@ -123,7 +124,8 @@ function jmi3Helper(tree, jmi2, id) {
     // Deleting the child from the JMI Type 2 Object
     delete jmi2[child.id];
 
-    childrenObj[child.id].contains = jmi3Helper(tree, jmi2, child.id);
+    childrenObj[child.id].contains = jmi3Helper(jmi2, child.id);
   });
 
+  return childrenObj;
 }
