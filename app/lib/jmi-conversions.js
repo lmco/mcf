@@ -32,16 +32,16 @@ const path = require('path');
 module.exports.convertJMI = function(from, to, data, field = '_id') {
   // Convert JMI type 1 to type 2
   if (from === 1 && to === 2) {
-    JMIType2(data, field);
+    jmi12(data, field);
   }
-  else if (from === 2 && to === 3) {
-    JMIType3(data, field);
+  else if (from === 1 && to === 3) {
+    jmi13(data, field);
   }
 
   throw new M.CustomError('JMI conversion not yet implemented.', 501, 'warn');
 };
 
-function JMIType2(data, field) {
+function jmi12(data, field) {
   // Error Check: Ensure data is in JMI type 1
   try {
     assert.ok(Array.isArray(data), 'Data is not in JMI type 1.');
@@ -63,6 +63,67 @@ function JMIType2(data, field) {
   return returnObj;
 }
 
-function JMIType3(data, field) {
+function jmi13(data, field) {
+  // Set data as JMIType2
+  const jmi2Obj = jmi12(data, field);
+
+  // Initialize variables
+  const roots = [];
+  const tree = {};
+
+  // Looping through object to find roots
+  Object.keys(jmi2Obj).forEach((key) => {
+    // Initialize parent
+    const parent = jmi2Obj[key].parent;
+
+    // If no parent is found or does not exist, set as root
+    if (!parent || !jmi2Obj[parent] ) {
+      roots.push(jmi2Obj[key]);
+    }
+  });
+
+  // Looping through roots to create tree
+  roots.forEach((root) => {
+    // Initializing root object in tree
+    tree[root.id] = root;
+
+    // Deleting the root from the JMI Type 2 Object
+    delete jmi2Obj[root.id];
+
+    // Creating the tree with jmi3Helper function
+    tree[root.id].contains = jmi3Helper(tree, jmi2Obj, root.id);
+  });
+
+}
+
+function jmi3Helper(tree, jmi2, id) {
+  const children = [];
+  const childrenObj = {};
+
+  // Looping through object to find roots
+  Object.keys(jmi2).forEach((key) => {
+    // Initialize parent
+    const parent = jmi2[key].parent;
+
+    // If no parent is found or does not exist, set as root
+    if (parent === id) {
+      children.push(jmi2[key]);
+    }
+  });
+
+  if (children.length === 0) {
+    return childrenObj;
+  }
+
+  // Looping through children to create tree
+  children.forEach((child) => {
+    // Initializing child object in tree
+    childrenObj[child.id] = child;
+
+    // Deleting the child from the JMI Type 2 Object
+    delete jmi2[child.id];
+
+    childrenObj[child.id].contains = jmi3Helper(tree, jmi2, child.id);
+  });
 
 }
