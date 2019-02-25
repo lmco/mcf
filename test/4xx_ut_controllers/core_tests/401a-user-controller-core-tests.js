@@ -24,7 +24,6 @@ const path = require('path');
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */

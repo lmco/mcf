@@ -22,7 +22,6 @@ const path = require('path');
 // MBEE modules
 const db = M.require('lib.db');
 const apiController = M.require('controllers.api-controller');
-const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */

@@ -35,7 +35,7 @@ module.exports.convertJMI = function(from, to, data, field = '_id') {
     return jmi12(data, field);
   }
   // Convert JMI type 1 to type 2
-  else if (from === 1 && to === 3) {
+  if (from === 1 && to === 3) {
     // Return JMI type 3 data
     return jmi13(data, field);
   }

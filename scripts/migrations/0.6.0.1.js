@@ -22,7 +22,6 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 // MBEE modules
-const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 
 /**

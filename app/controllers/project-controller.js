@@ -38,7 +38,7 @@ const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
-const jmi = M.requre('lib.jmi-conversions');
+const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds one or many projects. Depending on the given
