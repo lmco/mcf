@@ -69,6 +69,7 @@ module.exports = {
   postElements,
   patchElements,
   deleteElements,
+  searchElements,
   getElement,
   postElement,
   patchElement,
@@ -1975,6 +1976,73 @@ function deleteElements(req, res) {
     // Return 200: OK and the deleted element ids
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(elements.map(e => utils.parseID(e).pop())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search
+ *
+ * @description Does a text based search on elements and returns any matches.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with elements
+ */
+function searchElements(req, res) {
+  // Define options and query
+  // Note: Undefined if not set
+  let options;
+  let query = '';
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    query: 'string'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for query
+  if (options.query) {
+    query = options.query;
+    delete options.query;
+  }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Find elements
+  // NOTE: search() sanitizes input params
+  ElementController.search(req.user, req.params.orgid, req.params.projectid,
+    branchid, query, options)
+  .then((elements) => {
+    // Verify elements public data array is not empty
+    if (elements.length === 0) {
+      const error = new M.CustomError('No elements found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    // Return a 200: OK and public element data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
