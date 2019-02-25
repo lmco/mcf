@@ -29,6 +29,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 // Expose `API Controller functions`
 module.exports = {
@@ -1653,13 +1654,15 @@ function getElements(req, res) {
   // Note: Undefined if not set
   let elemIDs;
   let options;
+  let jmiOpt;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
     subtree: 'boolean',
-    ids: 'array'
+    ids: 'array',
+    jmi3: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1692,6 +1695,12 @@ function getElements(req, res) {
     elemIDs = req.body.map(p => p.id);
   }
 
+  // Check for JMI type 3 conversion option
+  if (options.hasOwnProperty('jmi3')) {
+    jmiOpt = options.jmi3;
+    delete options.jmi3;
+  }
+
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
@@ -1707,6 +1716,16 @@ function getElements(req, res) {
     if (elementsPublicData.length === 0) {
       const error = new M.CustomError('No elements found.', 404, 'warn');
       return res.status(error.status).send(error);
+    }
+
+    // Check for JMI conversion
+    if (jmiOpt) {
+      // Convert data to JMI type 3 object
+      const jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
+
+      // Return a 200: OK and public JMI type 3 element data
+      res.header('Content-Type', 'application/json');
+      return res.status(200).send(formatJSON(jmiData));
     }
 
     // Return a 200: OK and public element data
