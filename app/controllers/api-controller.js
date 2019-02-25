@@ -1695,7 +1695,7 @@ function getElements(req, res) {
     elemIDs = req.body.map(p => p.id);
   }
 
-  // Check for JMI type 3 conversion
+  // Check for JMI type 3 conversion option
   if (options.hasOwnProperty('jmi3')) {
     jmiOpt = options.jmi3;
     delete options.jmi3;
