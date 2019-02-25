@@ -25,6 +25,7 @@ const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -159,7 +160,7 @@ function createUsers(done) {
     chai.expect(createdUsers.length).to.equal(userDataObjects.length);
 
     // Convert createdUsers to JMI type 2 for easier lookup
-    const jmi2Users = utils.convertJMI(1, 2, createdUsers);
+    const jmi2Users = jmi.convertJMI(1, 2, createdUsers);
     // Loops through each user data object
     userDataObjects.forEach((userDataObject) => {
       const createdUser = jmi2Users[userDataObject.username];
@@ -268,7 +269,7 @@ function findUsers(done) {
     chai.expect(foundUsers.length).to.equal(userDataObjects.length);
 
     // Convert foundUsers to JMI type 2 for easier lookup
-    const jmi2Users = utils.convertJMI(1, 2, foundUsers);
+    const jmi2Users = jmi.convertJMI(1, 2, foundUsers);
     // Loop through each user data object
     userDataObjects.forEach((userDataObject) => {
       const foundUser = jmi2Users[userDataObject.username];
@@ -322,7 +323,7 @@ function findAllUsers(done) {
     chai.expect(foundUsers.length).to.be.at.least(userDataObjects.length);
 
     // Convert foundUsers to JMI type 2 for easier lookup
-    const jmi2Users = utils.convertJMI(1, 2, foundUsers);
+    const jmi2Users = jmi.convertJMI(1, 2, foundUsers);
     // Loop through each user data object
     userDataObjects.forEach((userDataObject) => {
       const foundUser = jmi2Users[userDataObject.username];
@@ -439,7 +440,7 @@ function updateUsers(done) {
     chai.expect(updatedUsers.length).to.equal(userDataObjects.length);
 
     // Convert updatedUsers to JMI type 2 for easier lookup
-    const jmi2Users = utils.convertJMI(1, 2, updatedUsers);
+    const jmi2Users = jmi.convertJMI(1, 2, updatedUsers);
     // Loop through each user data object
     userDataObjects.forEach((userDataObject) => {
       const updatedUser = jmi2Users[userDataObject.username];

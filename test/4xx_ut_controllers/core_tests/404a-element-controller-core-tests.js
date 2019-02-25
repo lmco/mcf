@@ -22,6 +22,7 @@ const path = require('path');
 const ElementController = M.require('controllers.element-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = require(path.join(M.root, 'test', 'test-utils'));
@@ -182,7 +183,7 @@ function createElements(done) {
     chai.expect(createdElements.length).to.equal(elemDataObjects.length);
 
     // Convert createdElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, createdElements);
+    const jmi2Elements = jmi.convertJMI(1, 2, createdElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemObj) => {
       const elementID = utils.createID(org.id, projID, elemObj.id);
@@ -311,7 +312,7 @@ function findElements(done) {
     chai.expect(foundElements.length).to.equal(elemDataObjects.length);
 
     // Convert foundElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, foundElements);
+    const jmi2Elements = jmi.convertJMI(1, 2, foundElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemObj) => {
       const elementID = utils.createID(org.id, projID, elemObj.id);
@@ -380,7 +381,7 @@ function findAllElements(done) {
     chai.expect(foundElements.length).to.not.equal(0);
 
     // Convert foundElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, foundElements);
+    const jmi2Elements = jmi.convertJMI(1, 2, foundElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemObj) => {
       const elementID = utils.createID(org.id, projID, elemObj.id);
@@ -569,7 +570,7 @@ function updateElements(done) {
     chai.expect(updatedElements.length).to.equal(elemDataObjects.length);
 
     // Convert updatedElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, updatedElements);
+    const jmi2Elements = jmi.convertJMI(1, 2, updatedElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemObj) => {
       const elementID = utils.createID(org.id, projID, elemObj.id);
