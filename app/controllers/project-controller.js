@@ -812,6 +812,46 @@ function update(requestingUser, organizationID, projects, options) {
 }
 
 /**
+ * @description This functions creates one or many projects from the provided
+ * data. If projects with matching ids already exist, the function updates those
+ * projects. This function is restricted to system-wide admins ONLY.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {(Object|Object[])} projects - Either an array of objects containing
+ * project data or a single object containing project data to create.
+ * @param {string} projects.id - The ID of the project being created.
+ * @param {string} projects.name - The name of the project.
+ * @param {Object} [projects.custom] - The additions or changes to existing
+ * custom data. If the key/value pair already exists, the value will be changed.
+ * If the key/value pair does not exist, it will be added.
+ * @param {string} [projects.visibility = 'private'] - The visibility of the
+ * project being created. If 'internal', users not in the project but in the
+ * owning org will be able to view the project.
+ * @param {Object} [projects.permissions] - Any preset permissions on the
+ * project. Keys should be usernames and values should be the highest
+ * permissions the user has. NOTE: The requesting user gets added as an admin by
+ * default.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ *
+ * @return {Promise} Array of created project objects
+ *
+ * @example
+ * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
+ * .then(function(projects) {
+ *   // Do something with the newly created projects
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createOrReplace(requestingUser, organizationID, projects, options) {
+
+}
+
+/**
  * @description This function removes one or many projects as well as the
  * elements that belong to them. This function can be used by system-wide admins
  * ONLY.
