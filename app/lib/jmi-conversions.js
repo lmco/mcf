@@ -68,31 +68,7 @@ function jmi13(data, field) {
   const jmi2Obj = jmi12(data, field);
 
   // Initialize variables
-  const roots = [];
-  const tree = {};
-
-  // Looping through object to find roots
-  Object.keys(jmi2Obj).forEach((key) => {
-    // Initialize parent
-    const parent = jmi2Obj[key].parent;
-
-    // If no parent is found or does not exist, set as root
-    if (!parent || !jmi2Obj[parent]) {
-      roots.push(jmi2Obj[key]);
-    }
-  });
-
-  // Looping through roots to create tree
-  roots.forEach((root) => {
-    // Initializing root object in tree
-    tree[root.id] = root;
-
-    // Deleting the root from the JMI Type 2 Object
-    delete jmi2Obj[root.id];
-
-    // Creating the tree with jmi3Helper function
-    tree[root.id].contains = jmi3Helper(jmi2Obj, root.id);
-  });
+  const tree = jmi3Helper(jmi2Obj, null);
 
   if (Object.keys(jmi2Obj).length > 0) {
     throw new M.CustomError('Circular reference.', 403, 'warn');
@@ -111,7 +87,13 @@ function jmi3Helper(jmi2, id) {
     const parent = jmi2[key].parent;
 
     // If no parent is found or does not exist, set as root
-    if (parent === id) {
+    if (id !== null) {
+      if (parent === id) {
+        children.push(jmi2[key]);
+      }
+    }
+    // If no parent is found or does not exist, set as root
+    else if (!parent || !jmi2[parent]) {
       children.push(jmi2[key]);
     }
   });
