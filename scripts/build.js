@@ -144,7 +144,7 @@ function build(_args) {
   // Transpile React components
   if (args.includes('--all') || args.includes('--react')) {
     webpack({
-      mode: 'production',
+      mode: 'development',
       entry: {
         navbar: path.join(M.root, 'app', 'ui', 'react-components', 'general-components', 'nav.jsx'),
         'home-page': path.join(M.root, 'app', 'ui', 'react-components', 'home-page', 'home-page.jsx'),
@@ -155,6 +155,9 @@ function build(_args) {
       output: {
         path: path.join(M.root, 'build', 'public', 'react-js'),
         filename: '[name].js'
+      },
+      devServer: {
+        historyApiFallback: true
       },
       module: {
         rules: [
