@@ -415,6 +415,8 @@ function create(requestingUser, orgs, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {boolean} [options.replace = false] - A boolean value that if true,
+ * replaces the entire object and ignores invalid update fields.
  *
  * @return {Promise} Array of updated organization objects
  *
@@ -458,13 +460,14 @@ function update(requestingUser, orgs, options) {
     let orgsToUpdate = [];
     let existingUsers = [];
     let updatingPermissions = false;
+    let replace = false;
 
     // Initialize valid options
     let populateString = '';
 
     // Ensure options are valid
     if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
+      // If the option 'populate' is supplied, ensure it's a array of strings
       if (options.hasOwnProperty('populate')) {
         if (!Array.isArray(options.populate)) {
           throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
@@ -484,6 +487,14 @@ function update(requestingUser, orgs, options) {
         });
 
         populateString = options.populate.join(' ');
+      }
+
+      // If the option 'replace' is supplies, ensure it's a boolean
+      if (options.hasOwnProperty('replace')) {
+        if (typeof options.replace !== 'string') {
+          throw new M.CustomError('The option \'replace\' is not a boolean.', 400, 'warn');
+        }
+        replace = options.replace;
       }
     }
 
@@ -591,7 +602,7 @@ function update(requestingUser, orgs, options) {
         }
 
         // Error Check: if org is currently archived, it must first be unarchived
-        if (org.archived && updateOrg.archived !== false) {
+        if (org.archived && updateOrg.archived !== false && !replace) {
           throw new M.CustomError(`Organization [${org._id}] is archived. `
               + 'Archived objects cannot be modified.', 403, 'warn');
         }
@@ -599,7 +610,7 @@ function update(requestingUser, orgs, options) {
         // For each key in the updated object
         Object.keys(updateOrg).forEach((key) => {
           // Check if the field is valid to update
-          if (!validFields.includes(key)) {
+          if (!validFields.includes(key) && !replace) {
             throw new M.CustomError(`Organization property [${key}] cannot `
                 + 'be changed.', 400, 'warn');
           }
@@ -624,6 +635,17 @@ function update(requestingUser, orgs, options) {
 
             // If the user is updating permissions
             if (key === 'permissions') {
+              // Remove all users not-specified if replacing
+              if (replace) {
+                Object.keys(org.permissions).forEach((k) => {
+                  // Don't delete the requesting users permissions
+                  // TODO: Figure this one out...
+                  if (k !== reqUser.username) {
+                    delete org.permissions[k];
+                  }
+                });
+              }
+
               // Loop through each user provided
               Object.keys(updateOrg[key]).forEach((user) => {
                 let permValue = updateOrg[key][user];
@@ -834,6 +856,7 @@ function createOrReplace(requestingUser, orgs, options) {
       returnOrgs = returnOrgs.concat(createdOrgs);
 
       // Update the existing orgs
+      options.replace = true;
       return update(requestingUser, orgsToUpdate, options);
     })
     .then((updatedOrgs) => {
