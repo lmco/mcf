@@ -105,12 +105,12 @@ function jmi3Helper(jmi2, id) {
   const children = [];
   const childrenObj = {};
 
-  // Looping through object to find roots
+  // Looping through object to find parent
   Object.keys(jmi2).forEach((key) => {
     // Initialize parent
     const parent = jmi2[key].parent;
 
-    // If no parent is found or does not exist, set as root
+    // Check for parent, if parent is same as id push to array
     if (parent === id) {
       children.push(jmi2[key]);
     }
