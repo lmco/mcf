@@ -77,6 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should POST an org', postOrg);
   it('should POST multiple orgs', postOrgs);
+  it('should PUT multiple orgs', putOrgs);
   it('should GET an org', getOrg);
   it('should GET multiple orgs', getOrgs);
   it('should GET all orgs', getAllOrgs);
@@ -184,6 +185,62 @@ function postOrgs(done) {
 }
 
 /**
+ * @description Verifies mock PUT request to create/replace multiple
+ * organizations.
+ */
+function putOrgs(done) {
+  // Create request object
+  const orgData = [
+    testData.orgs[1],
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
+  const params = {};
+  const method = 'PUT';
+  const req = testUtils.createRequest(adminUser, params, orgData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const putOrgs = JSON.parse(_data);
+    chai.expect(putOrgs.length).to.equal(orgData.length);
+
+    // Convert foundProjects to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, putOrgs, 'id');
+    // Loop through each project data object
+    orgData.forEach((orgDataObject) => {
+      const putOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify project created properly
+      chai.expect(putOrg.id).to.equal(orgDataObject.id);
+      chai.expect(putOrg.name).to.equal(orgDataObject.name);
+      chai.expect(putOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(putOrg.permissions[adminUser.username]).to.equal('admin');
+
+      // Verify additional properties
+      chai.expect(putOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(putOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(putOrg.createdOn).to.not.equal(null);
+      chai.expect(putOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(putOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  };
+
+  // PUTs multiple orgs
+  apiController.putOrgs(req, res);
+}
+
+/**
  * @description Verifies mock GET request to get an organization.
  */
 function getOrg(done) {
@@ -229,7 +286,9 @@ function getOrg(done) {
  */
 function getOrgs(done) {
   const orgData = [
-    testData.orgs[0]
+    testData.orgs[1],
+    testData.orgs[2],
+    testData.orgs[3]
   ];
   // Create request object
   const params = {};
@@ -270,8 +329,8 @@ function getOrgs(done) {
       // Verify specific fields not returned
       chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
-      done();
     });
+    done();
   };
 
   // GETs all orgs
@@ -283,7 +342,10 @@ function getOrgs(done) {
  */
 function getAllOrgs(done) {
   const orgData = [
-    testData.orgs[0]
+    testData.orgs[0],
+    testData.orgs[1],
+    testData.orgs[2],
+    testData.orgs[3]
   ];
 
   // Create request object
@@ -325,8 +387,8 @@ function getAllOrgs(done) {
       // Verify specific fields not returned
       chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
-      done();
     });
+    done();
   };
 
   // GETs all orgs
@@ -380,7 +442,8 @@ function patchOrgs(done) {
   // Create request object
   const orgData = [
     testData.orgs[1],
-    testData.orgs[2]
+    testData.orgs[2],
+    testData.orgs[3]
   ];
   const arrUpdateOrg = orgData.map((p) => ({
     id: p.id,
@@ -468,7 +531,8 @@ function deleteOrgs(done) {
   // Create request object
   const orgData = [
     testData.orgs[1],
-    testData.orgs[2]
+    testData.orgs[2],
+    testData.orgs[3]
   ];
   const params = {};
   const method = 'DELETE';

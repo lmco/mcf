@@ -219,6 +219,57 @@ api.route('/version')
  *       500:
  *         description: Internal Server Error, Failed to POST orgs due to a
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - organizations
+ *     description: Creates or replaces multiple organizations from the data
+ *                  provided in the request body. If the organization already
+ *                  exists, it is updated with the provided data. NOTE This
+ *                  function is reserved for system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: orgs
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *                 description: Required if creating an organization.
+ *               custom:
+ *                 type: object
+ *               permissions:
+ *                 type: object
+ *                 description: Any preset permissions. Keys are the users
+ *                              usernames, and values are the permission.
+ *         description: An array of objects containing organization data.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT orgs, returns orgs' public data.
+ *       400:
+ *         description: Bad Request, Failed to PUT orgs due to invalid field in
+ *                      request body.
+ *       401:
+ *         description: Unauthorized, Failed to PUT orgs due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT orgs due to an invalid request
+ *                      body.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT orgs due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - organizations
@@ -318,6 +369,11 @@ api.route('/orgs')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postOrgs
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putOrgs
 )
 .patch(
   AuthController.authenticate,

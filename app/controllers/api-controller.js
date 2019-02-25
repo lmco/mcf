@@ -38,6 +38,7 @@ module.exports = {
   version,
   getOrgs,
   postOrgs,
+  putOrgs,
   patchOrgs,
   deleteOrgs,
   getOrg,
@@ -294,6 +295,54 @@ function postOrgs(req, res) {
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Return 200: OK and created orgs
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/orgs
+ *
+ * @description Creates or replaces multiple orgs from an array of objects.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with orgs' public data
+ */
+function putOrgs(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Create or replace organizations in request body
+  // NOTE: createOrReplace() sanitizes req.body
+  OrgController.createOrReplace(req.user, req.body, options)
+  .then((orgs) => {
+    // Return 200: OK and created/replaced orgs
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
   })

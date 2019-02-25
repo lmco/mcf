@@ -79,6 +79,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should create an org', createOrg);
   it('should create multiple orgs', createOrgs);
+  it('should create and replace multiple orgs', createAndReplaceMultipleOrgs);
   it('should find an org', findOrg);
   it('should find multiple orgs', findOrgs);
   it('should find all orgs', findAllOrgs);
@@ -134,8 +135,7 @@ function createOrg(done) {
 function createOrgs(done) {
   const orgDataObjects = [
     testData.orgs[1],
-    testData.orgs[2],
-    testData.orgs[3]
+    testData.orgs[2]
   ];
 
   // Create orgs via controller
@@ -166,6 +166,56 @@ function createOrgs(done) {
       chai.expect(createdOrg.createdOn).to.not.equal(null);
       chai.expect(createdOrg.updatedOn).to.not.equal(null);
       chai.expect(createdOrg.archivedOn).to.equal(null);
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates and replaces multiple organizations using the org
+ * controller.
+ */
+function createAndReplaceMultipleOrgs(done) {
+  const orgDataObjects = [
+    testData.orgs[1],
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
+
+  // Create or replace orgs via controller
+  OrgController.createOrReplace(adminUser, orgDataObjects)
+  .then((returnedOrgs) => {
+    // Expect returnedOrgs not to be empty
+    chai.expect(returnedOrgs.length).to.equal(orgDataObjects.length);
+
+    // Convert returnedOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = utils.convertJMI(1, 2, returnedOrgs);
+    // Loop through each org data object
+    orgDataObjects.forEach((orgDataObject) => {
+      const returnedOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify org created properly
+      chai.expect(returnedOrg.id).to.equal(orgDataObject.id);
+      chai.expect(returnedOrg._id).to.equal(orgDataObject.id);
+      chai.expect(returnedOrg.name).to.equal(orgDataObject.name);
+      chai.expect(returnedOrg.custom).to.deep.equal(orgDataObject.custom);
+      chai.expect(returnedOrg.permissions[adminUser._id]).to.include('read');
+      chai.expect(returnedOrg.permissions[adminUser._id]).to.include('write');
+      chai.expect(returnedOrg.permissions[adminUser._id]).to.include('admin');
+
+      // Verify additional properties
+      chai.expect(returnedOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(returnedOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(returnedOrg.archivedBy).to.equal(null);
+      chai.expect(returnedOrg.createdOn).to.not.equal(null);
+      chai.expect(returnedOrg.updatedOn).to.not.equal(null);
+      chai.expect(returnedOrg.archivedOn).to.equal(null);
     });
     done();
   })
