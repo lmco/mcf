@@ -30,8 +30,9 @@ class ElementList extends Component {
 
         // Initialize state props
         this.state = {
-            elementChildren: null
-        }
+            elementChildren: null,
+            error: null
+        };
 
         // Bind component functions
         this.constructListItem = this.constructListItem.bind(this);
@@ -116,7 +117,7 @@ class ElementList extends Component {
                     listItems.push(listItem);
                 })
                 // If caught error, throw error
-                .catch((err) => console.log(err))
+                .catch((err) => this.setState({ error: err}))
             )
         }
 
@@ -128,7 +129,7 @@ class ElementList extends Component {
         })
         // If caught error, throw error
         .catch(err => {
-            console.log(err);
+            this.setState({ error: err});
         })
     }
 
@@ -138,7 +139,10 @@ class ElementList extends Component {
         // Renders the element tree
         return (
             <List className='guideline'>
-                {this.state.elementChildren}
+                {(!this.state.elementChildren)
+                    ? <div className="loading"> {this.state.error || 'Loading the project elements...'} </div>
+                    : (this.state.elementChildren)
+                }
             </List>
         )
     }
