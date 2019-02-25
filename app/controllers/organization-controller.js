@@ -840,6 +840,11 @@ function createOrReplace(requestingUser, orgs, options) {
     .then((_foundOrgs) => {
       foundOrgs = _foundOrgs;
 
+      // If data directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data'))) {
+        fs.mkdirSync(path.join(M.root, 'data'));
+      }
+
       // Write contents to temporary file
       return new Promise(function(res, rej) {
         fs.writeFile(path.join(M.root, 'data', 'replaced_orgs.json'),
