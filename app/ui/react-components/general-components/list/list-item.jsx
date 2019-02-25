@@ -18,7 +18,7 @@
 // React Modules
 import React from 'react';
 
-// Define ListItem Component
+// Define function
 function ListItem(props) {
 
     // Initialize basic list item html
@@ -46,5 +46,5 @@ function ListItem(props) {
     }
 }
 
-// Export component
+// Export function
 export default ListItem;

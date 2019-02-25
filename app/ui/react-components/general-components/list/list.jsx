@@ -18,7 +18,7 @@
 // React Modules
 import React from 'react';
 
-// Define List Component
+// Define component
 function List(props) {
     // Loops through the children and puts them in a react-fragment
     const listItems = React.Children.map(props.children, (child, i) =>

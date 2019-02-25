@@ -22,7 +22,7 @@ import { getRequest } from "../helper-functions/getRequest";
 import List from '../general-components/list/list.jsx';
 import ListItem from '../general-components/list/list-item.jsx';
 
-// Define ElementList Component
+// Define component
 class ElementList extends Component {
     constructor(props) {
         // Initialize parent props
@@ -70,7 +70,7 @@ class ElementList extends Component {
                         // Resolve the promises
                         Promise.all(promises)
                         .then(() => {
-                            // Return the element tree in html form
+                            // Return the element tree in list form
                             return resolve(
                                 <List>
                                     <ListItem element={containedElement}/>
@@ -86,7 +86,7 @@ class ElementList extends Component {
                         })
                     }
                     else {
-                        // Return the element in html form
+                        // Return the element in list form
                         return resolve(
                             <List>
                                 <ListItem key={item} element={containedElement}/>
@@ -139,15 +139,17 @@ class ElementList extends Component {
         // Renders the element tree
         return (
             <List className='guideline'>
+                {/*Verify elementChildren has elements*/}
                 {(!this.state.elementChildren)
+                    // Render error or loading page
                     ? <div className="loading"> {this.state.error || 'Loading the project elements...'} </div>
+                    // Render elements
                     : (this.state.elementChildren)
                 }
             </List>
         )
     }
 }
-
 
 // Export component
 export default ElementList
