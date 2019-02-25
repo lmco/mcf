@@ -1695,6 +1695,7 @@ function getElements(req, res) {
     elemIDs = req.body.map(p => p.id);
   }
 
+  // Check for JMI type 3 conversion
   if (options.hasOwnProperty('jmi3')) {
     jmiOpt = options.jmi3;
     delete options.jmi3;
@@ -1717,9 +1718,12 @@ function getElements(req, res) {
       return res.status(error.status).send(error);
     }
 
+    // Check for JMI conversion
     if (jmiOpt) {
+      // Convert data to JMI type 3 object
       const jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
-      // Return a 200: OK and public element data
+
+      // Return a 200: OK and public JMI type 3 element data
       res.header('Content-Type', 'application/json');
       return res.status(200).send(formatJSON(jmiData));
     }

@@ -46,10 +46,10 @@ module.exports.convertJMI = function(from, to, data, field = '_id') {
 /**
  * @description Converts data between JMI type 1 to type 2
  *
- * @param {Object|Object[]} data - The data to convert between JMI versions.
+ * @param {Object[]} data - The data to convert between JMI versions.
  * @param {string} field - The field to parse on
  *
- * @return {Object|Object[]} The converted JMI type 2 object.
+ * @return {Object} The converted JMI type 2 object.
  */
 function jmi12(data, field) {
   // Error Check: Ensure data is in JMI type 1
@@ -81,10 +81,10 @@ function jmi12(data, field) {
 /**
  * @description Converts data between JMI type 1 to type 3
  *
- * @param {Object|Object[]} data - The data to convert between JMI versions.
+ * @param {Object[]} data - The data to convert between JMI versions.
  * @param {string} field - The field to parse on
  *
- * @return {Object|Object[]} The converted JMI type 3 object.
+ * @return {Object} The converted JMI type 3 object.
  */
 function jmi13(data, field) {
   // Set data as JMI type 2
@@ -95,7 +95,7 @@ function jmi13(data, field) {
 
   // Error Check: Ensure there are no circular references
   if (Object.keys(jmi2Obj).length > 0) {
-    throw new M.CustomError('Circular reference.', 403, 'warn');
+    throw new M.CustomError('A circular reference exists in the given data', 403, 'warn');
   }
 
   // Return JMI type 3 object
@@ -105,10 +105,10 @@ function jmi13(data, field) {
 /**
  * @description Recursive JMI type 3 function
  *
- * @param {Object|Object[]} jmi2 - The data to convert between JMI versions.
+ * @param {Object} jmi2 - The data to convert between JMI versions.
  * @param {string} id - The field to parse on
  *
- * @return {Object|Object[]} The converted JMI type 2 object.
+ * @return {Object} The converted JMI type 2 object.
  */
 function jmi3Helper(jmi2, id) {
   // Initialize variables

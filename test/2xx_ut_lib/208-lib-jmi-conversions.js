@@ -45,7 +45,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function convert1to2(done) {
   // Initialize test data
-  const data = testData.jmi;
+  const data = testData.jmi1;
 
   // Convert JMI type from 1 to 2
   const object = convertJMI.convertJMI(1, 2, data, 'id');
@@ -60,13 +60,13 @@ function convert1to2(done) {
  */
 function convert1to3(done) {
   // Initialize test data
-  const data = testData.jmi;
+  const data = testData.jmi1;
 
   // Convert JMI type from 1 to 3
   const object = convertJMI.convertJMI(1, 3, data, 'id');
 
   // Verify object data
   chai.expect(Object.keys(object).length === 2);
-  chai.expect(Object.keys(object[testData.jmi[0].id].contains).length > 0);
+  chai.expect(Object.keys(object[testData.jmi1[0].id].contains).length > 0);
   done();
 }
