@@ -40,6 +40,7 @@ const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
+const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds one or many organizations. Depending on the
@@ -573,7 +574,7 @@ function update(requestingUser, orgs, options) {
       existingUsers = foundUsers.map(u => u._id);
 
       // Convert orgsToUpdate to JMI type 2
-      const jmiType2 = utils.convertJMI(1, 2, orgsToUpdate);
+      const jmiType2 = jmi.convertJMI(1, 2, orgsToUpdate);
       const bulkArray = [];
       // Get array of editable parameters
       const validFields = Organization.getValidUpdateFields();
