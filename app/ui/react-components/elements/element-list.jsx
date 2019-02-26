@@ -13,97 +13,44 @@
  *
  * @description This renders the element tree in the project's page.
  */
-import React, { Component } from 'react';
+import React from 'react';
 import { getRequest } from "../helper-functions/getRequest";
 import List from '../general-components/list/list.jsx';
 import ListItem from '../general-components/list/list-item.jsx';
 
 function ElementList(props) {
+    const { nodeElement, level, toggle, onNodeSelect, isOpen = false} = props;
+    const elements = props.elements;
+    const elementNodes = [];
 
-    return new Promise((resolve, reject) => {
-        const url = this.props.url;
-
-        getRequest(`${url}/branches/master/elements/${item}`)
-            .then(containedElement => {
-                const promises = [];
-                const listItems = [];
-
-                if (containedElement.contains.length > 0) {
-                    for (let i = 0; i < containedElement.contains.length; i++) {
-                        promises.push(this.constructListItem(containedElement.contains[i])
-                            .then((listItem) => {
-                                listItems.push(listItem);
-                            })
-                            .catch((err) => console.log(err))
-                        )
+    Object.key(elements).forEach((key) => {
+        const nodeElements = elements[key].contains;
+        if (nodeElement.length > 0 ) {
+            return (
+                <List>
+                    <ListItem element={elements[key]} onClick={toggle}/>
+                    {(!isOpen)
+                        ? (<List className='guideline'>
+                            <ElementList {...props} elements={nodeElements} level={level+1}/>
+                           </List>)
+                        : ''
                     }
-
-                    Promise.all(promises)
-                    .then(() => {
-                        return resolve(
-                            <List>
-                                <ListItem element={containedElement}/>
-                                <List className='guideline'>
-                                    {listItems}
-                                </List>
-                            </List>
-                        );
-                    })
-                    .catch(err => {
-                        console.log(err);
-                    })
-                }
-                else {
-                    return resolve(
-                        <List>
-                            <ListItem key={item} element={containedElement}/>
-                        </List>
-                    );
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                return reject(err);
-            })
-        })
-    }
-
-    componentDidMount() {
-        const element = this.props.element;
-
-        const promises = [];
-        const listItems = [];
-
-        for (let i = 0; i < element.contains.length; i++) {
-            promises.push(this.constructListItem(element.contains[i])
-                .then((listItem) => {
-                    listItems.push(listItem);
-                })
-                .catch((err) => this.setState({ error: err}))
+                </List>
             )
         }
+        else {
+            return (
+                <List>
+                    <ListItem element={elements[key]}/>
+                </List>
+            )
+        }
+    });
 
-        Promise.all(promises)
-        .then(() => {
-            this.setState({ elementChildren: listItems})
-        })
-        .catch(err => {
-            this.setState({ error: err});
-        })
-    }
-
-
-
-    render() {
-        return (
-            <List className='guideline'>
-                {(!this.state.elementChildren)
-                    ? <div className="loading"> {this.state.error || 'Loading the project elements...'} </div>
-                    : (this.state.elementChildren)
-                }
-            </List>
-        )
-    }
+    // toggle() {
+    //     this.setState({isExpanded: !this.state.isExpanded});
+    // }
+    return ( <div>nothing</div> )
 }
 
 
