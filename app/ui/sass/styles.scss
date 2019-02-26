@@ -101,7 +101,6 @@ label {
     width: 100%;
     position: absolute;
     display: grid;
-    grid-template-columns: 1fr;
     grid-template-rows: $banner-height 1fr $banner-height;
     grid-template-areas:
         "header"
@@ -153,6 +152,7 @@ label {
         }
 
         #view {
+            padding: 20px 40px;
             grid-area: view;
             overflow: scroll;
         }
@@ -267,6 +267,27 @@ label {
 /*                             Home Page Styling                              *
 /******************************************************************************/
 .mbee-home {
+    display: grid;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(10px, 1fr);
+    grid-template-areas:
+        "tile-col1" "tile-col2" "tile-col3";
+
+    .orgs {
+        grid-area: tile-col1;
+    }
+
+    .projects {
+        grid-area: tile-col2;
+    }
+
+    .users {
+        grid-area: tile-col3;
+    }
+
     .splash-row {
         position: relative;
         padding-top: 50px;
@@ -291,7 +312,7 @@ label {
 
     .home-links {
         display: flex;
-        justify-content: space-between;
+        justify-content: space-evenly;
         align-items: center;
         padding-top: 80px;
         height: 100%;
@@ -313,6 +334,7 @@ label {
             padding: 20px 0 15px 0;
             transition: all .23s ease-in-out;
             width: 160px;
+            margin: 10px;
 
             .home-link-icon {
                 font-size: 50px;

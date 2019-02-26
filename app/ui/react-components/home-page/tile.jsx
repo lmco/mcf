@@ -16,16 +16,18 @@
 import React from 'react';
 
 function Tile(props) {
+    const classes = "col-2" + props.id;
+
   return (
-    <div className="col-md-2" style={{'text-align': 'center'}}>
-    <a href={props.href} className="home-link">
-      <div className="home-link-icon">
-        <i className={props.icon}></i>
-      </div>
-      <div className="home-link-label">
-        <p>{props.children}</p>
-      </div>
-    </a>
+    <div className={classes} style={{'text-align': 'center'}}>
+        <a href={props.href} className="home-link">
+          <div className="home-link-icon">
+            <i className={props.icon}></i>
+          </div>
+          <div className="home-link-label">
+            <p>{props.children}</p>
+          </div>
+        </a>
     </div>
   )
 }

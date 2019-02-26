@@ -68,19 +68,26 @@ class HomePage extends Component {
                     </Modal>
                 </div>
                 <div className="mbee-home">
-                    <div className="row align-items-center">
-                        <div className="home-links">
-                            <div className="col-md-2"></div>
-                            <Tile href={'/organizations'} icon={'fas fa-cubes'}>
+                    <div className="row">
+                        <div className="home-links row">
+                            <Tile href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
                                 Organizations
                             </Tile>
-                            <Tile href={'/projects'} icon={'fas fa-box'}>
+                            <Tile href={'/projects'} icon={'fas fa-box'} id='projects'>
                                 Projects
                             </Tile>
-                            <Tile href={'/whoami'} icon={'fas fa-user-alt'}>
+                            <Tile href={'/whoami'} icon={'fas fa-user-alt'} id='user'>
                                 User Settings
                             </Tile>
-                            <div className="col-md-2"></div>
+                            <Tile href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
+                                Organizations
+                            </Tile>
+                            <Tile href={'/projects'} icon={'fas fa-box'} id='projects'>
+                                Projects
+                            </Tile>
+                            <Tile href={'/whoami'} icon={'fas fa-user-alt'} id='user'>
+                                User Settings
+                            </Tile>
                         </div>
                     </div>
                 </div>
