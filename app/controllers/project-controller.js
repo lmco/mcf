@@ -848,7 +848,131 @@ function update(requestingUser, organizationID, projects, options) {
  * });
  */
 function createOrReplace(requestingUser, organizationID, projects, options) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions'
+        + 'to replace projects.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
+      assert.ok(projects !== null, 'Projects parameter cannot be null.');
+      // If projects is an array, ensure each item inside is an object
+      if (Array.isArray(projects)) {
+        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in projects is not an'
+          + ' object.');
+        assert.ok(projects.every(p => p !== null), 'One or more items in projects is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
+    }
 
+    // Sanitize input parameters and create function-wide variables
+    const orgID = sani.sanitize(organizationID);
+    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const duplicateCheck = {};
+    let foundProjects = [];
+    let projectsToLookUp = [];
+    let existingUsers = [];
+    let updatingPermissions = false;
+    let foundOrg = {};
+
+    // Initialize valid options
+    let populateString = '';
+
+    // Ensure options are valid
+    if (options) {
+      // If the option 'populate' is supplied, ensure it's a string
+      if (options.hasOwnProperty('populate')) {
+        if (!Array.isArray(options.populate)) {
+          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+        }
+        if (!options.populate.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the populate array must be a string.', 400, 'warn'
+          );
+        }
+
+        // Ensure each field is able to be populated
+        const validPopulateFields = Project.getValidPopulateFields();
+        options.populate.forEach((p) => {
+          if (!validPopulateFields.includes(p)) {
+            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          }
+        });
+
+        populateString = options.populate.join(' ');
+      }
+    }
+
+    // Check the type of the projects parameter
+    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
+      // projects is an array, update many projects
+      projectsToLookUp = saniProjects;
+    }
+    else if (typeof saniProjects === 'object') {
+      // projects is an object, update a single project
+      projectsToLookUp = [saniProjects];
+    }
+    else {
+      throw new M.CustomError('Invalid input for updating projects.', 400, 'warn');
+    }
+
+    // Create list of ids
+    const arrIDs = [];
+    try {
+      let index = 1;
+      projectsToLookUp.forEach((proj) => {
+        // Ensure each project has an id and that its a string
+        assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
+        assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
+        proj.id = utils.createID(orgID, proj.id);
+        // If a duplicate ID, throw an error
+        if (duplicateCheck[proj.id]) {
+          throw new M.CustomError(`Multiple objects with the same ID [${proj.id}] exist in the`
+            + ' update.', 400, 'warn');
+        }
+        else {
+          duplicateCheck[proj.id] = proj.id;
+        }
+        arrIDs.push(proj.id);
+        proj._id = proj.id;
+
+        // Check if updating user permissions
+        if (proj.hasOwnProperty('permissions')) {
+          updatingPermissions = true;
+        }
+
+        index++;
+      });
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
+    }
+
+    // Create searchQuery
+    const searchQuery = { _id: { $in: arrIDs } };
+
+    // Find the organization containing the projects
+    Organization.findOne({ _id: orgID })
+      .then((_foundOrganization) => {
+        // Check if the organization was found
+        if (_foundOrganization === null) {
+          throw new M.CustomError(`The org [${_foundOrganization._id}] was not found.`, 404, 'warn');
+        }
+
+        // Set function-wide foundOrg
+        foundOrg = _foundOrganization;
+
+        // Find the projects to update
+        return Project.find(searchQuery);
+  });
 }
 
 /**
