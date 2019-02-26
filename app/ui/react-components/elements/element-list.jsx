@@ -18,64 +18,53 @@ import { getRequest } from "../helper-functions/getRequest";
 import List from '../general-components/list/list.jsx';
 import ListItem from '../general-components/list/list-item.jsx';
 
-class ElementList extends Component {
-    constructor(props) {
-        super(props);
+function ElementList(props) {
 
-        this.state = {
-            elementChildren: null,
-            error: null
-        };
+    return new Promise((resolve, reject) => {
+        const url = this.props.url;
 
-        this.constructListItem = this.constructListItem.bind(this);
-    }
+        getRequest(`${url}/branches/master/elements/${item}`)
+            .then(containedElement => {
+                const promises = [];
+                const listItems = [];
 
-    constructListItem(item) {
-        return new Promise((resolve, reject) => {
-            const url = this.props.url;
-
-            getRequest(`${url}/branches/master/elements/${item}`)
-                .then(containedElement => {
-                    const promises = [];
-                    const listItems = [];
-
-                    if (containedElement.contains.length > 0) {
-                        for (let i = 0; i < containedElement.contains.length; i++) {
-                            promises.push(this.constructListItem(containedElement.contains[i])
-                                .then((listItem) => {
-                                    listItems.push(listItem);
-                                })
-                                .catch((err) => console.log(err))
-                            )
-                        }
-
-                        Promise.all(promises)
-                        .then(() => {
-                            return resolve(
-                                <List>
-                                    <ListItem element={containedElement}/>
-                                    <List className='guideline'>
-                                        {listItems}
-                                    </List>
-                                </List>
-                            );
-                        })
-                        .catch(err => {
-                            console.log(err);
-                        })
+                if (containedElement.contains.length > 0) {
+                    for (let i = 0; i < containedElement.contains.length; i++) {
+                        promises.push(this.constructListItem(containedElement.contains[i])
+                            .then((listItem) => {
+                                listItems.push(listItem);
+                            })
+                            .catch((err) => console.log(err))
+                        )
                     }
-                    else {
+
+                    Promise.all(promises)
+                    .then(() => {
                         return resolve(
                             <List>
-                                <ListItem key={item} element={containedElement}/>
+                                <ListItem element={containedElement}/>
+                                <List className='guideline'>
+                                    {listItems}
+                                </List>
                             </List>
                         );
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                    return reject(err);
-                })
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    })
+                }
+                else {
+                    return resolve(
+                        <List>
+                            <ListItem key={item} element={containedElement}/>
+                        </List>
+                    );
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                return reject(err);
+            })
         })
     }
 

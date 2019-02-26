@@ -37,16 +37,15 @@ class ProjectElements extends Component {
 
     }
 
-    render() {
 
+
+    render() {
+        console.log(this.props.elements)
         return (
             <div id='view' className='project-elements'>
                 <h2>Elements</h2>
                 <hr/>
-                <List>
-                    <ListItem element={this.props.element} />
-                    <ElementList element={this.props.element} url={this.props.url}/>
-                </List>
+                    {/*<ElementList element={this.props.element} url={this.props.url}/>*/}
             </div>
         )
     }
