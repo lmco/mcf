@@ -152,7 +152,6 @@ label {
         }
 
         #view {
-            padding: 20px 40px;
             grid-area: view;
             overflow: scroll;
         }
@@ -271,6 +270,7 @@ label {
     height: 100%;
     width: 100%;
     position: absolute;
+    padding: 40px;
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(10px, 1fr);
     grid-template-areas:
