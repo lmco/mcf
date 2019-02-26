@@ -128,6 +128,10 @@ class OrganizationEdit extends Component{
                                    value={this.state.name || ''}
                                    invalid={nameInvalid}
                                    onChange={this.handleChange}/>
+                            {/*Verify fields are valid, or display feedback*/}
+                            <FormFeedback >
+                                Invalid: An org name may only contain letters, numbers, space, or dashes.
+                            </FormFeedback>
                         </FormGroup>
                         {/*Form section for permissions*/}
                         <FormGroup>

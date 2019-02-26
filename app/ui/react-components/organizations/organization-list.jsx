@@ -71,7 +71,7 @@ class OrganizationList extends Component {
     }
 
     render() {
-        // Loop through all the orgs
+        // Loop through all orgs
         const orgs = this.state.orgs.map(org =>
             // Create org links
             <Link to={`/${org.id}`}>

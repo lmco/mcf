@@ -13,36 +13,46 @@
  *
  * @description This renders the routes for the project pages.
  */
+
+// React Modules
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import ReactDOM from "react-dom";
 
+// MBEE Moduels
 import ProjectList from './project-list.jsx';
 import Project from './project.jsx';
 import { getRequest } from '../helper-functions/getRequest.js';
 
+// Define component
 class Projects extends Component {
-
   constructor(props) {
+      // Initialize parent props
       super(props);
 
+      // Initalize state props
       this.state = {
           user: null
       };
   }
 
   componentDidMount(){
+    // Get user data
     getRequest('/api/users/whoami')
     .then(user => {
-          this.setState({user: user});
+        // Set user state
+        this.setState({user: user});
       })
   }
 
   render() {
+      // Return project routes
       return (
           <Router>
               <Switch>
+                  {/*Route to projects list*/}
                   <Route exact path="/projects" component={ProjectList} />
+                  {/*Route to a project's home page*/}
                   <Route path="/:orgid/:projectid" render={ (props) => <Project {...props} user={this.state.user}/> } />
               </Switch>
           </Router>
@@ -50,4 +60,5 @@ class Projects extends Component {
   }
 }
 
+// Render on main html element
 ReactDOM.render(<Projects />, document.getElementById('main'));

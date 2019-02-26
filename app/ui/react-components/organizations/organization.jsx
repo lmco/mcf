@@ -94,18 +94,18 @@ class Organization extends Component {
                         ? <div className="loading"> {this.state.error || 'Loading your organization...'} </div>
                         // Display page based on route on clients side
                         : (<Switch>
-                                {/*Route for org home page*/}
+                                {/*Route to org home page*/}
                                 <Route exact path={`${this.props.match.url}/`}
                                        render={ (props) => <OrgHome {...props} org={this.state.org} /> } />
-                                {/*Route for project page*/}
+                                {/*Route to projects page*/}
                                 <Route path={`${this.props.match.url}/projects`}
                                     render={ (props) => <OrgProjects {...props} org={this.state.org} /> } />
-                                {/*Route for members page*/}
+                                {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
                                        render={ (props) => <OrgUsers {...props} org={this.state.org} /> } />
                                {/*Verify if user is admin*/}
                                 {(this.state.admin)
-                                    // Route for admin users ONLY edit page
+                                    // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}
                                              render={(props) => <OrgEdit {...props} org={this.state.org}/>}/>)
                                     : ''
