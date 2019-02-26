@@ -791,17 +791,17 @@ function createOrReplace(requestingUser, orgs, options) {
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const duplicateCheck = {};
     let foundOrgs = [];
-    let orgsToLoopUp = [];
+    let orgsToLookUp = [];
     let createdOrgs = [];
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
       // orgs is an array, update many orgs
-      orgsToLoopUp = saniOrgs;
+      orgsToLookUp = saniOrgs;
     }
     else if (typeof saniOrgs === 'object') {
       // orgs is an object, update a single org
-      orgsToLoopUp = [saniOrgs];
+      orgsToLookUp = [saniOrgs];
     }
     else {
       throw new M.CustomError('Invalid input for creating/replacing '
@@ -812,7 +812,7 @@ function createOrReplace(requestingUser, orgs, options) {
     const arrIDs = [];
     try {
       let index = 1;
-      orgsToLoopUp.forEach((org) => {
+      orgsToLookUp.forEach((org) => {
         // Ensure each org has an id and that its a string
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
@@ -862,7 +862,7 @@ function createOrReplace(requestingUser, orgs, options) {
       return Organization.deleteMany({ _id: foundOrgIDs });
     })
     // Create the new orgs
-    .then(() => create(requestingUser, orgsToLoopUp, options))
+    .then(() => create(requestingUser, orgsToLookUp, options))
     .then((_createdOrgs) => {
       createdOrgs = _createdOrgs;
 
