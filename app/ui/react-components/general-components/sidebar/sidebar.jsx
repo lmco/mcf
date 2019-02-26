@@ -61,21 +61,26 @@ class Sidebar extends Component {
     handleResize() {
         // Check the forceClosed state
         if (!this.state.forceClosed){
-            // Check the window width on the client and isExpanded state
+            // Check for min window width and if sidebar is not expanded state
             if (this.state.windowWidth < 1200 && window.innerWidth >= 1200 && !this.state.isExpanded) {
-                // 
+                // toggle sidebar
                 this.toggle()
             }
+            // Check for max window width and if sidebar is expanded state
             if (this.state.windowWidth >= 1200 && window.innerWidth < 1200 && this.state.isExpanded) {
+                // toggle sidebar
                 this.toggle()
             }
         }
-
+        // Set the window width state
         this.setState({ windowWidth: window.innerWidth })
     }
 
+    // Define the open and close of the sidebar function
     toggle(event) {
+        // Get the sidebar html element and toggle it
         document.getElementById('sidebar').classList.toggle('sidebar-expanded');
+        // if window width changes force sidebar closed
         if (event) {
             if (window.innerWidth >= 1200 && this.state.isExpanded) {
                 this.setState({forceClosed: true});
@@ -84,17 +89,20 @@ class Sidebar extends Component {
                 this.setState({forceClosed: false});
             }
         }
+        // Change the expanded state
         this.setState({isExpanded: !this.state.isExpanded});
     }
 
     render() {
-
+        // Create the sidebar links
         const sidebarLink = React.Children.map(this.props.children, child => {
             return (child.type === SidebarLink)
+                // Clone the react element sidebar link and change expanded state
                 ? React.cloneElement(child, {isExpanded: this.state.isExpanded})
                 : child;
         });
 
+        // Render the sidebar with the links above
         return (
             <div id='sidebar' className='sidebar'>
                 <div className='sidebar-links'>
@@ -113,4 +121,5 @@ class Sidebar extends Component {
     }
 }
 
+// Export component
 export default Sidebar;
