@@ -242,7 +242,7 @@ function putOrgs(done) {
     chai.expect(replacedOrgs.length).to.equal(orgData.length);
 
     // Convert replacedOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, replacedOrgs, 'id');
+    const jmi2Orgs = jmi.convertJMI(1, 2, replacedOrgs, 'id');
     // Loop through each org data object
     orgData.forEach((orgDataObject) => {
       const replacedOrg = jmi2Orgs[orgDataObject.id];

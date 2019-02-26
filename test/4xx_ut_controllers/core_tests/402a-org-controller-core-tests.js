@@ -235,7 +235,7 @@ function createOrReplaceOrgs(done) {
     chai.expect(replacedOrgs.length).to.equal(orgDataObjects.length);
 
     // Convert replacedOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, replacedOrgs);
+    const jmi2Orgs = jmi.convertJMI(1, 2, replacedOrgs);
     // Loop through each org data object
     orgDataObjects.forEach((orgDataObject) => {
       const replacedOrg = jmi2Orgs[orgDataObject.id];
