@@ -285,7 +285,7 @@ function putProjects(done) {
     chai.expect(replacedProjects.length).to.equal(projData.length);
 
     // Convert replacedProjects to JMI type 2 for easier lookup
-    const jmi2Projects = utils.convertJMI(1, 2, replacedProjects, 'id');
+    const jmi2Projects = jmi.convertJMI(1, 2, replacedProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
       const replacedProj = jmi2Projects[projDataObject.id];
