@@ -76,7 +76,7 @@ class OrganizationEdit extends Component{
             data: data
         })
         // On success
-        .done((msg, status) => {
+        .done(() => {
             // Update the page to reload to org home page
             window.location.replace(`/${this.props.org.id}`);
         })

@@ -75,7 +75,7 @@ class ProjectEdit extends Component{
             data: data
         })
         // On success
-        .done((msg, status) => {
+        .done(() => {
             // Update the page to reload to project home page
             window.location.replace(`/${this.props.orgid}/${this.props.project.id}`);
         })

@@ -13,29 +13,41 @@
  *
  * @description This renders the user's edit page.
  */
+
+// React Modules
 import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
+
+// MBEE Modules
 import validators from '../../../../build/json/validators.json';
 
+// Define component
 class UserEdit extends Component{
     constructor(props) {
+        // Initialize parent props
         super(props);
 
-        this.handleChange = this.handleChange.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
-
+        // Initialize state props
         this.state = {
             fname: this.props.user.fname,
             lname: this.props.user.lname,
             custom: JSON.stringify(this.props.user.custom || {}, null, 2)
-        }
+        };
+
+        // Bind component functions
+        this.handleChange = this.handleChange.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
     }
 
+    // Define handle change function
     handleChange(event) {
+        // Change the state with new value
         this.setState({ [event.target.name]: event.target.value});
     }
 
+    // Define the submit function
     onSubmit(){
+        // Send a patch request to update user data
         jQuery.ajax({
             method: "PATCH",
             url: `/api/users/${this.props.user.username}`,
@@ -45,41 +57,57 @@ class UserEdit extends Component{
                 custom: JSON.parse(this.state.custom)
             }
         })
-        .done((msg, status) => {
+        // On success
+        .done(() => {
+            // Update the page to reload to user home page
             window.location.replace('/whoami');
         })
+        // On fail
         .fail((msg) => {
+            // Let user know update failed
             alert( `Update Failed: ${msg.responseJSON.description}`);
         });
     }
 
     render() {
+        // Initialize variables
         let fnameInvalid;
         let lnameInvalid;
         let customInvalid;
         let disableSubmit;
 
+        // Verify if user's first name is valid
         if(!RegExp(validators.user.fname).test(this.state.fname)) {
+            // Set invalid fields
             fnameInvalid = true;
             disableSubmit = true;
         }
 
+        // Verify if user's last name is valid
         if(!RegExp(validators.user.lname).test(this.state.lname)) {
+            // Set invalid fields
             lnameInvalid = true;
             disableSubmit = true;
         }
 
+        // Verify if custom data is correct JSON format
         try {
             JSON.parse(this.state.custom);
         }
         catch(err) {
+            // Set invalid fields
             customInvalid = true;
             disableSubmit = true;
         }
 
+        // Render user edit page
         return (
             <div className='user-edit'>
+                <h2>User Edit</h2>
+                <hr />
+                {/*Create form to update user data*/}
                 <Form>
+                    {/*Form section for user's first name*/}
                     <FormGroup>
                         <Label for="fname">User's First Name</Label>
                         <Input type="fname"
@@ -89,11 +117,12 @@ class UserEdit extends Component{
                                value={this.state.fname || ''}
                                invalid={fnameInvalid}
                                onChange={this.handleChange}/>
+                        {/*Verify fields are valid, or display feedback*/}
                         <FormFeedback >
                             Invalid: A user's first name may only contain letters.
                         </FormFeedback>
                     </FormGroup>
-
+                    {/*Form section for user's last name*/}
                     <FormGroup>
                         <Label for="lname">User's Last Name</Label>
                         <Input type="lname"
@@ -103,11 +132,12 @@ class UserEdit extends Component{
                                value={this.state.lname || ''}
                                invalid={lnameInvalid}
                                onChange={this.handleChange}/>
+                        {/*Verify fields are valid, or display feedback*/}
                         <FormFeedback >
                             Invalid: A user's last name may only contain letters.
                         </FormFeedback>
                     </FormGroup>
-
+                    {/*Form section for custom data*/}
                     <FormGroup>
                         <Label for="custom">Custom Data</Label>
                         <Input type="custom"
@@ -117,10 +147,12 @@ class UserEdit extends Component{
                                value={this.state.custom || ''}
                                invalid={customInvalid}
                                onChange={this.handleChange}/>
+                        {/*Verify fields are valid, or display feedback*/}
                         <FormFeedback>
                             Invalid: Custom data must be valid JSON
                         </FormFeedback>
                     </FormGroup>
+                    {/*Button to submit changes*/}
                     <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
                 </Form>
             </div>
@@ -128,4 +160,5 @@ class UserEdit extends Component{
     }
 }
 
+// Export component
 export default UserEdit
