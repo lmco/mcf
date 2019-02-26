@@ -23,7 +23,7 @@ const path = require('path');
 
 // MBEE modules
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -154,7 +154,7 @@ function postOrgs(done) {
     chai.expect(postedOrgs.length).to.equal(orgData.length);
 
     // Convert postedOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
+    const jmi2Orgs = jmi.convertJMI(1, 2, postedOrgs, 'id');
     // Loop through each org data object
     orgData.forEach((orgDataObject) => {
       const postedOrg = jmi2Orgs[orgDataObject.id];
@@ -328,7 +328,7 @@ function getOrgs(done) {
     chai.expect(foundOrgs.length).to.equal(orgData.length);
 
     // Convert foundOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs, 'id');
+    const jmi2Orgs = jmi.convertJMI(1, 2, foundOrgs, 'id');
 
     // Loop through each org data object
     orgData.forEach((orgDataObject) => {
@@ -383,7 +383,7 @@ function getAllOrgs(done) {
     const foundOrgs = JSON.parse(body);
 
     // Convert foundOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs, 'id');
+    const jmi2Orgs = jmi.convertJMI(1, 2, foundOrgs, 'id');
 
     // Loop through each org data object
     orgData.forEach((orgDataObject) => {
@@ -486,7 +486,7 @@ function patchOrgs(done) {
     chai.expect(postedOrgs.length).to.equal(orgData.length);
 
     // Convert foundProjects to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, postedOrgs, 'id');
+    const jmi2Orgs = jmi.convertJMI(1, 2, postedOrgs, 'id');
     // Loop through each project data object
     orgData.forEach((orgDataObject) => {
       const patchedOrg = jmi2Orgs[orgDataObject.id];

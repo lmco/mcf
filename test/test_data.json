@@ -179,6 +179,26 @@
       "documentation": "Element #6",
       "custom": {}
     }
+  ],
+  "jmi1": [
+    { "id": "1",
+      "parent": null
+    },
+    {
+      "id": "2",
+      "parent": null
+    },
+    { "id": "3",
+      "parent": "1"
+    },
+    {
+      "id": "4",
+      "parent": "2"
+    },
+    {
+      "id": "5",
+      "parent": "4"
+    }
   ]
 }
 

@@ -23,7 +23,7 @@ const path = require('path');
 // MBEE modules
 const OrgController = M.require('controllers.organization-controller');
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -146,7 +146,7 @@ function createOrgs(done) {
     chai.expect(createdOrgs.length).to.equal(orgDataObjects.length);
 
     // Convert createdOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, createdOrgs);
+    const jmi2Orgs = jmi.convertJMI(1, 2, createdOrgs);
     // Loop through each org data object
     orgDataObjects.forEach((orgDataObject) => {
       const createdOrg = jmi2Orgs[orgDataObject.id];
@@ -326,7 +326,7 @@ function findOrgs(done) {
     chai.expect(foundOrgs.length).to.equal(orgDataObjects.length);
 
     // Convert foundOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs);
+    const jmi2Orgs = jmi.convertJMI(1, 2, foundOrgs);
     // Loop through each org data object
     orgDataObjects.forEach((orgDataObject) => {
       const foundOrg = jmi2Orgs[orgDataObject.id];
@@ -381,7 +381,7 @@ function findAllOrgs(done) {
     chai.expect(foundOrgs.length).to.equal(orgDataObjects.length);
 
     // Convert foundOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, foundOrgs);
+    const jmi2Orgs = jmi.convertJMI(1, 2, foundOrgs);
     // Loop through each org data object
     orgDataObjects.forEach((orgDataObject) => {
       const foundOrg = jmi2Orgs[orgDataObject.id];
@@ -490,7 +490,7 @@ function updateOrgs(done) {
     chai.expect(updatedOrgs.length).to.equal(orgDataObjects.length);
 
     // Convert updatedOrgs to JMI type 2 for easier lookup
-    const jmi2Orgs = utils.convertJMI(1, 2, updatedOrgs);
+    const jmi2Orgs = jmi.convertJMI(1, 2, updatedOrgs);
     // Loop through each org data object
     orgDataObjects.forEach((orgDataObject) => {
       const updatedOrg = jmi2Orgs[orgDataObject.id];
