@@ -24,11 +24,14 @@ module.exports = {
   find,
   create,
   update,
+  createOrReplace,
   remove
 };
 
 // Node.js Modules
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
 // MBEE Modules
 const Element = M.require('models.element');
@@ -839,9 +842,9 @@ function update(requestingUser, organizationID, projects, options) {
  * @return {Promise} Array of created project objects
  *
  * @example
- * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
+ * createOrReplace({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
  * .then(function(projects) {
- *   // Do something with the newly created projects
+ *   // Do something with the newly created/replaced projects
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -879,45 +882,15 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     const duplicateCheck = {};
     let foundProjects = [];
     let projectsToLookUp = [];
-    let existingUsers = [];
-    let updatingPermissions = false;
-    let foundOrg = {};
-
-    // Initialize valid options
-    let populateString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Project.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-    }
+    let createdProjects = [];
 
     // Check the type of the projects parameter
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
-      // projects is an array, update many projects
+      // projects is an array, replace/create many projects
       projectsToLookUp = saniProjects;
     }
     else if (typeof saniProjects === 'object') {
-      // projects is an object, update a single project
+      // projects is an object, replace/create a single project
       projectsToLookUp = [saniProjects];
     }
     else {
@@ -932,23 +905,16 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
         // Ensure each project has an id and that its a string
         assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
         assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
-        proj.id = utils.createID(orgID, proj.id);
+        const tmpID = utils.createID(orgID, proj.id);
         // If a duplicate ID, throw an error
-        if (duplicateCheck[proj.id]) {
+        if (duplicateCheck[tmpID]) {
           throw new M.CustomError(`Multiple objects with the same ID [${proj.id}] exist in the`
             + ' update.', 400, 'warn');
         }
         else {
-          duplicateCheck[proj.id] = proj.id;
+          duplicateCheck[tmpID] = tmpID;
         }
-        arrIDs.push(proj.id);
-        proj._id = proj.id;
-
-        // Check if updating user permissions
-        if (proj.hasOwnProperty('permissions')) {
-          updatingPermissions = true;
-        }
-
+        arrIDs.push(tmpID);
         index++;
       });
     }
@@ -961,17 +927,53 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
 
     // Find the organization containing the projects
     Organization.findOne({ _id: orgID })
-      .then((_foundOrganization) => {
-        // Check if the organization was found
-        if (_foundOrganization === null) {
-          throw new M.CustomError(`The org [${_foundOrganization._id}] was not found.`, 404, 'warn');
-        }
+    .then((_foundOrganization) => {
+      // Check if the organization was found
+      if (_foundOrganization === null) {
+        throw new M.CustomError(`The org [${_foundOrganization._id}] was not `
+          + 'found.', 404, 'warn');
+      }
 
-        // Set function-wide foundOrg
-        foundOrg = _foundOrganization;
+      // Find the projects to update
+      return Project.find(searchQuery);
+    })
+    .then((_foundProjects) => {
+      foundProjects = _foundProjects;
 
-        // Find the projects to update
-        return Project.find(searchQuery);
+      // If data directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data'))) {
+        fs.mkdirSync(path.join(M.root, 'data'));
+      }
+
+      // Write contents to temporary file
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', 'replaced_projects.json'),
+          JSON.stringify(_foundProjects, null, M.config.server.api.json.indent), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+      });
+    })
+    // Delete root model elements from database
+    .then(() => Element.deleteMany({ _id: foundProjects.map(p => utils.createID(p._id, 'model')) }))
+    // Delete projects from database
+    .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
+    .then(() => create(requestingUser, orgID, projectsToLookUp, options))
+    .then((_createdProjects) => {
+      createdProjects = _createdProjects;
+
+      // Delete the temporary file.
+      if (fs.existsSync(path.join(M.root, 'data', 'replaced_projects.json'))) {
+        return new Promise(function(res, rej) {
+          fs.unlink(path.join(M.root, 'data', 'replaced_projects.json'), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+        });
+      }
+    })
+    .then(() => resolve(createdProjects))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
 
