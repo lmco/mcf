@@ -884,6 +884,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     let foundProjects = [];
     let projectsToLookUp = [];
     let createdProjects = [];
+    const ts = Date.now();
 
     // Check the type of the projects parameter
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
@@ -946,10 +947,15 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
         fs.mkdirSync(path.join(M.root, 'data'));
       }
 
+      // If org directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data', orgID))) {
+        fs.mkdirSync(path.join(M.root, 'data', orgID));
+      }
+
       // Write contents to temporary file
       return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'replaced_projects.json'),
-          JSON.stringify(_foundProjects, null, M.config.server.api.json.indent), function(err) {
+        fs.writeFile(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`),
+          JSON.stringify(_foundProjects), function(err) {
             if (err) rej(err);
             else res();
           });
@@ -964,12 +970,10 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       createdProjects = _createdProjects;
 
       // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', 'replaced_projects.json'))) {
+      if (fs.existsSync(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`))) {
         return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', 'replaced_projects.json'), function(err) {
-            if (err) rej(err);
-            else res();
-          });
+          fs.unlink(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`),
+            function(err) { if (err) rej(err); else res(); });
         });
       }
     })

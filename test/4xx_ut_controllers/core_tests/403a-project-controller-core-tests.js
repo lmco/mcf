@@ -254,7 +254,7 @@ function createOrReplaceProjects(done) {
     chai.expect(replacedProjects.length).to.equal(projDataObjects.length);
 
     // Convert replacedProjects to JMI type 2 for easier lookup
-    const jmi2Projects = utils.convertJMI(1, 2, replacedProjects);
+    const jmi2Projects = jmi.convertJMI(1, 2, replacedProjects);
     // Loop through each project data object
     projDataObjects.forEach((projDataObject) => {
       const projectID = utils.createID(org.id, projDataObject.id);
