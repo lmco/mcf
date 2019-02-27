@@ -79,6 +79,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should get the requesting users data', whoami);
   it('should POST a user', postUser);
   it('should POST multiple users', postUsers);
+  it('should PUT a user', putUser);
+  it('should PUT multiple users', putUsers);
   it('should GET a user', getUser);
   it('should GET multiple users', getUsers);
   it('should GET all users', getAllUsers);
@@ -168,8 +170,7 @@ function postUsers(done) {
   // Create request object
   const userData = [
     testData.users[1],
-    testData.users[2],
-    testData.users[3]
+    testData.users[2]
   ];
   const params = {};
   const method = 'POST';
@@ -214,6 +215,103 @@ function postUsers(done) {
 
   // POSTs multiple users
   APIController.postUsers(req, res);
+}
+
+/**
+ * @description Verifies mock PUT request to create/replace a single user.
+ */
+function putUser(done) {
+  // Create request object
+  const userData = testData.users[0];
+  const params = { username: userData.username };
+  const method = 'PUT';
+  const req = testUtils.createRequest(adminUser, params, userData, method);
+
+  // Create response object
+  const res = {};
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Convert response to JSON
+    const replacedUser = JSON.parse(_data);
+
+    // Verify expected response
+    chai.expect(replacedUser.username).to.equal(userData.username);
+    chai.expect(replacedUser.fname).to.equal(userData.fname);
+    chai.expect(replacedUser.lname).to.equal(userData.lname);
+    chai.expect(replacedUser.preferredName).to.equal(userData.preferredName);
+    chai.expect(replacedUser.email).to.equal(userData.email);
+    chai.expect(replacedUser.custom).to.deep.equal(userData.custom);
+    chai.expect(replacedUser.admin).to.equal(userData.admin);
+    chai.expect(replacedUser).to.not.have.any.keys('password', '_id', '__v');
+
+    // Verify extra properties
+    chai.expect(replacedUser.createdOn).to.not.equal(null);
+    chai.expect(replacedUser.updatedOn).to.not.equal(null);
+    chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
+    chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+    done();
+  };
+
+  // PUTs a user
+  APIController.putUser(req, res);
+}
+
+/**
+ * @description Verifies mock PUT request to create/replace multiple users.
+ */
+function putUsers(done) {
+  // Create request object
+  const userData = [
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
+  const params = {};
+  const method = 'PUT';
+  const req = testUtils.createRequest(adminUser, params, userData, method);
+
+  // Create response object
+  const res = {};
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Convert response to JSON
+    const replacedUsers = JSON.parse(_data);
+    // Expect correct number of users to be created
+    chai.expect(replacedUsers.length).to.equal(userData.length);
+
+    // Convert replacedUsers to JMI type 2 for easier lookup
+    const jmi2Users = jmi.convertJMI(1, 2, replacedUsers, 'username');
+    // Loops through each user data object
+    userData.forEach((userDataObject) => {
+      const replacedUser = jmi2Users[userDataObject.username];
+
+      // Verify expected response
+      chai.expect(replacedUser.username).to.equal(userDataObject.username);
+      chai.expect(replacedUser.fname).to.equal(userDataObject.fname);
+      chai.expect(replacedUser.lname).to.equal(userDataObject.lname);
+      chai.expect(replacedUser.preferredName).to.equal(userDataObject.preferredName);
+      chai.expect(replacedUser.email).to.equal(userDataObject.email);
+      chai.expect(replacedUser.custom).to.deep.equal(userDataObject.custom);
+      chai.expect(replacedUser.admin).to.equal(userDataObject.admin);
+      chai.expect(replacedUser).to.not.have.any.keys('password', '_id', '__v');
+
+      // Verify extra properties
+      chai.expect(replacedUser.createdOn).to.not.equal(null);
+      chai.expect(replacedUser.updatedOn).to.not.equal(null);
+      chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
+      chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+    });
+    done();
+  };
+
+  // PUTs multiple users
+  APIController.putUsers(req, res);
 }
 
 /**

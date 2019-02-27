@@ -1999,6 +1999,68 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *       500:
  *         description: Internal Server Error, Failed to POST users due to
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - users
+ *     description: Creates or replaces multiple users from the data provided in
+ *                  the request body. Returns the user's public data. NOTE This
+ *                  endpoint is reserved for system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: users
+ *         description: An array of objects containing user data.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - username
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 description: Required unless running LDAP auth.
+ *               fname:
+ *                 type: string
+ *                 description: User's first name.
+ *               lname:
+ *                 type: string
+ *                 description: User's last name.
+ *               preferredName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               provider:
+ *                 type: string
+ *                 default: 'local'
+ *               admin:
+ *                 type: boolean
+ *                 description: If true, user is system-wide admin.
+ *               custom:
+ *                 type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT users returns public users data.
+ *       400:
+ *         description: Bad Request, Failed to PUT users due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT users due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT users due to not having
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT users due to
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - users
@@ -2106,6 +2168,12 @@ api.route('/users')
   Middleware.logRoute,
   Middleware.disableUserAPI,
   APIController.postUsers
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  Middleware.disableUserAPI,
+  APIController.putUsers
 )
 .patch(
   AuthController.authenticate,
@@ -2258,6 +2326,71 @@ api.route('/users/whoami')
  *       500:
  *         description: Internal Server Error, Failed to POST user due to server
  *                      side issue.
+ *   put:
+ *     tags:
+ *       - users
+ *     description: Creates or replaces a user from the given data in the
+ *                  request body. If a user with the username already exists,
+ *                  they are replaced. NOTE This endpoint is reserved for
+ *                  system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to create/replace.
+ *         required: true
+ *         type: string
+ *         in: path
+ *       - name: user
+ *         description: The object containing the user data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             username:
+ *               type: string
+ *               description: The username of the user. If provided, this must
+ *                            match the username provided in the path.
+ *             password:
+ *               type: string
+ *               description: The password of the user. This field is required
+ *                            unless LDAP authentication is used.
+ *             fname:
+ *               type: string
+ *             lname:
+ *               type: string
+ *             preferredName:
+ *               type: string
+ *             email:
+ *               type: string
+ *             provider:
+ *               type: string
+ *               default: 'local'
+ *             admin:
+ *               type: boolean
+ *             custom:
+ *               type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT user, return user's public data.
+ *       400:
+ *         description: Bad Request, Failed to PUT user due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT user due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST PUT due to an invalid request
+ *                      body.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT user due to server
+ *                      side issue.
  *   patch:
  *     tags:
  *       - users
@@ -2359,6 +2492,12 @@ api.route('/users/:username')
   Middleware.logRoute,
   Middleware.disableUserAPI,
   APIController.postUser
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  Middleware.disableUserAPI,
+  APIController.putUser
 )
 .patch(
   AuthController.authenticate,

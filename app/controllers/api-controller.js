@@ -58,10 +58,12 @@ module.exports = {
   deleteProject,
   getUsers,
   postUsers,
+  putUsers,
   patchUsers,
   deleteUsers,
   getUser,
   postUser,
+  putUser,
   patchUser,
   deleteUser,
   whoami,
@@ -1355,6 +1357,55 @@ function postUsers(req, res) {
 }
 
 /**
+ * PUT /api/users
+ *
+ * @description Creates or replaced multiple users. NOTE: This endpoint is
+ * reserved for system-wide admins ONLY.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with users' public data
+ */
+function putUsers(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Create or replace users
+  // NOTE: createOrReplace() sanitizes req.body
+  UserController.createOrReplace(req.user, req.body, options)
+  .then((users) => {
+    // Return 200: OK and public user data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * PATCH /api/users
  *
  * @description Updates multiple users.
@@ -1560,6 +1611,66 @@ function postUser(req, res) {
   UserController.create(req.user, req.body, options)
   .then((users) => {
     // Return 200: OK and created user
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(users[0].getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/users/:username
+ *
+ * @description Creates or replaces a user. NOTE: This endpoint is reserved for
+ * system-wide admins ONLY.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created user
+ */
+function putUser(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If username was provided in the body, ensure it matches username in params
+  if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
+    const error = new M.CustomError(
+      'Username in body does not match username in params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Set the username in req.body in case it wasn't provided
+  req.body.username = req.params.username;
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Creates or replaces a user with provided parameters
+  // NOTE: createOrReplace() sanitizes req.body
+  UserController.createOrReplace(req.user, req.body, options)
+  .then((users) => {
+    // Return 200: OK and created/replaced user
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(users[0].getPublicData()));
   })
