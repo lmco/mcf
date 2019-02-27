@@ -80,6 +80,8 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should POST an org', postOrg);
   it('should POST multiple orgs', postOrgs);
+  it('should PUT an org', putOrg);
+  it('should PUT multiple orgs', putOrgs);
   it('should GET an org', getOrg);
   it('should GET multiple orgs', getOrgs);
   it('should GET all orgs', getAllOrgs);
@@ -133,8 +135,7 @@ function postOrg(done) {
 function postOrgs(done) {
   const orgData = [
     testData.orgs[1],
-    testData.orgs[2],
-    testData.orgs[3]
+    testData.orgs[2]
   ];
   request({
     url: `${test.url}/api/orgs`,
@@ -152,13 +153,13 @@ function postOrgs(done) {
     const postedOrgs = JSON.parse(body);
     chai.expect(postedOrgs.length).to.equal(orgData.length);
 
-    // Convert foundProjects to JMI type 2 for easier lookup
+    // Convert postedOrgs to JMI type 2 for easier lookup
     const jmi2Orgs = jmi.convertJMI(1, 2, postedOrgs, 'id');
-    // Loop through each project data object
+    // Loop through each org data object
     orgData.forEach((orgDataObject) => {
       const postedOrg = jmi2Orgs[orgDataObject.id];
 
-      // Verify project created properly
+      // Verify org created properly
       chai.expect(postedOrg.id).to.equal(orgDataObject.id);
       chai.expect(postedOrg.name).to.equal(orgDataObject.name);
       chai.expect(postedOrg.custom).to.deep.equal(orgDataObject.custom || {});
@@ -172,6 +173,94 @@ function postOrgs(done) {
 
       // Verify specific fields not returned
       chai.expect(postedOrg).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  });
+}
+
+/**
+ * @description Verifies PUT /api/org/:orgid creates/replaces an organization.
+ */
+function putOrg(done) {
+  const orgData = testData.orgs[0];
+  request({
+    url: `${test.url}/api/orgs/${orgData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PUT',
+    body: JSON.stringify(orgData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const replacedOrg = JSON.parse(body);
+    chai.expect(replacedOrg.id).to.equal(orgData.id);
+    chai.expect(replacedOrg.name).to.equal(orgData.name);
+    chai.expect(replacedOrg.custom).to.deep.equal(orgData.custom || {});
+    chai.expect(replacedOrg.permissions[adminUser.username]).to.equal('admin');
+
+    // Verify additional properties
+    chai.expect(replacedOrg.createdBy).to.equal(adminUser.username);
+    chai.expect(replacedOrg.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedOrg.createdOn).to.not.equal(null);
+    chai.expect(replacedOrg.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(replacedOrg).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
+    done();
+  });
+}
+
+/**
+ * @description Verifies PUT /api/orgs creates/replaces multiple organizations.
+ */
+function putOrgs(done) {
+  const orgData = [
+    testData.orgs[1],
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
+  request({
+    url: `${test.url}/api/orgs`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PUT',
+    body: JSON.stringify(orgData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const replacedOrgs = JSON.parse(body);
+    chai.expect(replacedOrgs.length).to.equal(orgData.length);
+
+    // Convert replacedOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = jmi.convertJMI(1, 2, replacedOrgs, 'id');
+    // Loop through each org data object
+    orgData.forEach((orgDataObject) => {
+      const replacedOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify org created/replaced properly
+      chai.expect(replacedOrg.id).to.equal(orgDataObject.id);
+      chai.expect(replacedOrg.name).to.equal(orgDataObject.name);
+      chai.expect(replacedOrg.custom).to.deep.equal(orgDataObject.custom || {});
+      chai.expect(replacedOrg.permissions[adminUser.username]).to.equal('admin');
+
+      // Verify additional properties
+      chai.expect(replacedOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(replacedOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedOrg.createdOn).to.not.equal(null);
+      chai.expect(replacedOrg.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(replacedOrg).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();
