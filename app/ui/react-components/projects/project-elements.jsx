@@ -13,37 +13,34 @@
  *
  * @description This renders a project's element page.
  */
+
+// React Modules
 import React, { Component } from "react";
 
+// MBEE Modules
 import ElementList from "../elements/element-list.jsx";
 
+// Define component
 class ProjectElements extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
-
-        this.toggle = this.toggle.bind(this);
-
-        this.state = {
-            isExpanded: false
-        };
-    }
-
-    toggle() {
-        this.setState({isExpanded: !this.state.isExpanded});
-    }
-
-    componentDidMount() {
-
     }
 
     render() {
+        // Initialize element data
         const elements = this.props.elements;
 
+        // Loop through root elements
         const elementList = Object.keys(elements).map((key) => {
+            // Initialize root
             const rootElement = elements[key];
+
+            // Create the element list
             return (<ElementList element={rootElement} />)
         });
 
+        // Return element list
         return (
             <div id='view' className='project-elements'>
                 <h2>Elements</h2>
@@ -54,4 +51,5 @@ class ProjectElements extends Component {
     }
 }
 
+// Export component
 export default ProjectElements
