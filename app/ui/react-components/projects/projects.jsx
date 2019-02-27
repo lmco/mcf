@@ -42,8 +42,8 @@ class Projects extends Component {
       return (
           <Router>
               <Switch>
-                  <Route exact path="/projects" component={ProjectList} />
-                  <Route path="/:orgid/:projectid" render={ (props) => <Project {...props} user={this.state.user}/> } />
+                  <Route exact path="/projects" render={(props) => <ProjectList {...props} user={this.state.user}/> }/>
+                  <Route path="/:orgid/:projectid" render={(props) => <Project {...props} user={this.state.user}/> } />
               </Switch>
           </Router>
       );
