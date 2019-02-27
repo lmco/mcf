@@ -39,11 +39,10 @@ class Organizations extends Component {
     }
 
     render () {
-
         return (
             <Router>
                 <Switch>
-                    <Route exact path="/organizations" render={(props) => <OrganizationList {...props} user={this.state.user}/>} />
+                    <Route exact path="/organizations" component={OrganizationList} />
                     <Route path="/:orgid" render={(props) => <Organization {...props} user={this.state.user}/>} />
                 </Switch>
             </Router>
