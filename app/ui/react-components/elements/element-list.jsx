@@ -60,6 +60,7 @@ class ElementList extends Component {
             return (<List>
                         <ListItem element={element} onClick={this.toggle}/>
                         <List className='guideline'>
+                            {/*Verify if element children should be displayed*/}
                             {(!this.state.isOpen)
                                 ? elementList
                                 : ''
@@ -68,6 +69,7 @@ class ElementList extends Component {
                     </List>)
         }
         else {
+            // Return element
             return (<List>
                 <ListItem element={element} onClick={this.toggle}/>
             </List>)
