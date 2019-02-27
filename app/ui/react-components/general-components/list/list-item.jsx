@@ -31,7 +31,7 @@ function ListItem(props) {
         return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
     }
     else if (props.element) {
-        return <div onClick={props.onClick}> {props.element.name} </div>
+        return <div className='element-item' onClick={props.onClick}> {props.element.name} </div>
     }
     else {
         return listItem;
