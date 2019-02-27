@@ -95,7 +95,7 @@ class Project extends Component {
                                 <Route path={`${this.props.match.url}/users`}
                                        render={ (props) => <ProjectUsers {...props} project={this.state.project} /> } />
                                 <Route path={`${this.props.match.url}/elements`}
-                                   render={ (props) => <ProjectElements {...props} project={this.state.project} elements={this.state.elements} url={this.state.url}/> } />
+                                   render={ (props) => <ProjectElements {...props} project={this.state.project} elements={this.state.elements} /> } />
                                 {(this.state.admin)
                                     ? (<Route path={`${this.props.match.url}/edit`}
                                               render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)

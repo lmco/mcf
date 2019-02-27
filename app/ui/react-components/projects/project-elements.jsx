@@ -14,9 +14,8 @@
  * @description This renders a project's element page.
  */
 import React, { Component } from "react";
-import List from '../general-components/list/list.jsx';
-import ListItem from '../general-components/list/list-item.jsx';
-import ElementList from '../elements/element-list.jsx';
+
+import ElementList from "../elements/element-list.jsx";
 
 class ProjectElements extends Component {
     constructor(props) {
@@ -37,15 +36,19 @@ class ProjectElements extends Component {
 
     }
 
-
-
     render() {
-        console.log(this.props.elements)
+        const elements = this.props.elements;
+
+        const elementList = Object.keys(elements).map((key) => {
+            const rootElement = elements[key];
+            return (<ElementList element={rootElement} />)
+        });
+
         return (
             <div id='view' className='project-elements'>
                 <h2>Elements</h2>
                 <hr/>
-                    {/*<ElementList element={this.props.element} url={this.props.url}/>*/}
+                {elementList}
             </div>
         )
     }

@@ -27,11 +27,11 @@ function ListItem(props) {
     if (props.routerLink) {
         <NavLink exact to={props.routerLink}> {listItem} </NavLink>
     }
-    else if (props.href || props.onClick) {
+    else if (props.href) {
         return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
     }
     else if (props.element) {
-        return <div> {props.element.name} </div>
+        return <div onClick={props.onClick}> {props.element.name} </div>
     }
     else {
         return listItem;

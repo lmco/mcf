@@ -13,46 +13,54 @@
  *
  * @description This renders the element tree in the project's page.
  */
-import React from 'react';
-import { getRequest } from "../helper-functions/getRequest";
+import React, { Component } from 'react';
+
 import List from '../general-components/list/list.jsx';
 import ListItem from '../general-components/list/list-item.jsx';
 
-function ElementList(props) {
-    const { nodeElement, level, toggle, onNodeSelect, isOpen = false} = props;
-    const elements = props.elements;
-    const elementNodes = [];
+class ElementList extends Component {
+    constructor(props) {
+        super(props);
 
-    Object.key(elements).forEach((key) => {
-        const nodeElements = elements[key].contains;
-        if (nodeElement.length > 0 ) {
-            return (
-                <List>
-                    <ListItem element={elements[key]} onClick={toggle}/>
-                    {(!isOpen)
-                        ? (<List className='guideline'>
-                            <ElementList {...props} elements={nodeElements} level={level+1}/>
-                           </List>)
+        this.state = {
+            isOpen: false
+        };
+
+        this.toggle = this.toggle.bind(this);
+    }
+
+    toggle() {
+        this.setState({ isOpen: !this.state.isOpen });
+    }
+
+    render() {
+        const element = this.props.element;
+        const containsData = element.contains;
+        const lengthData = Object.keys(containsData).length;
+
+        if ((lengthData > 0) && !this.state.isOpen) {
+            const elementList = Object.keys(containsData).map((key) => {
+                const elementChildren = containsData[key];
+                return ( <ElementList element={elementChildren}/> )
+            });
+
+            return (<List>
+                <ListItem element={element} onClick={this.toggle}/>
+                <List className='guideline'>
+                    {(!this.state.isOpen)
+                        ? elementList
                         : ''
                     }
                 </List>
-            )
+            </List>)
         }
         else {
-            return (
-                <List>
-                    <ListItem element={elements[key]}/>
-                </List>
-            )
+            return (<List>
+                <ListItem element={element} onClick={this.toggle}/>
+            </List>)
         }
-    });
-
-    // toggle() {
-    //     this.setState({isExpanded: !this.state.isExpanded});
-    // }
-    return ( <div>nothing</div> )
+    }
 }
 
-
-
+// Export Element
 export default ElementList
