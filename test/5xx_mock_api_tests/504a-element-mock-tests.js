@@ -103,6 +103,8 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should POST an element', postElement);
   it('should POST multiple elements', postElements);
+  it('should PUT an element', putElement);
+  it('should PUT multiple elements', putElements);
   it('should GET an element', getElement);
   it('should GET multiple elements', getElements);
   it('should GET ALL elements', getAllElements);
@@ -189,8 +191,7 @@ function postElements(done) {
     testData.elements[2],
     testData.elements[3],
     testData.elements[4],
-    testData.elements[5],
-    testData.elements[6]
+    testData.elements[5]
   ];
   const params = { orgid: org.id, projectid: projID };
   const method = 'POST';
@@ -253,6 +254,147 @@ function postElements(done) {
 
   // POSTs multiple elements
   apiController.postElements(req, res);
+}
+
+/**
+ * @description Verifies mock PUT request to create/replace an element.
+ */
+function putElement(done) {
+  const elemData = testData.elements[0];
+  // Create request object
+  const body = elemData;
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: elemData.id
+  };
+  const method = 'PUT';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const replacedElem = JSON.parse(_data);
+
+    // Verify element created/replaced properly
+    chai.expect(replacedElem.id).to.equal(elemData.id);
+    chai.expect(replacedElem.name).to.equal(elemData.name);
+    chai.expect(replacedElem.custom).to.deep.equal(elemData.custom);
+    chai.expect(replacedElem.project).to.equal(projID);
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(replacedElem.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(replacedElem.source).to.equal(elemData.source);
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(replacedElem.target).to.equal(elemData.target);
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(replacedElem.parent).to.equal(elemData.parent);
+    }
+
+    // Verify additional properties
+    chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.createdOn).to.not.equal(null);
+    chai.expect(replacedElem.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(replacedElem).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
+    done();
+  };
+
+  // PUTs an element
+  apiController.putElement(req, res);
+}
+
+/**
+ * @description Verifies mock PUT request to create/replace multiple elements.
+ */
+function putElements(done) {
+  // Create request object
+  const elemData = [
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
+  ];
+  const params = { orgid: org.id, projectid: projID };
+  const method = 'PUT';
+  const req = testUtils.createRequest(adminUser, params, elemData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const replacedElements = JSON.parse(_data);
+
+    // Expect replacedElements not to be empty
+    chai.expect(replacedElements.length).to.equal(elemData.length);
+    // Convert replacedElements to JMI type 2 for easier lookup
+    const jmi2Elements = jmi.convertJMI(1, 2, replacedElements, 'id');
+    // Loop through each element data object
+    elemData.forEach((elemObj) => {
+      const replacedElem = jmi2Elements[elemObj.id];
+
+      // Verify elements created/replaced properly
+      chai.expect(replacedElem.id).to.equal(elemObj.id);
+      chai.expect(replacedElem.name).to.equal(elemObj.name);
+      chai.expect(replacedElem.custom).to.deep.equal(elemObj.custom);
+      chai.expect(replacedElem.project).to.equal(projID);
+
+      // If documentation was provided, verify it
+      if (elemObj.hasOwnProperty('documentation')) {
+        chai.expect(replacedElem.documentation).to.equal(elemObj.documentation);
+      }
+      // If source was provided, verify it
+      if (elemObj.hasOwnProperty('source')) {
+        chai.expect(replacedElem.source).to.equal(elemObj.source);
+      }
+      // If target was provided, verify it
+      if (elemObj.hasOwnProperty('target')) {
+        chai.expect(replacedElem.target).to.equal(elemObj.target);
+      }
+      // If parent was provided, verify it
+      if (elemObj.hasOwnProperty('parent')) {
+        chai.expect(replacedElem.parent).to.equal(elemObj.parent);
+      }
+
+      // Verify additional properties
+      chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.createdOn).to.not.equal(null);
+      chai.expect(replacedElem.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(replacedElem).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  };
+
+  // PUTs multiple elements
+  apiController.putElements(req, res);
 }
 
 /**

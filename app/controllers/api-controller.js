@@ -68,11 +68,13 @@ module.exports = {
   patchPassword,
   getElements,
   postElements,
+  putElements,
   patchElements,
   deleteElements,
   searchElements,
   getElement,
   postElement,
+  putElement,
   patchElement,
   deleteElement,
   invalidRoute
@@ -1899,6 +1901,59 @@ function postElements(req, res) {
 }
 
 /**
+ * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
+ *
+ * @description Creates/replaces specified elements. NOTE: this route is
+ * reserved for system-wide admins ONLY.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created/replaced elements
+ */
+function putElements(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Create or replace the specified elements
+  // NOTE: createOrReplace() sanitizes input params
+  ElementController.createOrReplace(req.user, req.params.orgid,
+    req.params.projectid, branchid, req.body, options)
+  .then((elements) => {
+    // Return 200: OK and the new/replaced elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Updates specified elements.
@@ -2192,6 +2247,69 @@ function postElement(req, res) {
     branchid, req.body, options)
   .then((element) => {
     // Return 200: OK and created element
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(element[0].getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
+ *
+ * @description Creates or replaces an element.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created/replaced element
+ */
+function putElement(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
+    const error = new M.CustomError(
+      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the element ID in the body equal req.params.elementid
+  req.body.id = req.params.elementid;
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Create or replace element with provided parameters
+  // NOTE: createOrReplace() sanitizes input params
+  ElementController.createOrReplace(req.user, req.params.orgid,
+    req.params.projectid, branchid, req.body, options)
+  .then((element) => {
+    // Return 200: OK and created/replaced element
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(element[0].getPublicData()));
   })
