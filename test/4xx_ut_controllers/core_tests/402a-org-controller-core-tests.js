@@ -184,14 +184,14 @@ function createOrgs(done) {
 function createOrReplaceOrg(done) {
   const orgData = testData.orgs[0];
 
-  // Create org via controller
+  // Create or replace org via controller
   OrgController.createOrReplace(adminUser, orgData)
   .then((replacedOrgs) => {
     // Expect replacedOrgs array to contain 1 org
     chai.expect(replacedOrgs.length).to.equal(1);
     const replacedOrg = replacedOrgs[0];
 
-    // Verify org created properly
+    // Verify org created/replaced properly
     chai.expect(replacedOrg.id).to.equal(orgData.id);
     chai.expect(replacedOrg._id).to.equal(orgData.id);
     chai.expect(replacedOrg.name).to.equal(orgData.name);
@@ -240,7 +240,7 @@ function createOrReplaceOrgs(done) {
     orgDataObjects.forEach((orgDataObject) => {
       const replacedOrg = jmi2Orgs[orgDataObject.id];
 
-      // Verify org created properly
+      // Verify org created/replaced properly
       chai.expect(replacedOrg.id).to.equal(orgDataObject.id);
       chai.expect(replacedOrg._id).to.equal(orgDataObject.id);
       chai.expect(replacedOrg.name).to.equal(orgDataObject.name);
