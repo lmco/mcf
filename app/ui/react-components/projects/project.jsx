@@ -32,7 +32,7 @@ class Project extends Component {
         this.state = {
             project: null,
             orgid: null,
-            element: null,
+            elements: null,
             url: null,
             error: null,
             admin: false
@@ -49,8 +49,8 @@ class Project extends Component {
 
         getRequest(`${url}`)
         .then(project => {
-            getRequest(`${url}/branches/master/elements/model`)
-            .then(element => {
+            getRequest(`${url}/branches/master/elements?jmi3=true`)
+            .then(elements => {
                 const username = this.props.user.username;
                 const perm = project.permissions[username];
                 const admin = this.props.user.admin;
@@ -60,7 +60,7 @@ class Project extends Component {
                 }
 
                 this.setState({ project: project });
-                this.setState({ element: element });
+                this.setState({ elements: elements });
             })
             .catch(err => {
                     console.log(err);
@@ -94,10 +94,15 @@ class Project extends Component {
                                        render={ (props) => <ProjectHome {...props} project={this.state.project} /> } />
                                 <Route path={`${this.props.match.url}/users`}
                                        render={ (props) => <ProjectUsers {...props} project={this.state.project} /> } />
+<<<<<<< HEAD
                                  <Route path={`${this.props.match.url}/elements`}
                                                render={(props) => <ProjectElements {...props} project={this.state.project}
                                                                                    element={this.state.element}
                                                                                    url={this.state.url}/>}/>
+=======
+                                <Route path={`${this.props.match.url}/elements`}
+                                   render={ (props) => <ProjectElements {...props} project={this.state.project} elements={this.state.elements} /> } />
+>>>>>>> e77e7ff967c4621cb7f8f15d57afb342e8eba53d
                                 {(this.state.admin)
                                     ? (<Route path={`${this.props.match.url}/edit`}
                                               render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)
