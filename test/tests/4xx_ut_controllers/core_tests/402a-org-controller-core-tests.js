@@ -79,6 +79,8 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should create an org', createOrg);
   it('should create multiple orgs', createOrgs);
+  it('should create or replace an org', createOrReplaceOrg);
+  it('should create and replace multiple orgs', createOrReplaceOrgs);
   it('should find an org', findOrg);
   it('should find multiple orgs', findOrgs);
   it('should find all orgs', findAllOrgs);
@@ -134,8 +136,7 @@ function createOrg(done) {
 function createOrgs(done) {
   const orgDataObjects = [
     testData.orgs[1],
-    testData.orgs[2],
-    testData.orgs[3]
+    testData.orgs[2]
   ];
 
   // Create orgs via controller
@@ -166,6 +167,95 @@ function createOrgs(done) {
       chai.expect(createdOrg.createdOn).to.not.equal(null);
       chai.expect(createdOrg.updatedOn).to.not.equal(null);
       chai.expect(createdOrg.archivedOn).to.equal(null);
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates or replaces an organization using the org controller
+ */
+function createOrReplaceOrg(done) {
+  const orgData = testData.orgs[0];
+
+  // Create or replace org via controller
+  OrgController.createOrReplace(adminUser, orgData)
+  .then((replacedOrgs) => {
+    // Expect replacedOrgs array to contain 1 org
+    chai.expect(replacedOrgs.length).to.equal(1);
+    const replacedOrg = replacedOrgs[0];
+
+    // Verify org created/replaced properly
+    chai.expect(replacedOrg.id).to.equal(orgData.id);
+    chai.expect(replacedOrg._id).to.equal(orgData.id);
+    chai.expect(replacedOrg.name).to.equal(orgData.name);
+    chai.expect(replacedOrg.custom).to.deep.equal(orgData.custom);
+    chai.expect(replacedOrg.permissions[adminUser._id]).to.include('read');
+    chai.expect(replacedOrg.permissions[adminUser._id]).to.include('write');
+    chai.expect(replacedOrg.permissions[adminUser._id]).to.include('admin');
+
+    // Verify additional properties
+    chai.expect(replacedOrg.createdBy).to.equal(adminUser.username);
+    chai.expect(replacedOrg.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedOrg.archivedBy).to.equal(null);
+    chai.expect(replacedOrg.createdOn).to.not.equal(null);
+    chai.expect(replacedOrg.updatedOn).to.not.equal(null);
+    chai.expect(replacedOrg.archivedOn).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates and replaces multiple organizations using the org
+ * controller.
+ */
+function createOrReplaceOrgs(done) {
+  const orgDataObjects = [
+    testData.orgs[1],
+    testData.orgs[2],
+    testData.orgs[3]
+  ];
+
+  // Create or replace orgs via controller
+  OrgController.createOrReplace(adminUser, orgDataObjects)
+  .then((replacedOrgs) => {
+    // Expect replacedOrgs not to be empty
+    chai.expect(replacedOrgs.length).to.equal(orgDataObjects.length);
+
+    // Convert replacedOrgs to JMI type 2 for easier lookup
+    const jmi2Orgs = jmi.convertJMI(1, 2, replacedOrgs);
+    // Loop through each org data object
+    orgDataObjects.forEach((orgDataObject) => {
+      const replacedOrg = jmi2Orgs[orgDataObject.id];
+
+      // Verify org created/replaced properly
+      chai.expect(replacedOrg.id).to.equal(orgDataObject.id);
+      chai.expect(replacedOrg._id).to.equal(orgDataObject.id);
+      chai.expect(replacedOrg.name).to.equal(orgDataObject.name);
+      chai.expect(replacedOrg.custom).to.deep.equal(orgDataObject.custom);
+      chai.expect(replacedOrg.permissions[adminUser._id]).to.include('read');
+      chai.expect(replacedOrg.permissions[adminUser._id]).to.include('write');
+      chai.expect(replacedOrg.permissions[adminUser._id]).to.include('admin');
+
+      // Verify additional properties
+      chai.expect(replacedOrg.createdBy).to.equal(adminUser.username);
+      chai.expect(replacedOrg.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedOrg.archivedBy).to.equal(null);
+      chai.expect(replacedOrg.createdOn).to.not.equal(null);
+      chai.expect(replacedOrg.updatedOn).to.not.equal(null);
+      chai.expect(replacedOrg.archivedOn).to.equal(null);
     });
     done();
   })
