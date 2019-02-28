@@ -27,7 +27,7 @@ class CreateOrganization extends Component{
         this.state = {
             name: null,
             id: null,
-            custom: JSON.stringify(this.props.org.custom || {}, null, 2)
+            custom: JSON.stringify( {}, null, 2)
         }
     }
 
@@ -75,7 +75,7 @@ class CreateOrganization extends Component{
 
         return (
             <div className='org-edit'>
-                <h2>Organization Edit</h2>
+                <h2>New Organization</h2>
                 <hr />
                 <div>
                     <Form>
