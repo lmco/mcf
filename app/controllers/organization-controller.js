@@ -23,14 +23,11 @@ module.exports = {
   find,
   create,
   update,
-  createOrReplace,
   remove
 };
 
 // Node.js Modules
 const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
 
 // MBEE Modules
 const Element = M.require('models.element');
@@ -40,7 +37,6 @@ const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
-const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds one or many organizations. Depending on the
@@ -417,6 +413,7 @@ function create(requestingUser, orgs, options) {
  * org will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
  *
  * @return {Promise} Array of updated organization objects
  *
@@ -466,7 +463,7 @@ function update(requestingUser, orgs, options) {
 
     // Ensure options are valid
     if (options) {
-      // If the option 'populate' is supplied, ensure it's a array of strings
+      // If the option 'populate' is supplied, ensure it's a string
       if (options.hasOwnProperty('populate')) {
         if (!Array.isArray(options.populate)) {
           throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
@@ -574,7 +571,7 @@ function update(requestingUser, orgs, options) {
       existingUsers = foundUsers.map(u => u._id);
 
       // Convert orgsToUpdate to JMI type 2
-      const jmiType2 = jmi.convertJMI(1, 2, orgsToUpdate);
+      const jmiType2 = utils.convertJMI(1, 2, orgsToUpdate);
       const bulkArray = [];
       // Get array of editable parameters
       const validFields = Organization.getValidUpdateFields();
@@ -725,155 +722,6 @@ function update(requestingUser, orgs, options) {
     .then(() => Organization.find(searchQuery)
     .populate(populateString))
     .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
-  });
-}
-
-/**
- * @description This function creates one or many orgs. If orgs with matching
- * ids already exist, this function updates those orgs. This function is
- * restricted to system-wide admins ONLY.
- *
- * @param {User} requestingUser - The object containing the requesting user.
- * @param {(Object|Object[])} orgs - Either an array of objects containing
- * updates/new data for organizations, or a single object containing updates.
- * @param {string} orgs.id - The ID of the org being updated/created. Field
- * cannot be updated but is required to find/created org.
- * @param {string} [orgs.name] - The updated/new name of the organization.
- * @param {Object} [orgs.permissions] - An object of key value pairs, where the
- * key is the username, and the value is the role which the user is to have in
- * the org.
- * @param {Object} [orgs.custom] - The additions or changes to existing custom
- * data. If the key/value pair already exists, the value will be changed. If the
- * key/value pair does not exist, it will be added.
- * @param {boolean} [orgs.archived] - The archived field. If true, the org will
- * not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on
- * return.
- *
- * @return {Promise} Array of replaced/created organization objects
- *
- * @example
- * createOrReplace({User}, [{Updated Org 1}, {Updated Org 2}...])
- * .then(function(orgs) {
- *   // Do something with the newly replaced/created orgs
- * })
- * .catch(function(error) {
- *   M.log.error(error);
- * });
- */
-function createOrReplace(requestingUser, orgs, options) {
-  return new Promise((resolve, reject) => {
-    // Ensure input parameters are correct type
-    try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions'
-        + 'to create or replace orgs.');
-      assert.ok(typeof orgs === 'object', 'Orgs parameter is not an object.');
-      assert.ok(orgs !== null, 'Orgs parameter cannot be null.');
-      // If orgs is an array, ensure each item inside is an object
-      if (Array.isArray(orgs)) {
-        assert.ok(orgs.every(o => typeof o === 'object'), 'Every item in orgs is not an'
-          + ' object.');
-        assert.ok(orgs.every(o => o !== null), 'One or more items in orgs is null.');
-      }
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
-    }
-    catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
-    }
-
-    // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
-    const duplicateCheck = {};
-    let foundOrgs = [];
-    let orgsToLookup = [];
-    let createdOrgs = [];
-    const timestamp = Date.now();
-
-    // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
-      // orgs is an array, update many orgs
-      orgsToLookup = saniOrgs;
-    }
-    else if (typeof saniOrgs === 'object') {
-      // orgs is an object, update a single org
-      orgsToLookup = [saniOrgs];
-    }
-    else {
-      throw new M.CustomError('Invalid input for creating/replacing '
-        + 'organizations.', 400, 'warn');
-    }
-
-    // Create list of ids
-    const arrIDs = [];
-    try {
-      let index = 1;
-      orgsToLookup.forEach((org) => {
-        // Ensure each org has an id and that its a string
-        assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
-        assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
-        // If a duplicate ID, throw an error
-        if (duplicateCheck[org.id]) {
-          throw new M.CustomError(`Multiple objects with the same ID [${org.id}]`
-            + ' exist in the orgs array.', 400, 'warn');
-        }
-        else {
-          duplicateCheck[org.id] = org.id;
-        }
-        arrIDs.push(org.id);
-        index++;
-      });
-    }
-    catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
-    }
-
-    // Create searchQuery
-    const searchQuery = { _id: { $in: arrIDs } };
-
-    // Find the orgs to replace
-    Organization.find(searchQuery)
-    .then((_foundOrgs) => {
-      foundOrgs = _foundOrgs;
-
-      // If data directory doesn't exist, create it
-      if (!fs.existsSync(path.join(M.root, 'data'))) {
-        fs.mkdirSync(path.join(M.root, 'data'));
-      }
-
-      // Write contents to temporary file
-      return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`),
-          JSON.stringify(_foundOrgs), function(err) {
-            if (err) rej(err);
-            else res();
-          });
-      });
-    })
-    // Delete orgs from database
-    .then(() => Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }))
-    // Create the new orgs
-    .then(() => create(requestingUser, orgsToLookup, options))
-    .then((_createdOrgs) => {
-      createdOrgs = _createdOrgs;
-
-      // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`))) {
-        return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`), function(err) {
-            if (err) rej(err);
-            else res();
-          });
-        });
-      }
-    })
-    .then(() => resolve(createdOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

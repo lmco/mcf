@@ -37,7 +37,6 @@ const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
-const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -529,7 +528,7 @@ function update(requestingUser, users, options) {
       foundUsers = _foundUsers;
 
       // Convert usersToUpdate to JMI type 2
-      const jmiType2 = jmi.convertJMI(1, 2, usersToUpdate);
+      const jmiType2 = utils.convertJMI(1, 2, usersToUpdate);
       const bulkArray = [];
       // Get array of editable parameters
       const validFields = User.getValidUpdateFields();

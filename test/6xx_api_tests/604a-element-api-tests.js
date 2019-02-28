@@ -23,7 +23,6 @@ const path = require('path');
 // MBEE modules
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
-const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -196,7 +195,7 @@ function postElements(done) {
     // Expect createdElements not to be empty
     chai.expect(createdElements.length).to.equal(elemData.length);
     // Convert createdElements to JMI type 2 for easier lookup
-    const jmi2Elements = jmi.convertJMI(1, 2, createdElements, 'id');
+    const jmi2Elements = utils.convertJMI(1, 2, createdElements, 'id');
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const createdElement = jmi2Elements[elemObj.id];
@@ -327,7 +326,7 @@ function getElements(done) {
     chai.expect(foundElements.length).to.equal(elemData.length);
 
     // Convert foundElements to JMI type 2 for easier lookup
-    const jmi2Elements = jmi.convertJMI(1, 2, foundElements, 'id');
+    const jmi2Elements = utils.convertJMI(1, 2, foundElements, 'id');
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const foundElement = jmi2Elements[elemObj.id];
@@ -528,7 +527,7 @@ function patchElements(done) {
     chai.expect(updatedElements.length).to.equal(elemData.length);
 
     // Convert updatedElements to JMI type 2 for easier lookup
-    const jmi2Elements = jmi.convertJMI(1, 2, updatedElements, 'id');
+    const jmi2Elements = utils.convertJMI(1, 2, updatedElements, 'id');
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const updatedElement = jmi2Elements[elemObj.id];
