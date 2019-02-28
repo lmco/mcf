@@ -11,13 +11,13 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders the organization create page.
+ * @description This renders the project create page.
  */
 import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
 import validators from '../../../../build/json/validators.json';
 
-class CreateOrganization extends Component{
+class CreateProject extends Component{
     constructor(props) {
         super(props);
 
@@ -25,6 +25,7 @@ class CreateOrganization extends Component{
         this.onSubmit = this.onSubmit.bind(this);
 
         this.state = {
+            org: null,
             name: null,
             id: null,
             custom: JSON.stringify( {}, null, 2)
@@ -37,6 +38,7 @@ class CreateOrganization extends Component{
 
     onSubmit(){
         let data = {
+            org: this.state.org,
             id: this.state.id,
             name: this.state.name,
             custom: JSON.parse(this.state.custom)
@@ -44,15 +46,15 @@ class CreateOrganization extends Component{
 
         jQuery.ajax({
             method: "POST",
-            url: `/api/orgs/${this.state.id}`,
+            url: `/api/orgs/${this.state.org}/projects/${this.state.id}`,
             data: data
         })
-        .done(() => {
-            window.location.replace(`/${this.state.id}`);
-        })
-        .fail((msg) => {
-            alert( `Create Failed: ${msg.responseJSON.description}`);
-        });
+            .done(() => {
+                window.location.replace(`/${this.state.id}`);
+            })
+            .fail((msg) => {
+                alert( `Create Failed: ${msg.responseJSON.description}`);
+            });
     }
 
     render() {
@@ -60,7 +62,7 @@ class CreateOrganization extends Component{
         let customInvalid;
         let disableSubmit;
 
-        if(!RegExp(validators.org.name).test(this.state.name)) {
+        if(!RegExp(validators.project.name).test(this.state.name)) {
             nameInvalid = true;
             disableSubmit = true;
         }
@@ -75,25 +77,34 @@ class CreateOrganization extends Component{
 
         return (
             <div className='org-edit'>
-                <h2>New Organization</h2>
+                <h2>New Project</h2>
                 <hr />
                 <div>
                     <Form>
                         <FormGroup>
-                            <Label for="id">Organization ID</Label>
+                            <Label for="org">Organization ID</Label>
+                            <Input type="org"
+                                   name="org"
+                                   id="org"
+                                   placeholder="Organization id"
+                                   value={this.state.org || ''}
+                                   onChange={this.handleChange}/>
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="id">Project ID</Label>
                             <Input type="id"
                                    name="id"
                                    id="id"
-                                   placeholder="Organization id"
+                                   placeholder="Project id"
                                    value={this.state.id || ''}
                                    onChange={this.handleChange}/>
                         </FormGroup>
                         <FormGroup>
-                            <Label for="name">Organization Name</Label>
+                            <Label for="name">Project Name</Label>
                             <Input type="name"
                                    name="name"
                                    id="name"
-                                   placeholder="Organization name"
+                                   placeholder="Project name"
                                    value={this.state.name || ''}
                                    invalid={nameInvalid}
                                    onChange={this.handleChange}/>
@@ -120,4 +131,4 @@ class CreateOrganization extends Component{
     }
 }
 
-export default CreateOrganization
+export default CreateProject

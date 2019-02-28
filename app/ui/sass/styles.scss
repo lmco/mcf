@@ -393,6 +393,28 @@ label {
         font-size: 18px;
     }
 
+    .project-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .project-header {
+        grid-area: header;
+        justify-content: flex-start;
+    }
+
+    .project-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+        }
+    }
+
     .list .list-item .list-header p {
         font-size: 15px;
     }
