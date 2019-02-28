@@ -977,7 +977,18 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
         });
       }
     })
-    .then(() => resolve(createdProjects))
+    .then(() => {
+      // Read all of the files in the org directory
+      const existingFiles = fs.readdirSync(path.join(M.root, 'data', orgID));
+
+      // If no files exist in the directory, delete it
+      if (existingFiles.length === 0) {
+        fs.rmdirSync(path.join(M.root, 'data', orgID));
+      }
+
+      // Return the newly created projects
+      return resolve(createdProjects);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
