@@ -21,6 +21,7 @@ import {Button, Modal, ModalBody} from 'reactstrap';
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
 import CreateOrganization from './organization-create.jsx';
+import DeleteOrganization from './organization-delete.jsx';
 
 import { getRequest } from '../helper-functions/getRequest';
 
@@ -37,11 +38,13 @@ class OrganizationList extends Component {
             width: null,
             orgs: [],
             admin: false,
-            modal: false,
+            modalCreate: false,
+            modalDelete: false,
             error: null
         };
 
-        this.handleToggle = this.handleToggle.bind(this);
+        this.handleCreateToggle = this.handleCreateToggle.bind(this);
+        this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     }
 
     componentDidMount() {
@@ -75,8 +78,12 @@ class OrganizationList extends Component {
         this.setState({ width: this.ref.current.clientWidth })
     }
 
-    handleToggle() {
-        this.setState({ modal: !this.state.modal });
+    handleCreateToggle() {
+        this.setState({ modalCreate: !this.state.modalCreate });
+    }
+
+    handleDeleteToggle() {
+        this.setState({ modalDelete: !this.state.modalDelete });
     }
 
     render() {
@@ -90,9 +97,14 @@ class OrganizationList extends Component {
         return (
             <React.Fragment>
                 <div>
-                    <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+                    <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                         <ModalBody>
-                            { (this.state.modal) ? <CreateOrganization /> : '' }
+                            { (this.state.modalCreate) ? <CreateOrganization /> : '' }
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+                        <ModalBody>
+                            { (this.state.modalDelete) ? <DeleteOrganization /> : '' }
                         </ModalBody>
                     </Modal>
                 </div>
@@ -103,9 +115,14 @@ class OrganizationList extends Component {
                             ? ''
                             : (<div className='org-button'>
                                     <Button className='btn'
+                                            outline color="danger"
+                                            onClick={this.handleDeleteToggle}>
+                                        Delete
+                                    </Button>
+                                    <Button className='btn'
                                             outline color="secondary"
-                                            onClick={this.handleToggle}>
-                                        Create Org
+                                            onClick={this.handleCreateToggle}>
+                                        Create
                                     </Button>
                                 </div>)
                         }
