@@ -87,15 +87,17 @@ class Project extends Component {
                             : ''
                         }
                     </Sidebar>
-                    {(!this.state.project && !this.state.elements)
+                    {(!this.state.project)
                         ? <div className="loading"> {this.state.error || 'Loading your project...'} </div>
                         : (<Switch>
                                 <Route exact path={`${this.props.match.url}/`}
                                        render={ (props) => <ProjectHome {...props} project={this.state.project} /> } />
                                 <Route path={`${this.props.match.url}/users`}
                                        render={ (props) => <ProjectUsers {...props} project={this.state.project} /> } />
-                                <Route path={`${this.props.match.url}/elements`}
-                                   render={ (props) => <ProjectElements {...props} project={this.state.project} element={this.state.element} url={this.state.url}/> } />
+                                 <Route path={`${this.props.match.url}/elements`}
+                                               render={(props) => <ProjectElements {...props} project={this.state.project}
+                                                                                   element={this.state.element}
+                                                                                   url={this.state.url}/>}/>
                                 {(this.state.admin)
                                     ? (<Route path={`${this.props.match.url}/edit`}
                                               render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)

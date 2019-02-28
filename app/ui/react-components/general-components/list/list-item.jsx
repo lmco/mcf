@@ -31,7 +31,12 @@ function ListItem(props) {
         return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
     }
     else if (props.element) {
-        return <div> {props.element.name} </div>
+        if (props.element.name){
+            return <div> <i className="fas fa-shapes"></i> {props.element.name} </div>
+        }
+        else {
+            return <div> <i className="fas fa-shapes"></i> {props.element.id} </div>
+        }
     }
     else {
         return listItem;
