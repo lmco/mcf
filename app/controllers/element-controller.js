@@ -1196,7 +1196,25 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         });
       }
     })
-    .then(() => resolve(createdElements))
+    .then(() => {
+      // Read all of the files in the project directory
+      const existingProjFiles = fs.readdirSync(path.join(M.root, 'data', orgID, projID));
+
+      // If no files exist in the directory, delete it
+      if (existingProjFiles.length === 0) {
+        fs.rmdirSync(path.join(M.root, 'data', orgID, projID));
+      }
+
+      // Read all of the files in the org directory
+      const existingOrgFiles = fs.readdirSync(path.join(M.root, 'data', orgID));
+
+      // If no files exist in the directory, delete it
+      if (existingOrgFiles.length === 0) {
+        fs.rmdirSync(path.join(M.root, 'data', orgID));
+      }
+
+      return resolve(createdElements);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
