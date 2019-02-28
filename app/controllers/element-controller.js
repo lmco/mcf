@@ -1079,6 +1079,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     let elementsToLookup = [];
     let createdElements = [];
     let foundElementIDs = [];
+    const ts = Date.now();
 
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) })
@@ -1159,9 +1160,19 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         fs.mkdirSync(path.join(M.root, 'data'));
       }
 
+      // If org directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data', orgID))) {
+        fs.mkdirSync(path.join(M.root, 'data', orgID));
+      }
+
+      // If project directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data', orgID, projID))) {
+        fs.mkdirSync(path.join(M.root, 'data', orgID, projID));
+      }
+
       // Write contents to temporary file
       return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'replaced_elements.json'),
+        fs.writeFile(path.join(M.root, 'data', orgID, projID, `PUT-backup-elements-${ts}.json`),
           JSON.stringify(foundElements), function(err) {
             if (err) rej(err);
             else res();
@@ -1174,11 +1185,11 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then(() => create(requestingUser, orgID, projID, branch, elementsToLookup, options))
     .then((_createdElements) => {
       createdElements = _createdElements;
-
+      const filePath = path.join(M.root, 'data', orgID, projID, `PUT-backup-elements-${ts}.json`);
       // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', 'replaced_elements.json'))) {
+      if (fs.existsSync(filePath)) {
         return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', 'replaced_elements.json'), function(err) {
+          fs.unlink(filePath, function(err) {
             if (err) rej(err);
             else res();
           });
