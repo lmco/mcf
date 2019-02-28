@@ -792,17 +792,18 @@ function createOrReplace(requestingUser, orgs, options) {
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
     const duplicateCheck = {};
     let foundOrgs = [];
-    let orgsToLookUp = [];
+    let orgsToLookup = [];
     let createdOrgs = [];
+    const timestamp = Date.now();
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
       // orgs is an array, update many orgs
-      orgsToLookUp = saniOrgs;
+      orgsToLookup = saniOrgs;
     }
     else if (typeof saniOrgs === 'object') {
       // orgs is an object, update a single org
-      orgsToLookUp = [saniOrgs];
+      orgsToLookup = [saniOrgs];
     }
     else {
       throw new M.CustomError('Invalid input for creating/replacing '
@@ -813,7 +814,7 @@ function createOrReplace(requestingUser, orgs, options) {
     const arrIDs = [];
     try {
       let index = 1;
-      orgsToLookUp.forEach((org) => {
+      orgsToLookup.forEach((org) => {
         // Ensure each org has an id and that its a string
         assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
         assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
@@ -836,7 +837,7 @@ function createOrReplace(requestingUser, orgs, options) {
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
 
-    // Find the orgs to update
+    // Find the orgs to replace
     Organization.find(searchQuery)
     .then((_foundOrgs) => {
       foundOrgs = _foundOrgs;
@@ -848,29 +849,24 @@ function createOrReplace(requestingUser, orgs, options) {
 
       // Write contents to temporary file
       return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'replaced_orgs.json'),
+        fs.writeFile(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`),
           JSON.stringify(_foundOrgs), function(err) {
             if (err) rej(err);
             else res();
           });
       });
     })
-    .then(() => {
-      // Create an array of found org IDs
-      const foundOrgIDs = foundOrgs.map(o => o._id);
-
-      // Delete orgs from database
-      return Organization.deleteMany({ _id: foundOrgIDs });
-    })
+    // Delete orgs from database
+    .then(() => Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }))
     // Create the new orgs
-    .then(() => create(requestingUser, orgsToLookUp, options))
+    .then(() => create(requestingUser, orgsToLookup, options))
     .then((_createdOrgs) => {
       createdOrgs = _createdOrgs;
 
       // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', 'replaced_orgs.json'))) {
+      if (fs.existsSync(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`))) {
         return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', 'replaced_orgs.json'), function(err) {
+          fs.unlink(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`), function(err) {
             if (err) rej(err);
             else res();
           });
