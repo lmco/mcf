@@ -90,7 +90,7 @@ class OrganizationList extends Component {
 
         const orgs = this.state.orgs.map(org =>
             <Link to={`/${org.id}`}>
-                <OrgListItem org={org}/>
+                <OrgListItem org={org} />
             </Link>
         );
 
@@ -104,7 +104,7 @@ class OrganizationList extends Component {
                     </Modal>
                     <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                         <ModalBody>
-                            { (this.state.modalDelete) ? <DeleteOrganization /> : '' }
+                            { (this.state.modalDelete) ? <DeleteOrganization orgs={this.state.orgs}/> : '' }
                         </ModalBody>
                     </Modal>
                 </div>

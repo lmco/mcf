@@ -56,21 +56,11 @@ class DeleteOrganization extends Component{
         });
     }
 
-    componentDidMount() {
-        // function to call on click of key press
-        const k = (ev) => {
-            // key press is enter
-            if (ev.keyCode == 13) {
-                // submit the form
-                this.onSubmit();
-            };
-        };
-
-        // Add event listener for enter key
-        window.addEventListener("keypress", k);
-    }
-
     render() {
+        const orgOptions = this.props.orgs.map((org) => {
+            return (<option value={org.id}>{org.name}</option>)
+        });
+
         return (
             <div className='org-edit'>
                 <h2>Delete Organization</h2>
@@ -79,12 +69,13 @@ class DeleteOrganization extends Component{
                     <Form>
                         <FormGroup>
                             <Label for="id">Organization ID</Label>
-                            <Input type="id"
+                            <Input type="select"
                                    name="id"
                                    id="id"
-                                   placeholder="Organization id"
                                    value={this.state.id || ''}
-                                   onChange={this.handleChange}/>
+                                   onChange={this.handleChange}>
+                                {orgOptions}
+                            </Input>
                         </FormGroup>
                         <Button onClick={this.onSubmit}> Delete </Button>
                     </Form>
