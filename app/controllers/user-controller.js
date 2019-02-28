@@ -695,6 +695,7 @@ function createOrReplace(requestingUser, users, options) {
     let foundUsers = [];
     let usersToLookup = [];
     let createdUsers = [];
+    const ts = Date.now();
 
     // Check the type of the users parameter
     if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
@@ -749,7 +750,7 @@ function createOrReplace(requestingUser, users, options) {
 
       // Write contents to temporary file
       return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'replaced_users.json'),
+        fs.writeFile(path.join(M.root, 'data', `PUT-backup-users-${ts}.json`),
           JSON.stringify(_foundUsers), function(err) {
             if (err) rej(err);
             else res();
@@ -763,9 +764,10 @@ function createOrReplace(requestingUser, users, options) {
       createdUsers = _createdUsers;
 
       // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', 'replaced_users.json'))) {
+      const filePath = path.join(M.root, 'data', `PUT-backup-users-${ts}.json`);
+      if (fs.existsSync(filePath)) {
         return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', 'replaced_users.json'), function(err) {
+          fs.unlink(filePath, function(err) {
             if (err) rej(err);
             else res();
           });
