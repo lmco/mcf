@@ -48,7 +48,7 @@ class CreateOrganization extends Component{
             data: data
         })
         .done(() => {
-            window.location.replace(`/${this.state.id}`);
+            window.location.replace(`/organizations`);
         })
         .fail((msg) => {
             alert( `Create Failed: ${msg.responseJSON.description}`);

@@ -22,6 +22,7 @@ import ProjectListItem from '../general-components/list/project-list-item.jsx';
 import { getRequest } from '../helper-functions/getRequest';
 import {Button, Modal, ModalBody} from "reactstrap";
 import CreateProject from './project-create.jsx';
+import DeleteProject from './project-delete.jsx';
 
 class ProjectList extends Component {
     constructor(props) {
@@ -35,11 +36,13 @@ class ProjectList extends Component {
             width: null,
             projects: [],
             admin: false,
-            modal: false,
+            modalCreate: false,
+            modalDelete: false,
             error: null
         };
 
-        this.handleToggle = this.handleToggle.bind(this);
+        this.handleCreateToggle = this.handleCreateToggle.bind(this);
+        this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     }
 
     componentDidMount() {
@@ -73,8 +76,12 @@ class ProjectList extends Component {
         this.setState({ width: this.ref.current.clientWidth })
     }
 
-    handleToggle() {
-        this.setState({ modal: !this.state.modal });
+    handleCreateToggle() {
+        this.setState({ modalCreate: !this.state.modalCreate });
+    }
+
+    handleDeleteToggle() {
+        this.setState({ modalDelete: !this.state.modalDelete });
     }
 
     render() {
@@ -93,9 +100,14 @@ class ProjectList extends Component {
         return (
             <React.Fragment>
                 <div>
-                    <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+                    <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                         <ModalBody>
-                            { (this.state.modal) ? <CreateProject /> : '' }
+                            { (this.state.modalCreate) ? <CreateProject /> : '' }
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+                        <ModalBody>
+                            { (this.state.modalDelete) ? <DeleteProject /> : '' }
                         </ModalBody>
                     </Modal>
                 </div>
@@ -106,9 +118,14 @@ class ProjectList extends Component {
                             ? ''
                             : (<div className='project-button'>
                                 <Button className='btn'
+                                        outline color="danger"
+                                        onClick={this.handleDeleteToggle}>
+                                    Delete
+                                </Button>
+                                <Button className='btn'
                                         outline color="secondary"
-                                        onClick={this.handleToggle}>
-                                    Create Project
+                                        onClick={this.handleCreateToggle}>
+                                    Create
                                 </Button>
                             </div>)
                         }

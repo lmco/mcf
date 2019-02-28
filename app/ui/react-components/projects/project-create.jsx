@@ -38,7 +38,6 @@ class CreateProject extends Component{
 
     onSubmit(){
         let data = {
-            org: this.state.org,
             id: this.state.id,
             name: this.state.name,
             custom: JSON.parse(this.state.custom)
@@ -50,7 +49,7 @@ class CreateProject extends Component{
             data: data
         })
             .done(() => {
-                window.location.replace(`/${this.state.id}`);
+                window.location.replace(`/projects`);
             })
             .fail((msg) => {
                 alert( `Create Failed: ${msg.responseJSON.description}`);
