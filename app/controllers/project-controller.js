@@ -887,6 +887,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     const ts = Date.now();
 
     // Check the type of the projects parameter
+    // TODO: Remove the && check, already do this check in the first try/catch
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
       // projects is an array, replace/create many projects
       projectsToLookUp = saniProjects;
