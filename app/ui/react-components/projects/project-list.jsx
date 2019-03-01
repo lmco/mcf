@@ -20,6 +20,9 @@ import List from '../general-components/list/list.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
 
 import { getRequest } from '../helper-functions/getRequest';
+import {Button, Modal, ModalBody} from "reactstrap";
+import CreateProject from './project-create.jsx';
+import DeleteProject from './project-delete.jsx';
 
 class ProjectList extends Component {
     constructor(props) {
@@ -31,19 +34,38 @@ class ProjectList extends Component {
 
         this.state = {
             width: null,
-            projects: []
+            projects: [],
+            admin: false,
+            modalCreate: false,
+            modalDelete: false,
+            error: null
         };
+
+        this.handleCreateToggle = this.handleCreateToggle.bind(this);
+        this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     }
 
     componentDidMount() {
         getRequest('/api/projects')
         .then(projects => {
-            this.setState({ projects: projects});
-        })
-        .catch(err => console.log(err));
+            getRequest('/api/users/whoami')
+            .then(user => {
+                const admin = user.admin;
 
-        window.addEventListener('resize', this.handleResize);
-        this.handleResize();
+                if (admin) {
+                    this.setState({admin: admin});
+                }
+
+                this.setState({ projects: projects});
+                window.addEventListener('resize', this.handleResize);
+                this.handleResize();
+            })
+            .catch(err => {
+                console.log(err);
+                this.setState({error: `Failed to grab user information: ${err}`});
+            });
+        })
+        .catch(err => this.setState({error: `Failed to load projects: ${err}`}));
     }
 
     componentWillUnmount() {
@@ -52,6 +74,14 @@ class ProjectList extends Component {
 
     handleResize() {
         this.setState({ width: this.ref.current.clientWidth })
+    }
+
+    handleCreateToggle() {
+        this.setState({ modalCreate: !this.state.modalCreate });
+    }
+
+    handleDeleteToggle() {
+        this.setState({ modalDelete: !this.state.modalDelete });
     }
 
     render() {
@@ -68,18 +98,49 @@ class ProjectList extends Component {
         });
 
         return (
-            <div id='view' className='project-list' ref={this.ref}>
-                <h2>Your Projects</h2>
-                <hr/>
-                {(this.state.projects.length === 0)
-                    ? (<div className='list-item'>
-                        <h3> No projects. </h3>
-                       </div>)
-                    : (<List>
-                        {projects}
-                       </List>)
-                }
-            </div>
+            <React.Fragment>
+                <div>
+                    <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
+                        <ModalBody>
+                            { (this.state.modalCreate) ? <CreateProject /> : '' }
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+                        <ModalBody>
+                            { (this.state.modalDelete) ? <DeleteProject projects={this.state.projects}/> : '' }
+                        </ModalBody>
+                    </Modal>
+                </div>
+                <div id='view' className='project-list' ref={this.ref}>
+                    <div className='project-list-header'>
+                        <h2 className='project-header'>Your Projects</h2>
+                        {(!this.state.admin)
+                            ? ''
+                            : (<div className='project-button'>
+                                <Button className='btn'
+                                        outline color="danger"
+                                        onClick={this.handleDeleteToggle}>
+                                    Delete
+                                </Button>
+                                <Button className='btn'
+                                        outline color="secondary"
+                                        onClick={this.handleCreateToggle}>
+                                    Create
+                                </Button>
+                            </div>)
+                        }
+                    </div>
+                    <hr/>
+                    {(this.state.projects.length === 0)
+                        ? (<div className='list-item'>
+                            <h3> No projects. </h3>
+                           </div>)
+                        : (<List>
+                            {projects}
+                           </List>)
+                    }
+                </div>
+            </React.Fragment>
         )
     }
 }

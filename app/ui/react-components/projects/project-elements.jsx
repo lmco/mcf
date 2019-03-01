@@ -13,43 +13,77 @@
  *
  * @description This renders a project's element page.
  */
-import React, { Component } from "react";
-import List from '../general-components/list/list.jsx';
-import ListItem from '../general-components/list/list-item.jsx';
-import ElementList from '../elements/element-list.jsx';
 
+// React Modules
+import React, { Component } from "react";
+
+// MBEE Modules
+import ElementList from "../elements/element-list.jsx";
+import {getRequest} from "../helper-functions/getRequest";
+
+// Define component
 class ProjectElements extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
 
-        this.toggle = this.toggle.bind(this);
-
+        // Initialize state props
         this.state = {
-            isExpanded: false
+            elements: null,
+            error: null
         };
     }
 
-    toggle() {
-        this.setState({isExpanded: !this.state.isExpanded});
-    }
-
     componentDidMount() {
+        // Verify if there are no elements
+        if (!this.props.elements){
+            const orgId = this.props.match.params.orgid;
+            const projId = this.props.match.params.projectid;
+            const url = `/api/orgs/${orgId}/projects/${projId}`;
 
+            // Grab all the elements
+            getRequest(`${url}/branches/master/elements?jmi3=true`)
+            .then(elements => {
+                // Set the element state
+                this.setState({ elements: elements });
+            })
+            .catch(err => {
+                console.log(err);
+                this.setState({error: 'Failed to load elements.'});
+            });
+        }
     }
 
     render() {
+        // Initialize element data
+        let elements = null;
 
+        if (!this.props.elements){
+            elements = this.state.elements;
+        }
+        else {
+            elements = this.props.elements;
+        }
+
+        // Loop through root elements
+        const elementList = Object.keys(elements).map((key) => {
+            // Initialize root
+            const rootElement = elements[key];
+
+            // Create the element list
+            return (<ElementList element={rootElement} />)
+        });
+
+        // Return element list
         return (
             <div id='view' className='project-elements'>
                 <h2>Elements</h2>
                 <hr/>
-                <List>
-                    <ListItem element={this.props.element} />
-                    <ElementList element={this.props.element} url={this.props.url}/>
-                </List>
+                {elementList}
             </div>
         )
     }
 }
 
+// Export component
 export default ProjectElements

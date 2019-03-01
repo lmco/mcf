@@ -47,10 +47,12 @@ module.exports = {
   getAllProjects,
   getProjects,
   postProjects,
+  putProjects,
   patchProjects,
   deleteProjects,
   getProject,
   postProject,
+  putProject,
   patchProject,
   deleteProject,
   getUsers,
@@ -65,11 +67,13 @@ module.exports = {
   patchPassword,
   getElements,
   postElements,
+  putElements,
   patchElements,
   deleteElements,
   searchElements,
   getElement,
   postElement,
+  putElement,
   patchElement,
   deleteElement,
   invalidRoute
@@ -771,8 +775,7 @@ function postProjects(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
-    archived: 'boolean'
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -804,6 +807,54 @@ function postProjects(req, res) {
 }
 
 /**
+ * PUT /api/org/:orgid/projects
+ *
+ * @description This function creates/replaces multiple projects.
+ *
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} Response object with created/replaced projects.
+ */
+function putProjects(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Create or replace the specified projects
+  // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
+  ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
+  .then((projects) => {
+    // Return 200: OK and the created/replaced projects
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * PATCH /api/org/:orgid/projects
  *
  * @description This function updates multiple projects.
@@ -820,8 +871,7 @@ function patchProjects(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
-    archived: 'boolean'
+    populate: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1013,6 +1063,66 @@ function postProject(req, res) {
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     // Return 200: OK and created project
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/orgs/:orgid/projects/:projectid
+ *
+ * @description Takes an organization ID and project ID in the URI and project
+ * data in the request body, and creates/replaces a project.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created project.
+ */
+function putProject(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If project ID was provided in the body, ensure it matches project ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
+    const error = new M.CustomError(
+      'Project ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the orgid in req.body in case it wasn't provided
+  req.body.id = req.params.projectid;
+
+  // Create or replace project with provided parameters
+  // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
+  ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
+  .then((projects) => {
+    // Return 200: OK and created/replaced project
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(projects[0].getPublicData()));
   })
@@ -1770,6 +1880,59 @@ function postElements(req, res) {
 }
 
 /**
+ * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
+ *
+ * @description Creates/replaces specified elements. NOTE: this route is
+ * reserved for system-wide admins ONLY.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created/replaced elements
+ */
+function putElements(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Create or replace the specified elements
+  // NOTE: createOrReplace() sanitizes input params
+  ElementController.createOrReplace(req.user, req.params.orgid,
+    req.params.projectid, branchid, req.body, options)
+  .then((elements) => {
+    // Return 200: OK and the new/replaced elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Updates specified elements.
@@ -2063,6 +2226,69 @@ function postElement(req, res) {
     branchid, req.body, options)
   .then((element) => {
     // Return 200: OK and created element
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(element[0].getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
+ *
+ * @description Creates or replaces an element.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created/replaced element
+ */
+function putElement(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
+    const error = new M.CustomError(
+      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the element ID in the body equal req.params.elementid
+  req.body.id = req.params.elementid;
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Create or replace element with provided parameters
+  // NOTE: createOrReplace() sanitizes input params
+  ElementController.createOrReplace(req.user, req.params.orgid,
+    req.params.projectid, branchid, req.body, options)
+  .then((element) => {
+    // Return 200: OK and created/replaced element
     res.header('Content-Type', 'application/json');
     return res.status(200).send(formatJSON(element[0].getPublicData()));
   })

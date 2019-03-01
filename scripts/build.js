@@ -111,12 +111,11 @@ function build(_args) {
 
   // Initialize validators for UI validation
   const validator = {
+    id: validators.org.id,
     org: {
-      id: validators.org.id,
       name: validators.org.name
     },
     project: {
-      id: validators.project.id,
       name: validators.project.name
     },
     user: {

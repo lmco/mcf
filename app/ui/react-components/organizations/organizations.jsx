@@ -25,15 +25,25 @@ import { getRequest } from '../helper-functions/getRequest.js';
 class Organizations extends Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            user: null
+        };
+    }
+
+    componentDidMount(){
+        getRequest('/api/users/whoami')
+        .then(user => {
+            this.setState({user: user});
+        })
     }
 
     render () {
-
         return (
             <Router>
                 <Switch>
                     <Route exact path="/organizations" component={OrganizationList} />
-                    <Route path="/:orgid" component={Organization} />
+                    <Route path="/:orgid" render={(props) => <Organization {...props} user={this.state.user}/>} />
                 </Switch>
             </Router>
         );

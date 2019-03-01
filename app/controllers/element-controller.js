@@ -22,6 +22,7 @@ module.exports = {
   find,
   create,
   update,
+  createOrReplace,
   remove,
   search
 };
@@ -31,6 +32,8 @@ module.exports = {
 
 // Node.js Modules
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
 // MBEE Modules
 const Element = M.require('models.element');
@@ -993,6 +996,224 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       return Promise.all(promises2);
     })
     .then(() => resolve(foundUpdatedElements))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
+ * @description This functions creates or replaces one or many elements. If the
+ * element already exists, it is replaced with the provided data. NOTE: This
+ * function is reserved for system-wide admins ONLY.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to add elements to.
+ * @param {(Object|Object[])} elements - Either an array of objects containing
+ * element data or a single object containing element data to create/replace.
+ * @param {string} elements.id - The ID of the element being created/replaced.
+ * @param {string} [elements.name] - The name of the element.
+ * @param {string} [elements.parent = 'model'] - The ID of the parent of the
+ * element. The default value is 'model'
+ * @param {string} [elements.source] - The ID of the source element. If
+ * provided, the parameter target is required.
+ * @param {string} [elements.target] - The ID of the target element. If
+ * provided, the parameter source is required.
+ * @param {string} [elements.documentation] - Any additional text
+ * documentation about an element.
+ * @param {string} [elements.type] - An optional type string.
+ * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * object. Must be proper JSON form.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
+ *
+ * @return {Promise} Array of created/replaced element objects
+ *
+ * @example
+ * createOrReplace({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...])
+ * .then(function(elements) {
+ *   // Do something with the newly created/replaced elements
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createOrReplace(requestingUser, organizationID, projectID, branch, elements, options) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions'
+        + 'to replace elements.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
+      // Ensure user is on the master branch
+      assert.ok(branch === 'master', 'User must be on the master branch.');
+      assert.ok(typeof elements === 'object', 'Elements parameter is not an object.');
+      assert.ok(elements !== null, 'Elements parameter cannot be null.');
+      // If elements is an array, ensure each item inside is an object
+      if (Array.isArray(elements)) {
+        assert.ok(elements.every(e => typeof e === 'object'), 'Every item in elements is not an'
+          + ' object.');
+        assert.ok(elements.every(e => e !== null), 'One or more items in elements is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
+    }
+
+    // Sanitize input parameters and create function-wide variables
+    const orgID = sani.sanitize(organizationID);
+    const projID = sani.sanitize(projectID);
+    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const duplicateCheck = {};
+    let foundElements = [];
+    let elementsToLookup = [];
+    let createdElements = [];
+    let foundElementIDs = [];
+    const ts = Date.now();
+
+    // Find the project
+    Project.findOne({ _id: utils.createID(orgID, projID) })
+    .then((foundProject) => {
+      // Check that the project was found
+      if (!foundProject) {
+        throw new M.CustomError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 404, 'warn');
+      }
+
+      // Check the type of the elements parameter
+      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
+        // elements is an array, create/replace many elements
+        elementsToLookup = saniElements;
+      }
+      else if (typeof saniElements === 'object') {
+        // elements is an object, create/replace a single element
+        elementsToLookup = [saniElements];
+      }
+      else {
+        throw new M.CustomError('Invalid input for creating/replacing'
+          + ' elements.', 400, 'warn');
+      }
+
+      // Create list of ids
+      const arrIDs = [];
+      try {
+        let index = 1;
+        elementsToLookup.forEach((elem) => {
+          // Ensure each element has an id and that its a string
+          assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
+          assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
+          const tmpID = utils.createID(orgID, projID, elem.id);
+          // If a duplicate ID, throw an error
+          if (duplicateCheck[tmpID]) {
+            throw new M.CustomError(`Multiple objects with the same ID [${elem.id}] exist in the`
+              + ' update.', 400, 'warn');
+          }
+          else {
+            duplicateCheck[tmpID] = tmpID;
+          }
+          arrIDs.push(tmpID);
+          index++;
+        });
+      }
+      catch (err) {
+        throw new M.CustomError(err.message, 403, 'warn');
+      }
+
+      const promises = [];
+      const searchQuery = { project: utils.createID(orgID, projID) };
+
+      // Find elements in batches
+      for (let i = 0; i < arrIDs.length / 50000; i++) {
+        // Split arrIDs list into batches of 50000
+        searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
+
+        // Add find operation to promises array
+        promises.push(Element.find(searchQuery)
+        .then((_foundElements) => {
+          foundElements = foundElements.concat(_foundElements);
+        }));
+      }
+
+      // Return when all elements have been found
+      return Promise.all(promises);
+    })
+    .then(() => {
+      foundElementIDs = foundElements.map(e => e._id);
+
+      // Error Check: ensure user cannot replace root model element
+      if (foundElementIDs.includes(utils.createID(orgID, projID, 'model'))) {
+        throw new M.CustomError('User cannot replace the root model element.', 403, 'warn');
+      }
+
+      // If data directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data'))) {
+        fs.mkdirSync(path.join(M.root, 'data'));
+      }
+
+      // If org directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data', orgID))) {
+        fs.mkdirSync(path.join(M.root, 'data', orgID));
+      }
+
+      // If project directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data', orgID, projID))) {
+        fs.mkdirSync(path.join(M.root, 'data', orgID, projID));
+      }
+
+      // Write contents to temporary file
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', orgID, projID, `PUT-backup-elements-${ts}.json`),
+          JSON.stringify(foundElements), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+      });
+    })
+    // Delete elements from database
+    .then(() => Element.deleteMany({ _id: foundElementIDs }))
+    // Create new elements
+    .then(() => create(requestingUser, orgID, projID, branch, elementsToLookup, options))
+    .then((_createdElements) => {
+      createdElements = _createdElements;
+      const filePath = path.join(M.root, 'data', orgID, projID, `PUT-backup-elements-${ts}.json`);
+      // Delete the temporary file.
+      if (fs.existsSync(filePath)) {
+        return new Promise(function(res, rej) {
+          fs.unlink(filePath, function(err) {
+            if (err) rej(err);
+            else res();
+          });
+        });
+      }
+    })
+    .then(() => {
+      // Read all of the files in the project directory
+      const existingProjFiles = fs.readdirSync(path.join(M.root, 'data', orgID, projID));
+
+      // If no files exist in the directory, delete it
+      if (existingProjFiles.length === 0) {
+        fs.rmdirSync(path.join(M.root, 'data', orgID, projID));
+      }
+
+      // Read all of the files in the org directory
+      const existingOrgFiles = fs.readdirSync(path.join(M.root, 'data', orgID));
+
+      // If no files exist in the directory, delete it
+      if (existingOrgFiles.length === 0) {
+        fs.rmdirSync(path.join(M.root, 'data', orgID));
+      }
+
+      return resolve(createdElements);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

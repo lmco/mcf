@@ -41,11 +41,11 @@ class Project extends Component {
 
     componentDidMount() {
         const orgId = this.props.match.params.orgid;
-        this.setState({orgid: orgId});
         const projId = this.props.match.params.projectid;
-
         const url = `/api/orgs/${orgId}/projects/${projId}`;
+
         this.setState({url: url});
+        this.setState({orgid: orgId});
 
         getRequest(`${url}`)
         .then(project => {

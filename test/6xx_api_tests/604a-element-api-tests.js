@@ -95,6 +95,8 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should POST an element', postElement);
   it('should POST multiple elements', postElements);
+  it('should PUT an element', putElement);
+  it('should PUT multiple elements', putElements);
   it('should GET an element', getElement);
   it('should GET multiple elements', getElements);
   it('should GET an element through text search', searchElement);
@@ -126,7 +128,6 @@ function postElement(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const createdElement = JSON.parse(body);
-
 
     // Verify element created properly
     chai.expect(createdElement.id).to.equal(elemData.id);
@@ -174,8 +175,7 @@ function postElements(done) {
     testData.elements[2],
     testData.elements[3],
     testData.elements[4],
-    testData.elements[5],
-    testData.elements[6]
+    testData.elements[5]
   ];
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
@@ -231,6 +231,137 @@ function postElements(done) {
 
       // Verify specific fields not returned
       chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  });
+}
+
+/**
+ * @description Verifies PUT
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
+ * creates or replaces a single element.
+ */
+function putElement(done) {
+  const elemData = testData.elements[0];
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/${elemData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PUT',
+    body: JSON.stringify(elemData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const replacedElem = JSON.parse(body);
+
+    // Verify element created/replaced properly
+    chai.expect(replacedElem.id).to.equal(elemData.id);
+    chai.expect(replacedElem.name).to.equal(elemData.name);
+    chai.expect(replacedElem.custom).to.deep.equal(elemData.custom);
+    chai.expect(replacedElem.project).to.equal(projID);
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(replacedElem.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(replacedElem.source).to.equal(elemData.source);
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(replacedElem.target).to.equal(elemData.target);
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(replacedElem.parent).to.equal(elemData.parent);
+    }
+
+    // Verify additional properties
+    chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.createdOn).to.not.equal(null);
+    chai.expect(replacedElem.updatedOn).to.not.equal(null);
+
+    // Verify specific fields not returned
+    chai.expect(replacedElem).to.not.have.keys(['archived', 'archivedOn',
+      'archivedBy', '__v', '_id']);
+    done();
+  });
+}
+
+/**
+ * @description Verifies PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
+ * creates or replaces multiple elements.
+ */
+function putElements(done) {
+  const elemData = [
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
+  ];
+  request({
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PUT',
+    body: JSON.stringify(elemData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const replacedElements = JSON.parse(body);
+
+    // Expect replacedElements not to be empty
+    chai.expect(replacedElements.length).to.equal(elemData.length);
+    // Convert replacedElements to JMI type 2 for easier lookup
+    const jmi2Elements = jmi.convertJMI(1, 2, replacedElements, 'id');
+    // Loop through each element data object
+    elemData.forEach((elemObj) => {
+      const replacedElem = jmi2Elements[elemObj.id];
+
+      // Verify elements created/replaced properly
+      chai.expect(replacedElem.id).to.equal(elemObj.id);
+      chai.expect(replacedElem.name).to.equal(elemObj.name);
+      chai.expect(replacedElem.custom).to.deep.equal(elemObj.custom);
+      chai.expect(replacedElem.project).to.equal(projID);
+
+      // If documentation was provided, verify it
+      if (elemObj.hasOwnProperty('documentation')) {
+        chai.expect(replacedElem.documentation).to.equal(elemObj.documentation);
+      }
+      // If source was provided, verify it
+      if (elemObj.hasOwnProperty('source')) {
+        chai.expect(replacedElem.source).to.equal(elemObj.source);
+      }
+      // If target was provided, verify it
+      if (elemObj.hasOwnProperty('target')) {
+        chai.expect(replacedElem.target).to.equal(elemObj.target);
+      }
+      // If parent was provided, verify it
+      if (elemObj.hasOwnProperty('parent')) {
+        chai.expect(replacedElem.parent).to.equal(elemObj.parent);
+      }
+
+      // Verify additional properties
+      chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.createdOn).to.not.equal(null);
+      chai.expect(replacedElem.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(replacedElem).to.not.have.keys(['archived', 'archivedOn',
         'archivedBy', '__v', '_id']);
     });
     done();
