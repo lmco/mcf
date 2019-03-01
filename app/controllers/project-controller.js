@@ -900,6 +900,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       throw new M.CustomError('Invalid input for updating projects.', 400, 'warn');
     }
 
+    // TODO: Reevaluate placement of code block, consider putting after org find (inspect other fxn)
     // Create list of ids
     const arrIDs = [];
     try {
@@ -933,8 +934,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     .then((_foundOrganization) => {
       // Check if the organization was found
       if (_foundOrganization === null) {
-        throw new M.CustomError(`The org [${_foundOrganization._id}] was not `
-          + 'found.', 404, 'warn');
+        throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
       }
 
       // Find the projects to update
