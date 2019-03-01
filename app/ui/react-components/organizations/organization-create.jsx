@@ -154,7 +154,7 @@ class CreateOrganization extends Component{
                             </FormFeedback>
                         </FormGroup>
                         {/*Button to create org*/}
-                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Create Org </Button>
                     </Form>
                 </div>
             </div>
