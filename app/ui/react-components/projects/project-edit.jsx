@@ -111,7 +111,7 @@ class ProjectEdit extends Component{
 
         // Render project edit page
         return (
-            <div className='project-edit'>
+            <div className='project-forms'>
                 <h2>Project Edit</h2>
                 <hr />
                 <div>

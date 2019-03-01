@@ -22,6 +22,9 @@ import { Link } from 'react-router-dom';
 import List from '../general-components/list/list.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
 import { getRequest } from '../helper-functions/getRequest';
+import {Button, Modal, ModalBody} from "reactstrap";
+import CreateProject from './project-create.jsx';
+import DeleteProject from './project-delete.jsx';
 
 // Define component
 class ProjectList extends Component {
@@ -32,30 +35,43 @@ class ProjectList extends Component {
         // Initialize state props
         this.state = {
             width: null,
-            projects: []
+            projects: [],
+            admin: false,
+            modalCreate: false,
+            modalDelete: false,
+            error: null
         };
-
         // Create reference
         this.ref = React.createRef();
 
         // Bind component functions
         this.handleResize = this.handleResize.bind(this);
+        this.handleCreateToggle = this.handleCreateToggle.bind(this);
+        this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     }
 
     componentDidMount() {
         // Get projects user has permissions on
         getRequest('/api/projects')
         .then(projects => {
-            // Set projects state
-            this.setState({ projects: projects});
+            getRequest('/api/users/whoami')
+            .then(user => {
+                const admin = user.admin;
+
+                if (admin) {
+                    this.setState({admin: admin});
+                }
+
+                this.setState({ projects: projects});
+                window.addEventListener('resize', this.handleResize);
+                this.handleResize();
+            })
+            .catch(err => {
+                console.log(err);
+                this.setState({error: `Failed to grab user information: ${err}`});
+            });
         })
-        .catch(err => console.log(err));
-
-        // Add event listener for window resizing
-        window.addEventListener('resize', this.handleResize);
-
-        // Set initial size of window
-        this.handleResize();
+        .catch(err => this.setState({error: `Failed to load projects: ${err}`}));
     }
 
     componentWillUnmount() {
@@ -66,6 +82,14 @@ class ProjectList extends Component {
     handleResize() {
         // Set state to width of window
         this.setState({ width: this.ref.current.clientWidth })
+    }
+
+    handleCreateToggle() {
+        this.setState({ modalCreate: !this.state.modalCreate });
+    }
+
+    handleDeleteToggle() {
+        this.setState({ modalDelete: !this.state.modalDelete });
     }
 
     render() {
@@ -84,20 +108,49 @@ class ProjectList extends Component {
 
         // Return projet list
         return (
-            <div id='view' className='project-list' ref={this.ref}>
-                <h2>Your Projects</h2>
-                <hr/>
-                {/*Verify if there are projects*/}
-                {(this.state.projects.length === 0)
-                    ? (<div className='list-item'>
-                        <h3> No projects. </h3>
-                       </div>)
-                    // Display project list
-                    : (<List>
-                        {projects}
-                       </List>)
-                }
-            </div>
+            <React.Fragment>
+                <div>
+                    <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
+                        <ModalBody>
+                            { (this.state.modalCreate) ? <CreateProject /> : '' }
+                        </ModalBody>
+                    </Modal>
+                    <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+                        <ModalBody>
+                            { (this.state.modalDelete) ? <DeleteProject projects={this.state.projects}/> : '' }
+                        </ModalBody>
+                    </Modal>
+                </div>
+                <div id='view' className='project-list' ref={this.ref}>
+                    <div className='project-list-header'>
+                        <h2 className='project-header'>Your Projects</h2>
+                        {(!this.state.admin)
+                            ? ''
+                            : (<div className='project-button'>
+                                <Button className='btn'
+                                        outline color="danger"
+                                        onClick={this.handleDeleteToggle}>
+                                    Delete
+                                </Button>
+                                <Button className='btn'
+                                        outline color="secondary"
+                                        onClick={this.handleCreateToggle}>
+                                    Create
+                                </Button>
+                            </div>)
+                        }
+                    </div>
+                    <hr/>
+                    {(this.state.projects.length === 0)
+                        ? (<div className='list-item'>
+                            <h3> No projects. </h3>
+                           </div>)
+                        : (<List>
+                            {projects}
+                           </List>)
+                    }
+                </div>
+            </React.Fragment>
         )
     }
 }

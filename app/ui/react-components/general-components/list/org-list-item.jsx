@@ -62,6 +62,7 @@ class OrgListItem extends Component {
     render() {
         // Initialize variables
         const org = this.props.org;
+
         const stats = (
             // Create the stat list for the organization
             <StatsList>

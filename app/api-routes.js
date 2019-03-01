@@ -823,6 +823,69 @@ api.route('/projects')
  *       500:
  *         description: Internal Server Error, Failed to POST projects due to a
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - projects
+ *     description: Creates or replaces multiple projects from the supplied data
+ *                  in the request body. If the project already exists, it will
+ *                  be replaced along with the root model element. Returns the
+ *                  created projects' public data. NOTE this endpoint is
+ *                  reserved for system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projects
+ *         in: body
+ *         description: An array of objects containing new project data.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               custom:
+ *                 type: object
+ *               visibility:
+ *                 type: string
+ *                 default: private
+ *                 enum: [internal, private]
+ *               permissions:
+ *                 type: object
+ *                 description: Any preset permissions. Keys are the users
+ *                              usernames, and values are the permission.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT projects, returns project public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT projects due to invalid
+ *                      project data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT projects due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT projects due to invalid
+ *                      parameters.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT projects due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - projects
@@ -938,6 +1001,11 @@ api.route('/orgs/:orgid/projects')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProjects
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putProjects
 )
 .patch(
   AuthController.authenticate,
@@ -1068,6 +1136,75 @@ api.route('/orgs/:orgid/projects')
  *       500:
  *         description: Internal Server Error, Failed to POST project due to a
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - projects
+ *     description: Creates or replaces a project from the given data in the
+ *                  request body. If the project already exists, it will be
+ *                  replaced. NOTE this function is reserved for system-wide
+ *                  admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project to create/replace.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: project
+ *         description: The object containing the project data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: Must match the id in the request parameters.
+ *             name:
+ *               type: string
+ *             custom:
+ *               type: object
+ *             visibility:
+ *               type: string
+ *               default: private
+ *               enum: [internal, private]
+ *             permissions:
+ *               type: object
+ *               description: Any preset permissions. Keys are the users
+ *                            usernames, and values are the permission.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT project, return project public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT project due to invalid
+ *                      project data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT project due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT project due to an invalid
+ *                      parameter.
+ *       404:
+ *         description: Not Found, Failed to PUT project due to org not being
+ *                      found.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT project due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - projects
@@ -1180,6 +1317,11 @@ api.route('/orgs/:orgid/projects/:projectid')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProject
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putProject
 )
 .patch(
   AuthController.authenticate,
@@ -1426,6 +1568,92 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       500:
  *         description: Internal Server Error, Failed to POST elements due to a
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - elements
+ *     description: Creates or replaces multiple elements from the supplied data
+ *                  in the request body. In an element with a matching ID
+ *                  already exists, it is replaced. Returns the element's public
+ *                  data. NOTE this route is reserved for system-wide admins
+ *                  ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch whose elements are being
+ *                      created/replaced.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: body
+ *         in: body
+ *         description: An array of objects containing element data.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               parent:
+ *                 type: string
+ *                 default: 'model'
+ *               source:
+ *                 type: string
+ *                 description: Required if target is provided.
+ *               target:
+ *                 type: string
+ *                 description: Required if source is provided.
+ *               documentation:
+ *                 type: string
+ *                 default: ''
+ *                 description: An optional field to provided notes or
+ *                              description about an element.
+ *               type:
+ *                 type: string
+ *                 default: ''
+ *               custom:
+ *                 type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT elements, return element public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT elements due to invalid
+ *                      element data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT elements due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT elements due to invalid
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to PUT elements because branch,
+ *                      project or org did not exist.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT elements due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - elements
@@ -1565,6 +1793,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postElements
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putElements
 )
 .patch(
   AuthController.authenticate,
@@ -1729,6 +1962,95 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       500:
  *         description: Internal Server Error, Failed to POST element due to
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - elements
+ *     description: Creates or replaces an element from given data in the
+ *                  request body. If an element with the same ID already exists,
+ *                  it will be replaced. NOTE this route is reserved for system
+ *                  admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element to create/replace.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: body
+ *         description: The object containing the element data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the element. If provided, it must
+ *                      match the element ID provided in the path.
+ *             name:
+ *               type: string
+ *             parent:
+ *               type: string
+ *               default: 'model'
+ *               description: The ID of the parent element.
+ *             source:
+ *               type: string
+ *               description: An optional field that stores the ID of a source
+ *                            element. If provided, target is required.
+ *             target:
+ *               type: string
+ *               description: An optional field that stores the ID of a target
+ *                            element. If provided, source is required.
+ *             documentation:
+ *               type: string
+ *               default: ''
+ *               description: The documentation for the element.
+ *             type:
+ *               type: string
+ *               default: ''
+ *             custom:
+ *               type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT element, returns element public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT element due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT element due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT element due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to PUT element due to branch, project
+ *                      or org not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT element due to
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - elements
@@ -1870,6 +2192,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postElement
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putElement
 )
 .patch(
   AuthController.authenticate,

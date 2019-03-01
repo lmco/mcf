@@ -112,7 +112,7 @@ class OrganizationEdit extends Component{
 
         // Render organization edit page
         return (
-            <div className='org-edit'>
+            <div className='org-forms'>
                 <h2>Organization Edit</h2>
                 <hr />
                 <div>

@@ -332,6 +332,29 @@ label {
         font-size: 18px
     }
 
+    .org-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .org-header {
+        grid-area: header;
+        justify-content: flex-start;
+    }
+
+    .org-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+            margin-right: 5px;
+        }
+    }
+
     .list .list-item .list-header p {
         font-size: 15px;
     }
@@ -352,7 +375,7 @@ label {
     padding: 2em;
 }
 
-.org-edit {
+.org-forms {
     padding: 2em;
 
     .nested-form {
@@ -369,6 +392,29 @@ label {
     h2 {
         margin-bottom: 1em;
         font-size: 18px;
+    }
+
+    .project-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .project-header {
+        grid-area: header;
+        justify-content: flex-start;
+    }
+
+    .project-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+            margin: 5px;
+        }
     }
 
     .list .list-item .list-header p {
@@ -388,7 +434,7 @@ label {
     padding: 2em;
 }
 
-.project-edit {
+.project-forms {
     padding: 2em;
 
     .nested-form {

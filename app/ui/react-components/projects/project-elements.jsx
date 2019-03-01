@@ -19,17 +19,51 @@ import React, { Component } from "react";
 
 // MBEE Modules
 import ElementList from "../elements/element-list.jsx";
+import {getRequest} from "../helper-functions/getRequest";
 
 // Define component
 class ProjectElements extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
+
+        // Initialize state props
+        this.state = {
+            elements: null,
+            error: null
+        };
+    }
+
+    componentDidMount() {
+        // Verify if there are no elements
+        if (!this.props.elements){
+            const orgId = this.props.match.params.orgid;
+            const projId = this.props.match.params.projectid;
+            const url = `/api/orgs/${orgId}/projects/${projId}`;
+
+            // Grab all the elements
+            getRequest(`${url}/branches/master/elements?jmi3=true`)
+            .then(elements => {
+                // Set the element state
+                this.setState({ elements: elements });
+            })
+            .catch(err => {
+                console.log(err);
+                this.setState({error: 'Failed to load elements.'});
+            });
+        }
     }
 
     render() {
         // Initialize element data
-        const elements = this.props.elements;
+        let elements = null;
+
+        if (!this.props.elements){
+            elements = this.state.elements;
+        }
+        else {
+            elements = this.props.elements;
+        }
 
         // Loop through root elements
         const elementList = Object.keys(elements).map((key) => {

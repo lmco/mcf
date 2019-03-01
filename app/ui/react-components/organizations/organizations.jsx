@@ -29,17 +29,26 @@ class Organizations extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
+
+        this.state = {
+            user: null
+        };
     }
 
-    render () {
-        // Return org routes
+    componentDidMount(){
+        getRequest('/api/users/whoami')
+        .then(user => {
+            this.setState({user: user});
+        })
+    }
+
+    render() {
         return (
             <Router>
                 <Switch>
                     {/*Route to organizations list*/}
                     <Route exact path="/organizations" component={OrganizationList} />
-                    {/*Route to an organization's home page*/}
-                    <Route path="/:orgid" component={Organization} />
+                    <Route path="/:orgid" render={(props) => <Organization {...props} user={this.state.user}/>} />
                 </Switch>
             </Router>
         );

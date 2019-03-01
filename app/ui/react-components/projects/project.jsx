@@ -50,7 +50,6 @@ class Project extends Component {
         const projId = this.props.match.params.projectid;
         const url = `/api/orgs/${orgId}/projects/${projId}`;
 
-        // Set states
         this.setState({url: url});
         this.setState({orgid: orgId});
 
