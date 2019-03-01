@@ -92,9 +92,17 @@ class CreateProject extends Component{
 
     render() {
         // Initialize validators
+        let idInvalid;
         let nameInvalid;
         let customInvalid;
         let disableSubmit;
+
+        // Verify if project name is valid
+        if (!RegExp(validators.id).test(this.state.id)) {
+            // Set invalid fields
+            idInvalid = true;
+            disableSubmit = true;
+        }
 
         // Verify if project name is valid
         if(!RegExp(validators.project.name).test(this.state.name)) {
@@ -140,7 +148,12 @@ class CreateProject extends Component{
                                    id="id"
                                    placeholder="Project id"
                                    value={this.state.id || ''}
+                                   invalid={idInvalid}
                                    onChange={this.handleChange}/>
+                            {/*If invalid id, notify user*/}
+                            <FormFeedback >
+                                Invalid: A project id may only contain lower case letters, numbers, or dashes.
+                            </FormFeedback>
                         </FormGroup>
                         {/*Create an input to create a project name*/}
                         <FormGroup>
@@ -152,6 +165,10 @@ class CreateProject extends Component{
                                    value={this.state.name || ''}
                                    invalid={nameInvalid}
                                    onChange={this.handleChange}/>
+                            {/*If invalid name, notify user*/}
+                            <FormFeedback >
+                                Invalid: A project name may only contain letters, numbers, space, or dashes.
+                            </FormFeedback>
                         </FormGroup>
                         {/*Create an input for custom data*/}
                         <FormGroup>
@@ -177,4 +194,5 @@ class CreateProject extends Component{
     }
 }
 
+// Define component
 export default CreateProject
