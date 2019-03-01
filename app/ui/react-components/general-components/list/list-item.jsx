@@ -32,13 +32,12 @@ function ListItem(props) {
     if (props.routerLink) {
         <NavLink exact to={props.routerLink}> {listItem} </NavLink>
     }
-    // If href or onClick provided, ensure item has reference or on click function
-    else if (props.href || props.onClick) {
+    else if (props.href) {
         return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
     }
     // If element provided, ensure it prints the element name
     else if (props.element) {
-        return <div> {props.element.name} </div>
+        return <div className='element-item' onClick={props.onClick}> {props.element.name} </div>
     }
     // Else use basic list item format
     else {

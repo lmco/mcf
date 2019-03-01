@@ -37,7 +37,7 @@ class Project extends Component {
         this.state = {
             project: null,
             orgid: null,
-            element: null,
+            elements: null,
             url: null,
             error: null,
             admin: false
@@ -57,10 +57,9 @@ class Project extends Component {
         // Get project data
         getRequest(`${url}`)
         .then(project => {
-            // Get project's elements
-            getRequest(`${url}/branches/master/elements/model`)
-            .then(element => {
-                // Initialize variables
+            // Get project elements in JMI Type 3
+            getRequest(`${url}/branches/master/elements?jmi3=true`)
+            .then(elements => {
                 const username = this.props.user.username;
                 const perm = project.permissions[username];
                 const admin = this.props.user.admin;
@@ -73,7 +72,7 @@ class Project extends Component {
 
                 // Set states
                 this.setState({ project: project });
-                this.setState({ element: element });
+                this.setState({ elements: elements });
             })
             .catch(err => {
                 // Throw error and set state
@@ -117,8 +116,8 @@ class Project extends Component {
                                        render={ (props) => <ProjectUsers {...props} project={this.state.project} /> } />
                                 {/*Route to element page*/}
                                 <Route path={`${this.props.match.url}/elements`}
-                                       render={ (props) => <ProjectElements {...props} project={this.state.project} element={this.state.element} url={this.state.url}/> } />
-                                {/*Verify if user is admin*/}
+                                   render={ (props) => <ProjectElements {...props} project={this.state.project} elements={this.state.elements} /> } />
+                                {/*Verify admin user*/}
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}

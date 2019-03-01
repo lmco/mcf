@@ -179,7 +179,7 @@ ProjectSchema.statics.getPermissionLevels = function() {
  * @memberOf ProjectSchema
  */
 ProjectSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom', 'archived', 'permissions'];
+  return ['name', 'custom', 'archived', 'permissions', 'visibilty'];
 };
 ProjectSchema.statics.getValidUpdateFields = function() {
   return ProjectSchema.methods.getValidUpdateFields();

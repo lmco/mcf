@@ -18,42 +18,34 @@
 import React, { Component } from "react";
 
 // MBEE Modules
-import List from '../general-components/list/list.jsx';
-import ListItem from '../general-components/list/list-item.jsx';
-import ElementList from '../elements/element-list.jsx';
+import ElementList from "../elements/element-list.jsx";
 
 // Define component
 class ProjectElements extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
-
-        // Initialize state props
-        this.state = {
-            isExpanded: false
-        };
-
-        // Bind component functions
-        this.toggle = this.toggle.bind(this);
-    }
-
-    // Define toggle function
-    toggle() {
-        // Set expanded state
-        this.setState({isExpanded: !this.state.isExpanded});
     }
 
     render() {
+        // Initialize element data
+        const elements = this.props.elements;
+
+        // Loop through root elements
+        const elementList = Object.keys(elements).map((key) => {
+            // Initialize root
+            const rootElement = elements[key];
+
+            // Create the element list
+            return (<ElementList element={rootElement} />)
+        });
+
         // Return element list
         return (
             <div id='view' className='project-elements'>
                 <h2>Elements</h2>
                 <hr/>
-                <List>
-                    <ListItem element={this.props.element} />
-                    {/*Render element tree*/}
-                    <ElementList element={this.props.element} url={this.props.url}/>
-                </List>
+                {elementList}
             </div>
         )
     }
