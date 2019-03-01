@@ -17,6 +17,8 @@
 // React Modules
 import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
+
+// MBEE Modules
 import validators from '../../../../build/json/validators.json';
 import {getRequest} from "../helper-functions/getRequest";
 
@@ -97,7 +99,7 @@ class CreateProject extends Component{
         let customInvalid;
         let disableSubmit;
 
-        // Verify if project name is valid
+        // Verify if project id is valid
         if (!RegExp(validators.id).test(this.state.id)) {
             // Set invalid fields
             idInvalid = true;
@@ -121,9 +123,9 @@ class CreateProject extends Component{
             disableSubmit = true;
         }
 
-        // Return the form to create the project
+        // Return the form to create a project
         return (
-            <div className='org-edit'>
+            <div className='project-forms'>
                 <h2>New Project</h2>
                 <hr />
                 <div>
@@ -140,7 +142,7 @@ class CreateProject extends Component{
                                 {this.state.orgOpt}
                             </Input>
                         </FormGroup>
-                        {/*Create an input to create a project id*/}
+                        {/*Create an input for project id*/}
                         <FormGroup>
                             <Label for="id">Project ID</Label>
                             <Input type="id"
@@ -155,7 +157,7 @@ class CreateProject extends Component{
                                 Invalid: A project id may only contain lower case letters, numbers, or dashes.
                             </FormFeedback>
                         </FormGroup>
-                        {/*Create an input to create a project name*/}
+                        {/*Create an input for project name*/}
                         <FormGroup>
                             <Label for="name">Project Name</Label>
                             <Input type="name"
@@ -194,5 +196,5 @@ class CreateProject extends Component{
     }
 }
 
-// Define component
+// Export component
 export default CreateProject

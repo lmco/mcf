@@ -13,9 +13,10 @@
  *
  * @description This renders the organization create page.
  */
+
+// React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
-import validators from '../../../../build/json/validators.json';
+import {Form, FormGroup, Label, Input, Button} from 'reactstrap';
 
 // Define component
 class DeleteOrganization extends Component{
@@ -57,16 +58,20 @@ class DeleteOrganization extends Component{
     }
 
     render() {
+        // Loop through orgs
         const orgOptions = this.props.orgs.map((org) => {
+            // Create an org option
             return (<option value={org.id}>{org.name}</option>)
         });
 
+        // Return the form to delete org
         return (
-            <div className='org-edit'>
+            <div className='org-forms'>
                 <h2>Delete Organization</h2>
                 <hr />
                 <div>
                     <Form>
+                        {/*Select the organization*/}
                         <FormGroup>
                             <Label for="id">Organization ID</Label>
                             <Input type="select"
@@ -77,6 +82,7 @@ class DeleteOrganization extends Component{
                                 {orgOptions}
                             </Input>
                         </FormGroup>
+                        {/*Delete the organization selected*/}
                         <Button color='danger' onClick={this.onSubmit}> Delete </Button>
                     </Form>
                 </div>
@@ -85,4 +91,5 @@ class DeleteOrganization extends Component{
     }
 }
 
+// Export component
 export default DeleteOrganization
