@@ -29,10 +29,12 @@ class DeleteProject extends Component{
             org: null,
             id: null,
             orgOpt: null,
-            projectOpt: null
+            projectOpt: null,
+            error: null
         };
 
         // Bind component functions
+        this.handleOrgChange = this.handleOrgChange.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
     }
@@ -42,7 +44,7 @@ class DeleteProject extends Component{
         // Set the state of the changed states in the form
         this.setState({ [event.target.name]: event.target.value});
 
-        getRequest(`/api/orgs/${this.state.org}/projects`)
+        getRequest(`/api/orgs/${event.target.value}/projects`)
         .then(projects => {
             const projectOptions = projects.map((project) => {
                 return (<option value={project.id}>{project.name}</option>)
@@ -52,6 +54,7 @@ class DeleteProject extends Component{
         })
         .catch(err => {
             console.log(err);
+            this.setState({error: 'Failed to load projects.'})
         })
     }
 
@@ -107,6 +110,7 @@ class DeleteProject extends Component{
                                    id="org"
                                    value={this.state.org || ''}
                                    onChange={this.handleOrgChange}>
+                                <option>Choose one...</option>
                                 {this.state.orgOpt}
                             </Input>
                         </FormGroup>
@@ -117,6 +121,7 @@ class DeleteProject extends Component{
                                    id="id"
                                    value={this.state.id || ''}
                                    onChange={this.handleChange}>
+                                <option>Choose one...</option>
                                 {this.state.projectOpt}
                             </Input>
                         </FormGroup>
