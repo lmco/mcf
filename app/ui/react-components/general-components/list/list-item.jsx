@@ -25,22 +25,26 @@ function ListItem(props) {
     const listItem = (
         <div className='list-item'>
             {props.children}
-         </div>
+        </div>
     );
 
-    // If router link provided, ensure the item is a NavLink to route
+    // Verify router link provided
     if (props.routerLink) {
+        // Create a navLink item
         <NavLink exact to={props.routerLink}> {listItem} </NavLink>
     }
+    // Verify href provided
     else if (props.href) {
+        // Create a href item
         return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
     }
-    // If element provided, ensure it prints the element name
+    // Verify element provided
     else if (props.element) {
+        // Create an element item
         return <div className='element-item' onClick={props.onClick}> {props.element.name} </div>
     }
-    // Else use basic list item format
     else {
+        // Create basic item
         return listItem;
     }
 }

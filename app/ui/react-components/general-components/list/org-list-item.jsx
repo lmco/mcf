@@ -41,10 +41,10 @@ class OrgListItem extends Component {
     }
 
     componentDidMount() {
-        // Event listener of the size of the window
+        // Create event listener to resize window
         window.addEventListener('resize', this.handleResize);
 
-        // Handle initial size of window
+        // Set initial size of window
         this.handleResize();
     }
 
