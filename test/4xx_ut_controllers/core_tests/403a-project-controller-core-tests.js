@@ -203,10 +203,10 @@ function createOrReplaceProject(done) {
 
   // Create project via controller
   ProjController.createOrReplace(adminUser, org.id, projData)
-  .then((createdProjects) => {
-    // Expect createdProjects array to contain 1 project
-    chai.expect(createdProjects.length).to.equal(1);
-    const replacedProj = createdProjects[0];
+  .then((replacedProjects) => {
+    // Expect replacedProjects array to contain 1 project
+    chai.expect(replacedProjects.length).to.equal(1);
+    const replacedProj = replacedProjects[0];
 
     // Verify project created/replaced properly
     chai.expect(replacedProj.id).to.equal(utils.createID(org.id, projData.id));
