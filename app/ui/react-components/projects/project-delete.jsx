@@ -16,6 +16,7 @@
 import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
 import validators from '../../../../build/json/validators.json';
+import {getRequest} from "../helper-functions/getRequest";
 
 // Define component
 class DeleteProject extends Component{
@@ -28,12 +29,30 @@ class DeleteProject extends Component{
             org: null,
             id: null,
             orgOpt: null,
-            projOpt: null
+            projectOpt: null
         };
 
         // Bind component functions
         this.handleChange = this.handleChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+    }
+
+    // Define handle change function
+    handleOrgChange(event) {
+        // Set the state of the changed states in the form
+        this.setState({ [event.target.name]: event.target.value});
+
+        getRequest(`/api/orgs/${this.state.org}/projects`)
+        .then(projects => {
+            const projectOptions = projects.map((project) => {
+                return (<option value={project.id}>{project.name}</option>)
+            });
+
+            this.setState({projectOpt: projectOptions});
+        })
+        .catch(err => {
+            console.log(err);
+        })
     }
 
     // Define handle change function
@@ -60,16 +79,18 @@ class DeleteProject extends Component{
     }
 
     componentDidMount() {
-        const orgOptions = this.props.projects.map((project) => {
-            return (<options>{project.org}</options>)
-        });
+        getRequest(`/api/orgs/`)
+        .then(orgs => {
+            const orgOptions = orgs.map((org) => {
+                return (<option value={org.id}>{org.name}</option>)
+            });
 
-        const projectOptions = this.props.projects.map((project) => {
-            return (<options value={project.id}>{project.name}</options>)
-        });
-
-        this.setState({orgOpt: orgOptions});
-        this.setState({projOpt: projectOptions});
+            this.setState({orgOpt: orgOptions});
+        })
+        .catch(err => {
+            console.log(err);
+            this.setState({error: 'Failed to load organization.'})
+        })
     }
 
     render() {
@@ -85,7 +106,7 @@ class DeleteProject extends Component{
                                    name="org"
                                    id="org"
                                    value={this.state.org || ''}
-                                   onChange={this.handleChange}>
+                                   onChange={this.handleOrgChange}>
                                 {this.state.orgOpt}
                             </Input>
                         </FormGroup>
@@ -96,7 +117,7 @@ class DeleteProject extends Component{
                                    id="id"
                                    value={this.state.id || ''}
                                    onChange={this.handleChange}>
-                                {this.state.projOpt}
+                                {this.state.projectOpt}
                             </Input>
                         </FormGroup>
                         <Button color='danger' onClick={this.onSubmit}> Delete </Button>
