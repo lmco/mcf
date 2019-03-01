@@ -13,9 +13,12 @@
  *
  * @description This renders the organization create page.
  */
+
+// React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
-import validators from '../../../../build/json/validators.json';
+import {Form, FormGroup, Label, Input, Button} from 'reactstrap';
+
+// MBEE Modules
 import {getRequest} from "../helper-functions/getRequest";
 
 // Define component
@@ -39,23 +42,25 @@ class DeleteProject extends Component{
         this.onSubmit = this.onSubmit.bind(this);
     }
 
-    // Define handle change function
+    // Define handle org change function
     handleOrgChange(event) {
-        // Set the state of the changed states in the form
+        // Set the state of the changed orgs in the form
         this.setState({ [event.target.name]: event.target.value});
 
+        // Get all the projects from that org
         getRequest(`/api/orgs/${event.target.value}/projects`)
         .then(projects => {
+            // Loop through projects and create proj options
             const projectOptions = projects.map((project) => {
                 return (<option value={project.id}>{project.name}</option>)
             });
 
+            // Set the new project options
             this.setState({projectOpt: projectOptions});
         })
         .catch(err => {
-            console.log(err);
+            // Set the project options to empty if none found
             this.setState({projectOpt: []});
-            this.setState({error: 'Failed to load projects.'})
         })
     }
 
@@ -83,27 +88,32 @@ class DeleteProject extends Component{
     }
 
     componentDidMount() {
+        // Get all the organizations user is apart of
         getRequest(`/api/orgs/`)
         .then(orgs => {
+            // Loop through organizations and make them options
             const orgOptions = orgs.map((org) => {
                 return (<option value={org.id}>{org.name}</option>)
             });
 
+            // Set the org options state
             this.setState({orgOpt: orgOptions});
         })
         .catch(err => {
-            console.log(err);
+            // Set the error state if no orgs found
             this.setState({error: 'Failed to load organization.'})
         })
     }
 
     render() {
+        // Return the project delete form
         return (
             <div className='project-edit'>
                 <h2>Delete Organization</h2>
                 <hr />
                 <div>
                     <Form>
+                        {/*Create a form to choose the organization*/}
                         <FormGroup>
                             <Label for="org">Organization ID</Label>
                             <Input type="select"
@@ -115,6 +125,7 @@ class DeleteProject extends Component{
                                 {this.state.orgOpt}
                             </Input>
                         </FormGroup>
+                        {/*Create a form to choose the project*/}
                         <FormGroup>
                             <Label for="id">Project ID</Label>
                             <Input type="select"
@@ -126,6 +137,7 @@ class DeleteProject extends Component{
                                 {this.state.projectOpt}
                             </Input>
                         </FormGroup>
+                        {/*Button to submit and delete project*/}
                         <Button color='danger' onClick={this.onSubmit}> Delete </Button>
                     </Form>
                 </div>
@@ -134,4 +146,5 @@ class DeleteProject extends Component{
     }
 }
 
+// Define component
 export default DeleteProject
