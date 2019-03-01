@@ -87,7 +87,7 @@ class ProjectEdit extends Component{
         }
 
         return (
-            <div className='project-edit'>
+            <div className='project-forms'>
                 <h2>Project Edit</h2>
                 <hr />
                 <div>

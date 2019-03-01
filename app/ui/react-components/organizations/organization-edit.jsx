@@ -88,7 +88,7 @@ class OrganizationEdit extends Component{
         }
 
         return (
-            <div className='org-edit'>
+            <div className='org-forms'>
                 <h2>Organization Edit</h2>
                 <hr />
                 <div>

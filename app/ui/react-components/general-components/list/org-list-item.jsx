@@ -47,6 +47,7 @@ class OrgListItem extends Component {
 
     render() {
         const org = this.props.org;
+
         const stats = (
             <StatsList>
                 <Stat title='Projects' icon='fas fa-boxes' value={org.projects.length} _key={`${org.id}-projects`} />
