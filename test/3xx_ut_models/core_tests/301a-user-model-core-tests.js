@@ -26,7 +26,7 @@ const User = M.require('models.user');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 
 /* --------------------( Main )-------------------- */

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.604a-element-api-tests
+ * @module test.504a-element-mock-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -9,29 +9,29 @@
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description This tests the element API controller functionality:
- * GET, POST, PATCH, and DELETE of an element.
+ * @description This tests mock requests of the API controller functionality:
+ * GET, POST, PATCH, and DELETE elements.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
-const request = require('request');
 const path = require('path');
 
 // MBEE modules
+const ProjController = M.require('controllers.project-controller');
+const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
-// Variables used across test functions
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
-const test = M.config.test;
-let org = null;
 let adminUser = null;
+let org = null;
+let proj = null;
 let projID = null;
 
 /* --------------------( Main )-------------------- */
@@ -43,45 +43,52 @@ let projID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Create admin, organization, and project.
+   * After: Connect to database. Create an admin user, organization, and project
    */
   before((done) => {
     // Open the database connection
     db.connect()
     // Create test admin
     .then(() => testUtils.createTestAdmin())
-    .then((user) => {
-      // Set admin global user
-      adminUser = user;
+    .then((_adminUser) => {
+      // Set global admin user
+      adminUser = _adminUser;
 
-      // Create org
+      // Create organization
       return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
+      // Set global organization
       org = retOrg;
 
+      // Define project data
+      const projData = testData.projects[0];
+
       // Create project
-      return testUtils.createTestProject(adminUser, org.id);
+      return ProjController.create(adminUser, org.id, projData);
     })
     .then((retProj) => {
-      projID = utils.parseID(retProj.id).pop();
+      // Set global project
+      proj = retProj;
+      projID = utils.parseID(proj[0].id).pop();
       done();
     })
     .catch((error) => {
       M.log.error(error);
       // Expect no error
-      chai.expect(error.message).to.equal(null);
+      chai.expect(error).to.equal(null);
       done();
     });
   });
 
   /**
-   * After: Delete organization and admin user
+   * After: Remove Organization and project.
+   * Close database connection.
    */
   after((done) => {
-    // Delete organization
+    // Remove organization
+    // Note: Projects under organization will also be removed
     testUtils.removeTestOrg(adminUser)
-    // Delete admin user
     .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
     .then(() => done())
@@ -93,11 +100,12 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-  /* Execute the tests */
+  /* Execute tests */
   it('should POST an element', postElement);
   it('should POST multiple elements', postElements);
   it('should GET an element', getElement);
   it('should GET multiple elements', getElements);
+  it('should GET ALL elements', getAllElements);
   it('should GET an element through text search', searchElement);
   it('should PATCH an element', patchElement);
   it('should PATCH multiple elements', patchElements);
@@ -107,27 +115,30 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies POST
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
- * creates a single element.
+ * @description Verifies mock POST request to create an element.
  */
 function postElement(done) {
   const elemData = testData.elements[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/${elemData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(elemData)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const createdElement = JSON.parse(body);
+  // Create request object
+  const body = elemData;
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: elemData.id
+  };
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const createdElement = JSON.parse(_data);
 
     // Verify element created properly
     chai.expect(createdElement.id).to.equal(elemData.id);
@@ -162,14 +173,17 @@ function postElement(done) {
     chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
       'archivedBy', '__v', '_id']);
     done();
-  });
+  };
+
+  // POSTs an element
+  apiController.postElement(req, res);
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
- * creates multiple elements.
+ * @description Verifies mock POST request to create multiple elements.
  */
 function postElements(done) {
+  // Create request object
   const elemData = [
     testData.elements[1],
     testData.elements[2],
@@ -178,20 +192,20 @@ function postElements(done) {
     testData.elements[5],
     testData.elements[6]
   ];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(elemData)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
+  const params = { orgid: org.id, projectid: projID };
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, elemData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
     // Verify response body
-    const createdElements = JSON.parse(body);
+    const createdElements = JSON.parse(_data);
 
     // Expect createdElements not to be empty
     chai.expect(createdElements.length).to.equal(elemData.length);
@@ -235,29 +249,37 @@ function postElements(done) {
         'archivedBy', '__v', '_id']);
     });
     done();
-  });
+  };
+
+  // POSTs multiple elements
+  apiController.postElements(req, res);
 }
 
 /**
- * @description Verifies GET
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
- * finds a single element.
+ * @description Verifies mock GET request to get an element.
  */
 function getElement(done) {
   const elemData = testData.elements[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/${elemData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: elemData.id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
     // Verify response body
-    const foundElement = JSON.parse(body);
+    const foundElement = JSON.parse(_data);
 
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
@@ -292,12 +314,14 @@ function getElement(done) {
     chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
       'archivedBy', '__v', '_id']);
     done();
-  });
+  };
+
+  // GETs an element
+  apiController.getElement(req, res);
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
- * finds multiple elements.
+ * @description Verifies mock GET request to get multiple elements.
  */
 function getElements(done) {
   const elemData = [
@@ -308,20 +332,22 @@ function getElements(done) {
     testData.elements[5],
     testData.elements[6]
   ];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET',
-    body: JSON.stringify(elemData.map(e => e.id))
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
+
+  // Create request object
+  const params = { orgid: org.id, projectid: projID };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, elemData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
     // Verify response body
-    const foundElements = JSON.parse(body);
+    const foundElements = JSON.parse(_data);
 
     // Expect foundElements not to be empty
     chai.expect(foundElements.length).to.equal(elemData.length);
@@ -366,33 +392,120 @@ function getElements(done) {
         'archivedBy', '__v', '_id']);
     });
     done();
-  });
+  };
+
+  // GETs multiple elements
+  apiController.getElements(req, res);
 }
 
 /**
- * @description Verifies GET
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search
- * searches for elements using text based search.
+ * @description Verifies mock GET request to get all elements.
+ */
+function getAllElements(done) {
+  const elemData = [
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
+  ];
+
+  // Create request object
+  const params = { orgid: org.id, projectid: projID };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const foundElements = JSON.parse(_data);
+
+    // Expect foundElements not to be empty
+    chai.expect(foundElements.length).to.be.at.least(elemData.length);
+
+    // Convert foundElements to JMI type 2 for easier lookup
+    const jmi2Elements = jmi.convertJMI(1, 2, foundElements, 'id');
+    // Loop through each element data object
+    elemData.forEach((elemObj) => {
+      const foundElement = jmi2Elements[elemObj.id];
+
+      // Verify elements created properly
+      chai.expect(foundElement.id).to.equal(elemObj.id);
+      chai.expect(foundElement.name).to.equal(elemObj.name);
+      chai.expect(foundElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(foundElement.project).to.equal(projID);
+
+      // If documentation was provided, verify it
+      if (elemObj.hasOwnProperty('documentation')) {
+        chai.expect(foundElement.documentation).to.equal(elemObj.documentation);
+      }
+      // If source was provided, verify it
+      if (elemObj.hasOwnProperty('source')) {
+        chai.expect(foundElement.source).to.equal(elemObj.source);
+      }
+      // If target was provided, verify it
+      if (elemObj.hasOwnProperty('target')) {
+        chai.expect(foundElement.target).to.equal(elemObj.target);
+      }
+      // If parent was provided, verify it
+      if (elemObj.hasOwnProperty('parent')) {
+        chai.expect(foundElement.parent).to.equal(elemObj.parent);
+      }
+
+      // Verify additional properties
+      chai.expect(foundElement.createdBy).to.equal(adminUser.username);
+      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElement.createdOn).to.not.equal(null);
+      chai.expect(foundElement.updatedOn).to.not.equal(null);
+
+      // Verify specific fields not returned
+      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
+        'archivedBy', '__v', '_id']);
+    });
+    done();
+  };
+
+  // GETs multiple elements
+  apiController.getElements(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to search elements.
  */
 function searchElement(done) {
   const elemData = testData.elements[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/search?query="${elemData.name}"`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const resp = JSON.parse(body);
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: elemData.id
+  };
+  const query = { query: `"${elemData.name}"` };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method, query);
 
-    // Expect resp array to contains 1 element
-    chai.expect(resp.length).to.equal(1);
-    const foundElement = resp[0];
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const response = JSON.parse(_data);
+
+    // Expect response array to contains 1 element
+    chai.expect(response.length).to.equal(1);
+    const foundElement = response[0];
 
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
@@ -427,34 +540,41 @@ function searchElement(done) {
     chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
       'archivedBy', '__v', '_id']);
     done();
-  });
+  };
+
+  // GETs elements through text search
+  apiController.searchElements(req, res);
 }
 
 /**
- * @description Verifies PATCH
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
- * updates a single element.
+ * @description Verifies mock PATCH request to update an element.
  */
 function patchElement(done) {
   const elemData = testData.elements[0];
+  // Create updated elem object
   const updateObj = {
     id: elemData.id,
     name: `${elemData.name}_edit`
   };
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/${elemData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify(updateObj)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
+
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: testData.elements[0].id
+  };
+  const method = 'PATCH';
+  const req = testUtils.createRequest(adminUser, params, updateObj, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
     // Verify response body
-    const updatedElement = JSON.parse(body);
+    const updatedElement = JSON.parse(_data);
 
     // Verify element updated properly
     chai.expect(updatedElement.id).to.equal(elemData.id);
@@ -489,14 +609,17 @@ function patchElement(done) {
     chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
       'archivedBy', '__v', '_id']);
     done();
-  });
+  };
+
+  // PATCHs an element
+  apiController.patchElement(req, res);
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
- * updates multiple elements.
+ * @description Verifies mock PATCH request to update multiple elements.
  */
 function patchElements(done) {
+  // Create request object
   const elemData = [
     testData.elements[1],
     testData.elements[2],
@@ -505,24 +628,27 @@ function patchElements(done) {
     testData.elements[5],
     testData.elements[6]
   ];
-  const updateObj = elemData.map(e => ({
-    id: e.id,
-    name: `${e.name}_edit`
+
+  // Create objects to update elements
+  const arrUpdateObjects = elemData.map(p => ({
+    name: `${p.name}_edit`,
+    id: p.id
   }));
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify(updateObj)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
+
+  const params = { orgid: org.id, projectid: projID };
+  const method = 'PATCH';
+  const req = testUtils.createRequest(adminUser, params, arrUpdateObjects, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
     // Verify response body
-    const updatedElements = JSON.parse(body);
+    const updatedElements = JSON.parse(_data);
 
     // Expect updatedElements not to be empty
     chai.expect(updatedElements.length).to.equal(elemData.length);
@@ -567,41 +693,48 @@ function patchElements(done) {
         'archivedBy', '__v', '_id']);
     });
     done();
-  });
+  };
+
+  // PATCHs multiple elements
+  apiController.patchElements(req, res);
 }
 
 /**
- * @description Verifies DELETE
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
- * deletes a single element.
+ * @description Verifies mock DELETE request to delete an element.
  */
 function deleteElement(done) {
-  const elemData = testData.elements[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/${elemData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'DELETE'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const deleteElementID = JSON.parse(body);
+  // Create request object
+  const body = {};
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    elementid: testData.elements[0].id
+  };
+  const method = 'DELETE';
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
-    // Verify correct element deleted
-    chai.expect(deleteElementID).to.equal(elemData.id);
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const elementid = JSON.parse(_data);
+    chai.expect(elementid).to.equal(testData.elements[0].id);
     done();
-  });
+  };
+
+  // DELETEs an element
+  apiController.deleteElement(req, res);
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
- * deletes multiple elements.
+ * @description Verifies mock DELETE request to delete multiple elements.
  */
 function deleteElements(done) {
+  // Create request object
   const elemData = [
     testData.elements[1],
     testData.elements[2],
@@ -610,21 +743,25 @@ function deleteElements(done) {
     testData.elements[5],
     testData.elements[6]
   ];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify(elemData.map(e => e.id))
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const deletedElementIDs = JSON.parse(body);
-    chai.expect(deletedElementIDs).to.have.members(elemData.map(p => p.id));
+  const elemIDs = elemData.map(e => e.id);
+
+  const params = { orgid: org.id, projectid: projID };
+  const method = 'DELETE';
+  const req = testUtils.createRequest(adminUser, params, elemIDs, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const arrDeletedElemIDs = JSON.parse(_data);
+    chai.expect(arrDeletedElemIDs).to.have.members(elemData.map(p => p.id));
     done();
-  });
+  };
+
+  // DELETEs multiple elements
+  apiController.deleteElements(req, res);
 }

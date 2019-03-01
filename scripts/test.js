@@ -83,7 +83,7 @@ function test(_args) {
   // Create mocha object with options
   const mocha = new Mocha(opts);
   // Set the test directory
-  const testDir = `${M.root}/test/tests`;
+  const testDir = `${M.root}/test`;
 
   // Call the mochaWalk function to load in all of the test files
   mochaWalk(testDir, mocha);
