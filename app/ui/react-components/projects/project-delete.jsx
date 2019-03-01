@@ -54,6 +54,7 @@ class DeleteProject extends Component{
         })
         .catch(err => {
             console.log(err);
+            this.setState({projectOpt: []});
             this.setState({error: 'Failed to load projects.'})
         })
     }
