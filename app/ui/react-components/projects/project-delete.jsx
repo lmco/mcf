@@ -26,7 +26,9 @@ class DeleteProject extends Component{
         // Initialize state props
         this.state = {
             org: null,
-            id: null
+            id: null,
+            orgOpt: null,
+            projOpt: null
         };
 
         // Bind component functions
@@ -58,17 +60,16 @@ class DeleteProject extends Component{
     }
 
     componentDidMount() {
-        // function to call on click of key press
-        const k = (ev) => {
-            // key press is enter
-            if (ev.keyCode == 13) {
-                // submit the form
-                this.onSubmit();
-            };
-        };
+        const orgOptions = this.props.projects.map((project) => {
+            return (<options>{project.org}</options>)
+        });
 
-        // Add event listener for enter key
-        window.addEventListener("keypress", k);
+        const projectOptions = this.props.projects.map((project) => {
+            return (<options value={project.id}>{project.name}</options>)
+        });
+
+        this.setState({orgOpt: orgOptions});
+        this.setState({projOpt: projectOptions});
     }
 
     render() {
@@ -80,23 +81,25 @@ class DeleteProject extends Component{
                     <Form>
                         <FormGroup>
                             <Label for="org">Organization ID</Label>
-                            <Input type="org"
+                            <Input type="select"
                                    name="org"
                                    id="org"
-                                   placeholder="Organization id"
                                    value={this.state.org || ''}
-                                   onChange={this.handleChange}/>
+                                   onChange={this.handleChange}>
+                                {this.state.orgOpt}
+                            </Input>
                         </FormGroup>
                         <FormGroup>
                             <Label for="id">Project ID</Label>
-                            <Input type="id"
+                            <Input type="select"
                                    name="id"
                                    id="id"
-                                   placeholder="Project id"
                                    value={this.state.id || ''}
-                                   onChange={this.handleChange}/>
+                                   onChange={this.handleChange}>
+                                {this.state.projOpt}
+                            </Input>
                         </FormGroup>
-                        <Button onClick={this.onSubmit}> Delete </Button>
+                        <Button color='danger' onClick={this.onSubmit}> Delete </Button>
                     </Form>
                 </div>
             </div>

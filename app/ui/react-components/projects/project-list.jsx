@@ -107,7 +107,7 @@ class ProjectList extends Component {
                     </Modal>
                     <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                         <ModalBody>
-                            { (this.state.modalDelete) ? <DeleteProject /> : '' }
+                            { (this.state.modalDelete) ? <DeleteProject projects={this.state.projects}/> : '' }
                         </ModalBody>
                     </Modal>
                 </div>

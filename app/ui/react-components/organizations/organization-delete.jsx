@@ -77,7 +77,7 @@ class DeleteOrganization extends Component{
                                 {orgOptions}
                             </Input>
                         </FormGroup>
-                        <Button onClick={this.onSubmit}> Delete </Button>
+                        <Button color='danger' onClick={this.onSubmit}> Delete </Button>
                     </Form>
                 </div>
             </div>
