@@ -817,8 +817,8 @@ function update(requestingUser, organizationID, projects, options) {
 
 /**
  * @description This functions creates one or many projects from the provided
- * data. If projects with matching ids already exist, the function updates those
- * projects. This function is restricted to system-wide admins ONLY.
+ * data. If projects with matching ids already exist, the function replaces
+ * those projects. This function is restricted to system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
