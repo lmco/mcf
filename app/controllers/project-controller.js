@@ -966,6 +966,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     .then(() => Element.deleteMany({ _id: foundProjects.map(p => utils.createID(p._id, 'model')) }))
     // Delete projects from database
     .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
+    // Create the new/replaced projects
     .then(() => create(requestingUser, orgID, projectsToLookUp, options))
     .then((_createdProjects) => {
       createdProjects = _createdProjects;
