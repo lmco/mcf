@@ -266,39 +266,16 @@ label {
 /*                             Home Page Styling                              *
 /******************************************************************************/
 .mbee-home {
-    display: grid;
+    display: flex;
     height: 100%;
     width: 100%;
     position: absolute;
-    padding: 40px;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(10px, 1fr);
-    grid-template-areas:
-        "tile-col1" "tile-col2" "tile-col3";
-
-    .row:first-child {
-        padding-top: 0px;
-    }
-
-    .row {
-        padding-top: 20px;
-    }
-
-    .orgs {
-        grid-area: tile-col1;
-    }
-
-    .projects {
-        grid-area: tile-col2;
-    }
-
-    .users {
-        grid-area: tile-col3;
-    }
+    padding: 10px;
 
     .splash-row {
+        display: flex;
+        justify-content: center;
         position: relative;
-        padding-top: 50px;
         height: 75%;
         width: 100%;
         font-family: 'Helvetica Neue', Helvetica;
@@ -320,9 +297,9 @@ label {
 
     .home-links {
         display: flex;
+        flex-flow: wrap;
         justify-content: space-evenly;
-        align-items: top;
-        padding-top: 20px;
+        align-items: center;
         height: 100%;
         width: 100%;
 

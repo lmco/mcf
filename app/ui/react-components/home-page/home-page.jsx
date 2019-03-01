@@ -96,23 +96,21 @@ class HomePage extends Component {
                     </Modal>
                 </div>
                 <div className="mbee-home">
-                    <div className="row">
-                        <div className="home-links row">
-                            {
-                                (this.state.starredProjects.length > 0)
-                                    ?  this.state.starredProjects
-                                    : ''
-                            }
-                            <Tile href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
-                                Organizations
-                            </Tile>
-                            <Tile href={'/projects'} icon={'fas fa-box'} id='projects'>
-                                Projects
-                            </Tile>
-                            <Tile href={'/whoami'} icon={'fas fa-user-alt'} id='user'>
-                                User Settings
-                            </Tile>
-                        </div>
+                    <div className="home-links">
+                        {
+                            (this.state.starredProjects.length > 0)
+                                ?  this.state.starredProjects
+                                : ''
+                        }
+                        <Tile href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
+                            Organizations
+                        </Tile>
+                        <Tile href={'/projects'} icon={'fas fa-box'} id='projects'>
+                            Projects
+                        </Tile>
+                        <Tile href={'/whoami'} icon={'fas fa-user-alt'} id='user'>
+                            User Settings
+                        </Tile>
                     </div>
                 </div>
             </React.Fragment>
