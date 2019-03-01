@@ -17,7 +17,6 @@
 
 // Node modules
 const chai = require('chai');
-const path = require('path');
 
 // MBEE Modules
 const convertJMI = M.require('lib.jmi-conversions');

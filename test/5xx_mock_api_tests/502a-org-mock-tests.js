@@ -17,7 +17,6 @@
 
 // NPM modules
 const chai = require('chai');
-const path = require('path');
 
 // MBEE modules
 const db = M.require('lib.db');

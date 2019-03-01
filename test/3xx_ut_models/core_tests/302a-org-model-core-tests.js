@@ -19,9 +19,6 @@
  * setters, and getters.
  */
 
-// Node modules
-const path = require('path');
-
 // NPM modules
 const chai = require('chai');
 

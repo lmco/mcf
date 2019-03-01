@@ -18,7 +18,6 @@
 
 // NPM modules
 const chai = require('chai');
-const path = require('path');
 
 // MBEE modules
 const OrgController = M.require('controllers.organization-controller');

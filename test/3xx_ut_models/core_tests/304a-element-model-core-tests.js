@@ -20,7 +20,6 @@
 
 // Node modules
 const chai = require('chai');
-const path = require('path');
 
 // MBEE modules
 const Element = M.require('models.element');
