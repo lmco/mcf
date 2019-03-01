@@ -93,7 +93,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a project', createProject);
   it('should create multiple projects', createProjects);
   it('should create or replace a project', createOrReplaceProject);
-  it('should create and replace multiple projetcs', createOrReplaceProjects);
+  it('should create and replace multiple projects', createOrReplaceProjects);
   it('should find a project', findProject);
   it('should find multiple projects', findProjects);
   it('should find all projects', findAllProjects);
