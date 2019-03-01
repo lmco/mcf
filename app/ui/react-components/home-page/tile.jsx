@@ -16,7 +16,7 @@
 import React from 'react';
 
 function Tile(props) {
-    const classes = "col-2" + props.id;
+    const classes = "tile col-2" + props.id;
 
   return (
     <div className={classes} style={{'text-align': 'center'}}>

@@ -276,6 +276,14 @@ label {
     grid-template-areas:
         "tile-col1" "tile-col2" "tile-col3";
 
+    .row:first-child {
+        padding-top: 0px;
+    }
+
+    .row {
+        padding-top: 20px;
+    }
+
     .orgs {
         grid-area: tile-col1;
     }
@@ -313,8 +321,8 @@ label {
     .home-links {
         display: flex;
         justify-content: space-evenly;
-        align-items: center;
-        padding-top: 80px;
+        align-items: top;
+        padding-top: 20px;
         height: 100%;
         width: 100%;
 

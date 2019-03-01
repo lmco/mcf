@@ -20,19 +20,44 @@ import { Modal, ModalBody } from 'reactstrap';
 
 import Tile from './tile.jsx';
 import Space from '../general-components/space/space.jsx';
+import { getRequest } from '../helper-functions/getRequest.js';
 
 class HomePage extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            modal: false
+            modal: false,
+            user: null,
+            starredProjects: []
         };
 
         this.handleToggle = this.handleToggle.bind(this);
     }
 
     componentDidMount() {
+
+        const url = '/api/users/whoami';
+
+        getRequest(`${url}`)
+        .then(user => {
+            this.setState({user: user});
+            if (user.custom.hasOwnProperty('starred_projects')) {
+                 const starredProjects = user.custom.starred_projects.map(p => {
+                    return (
+                        <Tile href={'/' + p} icon={'fas fa-star'}>
+                            {p}
+                        </Tile>
+                    )
+                });
+                this.setState({starredProjects: starredProjects});
+            }
+        })
+        .catch(err => {
+            console.log(err);
+        });
+
+
         let buffer,
             latchId,
             code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13];
@@ -51,6 +76,9 @@ class HomePage extends Component {
             }
         };
         window.addEventListener("keyup", k);
+
+
+
     }
 
     handleToggle() {
@@ -70,15 +98,11 @@ class HomePage extends Component {
                 <div className="mbee-home">
                     <div className="row">
                         <div className="home-links row">
-                            <Tile href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
-                                Organizations
-                            </Tile>
-                            <Tile href={'/projects'} icon={'fas fa-box'} id='projects'>
-                                Projects
-                            </Tile>
-                            <Tile href={'/whoami'} icon={'fas fa-user-alt'} id='user'>
-                                User Settings
-                            </Tile>
+                            {
+                                (this.state.starredProjects.length > 0)
+                                    ?  this.state.starredProjects
+                                    : ''
+                            }
                             <Tile href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
                                 Organizations
                             </Tile>
