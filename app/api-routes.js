@@ -823,6 +823,69 @@ api.route('/projects')
  *       500:
  *         description: Internal Server Error, Failed to POST projects due to a
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - projects
+ *     description: Creates or replaces multiple projects from the supplied data
+ *                  in the request body. If the project already exists, it will
+ *                  be replaced along with the root model element. Returns the
+ *                  created projects' public data. NOTE this endpoint is
+ *                  reserved for system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projects
+ *         in: body
+ *         description: An array of objects containing new project data.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               custom:
+ *                 type: object
+ *               visibility:
+ *                 type: string
+ *                 default: private
+ *                 enum: [internal, private]
+ *               permissions:
+ *                 type: object
+ *                 description: Any preset permissions. Keys are the users
+ *                              usernames, and values are the permission.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT projects, returns project public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT projects due to invalid
+ *                      project data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT projects due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT projects due to invalid
+ *                      parameters.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT projects due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - projects
@@ -938,6 +1001,11 @@ api.route('/orgs/:orgid/projects')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProjects
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putProjects
 )
 .patch(
   AuthController.authenticate,
@@ -1068,6 +1136,75 @@ api.route('/orgs/:orgid/projects')
  *       500:
  *         description: Internal Server Error, Failed to POST project due to a
  *                      server side issue.
+ *   put:
+ *     tags:
+ *       - projects
+ *     description: Creates or replaces a project from the given data in the
+ *                  request body. If the project already exists, it will be
+ *                  replaced. NOTE this function is reserved for system-wide
+ *                  admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project to create/replace.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: project
+ *         description: The object containing the project data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: Must match the id in the request parameters.
+ *             name:
+ *               type: string
+ *             custom:
+ *               type: object
+ *             visibility:
+ *               type: string
+ *               default: private
+ *               enum: [internal, private]
+ *             permissions:
+ *               type: object
+ *               description: Any preset permissions. Keys are the users
+ *                            usernames, and values are the permission.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT project, return project public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT project due to invalid
+ *                      project data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT project due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT project due to an invalid
+ *                      parameter.
+ *       404:
+ *         description: Not Found, Failed to PUT project due to org not being
+ *                      found.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT project due to a
+ *                      server side issue.
  *   patch:
  *     tags:
  *       - projects
@@ -1180,6 +1317,11 @@ api.route('/orgs/:orgid/projects/:projectid')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.postProject
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putProject
 )
 .patch(
   AuthController.authenticate,
