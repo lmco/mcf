@@ -17,10 +17,11 @@
 import React from 'react';
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
+import { Button, Modal, ModalBody } from 'reactstrap';
+import CreateProject from '../projects/project-create.jsx';
 
 
 function OrganizationProjects(props) {
-
     const org = props.org;
 
     const listItems = org.projects.map(project =>
@@ -28,13 +29,34 @@ function OrganizationProjects(props) {
     );
 
     return (
-        <div id='view' className='org-projects'>
-            <h2>Projects</h2>
-            <hr />
-            <List>
-                {listItems}
-            </List>
-        </div>
+        <React.Fragment>
+            <div>
+                <Modal isOpen={props.modal} toggle={props.handleToggle}>
+                    <ModalBody>
+                        {(props.write) ? <CreateProject org={org}/> : '' }
+                    </ModalBody>
+                </Modal>
+            </div>
+            <div id='view' className='org-projects'>
+                <div className='project-list-header'>
+                     <h2 className='project-header'>Projects</h2>
+                    {(!props.write)
+                        ? ''
+                        :(<div className='project-button'>
+                            <Button className='btn'
+                                    outline color="secondary"
+                                    onClick={props.handleToggle}>
+                                Create
+                            </Button>
+                         </div>)
+                    }
+                </div>
+                <hr />
+                <List>
+                    {listItems}
+                </List>
+            </div>
+        </React.Fragment>
     )
 }
 

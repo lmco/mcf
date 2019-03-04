@@ -343,6 +343,7 @@ label {
     .org-header {
         grid-area: header;
         justify-content: flex-start;
+        margin: 0;
     }
 
     .org-button {
@@ -366,8 +367,33 @@ label {
 
 .org-projects {
     padding: 2em;
+
     .list .list-header p {
         font-size: 15px;
+    }
+
+    .project-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .project-header {
+        grid-area: header;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .project-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+            margin: 5px;
+        }
     }
 }
 
@@ -405,6 +431,7 @@ label {
     .project-header {
         grid-area: header;
         justify-content: flex-start;
+        margin: 0;
     }
 
     .project-button {
