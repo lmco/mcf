@@ -26,7 +26,6 @@ import OrgHome from './organization-home.jsx'
 import OrgProjects from './organization-projects.jsx'
 import OrgUsers from './organization-users.jsx'
 import OrgEdit from './organization-edit.jsx'
-import CreateProject from '../projects/project-create.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component

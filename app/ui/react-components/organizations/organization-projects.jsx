@@ -17,11 +17,11 @@
 
 // React Modules
 import React from 'react';
+import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
-import { Button, Modal, ModalBody } from 'reactstrap';
 import CreateProject from '../projects/project-create.jsx';
 
 // Define function

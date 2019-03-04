@@ -17,14 +17,14 @@
 // React Modules
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-import {Button, Modal, ModalBody} from "reactstrap";
 import CreateProject from './project-create.jsx';
 import DeleteProject from './project-delete.jsx';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProjectList extends Component {

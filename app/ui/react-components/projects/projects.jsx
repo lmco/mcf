@@ -17,7 +17,7 @@
 // React Modules
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import ReactDOM from "react-dom";
+import ReactDOM from 'react-dom';
 
 // MBEE Moduels
 import ProjectList from './project-list.jsx';
