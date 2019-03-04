@@ -113,7 +113,7 @@ class ProjectList extends Component {
                 </div>
                 <div id='view' className='project-list' ref={this.ref}>
                     <div className='project-list-header'>
-                        <h2 className='project-header'>Your Projects</h2>
+                        <h2 className='project-header'>Projects</h2>
                         {(!this.state.admin)
                             ? ''
                             : (<div className='project-button'>
