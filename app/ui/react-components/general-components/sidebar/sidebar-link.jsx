@@ -20,7 +20,7 @@ import { UncontrolledTooltip } from 'reactstrap';
 function SidebarLink(props) {
     const sidebarItem = (
         <div className='sidebar-item' id={props.title}>
-            {(!props.isExpanded) ? <i className={props.icon}/> : ''}
+            <i className={props.icon}/>
             {(!props.isExpanded) ?
                 <UncontrolledTooltip placement='right'
                                      target={props.title}
