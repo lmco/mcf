@@ -23,6 +23,7 @@ import OrgHome from './organization-home.jsx'
 import OrgProjects from './organization-projects.jsx'
 import OrgUsers from './organization-users.jsx'
 import OrgEdit from './organization-edit.jsx'
+import CreateProject from '../projects/project-create.jsx';
 
 import { getRequest } from '../helper-functions/getRequest.js';
 
@@ -33,7 +34,8 @@ class Organization extends Component {
         this.state = {
             org: null,
             error: null,
-            admin: false
+            admin: false,
+            write: false
         };
     }
 
@@ -46,6 +48,11 @@ class Organization extends Component {
 
             if ((admin) || (perm === 'admin')){
                 this.setState({admin: true});
+            }
+
+            // Verify is user has write permissions
+            if(admin || (perm === 'write')) {
+                this.setState({write: true});
             }
 
             this.setState({org: org})
@@ -69,6 +76,10 @@ class Organization extends Component {
                             ?(<SidebarLink title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
                             : ''
                         }
+                        {(this.state.write)
+                            ? (<SidebarLink title='New-Project' icon='fas fa-plus-circle' routerLink={`${this.props.match.url}/newprojects`} />)
+                            : ''
+                        }
                     </Sidebar>
                     {(!this.state.org)
                         ? <div className="loading"> {this.state.error || 'Loading your organization...'} </div>
@@ -82,6 +93,11 @@ class Organization extends Component {
                                 {(this.state.admin)
                                     ? (<Route path={`${this.props.match.url}/edit`}
                                              render={(props) => <OrgEdit {...props} org={this.state.org}/>}/>)
+                                    : ''
+                                }
+                                {(this.state.write)
+                                    ? (<Route path={`${this.props.match.url}/newproject`}
+                                              render={(props) => <CreateProject {...props} org={this.state.org}/>}/>)
                                     : ''
                                 }
                             </Switch>)
