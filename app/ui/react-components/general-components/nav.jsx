@@ -32,7 +32,7 @@ import {
     DropdownItem } from 'reactstrap';
 
 // MBEE Modules
-import { getRequest } from '../helper-functions/getRequest.js';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class MbeeNav extends Component {
@@ -61,7 +61,7 @@ class MbeeNav extends Component {
         const url = '/api/users/whoami';
 
         // Confirm if user exists
-        getRequest(`${url}`)
+        ajaxRequest('GET', url)
         .then(user => {
             // Set user state
             this.setState({user: user});
