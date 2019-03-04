@@ -18,8 +18,8 @@
 import React, { Component } from "react";
 
 // MBEE Modules
-import ElementList from "../elements/element-list.jsx";
-import {getRequest} from "../helper-functions/getRequest";
+import ElementList from '../elements/element-list.jsx';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProjectElements extends Component {
@@ -42,14 +42,13 @@ class ProjectElements extends Component {
             const url = `/api/orgs/${orgId}/projects/${projId}`;
 
             // Grab all the elements
-            getRequest(`${url}/branches/master/elements?jmi3=true`)
+            ajaxRequest('GET',`${url}/branches/master/elements?jmi3=true`)
             .then(elements => {
                 // Set the element state
                 this.setState({ elements: elements });
             })
             .catch(err => {
-                console.log(err);
-                this.setState({error: 'Failed to load elements.'});
+                this.setState({error: `Failed to load elements: ${err}`});
             });
         }
     }
@@ -58,10 +57,13 @@ class ProjectElements extends Component {
         // Initialize element data
         let elements = null;
 
+        // Verify if elements were in props
         if (!this.props.elements){
+            // Set the element state
             elements = this.state.elements;
         }
         else {
+            // Set the element state
             elements = this.props.elements;
         }
 

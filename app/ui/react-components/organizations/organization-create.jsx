@@ -19,6 +19,7 @@ import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
 
 // MBEE Modules
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
 
 // Define component
@@ -48,6 +49,7 @@ class CreateOrganization extends Component{
     // Define submit function
     onSubmit(){
         // Initialize org data
+        const url = `/api/orgs/${this.state.id}`;
         let data = {
             id: this.state.id,
             name: this.state.name,
@@ -55,18 +57,14 @@ class CreateOrganization extends Component{
         };
 
         // Post the new org
-        jQuery.ajax({
-            method: "POST",
-            url: `/api/orgs/${this.state.id}`,
-            data: data
-        })
-        .done(() => {
+        ajaxRequest('POST', url, data)
+        .then(() => {
             // On success, return the orgs page
             window.location.replace(`/organizations`);
         })
-        .fail((msg) => {
+        .catch((err) => {
             // On failure, alert user
-            alert( `Create Failed: ${msg.responseJSON.description}`);
+            alert( `Create Failed: ${err.responseJSON.description}`);
         });
     }
 

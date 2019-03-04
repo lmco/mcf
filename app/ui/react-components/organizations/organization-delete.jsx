@@ -18,6 +18,9 @@
 import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, Button} from 'reactstrap';
 
+// MBEE Modules
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
+
 // Define component
 class DeleteOrganization extends Component{
     constructor(props) {
@@ -42,18 +45,16 @@ class DeleteOrganization extends Component{
 
     // Define the on submit function
     onSubmit(){
+        const url =  `/api/orgs/${this.state.id}`;
         // Delete the organization selected
-        jQuery.ajax({
-            method: "DELETE",
-            url: `/api/orgs/${this.state.id}`
-        })
-        .done(() => {
+        ajaxRequest('DELETE', url)
+        .then(() => {
             // On success, return to the organizations page
             window.location.replace(`/organizations`);
         })
-        .fail((msg) => {
+        .catch((err) => {
             // On failure, notify user of failure
-            alert( `Delete Failed: ${msg.responseJSON.description}`);
+            alert( `Delete Failed: ${err.responseJSON.description}`);
         });
     }
 
