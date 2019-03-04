@@ -13,14 +13,18 @@
  *
  * @description This renders a project's home page.
  */
+
+// React Modules
 import React from 'react';
 
+// Define function
 function ProjectHome(props) {
+    // Initialize variables
     const project = props.project;
-
     const orgId = project.org;
     const projId = project.id;
 
+    // Render project data in table format
     return (
         <div id='view' className='project-home'>
             <h2>{project.name}</h2>
@@ -43,4 +47,5 @@ function ProjectHome(props) {
     )
 }
 
+// Export function
 export default ProjectHome

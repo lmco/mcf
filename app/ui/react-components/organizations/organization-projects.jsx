@@ -14,20 +14,28 @@
  *
  * @description This renders an organization's projects list.
  */
+
+// React Modules
 import React from 'react';
+
+// MBEE Modules
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
 import { Button, Modal, ModalBody } from 'reactstrap';
 import CreateProject from '../projects/project-create.jsx';
 
-
+// Define function
 function OrganizationProjects(props) {
+    // Initialize variables
     const org = props.org;
 
+    // Loop through the org's projects
     const listItems = org.projects.map(project =>
+        // Create the project list item
         <ListItem href={`/${org.id}/${project.id}`}> {project.name} </ListItem>
     );
 
+    // Return the org's project list
     return (
         <React.Fragment>
             <div>
@@ -60,4 +68,5 @@ function OrganizationProjects(props) {
     )
 }
 
+// Export function
 export default OrganizationProjects

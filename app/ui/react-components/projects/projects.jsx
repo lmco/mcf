@@ -13,41 +13,54 @@
  *
  * @description This renders the routes for the project pages.
  */
+
+// React Modules
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import ReactDOM from "react-dom";
 
+// MBEE Moduels
 import ProjectList from './project-list.jsx';
 import Project from './project.jsx';
-import { getRequest } from '../helper-functions/getRequest.js';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
+// Define component
 class Projects extends Component {
-
   constructor(props) {
+      // Initialize parent props
       super(props);
 
+      // Initialize state props
       this.state = {
-          user: null
+          user: null,
+          error: null
       };
   }
 
   componentDidMount(){
-    getRequest('/api/users/whoami')
+    // Get user data
+    ajaxRequest('GET','/api/users/whoami')
     .then(user => {
-          this.setState({user: user});
-      })
+        // Set user state
+        this.setState({user: user});
+    })
+    .catch((err) => this.setState({error: err.responseJSON.description}))
   }
 
   render() {
+      // Return project routes
       return (
           <Router>
               <Switch>
-                  <Route exact path="/projects" component={ProjectList}/>
-                  <Route path="/:orgid/:projectid" render={(props) => <Project {...props} user={this.state.user}/> } />
+                  {/*Route to projects list*/}
+                  <Route exact path="/projects" component={ProjectList} />
+                  {/*Route to a project's home page*/}
+                  <Route path="/:orgid/:projectid" render={ (props) => <Project {...props} user={this.state.user}/> } />
               </Switch>
           </Router>
       );
   }
 }
 
+// Render on main html element
 ReactDOM.render(<Projects />, document.getElementById('main'));

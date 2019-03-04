@@ -13,29 +13,39 @@
  *
  * @description This renders a stat.
  */
+
+// React Modules
 import React, { Component } from 'react';
 import { UncontrolledTooltip } from 'reactstrap';
 
+// Define component
 class Stat extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
 
+        // Create reference
         this.ref = React.createRef();
     }
 
     componentDidMount() {
+        // Set the child width and title of the parent props
         this.props.setChildWidth(this.props.title, this.ref.current.clientWidth)
     }
 
     render() {
+        // Return stats
         return (
+            // Create stat div with key or title
             <div className='stats-item' ref={this.ref} id={this.props._key || this.props.title}>
                 <i className={this.props.icon}/>
+                {/*If prop value does not exist, display a '?'*/}
                 <p>{isNaN(this.props.value)
                     ? '?'
                     : this.props.value
                 }
                 </p>
+                {/*Create hover title for icon*/}
                 <UncontrolledTooltip placement='top'
                                      target={this.props._key || this.props.title}
                                      delay={{
@@ -51,4 +61,5 @@ class Stat extends Component {
     }
 }
 
+// Export component
 export default Stat;
