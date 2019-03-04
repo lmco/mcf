@@ -49,8 +49,10 @@ function OrganizationProjects(props) {
             <div id='view' className='org-projects'>
                 <div className='project-list-header'>
                      <h2 className='project-header'>Projects</h2>
+                    {/*Verify user has write permissions*/}
                     {(!props.write)
                         ? ''
+                        // Display project create button
                         :(<div className='project-button'>
                             <Button className='btn'
                                     outline color="secondary"
@@ -61,6 +63,7 @@ function OrganizationProjects(props) {
                     }
                 </div>
                 <hr />
+                {/*Display list of projects*/}
                 <List>
                     {listItems}
                 </List>

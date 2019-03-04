@@ -142,7 +142,9 @@ class CreateProject extends Component{
                 <hr />
                 <div>
                     <Form>
+                        {/*Verify if org is already provided*/}
                         {(!this.props.org)
+                            // Let user choose which org
                             ? (
                                 // Create options to choose the organization
                                 <FormGroup>
@@ -157,6 +159,7 @@ class CreateProject extends Component{
                                     </Input>
                                 </FormGroup>
                             )
+                            // Display org deleting from
                             : (<h2>{this.props.org.name}</h2>)
                         }
                         {/*Create an input for project id*/}
