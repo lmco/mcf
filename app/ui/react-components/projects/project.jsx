@@ -79,7 +79,7 @@ class Project extends Component {
                 <React.Fragment>
                     <Sidebar>
                         <SidebarLink title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
-                        <SidebarLink title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
+                        <SidebarLink title='Members' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
                         <SidebarLink title='Elements' icon='fas fa-sitemap' routerLink={`${this.props.match.url}/elements`} />
                         <hr />
                         {(this.state.admin)

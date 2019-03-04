@@ -63,7 +63,7 @@ class Organization extends Component {
                     <Sidebar>
                         <SidebarLink title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
                         <SidebarLink title='Projects' icon='fas fa-boxes' routerLink={`${this.props.match.url}/projects`} />
-                        <SidebarLink title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
+                        <SidebarLink title='Members' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
                         <hr />
                         {(this.state.admin)
                             ?(<SidebarLink title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)

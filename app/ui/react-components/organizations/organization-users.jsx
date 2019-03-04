@@ -15,7 +15,8 @@
  * @description This renders an organization's members.
  */
 import React from 'react';
-import ListItem from '../general-components/list/list-item.jsx';
+
+import UserListItem from '../general-components/list/user-list-item.jsx';
 import List from '../general-components/list/list.jsx';
 
 
@@ -23,12 +24,12 @@ function OrganizationUsers(props) {
     const users = Object.keys(props.org.permissions);
 
     const listItems = users.map(user =>
-        <ListItem> {user} </ListItem>
+        <UserListItem user={user} permission={props.org.permissions[user]}/>
     );
 
     return (
         <div id='view' className='org-users'>
-            <h2>Users</h2>
+            <h2>Members</h2>
             <hr />
             <List>
                 {listItems}
