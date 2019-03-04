@@ -25,7 +25,7 @@ import ProjectHome from './project-home.jsx'
 import ProjectUsers from './project-users.jsx'
 import ProjectElements from './project-elements.jsx'
 import ProjectEdit from './project-edit.jsx'
-import { getRequest } from '../helper-functions/getRequest.js';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class Project extends Component {
@@ -55,10 +55,10 @@ class Project extends Component {
         this.setState({orgid: orgId});
 
         // Get project data
-        getRequest(`${url}`)
+        ajaxRequest('GET',`${url}`)
         .then(project => {
             // Get project elements in JMI Type 3
-            getRequest(`${url}/branches/master/elements?jmi3=true`)
+            ajaxRequest('GET',`${url}/branches/master/elements?jmi3=true`)
             .then(elements => {
                 // Initialize variables
                 const username = this.props.user.username;

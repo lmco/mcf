@@ -19,6 +19,7 @@ import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
 
 // MBEE Modules
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
 
 // Define component
@@ -47,23 +48,19 @@ class UserEdit extends Component{
 
     // Define the submit function
     onSubmit(){
+        const url = `/api/users/${this.props.user.username}`;
+        const data= {
+            fname: this.state.fname,
+            lname: this.state.lname,
+            custom: JSON.parse(this.state.custom)
+        };
         // Send a patch request to update user data
-        jQuery.ajax({
-            method: "PATCH",
-            url: `/api/users/${this.props.user.username}`,
-            data: {
-                fname: this.state.fname,
-                lname: this.state.lname,
-                custom: JSON.parse(this.state.custom)
-            }
-        })
-        // On success
-        .done(() => {
+        ajaxRequest('PATCH', url, data)
+        .then(() => {
             // Update the page to reload to user home page
             window.location.replace('/whoami');
         })
-        // On fail
-        .fail((msg) => {
+        .catch((msg) => {
             // Let user know update failed
             alert( `Update Failed: ${msg.responseJSON.description}`);
         });

@@ -24,7 +24,7 @@ import Sidebar from '../general-components/sidebar/sidebar.jsx'
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx'
 import UserHome from './user-home.jsx';
 import UserEdit from './user-edit.jsx';
-import { getRequest } from '../helper-functions/getRequest.js';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class User extends Component {
@@ -41,7 +41,7 @@ class User extends Component {
 
     componentDidMount() {
         // Get user data
-        getRequest('/api/users/whoami')
+        ajaxRequest('GET','/api/users/whoami')
         .then(user => {
             // Set user state
             this.setState({ user: user});

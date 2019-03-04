@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
 
 // MBEE Modules
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
 
 // Define component
@@ -52,6 +53,7 @@ class OrganizationEdit extends Component{
         // Initialize variables
         const username = this.state.username;
         const permissions = this.state.permissions;
+        const url = `/api/orgs/${this.props.org.id}`;
         let data = {
             name: this.state.name,
             custom: JSON.parse(this.state.custom)
@@ -69,21 +71,18 @@ class OrganizationEdit extends Component{
             };
         }
 
+
         // Send a patch request to update org data
-        jQuery.ajax({
-            method: "PATCH",
-            url: `/api/orgs/${this.props.org.id}`,
-            data: data
-        })
+        ajaxRequest('PATCH', url, data)
         // On success
-        .done(() => {
+        .then(() => {
             // Update the page to reload to org home page
             window.location.replace(`/${this.props.org.id}`);
         })
         // On fail
-        .fail((msg) => {
+        .catch((err) => {
             // Let user know update failed
-            alert( `Update Failed: ${msg.responseJSON.description}`);
+            alert( `Update Failed: ${err.responseJSON.description}`);
         });
     }
 

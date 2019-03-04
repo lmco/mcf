@@ -19,6 +19,7 @@ import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
 
 // MBEE Modules
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
 
 // Define component
@@ -69,18 +70,12 @@ class ProjectEdit extends Component{
         }
 
         // Send a patch request to update project data
-        jQuery.ajax({
-            method: "PATCH",
-            url: this.props.url,
-            data: data
-        })
-        // On success
-        .done(() => {
+        ajaxRequest('PATCH', this.props.url, data)
+        .then(() => {
             // Update the page to reload to project home page
             window.location.replace(`/${this.props.orgid}/${this.props.project.id}`);
         })
-        // On fail
-        .fail((msg) => {
+        .catch((msg) => {
             // Let user know update failed
             alert( `Update Failed: ${msg.responseJSON.description}`);
         })

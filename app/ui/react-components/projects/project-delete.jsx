@@ -19,7 +19,7 @@ import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, Button} from 'reactstrap';
 
 // MBEE Modules
-import { getRequest } from "../helper-functions/getRequest";
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class DeleteProject extends Component{
@@ -48,7 +48,7 @@ class DeleteProject extends Component{
         this.setState({ [event.target.name]: event.target.value});
 
         // Get all the projects from that org
-        getRequest(`/api/orgs/${event.target.value}/projects`)
+        ajaxRequest('GET',`/api/orgs/${event.target.value}/projects`)
         .then(projects => {
             // Loop through projects and create proj options
             const projectOptions = projects.map((project) => {
@@ -72,16 +72,14 @@ class DeleteProject extends Component{
 
     // Define the on submit function
     onSubmit(){
+        const url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
         // Delete the project selected
-        jQuery.ajax({
-            method: "DELETE",
-            url: `/api/orgs/${this.state.org}/projects/${this.state.id}`
-        })
-        .done(() => {
+        ajaxRequest('DELETE', url)
+        .then(() => {
             // On success, return to the projects page
             window.location.replace(`/projects`);
         })
-        .fail((msg) => {
+        .catch((msg) => {
             // On failure, notify user of failure
             alert( `Delete Failed: ${msg.responseJSON.description}`);
         });
@@ -89,7 +87,7 @@ class DeleteProject extends Component{
 
     componentDidMount() {
         // Get all the organizations user is apart of
-        getRequest(`/api/orgs/`)
+        ajaxRequest('GET',`/api/orgs/`)
         .then(orgs => {
             // Loop through organizations and make them options
             const orgOptions = orgs.map((org) => {

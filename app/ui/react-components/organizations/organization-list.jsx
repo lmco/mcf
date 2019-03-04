@@ -25,7 +25,7 @@ import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
 import CreateOrganization from './organization-create.jsx';
 import DeleteOrganization from './organization-delete.jsx';
-import { getRequest } from '../helper-functions/getRequest';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class OrganizationList extends Component {
@@ -53,10 +53,10 @@ class OrganizationList extends Component {
 
     componentDidMount() {
         // Get all orgs with their projects
-        getRequest('/api/orgs?populate=projects')
+        ajaxRequest('GET','/api/orgs?populate=projects')
         .then(orgs => {
             // Get the users information
-            getRequest('/api/users/whoami')
+            ajaxRequest('GET','/api/users/whoami')
                 .then(user => {
                     // Verify if admin user
                     if (user.admin) {

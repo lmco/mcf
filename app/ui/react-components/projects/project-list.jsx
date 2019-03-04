@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom';
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
-import { getRequest } from '../helper-functions/getRequest.js';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import {Button, Modal, ModalBody} from "reactstrap";
 import CreateProject from './project-create.jsx';
 import DeleteProject from './project-delete.jsx';
@@ -53,10 +53,10 @@ class ProjectList extends Component {
 
     componentDidMount() {
         // Get projects user has permissions on
-        getRequest('/api/projects')
+        ajaxRequest('GET','/api/projects')
         .then(projects => {
             // Get user information
-            getRequest('/api/users/whoami')
+            ajaxRequest('GET','/api/users/whoami')
             .then(user => {
                 // Verify user is admin
                 if (user.admin) {

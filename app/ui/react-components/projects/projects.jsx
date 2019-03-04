@@ -22,7 +22,7 @@ import ReactDOM from "react-dom";
 // MBEE Moduels
 import ProjectList from './project-list.jsx';
 import Project from './project.jsx';
-import { getRequest } from '../helper-functions/getRequest.js';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class Projects extends Component {
@@ -32,17 +32,19 @@ class Projects extends Component {
 
       // Initialize state props
       this.state = {
-          user: null
+          user: null,
+          error: null
       };
   }
 
   componentDidMount(){
     // Get user data
-    getRequest('/api/users/whoami')
+    ajaxRequest('GET','/api/users/whoami')
     .then(user => {
         // Set user state
         this.setState({user: user});
-      })
+    })
+    .catch((err) => this.setState({error: err.responseJSON.description}))
   }
 
   render() {

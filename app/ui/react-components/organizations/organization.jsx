@@ -26,7 +26,7 @@ import OrgHome from './organization-home.jsx'
 import OrgProjects from './organization-projects.jsx'
 import OrgUsers from './organization-users.jsx'
 import OrgEdit from './organization-edit.jsx'
-import { getRequest } from '../helper-functions/getRequest.js';
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class Organization extends Component {
@@ -44,7 +44,7 @@ class Organization extends Component {
 
     componentDidMount() {
         // Get the organization and it's projects
-        getRequest(`/api/orgs/${this.props.match.params.orgid}?populate=projects`)
+        ajaxRequest('GET', `/api/orgs/${this.props.match.params.orgid}?populate=projects`)
         .then(org => {
             // Initialize variables
             const username = this.props.user.username;
