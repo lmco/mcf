@@ -82,7 +82,8 @@ class Sidebar extends Component {
                 </div>
                 <div className='sidebar-collapse'>
                     <hr/>
-                    <SidebarLink title='Collapse'
+                    <SidebarLink id='Collapse'
+                                 title='Collapse'
                                  icon='fas fa-angle-right'
                                  tooltip='Expand Sidebar'
                                  onClick={this.toggle}

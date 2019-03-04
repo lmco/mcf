@@ -56,11 +56,19 @@ class CreateProject extends Component{
             name: this.state.name,
             custom: JSON.parse(this.state.custom)
         };
+        let org;
+
+        if (!this.props.org) {
+            org = this.state.org;
+        }
+        else {
+            org = this.props.org.id;
+        }
 
         // Post the new project
         jQuery.ajax({
             method: "POST",
-            url: `/api/orgs/${this.state.org}/projects/${this.state.id}`,
+            url: `/api/orgs/${org}/projects/${this.state.id}`,
             data: data
         })
         .done(() => {
@@ -74,8 +82,9 @@ class CreateProject extends Component{
     }
 
     componentDidMount() {
-        // Get all the organizations user is apart of
-        getRequest(`/api/orgs/`)
+        if (!this.props.org) {
+            // Get all the organizations user is apart of
+            getRequest(`/api/orgs/`)
             .then(orgs => {
                 // Loop through organizations and make them options
                 const orgOptions = orgs.map((org) => {
@@ -89,6 +98,7 @@ class CreateProject extends Component{
                 // Set the error state if no orgs found
                 this.setState({error: 'Failed to load organization.'})
             })
+        }
     }
 
 
@@ -126,22 +136,27 @@ class CreateProject extends Component{
         // Return the form to create a project
         return (
             <div className='project-forms'>
-                <h2>New Project</h2>
+                <h2>New Project </h2>
                 <hr />
                 <div>
                     <Form>
-                        {/*Create options to choose the organization*/}
-                        <FormGroup>
-                            <Label for="org">Organization ID</Label>
-                            <Input type="select"
-                                   name="org"
-                                   id="org"
-                                   value={this.state.org || ''}
-                                   onChange={this.handleChange}>
-                                <option>Choose one...</option>
-                                {this.state.orgOpt}
-                            </Input>
-                        </FormGroup>
+                        {(!this.props.org)
+                            ? (
+                                // Create options to choose the organization
+                                <FormGroup>
+                                    <Label for="org">Organization ID</Label>
+                                    <Input type="select"
+                                           name="org"
+                                           id="org"
+                                           value={this.state.org || ''}
+                                           onChange={this.handleChange}>
+                                        <option>Choose one...</option>
+                                        {this.state.orgOpt}
+                                    </Input>
+                                </FormGroup>
+                            )
+                            : (<h2>{this.props.org.name}</h2>)
+                        }
                         {/*Create an input for project id*/}
                         <FormGroup>
                             <Label for="id">Project ID</Label>

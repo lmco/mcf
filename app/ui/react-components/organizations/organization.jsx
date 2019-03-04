@@ -68,16 +68,16 @@ class Organization extends Component {
             <Router>
                 <React.Fragment>
                     <Sidebar>
-                        <SidebarLink title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
-                        <SidebarLink title='Projects' icon='fas fa-boxes' routerLink={`${this.props.match.url}/projects`} />
-                        <SidebarLink title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
+                        <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
+                        <SidebarLink id='Projects' title='Projects' icon='fas fa-boxes' routerLink={`${this.props.match.url}/projects`} />
+                        <SidebarLink id='Users' title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
                         <hr />
                         {(this.state.admin)
-                            ?(<SidebarLink title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
+                            ?(<SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
                             : ''
                         }
                         {(this.state.write)
-                            ? (<SidebarLink title='New-Project' icon='fas fa-plus-circle' routerLink={`${this.props.match.url}/newprojects`} />)
+                            ? (<SidebarLink id='New-Project' title='New Project' icon='fas fa-plus-circle' routerLink={`${this.props.match.url}/newproject`} />)
                             : ''
                         }
                     </Sidebar>
