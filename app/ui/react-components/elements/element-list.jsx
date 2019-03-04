@@ -49,7 +49,7 @@ class ElementList extends Component {
         const containsData = element.contains;
         const lengthData = Object.keys(containsData).length;
 
-        // Check if element has children
+        // Check if an element has children
         if (lengthData > 0) {
             // Loop through children recursively call ElementList
             const elementList = Object.keys(containsData).map((key) => {
@@ -71,11 +71,11 @@ class ElementList extends Component {
         else {
             // Return element
             return (<List>
-                <ElementListItem element={element} onClick={this.toggle}/>
-            </List>)
+                        <ElementListItem element={element} onClick={this.toggle}/>
+                    </List>)
         }
     }
 }
 
-// Export Element
+// Export component
 export default ElementList

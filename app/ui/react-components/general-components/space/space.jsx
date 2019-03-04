@@ -12,11 +12,17 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  */
+
+// React Modules
 import React, { Component } from 'react';
+
+// MBEE Modules
 import start from './space.js';
 
+// Define component
 class Space extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
     }
 
@@ -25,6 +31,7 @@ class Space extends Component {
     }
 
     render() {
+        // Render space
         return (
             <canvas id="game-canvas"
                     style={{
@@ -49,4 +56,5 @@ class Space extends Component {
     }
 }
 
+// Export component
 export default Space;

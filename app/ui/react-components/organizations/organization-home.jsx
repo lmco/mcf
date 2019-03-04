@@ -14,11 +14,16 @@
  *
  * @description This renders an organization's home page.
  */
+
+// React Modules
 import React from 'react';
 
+// Define function
 function OrganizationHome(props) {
+    // Initialize variables
     const org = props.org;
 
+    // Render organization data in table format
     return (
         <div id='view' className='org-home'>
             <h2>{org.name}</h2>
@@ -37,4 +42,5 @@ function OrganizationHome(props) {
     )
 }
 
+// Export function
 export default OrganizationHome

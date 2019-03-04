@@ -13,11 +13,16 @@
  *
  * @description This renders a user's home page.
  */
+
+// React Modules
 import React from 'react';
 
+// Define function
 function UserHome(props) {
+    // Initialize variables
     const user = props.user;
 
+    // Render user data in table format
     return (
         <div id='view' className='user-home'>
             <h2>{user.name}</h2>
@@ -40,4 +45,5 @@ function UserHome(props) {
     )
 }
 
+// Export function
 export default UserHome
