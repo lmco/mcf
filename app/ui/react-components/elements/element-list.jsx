@@ -19,7 +19,7 @@ import React, { Component } from 'react';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
-import ListItem from '../general-components/list/list-item.jsx';
+import ElementListItem from '../general-components/list/element-list-item.jsx';
 
 // Define component
 class ElementList extends Component {
@@ -58,7 +58,7 @@ class ElementList extends Component {
 
             // Return the List
             return (<List>
-                        <ListItem element={element} onClick={this.toggle}/>
+                        <ElementListItem element={element} onClick={this.toggle}/>
                         <List className='guideline'>
                             {/*Verify if element children should be displayed*/}
                             {(!this.state.isOpen)
@@ -71,7 +71,7 @@ class ElementList extends Component {
         else {
             // Return element
             return (<List>
-                <ListItem element={element} onClick={this.toggle}/>
+                <ElementListItem element={element} onClick={this.toggle}/>
             </List>)
         }
     }

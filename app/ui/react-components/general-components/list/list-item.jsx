@@ -30,9 +30,6 @@ function ListItem(props) {
     else if (props.href) {
         return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
     }
-    else if (props.element) {
-        return <div className='element-item' onClick={props.onClick}> {props.element.name} </div>
-    }
     else {
         return listItem;
     }
