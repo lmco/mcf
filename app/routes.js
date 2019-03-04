@@ -162,14 +162,6 @@ router.route('/:orgid/projects')
   UIController.organizations
 );
 
-/* This renders an organization's project create page for a user */
-router.route('/:orgid/newproject')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.organizations
-);
-
 /* This renders an organization's edit form for an admin user */
 router.route('/:orgid/edit')
 .get(
