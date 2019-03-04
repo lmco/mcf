@@ -30,7 +30,7 @@ class Projects extends Component {
       // Initialize parent props
       super(props);
 
-      // Initalize state props
+      // Initialize state props
       this.state = {
           user: null
       };

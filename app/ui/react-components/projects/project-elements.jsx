@@ -58,10 +58,13 @@ class ProjectElements extends Component {
         // Initialize element data
         let elements = null;
 
+        // Verify if elements were in props
         if (!this.props.elements){
+            // Set the element state
             elements = this.state.elements;
         }
         else {
+            // Set the element state
             elements = this.props.elements;
         }
 

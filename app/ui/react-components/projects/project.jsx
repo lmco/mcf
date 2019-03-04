@@ -50,6 +50,7 @@ class Project extends Component {
         const projId = this.props.match.params.projectid;
         const url = `/api/orgs/${orgId}/projects/${projId}`;
 
+        // Set states
         this.setState({url: url});
         this.setState({orgid: orgId});
 
@@ -59,6 +60,7 @@ class Project extends Component {
             // Get project elements in JMI Type 3
             getRequest(`${url}/branches/master/elements?jmi3=true`)
             .then(elements => {
+                // Initialize variables
                 const username = this.props.user.username;
                 const perm = project.permissions[username];
                 const admin = this.props.user.admin;

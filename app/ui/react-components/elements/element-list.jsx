@@ -77,5 +77,5 @@ class ElementList extends Component {
     }
 }
 
-// Export Element
+// Export component
 export default ElementList

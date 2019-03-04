@@ -46,30 +46,38 @@ class OrganizationList extends Component {
         // Create reference
         this.ref = React.createRef();
 
+        // Bind component functions
         this.handleCreateToggle = this.handleCreateToggle.bind(this);
         this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     }
 
     componentDidMount() {
+        // Get all orgs with their projects
         getRequest('/api/orgs?populate=projects')
         .then(orgs => {
+            // Get the users information
             getRequest('/api/users/whoami')
                 .then(user => {
-                    const admin = user.admin;
-
-                    if (admin) {
-                        this.setState({admin: admin});
+                    // Verify if admin user
+                    if (user.admin) {
+                        // Set admin state
+                        this.setState({admin: user.admin});
                     }
 
+                    // Set org state
                     this.setState({ orgs: orgs });
+
+                    // Create event listener for window resizing
                     window.addEventListener('resize', this.handleResize);
+                    // Handle initial size of window
                     this.handleResize();
                 })
                 .catch(err => {
-                    console.log(err);
+                    // Throw error and set error state
                     this.setState({error: `Failed to grab user information: ${err}`});
                 });
         })
+        // Throw error and set error state
         .catch(err => this.setState({error: `Failed to load organizations: ${err}`}));
     }
 
@@ -83,11 +91,15 @@ class OrganizationList extends Component {
         this.setState({ width: this.ref.current.clientWidth })
     }
 
+    // Define toggle function
     handleCreateToggle() {
+        // Set the create modal state
         this.setState({ modalCreate: !this.state.modalCreate });
     }
 
+    // Define toggle function
     handleDeleteToggle() {
+        // Set the delete modal state
         this.setState({ modalDelete: !this.state.modalDelete });
     }
 
@@ -104,22 +116,27 @@ class OrganizationList extends Component {
         return (
             <React.Fragment>
                 <div>
+                    {/*Modal for creating an org*/}
                     <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                         <ModalBody>
                             { (this.state.modalCreate) ? <CreateOrganization /> : '' }
                         </ModalBody>
                     </Modal>
+                    {/*Modal for deleting an org*/}
                     <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                         <ModalBody>
                             { (this.state.modalDelete) ? <DeleteOrganization orgs={this.state.orgs}/> : '' }
                         </ModalBody>
                     </Modal>
                 </div>
+                {/*Display the list of organizations*/}
                 <div id='view' className='org-list' ref={this.ref}>
                     <div className='org-list-header'>
                         <h2 className='org-header'>Your Organizations</h2>
+                        {/*Verify user is an admin */}
                         {(!this.state.admin)
                             ? ''
+                            // Display create and delete buttons
                             : (<div className='org-button'>
                                     <Button className='btn'
                                             outline color="danger"
@@ -135,6 +152,7 @@ class OrganizationList extends Component {
                         }
                     </div>
                     <hr/>
+                    {/*Verify there are orgs*/}
                     {(this.state.orgs.length === 0)
                         ? (<div className='list-item'>
                             <h3> No organizations. </h3>

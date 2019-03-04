@@ -20,7 +20,7 @@ import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
 
 // MBEE Modules
 import validators from '../../../../build/json/validators.json';
-import {getRequest} from "../helper-functions/getRequest";
+import { getRequest } from "../helper-functions/getRequest";
 
 // Define component
 class CreateProject extends Component{

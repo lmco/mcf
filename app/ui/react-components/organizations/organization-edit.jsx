@@ -61,12 +61,12 @@ class OrganizationEdit extends Component{
         if(username && permissions) {
             // Change data object
             data = {
-                    name: this.state.name,
-                    permissions: {
-                        [username]: this.state.permissions
-                    },
-                    custom: JSON.parse(this.state.custom)
-                };
+                name: this.state.name,
+                permissions: {
+                    [username]: this.state.permissions
+                },
+                custom: JSON.parse(this.state.custom)
+            };
         }
 
         // Send a patch request to update org data

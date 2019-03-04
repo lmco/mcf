@@ -19,7 +19,7 @@ import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, Button} from 'reactstrap';
 
 // MBEE Modules
-import {getRequest} from "../helper-functions/getRequest";
+import { getRequest } from "../helper-functions/getRequest";
 
 // Define component
 class DeleteProject extends Component{

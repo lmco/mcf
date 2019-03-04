@@ -23,6 +23,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 // MBEE Modules
 import OrganizationList from './organization-list.jsx';
 import Organization from './organization.jsx';
+import { getRequest } from "../helper-functions/getRequest.js";
 
 // Define component
 class Organizations extends Component {
@@ -30,14 +31,17 @@ class Organizations extends Component {
         // Initialize parent props
         super(props);
 
+        // Initialize state props
         this.state = {
             user: null
         };
     }
 
     componentDidMount(){
+        // Get the users information
         getRequest('/api/users/whoami')
         .then(user => {
+            // Set user state
             this.setState({user: user});
         })
     }
@@ -48,6 +52,7 @@ class Organizations extends Component {
                 <Switch>
                     {/*Route to organizations list*/}
                     <Route exact path="/organizations" component={OrganizationList} />
+                    {/*Route to organization*/}
                     <Route path="/:orgid" render={(props) => <Organization {...props} user={this.state.user}/>} />
                 </Switch>
             </Router>

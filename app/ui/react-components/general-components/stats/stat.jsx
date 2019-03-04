@@ -39,7 +39,7 @@ class Stat extends Component {
             // Create stat div with key or title
             <div className='stats-item' ref={this.ref} id={this.props._key || this.props.title}>
                 <i className={this.props.icon}/>
-                {/*Ff prop value does not exist, display a '?'*/}
+                {/*If prop value does not exist, display a '?'*/}
                 <p>{isNaN(this.props.value)
                     ? '?'
                     : this.props.value

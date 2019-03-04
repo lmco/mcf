@@ -26,7 +26,7 @@ function SidebarLink(props) {
         <div className='sidebar-item' id={props.title}>
             {/*if sidebar is not expanded, set as the icon*/}
             {(!props.isExpanded) ? <i className={props.icon}/> : ''}
-            {/*if sidebard is not expanded, set a name when hovering over icon*/}
+            {/*if sidebar is not expanded, set a name when hovering over icon*/}
             {(!props.isExpanded) ?
                 <UncontrolledTooltip placement='right'
                                      target={props.title}

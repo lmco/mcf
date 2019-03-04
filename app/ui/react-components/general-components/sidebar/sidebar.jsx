@@ -80,7 +80,7 @@ class Sidebar extends Component {
     toggle(event) {
         // Get the sidebar html element and toggle it
         document.getElementById('sidebar').classList.toggle('sidebar-expanded');
-        // if window width changes force sidebar closed
+        // If window width changes force sidebar closed
         if (event) {
             if (window.innerWidth >= 1200 && this.state.isExpanded) {
                 this.setState({forceClosed: true});
