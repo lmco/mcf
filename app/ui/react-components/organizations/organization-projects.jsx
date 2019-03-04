@@ -39,9 +39,10 @@ function OrganizationProjects(props) {
     return (
         <React.Fragment>
             <div>
+                {/*Modal for creating a project*/}
                 <Modal isOpen={props.modal} toggle={props.handleToggle}>
                     <ModalBody>
-                        {(props.write) ? <CreateProject org={org}/> : '' }
+                        <CreateProject org={org}/>
                     </ModalBody>
                 </Modal>
             </div>

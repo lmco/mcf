@@ -124,13 +124,13 @@ class ProjectList extends Component {
                     {/*Modal for creating a project*/}
                     <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                         <ModalBody>
-                            { (this.state.modalCreate) ? <CreateProject /> : '' }
+                            <CreateProject />
                         </ModalBody>
                     </Modal>
                     {/*Modal for deleting a project*/}
                     <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                         <ModalBody>
-                            { (this.state.modalDelete) ? <DeleteProject projects={this.state.projects}/> : '' }
+                            <DeleteProject projects={this.state.projects}/>
                         </ModalBody>
                     </Modal>
                 </div>

@@ -107,7 +107,7 @@ class DeleteProject extends Component{
         // Return the project delete form
         return (
             <div className='project-forms'>
-                <h2>Delete Organization</h2>
+                <h2>Delete Project</h2>
                 <hr />
                 <div>
                     <Form>
