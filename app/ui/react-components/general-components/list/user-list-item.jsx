@@ -12,11 +12,15 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This renders a list item.
+ * @description This renders a user list item.
  */
+
+// React Modules
 import React from 'react';
 
+// Define function
 function UserListItem(props) {
+    // Return the user list item
     return (
         <div className='stats-list-item'>
             <p> {props.user} </p>
@@ -25,4 +29,5 @@ function UserListItem(props) {
     );
 }
 
+// Export function
 export default UserListItem;
