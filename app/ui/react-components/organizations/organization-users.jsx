@@ -14,19 +14,26 @@
  *
  * @description This renders an organization's members.
  */
+
+// React Modules
 import React from 'react';
 
+// MBEE Modules
 import UserListItem from '../general-components/list/user-list-item.jsx';
 import List from '../general-components/list/list.jsx';
 
-
+// Define function
 function OrganizationUsers(props) {
+    // Initialize variables
     const users = Object.keys(props.org.permissions);
 
+    // Loop through org members
     const listItems = users.map(user =>
+        // Create user list item
         <UserListItem user={user} permission={props.org.permissions[user]}/>
     );
 
+    // Return org member list
     return (
         <div id='view' className='org-users'>
             <h2>Members</h2>
@@ -39,4 +46,5 @@ function OrganizationUsers(props) {
     )
 }
 
+// Export function
 export default OrganizationUsers
