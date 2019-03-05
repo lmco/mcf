@@ -22,7 +22,7 @@ const chai = require('chai');
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -176,7 +176,7 @@ function postProjects(done) {
     chai.expect(createdProjects.length).to.equal(projData.length);
 
     // Convert createdProjects to JMI type 2 for easier lookup
-    const jmi2Projects = utils.convertJMI(1, 2, createdProjects, 'id');
+    const jmi2Projects = jmi.convertJMI(1, 2, createdProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
       const createdProj = jmi2Projects[projDataObject.id];
@@ -393,7 +393,7 @@ function getProjects(done) {
     chai.expect(foundProjects.length).to.equal(projData.length);
 
     // Convert foundProjects to JMI type 2 for easier lookup
-    const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
+    const jmi2Projects = jmi.convertJMI(1, 2, foundProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
       const foundProj = jmi2Projects[projDataObject.id];
@@ -455,7 +455,7 @@ function getAllProjectsOnOrg(done) {
     chai.expect(foundProjects.length).to.equal(projData.length);
 
     // Convert foundProjects to JMI type 2 for easier lookup
-    const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
+    const jmi2Projects = jmi.convertJMI(1, 2, foundProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
       const foundProj = jmi2Projects[projDataObject.id];
@@ -515,7 +515,7 @@ function getAllProjects(done) {
     chai.expect(foundProjects.length).to.equal(projData.length);
 
     // Convert foundProjects to JMI type 2 for easier lookup
-    const jmi2Projects = utils.convertJMI(1, 2, foundProjects, 'id');
+    const jmi2Projects = jmi.convertJMI(1, 2, foundProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
       const foundProj = jmi2Projects[projDataObject.id];
@@ -632,7 +632,7 @@ function patchProjects(done) {
     chai.expect(updateProjects.length).to.equal(projData.length);
 
     // Convert updateProjects to JMI type 2 for easier lookup
-    const jmi2Projects = utils.convertJMI(1, 2, updateProjects, 'id');
+    const jmi2Projects = jmi.convertJMI(1, 2, updateProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
       const updatedProj = jmi2Projects[projDataObject.id];

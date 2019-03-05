@@ -41,6 +41,7 @@ const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
+const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -651,7 +652,7 @@ function update(requestingUser, organizationID, projects, options) {
       existingUsers = foundUsers.map(u => u._id);
 
       // Convert projectsToUpdate to JMI type 2
-      const jmiType2 = utils.convertJMI(1, 2, projectsToUpdate);
+      const jmiType2 = jmi.convertJMI(1, 2, projectsToUpdate);
       const bulkArray = [];
       const promises = [];
       // Get array of editable parameters

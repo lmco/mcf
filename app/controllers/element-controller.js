@@ -41,6 +41,7 @@ const Project = M.require('models.project');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
+const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds one or many elements. Depending on the
@@ -428,7 +429,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Attempt to convert elements to JMI type 2, to see if duplicate ids exist
     try {
-      utils.convertJMI(1, 2, elementsToCreate, '_id');
+      jmi.convertJMI(1, 2, elementsToCreate, '_id');
     }
     catch (err) {
       throw new M.CustomError('Cannot create multiple elements with the same ID.', 403, 'warn');
@@ -494,7 +495,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       });
 
       // Convert elemObjects array to JMI type 2 for easier lookup
-      const jmi2 = utils.convertJMI(1, 2, elementObjects);
+      const jmi2 = jmi.convertJMI(1, 2, elementObjects);
 
       // Define array of elements that need to be searched for in DB
       const elementsToFind = [];
@@ -553,7 +554,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     })
     .then((extraElements) => {
       // Convert extraElements to JMI type 2 for easier lookup
-      const extraElementsJMI2 = utils.convertJMI(1, 2, extraElements);
+      const extraElementsJMI2 = jmi.convertJMI(1, 2, extraElements);
       // Loop through each remaining element that does not have it's parent,
       // source, or target set yet
       remainingElements.forEach((element) => {
@@ -859,9 +860,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     })
     .then((foundSourceTarget) => {
       // Convert elementsToUpdate to JMI type 2
-      const jmiType2 = utils.convertJMI(1, 2, elementsToUpdate);
+      const jmiType2 = jmi.convertJMI(1, 2, elementsToUpdate);
       // Convert foundSourceTarget to JMI type 2
-      const sourceTargetJMI2 = utils.convertJMI(1, 2, foundSourceTarget);
+      const sourceTargetJMI2 = jmi.convertJMI(1, 2, foundSourceTarget);
       const bulkArray = [];
       // Get array of editable parameters
       const validFields = Element.getValidUpdateFields();
