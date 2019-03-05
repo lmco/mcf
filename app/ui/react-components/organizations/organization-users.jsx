@@ -64,7 +64,7 @@ class OrganizationUsers extends Component {
                 {/*Modal for creating a project*/}
                 <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
                     <ModalBody>
-                        {(this.state.modal) ? <UserRoleEdit org={this.props.org}/> : ''}
+                        <UserRoleEdit org={this.props.org}/>
                     </ModalBody>
                 </Modal>
                 <div id='view' className='org-list'>

@@ -46,19 +46,24 @@ class Organization extends Component {
         // Get the organization and it's projects
         ajaxRequest('GET', `/api/orgs/${this.props.match.params.orgid}?populate=projects`)
         .then(org => {
-            // Initialize variables
-            const username = this.props.user.username;
-            const perm = org.permissions[username];
-            const admin = this.props.user.admin;
+            // Get the users information
+            ajaxRequest('GET','/api/users/whoami')
+            .then(user => {
+                // Initialize variables
+                const username = user.username;
+                const perm = org.permissions[username];
+                const admin = user.admin;
 
-            // Verify if user is admin
-            if ((admin) || (perm === 'admin')){
-                // Set the admin state
-                this.setState({admin: true});
-            }
+                // Verify if user is admin
+                if ((admin) || (perm === 'admin')){
+                    // Set the admin state
+                    this.setState({admin: true});
+                }
 
-            // Set the org state
-            this.setState({org: org})
+                // Set the org state
+                this.setState({org: org})
+            })
+            .catch((err) => this.setState({error: err.responseJSON.description}))
         })
         .catch(err => {
             // Throw error and set error state

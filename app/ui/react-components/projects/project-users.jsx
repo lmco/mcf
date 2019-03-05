@@ -15,34 +15,75 @@
  */
 
 // React Modules
-import React from 'react';
+import React, { Component } from 'react';
 
 // MBEE Modules
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
+import { Button, Modal, ModalBody } from 'reactstrap';
+import UserRoleEdit from '../user/user-role-edit.jsx';
 
 // Define function
-function ProjectUsers(props) {
-    // Initialize variables
-    const users = Object.keys(props.project.permissions);
+class ProjectUsers extends Component {
+    constructor(props) {
+        // Initialize parent props
+        super(props);
 
-    // Loop through project members
-    const listItems = users.map(user =>
-        // Create user list item
-        <ListItem> {user} </ListItem>
-    );
+        // Initialize state props
+        this.state = {
+            admin: false,
+            modal: false,
+            error: null
+        };
 
-    // Return project member list
-    return (
-        <div id='view' className='project-user'>
-            <h2>Users</h2>
-            <hr />
-            <List>
-                {listItems}
-            </List>
+        // Bind component functions
+        this.handleToggle = this.handleToggle.bind(this);
+    }
 
-        </div>
-    )
+    // Define toggle function
+    handleToggle() {
+        // Set the create modal state
+        this.setState({ modal: !this.state.modal });
+    }
+
+    render() {
+        // Initialize variables
+        const users = Object.keys(this.props.project.permissions);
+
+        // Loop through project members
+        const listItems = users.map(user =>
+            // Create user list item
+            <ListItem> {user} </ListItem>
+        );
+
+        // Return project member list
+        return (
+            <React.Fragment>
+                {/*Modal for creating a project*/}
+                <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+                    <ModalBody>
+                        <UserRoleEdit org={this.props.project}/>
+                    </ModalBody>
+                </Modal>
+                <div id='view' className='project-list'>
+                    <div className='project-list-header'>
+                    <h2 className='org-header'>Users</h2>
+                        <div className='org-button'>
+                            <Button className='btn'
+                                    outline color="secondary"
+                                    onClick={this.handleToggle}>
+                                Add
+                            </Button>
+                        </div>
+                    </div>
+                    <hr/>
+                    <List>
+                        {listItems}
+                    </List>
+                </div>
+            </React.Fragment>
+        )
+    }
 }
 
 // Export function

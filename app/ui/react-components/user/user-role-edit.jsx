@@ -16,15 +16,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Form,
-        FormGroup,
-        Label,
-        Input,
-        Button,
-        Dropdown,
-        DropdownItem,
-        DropdownMenu,
-        DropdownToggle } from 'reactstrap';
+import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
@@ -37,16 +29,13 @@ class UserRoleEdit extends Component{
 
         // Initialize state props
         this.state = {
-            id: null,
             users: null,
             username: '',
-            permissions: '',
-            dropDownOpen: false
+            permissions: ''
         };
 
         // Bind component functions
         this.handleChange = this.handleChange.bind(this);
-        this.toggleDropdown = this.toggleDropdown.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
     }
 
@@ -56,27 +45,35 @@ class UserRoleEdit extends Component{
         this.setState({ [event.target.name]: event.target.value});
     }
 
-    toggleDropdown() {
-        this.setState({dropdownOpen: !this.state.dropdownOpen});
-    }
-
     // Define the submit function
     onSubmit(){
         // Initialize variables
         const username = this.state.username;
-
-        // Change data object
+        let url;
+        let redirect;
         const data = {
             permissions: {
                 [username]: this.state.permissions
             }
         };
 
+        console.log(this.props.org);
+
+        if (this.props.org) {
+            url = `/api/orgs/${this.props.org.id}`;
+            redirect = `/${this.props.org.id}/users`;
+        }
+        else {
+            url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
+            redirect = `/${this.props.project.org}/${this.props.project.id}/users`
+            console.log(url)
+        }
+
         // Send a patch request to update project data
-        ajaxRequest('PATCH', `/api/orgs/${this.props.org.id}`, data)
+        ajaxRequest('PATCH', url, data)
         .then(() => {
             // Update the page to reload to project home page
-            window.location.replace(`/${this.props.org.id}/users`);
+            window.location.replace(redirect);
         })
         .catch((msg) => {
             // Let user know update failed
@@ -89,7 +86,7 @@ class UserRoleEdit extends Component{
         ajaxRequest('GET', '/api/users')
         .then((users) => {
             const userOpts = users.map((user) => {
-                return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
+                return (<option value={user.username}>{user.name}</option>);
             });
 
             // Set the user state
@@ -102,33 +99,36 @@ class UserRoleEdit extends Component{
     }
 
     render() {
+        let title;
+
+        if (this.props.org) {
+            title = this.props.org.name;
+        }
+        else {
+            title = this.props.project.name;
+        }
+
         // Render project edit page
         return (
             <div className='project-forms'>
                 <h2>User Roles</h2>
                 <hr />
                 <div>
-                    <h3> Org: {this.props.org.id} </h3>
+                    <h3> {title} </h3>
                     {/*Create form to update project data*/}
                     <Form>
                         {/*Username input*/}
-                        <Dropdown
-                            isOpen={this.state.dropdownOpen}
-                            toggle={this.toggleDropdown}
-                        >
-                            <DropdownToggle caret>
-                                <Input
-                                    type='text'
-                                    name='username'
-                                    placeholder='Search for username...'
-                                    value={this.state.username}
-                                    onChange={this.handleChange}
-                                />
-                            </DropdownToggle>
-                            <DropdownMenu>
+                        <FormGroup>
+                            <Label for='username'>Username</Label>
+                            <Input type='select'
+                                   id="username"
+                                   name="username"
+                                   value={this.state.username || ''}
+                                   onChange={this.handleChange}>
+                                <option>Choose one...</option>
                                 {this.state.users}
-                            </DropdownMenu>
-                        </Dropdown>
+                            </Input>
+                        </FormGroup>
                         {/*Permissions user updates with*/}
                         <FormGroup>
                             <Label for="permissions">Permissions</Label>
