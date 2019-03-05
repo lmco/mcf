@@ -86,32 +86,21 @@ class DeleteProject extends Component{
     }
 
     componentDidMount() {
-        if(!this.props.orgs) {
-            // Get all the organizations user is apart of
-            ajaxRequest('GET', `/api/orgs/`)
-            .then(orgs => {
-                // Loop through organizations and make them options
-                const orgOptions = orgs.map((org) => {
-                    return (<option value={org.id}>{org.name}</option>)
-                });
-
-                // Set the org options state
-                this.setState({orgOpt: orgOptions});
-            })
-            .catch(err => {
-                // Set the error state if no orgs found
-                this.setState({error: 'Failed to load organization.'})
-            })
-        }
-        else {
+        // Get all the organizations user is apart of
+        ajaxRequest('GET', `/api/orgs/`)
+        .then(orgs => {
             // Loop through organizations and make them options
-            const orgOptions = this.props.orgs.map((org) => {
+            const orgOptions = orgs.map((org) => {
                 return (<option value={org.id}>{org.name}</option>)
             });
 
             // Set the org options state
             this.setState({orgOpt: orgOptions});
-        }
+        })
+        .catch(err => {
+            // Set the error state if no orgs found
+            this.setState({error: 'Failed to grab organizations.'})
+        })
     }
 
     render() {
