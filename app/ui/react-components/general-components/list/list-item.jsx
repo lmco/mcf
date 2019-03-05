@@ -38,11 +38,6 @@ function ListItem(props) {
         // Create a href item
         return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
     }
-    // Verify element provided
-    else if (props.element) {
-        // Create an element item
-        return <div className='element-item' onClick={props.onClick}> {props.element.name} </div>
-    }
     else {
         // Create basic item
         return listItem;

@@ -64,11 +64,12 @@ function initApp() {
     app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
 
     // for parsing application/json
-    app.use(bodyParser.json({ limit: '50mb' }));
+    app.use(bodyParser.json({ limit: M.config.server.requestSize || '50mb' }));
     app.use(bodyParser.text());
 
     // for parsing application/xwww-form-urlencoded
-    app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+    app.use(bodyParser.urlencoded({ limit: M.config.server.requestSize || '50mb',
+      extended: true }));
 
     // Trust proxy for IP logging
     app.enable('trust proxy');
