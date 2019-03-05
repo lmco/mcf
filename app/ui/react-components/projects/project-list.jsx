@@ -37,6 +37,8 @@ class ProjectList extends Component {
             width: null,
             projects: [],
             admin: false,
+            write: false,
+            writePermOrgs: null,
             modalCreate: false,
             modalDelete: false,
             error: null
@@ -58,19 +60,46 @@ class ProjectList extends Component {
             // Get user information
             ajaxRequest('GET','/api/users/whoami')
             .then(user => {
-                // Verify user is admin
-                if (user.admin) {
-                    // Set admin state
-                    this.setState({admin: user.admin});
-                }
+                // Get all orgs
+                ajaxRequest('GET','/api/orgs')
+                .then(orgs => {
+                    // Initialize variables
+                    const writePermOrgs = [];
 
-                // Set projects state
-                this.setState({ projects: projects});
+                    // Loop through orgs
+                    orgs.map((org) => {
+                        // Initialize variables
+                        const perm = org.permissions[user.username];
 
-                // Add event listener for window resizing
-                window.addEventListener('resize', this.handleResize);
-                // Handle initial size of window
-                this.handleResize();
+                        // Verify if user has write or admin permissions
+                        if ((perm === 'write') || (perm === 'admin')) {
+                            // Push the org to the org permissions
+                            writePermOrgs.push(org);
+                        }
+                    });
+
+                    // Verify there are orgs
+                    if(writePermOrgs.length > 0) {
+                        // Set write states
+                        this.setState({write: true});
+                        this.setState({writePermOrgs: writePermOrgs});
+                    }
+
+                    // Verify user is admin
+                    if (user.admin) {
+                        // Set admin state
+                        this.setState({admin: user.admin});
+                    }
+
+                    // Set projects state
+                    this.setState({ projects: projects});
+
+                    // Add event listener for window resizing
+                    window.addEventListener('resize', this.handleResize);
+                    // Handle initial size of window
+                    this.handleResize();
+                })
+                .catch((err) => console.log(err));
             })
             .catch(err => {
                 // Throw error and set error state
@@ -120,41 +149,51 @@ class ProjectList extends Component {
         // Return projet list
         return (
             <React.Fragment>
-                <div>
-                    {/*Modal for creating a project*/}
-                    <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
-                        <ModalBody>
-                            <CreateProject />
-                        </ModalBody>
-                    </Modal>
-                    {/*Modal for deleting a project*/}
-                    <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
-                        <ModalBody>
-                            <DeleteProject projects={this.state.projects}/>
-                        </ModalBody>
-                    </Modal>
-                </div>
+                {/*Modal for creating a project*/}
+                <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
+                    <ModalBody>
+                        {/*Verify user has write and admin permissions*/}
+                        {(this.state.write && this.state.admin)
+                            // Allow access to all orgs
+                            ? <CreateProject />
+                            // Allow access to write orgs only
+                            : <CreateProject orgs={this.state.writePermOrgs}/>
+                        }
+                    </ModalBody>
+                </Modal>
+                {/*Modal for deleting a project*/}
+                <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+                    <ModalBody>
+                        <DeleteProject projects={this.state.projects}/>
+                    </ModalBody>
+                </Modal>
                 {/*Display the list of projects*/}
                 <div id='view' className='project-list' ref={this.ref}>
                     <div className='project-list-header'>
                         <h2 className='project-header'>Projects</h2>
-                        {/*Verify user is an admin */}
-                        {(!this.state.admin)
-                            ? ''
-                            // Display create and delete buttons
-                            : (<div className='project-button'>
-                                <Button className='btn'
-                                        outline color="danger"
-                                        onClick={this.handleDeleteToggle}>
+                        <div className='project-button'>
+                            {/*Verify user is an admin */}
+                            {(!this.state.admin)
+                                ? ''
+                                // Display create and delete buttons
+                                :(<Button className='btn'
+                                          outline color="danger"
+                                          onClick={this.handleDeleteToggle}>
                                     Delete
-                                </Button>
-                                <Button className='btn'
-                                        outline color="secondary"
-                                        onClick={this.handleCreateToggle}>
+                                  </Button>)
+                            }
+                            {/*Verify user has write permission*/}
+                            {(!this.state.write)
+                                ? ''
+                                // Display create button
+                                :(<Button className='btn'
+                                          outline color="secondary"
+                                          onClick={this.handleCreateToggle}>
                                     Create
-                                </Button>
-                            </div>)
-                        }
+                                 </Button>)
+
+                            }
+                        </div>
                     </div>
                     <hr/>
                     {/*Verify there are projects*/}

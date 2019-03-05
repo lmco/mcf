@@ -84,7 +84,8 @@ class CreateProject extends Component{
     }
 
     componentDidMount() {
-        if (!this.props.org) {
+        // Verify no orgs were passed in props
+        if (!this.props.org && !this.props.orgs) {
             // Get all the organizations user is apart of
             ajaxRequest('GET',`/api/orgs/`)
             .then(orgs => {
@@ -110,6 +111,7 @@ class CreateProject extends Component{
         let nameInvalid;
         let customInvalid;
         let disableSubmit;
+        let orgOpts;
 
         // Verify if project id is valid
         if (!RegExp(validators.id).test(this.state.id)) {
@@ -135,6 +137,19 @@ class CreateProject extends Component{
             disableSubmit = true;
         }
 
+        // Verify if orgs are provided
+        if (this.props.orgs){
+            // Loop through orgs
+            orgOpts = this.props.orgs.map((org) => {
+                // Create them as options
+                return (<option value={org.id}>{org.name}</option>)
+            })
+        }
+        else {
+            // Set the state as the org options
+            orgOpts = this.state.orgOpt
+        }
+
         // Return the form to create a project
         return (
             <div className='project-forms'>
@@ -155,7 +170,7 @@ class CreateProject extends Component{
                                            value={this.state.org || ''}
                                            onChange={this.handleChange}>
                                         <option>Choose one...</option>
-                                        {this.state.orgOpt}
+                                        {orgOpts}
                                     </Input>
                                 </FormGroup>
                             )
