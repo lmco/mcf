@@ -585,7 +585,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         // If the element is a relationship and has a target
         if (element.$target) {
           try {
-            element.target = extraElementsJMI2[element.target]._id;
+            element.target = extraElementsJMI2[element.$target]._id;
             element.$target = null;
           }
           catch (e) {
