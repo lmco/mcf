@@ -23,9 +23,8 @@ import { UncontrolledTooltip } from 'reactstrap';
 function SidebarLink(props) {
     // Define sidebar item
     const sidebarItem = (
-        <div className='sidebar-item' id={props.id}>
-            {/*if sidebar is not expanded, set as the icon*/}
-            {(!props.isExpanded) ? <i className={props.icon}/> : ''}
+        <div className='sidebar-item' id={props.title}>
+            <i className={props.icon}/>
             {/*if sidebar is not expanded, set a name when hovering over icon*/}
             {(!props.isExpanded) ?
                 <UncontrolledTooltip placement='right'

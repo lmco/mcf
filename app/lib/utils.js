@@ -161,18 +161,6 @@ module.exports.checkExists = function(properties, obj) {
 };
 
 /**
- * @description Checks whether the user is an admin or not. Throws an error
- * if user is not an admin.
- *
- * @param {User} user - The user object being checked.
- */
-module.exports.assertAdmin = function(user) {
-  if (!user.admin) {
-    throw new M.CustomError('User does not have permissions.', 401);
-  }
-};
-
-/**
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *

@@ -33,7 +33,7 @@ class ProjectEdit extends Component{
             name: this.props.project.name,
             username: '',
             permissions: '',
-            custom: JSON.stringify(this.props.project.custom || {}, null, 2),
+            custom: JSON.stringify(this.props.project.custom || {}, null, 2)
         };
 
         // Bind component functions

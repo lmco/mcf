@@ -60,7 +60,6 @@ function build(_args) {
 
   // Assign parameters to args. If no parameters, default to '--all'
   const args = (_args === undefined || _args.length === 0) ? ['--all'] : _args;
-
   // Copy static dependencies to build directory
   if (args.includes('--all') || args.includes('--copy-deps')) {
     M.log.info('  + Copying dependencies ...');
@@ -140,45 +139,6 @@ function build(_args) {
   // Import validator object into validators file
   fs.writeFileSync(path.join(validatorsDir, 'validators.json'), JSON.stringify(validator), 'utf8');
 
-  // Transpile React components
-  if (args.includes('--all') || args.includes('--react')) {
-    webpack({
-      mode: 'development',
-      entry: {
-        navbar: path.join(M.root, 'app', 'ui', 'react-components', 'general-components', 'nav.jsx'),
-        'home-page': path.join(M.root, 'app', 'ui', 'react-components', 'home-page', 'home-page.jsx'),
-        organizations: path.join(M.root, 'app', 'ui', 'react-components', 'organizations', 'organizations.jsx'),
-        projects: path.join(M.root, 'app', 'ui', 'react-components', 'projects', 'projects.jsx'),
-        user: path.join(M.root, 'app', 'ui', 'react-components', 'user', 'user.jsx')
-      },
-      output: {
-        path: path.join(M.root, 'build', 'public', 'react-js'),
-        filename: '[name].js'
-      },
-      devServer: {
-        historyApiFallback: true
-      },
-      module: {
-        rules: [
-          {
-            test: /\.jsx?$/,
-            loader: 'babel-loader',
-            exclude: /node_modules/,
-            options: {
-              presets: ['babel-preset-env', 'babel-preset-react']
-            }
-          }
-        ]
-      }
-    }, (err, stats) => {
-      if (err || stats.hasErrors()) {
-        // eslint-disable-next-line no-console
-        console.log(stats.compilation.errors);
-      }
-    });
-  }
-
-
   // Compile Sass into CSS
   if (args.includes('--all') || args.includes('--sass')) {
     M.log.info('  + Compiling sass ...');
@@ -207,7 +167,59 @@ function build(_args) {
     .pipe(gulp.dest('build/fm'));
   }
 
-  M.log.info('Build Complete.');
+  // Returning a promise to make synchronous
+  return new Promise((resolve, reject) => {
+    // Transpile React components
+    if (args.includes('--all') || args.includes('--react')) {
+      M.log.info('  + Transpiling react ...');
+      webpack({
+        mode: 'development',
+        entry: {
+          navbar: path.join(M.root, 'app', 'ui', 'react-components', 'general-components', 'nav.jsx'),
+          'home-page': path.join(M.root, 'app', 'ui', 'react-components', 'home-page', 'home-page.jsx'),
+          organizations: path.join(M.root, 'app', 'ui', 'react-components', 'organizations', 'organizations.jsx'),
+          projects: path.join(M.root, 'app', 'ui', 'react-components', 'projects', 'projects.jsx'),
+          user: path.join(M.root, 'app', 'ui', 'react-components', 'user', 'user.jsx')
+        },
+        output: {
+          path: path.join(M.root, 'build', 'public', 'react-js'),
+          filename: '[name].js'
+        },
+        devServer: {
+          historyApiFallback: true
+        },
+        module: {
+          rules: [
+            {
+              test: /\.jsx?$/,
+              loader: 'babel-loader',
+              exclude: /node_modules/,
+              options: {
+                presets: ['babel-preset-env', 'babel-preset-react']
+              }
+            }
+          ]
+        }
+      }, (err, stats) => {
+        if (err || stats.hasErrors()) {
+          // eslint-disable-next-line no-console
+          console.log(stats.compilation.errors);
+          return reject();
+        }
+        return resolve();
+      });
+    }
+    else {
+      return resolve();
+    }
+  })
+  .then(() => {
+    M.log.info('Build Complete.');
+  })
+  .catch(() => {
+    M.log.warn('React build FAILED');
+    M.log.info('Build Complete.');
+  });
 }
 
 module.exports = build;
