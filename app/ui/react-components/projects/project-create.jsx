@@ -19,8 +19,8 @@ import React, { Component } from 'react';
 import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
 
 // MBEE Modules
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
-import {getRequest} from "../helper-functions/getRequest";
 
 // Define component
 class CreateProject extends Component{
@@ -51,6 +51,7 @@ class CreateProject extends Component{
     // Define the submit function
     onSubmit(){
         // Initialize project data
+        const url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
         let data = {
             id: this.state.id,
             name: this.state.name,
@@ -58,16 +59,12 @@ class CreateProject extends Component{
         };
 
         // Post the new project
-        jQuery.ajax({
-            method: "POST",
-            url: `/api/orgs/${this.state.org}/projects/${this.state.id}`,
-            data: data
-        })
-        .done(() => {
+        ajaxRequest('POST', url, data)
+        .then(() => {
             // On success, return to projects page
             window.location.replace(`/projects`);
         })
-        .fail((msg) => {
+        .catch((msg) => {
             // On failure, alert user
             alert( `Create Failed: ${msg.responseJSON.description}`);
         });
@@ -75,20 +72,20 @@ class CreateProject extends Component{
 
     componentDidMount() {
         // Get all the organizations user is apart of
-        getRequest(`/api/orgs/`)
-            .then(orgs => {
-                // Loop through organizations and make them options
-                const orgOptions = orgs.map((org) => {
-                    return (<option value={org.id}>{org.name}</option>)
-                });
+        ajaxRequest('GET',`/api/orgs/`)
+        .then(orgs => {
+            // Loop through organizations and make them options
+            const orgOptions = orgs.map((org) => {
+                return (<option value={org.id}>{org.name}</option>)
+            });
 
-                // Set the org options state
-                this.setState({orgOpt: orgOptions});
-            })
-            .catch(err => {
-                // Set the error state if no orgs found
-                this.setState({error: 'Failed to load organization.'})
-            })
+            // Set the org options state
+            this.setState({orgOpt: orgOptions});
+        })
+        .catch(err => {
+            // Set the error state if no orgs found
+            this.setState({error: `Failed to load organization: ${err}`})
+        })
     }
 
 

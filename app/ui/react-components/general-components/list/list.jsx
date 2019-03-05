@@ -14,27 +14,34 @@
  *
  * @description This renders a list.
  */
+
+// React Modules
 import React from 'react';
 
+// Define component
 function List(props) {
-    const listItems = React.Children.map(props.children, (child, i) =>
+    // Loops through the children and puts them in a react-fragment
+    const listItems = React.Children.map(props.children, (child) =>
         <React.Fragment>
             {child}
-            {/*{(React.Children.count(props.children) - 1 === i) ? '' : <hr/>}*/}
         </React.Fragment>
     );
 
+    // Initializes the classes
     let appliedClasses = 'list';
+
+    // Verify class name provided
     if(props.className) {
+        // Add class name to the element
         appliedClasses += ` ${props.className}`;
     }
 
-    return (
-        <div className={appliedClasses}>
-            {listItems}
-        </div>
+    // Return the list of items with the classes
+    return (<div className={appliedClasses}>
+                {listItems}
+            </div>
     )
 }
 
-
+// Export component
 export default List

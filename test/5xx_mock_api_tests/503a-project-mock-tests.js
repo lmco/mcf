@@ -18,7 +18,6 @@
 
 // NPM modules
 const chai = require('chai');
-const path = require('path');
 
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
@@ -27,7 +26,7 @@ const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;

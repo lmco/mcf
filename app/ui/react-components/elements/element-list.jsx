@@ -13,112 +13,69 @@
  *
  * @description This renders the element tree in the project's page.
  */
-import React, { Component } from 'react';
-import { getRequest } from "../helper-functions/getRequest";
-import List from '../general-components/list/list.jsx';
-import ListItem from '../general-components/list/list-item.jsx';
 
+// React Modules
+import React, { Component } from 'react';
+
+// MBEE Modules
+import List from '../general-components/list/list.jsx';
+import ElementListItem from '../general-components/list/element-list-item.jsx';
+
+// Define component
 class ElementList extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
 
+        // Initialize state props
         this.state = {
-            elementChildren: null,
-            error: null
-        }
+            isOpen: false
+        };
 
-        this.constructListItem = this.constructListItem.bind(this);
+        // Bind component functions
+        this.toggle = this.toggle.bind(this);
     }
 
-    constructListItem(item) {
-        return new Promise((resolve, reject) => {
-            const url = this.props.url;
-
-            getRequest(`${url}/branches/master/elements/${item}`)
-                .then(containedElement => {
-                    const promises = [];
-                    const listItems = [];
-
-                    if (containedElement.contains.length > 0) {
-                        for (let i = 0; i < containedElement.contains.length; i++) {
-                            promises.push(this.constructListItem(containedElement.contains[i])
-                                .then((listItem) => {
-                                    listItems.push(listItem);
-                                })
-                                .catch((err) => console.log(err))
-                            )
-                        }
-
-                        Promise.all(promises)
-                        .then(() => {
-                            return resolve(
-                                <List>
-                                    <ListItem element={containedElement}/>
-                                    <List className='guideline'>
-                                        {listItems}
-                                    </List>
-                                </List>
-                            );
-                        })
-                        .catch(err => {
-                            console.log(err);
-                        })
-                    }
-                    else {
-                        return resolve(
-                            <List>
-                                <ListItem key={item} element={containedElement}/>
-                            </List>
-                        );
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                    this.setState({error: 'Failed to load elements.'});
-                    return reject(err);
-                })
-        })
+    // Define toggle function
+    toggle() {
+        // Change state of isOpen
+        this.setState({ isOpen: !this.state.isOpen });
     }
 
-    componentDidMount() {
-        const element = this.props.element;
-
-        const promises = [];
-        const listItems = [];
-
-        for (let i = 0; i < element.contains.length; i++) {
-            promises.push(this.constructListItem(element.contains[i])
-                .then((listItem) => {
-                    listItems.push(listItem);
-                })
-                .catch((err) => console.log(err))
-            )
-        }
-
-        Promise.all(promises)
-        .then(() => {
-            this.setState({ elementChildren: listItems})
-        })
-        .catch(err => {
-            console.log(err);
-        })
-    }
-
-
-
+    // Create the element tree list
     render() {
+        // Initialize variables
         const element = this.props.element;
-        if (element && this.state.elementChildren) {
-            return (<List className='guideline'>
-                {this.state.elementChildren}
-            </List>)
+        const containsData = element.contains;
+        const lengthData = Object.keys(containsData).length;
+
+        // Check if an element has children
+        if (lengthData > 0) {
+            // Loop through children recursively call ElementList
+            const elementList = Object.keys(containsData).map((key) => {
+                return ( <ElementList element={containsData[key]}/> )
+            });
+
+            // Return the List
+            return (<List>
+                        <ElementListItem element={element} onClick={this.toggle}/>
+                        <List className='guideline'>
+                            {/*Verify if element children should be displayed*/}
+                            {(!this.state.isOpen)
+                                ? elementList
+                                : ''
+                            }
+                        </List>
+                    </List>)
         }
         else {
-            return (<div className="loading"> {this.state.error || 'Loading your element...'} </div>)
+            // Return element
+            return (<List>
+                        <ElementListItem element={element} onClick={this.toggle}/>
+                    </List>)
         }
     }
 }
 
-
-
+// Export component
 export default ElementList

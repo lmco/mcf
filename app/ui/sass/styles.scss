@@ -101,6 +101,7 @@ label {
     width: 100%;
     position: absolute;
     display: grid;
+    grid-template-columns: 1fr;
     grid-template-rows: $banner-height 1fr $banner-height;
     grid-template-areas:
         "header"
@@ -225,6 +226,7 @@ label {
     }
 
     .sidebar-item {
+        padding:20px;
         height: 50px;
         font-size: 12px;
         display: flex;
@@ -266,16 +268,9 @@ label {
 /*                             Home Page Styling                              *
 /******************************************************************************/
 .mbee-home {
-    display: flex;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    padding: 10px;
-
     .splash-row {
-        display: flex;
-        justify-content: center;
         position: relative;
+        padding-top: 50px;
         height: 75%;
         width: 100%;
         font-family: 'Helvetica Neue', Helvetica;
@@ -297,9 +292,9 @@ label {
 
     .home-links {
         display: flex;
-        flex-flow: wrap;
-        justify-content: space-evenly;
+        justify-content: space-between;
         align-items: center;
+        padding-top: 80px;
         height: 100%;
         width: 100%;
 
@@ -310,16 +305,11 @@ label {
         }
 
         .home-link {
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: rgba(0,0,0,.1) 2px 4px 4px;
+            border-radius: 15px;
             color: inherit;
             display: flex;
             flex-direction: column;
-            padding: 20px 0 15px 0;
-            transition: all .23s ease-in-out;
             width: 160px;
-            margin: 10px;
 
             .home-link-icon {
                 font-size: 50px;
@@ -327,13 +317,6 @@ label {
 
             .home-link-label {
             }
-        }
-
-        .home-link:hover {
-            background: lighten($mbee-color-primary, 25%);
-            border: 1px solid $mbee-color-primary;
-            box-shadow: rgba(0,0,0,.1) 4px 6px 6px;
-            transform: scale(1.1);
         }
     }
 }
@@ -514,6 +497,33 @@ label {
     text-overflow: ellipsis;
 }
 
+.element-item {
+    display: grid;
+    grid-template-columns: minmax(auto, 35px) 1fr;
+    grid-template-areas: "stats header";
+    justify-content: space-between;
+    align-items: center;
+
+    .list-header {
+        grid-area: header;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        p {
+            font-size: 15px;
+            margin: 0;
+            display: inline-block;
+        }
+    }
+
+    .stats-list {
+        grid-area: stats;
+        justify-self: flex-end;
+    }
+    padding: 2px;
+    cursor: pointer;
+}
+
 .stats-list-item {
     display: grid;
     grid-template-columns: minmax(auto, 600px) 1fr;
@@ -562,4 +572,3 @@ label {
         }
     }
 }
-

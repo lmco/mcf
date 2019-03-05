@@ -14,24 +14,30 @@
  *
  * @description This renders the homepage.
  */
+
+// React Modules
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Modal, ModalBody } from 'reactstrap';
 
+// JSX Modules
 import Tile from './tile.jsx';
 import Space from '../general-components/space/space.jsx';
-import { getRequest } from '../helper-functions/getRequest.js';
 
+// Define HomePage Component
 class HomePage extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
 
+        // Initialize state props
         this.state = {
             modal: false,
             user: null,
             starredProjects: []
         };
 
+        // Bind component functions
         this.handleToggle = this.handleToggle.bind(this);
     }
 
@@ -62,6 +68,7 @@ class HomePage extends Component {
             latchId,
             code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13];
 
+        // Define event listener
         const k = (ev) => {
             buffer = buffer || code.slice();
             if (buffer[0] === ev.keyCode) {
@@ -76,16 +83,16 @@ class HomePage extends Component {
             }
         };
         window.addEventListener("keyup", k);
-
-
-
     }
 
+    // Define toggle functionality
     handleToggle() {
+        // Set the state to opposite of its initial state
         this.setState({ modal: !this.state.modal });
     }
 
     render() {
+        // Render the homepage
         return (
             <React.Fragment>
                 <div>
