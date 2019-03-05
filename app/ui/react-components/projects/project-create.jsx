@@ -102,6 +102,17 @@ class CreateProject extends Component{
                 this.setState({error: `Failed to load organization: ${err}`})
             })
         }
+        // Verify orgs were provided
+        else if (this.props.orgs) {
+            // Loop through orgs
+            const orgOptions = this.props.orgs.map((org) => {
+                // Create them as options
+                return (<option value={org.id}>{org.name}</option>)
+            });
+
+            // Set the org options state
+            this.setState({orgOpt: orgOptions});
+        }
     }
 
 
@@ -111,7 +122,6 @@ class CreateProject extends Component{
         let nameInvalid;
         let customInvalid;
         let disableSubmit;
-        let orgOpts;
 
         // Verify if project id is valid
         if (!RegExp(validators.id).test(this.state.id)) {
@@ -137,18 +147,6 @@ class CreateProject extends Component{
             disableSubmit = true;
         }
 
-        // Verify if orgs are provided
-        if (this.props.orgs){
-            // Loop through orgs
-            orgOpts = this.props.orgs.map((org) => {
-                // Create them as options
-                return (<option value={org.id}>{org.name}</option>)
-            })
-        }
-        else {
-            // Set the state as the org options
-            orgOpts = this.state.orgOpt
-        }
 
         // Return the form to create a project
         return (
@@ -170,7 +168,7 @@ class CreateProject extends Component{
                                            value={this.state.org || ''}
                                            onChange={this.handleChange}>
                                         <option>Choose one...</option>
-                                        {orgOpts}
+                                        {this.state.orgOpt}
                                     </Input>
                                 </FormGroup>
                             )

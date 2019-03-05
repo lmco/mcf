@@ -164,7 +164,13 @@ class ProjectList extends Component {
                 {/*Modal for deleting a project*/}
                 <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                     <ModalBody>
-                        <DeleteProject projects={this.state.projects}/>
+                        {/*Verify user has write and admin permissions*/}
+                        {(this.state.write && this.state.admin)
+                            // Allow access to all orgs
+                            ? <DeleteProject projects={this.state.projects}/>
+                            // Allow access to write orgs only
+                            : <DeleteProject orgs={this.state.writePermOrgs}/>
+                        }
                     </ModalBody>
                 </Modal>
                 {/*Display the list of projects*/}
@@ -172,28 +178,23 @@ class ProjectList extends Component {
                     <div className='project-list-header'>
                         <h2 className='project-header'>Projects</h2>
                         <div className='project-button'>
-                            {/*Verify user is an admin */}
-                            {(!this.state.admin)
-                                ? ''
-                                // Display create and delete buttons
-                                :(<Button className='btn'
-                                          outline color="danger"
-                                          onClick={this.handleDeleteToggle}>
-                                    Delete
-                                  </Button>)
-                            }
                             {/*Verify user has write permission*/}
                             {(!this.state.write)
                                 ? ''
                                 // Display create button
-                                :(<Button className='btn'
+                                :(<div className='project-button'>
+                                        <Button className='btn'
+                                           outline color="danger"
+                                           onClick={this.handleDeleteToggle}>
+                                        Delete
+                                    </Button>
+                                    <Button className='btn'
                                           outline color="secondary"
                                           onClick={this.handleCreateToggle}>
                                     Create
-                                 </Button>)
-
+                                 </Button>
+                                </div>)
                             }
-                        </div>
                     </div>
                     <hr/>
                     {/*Verify there are projects*/}
