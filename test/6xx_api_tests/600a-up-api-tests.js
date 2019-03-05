@@ -17,7 +17,6 @@
  */
 
 // Node Modules
-const path = require('path');
 const request = require('request');
 
 // NPM modules
