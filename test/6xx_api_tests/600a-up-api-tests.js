@@ -25,7 +25,7 @@ const chai = require('chai');
 
 // MBEE modules
 const test = M.config.test;
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testUtils = M.require('lib.test-utils');
 
 /* --------------------( Main )-------------------- */
 /**
