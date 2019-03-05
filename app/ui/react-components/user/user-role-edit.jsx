@@ -16,11 +16,18 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, FormFeedback, Button, Select} from 'reactstrap';
+import {Form,
+        FormGroup,
+        Label,
+        Input,
+        Button,
+        Dropdown,
+        DropdownItem,
+        DropdownMenu,
+        DropdownToggle } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-import validators from '../../../../build/json/validators.json';
 
 // Define component
 class UserRoleEdit extends Component{
@@ -33,11 +40,13 @@ class UserRoleEdit extends Component{
             id: null,
             users: null,
             username: '',
-            permissions: ''
+            permissions: '',
+            dropDownOpen: false
         };
 
         // Bind component functions
         this.handleChange = this.handleChange.bind(this);
+        this.toggleDropdown = this.toggleDropdown.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
     }
 
@@ -45,6 +54,10 @@ class UserRoleEdit extends Component{
     handleChange(event) {
         // Change the state with new value
         this.setState({ [event.target.name]: event.target.value});
+    }
+
+    toggleDropdown() {
+        this.setState({dropdownOpen: !this.state.dropdownOpen});
     }
 
     // Define the submit function
@@ -60,10 +73,10 @@ class UserRoleEdit extends Component{
         };
 
         // Send a patch request to update project data
-        ajaxRequest('PATCH', this.props.url, data)
+        ajaxRequest('PATCH', `/api/orgs/${this.props.org.id}`, data)
         .then(() => {
             // Update the page to reload to project home page
-            window.location.replace(`/${this.props.orgid}/${this.props.project.id}`);
+            window.location.replace(`/${this.props.org.id}/users`);
         })
         .catch((msg) => {
             // Let user know update failed
@@ -76,7 +89,7 @@ class UserRoleEdit extends Component{
         ajaxRequest('GET', '/api/users')
         .then((users) => {
             const userOpts = users.map((user) => {
-                return (<option value={user.username}>{user.name}</option>);
+                return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
             });
 
             // Set the user state
@@ -89,27 +102,33 @@ class UserRoleEdit extends Component{
     }
 
     render() {
-
         // Render project edit page
         return (
             <div className='project-forms'>
                 <h2>User Roles</h2>
                 <hr />
                 <div>
-                    <h3> Org: {this.state.project.org} </h3>
-                    <h3>Project: {this.state.project.name}</h3>
+                    <h3> Org: {this.props.org.id} </h3>
                     {/*Create form to update project data*/}
                     <Form>
                         {/*Username input*/}
-                        <FormGroup>
-                            <Label for='username'>Username</Label>
-                            <Input type='text'
-                                   id="username"
-                                   name="username"
-                                   options={this.state.users}
-                                   value={this.state.username || ''}
-                                   onChange={this.handleChange}/>
-                        </FormGroup>
+                        <Dropdown
+                            isOpen={this.state.dropdownOpen}
+                            toggle={this.toggleDropdown}
+                        >
+                            <DropdownToggle caret>
+                                <Input
+                                    type='text'
+                                    name='username'
+                                    placeholder='Search for username...'
+                                    value={this.state.username}
+                                    onChange={this.handleChange}
+                                />
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                {this.state.users}
+                            </DropdownMenu>
+                        </Dropdown>
                         {/*Permissions user updates with*/}
                         <FormGroup>
                             <Label for="permissions">Permissions</Label>
@@ -126,7 +145,7 @@ class UserRoleEdit extends Component{
                             </Input>
                         </FormGroup>
                         {/*Button to submit changes*/}
-                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+                        <Button onClick={this.onSubmit}> Submit </Button>
                     </Form>
                 </div>
             </div>

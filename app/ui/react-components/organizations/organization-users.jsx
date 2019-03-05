@@ -16,45 +16,76 @@
  */
 
 // React Modules
-import React from 'react';
+import React, { Component } from 'react';
 
 // MBEE Modules
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
-import {Modal, ModalBody} from 'reactstrap';
+import { Button, Modal, ModalBody } from 'reactstrap';
 import UserRoleEdit from '../user/user-role-edit.jsx';
 
 // Define function
-function OrganizationUsers(props) {
-    // Initialize variables
-    const users = Object.keys(props.org.permissions);
+class OrganizationUsers extends Component {
+    constructor(props) {
+        // Initialize parent props
+        super(props);
 
-    // Loop through org members
-    const listItems = users.map(user =>
-        // Create user list item
-        <ListItem> {user} </ListItem>
-    );
+        // Initialize state props
+        this.state = {
+            admin: false,
+            modal: false,
+            error: null
+        };
 
-    // Return org member list
-    return (
-        <React.Fragment>
-            {/*Modal for creating a project*/}
-            <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
-                <ModalBody>
-                    { (this.state.modalCreate) ? < /> : '' }
-                </ModalBody>
-            </Modal>
-            <div id='view' className='org-users'>
-                <div className='project-list-header'>
-                    <h2>Users</h2>
-                    <hr />
+        // Bind component functions
+        this.handleToggle = this.handleToggle.bind(this);
+    }
+
+    // Define toggle function
+    handleToggle() {
+        // Set the create modal state
+        this.setState({ modal: !this.state.modal });
+    }
+
+
+    render() {
+        // Initialize variables
+        const users = Object.keys(this.props.org.permissions);
+
+        // Loop through org members
+        const listItems = users.map(user =>
+            // Create user list item
+            <ListItem> {user} </ListItem>
+        );
+
+        // Return org member list
+        return (
+            <React.Fragment>
+                {/*Modal for creating a project*/}
+                <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+                    <ModalBody>
+                        {(this.state.modal) ? <UserRoleEdit org={this.props.org}/> : ''}
+                    </ModalBody>
+                </Modal>
+                <div id='view' className='org-list'>
+                    <div className='org-list-header'>
+                        <h2 className='org-header'>Users</h2>
+                        <div className='org-button'>
+                            <Button className='btn'
+                                    outline color="secondary"
+                                    onClick={this.handleToggle}>
+                                Add
+                            </Button>
+                        </div>
+                    </div>
+                    <hr/>
                     <List>
                         {listItems}
                     </List>
                 </div>
-            </div>
-        </React.Fragment>
-    )
+            </React.Fragment>
+        )
+    }
 }
 
 // Export function
