@@ -21,8 +21,6 @@ import React from 'react';
 // MBEE Modules
 import UserListItem from '../general-components/list/user-list-item.jsx';
 import List from '../general-components/list/list.jsx';
-import {Modal, ModalBody} from 'reactstrap';
-import UserRoleEdit from '../user/user-role-edit.jsx';
 
 // Define function
 function OrganizationUsers(props) {
