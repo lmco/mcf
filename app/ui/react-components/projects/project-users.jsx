@@ -24,7 +24,6 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 import UserRoleEdit from '../user/user-role-edit.jsx';
 
 // Define function
-<<<<<<< HEAD
 class ProjectUsers extends Component {
     constructor(props) {
         // Initialize parent props
@@ -53,8 +52,8 @@ class ProjectUsers extends Component {
 
         // Loop through project members
         const listItems = users.map(user =>
-            // Create user list item
-            <ListItem> {user} </ListItem>
+        // Create user list item
+        <UserListItem user={user} permission={props.project.permissions[user]}/>
         );
 
         // Return project member list
@@ -85,29 +84,6 @@ class ProjectUsers extends Component {
             </React.Fragment>
         )
     }
-=======
-function ProjectUsers(props) {
-    // Initialize variables
-    const users = Object.keys(props.project.permissions);
-
-    // Loop through project members
-    const listItems = users.map(user =>
-        // Create user list item
-        <UserListItem user={user} permission={props.project.permissions[user]}/>
-    );
-
-    // Return project member list
-    return (
-        <div id='view' className='project-user'>
-            <h2>Members</h2>
-            <hr />
-            <List>
-                {listItems}
-            </List>
-
-        </div>
-    )
->>>>>>> develop
 }
 
 // Export function
