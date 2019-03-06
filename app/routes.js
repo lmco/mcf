@@ -194,6 +194,14 @@ router.route('/:orgid/:projectid/elements')
   UIController.projects
 );
 
+/* This renders a project's search page for a user */
+router.route('/:orgid/:projectid/search')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.projects
+);
+
 /* This renders a project edit form for an admin user */
 router.route('/:orgid/:projectid/edit')
 .get(

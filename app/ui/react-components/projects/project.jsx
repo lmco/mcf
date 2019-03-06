@@ -96,6 +96,7 @@ class Project extends Component {
                         <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
                         <SidebarLink id='Users' title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
                         <SidebarLink id='Elements' title='Elements' icon='fas fa-sitemap' routerLink={`${this.props.match.url}/elements`} />
+                        <SidebarLink id='Search' title='Search' icon='fas fa-search' routerLink={`${this.props.match.url}/search`} />
                         <hr />
                         {/*Check if user is admin*/}
                         {(this.state.admin)
@@ -118,6 +119,8 @@ class Project extends Component {
                                 {/*Route to element page*/}
                                 <Route path={`${this.props.match.url}/elements`}
                                    render={ (props) => <ProjectElements {...props} project={this.state.project} elements={this.state.elements} /> } />
+                                <Route path={`${this.props.match.url}/search`}
+                                       render={ (props) => <Search {...props} project={this.state.project} elements={this.state.elements} /> } />
                                 {/*Verify admin user*/}
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
