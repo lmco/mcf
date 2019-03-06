@@ -38,8 +38,13 @@ class Organization extends Component {
         this.state = {
             org: null,
             error: null,
-            admin: false
+            admin: false,
+            write: false,
+            modal: false
         };
+
+        // Bind component functions
+        this.handleToggle = this.handleToggle.bind(this);
     }
 
     componentDidMount() {
@@ -59,16 +64,29 @@ class Organization extends Component {
                     // Set the admin state
                     this.setState({admin: true});
                 }
-
+                
                 // Set the org state
                 this.setState({org: org})
+
+                // Verify is user has write permissions
+                if(admin || (perm === 'write')) {
+                    this.setState({write: true});
+                }
             })
-            .catch((err) => this.setState({error: err.responseJSON.description}))
+            .catch(err => {
+                // Throw error and set error state
+                this.setState({error: `Failed to load organization: ${err.responseJSON.description}`})
+            });
         })
         .catch(err => {
             // Throw error and set error state
-            this.setState({error: `Failed to load organization: ${err}`})
+            this.setState({error: `Failed to load organization: ${err.responseJSON.description}`})
         })
+    }
+
+    // Define handle toggle
+    handleToggle() {
+        this.setState({ modal: !this.state.modal });
     }
 
     render() {
@@ -78,14 +96,14 @@ class Organization extends Component {
                 <React.Fragment>
                     {/*Create the sidebar with sidebar links*/}
                     <Sidebar>
-                        <SidebarLink title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
-                        <SidebarLink title='Projects' icon='fas fa-boxes' routerLink={`${this.props.match.url}/projects`} />
-                        <SidebarLink title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
+                        <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
+                        <SidebarLink id='Projects' title='Projects' icon='fas fa-boxes' routerLink={`${this.props.match.url}/projects`} />
+                        <SidebarLink id='Members' title='Members' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
                         <hr />
                         {/*Check if user is admin*/}
                         {(this.state.admin)
                             // Add the edit router link for admin users ONLY
-                            ?(<SidebarLink title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
+                            ?(<SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
                             : ''
                         }
                     </Sidebar>
@@ -100,7 +118,7 @@ class Organization extends Component {
                                        render={ (props) => <OrgHome {...props} org={this.state.org} /> } />
                                 {/*Route to projects page*/}
                                 <Route path={`${this.props.match.url}/projects`}
-                                    render={ (props) => <OrgProjects {...props} org={this.state.org} /> } />
+                                    render={ (props) => <OrgProjects {...props} org={this.state.org} write={this.state.write} modal={this.state.modal} handleToggle={this.handleToggle}/> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
                                        render={ (props) => <OrgUsers {...props} org={this.state.org} /> } />
@@ -108,7 +126,7 @@ class Organization extends Component {
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}
-                                             render={(props) => <OrgEdit {...props} org={this.state.org}/>}/>)
+                                             render={(props) => <OrgEdit {...props} org={this.state.org} />}/>)
                                     : ''
                                 }
                             </Switch>)

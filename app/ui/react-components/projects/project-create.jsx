@@ -16,7 +16,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
+import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
@@ -50,8 +50,21 @@ class CreateProject extends Component{
 
     // Define the submit function
     onSubmit(){
+        // Initialize variables
+        let org;
+
+        // Verify if org is in props
+        if (!this.props.org) {
+            // Set org as the state prop
+            org = this.state.org;
+        }
+        else {
+            // Set org as the parent prop
+            org = this.props.org.id;
+        }
+
         // Initialize project data
-        const url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
+        const url = `/api/orgs/${org}/projects/${this.state.id}`;
         let data = {
             id: this.state.id,
             name: this.state.name,
@@ -71,21 +84,35 @@ class CreateProject extends Component{
     }
 
     componentDidMount() {
-        // Get all the organizations user is apart of
-        ajaxRequest('GET',`/api/orgs/`)
-        .then(orgs => {
-            // Loop through organizations and make them options
-            const orgOptions = orgs.map((org) => {
+        // Verify no orgs were passed in props
+        if (!this.props.org && !this.props.orgs) {
+            // Get all the organizations user is apart of
+            ajaxRequest('GET',`/api/orgs/`)
+            .then(orgs => {
+                // Loop through organizations and make them options
+                const orgOptions = orgs.map((org) => {
+                    return (<option value={org.id}>{org.name}</option>)
+                });
+
+                // Set the org options state
+                this.setState({orgOpt: orgOptions});
+            })
+            .catch(err => {
+                // Set the error state if no orgs found
+                this.setState({error: `Failed to load organization: ${err}`})
+            })
+        }
+        // Verify orgs were provided
+        else if (this.props.orgs) {
+            // Loop through orgs
+            const orgOptions = this.props.orgs.map((org) => {
+                // Create them as options
                 return (<option value={org.id}>{org.name}</option>)
             });
 
             // Set the org options state
             this.setState({orgOpt: orgOptions});
-        })
-        .catch(err => {
-            // Set the error state if no orgs found
-            this.setState({error: `Failed to load organization: ${err}`})
-        })
+        }
     }
 
 
@@ -120,25 +147,34 @@ class CreateProject extends Component{
             disableSubmit = true;
         }
 
+
         // Return the form to create a project
         return (
             <div className='project-forms'>
-                <h2>New Project</h2>
+                <h2>New Project </h2>
                 <hr />
                 <div>
                     <Form>
-                        {/*Create options to choose the organization*/}
-                        <FormGroup>
-                            <Label for="org">Organization ID</Label>
-                            <Input type="select"
-                                   name="org"
-                                   id="org"
-                                   value={this.state.org || ''}
-                                   onChange={this.handleChange}>
-                                <option>Choose one...</option>
-                                {this.state.orgOpt}
-                            </Input>
-                        </FormGroup>
+                        {/*Verify if org is already provided*/}
+                        {(!this.props.org)
+                            // Let user choose which org
+                            ? (
+                                // Create options to choose the organization
+                                <FormGroup>
+                                    <Label for="org">Organization ID</Label>
+                                    <Input type="select"
+                                           name="org"
+                                           id="org"
+                                           value={this.state.org || ''}
+                                           onChange={this.handleChange}>
+                                        <option>Choose one...</option>
+                                        {this.state.orgOpt}
+                                    </Input>
+                                </FormGroup>
+                            )
+                            // Display org deleting from
+                            : (<h2>{this.props.org.name}</h2>)
+                        }
                         {/*Create an input for project id*/}
                         <FormGroup>
                             <Label for="id">Project ID</Label>

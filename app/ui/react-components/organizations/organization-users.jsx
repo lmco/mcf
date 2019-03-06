@@ -19,7 +19,7 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import ListItem from '../general-components/list/list-item.jsx';
+import UserListItem from '../general-components/list/user-list-item.jsx';
 import List from '../general-components/list/list.jsx';
 import { Button, Modal, ModalBody } from 'reactstrap';
 import UserRoleEdit from '../user/user-role-edit.jsx';
@@ -55,9 +55,8 @@ class OrganizationUsers extends Component {
         // Loop through org members
         const listItems = users.map(user =>
             // Create user list item
-            <ListItem> {user} </ListItem>
+            <UserListItem user={user} permission={props.org.permissions[user]}/>
         );
-
         // Return org member list
         return (
             <React.Fragment>

@@ -119,20 +119,20 @@ class OrganizationList extends Component {
                     {/*Modal for creating an org*/}
                     <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                         <ModalBody>
-                            { (this.state.modalCreate) ? <CreateOrganization /> : '' }
+                            <CreateOrganization />
                         </ModalBody>
                     </Modal>
                     {/*Modal for deleting an org*/}
                     <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                         <ModalBody>
-                            { (this.state.modalDelete) ? <DeleteOrganization orgs={this.state.orgs}/> : '' }
+                            <DeleteOrganization orgs={this.state.orgs}/>
                         </ModalBody>
                     </Modal>
                 </div>
                 {/*Display the list of organizations*/}
                 <div id='view' className='org-list' ref={this.ref}>
                     <div className='org-list-header'>
-                        <h2 className='org-header'>Your Organizations</h2>
+                        <h2 className='org-header'>Organizations</h2>
                         {/*Verify user is an admin */}
                         {(!this.state.admin)
                             ? ''

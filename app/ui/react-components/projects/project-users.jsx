@@ -18,12 +18,13 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import ListItem from '../general-components/list/list-item.jsx';
+import UserListItem from '../general-components/list/user-list-item.jsx';
 import List from '../general-components/list/list.jsx';
 import { Button, Modal, ModalBody } from 'reactstrap';
 import UserRoleEdit from '../user/user-role-edit.jsx';
 
 // Define function
+<<<<<<< HEAD
 class ProjectUsers extends Component {
     constructor(props) {
         // Initialize parent props
@@ -84,6 +85,29 @@ class ProjectUsers extends Component {
             </React.Fragment>
         )
     }
+=======
+function ProjectUsers(props) {
+    // Initialize variables
+    const users = Object.keys(props.project.permissions);
+
+    // Loop through project members
+    const listItems = users.map(user =>
+        // Create user list item
+        <UserListItem user={user} permission={props.project.permissions[user]}/>
+    );
+
+    // Return project member list
+    return (
+        <div id='view' className='project-user'>
+            <h2>Members</h2>
+            <hr />
+            <List>
+                {listItems}
+            </List>
+
+        </div>
+    )
+>>>>>>> develop
 }
 
 // Export function

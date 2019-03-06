@@ -20,6 +20,7 @@ export function ajaxRequest(method, url, data, dataType) {
   // Declare promise
   return new Promise((resolve, reject) => {
     // Execute javascript query
+    /* eslint-disable no-undef */
     jQuery.ajax({
       // Specify method
       method: method,

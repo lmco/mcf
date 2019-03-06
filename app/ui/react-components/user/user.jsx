@@ -59,11 +59,11 @@ class User extends Component {
                 <React.Fragment>
                     {/*Create the sidebar with sidebar links*/}
                     <Sidebar>
-                        <SidebarLink title='Home' icon='fas fa-home' exact path="/whoami" />
-                        <SidebarLink title='Organizations' icon='fas fa-boxes' href={`/organizations`} />
-                        <SidebarLink title='Projects' icon='fas fa-box' href={`/projects`} />
+                        <SidebarLink id='Home' title='Home' icon='fas fa-home' exact path="/whoami" />
+                        <SidebarLink id='Org' title='Organizations' icon='fas fa-boxes' href={`/organizations`} />
+                        <SidebarLink id='Proj' title='Projects' icon='fas fa-box' href={`/projects`} />
                         <hr />
-                        <SidebarLink title='Edit' icon='fas fa-cog' routerLink={'/whoami/edit'} />
+                        <SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={'/whoami/edit'} />
                     </Sidebar>
                     {/*Verify user data exists*/}
                     {(!this.state.user)
