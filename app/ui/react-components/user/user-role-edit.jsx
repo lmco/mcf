@@ -99,10 +99,8 @@ class UserRoleEdit extends Component{
         // Get all the users
         ajaxRequest('GET', '/api/users')
         .then((users) => {
-            let index = 0;
             const userOpts = users.map((user) => {
-                index++;
-                return (<DropdownItem value={user.username} eventKey={index}>{user.name}</DropdownItem>);
+                return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
             });
 
             // Set the user state
@@ -140,9 +138,9 @@ class UserRoleEdit extends Component{
                                     onClick={this.toggle}
                                     aria-expanded={this.state.dropDownOpen}
                                 >
-                                    Username
+                                        username
                                 </DropdownToggle>
-                                <DropdownMenu as={CustomMenu}>
+                                <DropdownMenu >
                                     <CustomMenu>
                                         {this.state.users}
                                     </CustomMenu>
