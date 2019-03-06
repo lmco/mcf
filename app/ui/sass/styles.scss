@@ -101,7 +101,6 @@ label {
     width: 100%;
     position: absolute;
     display: grid;
-    grid-template-columns: 1fr;
     grid-template-rows: $banner-height 1fr $banner-height;
     grid-template-areas:
         "header"
@@ -268,35 +267,22 @@ label {
 /*                             Home Page Styling                              *
 /******************************************************************************/
 .mbee-home {
-    .splash-row {
-        position: relative;
-        padding-top: 50px;
-        height: 75%;
-        width: 100%;
-        font-family: 'Helvetica Neue', Helvetica;
-
-        h1 {
-            font-weight: 100;
-            font-size: 114px;
-            line-height: 0.8;
-            color: #e7e7e8;
-        }
-
-        h2 {
-            font-weight: 100;
-            font-size: 18px;
-            color: #FFC610;
-            padding-left: 4px;
-        }
-    }
+    display:flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    padding: 0;
 
     .home-links {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 80px;
+        flex-flow: wrap;
+        justify-content: space-evenly;
+        align-items: baseline;
+        padding: 15% 0;
         height: 100%;
         width: 100%;
+        overflow-y: scroll;
 
         a:hover {
             background: darken($mbee-background, 10);
@@ -305,11 +291,17 @@ label {
         }
 
         .home-link {
-            border-radius: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: rgba(0,0,0,.1) 2px 4px 4px;
             color: inherit;
             display: flex;
             flex-direction: column;
+            padding: 20px 0 15px 0;
+            text-align: center;
+            transition: all .23s ease-in-out;
             width: 160px;
+            margin: 10px;
 
             .home-link-icon {
                 font-size: 50px;
@@ -318,6 +310,14 @@ label {
             .home-link-label {
             }
         }
+
+        .home-link:hover {
+            background: lighten($mbee-color-primary, 25%);
+            border: 1px solid $mbee-color-primary;
+            box-shadow: rgba(0,0,0,.1) 4px 6px 6px;
+            transform: scale(1.1);
+        }
+
     }
 }
 

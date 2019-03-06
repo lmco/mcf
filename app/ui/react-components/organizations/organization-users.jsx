@@ -35,7 +35,6 @@ function OrganizationUsers(props) {
 
     // Return org member list
     return (
-<<<<<<< HEAD
         <div id='view' className='org-users'>
             <h2>Members</h2>
             <hr />
@@ -44,17 +43,6 @@ function OrganizationUsers(props) {
             </List>
 
         </div>
-=======
-            <div id='view' className='org-users'>
-                <div className='project-list-header'>
-                    <h2>Users</h2>
-                    <hr />
-                    <List>
-                        {listItems}
-                    </List>
-                </div>
-            </div>
->>>>>>> develop
     )
 }
 

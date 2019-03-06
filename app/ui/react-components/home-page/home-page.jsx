@@ -20,7 +20,10 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Modal, ModalBody } from 'reactstrap';
 
-// JSX Modules
+import {ajaxRequest} from '../helper-functions/ajaxRequests.js';
+
+// JSX
+import Tile from './tile.jsx';
 import Space from '../general-components/space/space.jsx';
 
 // Define HomePage Component
@@ -31,7 +34,9 @@ class HomePage extends Component {
 
         // Initialize state props
         this.state = {
-            modal: false
+            modal: false,
+            user: null,
+            starredProjects: []
         };
 
         // Bind component functions
@@ -39,7 +44,28 @@ class HomePage extends Component {
     }
 
     componentDidMount() {
-        // Initialize variables
+
+        const url = '/api/users/whoami';
+
+        ajaxRequest('GET', `${url}`)
+        .then(user => {
+            this.setState({user: user});
+            if (user.custom.hasOwnProperty('starred_projects')) {
+                 const starredProjects = user.custom.starred_projects.map(p => {
+                    return (
+                        <Tile key={'starred-' + p} href={'/' + p} icon={'fas fa-star'}>
+                            {p}
+                        </Tile>
+                    )
+                });
+                this.setState({starredProjects: starredProjects});
+            }
+        })
+        .catch(err => {
+            console.log(err);
+        });
+
+
         let buffer,
             latchId,
             code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13];
@@ -79,49 +105,21 @@ class HomePage extends Component {
                     </Modal>
                 </div>
                 <div className="mbee-home">
-                    <div className="row align-items-center">
-                        <div className="col-md-2">
-                        </div>
-                        <div className="col-md-8" style={{'text-align': 'center'}}>
-                            <div className="row align-items-center splash-row">
-                                <div className="col-5" style={{'text-align': 'right'}}>
-                                    <img src="/img/logo.png" height="180" alt=""
-                                         style={{'margin-bottom': '20px'}} />
-                                </div>
-                                <div className="col-7" style={{'text-align': 'left'}}>
-                                    <h1>MBEE</h1>
-                                    <h2>Model-Based Engineering Environment</h2>
-                                </div>
-                            </div>
-                            <div className="home-links">
-                                <a href="/organizations" className="home-link">
-                                    <div className="home-link-icon">
-                                        <i className="fas fa-boxes"></i>
-                                    </div>
-                                    <div className="home-link-label">
-                                        <p>Your Organizations</p>
-                                    </div>
-                                </a>
-                                <a href="/projects" className="home-link">
-                                    <div className="home-link-icon">
-                                        <i className="fas fa-box"></i>
-                                    </div>
-                                    <div className="home-link-label">
-                                        <p>Your Projects</p>
-                                    </div>
-                                </a>
-                                <a href="/whoami" className="home-link">
-                                    <div className="home-link-icon">
-                                        <i className="fas fa-user-secret"></i>
-                                    </div>
-                                    <div className="home-link-label">
-                                        <p>You</p>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div className="col-md-2">
-                        </div>
+                    <div className="home-links">
+                        {
+                            (this.state.starredProjects.length > 0)
+                                ?  this.state.starredProjects
+                                : ''
+                        }
+                        <Tile key="orgs" href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
+                            Organizations
+                        </Tile>
+                        <Tile key="projects" href={'/projects'} icon={'fas fa-box'} id='projects'>
+                            Projects
+                        </Tile>
+                        <Tile key="user" href={'/whoami'} icon={'fas fa-user-alt'} id='user'>
+                            User Settings
+                        </Tile>
                     </div>
                 </div>
             </React.Fragment>
@@ -130,6 +128,5 @@ class HomePage extends Component {
     }
 }
 
-// Export the file to connect to the ejs file for rendering
 ReactDOM.render(<HomePage />, document.getElementById('view'));
 
