@@ -106,6 +106,7 @@ function build(_args) {
     // Copy MBEE JS
     gulp.src('./app/ui/js/**/*.js')
     .pipe(concat('mbee.js'))
+    .pipe(minify({ ext: { min: '.min.js' } }))
     .pipe(gulp.dest('build/public/js'));
   }
 

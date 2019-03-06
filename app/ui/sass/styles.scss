@@ -305,7 +305,11 @@ textarea[name="custom"] {
             flex-direction: column;
             padding: 20px 0 15px 0;
             text-align: center;
-            transition: all .23s ease-in-out;
+            transition:
+                transform .23s ease-in-out,
+                background .23s ease-in-out,
+                border .23s ease-in-out,
+                box-shadow .23s ease-in-out;
             width: 160px;
             margin: 10px;
 
