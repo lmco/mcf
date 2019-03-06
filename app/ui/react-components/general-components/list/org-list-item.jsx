@@ -67,7 +67,7 @@ class OrgListItem extends Component {
             // Create the stat list for the organization
             <StatsList>
                 <Stat title='Projects' icon='fas fa-boxes' value={org.projects.length} _key={`${org.id}-projects`} />
-                <Stat title='Users' icon='fas fa-users' value={Object.keys(org.permissions).length} _key={`${org.id}-users`} />
+                <Stat title='Users' icon='fas fa-users' value={Object.keys(org.permissions).length} _key={`org-${org.id}-users`} />
             </StatsList>
         );
 

@@ -16,9 +16,19 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
+import { Form,
+        FormGroup,
+        Label,
+        Input,
+        Button,
+        Dropdown,
+        DropdownToggle,
+        DropdownMenu,
+        DropdownItem } from 'reactstrap';
 
 // MBEE Modules
+import CustomToggle from '../general-components/dropdown-search/custom-toggle.jsx';
+import CustomMenu from '../general-components/dropdown-search/custom-menu.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -31,12 +41,14 @@ class UserRoleEdit extends Component{
         this.state = {
             users: null,
             username: '',
-            permissions: ''
+            permissions: '',
+            dropDownOpen: false
         };
 
         // Bind component functions
         this.handleChange = this.handleChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+        this.toggle = this.toggle.bind(this);
     }
 
     // Define handle change function
@@ -79,6 +91,10 @@ class UserRoleEdit extends Component{
         })
     }
 
+    toggle(){
+        this.setState({ dropDownOpen: !this.state.dropDownOpen })
+    }
+
     componentDidMount() {
         // Get all the users
         ajaxRequest('GET', '/api/users')
@@ -115,6 +131,26 @@ class UserRoleEdit extends Component{
                     <h3> {title} </h3>
                     {/*Create form to update project data*/}
                     <Form>
+                        <FormGroup>
+                            <Label for='username'>Username</Label>
+                            <Dropdown isOpen={this.state.dropDownOpen} toggle={this.toggle}>
+                                <DropdownToggle
+                                    as={CustomToggle}
+                                    onClick={this.toggle}
+                                    aria-expanded={this.state.dropDownOpen}
+                                >
+                                    Username
+                                </DropdownToggle>
+                                <DropdownMenu as={CustomMenu}>
+                                    <DropdownItem eventKey="1">Red</DropdownItem>
+                                    <DropdownItem eventKey="2">Blue</DropdownItem>
+                                    <DropdownItem eventKey="3" active>
+                                        Orange
+                                    </DropdownItem>
+                                    <DropdownItem eventKey="1">Red-Orange</DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
+                        </FormGroup>
                         {/*Username input*/}
                         <FormGroup>
                             <Label for='username'>Username</Label>

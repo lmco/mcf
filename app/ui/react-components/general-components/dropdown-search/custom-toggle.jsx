@@ -16,15 +16,11 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
-
-// MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
-class CustomToggle extends React.Component {
-    constructor(props, context) {
-        super(props, context);
+class CustomToggle extends Component {
+    constructor(props) {
+        super(props);
 
         this.handleClick = this.handleClick.bind(this);
     }
