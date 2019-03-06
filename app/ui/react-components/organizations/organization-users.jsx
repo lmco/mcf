@@ -35,15 +35,15 @@ function OrganizationUsers(props) {
 
     // Return org member list
     return (
-            <div id='view' className='org-users'>
-                <div className='project-list-header'>
-                    <h2>Users</h2>
-                    <hr />
-                    <List>
-                        {listItems}
-                    </List>
-                </div>
+        <div id='view' className='org-users'>
+            <div className='project-list-header'>
+                <h2>Users</h2>
+                <hr />
+                <List>
+                    {listItems}
+                </List>
             </div>
+        </div>
     )
 }
 

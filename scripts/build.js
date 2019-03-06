@@ -60,6 +60,7 @@ function build(_args) {
 
   // Assign parameters to args. If no parameters, default to '--all'
   const args = (_args === undefined || _args.length === 0) ? ['--all'] : _args;
+
   // Copy static dependencies to build directory
   if (args.includes('--all') || args.includes('--copy-deps')) {
     M.log.info('  + Copying dependencies ...');
@@ -87,7 +88,13 @@ function build(_args) {
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Jquery UI JS
-    gulp.src(['./node_modules/jquery-ui/ui/effect.js', './node_modules/jquery-ui/ui/effects/*.js'])
+    gulp.src([
+      './node_modules/jquery-ui/ui/effect.js',
+      './node_modules/jquery-ui/ui/effects/*.js'
+      // TODO (jk) - Determine if we need this
+      // './node_modules/jquery-ui/ui/widget.js',
+      // './node_modules/jquery-ui/ui/widgets/*.js'
+    ])
     .pipe(concat('jquery-ui.js'))
     .pipe(minify({ noSource: true }))
     .pipe(gulp.dest('build/public/js'));
