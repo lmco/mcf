@@ -566,7 +566,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           }
           catch (e) {
             // Parent not found in db, throw an error
-            throw new M.CustomError(`Parent element ${element.$parent} not found.`, 404, 'warn');
+            throw new M.CustomError(`Parent element ${element.parent} not found.`, 404, 'warn');
           }
         }
 
@@ -578,7 +578,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           }
           catch (e) {
             // Source not found in db, throw an error
-            throw new M.CustomError(`Source element ${element.$source} not found.`, 404, 'warn');
+            throw new M.CustomError(`Source element ${element.source} not found.`, 404, 'warn');
           }
         }
 
@@ -590,7 +590,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           }
           catch (e) {
             // Target not found in db, throw an error
-            throw new M.CustomError(`Target element ${element.$target} not found.`, 404, 'warn');
+            throw new M.CustomError(`Target element ${element.target} not found.`, 404, 'warn');
           }
         }
       });
