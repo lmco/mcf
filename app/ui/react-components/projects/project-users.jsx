@@ -53,7 +53,7 @@ class ProjectUsers extends Component {
         // Loop through project members
         const listItems = users.map(user =>
         // Create user list item
-        <UserListItem user={user} permission={props.project.permissions[user]}/>
+        <UserListItem user={user} permission={this.props.project.permissions[user]}/>
         );
 
         // Return project member list
@@ -67,8 +67,8 @@ class ProjectUsers extends Component {
                 </Modal>
                 <div id='view' className='project-list'>
                     <div className='project-list-header'>
-                    <h2 className='org-header'>Users</h2>
-                        <div className='org-button'>
+                    <h2 className='project-header'>Users</h2>
+                        <div className='project-button'>
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={this.handleToggle}>

@@ -55,7 +55,7 @@ class OrganizationUsers extends Component {
         // Loop through org members
         const listItems = users.map(user =>
             // Create user list item
-            <UserListItem user={user} permission={props.org.permissions[user]}/>
+            <UserListItem user={user} permission={this.props.org.permissions[user]}/>
         );
         // Return org member list
         return (

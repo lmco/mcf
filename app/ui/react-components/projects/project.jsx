@@ -96,7 +96,6 @@ class Project extends Component {
                         <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
                         <SidebarLink id='Members' title='Members' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
                         <SidebarLink id='Elements' title='Elements' icon='fas fa-sitemap' routerLink={`${this.props.match.url}/elements`} />
-                        <SidebarLink id='Elements' title='Elements' icon='fas fa-sitemap' routerLink={`${this.props.match.url}/elements`} />
                         <hr />
                         {/*Check if user is admin*/}
                         {(this.state.admin)

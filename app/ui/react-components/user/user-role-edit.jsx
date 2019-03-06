@@ -57,8 +57,6 @@ class UserRoleEdit extends Component{
             }
         };
 
-        console.log(this.props.org);
-
         if (this.props.org) {
             url = `/api/orgs/${this.props.org.id}`;
             redirect = `/${this.props.org.id}/users`;
