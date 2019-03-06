@@ -80,6 +80,12 @@ label {
     font-size: 15px;
 }
 
+textarea[name="custom"] {
+    font-family: Consolas, "Courier New";
+    resize: vertical;
+    outline: none;
+}
+
 /******************************************************************************
 /*                                  Themes                                    *
 /******************************************************************************/
