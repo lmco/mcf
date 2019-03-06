@@ -27,7 +27,6 @@ import { Form,
         DropdownItem } from 'reactstrap';
 
 // MBEE Modules
-import CustomToggle from '../general-components/dropdown-search/custom-toggle.jsx';
 import CustomMenu from '../general-components/dropdown-search/custom-menu.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -42,6 +41,7 @@ class UserRoleEdit extends Component{
             users: null,
             username: '',
             permissions: '',
+            searchParam: '',
             dropDownOpen: false
         };
 
@@ -54,7 +54,7 @@ class UserRoleEdit extends Component{
     // Define handle change function
     handleChange(event) {
         // Change the state with new value
-        this.setState({ [event.target.name]: event.target.value});
+        this.setState({ [event.target.name]: event.target.value });
     }
 
     // Define the submit function
@@ -99,8 +99,10 @@ class UserRoleEdit extends Component{
         // Get all the users
         ajaxRequest('GET', '/api/users')
         .then((users) => {
+            let index = 0;
             const userOpts = users.map((user) => {
-                return (<option value={user.username}>{user.name}</option>);
+                index++;
+                return (<DropdownItem value={user.username} eventKey={index}>{user.name}</DropdownItem>);
             });
 
             // Set the user state
@@ -135,19 +137,15 @@ class UserRoleEdit extends Component{
                             <Label for='username'>Username</Label>
                             <Dropdown isOpen={this.state.dropDownOpen} toggle={this.toggle}>
                                 <DropdownToggle
-                                    as={CustomToggle}
                                     onClick={this.toggle}
                                     aria-expanded={this.state.dropDownOpen}
                                 >
                                     Username
                                 </DropdownToggle>
                                 <DropdownMenu as={CustomMenu}>
-                                    <DropdownItem eventKey="1">Red</DropdownItem>
-                                    <DropdownItem eventKey="2">Blue</DropdownItem>
-                                    <DropdownItem eventKey="3" active>
-                                        Orange
-                                    </DropdownItem>
-                                    <DropdownItem eventKey="1">Red-Orange</DropdownItem>
+                                    <CustomMenu>
+                                        {this.state.users}
+                                    </CustomMenu>
                                 </DropdownMenu>
                             </Dropdown>
                         </FormGroup>

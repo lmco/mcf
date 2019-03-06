@@ -17,6 +17,8 @@
 // React Modules
 import React, { Component } from 'react';
 
+import { Input } from 'reactstrap';
+
 class CustomMenu extends Component {
     constructor(props) {
         super(props);
