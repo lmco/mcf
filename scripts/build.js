@@ -90,7 +90,7 @@ function build(_args) {
     // Copy Jquery UI JS
     gulp.src([
       './node_modules/jquery-ui/ui/effect.js',
-      './node_modules/jquery-ui/ui/effects/*.js',
+      './node_modules/jquery-ui/ui/effects/*.js'
       // TODO (jk) - Determine if we need this
       // './node_modules/jquery-ui/ui/widget.js',
       // './node_modules/jquery-ui/ui/widgets/*.js'
