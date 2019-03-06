@@ -18,7 +18,7 @@
 import React from 'react';
 
 // MBEE Modules
-import ListItem from '../general-components/list/list-item.jsx';
+import UserListItem from '../general-components/list/user-list-item.jsx';
 import List from '../general-components/list/list.jsx';
 
 // Define function
@@ -29,13 +29,13 @@ function ProjectUsers(props) {
     // Loop through project members
     const listItems = users.map(user =>
         // Create user list item
-        <ListItem> {user} </ListItem>
+        <UserListItem user={user} permission={props.project.permissions[user]}/>
     );
 
     // Return project member list
     return (
         <div id='view' className='project-user'>
-            <h2>Users</h2>
+            <h2>Members</h2>
             <hr />
             <List>
                 {listItems}
