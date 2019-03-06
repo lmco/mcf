@@ -16,7 +16,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
+import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
@@ -33,7 +33,7 @@ class ProjectEdit extends Component{
             name: this.props.project.name,
             username: '',
             permissions: '',
-            custom: JSON.stringify(this.props.project.custom || {}, null, 2),
+            custom: JSON.stringify(this.props.project.custom || {}, null, 2)
         };
 
         // Bind component functions

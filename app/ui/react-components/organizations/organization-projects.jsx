@@ -17,10 +17,12 @@
 
 // React Modules
 import React from 'react';
+import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
+import CreateProject from '../projects/project-create.jsx';
 
 // Define function
 function OrganizationProjects(props) {
@@ -35,13 +37,38 @@ function OrganizationProjects(props) {
 
     // Return the org's project list
     return (
-        <div id='view' className='org-projects'>
-            <h2>Projects</h2>
-            <hr />
-            <List>
-                {listItems}
-            </List>
-        </div>
+        <React.Fragment>
+            <div>
+                {/*Modal for creating a project*/}
+                <Modal isOpen={props.modal} toggle={props.handleToggle}>
+                    <ModalBody>
+                        <CreateProject org={org}/>
+                    </ModalBody>
+                </Modal>
+            </div>
+            <div id='view' className='org-projects'>
+                <div className='project-list-header'>
+                     <h2 className='project-header'>Projects</h2>
+                    {/*Verify user has write permissions*/}
+                    {(!props.write)
+                        ? ''
+                        // Display project create button
+                        :(<div className='project-button'>
+                            <Button className='btn'
+                                    outline color="secondary"
+                                    onClick={props.handleToggle}>
+                                Create
+                            </Button>
+                         </div>)
+                    }
+                </div>
+                <hr />
+                {/*Display list of projects*/}
+                <List>
+                    {listItems}
+                </List>
+            </div>
+        </React.Fragment>
     )
 }
 

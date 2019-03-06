@@ -93,14 +93,14 @@ class Project extends Component {
                 <React.Fragment>
                     {/*Create the sidebar with sidebar links*/}
                     <Sidebar>
-                        <SidebarLink title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
-                        <SidebarLink title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
-                        <SidebarLink title='Elements' icon='fas fa-sitemap' routerLink={`${this.props.match.url}/elements`} />
+                        <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
+                        <SidebarLink id='Users' title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
+                        <SidebarLink id='Elements' title='Elements' icon='fas fa-sitemap' routerLink={`${this.props.match.url}/elements`} />
                         <hr />
                         {/*Check if user is admin*/}
                         {(this.state.admin)
                             // Add the edit router link for admin users ONLY
-                            ?(<SidebarLink title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
+                            ?(<SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
                             : ''
                         }
                     </Sidebar>
