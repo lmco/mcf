@@ -17,7 +17,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Input} from 'reactstrap';
+import {Input, Form, FormGroup} from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
@@ -43,13 +43,17 @@ class Search extends Component{
     render(){
         return (
             <div>
-                <Input type="text"
-                       name="query"
-                       id="query"
-                       placeholder="Search"
-                       value={this.state.query || ""}
-                       onChange={this.onChange}
-                       />
+                <Form>
+                    <FormGroup>
+                        <Input type="text"
+                               name="query"
+                               id="query"
+                               placeholder="Search"
+                               value={this.state.query || ""}
+                               onChange={this.onChange}
+                               />
+                    </FormGroup>
+                </Form>
             </div>
         )
     }

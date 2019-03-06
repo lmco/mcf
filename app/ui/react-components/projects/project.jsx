@@ -25,6 +25,7 @@ import ProjectHome from './project-home.jsx'
 import ProjectUsers from './project-users.jsx'
 import ProjectElements from './project-elements.jsx'
 import ProjectEdit from './project-edit.jsx'
+import Search from '../search/search.jsx'
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
