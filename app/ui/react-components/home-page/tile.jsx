@@ -19,7 +19,7 @@ function Tile(props) {
     const classes = "tile col-2" + props.id;
 
   return (
-    <div className={classes} style={{'text-align': 'center'}}>
+    <div className={classes}>
         <a href={props.href} className="home-link">
           <div className="home-link-icon">
             <i className={props.icon}></i>

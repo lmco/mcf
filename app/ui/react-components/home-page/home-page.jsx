@@ -20,7 +20,9 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Modal, ModalBody } from 'reactstrap';
 
-// JSX Modules
+import {ajaxRequest} from '../helper-functions/ajaxRequests.js';
+
+// JSX
 import Tile from './tile.jsx';
 import Space from '../general-components/space/space.jsx';
 
@@ -45,13 +47,13 @@ class HomePage extends Component {
 
         const url = '/api/users/whoami';
 
-        getRequest(`${url}`)
+        ajaxRequest('GET', `${url}`)
         .then(user => {
             this.setState({user: user});
             if (user.custom.hasOwnProperty('starred_projects')) {
                  const starredProjects = user.custom.starred_projects.map(p => {
                     return (
-                        <Tile href={'/' + p} icon={'fas fa-star'}>
+                        <Tile key={'starred-' + p} href={'/' + p} icon={'fas fa-star'}>
                             {p}
                         </Tile>
                     )
@@ -109,13 +111,13 @@ class HomePage extends Component {
                                 ?  this.state.starredProjects
                                 : ''
                         }
-                        <Tile href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
+                        <Tile key="orgs" href={'/organizations'} icon={'fas fa-cubes'} id='orgs'>
                             Organizations
                         </Tile>
-                        <Tile href={'/projects'} icon={'fas fa-box'} id='projects'>
+                        <Tile key="projects" href={'/projects'} icon={'fas fa-box'} id='projects'>
                             Projects
                         </Tile>
-                        <Tile href={'/whoami'} icon={'fas fa-user-alt'} id='user'>
+                        <Tile key="user" href={'/whoami'} icon={'fas fa-user-alt'} id='user'>
                             User Settings
                         </Tile>
                     </div>
