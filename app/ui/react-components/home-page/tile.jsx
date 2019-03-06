@@ -20,7 +20,7 @@ function Tile(props) {
 
   return (
     <div className={classes}>
-        <a href={props.href} className="home-link">
+        <a href={props.href} className="tile home-link">
           <div className="home-link-icon">
             <i className={props.icon}></i>
           </div>
