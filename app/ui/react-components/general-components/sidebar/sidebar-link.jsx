@@ -28,7 +28,7 @@ function SidebarLink(props) {
             {/*if sidebar is not expanded, set a name when hovering over icon*/}
             {(!props.isExpanded) ?
                 <UncontrolledTooltip placement='right'
-                                     target={props.title}
+                                     target={props.id}
                                      delay={{
                                          show: 0,
                                          hide: 0

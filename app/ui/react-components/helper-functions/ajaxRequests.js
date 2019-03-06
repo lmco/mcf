@@ -19,8 +19,9 @@
 export function ajaxRequest(method, url, data, dataType) {
   // Declare promise
   return new Promise((resolve, reject) => {
-    // Execute javascript query             // TODO (jk) - Determine ESLint approach here
-    jQuery.ajax({                           // eslint-disable-line no-undef
+    // Execute javascript query
+    /* eslint-disable no-undef */
+    jQuery.ajax({
       // Specify method
       method: method,
       // Specify URL, data type, and data
