@@ -21,8 +21,6 @@ import React from 'react';
 // MBEE Modules
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
-import {Modal, ModalBody} from 'reactstrap';
-import UserRoleEdit from '../user/user-role-edit.jsx';
 
 // Define function
 function OrganizationUsers(props) {
@@ -37,23 +35,15 @@ function OrganizationUsers(props) {
 
     // Return org member list
     return (
-        <React.Fragment>
-            {/*Modal for creating a project*/}
-            <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
-                <ModalBody>
-                    { (this.state.modalCreate) ? < /> : '' }
-                </ModalBody>
-            </Modal>
-            <div id='view' className='org-users'>
-                <div className='project-list-header'>
-                    <h2>Users</h2>
-                    <hr />
-                    <List>
-                        {listItems}
-                    </List>
-                </div>
+        <div id='view' className='org-users'>
+            <div className='project-list-header'>
+                <h2>Users</h2>
+                <hr />
+                <List>
+                    {listItems}
+                </List>
             </div>
-        </React.Fragment>
+        </div>
     )
 }
 
