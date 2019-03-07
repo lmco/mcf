@@ -59,7 +59,7 @@ class SearchResult extends Component {
             </div>
         );
         return (
-            <div className={'search-result'} key={element.id}>
+            <div className={'search-result'} key={'element-' + element.id}>
                 <div className={'search-result-header'}>
                     {icon}
                     <span>{element.name} <small>({element.id})</small></span>
