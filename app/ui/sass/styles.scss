@@ -508,7 +508,7 @@ textarea[name="custom"] {
 .user-searchbar {
     grid-area: searchbar;
     justify-content: flex-start;
-    margin: 0;
+    margin-left: 0 !important;
 }
 
 .search-button {
