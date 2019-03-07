@@ -49,7 +49,7 @@ class CustomMenu extends Component {
                        placeholder="Type to filter..."
                        onChange={this.handleChange}
                        value={value}/>
-                <ul className="list-unstyled">
+                <ul className="list-unstyled" onClick={this.props.updateUsername}>
                     {React.Children.toArray(children).filter(
                         child =>
                             !value || child.props.children.toLowerCase().startsWith(value) || child.props.value.startsWith(value)

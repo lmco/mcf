@@ -49,6 +49,7 @@ class UserRoleEdit extends Component{
         this.handleChange = this.handleChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.toggle = this.toggle.bind(this);
+        this.updateUsername = this.updateUsername.bind(this);
     }
 
     // Define handle change function
@@ -95,6 +96,11 @@ class UserRoleEdit extends Component{
         this.setState({ dropDownOpen: !this.state.dropDownOpen })
     }
 
+    updateUsername(event) {
+        // Change the state with new value
+        this.setState({ username: event.target.value });
+    }
+
     componentDidMount() {
         // Get all the users
         ajaxRequest('GET', '/api/users')
@@ -135,11 +141,12 @@ class UserRoleEdit extends Component{
                             <Label for='username'>Username</Label>
                             <div className='username-search'>
                                 <Input autoFocus
-                                       name='searchParam'
+                                       id="username"
+                                       name="username"
                                        className="user-searchbar mx-3 my-2 w-auto"
                                        placeholder="Choose a user..."
                                        onChange={this.handleChange}
-                                       value={this.state.searchParam || ''} />
+                                       value={this.state.username || ''} />
                                 <Dropdown className='search-button' isOpen={this.state.dropDownOpen} toggle={this.toggle}>
                                     <DropdownToggle
                                         onClick={this.toggle}
@@ -148,24 +155,12 @@ class UserRoleEdit extends Component{
                                             username
                                     </DropdownToggle>
                                     <DropdownMenu >
-                                        <CustomMenu>
+                                        <CustomMenu updateUsername={this.updateUsername}>
                                             {this.state.users}
                                         </CustomMenu>
                                     </DropdownMenu>
                                 </Dropdown>
                             </div>
-                        </FormGroup>
-                        {/*Username input*/}
-                        <FormGroup>
-                            <Label for='username'>Username</Label>
-                            <Input type='select'
-                                   id="username"
-                                   name="username"
-                                   value={this.state.username || ''}
-                                   onChange={this.handleChange}>
-                                <option>Choose one...</option>
-                                {this.state.users}
-                            </Input>
                         </FormGroup>
                         {/*Permissions user updates with*/}
                         <FormGroup>
