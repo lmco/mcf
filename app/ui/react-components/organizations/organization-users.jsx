@@ -73,7 +73,7 @@ class OrganizationUsers extends Component {
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={this.handleToggle}>
-                                Add
+                                Edit
                             </Button>
                         </div>
                     </div>
