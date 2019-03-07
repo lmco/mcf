@@ -21,6 +21,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
+import ListItem from '../general-components/list/list-item.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
 import CreateProject from './project-create.jsx';
 import DeleteProject from './project-delete.jsx';
@@ -36,6 +37,7 @@ class ProjectList extends Component {
         this.state = {
             width: null,
             projects: [],
+            orgs: [],
             admin: false,
             write: false,
             writePermOrgs: null,
@@ -58,10 +60,12 @@ class ProjectList extends Component {
         ajaxRequest('GET','/api/users/whoami')
         .then(user => {
             // Get all orgs
-            ajaxRequest('GET','/api/orgs')
+            // Get the organization and it's projects
+            ajaxRequest('GET', `/api/orgs?populate=projects`)
             .then(orgs => {
                 // Initialize variables
                 const writePermOrgs = [];
+                const allProjects = [];
 
                 // Add event listener for window resizing
                 window.addEventListener('resize', this.handleResize);
@@ -70,6 +74,11 @@ class ProjectList extends Component {
 
                 // Loop through orgs
                 orgs.map((org) => {
+                    // Loop through projects and push to array
+                    org.projects.map(project => {
+                        allProjects.push(project);
+                    });
+
                     // Initialize variables
                     const perm = org.permissions[user.username];
 
@@ -93,16 +102,11 @@ class ProjectList extends Component {
                     this.setState({admin: user.admin});
                 }
 
-                // Get projects user has permissions on
-                ajaxRequest('GET','/api/projects')
-                .then(projects => {
+                // Set the org state
+                this.setState({orgs: orgs});
 
-                    // Set projects state
-                    this.setState({ projects: projects});
-                })
-                .catch((err) => {
-                    this.setState({error: `Failed to load projects: ${err}`})
-                });
+                // Set the org state
+                this.setState({projects: allProjects});
             })
             .catch(err => {
                 // Throw error and set error state
@@ -139,16 +143,28 @@ class ProjectList extends Component {
 
     render() {
         // Loop through all projects
-        const projects = this.state.projects.map(project => {
+        const list = this.state.orgs.map(org => {
             // Initialize variables
-            const orgId = project.org;
+            const orgId = org.id;
 
-            // Create project links
+            const projects = org.projects.map(project => {
+                // Create project links
+                return (
+                    <Link to={`/${orgId}/${project.id}`}>
+                        <ProjectListItem project={project}/>
+                    </Link>
+                )
+            });
+
             return (
-                <Link to={`/${orgId}/${project.id}`}>
-                    <ProjectListItem project={project}/>
-                </Link>
+                <React.Fragment>
+                    <ListItem href={`/${orgId}`}> {org.name} </ListItem>
+                    <List>
+                        {projects}
+                    </List>
+                </React.Fragment>
             )
+
         });
 
         // Return project list
@@ -212,7 +228,7 @@ class ProjectList extends Component {
                             <h3> No projects. </h3>
                            </div>)
                         : (<List>
-                            {projects}
+                            {list}
                            </List>)
                     }
                 </div>

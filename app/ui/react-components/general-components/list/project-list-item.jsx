@@ -74,7 +74,7 @@ class ProjectListItem extends Component {
         return (
             <div className='stats-list-item' ref={this.ref}>
                 <div className='list-header'>
-                    <p>{project.org} / {project.name}</p>
+                    <p>{project.name}</p>
                 </div>
                 {/*Verify width of client, remove stats based on width*/}
                 {(this.state.width > 600) ? stats : ''}
