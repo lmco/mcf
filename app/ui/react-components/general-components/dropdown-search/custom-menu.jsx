@@ -19,49 +19,31 @@ import React, { Component } from 'react';
 
 import { Input } from 'reactstrap';
 
-class CustomMenu extends Component {
-    constructor(props) {
-        super(props);
+function CustomMenu(props){
+    const {
+        children,
+        style,
+        className,
+        'aria-labelledby': labeledBy,
+    } = props;
 
-        this.handleChange = this.handleChange.bind(this);
+    const  value = props.username;
 
-        this.state = { value: '' };
-    }
-
-    handleChange(e) {
-        this.setState({ value: e.target.value.toLowerCase().trim() });
-    }
-
-    render() {
-        const {
-            children,
-            style,
-            className,
-            'aria-labelledby': labeledBy,
-        } = this.props;
-
-        let { value } = this.state;
-
-        if (this.props.username) {
-            value = this.props.username;
-        }
-
-        return (
-            <div style={style} className={className} aria-labelledby={labeledBy}>
-                <Input autoFocus
-                       className="mx-3 my-2 w-auto"
-                       placeholder="Type to filter..."
-                       onChange={this.props.updateUsername}
-                       value={value}/>
-                <ul className="list-unstyled" onClick={this.props.updateUsername}>
-                    {React.Children.toArray(children).filter(
-                        child =>
-                            !value || child.props.children.toLowerCase().startsWith(value) || child.props.value.startsWith(value)
-                    )}
-                </ul>
-            </div>
-        );
-    }
+    return (
+        <div style={style} className={className} aria-labelledby={labeledBy}>
+            <Input autoFocus
+                   className="mx-3 my-2 w-auto"
+                   placeholder="Type to filter..."
+                   onChange={props.updateUsername}
+                   value={value}/>
+            <ul className="list-unstyled" onClick={props.updateUsername}>
+                {React.Children.toArray(children).filter(
+                    child =>
+                        !value || child.props.children.toLowerCase().startsWith(value) || child.props.value.startsWith(value)
+                )}
+            </ul>
+        </div>
+    );
 }
 
 // Export component
