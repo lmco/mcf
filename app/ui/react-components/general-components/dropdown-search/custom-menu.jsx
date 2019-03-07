@@ -42,17 +42,17 @@ class CustomMenu extends Component {
 
         let { value } = this.state;
 
-        //if (this.props.username) {
+        if (this.props.username) {
             value = this.props.username;
-        //}
+        }
 
         return (
             <div style={style} className={className} aria-labelledby={labeledBy}>
-                {/*<Input autoFocus*/}
-                       {/*className="mx-3 my-2 w-auto"*/}
-                       {/*placeholder="Type to filter..."*/}
-                       {/*onChange={this.handleChange}*/}
-                       {/*value={value}/>*/}
+                <Input autoFocus
+                       className="mx-3 my-2 w-auto"
+                       placeholder="Type to filter..."
+                       onChange={this.props.updateUsername}
+                       value={value}/>
                 <ul className="list-unstyled" onClick={this.props.updateUsername}>
                     {React.Children.toArray(children).filter(
                         child =>
