@@ -121,7 +121,7 @@ class Organization extends Component {
                                     render={ (props) => <OrgProjects {...props} org={this.state.org} write={this.state.write} modal={this.state.modal} handleToggle={this.handleToggle}/> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <OrgUsers {...props} org={this.state.org} /> } />
+                                       render={ (props) => <OrgUsers {...props} org={this.state.org} admin={this.state.admin}/> } />
                                {/*Verify if user is admin*/}
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page

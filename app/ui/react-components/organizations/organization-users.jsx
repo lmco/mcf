@@ -60,22 +60,33 @@ class OrganizationUsers extends Component {
         // Return org member list
         return (
             <React.Fragment>
-                {/*Modal for creating a project*/}
-                <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
-                    <ModalBody>
-                        <UserRoleEdit org={this.props.org}/>
-                    </ModalBody>
-                </Modal>
+                {/*Verify admin user*/}
+                {(!this.props.admin)
+                    ? ''
+                    : ( // Modal for editing user roles
+                        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+                            <ModalBody>
+                                <UserRoleEdit org={this.props.org}/>
+                            </ModalBody>
+                        </Modal>
+                    )
+                }
                 <div id='view' className='org-list'>
                     <div className='org-list-header'>
                         <h2 className='org-header'>Users</h2>
-                        <div className='org-button'>
-                            <Button className='btn'
-                                    outline color="secondary"
-                                    onClick={this.handleToggle}>
-                                Edit
-                            </Button>
-                        </div>
+                        {/*Verify user is admin*/}
+                        {(!this.props.admin)
+                            ? ''
+                            : ( // Button to edit user roles
+                                <div className='org-button'>
+                                    <Button className='btn'
+                                            outline color="secondary"
+                                            onClick={this.handleToggle}>
+                                        Edit
+                                    </Button>
+                                </div>
+                            )
+                        }
                     </div>
                     <hr/>
                     <List>

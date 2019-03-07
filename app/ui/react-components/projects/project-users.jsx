@@ -59,10 +59,11 @@ class ProjectUsers extends Component {
         // Return project member list
         return (
             <React.Fragment>
+                {/*Verify admin user*/}
                 {(!this.props.admin)
                     ? ''
                     : (
-                        // Modal for creating a project
+                        // Modal for editing user roles
                         <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
                             <ModalBody>
                                 <UserRoleEdit project={this.props.project}/>
@@ -73,9 +74,10 @@ class ProjectUsers extends Component {
                 <div id='view' className='project-list'>
                     <div className='project-list-header'>
                     <h2 className='project-header'>Users</h2>
+                        {/*Verify user is admin*/}
                         {(!this.props.admin)
                             ? ''
-                            : (
+                            : ( // Button to edit user roles
                                 <div className='project-button'>
                                     <Button className='btn'
                                             outline color="secondary"
