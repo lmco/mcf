@@ -133,19 +133,27 @@ class UserRoleEdit extends Component{
                     <Form>
                         <FormGroup>
                             <Label for='username'>Username</Label>
-                            <Dropdown isOpen={this.state.dropDownOpen} toggle={this.toggle}>
-                                <DropdownToggle
-                                    onClick={this.toggle}
-                                    aria-expanded={this.state.dropDownOpen}
-                                >
-                                        username
-                                </DropdownToggle>
-                                <DropdownMenu >
-                                    <CustomMenu>
-                                        {this.state.users}
-                                    </CustomMenu>
-                                </DropdownMenu>
-                            </Dropdown>
+                            <div className='username-search'>
+                                <Input autoFocus
+                                       name='searchParam'
+                                       className="user-searchbar mx-3 my-2 w-auto"
+                                       placeholder="Choose a user..."
+                                       onChange={this.handleChange}
+                                       value={this.state.searchParam || ''} />
+                                <Dropdown className='search-button' isOpen={this.state.dropDownOpen} toggle={this.toggle}>
+                                    <DropdownToggle
+                                        onClick={this.toggle}
+                                        aria-expanded={this.state.dropDownOpen}
+                                    >
+                                            username
+                                    </DropdownToggle>
+                                    <DropdownMenu >
+                                        <CustomMenu>
+                                            {this.state.users}
+                                        </CustomMenu>
+                                    </DropdownMenu>
+                                </Dropdown>
+                            </div>
                         </FormGroup>
                         {/*Username input*/}
                         <FormGroup>

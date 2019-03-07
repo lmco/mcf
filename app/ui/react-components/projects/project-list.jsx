@@ -101,17 +101,17 @@ class ProjectList extends Component {
                     this.setState({ projects: projects});
                 })
                 .catch((err) => {
-                    this.setState({error: `Failed to load projects: ${err.responseJSON.description}`})
+                    this.setState({error: `Failed to load projects: ${err}`})
                 });
             })
             .catch(err => {
                 // Throw error and set error state
-                this.setState({error: `Failed to grab orgs: ${err.responseJSON.description}`});
+                this.setState({error: `Failed to grab orgs: ${err}`});
             });
         })
         // Throw error and set error state
         .catch(err => {
-            this.setState({error: `Failed to grab user information: ${err.responseJSON.description}`});
+            this.setState({error: `Failed to grab user information: ${err}`});
         });
     }
 

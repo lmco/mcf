@@ -497,6 +497,30 @@ textarea[name="custom"] {
     padding: 2em;
 }
 
+.username-search {
+    display: grid;
+    grid-template-columns: minmax(auto, 600px) 1fr;
+    grid-template-areas: "searchbar button";
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-searchbar {
+    grid-area: searchbar;
+    justify-content: flex-start;
+    margin: 0;
+}
+
+.search-button {
+    grid-area: button;
+    justify-content: flex-end;
+
+    .btn {
+        float: right;
+        margin: 5px;
+    }
+}
+
 /******************************************************************************
 /*                           List Component Styling                           *
 /******************************************************************************/
@@ -606,6 +630,52 @@ textarea[name="custom"] {
         }
         p {
             margin: 0;
+        }
+    }
+}
+
+/******************************************************************************
+/*                           Search Form Styling                              *
+/******************************************************************************/
+
+#search {
+    overflow-y: scroll;
+}
+
+.search-form {
+    padding: 80px;
+
+    .form-row {
+        width: 100%;
+
+        input {
+            width: 100%;
+        }
+    }
+}
+
+.search-results {
+    margin: 20px;
+
+    .search-result {
+
+        border: 1px solid #ccc;
+        border-radius: 2px;
+        padding: 10px;
+        margin: 20px;
+
+        .search-result-header {
+            span {
+                margin-left: 15px;
+            }
+        }
+
+        .search-result-raw {
+            background-color: #efefef;
+            border: 1px solid #e8e8e8;
+            font-family: Consolas, "Courier New";
+            margin: 20px;
+            overflow: scroll;
         }
     }
 }
