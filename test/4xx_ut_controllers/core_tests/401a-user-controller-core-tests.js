@@ -18,7 +18,6 @@
 
 // NPM modules
 const chai = require('chai');
-const path = require('path');
 
 // MBEE modules
 const UserController = M.require('controllers.user-controller');
@@ -28,7 +27,7 @@ const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 
@@ -80,6 +79,8 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should create a user', createUser);
   it('should create multiple users', createUsers);
+  it('should create or replace a user', createOrReplaceUser);
+  it('should create and replace multiple users', createOrReplaceUsers);
   it('should find a user', findUser);
   it('should find multiple users', findUsers);
   it('should find all users', findAllUsers);
@@ -148,8 +149,7 @@ function createUser(done) {
 function createUsers(done) {
   const userDataObjects = [
     testData.users[1],
-    testData.users[2],
-    testData.users[3]
+    testData.users[2]
   ];
 
   // Create users via controller
@@ -183,6 +183,121 @@ function createUsers(done) {
       chai.expect(createdUser.createdOn).to.not.equal(null);
       chai.expect(createdUser.updatedOn).to.not.equal(null);
       chai.expect(createdUser.archivedOn).to.equal(null);
+    });
+
+    // Find the default org
+    return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultOrg) => {
+    const usernames = userDataObjects.map(u => u.username);
+    // Verify the user has read/write permission on the default org
+    usernames.forEach((username) => {
+      chai.expect(defaultOrg.permissions[username]).to.include('read');
+      chai.expect(defaultOrg.permissions[username]).to.include('write');
+      chai.expect(defaultOrg.permissions[username]).to.not.include('admin');
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates or replaces a user using the user controller
+ */
+function createOrReplaceUser(done) {
+  const userData = testData.users[0];
+
+  // Create or replace user via controller
+  UserController.createOrReplace(adminUser, userData)
+  .then((replacedUsers) => {
+    // Expect replacedUsers array to contain 1 user
+    chai.expect(replacedUsers.length).to.equal(1);
+    const replacedUser = replacedUsers[0];
+
+    // Verify user created/replaced properly
+    chai.expect(replacedUser._id).to.equal(userData.username);
+    chai.expect(replacedUser.username).to.equal(userData.username);
+    chai.expect(replacedUser.preferredName).to.equal(userData.preferredName);
+    chai.expect(replacedUser.fname).to.equal(userData.fname);
+    chai.expect(replacedUser.lname).to.equal(userData.lname);
+    chai.expect(replacedUser.admin).to.equal(userData.admin);
+    chai.expect(replacedUser.custom).to.deep.equal(userData.custom);
+
+    // Expect the password to be hashed
+    chai.expect(replacedUser.password).to.not.equal(userData.password);
+
+    // Verify additional properties
+    chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
+    chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedUser.archivedBy).to.equal(null);
+    chai.expect(replacedUser.createdOn).to.not.equal(null);
+    chai.expect(replacedUser.updatedOn).to.not.equal(null);
+    chai.expect(replacedUser.archivedOn).to.equal(null);
+
+    // Find the default org
+    return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+  })
+  .then((defaultOrg) => {
+    // Verify the user has read/write permission on the default org
+    chai.expect(defaultOrg.permissions[userData.username]).to.include('read');
+    chai.expect(defaultOrg.permissions[userData.username]).to.include('write');
+    chai.expect(defaultOrg.permissions[userData.username]).to.not.include('admin');
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates/replaces multiple users using the user controller
+ */
+function createOrReplaceUsers(done) {
+  const userDataObjects = [
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
+
+  // Create/replaces users via controller
+  UserController.createOrReplace(adminUser, userDataObjects)
+  .then((replacedUsers) => {
+    // Expect replacedUsers not to be empty
+    chai.expect(replacedUsers.length).to.equal(userDataObjects.length);
+
+    // Convert replacedUsers to JMI type 2 for easier lookup
+    const jmi2Users = jmi.convertJMI(1, 2, replacedUsers);
+    // Loops through each user data object
+    userDataObjects.forEach((userDataObject) => {
+      const replacedUser = jmi2Users[userDataObject.username];
+
+      // Verify user created/replaced properly
+      chai.expect(replacedUser._id).to.equal(userDataObject.username);
+      chai.expect(replacedUser.username).to.equal(userDataObject.username);
+      chai.expect(replacedUser.preferredName).to.equal(userDataObject.preferredName);
+      chai.expect(replacedUser.fname).to.equal(userDataObject.fname);
+      chai.expect(replacedUser.lname).to.equal(userDataObject.lname);
+      chai.expect(replacedUser.admin).to.equal(userDataObject.admin);
+      chai.expect(replacedUser.custom).to.deep.equal(userDataObject.custom);
+
+      // Expect the password to be hashed
+      chai.expect(replacedUser.password).to.not.equal(userDataObject.password);
+
+      // Verify additional properties
+      chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
+      chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedUser.archivedBy).to.equal(null);
+      chai.expect(replacedUser.createdOn).to.not.equal(null);
+      chai.expect(replacedUser.updatedOn).to.not.equal(null);
+      chai.expect(replacedUser.archivedOn).to.equal(null);
     });
 
     // Find the default org

@@ -16,7 +16,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, Button} from 'reactstrap';
+import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
@@ -87,7 +87,7 @@ class DeleteProject extends Component{
 
     componentDidMount() {
         // Get all the organizations user is apart of
-        ajaxRequest('GET',`/api/orgs/`)
+        ajaxRequest('GET', `/api/orgs/`)
         .then(orgs => {
             // Loop through organizations and make them options
             const orgOptions = orgs.map((org) => {
@@ -99,7 +99,7 @@ class DeleteProject extends Component{
         })
         .catch(err => {
             // Set the error state if no orgs found
-            this.setState({error: 'Failed to load organization.'})
+            this.setState({error: 'Failed to grab organizations.'})
         })
     }
 
@@ -107,7 +107,7 @@ class DeleteProject extends Component{
         // Return the project delete form
         return (
             <div className='project-forms'>
-                <h2>Delete Organization</h2>
+                <h2>Delete Project</h2>
                 <hr />
                 <div>
                     <Form>

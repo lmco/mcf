@@ -16,7 +16,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, Button} from 'reactstrap';
+import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';

@@ -11,6 +11,7 @@
   "private": true,
   "dependencies": {
     "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
     "connect-mongo": "^2.0.1",
     "ejs": "^2.5.7",
     "express": "^4.16.4",
@@ -39,7 +40,7 @@
     "gulp-minify": "^3.1.0",
     "gulp-sass": "^4.0.1",
     "jquery": "^3.3.1",
-    "jquery-ui": "^1.12.1",
+    "jquery-ui-dist": "^1.12.1",
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "mocha-junit-reporter": "^1.17.0",

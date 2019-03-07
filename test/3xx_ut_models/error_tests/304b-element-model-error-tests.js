@@ -15,7 +15,6 @@
  */
 
 // Node modules
-const path = require('path');
 const chai = require('chai');
 
 // MBEE modules
@@ -23,7 +22,7 @@ const Element = M.require('models.element');
 const db = M.require('lib.db');
 
 /* --------------------( Test Data )-------------------- */
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 
 /* --------------------( Main )-------------------- */

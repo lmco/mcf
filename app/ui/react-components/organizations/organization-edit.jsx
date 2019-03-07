@@ -17,7 +17,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
+import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
@@ -42,11 +42,19 @@ class OrganizationEdit extends Component{
         this.onSubmit = this.onSubmit.bind(this);
     }
 
+    componentDidMount() {
+        $('textarea[name="custom"]').autoResize();
+    }
+
     // Define handle change function
     handleChange(event) {
         // Change the state with new value
         this.setState({ [event.target.name]: event.target.value});
+
+        // Resize custom data field
+        $('textarea[name="custom"]').autoResize();
     }
+
 
     // Define the submit function
     onSubmit(){
@@ -165,7 +173,7 @@ class OrganizationEdit extends Component{
                         {/*Form section for custom data*/}
                         <FormGroup>
                             <Label for="custom">Custom Data</Label>
-                            <Input type="custom"
+                            <Input type="textarea"
                                    name="custom"
                                    id="custom"
                                    placeholder="Custom Data"

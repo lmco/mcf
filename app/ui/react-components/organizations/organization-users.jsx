@@ -19,7 +19,7 @@
 import React from 'react';
 
 // MBEE Modules
-import ListItem from '../general-components/list/list-item.jsx';
+import UserListItem from '../general-components/list/user-list-item.jsx';
 import List from '../general-components/list/list.jsx';
 
 // Define function
@@ -30,13 +30,13 @@ function OrganizationUsers(props) {
     // Loop through org members
     const listItems = users.map(user =>
         // Create user list item
-        <ListItem> {user} </ListItem>
+        <UserListItem user={user} permission={props.org.permissions[user]}/>
     );
 
     // Return org member list
     return (
         <div id='view' className='org-users'>
-            <h2>Users</h2>
+            <h2>Members</h2>
             <hr />
             <List>
                 {listItems}

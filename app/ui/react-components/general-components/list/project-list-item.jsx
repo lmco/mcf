@@ -66,7 +66,7 @@ class ProjectListItem extends Component {
         const stats = (
             // Create the stat list for the organization
             <StatsList>
-                <Stat title='Users' icon='fas fa-users' value={Object.keys(project.permissions).length} _key={`${project.id.split(':').join('-')}-users`} />
+                <Stat title='Users' icon='fas fa-users' value={Object.keys(project.permissions).length} _key={`project-${project.id.split(':').join('-')}-users`} />
             </StatsList>
         );
 
