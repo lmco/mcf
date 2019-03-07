@@ -105,6 +105,13 @@ class Sidebar extends Component {
         // Render the sidebar with the links above
         return (
             <div id='sidebar' className='sidebar'>
+                {(this.props.title && this.state.isExpanded)
+                    ?(<React.Fragment>
+                        <h2 className='sidebar-header'> {this.props.title} </h2>
+                        <hr/>
+                      </React.Fragment>)
+                    : ''
+                }
                 <div className='sidebar-links'>
                     {sidebarLink}
                 </div>
