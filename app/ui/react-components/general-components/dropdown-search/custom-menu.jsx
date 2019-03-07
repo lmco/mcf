@@ -27,20 +27,23 @@ function CustomMenu(props){
         className,
         'aria-labelledby': labeledBy,
     } = props;
-    const  value = props.username;
+    const  searchParam = props.username;
 
-    // Return
+    // Return filtering list
     return (
         <div style={style} className={className} aria-labelledby={labeledBy}>
+            {/* Input to filter list*/}
             <Input autoFocus
                    className="mx-3 my-2 w-auto"
                    placeholder="Type to filter..."
                    onChange={props.onChange}
-                   value={value}/>
+                   value={searchParam}/>
+           {/* List of children */}
             <ul className="list-unstyled" onClick={props.onChange}>
                 {React.Children.toArray(children).filter(
                     child =>
-                        !value || child.props.children.toLowerCase().startsWith(value) || child.props.value.startsWith(value)
+                        // Verify if the children name or value start with search parameter
+                        !searchParam || child.props.children.toLowerCase().startsWith(searchParam) || child.props.value.startsWith(searchParam)
                 )}
             </ul>
         </div>

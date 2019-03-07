@@ -133,16 +133,16 @@ class UserRoleEdit extends Component{
                 <h2>User Roles</h2>
                 <hr />
                 <div>
-                    <h3> {title} </h3>
+                    <h3 className='edit-role-title'> {title} </h3>
                     {/*Create form to update project data*/}
                     <Form>
                         <FormGroup>
-                            <Label for='username'>Username</Label>
+                            <Label className='username-label' for='username'>Username</Label>
                             <div className='username-search'>
                                 <Input autoFocus
                                        id="username"
                                        name="username"
-                                       className="user-searchbar mx-3 my-2 w-auto"
+                                       className="user-searchbar my-2 w-auto"
                                        placeholder="Choose a user..."
                                        onChange={this.handleChange}
                                        value={this.state.username || ''} />
