@@ -212,6 +212,7 @@ function getOrgs(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
     ids: 'array'
   };
 
@@ -280,7 +281,8 @@ function postOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -328,7 +330,8 @@ function putOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -376,7 +379,8 @@ function patchOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -477,7 +481,8 @@ function getOrg(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -534,7 +539,8 @@ function postOrg(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -594,7 +600,8 @@ function putOrg(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -654,7 +661,8 @@ function patchOrg(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request

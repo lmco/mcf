@@ -98,7 +98,7 @@ ProjectSchema.plugin(extensions);
  * @memberOf ProjectSchema
  */
 ProjectSchema.methods.getPublicData = function() {
-  const permissions = {};
+  const permissions = (this.permissions) ? {} : undefined;
   let createdBy;
   let lastModifiedBy;
   let archivedBy;

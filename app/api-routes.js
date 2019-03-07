@@ -155,6 +155,13 @@ api.route('/version')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET orgs, returns public org data.
@@ -202,6 +209,13 @@ api.route('/version')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -253,6 +267,13 @@ api.route('/version')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -309,6 +330,13 @@ api.route('/version')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -414,6 +442,13 @@ api.route('/orgs')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET org, returns org public data.
@@ -466,6 +501,13 @@ api.route('/orgs')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST org, returns org public data.
@@ -522,6 +564,13 @@ api.route('/orgs')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST org, returns org public data.
@@ -573,6 +622,13 @@ api.route('/orgs')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -747,9 +803,9 @@ api.route('/projects')
  *         type: boolean
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
- *                      default the id, org and permissions fields are all
- *                      returned. To specifically NOT include a field, include a
- *                      '-' in front of the field (-name).
+ *                      default the id and org fields are all returned. To
+ *                      specifically NOT include a field, include a '-' in front
+ *                      of the field (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -816,9 +872,9 @@ api.route('/projects')
  *         required: false
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
- *                      default the id, org and permissions fields are all
- *                      returned. To specifically NOT include a field, include a
- *                      '-' in front of the field (-name).
+ *                      default the id and org fields are all returned. To
+ *                      specifically NOT include a field, include a '-' in front
+ *                      of the field (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -886,9 +942,9 @@ api.route('/projects')
  *         required: false
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
- *                      default the id, org and permissions fields are all
- *                      returned. To specifically NOT include a field, include a
- *                      '-' in front of the field (-name).
+ *                      default the id and org fields are all returned. To
+ *                      specifically NOT include a field, include a '-' in front
+ *                      of the field (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -957,9 +1013,9 @@ api.route('/projects')
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
- *                      default the id, org and permissions fields are all
- *                      returned. To specifically NOT include a field, include a
- *                      '-' in front of the field (-name).
+ *                      default the id and org fields are all returned. To
+ *                      specifically NOT include a field, include a '-' in front
+ *                      of the field (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -1081,9 +1137,9 @@ api.route('/orgs/:orgid/projects')
  *         type: boolean
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
- *                      default the id, org and permissions fields are all
- *                      returned. To specifically NOT include a field, include a
- *                      '-' in front of the field (-name).
+ *                      default the id and org fields are all returned. To
+ *                      specifically NOT include a field, include a '-' in front
+ *                      of the field (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -1154,9 +1210,9 @@ api.route('/orgs/:orgid/projects')
  *         required: false
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
- *                      default the id, org and permissions fields are all
- *                      returned. To specifically NOT include a field, include a
- *                      '-' in front of the field (-name).
+ *                      default the id and org fields are all returned. To
+ *                      specifically NOT include a field, include a '-' in front
+ *                      of the field (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -1230,9 +1286,9 @@ api.route('/orgs/:orgid/projects')
  *         required: false
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
- *                      default the id, org and permissions fields are all
- *                      returned. To specifically NOT include a field, include a
- *                      '-' in front of the field (-name).
+ *                      default the id and org fields are all returned. To
+ *                      specifically NOT include a field, include a '-' in front
+ *                      of the field (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -1299,9 +1355,9 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
- *                      default the id, org and permissions fields are all
- *                      returned. To specifically NOT include a field, include a
- *                      '-' in front of the field (-name).
+ *                      default the id and org fields are all returned. To
+ *                      specifically NOT include a field, include a '-' in front
+ *                      of the field (-name).
  *         in: query
  *         type: string
  *     responses:
