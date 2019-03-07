@@ -153,7 +153,7 @@ class UserRoleEdit extends Component{
                                             Search
                                     </DropdownToggle>
                                     <DropdownMenu >
-                                        <CustomMenu username={this.state.username} updateUsername={this.updateUsername}>
+                                        <CustomMenu username={this.state.username} onChange={this.updateUsername}>
                                             {this.state.users}
                                         </CustomMenu>
                                     </DropdownMenu>

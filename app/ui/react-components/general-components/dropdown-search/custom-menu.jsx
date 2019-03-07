@@ -15,28 +15,29 @@
  */
 
 // React Modules
-import React, { Component } from 'react';
-
+import React from 'react';
 import { Input } from 'reactstrap';
 
+// Define function
 function CustomMenu(props){
+    // Initialize props
     const {
         children,
         style,
         className,
         'aria-labelledby': labeledBy,
     } = props;
-
     const  value = props.username;
 
+    // Return
     return (
         <div style={style} className={className} aria-labelledby={labeledBy}>
             <Input autoFocus
                    className="mx-3 my-2 w-auto"
                    placeholder="Type to filter..."
-                   onChange={props.updateUsername}
+                   onChange={props.onChange}
                    value={value}/>
-            <ul className="list-unstyled" onClick={props.updateUsername}>
+            <ul className="list-unstyled" onClick={props.onChange}>
                 {React.Children.toArray(children).filter(
                     child =>
                         !value || child.props.children.toLowerCase().startsWith(value) || child.props.value.startsWith(value)
