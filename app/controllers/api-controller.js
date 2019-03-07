@@ -1385,6 +1385,7 @@ function getUsers(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
     usernames: 'array'
   };
 
@@ -1451,7 +1452,8 @@ function postUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1500,7 +1502,8 @@ function putUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1549,7 +1552,8 @@ function patchUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1645,7 +1649,8 @@ function getUser(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1702,7 +1707,8 @@ function postUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1762,7 +1768,8 @@ function putUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1822,7 +1829,8 @@ function patchUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request

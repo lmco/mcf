@@ -2415,6 +2415,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
@@ -2480,6 +2487,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST users returns public users data.
@@ -2542,6 +2556,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT users returns public users data.
@@ -2602,6 +2623,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH users, returns user's public
@@ -2742,6 +2770,13 @@ api.route('/users/whoami')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET user, returns user's public data.
@@ -2807,6 +2842,13 @@ api.route('/users/whoami')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST user, return user's public data.
@@ -2872,6 +2914,13 @@ api.route('/users/whoami')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT user, return user's public data.
@@ -2923,6 +2972,13 @@ api.route('/users/whoami')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
