@@ -88,9 +88,12 @@ class Project extends Component {
     }
 
     render() {
+        // Initialize variables
         let title;
 
+        // Verify if project exists
         if(this.state.project){
+            // Set the title for sidebar
             title = <h2> {this.state.project.name}</h2>;
         }
         // Return project page

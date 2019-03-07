@@ -105,7 +105,9 @@ class Sidebar extends Component {
         // Render the sidebar with the links above
         return (
             <div id='sidebar' className='sidebar'>
+                {/*Verify if title was provided and is expanded*/}
                 {(this.props.title && this.state.isExpanded)
+                    // Display the title
                     ?(<React.Fragment>
                         <div className='sidebar-header'>
                             {this.props.title}

@@ -82,9 +82,12 @@ class Organization extends Component {
     }
 
     render() {
+        // Initialize variables
         let title;
 
+        // Verify org exists
         if(this.state.org){
+            // Set the title for sidebar
             title = <h2> {this.state.org.name}</h2>;
         }
 
