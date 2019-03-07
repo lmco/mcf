@@ -60,14 +60,17 @@ class MbeeNav extends Component {
         // Initialize url
         const url = '/api/users/whoami';
 
-        // Confirm if user exists
-        ajaxRequest('GET', url)
-        .then(user => {
-            // Set user state
-            this.setState({user: user});
-        })
-        .catch(err => {
-
+        // Do ajax request
+        $.ajax({
+            method: "GET",
+            url: url,
+            statusCode: {
+                200: (data) => { this.setState({ user: data }); },
+                401: (data) => { this.setState({ user: null}); }
+            },
+            fail: () => {
+                console.log('A failure occurred.')
+            }
         });
 
         // Set component size
