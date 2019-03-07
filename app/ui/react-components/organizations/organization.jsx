@@ -51,28 +51,36 @@ class Organization extends Component {
         // Get the organization and it's projects
         ajaxRequest('GET', `/api/orgs/${this.props.match.params.orgid}?populate=projects`)
         .then(org => {
-            // Initialize variables
-            const username = this.props.user.username;
-            const perm = org.permissions[username];
-            const admin = this.props.user.admin;
+            // Get the users information
+            ajaxRequest('GET','/api/users/whoami')
+            .then(user => {
+                // Initialize variables
+                const username = user.username;
+                const perm = org.permissions[username];
+                const admin = user.admin;
 
-            // Verify if user is admin
-            if ((admin) || (perm === 'admin')){
-                // Set the admin state
-                this.setState({admin: true});
-            }
+                // Verify if user is admin
+                if ((admin) || (perm === 'admin')){
+                    // Set the admin state
+                    this.setState({admin: true});
+                }
+                
+                // Set the org state
+                this.setState({org: org})
 
-            // Verify is user has write permissions
-            if(admin || (perm === 'write')) {
-                this.setState({write: true});
-            }
-
-            // Set the org state
-            this.setState({org: org})
+                // Verify is user has write permissions
+                if(admin || (perm === 'write')) {
+                    this.setState({write: true});
+                }
+            })
+            .catch(err => {
+                // Throw error and set error state
+                this.setState({error: `Failed to load organization: ${err.responseJSON.description}`})
+            });
         })
         .catch(err => {
             // Throw error and set error state
-            this.setState({error: `Failed to load organization: ${err}`})
+            this.setState({error: `Failed to load organization: ${err.responseJSON.description}`})
         })
     }
 
@@ -113,7 +121,7 @@ class Organization extends Component {
                                     render={ (props) => <OrgProjects {...props} org={this.state.org} write={this.state.write} modal={this.state.modal} handleToggle={this.handleToggle}/> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <OrgUsers {...props} org={this.state.org} /> } />
+                                       render={ (props) => <OrgUsers {...props} org={this.state.org} admin={this.state.admin}/> } />
                                {/*Verify if user is admin*/}
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
