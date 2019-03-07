@@ -63,6 +63,9 @@ const jmi = M.require('lib.jmi-conversions');
  * archived objects. The default value is false.
  * @param {boolean} [options.subtree] - If true, all elements in the subtree of
  * the found elements will also be returned. The default value is false.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of found element objects
  *
@@ -122,6 +125,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     let archived = false;
     let populateString = 'contains ';
     let subtree = false;
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -161,6 +165,20 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           throw new M.CustomError('The option \'subtree\' is not a boolean.', 400, 'warn');
         }
         subtree = options.subtree;
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -219,7 +237,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       // If no IDs provided, find all elements in a project
       if (elementIDs.length === 0) {
         // Find all elements in a project
-        return Element.find(searchQuery).populate(populateString);
+        return Element.find(searchQuery, fieldsString).populate(populateString);
       }
       // Find elements by ID
 
@@ -231,7 +249,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery).populate(populateString)
+        promises.push(Element.find(searchQuery, fieldsString).populate(populateString)
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
         }));
@@ -245,9 +263,9 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       if (!found.every(o => typeof o === 'undefined')) {
         return resolve(found);
       }
+
       // Each item in found is undefined, which is the return from Promise.all(), return
       // foundElements
-
       return resolve(foundElements);
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -283,6 +301,9 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of created element objects
  *
@@ -334,6 +355,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Initialize valid options
     let populateString = 'contains ';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -357,6 +379,20 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         });
 
         populateString += options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -606,7 +642,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
         // Add find operation to promises array
-        promises.push(Element.find(tmpQuery).populate(populateString)
+        promises.push(Element.find(tmpQuery, fieldsString).populate(populateString)
         .then((_foundElements) => {
           populatedElements = populatedElements.concat(_foundElements);
         }));
@@ -655,6 +691,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of updated element objects
  *
@@ -711,6 +750,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Initialize valid options
     let populateString = 'contains ';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -734,6 +774,20 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         });
 
         populateString += options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -987,7 +1041,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises2.push(Element.find(searchQuery).populate(populateString)
+        promises2.push(Element.find(searchQuery, fieldsString).populate(populateString)
         .then((_foundElements) => {
           foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
         }));
@@ -1028,6 +1082,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of created/replaced element objects
  *

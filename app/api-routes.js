@@ -1469,6 +1469,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      elements in the searched element's subtree.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, project, org and contains fields are
+ *                      all returned. To specifically NOT include a field,
+ *                      include a '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1550,6 +1557,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, project, org and contains fields are
+ *                      all returned. To specifically NOT include a field,
+ *                      include a '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST elements, return element public
@@ -1635,6 +1649,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, project, org and contains fields are
+ *                      all returned. To specifically NOT include a field,
+ *                      include a '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT elements, return element public
@@ -1717,6 +1738,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, project, org and contains fields are
+ *                      all returned. To specifically NOT include a field,
+ *                      include a '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH elements, returns element public
@@ -1858,6 +1886,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      than a single object.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, project, org and contains fields are
+ *                      all returned. To specifically NOT include a field,
+ *                      include a '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET element, returns element public
@@ -1944,6 +1979,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, project, org and contains fields are
+ *                      all returned. To specifically NOT include a field,
+ *                      include a '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST element, returns element public
@@ -2033,6 +2075,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, project, org and contains fields are
+ *                      all returned. To specifically NOT include a field,
+ *                      include a '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT element, returns element public
@@ -2112,6 +2161,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, project, org and contains fields are
+ *                      all returned. To specifically NOT include a field,
+ *                      include a '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH element, returns element public

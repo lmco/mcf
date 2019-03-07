@@ -1992,6 +1992,7 @@ function getElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     subtree: 'boolean',
+    fields: 'array',
     ids: 'array',
     jmi3: 'boolean'
   };
@@ -2084,7 +2085,8 @@ function postElements(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2137,7 +2139,8 @@ function putElements(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2189,7 +2192,8 @@ function patchElements(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2360,7 +2364,8 @@ function getElement(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    subtree: 'boolean'
+    subtree: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2427,7 +2432,8 @@ function postElement(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2490,7 +2496,8 @@ function putElement(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2553,7 +2560,8 @@ function patchElement(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
