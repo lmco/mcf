@@ -745,6 +745,13 @@ api.route('/projects')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, org and permissions fields are all
+ *                      returned. To specifically NOT include a field, include a
+ *                      '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -807,6 +814,13 @@ api.route('/projects')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, org and permissions fields are all
+ *                      returned. To specifically NOT include a field, include a
+ *                      '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST projects, returns project public
@@ -870,6 +884,13 @@ api.route('/projects')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, org and permissions fields are all
+ *                      returned. To specifically NOT include a field, include a
+ *                      '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT projects, returns project public
@@ -932,6 +953,13 @@ api.route('/projects')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, org and permissions fields are all
+ *                      returned. To specifically NOT include a field, include a
+ *                      '-' in front of the field (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -1051,6 +1079,13 @@ api.route('/orgs/:orgid/projects')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, org and permissions fields are all
+ *                      returned. To specifically NOT include a field, include a
+ *                      '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET project, returns project public
@@ -1117,6 +1152,13 @@ api.route('/orgs/:orgid/projects')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, org and permissions fields are all
+ *                      returned. To specifically NOT include a field, include a
+ *                      '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST project, return project public
@@ -1186,6 +1228,13 @@ api.route('/orgs/:orgid/projects')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, org and permissions fields are all
+ *                      returned. To specifically NOT include a field, include a
+ *                      '-' in front of the field (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT project, return project public
@@ -1246,6 +1295,13 @@ api.route('/orgs/:orgid/projects')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id, org and permissions fields are all
+ *                      returned. To specifically NOT include a field, include a
+ *                      '-' in front of the field (-name).
  *         in: query
  *         type: string
  *     responses:

@@ -819,6 +819,7 @@ function getProjects(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
     ids: 'array'
   };
 
@@ -888,7 +889,8 @@ function postProjects(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -936,7 +938,8 @@ function putProjects(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -984,7 +987,8 @@ function patchProjects(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1084,7 +1088,8 @@ function getProject(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1141,7 +1146,8 @@ function postProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1201,7 +1207,8 @@ function putProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1260,7 +1267,8 @@ function patchProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
