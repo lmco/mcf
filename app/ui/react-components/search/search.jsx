@@ -81,7 +81,7 @@ class Search extends Component{
     render() {
         return (
             <div id={'search'}>
-                <Form className={'search-form'} inline>
+                <Form id={'search-form'} className={'search-form'} inline>
                     <Row form>
                         <Col md={10} sm={8} xs={6}>
                             <FormGroup id={'search-input-form-group'} className={"mb-2 mr-sm-2 mb-sm-0"}>
@@ -97,7 +97,7 @@ class Search extends Component{
                         <Col md={2} sm={4} xs={6} >
                             <Button className='btn'
                                     outline color="primary"
-                                    onClick={this.doSearch}>
+                                    type='submit'>
                                 Search
                             </Button>
                         </Col>
