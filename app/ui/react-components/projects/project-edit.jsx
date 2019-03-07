@@ -45,6 +45,9 @@ class ProjectEdit extends Component{
     handleChange(event) {
         // Change the state with new value
         this.setState({ [event.target.name]: event.target.value});
+
+        // Resize custom data field
+        $('textarea[name="custom"]').autoResize();
     }
 
     // Define the submit function
@@ -79,6 +82,11 @@ class ProjectEdit extends Component{
             // Let user know update failed
             alert( `Update Failed: ${msg.responseJSON.description}`);
         })
+    }
+
+    componentDidMount() {
+        //$('textarea[name="custom"]').resizable();
+        $('textarea[name="custom"]').autoResize();
     }
 
     render() {
@@ -159,7 +167,7 @@ class ProjectEdit extends Component{
                         {/*Form section for custom data*/}
                         <FormGroup>
                             <Label for="custom">Custom Data</Label>
-                            <Input type="custom"
+                            <Input type="textarea"
                                    name="custom"
                                    id="custom"
                                    placeholder="Custom Data"

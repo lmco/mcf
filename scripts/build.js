@@ -89,14 +89,8 @@ function build(_args) {
 
     // Copy Jquery UI JS
     gulp.src([
-      './node_modules/jquery-ui/ui/effect.js',
-      './node_modules/jquery-ui/ui/effects/*.js'
-      // TODO (jk) - Determine if we need this
-      // './node_modules/jquery-ui/ui/widget.js',
-      // './node_modules/jquery-ui/ui/widgets/*.js'
+      './node_modules/jquery-ui-dist/jquery-ui.min.js'
     ])
-    .pipe(concat('jquery-ui.js'))
-    .pipe(minify({ noSource: true }))
     .pipe(gulp.dest('build/public/js'));
 
     // Copy Popper JS
@@ -112,6 +106,7 @@ function build(_args) {
     // Copy MBEE JS
     gulp.src('./app/ui/js/**/*.js')
     .pipe(concat('mbee.js'))
+    .pipe(minify({ ext: { min: '.min.js' } }))
     .pipe(gulp.dest('build/public/js'));
   }
 
