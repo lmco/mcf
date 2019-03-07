@@ -159,7 +159,7 @@ class ProjectList extends Component {
             return (
                 <React.Fragment>
                     <ListItem href={`/${orgId}`}> {org.name} </ListItem>
-                    <List>
+                    <List className='projects-list'>
                         {projects}
                     </List>
                 </React.Fragment>
