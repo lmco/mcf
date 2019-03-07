@@ -70,33 +70,39 @@ class UserRoleEdit extends Component{
             }
         };
 
+        // Verify if org provided
         if (this.props.org) {
+            // Set url and redirect to org information
             url = `/api/orgs/${this.props.org.id}`;
             redirect = `/${this.props.org.id}/users`;
         }
         else {
+            // Set url and redirect to project information
             url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
             redirect = `/${this.props.project.org}/${this.props.project.id}/users`
         }
 
-        // Send a patch request to update project data
+        // Send a patch request to update data
         ajaxRequest('PATCH', url, data)
         .then(() => {
-            // Update the page to reload to project home page
+            // Update the page to reload to user page
             window.location.replace(redirect);
         })
         .catch((msg) => {
-            // Let user know update failed
+            // Update user if failed
             alert( `Update Failed: ${msg.responseJSON.description}`);
         })
     }
 
+    // Define toggle function
     toggle(){
+        // Set the drop down states
         this.setState({ dropDownOpen: !this.state.dropDownOpen })
     }
 
+    // Define update username
     updateUsername(event) {
-        // Change the state with new value
+        // Change the username with new value
         this.setState({ username: event.target.value });
     }
 
@@ -104,7 +110,9 @@ class UserRoleEdit extends Component{
         // Get all the users
         ajaxRequest('GET', '/api/users')
         .then((users) => {
+            // Loop through users
             const userOpts = users.map((user) => {
+                // Create a DropdownItem for each user
                 return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
             });
 
@@ -112,18 +120,22 @@ class UserRoleEdit extends Component{
             this.setState({users: userOpts});
         })
         .catch((msg) => {
-            // Let user know update failed
+            // Update user if failed
             alert( `Grabbing users failed: ${msg.responseJSON.description}`);
         })
     }
 
     render() {
+        // Initialize variables
         let title;
 
+        // Verify if org provided
         if (this.props.org) {
+            // Set title to org name
             title = this.props.org.name;
         }
         else {
+            // Set title to project name
             title = this.props.project.name;
         }
 
@@ -134,11 +146,13 @@ class UserRoleEdit extends Component{
                 <hr />
                 <div>
                     <h3 className='edit-role-title'> {title} </h3>
-                    {/*Create form to update project data*/}
+                    {/*Create form to update user roles*/}
                     <Form>
                         <FormGroup>
+                            {/* Create a search bar for username input*/}
                             <Label className='username-label' for='username'>Username</Label>
                             <div className='username-search'>
+                                {/* Input field for username */}
                                 <Input autoFocus
                                        id="username"
                                        name="username"
@@ -146,13 +160,16 @@ class UserRoleEdit extends Component{
                                        placeholder="Choose a user..."
                                        onChange={this.handleChange}
                                        value={this.state.username || ''} />
+                               {/* Drop down menu to choose a user*/}
                                 <Dropdown className='search-button' isOpen={this.state.dropDownOpen} toggle={this.toggle}>
+                                    {/* Button to toggle drop down menu*/}
                                     <DropdownToggle
                                         onClick={this.toggle}
                                         aria-expanded={this.state.dropDownOpen}>
                                             Search
                                     </DropdownToggle>
                                     <DropdownMenu >
+                                        {/* List all the usernames with a filter option*/}
                                         <CustomMenu username={this.state.username} onChange={this.updateUsername}>
                                             {this.state.users}
                                         </CustomMenu>
