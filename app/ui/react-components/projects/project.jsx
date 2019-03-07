@@ -116,7 +116,7 @@ class Project extends Component {
                                        render={ (props) => <ProjectHome {...props} project={this.state.project} /> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <ProjectUsers {...props} project={this.state.project} /> } />
+                                       render={ (props) => <ProjectUsers {...props} project={this.state.project} admin={this.state.admin}/> } />
                                 {/*Route to element page*/}
                                 <Route path={`${this.props.match.url}/elements`}
                                    render={ (props) => <ProjectElements {...props} project={this.state.project} elements={this.state.elements} /> } />

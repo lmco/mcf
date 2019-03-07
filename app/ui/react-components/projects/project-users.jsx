@@ -59,22 +59,32 @@ class ProjectUsers extends Component {
         // Return project member list
         return (
             <React.Fragment>
-                {/*Modal for creating a project*/}
-                <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
-                    <ModalBody>
-                        <UserRoleEdit project={this.props.project}/>
-                    </ModalBody>
-                </Modal>
+                {(!this.props.admin)
+                    ? ''
+                    : (
+                        // Modal for creating a project
+                        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+                            <ModalBody>
+                                <UserRoleEdit project={this.props.project}/>
+                            </ModalBody>
+                        </Modal>
+                    )
+                }
                 <div id='view' className='project-list'>
                     <div className='project-list-header'>
                     <h2 className='project-header'>Users</h2>
-                        <div className='project-button'>
-                            <Button className='btn'
-                                    outline color="secondary"
-                                    onClick={this.handleToggle}>
-                               Edit
-                            </Button>
-                        </div>
+                        {(!this.props.admin)
+                            ? ''
+                            : (
+                                <div className='project-button'>
+                                    <Button className='btn'
+                                            outline color="secondary"
+                                            onClick={this.handleToggle}>
+                                        Edit
+                                    </Button>
+                                </div>
+                            )
+                        }
                     </div>
                     <hr/>
                     <List>
