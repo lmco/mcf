@@ -77,7 +77,6 @@ class UserRoleEdit extends Component{
         else {
             url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
             redirect = `/${this.props.project.org}/${this.props.project.id}/users`
-            console.log(url)
         }
 
         // Send a patch request to update project data
@@ -150,12 +149,11 @@ class UserRoleEdit extends Component{
                                 <Dropdown className='search-button' isOpen={this.state.dropDownOpen} toggle={this.toggle}>
                                     <DropdownToggle
                                         onClick={this.toggle}
-                                        aria-expanded={this.state.dropDownOpen}
-                                    >
-                                            username
+                                        aria-expanded={this.state.dropDownOpen}>
+                                            Search
                                     </DropdownToggle>
                                     <DropdownMenu >
-                                        <CustomMenu updateUsername={this.updateUsername}>
+                                        <CustomMenu username={this.state.username} updateUsername={this.updateUsername}>
                                             {this.state.users}
                                         </CustomMenu>
                                     </DropdownMenu>

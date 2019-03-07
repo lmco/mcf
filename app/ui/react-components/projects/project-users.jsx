@@ -62,7 +62,7 @@ class ProjectUsers extends Component {
                 {/*Modal for creating a project*/}
                 <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
                     <ModalBody>
-                        <UserRoleEdit org={this.props.project}/>
+                        <UserRoleEdit project={this.props.project}/>
                     </ModalBody>
                 </Modal>
                 <div id='view' className='project-list'>
