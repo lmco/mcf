@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.projects
+ * @module ui.react-components.general-components.dropdown-search
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,7 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders the user role edit page.
+ * @description This renders the filter list of the usernames.
  */
 
 // React Modules

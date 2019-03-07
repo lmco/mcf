@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.projects
+ * @module ui.react-components.user
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
