@@ -26,6 +26,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
+const compression = require('compression');
 
 // MBEE modules
 const db = M.require('lib.db');
@@ -62,6 +63,9 @@ function initApp() {
     const staticDir = path.join(__dirname, '..', 'build', 'public');
     app.use(express.static(staticDir));
     app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
+
+    // Compress responses
+    app.use(compression());
 
     // for parsing application/json
     app.use(bodyParser.json({ limit: M.config.server.requestSize || '50mb' }));
