@@ -91,7 +91,7 @@ class Project extends Component {
         let title;
 
         if(this.state.project){
-            title = this.state.project.id;
+            title = <h2> {this.state.project.name}</h2>;
         }
         // Return project page
         return (

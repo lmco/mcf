@@ -107,7 +107,9 @@ class Sidebar extends Component {
             <div id='sidebar' className='sidebar'>
                 {(this.props.title && this.state.isExpanded)
                     ?(<React.Fragment>
-                        <h2 className='sidebar-header'> {this.props.title} </h2>
+                        <div className='sidebar-header'>
+                            {this.props.title}
+                        </div>
                         <hr/>
                       </React.Fragment>)
                     : ''

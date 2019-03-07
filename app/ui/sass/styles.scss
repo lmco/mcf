@@ -229,6 +229,8 @@ textarea[name="custom"] {
         padding: 10px 20px;
         margin-top: 15px;
         margin-bottom: 0px;
+        display: flex;
+        justify-content: center;
     }
 
     .sidebar-links {
