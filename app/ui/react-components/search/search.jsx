@@ -28,14 +28,28 @@ class Search extends Component{
         // Initialize parent props
         super(props);
 
+        // Parse the get parameters
+        let getParams = {};
+        let getParamsRaw = this.props.location.search.slice(1);
+        getParamsRaw.split('&').forEach(keyValuePair => {
+            let arr = keyValuePair.split('=');
+            getParams[arr[0]] = arr[1];
+        });
+
         this.state = {
-            query: "",
+            query: getParams['query'] || null,
             results: null
         };
 
         // Bind component functions
         this.onChange = this.onChange.bind(this);
         this.doSearch = this.doSearch.bind(this);
+    }
+
+    componentDidMount() {
+        if (this.state.query) {
+            this.doSearch();
+        }
     }
 
     // Define change function
@@ -69,7 +83,7 @@ class Search extends Component{
             <div id={'search'}>
                 <Form className={'search-form'} inline>
                     <Row form>
-                        <Col md={10} sm={6}>
+                        <Col md={10} sm={8} xs={6}>
                             <FormGroup id={'search-input-form-group'} className={"mb-2 mr-sm-2 mb-sm-0"}>
                                 <Input type="text"
                                        name="query"
@@ -80,7 +94,7 @@ class Search extends Component{
                                        />
                             </FormGroup>
                         </Col>
-                        <Col md={2} sm={6}>
+                        <Col md={2} sm={4} xs={6} >
                             <Button className='btn'
                                     outline color="primary"
                                     onClick={this.doSearch}>

@@ -631,8 +631,27 @@ textarea[name="custom"] {
 }
 
 .search-results {
+    margin: 20px;
+
     .search-result {
-        background-color: #e8e8e8;
+
         border: 1px solid #ccc;
+        border-radius: 2px;
+        padding: 10px;
+        margin: 20px;
+
+        .search-result-header {
+            span {
+                margin-left: 15px;
+            }
+        }
+
+        .search-result-raw {
+            background-color: #efefef;
+            border: 1px solid #e8e8e8;
+            font-family: Consolas, "Courier New";
+            margin: 20px;
+            overflow: scroll;
+        }
     }
 }

@@ -43,12 +43,13 @@ class SearchResults extends Component {
         }
 
         const results = this.props.results.map(result => {
+
             let htmlResult = JSON.stringify(result, null, 4);
             htmlResult = htmlResult.replace(/\n/g, '<br/>');
             htmlResult = htmlResult.replace(/ /g, '&nbsp;');
 
-
             /* NOTE:
+             *
              *  This isn't really that dangerous since we sanitize all
              *  input on the server side.
              *
@@ -56,7 +57,15 @@ class SearchResults extends Component {
              */
             return (
                 <div className={'search-result'} key={result.id}>
-                    <div dangerouslySetInnerHTML={{__html: htmlResult}} >
+                    <div className={'search-result-header'}>
+                        <i className={'fas fa-chevron-right'}
+                           data-toggle="collapse"
+                           data-target={'#result-raw-' + result.id}></i>
+                        <span>{result.name} <small>({result.id})</small></span>
+                    </div>
+                    <div id={'result-raw-' + result.id} className="collapse search-result-raw ">
+                        <div dangerouslySetInnerHTML={{__html: htmlResult}} >
+                        </div>
                     </div>
                 </div>
             )
