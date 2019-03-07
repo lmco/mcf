@@ -122,6 +122,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     let archived = false;
     let populateString = 'contains ';
     let subtree = false;
+    let limit = 0;
 
     // Ensure options are valid
     if (options) {
@@ -161,6 +162,14 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           throw new M.CustomError('The option \'subtree\' is not a boolean.', 400, 'warn');
         }
         subtree = options.subtree;
+      }
+
+      // If the option 'limit' is supplied ensure it's a number
+      if (options.hasOwnProperty('limit')) {
+        if (typeof options.limit !== 'number') {
+          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        }
+        limit = options.limit;
       }
     }
 
