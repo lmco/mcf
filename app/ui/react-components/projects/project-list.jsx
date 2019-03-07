@@ -59,8 +59,7 @@ class ProjectList extends Component {
         // Get user information
         ajaxRequest('GET','/api/users/whoami')
         .then(user => {
-            // Get all orgs
-            // Get the organization and it's projects
+            // Get the organization and their projects
             ajaxRequest('GET', `/api/orgs?populate=projects`)
             .then(orgs => {
                 // Initialize variables
@@ -142,11 +141,12 @@ class ProjectList extends Component {
     }
 
     render() {
-        // Loop through all projects
+        // Loop through all orgs
         const list = this.state.orgs.map(org => {
             // Initialize variables
             const orgId = org.id;
 
+            // Loop through projects in each org
             const projects = org.projects.map(project => {
                 // Create project links
                 return (
@@ -156,6 +156,7 @@ class ProjectList extends Component {
                 )
             });
 
+            // Return the list of the orgs with projects
             return (
                 <React.Fragment>
                     <ListItem href={`/${orgId}`}> {org.name} </ListItem>
