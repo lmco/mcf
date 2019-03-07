@@ -26,10 +26,6 @@ class SearchResults extends Component {
         this.state = {
             results: props.results
         };
-
-        // Bind component functions
-        //this.onChange = this.onChange.bind(this);
-        //this.doSearch = this.doSearch.bind(this);
     }
 
     render() {

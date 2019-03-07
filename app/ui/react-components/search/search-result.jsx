@@ -28,7 +28,6 @@ class SearchResult extends Component {
 
         // Bind component functions
         this.toggleCollapse = this.toggleCollapse.bind(this);
-        //this.doSearch = this.doSearch.bind(this);
     }
 
     toggleCollapse() {
@@ -41,20 +40,19 @@ class SearchResult extends Component {
         const icon = (<i className={'fas ' + iconClass}
                          onClick={this.toggleCollapse}></i>);
 
-        /* NOTE:
-             *
-             *  This isn't really that dangerous since we sanitize all
-             *  input on the server side.
-             *
-             *  ~jdk
-             */
-
         const element = this.props.data;
 
         let htmlResult = JSON.stringify(element, null, 4);
         htmlResult = htmlResult.replace(/\n/g, '<br/>');
         htmlResult = htmlResult.replace(/ /g, '&nbsp;');
 
+        /* NOTE:
+         *
+         *  This isn't really that dangerous since we sanitize all
+         *  input on the server side.
+         *
+         *  ~jdk
+         */
         const rawJSONData = (
             <div id={'result-raw-' + element.id} className="search-result-raw">
                 <div dangerouslySetInnerHTML={{__html: htmlResult}}></div>
