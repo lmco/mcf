@@ -350,7 +350,7 @@ textarea[name="custom"] {
         margin-bottom: 1em;
         font-size: 18px
     }
-    .project-list-header {
+    .org-list-header {
         display: grid;
         grid-template-columns: minmax(auto, 600px) 1fr;
         grid-template-areas: "header button";
@@ -358,13 +358,13 @@ textarea[name="custom"] {
         align-items: center;
     }
 
-    .project-header {
+    .org-header {
         grid-area: header;
         justify-content: flex-start;
         margin: 0;
     }
 
-    .project-button {
+    .org-button {
         grid-area: button;
         justify-content: flex-end;
 

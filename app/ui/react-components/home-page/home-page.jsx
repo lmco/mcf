@@ -18,8 +18,7 @@
 // React Modules
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Link } from 'react-router-dom';
-import { Modal, ModalBody } from 'reactstrap';
+import {Button, Modal, ModalBody} from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
@@ -183,10 +182,27 @@ class HomePage extends Component {
                 </Modal>
                 {/*Display the list of projects*/}
                 <div id='view' className='org-list' ref={this.ref}>
-                    {/*<div className='org-list-header'>*/}
-                        {/*<h2 className='org-header'>Projects</h2>*/}
-                    {/*</div>*/}
-                    {/*<hr/>*/}
+                    <div className='org-list-header'>
+                        <h2 className='org-header'>Organizations and Projects</h2>
+                        {/*Verify user is an admin */}
+                        {(!this.state.admin)
+                            ? ''
+                            // Display create and delete buttons
+                            : (<div className='org-button'>
+                                <Button className='btn'
+                                        outline color="secondary"
+                                        onClick={this.handleCreateToggle}>
+                                    Create
+                                </Button>
+                                <Button className='btn'
+                                        outline color="danger"
+                                        onClick={this.handleDeleteToggle}>
+                                    Delete
+                                </Button>
+                            </div>)
+                        }
+                    </div>
+                    <hr/>
                     {/*Verify there are projects*/}
                     {(this.state.orgs.length === 0)
                         ?(<div className='list-item'>

@@ -16,7 +16,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
+import {Button, Modal, ModalBody, UncontrolledTooltip} from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
