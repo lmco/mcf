@@ -207,13 +207,15 @@ function getOrgs(req, res) {
   // Note: Undefined if not set
   let ids;
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
-    ids: 'array'
+    ids: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -246,6 +248,12 @@ function getOrgs(req, res) {
     ids = req.body.map(o => o.id);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
   OrgController.find(req.user, ids, options)
@@ -256,9 +264,15 @@ function getOrgs(req, res) {
       return res.status(error.status).send(error);
     }
 
+    // Get the public data of each org
+    const orgsPublicData = orgs.map(o => o.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+
     // Return 200: OK and public org data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -278,11 +292,13 @@ function postOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -301,13 +317,25 @@ function postOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create organizations in request body
   // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
+    // Get the public data of each org
+    const orgsPublicData = orgs.map(o => o.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -327,11 +355,13 @@ function putOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -350,13 +380,25 @@ function putOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create or replace organizations in request body
   // NOTE: createOrReplace() sanitizes req.body
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
+    // Get the public data of each org
+    const orgsPublicData = orgs.map(o => o.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+
     // Return 200: OK and created/replaced orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -376,11 +418,13 @@ function patchOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -399,13 +443,25 @@ function patchOrgs(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Update the specified orgs
   // NOTE: update() sanitizes req.body
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
+    // Get the public data of each org
+    const orgsPublicData = orgs.map(o => o.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -427,9 +483,12 @@ function deleteOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Attempt to parse query options
   try {
@@ -452,12 +511,21 @@ function deleteOrgs(req, res) {
     req.body = req.body.map(o => o.id);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Remove the specified orgs
   OrgController.remove(req.user, req.body, options)
   // Return 200: OK and the deleted org IDs
   .then((orgIDs) => {
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgIDs : formatJSON(orgIDs);
+
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgIDs));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -477,12 +545,14 @@ function getOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -501,6 +571,12 @@ function getOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Find the org from it's id
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid, options)
@@ -513,9 +589,15 @@ function getOrg(req, res) {
       return res.status(error.status).send(error);
     }
 
+    // Get the public data of each org
+    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -536,11 +618,13 @@ function postOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -570,13 +654,25 @@ function postOrg(req, res) {
   // Set the org ID in the body equal req.params.orgid
   req.body.id = req.params.orgid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create the organization with provided parameters
   // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
+    // Get the public data of each org
+    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -597,11 +693,13 @@ function putOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -631,13 +729,25 @@ function putOrg(req, res) {
   // Set the org ID in the body equal req.params.orgid
   req.body.id = req.params.orgid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create or replace the organization with provided parameters
   // NOTE: createOrReplace() sanitizes req.body
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
+    // Get the public data of each org
+    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -658,11 +768,13 @@ function patchOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -692,13 +804,25 @@ function patchOrg(req, res) {
   // Set body org id
   req.body.id = req.params.orgid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Update the specified organization
   // NOTE: update() sanitizes req.body
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
+    // Get the public data of each org
+    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -719,9 +843,12 @@ function deleteOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Attempt to parse query options
   try {
@@ -739,13 +866,22 @@ function deleteOrg(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Remove the specified organization
   // NOTE: remove() sanitizes req.params.orgid
   OrgController.remove(req.user, req.params.orgid, options)
   .then((orgIDs) => {
+    // Format JSON if minify option is not true
+    const json = (minified) ? orgIDs : formatJSON(orgIDs);
+
     // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(orgIDs[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -771,7 +907,8 @@ function getAllProjects(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -844,7 +981,8 @@ function getProjects(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
-    ids: 'array'
+    ids: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -929,7 +1067,8 @@ function postProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -993,7 +1132,8 @@ function putProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1057,7 +1197,8 @@ function patchProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1120,7 +1261,9 @@ function deleteProjects(req, res) {
   let options;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -1173,7 +1316,8 @@ function getProject(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1246,7 +1390,8 @@ function postProject(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1322,7 +1467,8 @@ function putProject(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1397,7 +1543,8 @@ function patchProject(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1471,7 +1618,9 @@ function deleteProject(req, res) {
   let options;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -1522,7 +1671,8 @@ function getUsers(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
-    usernames: 'array'
+    usernames: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1589,7 +1739,8 @@ function postUsers(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1639,7 +1790,8 @@ function putUsers(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1689,7 +1841,8 @@ function patchUsers(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1737,7 +1890,9 @@ function deleteUsers(req, res) {
   let options;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -1786,7 +1941,8 @@ function getUser(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1844,7 +2000,8 @@ function postUser(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1905,7 +2062,8 @@ function putUser(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1966,7 +2124,8 @@ function patchUser(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2024,7 +2183,9 @@ function deleteUser(req, res) {
   let options;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -2154,7 +2315,8 @@ function getElements(req, res) {
     subtree: 'boolean',
     fields: 'array',
     ids: 'array',
-    jmi3: 'boolean'
+    jmi3: 'boolean',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2259,7 +2421,8 @@ function postElements(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2328,7 +2491,8 @@ function putElements(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2396,7 +2560,8 @@ function patchElements(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2462,7 +2627,9 @@ function deleteElements(req, res) {
   let options;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -2516,7 +2683,8 @@ function searchElements(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    query: 'string'
+    q: 'string',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2535,10 +2703,10 @@ function searchElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check options for query
-  if (options.query) {
-    query = options.query;
-    delete options.query;
+  // Check options for q (query)
+  if (options.q) {
+    query = options.q;
+    delete options.q;
   }
 
   // Default branch to master
@@ -2583,7 +2751,8 @@ function getElement(req, res) {
     populate: 'array',
     archived: 'boolean',
     subtree: 'boolean',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2666,7 +2835,8 @@ function postElement(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2745,7 +2915,8 @@ function putElement(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2824,7 +2995,8 @@ function patchElement(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    fields: 'array'
+    fields: 'array',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2902,7 +3074,9 @@ function deleteElement(req, res) {
   let options;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
