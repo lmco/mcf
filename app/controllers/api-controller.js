@@ -212,6 +212,7 @@ function getOrgs(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
     ids: 'array'
   };
 
@@ -280,7 +281,8 @@ function postOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -328,7 +330,8 @@ function putOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -376,7 +379,8 @@ function patchOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -477,7 +481,8 @@ function getOrg(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -534,7 +539,8 @@ function postOrg(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -594,7 +600,8 @@ function putOrg(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -654,7 +661,8 @@ function patchOrg(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -819,6 +827,7 @@ function getProjects(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
     ids: 'array'
   };
 
@@ -888,7 +897,8 @@ function postProjects(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -936,7 +946,8 @@ function putProjects(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -984,7 +995,8 @@ function patchProjects(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1084,7 +1096,8 @@ function getProject(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1141,7 +1154,8 @@ function postProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1201,7 +1215,8 @@ function putProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1260,7 +1275,8 @@ function patchProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1369,6 +1385,7 @@ function getUsers(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
     usernames: 'array'
   };
 
@@ -1435,7 +1452,8 @@ function postUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1484,7 +1502,8 @@ function putUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1533,7 +1552,8 @@ function patchUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1629,7 +1649,8 @@ function getUser(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1686,7 +1707,8 @@ function postUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1746,7 +1768,8 @@ function putUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1806,7 +1829,8 @@ function patchUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1992,6 +2016,8 @@ function getElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     subtree: 'boolean',
+    fields: 'array',
+    limit: 'number',
     ids: 'array',
     jmi3: 'boolean'
   };
@@ -2084,7 +2110,8 @@ function postElements(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2137,7 +2164,8 @@ function putElements(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2189,7 +2217,8 @@ function patchElements(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2294,6 +2323,7 @@ function searchElements(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    limit: 'number',
     query: 'string'
   };
 
@@ -2360,7 +2390,8 @@ function getElement(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    subtree: 'boolean'
+    subtree: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2427,7 +2458,8 @@ function postElement(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2490,7 +2522,8 @@ function putElement(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2553,7 +2586,8 @@ function patchElement(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request

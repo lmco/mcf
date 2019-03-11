@@ -59,6 +59,9 @@ const jmi = M.require('lib.jmi-conversions');
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of found project objects
  *
@@ -113,6 +116,7 @@ function find(requestingUser, organizationID, projects, options) {
     // Initialize valid options
     let archived = false;
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -145,6 +149,20 @@ function find(requestingUser, organizationID, projects, options) {
 
         populateString = options.populate.join(' ');
       }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
+      }
     }
 
     // Define searchQuery
@@ -176,7 +194,7 @@ function find(requestingUser, organizationID, projects, options) {
     }
 
     // Find the projects
-    Project.find(searchQuery)
+    Project.find(searchQuery, fieldsString)
     .populate(populateString)
     .then((foundProjects) => resolve(foundProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -208,6 +226,9 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of created project objects
  *
@@ -253,6 +274,7 @@ function create(requestingUser, organizationID, projects, options) {
 
     // Initialize valid options
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -276,6 +298,20 @@ function create(requestingUser, organizationID, projects, options) {
         });
 
         populateString = options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -442,7 +478,8 @@ function create(requestingUser, organizationID, projects, options) {
         // Create the elements
       return Element.insertMany(elemObjects);
     })
-    .then(() => resolve(Project.find({ _id: { $in: arrIDs } }).populate(populateString)))
+    .then(() => resolve(Project.find({ _id: { $in: arrIDs } }, fieldsString)
+    .populate(populateString)))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -479,6 +516,9 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of updated project objects
  *
@@ -528,6 +568,7 @@ function update(requestingUser, organizationID, projects, options) {
 
     // Initialize valid options
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -551,6 +592,20 @@ function update(requestingUser, organizationID, projects, options) {
         });
 
         populateString = options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -808,8 +863,7 @@ function update(requestingUser, organizationID, projects, options) {
       // Return when all promises have been complete
       return Promise.all(promises);
     })
-    .then(() => Project.find(searchQuery)
-    .populate(populateString))
+    .then(() => Project.find(searchQuery, fieldsString).populate(populateString))
     .then((foundUpdatedProjects) => resolve(foundUpdatedProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -839,6 +893,9 @@ function update(requestingUser, organizationID, projects, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of created project objects
  *

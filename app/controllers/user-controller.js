@@ -56,6 +56,9 @@ const jmi = M.require('lib.jmi-conversions');
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and username fields. To NOT include a field, provide a '-'
+ * in front.
  *
  * @return {Promise} Array of found user objects.
  *
@@ -104,6 +107,7 @@ function find(requestingUser, users, options) {
     // Initialize valid options
     let archived = false;
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -136,6 +140,20 @@ function find(requestingUser, users, options) {
 
         populateString = options.populate.join(' ');
       }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
+      }
     }
 
     // Define searchQuery
@@ -160,7 +178,7 @@ function find(requestingUser, users, options) {
     }
 
     // Find the users
-    User.find(searchQuery)
+    User.find(searchQuery, fieldsString)
     .populate(populateString)
     .then((foundUser) => resolve(foundUser))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -192,6 +210,9 @@ function find(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and username fields. To NOT include a field, provide a '-'
+ * in front.
  *
  * @return {Promise} Array of created user objects
  *
@@ -235,7 +256,7 @@ function create(requestingUser, users, options) {
 
     // Initialize valid options
     let populateString = '';
-    let populate = false;
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -259,7 +280,20 @@ function create(requestingUser, users, options) {
         });
 
         populateString = options.populate.join(' ');
-        populate = true;
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -360,15 +394,8 @@ function create(requestingUser, users, options) {
       // Save the updated default org
       return defaultOrg.save();
     })
-    .then(() => {
-      // If user wants populated users, find and populate
-      if (populate) {
-        return resolve(User.find({ _id: { $in: arrUsernames } })
-        .populate(populateString));
-      }
-
-      return resolve(createdUsers);
-    })
+    .then(() => resolve(User.find({ _id: { $in: arrUsernames } }, fieldsString)
+    .populate(populateString)))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -401,6 +428,9 @@ function create(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and username fields. To NOT include a field, provide a '-'
+ * in front.
  *
  * @return {Promise} Array of updated user objects
  *
@@ -446,6 +476,7 @@ function update(requestingUser, users, options) {
 
     // Initialize valid options
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -469,6 +500,20 @@ function update(requestingUser, users, options) {
         });
 
         populateString = options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -623,7 +668,7 @@ function update(requestingUser, users, options) {
       // Update all users through a bulk write to the database
       return User.bulkWrite(bulkArray);
     })
-    .then(() => User.find(searchQuery).populate(populateString))
+    .then(() => User.find(searchQuery, fieldsString).populate(populateString))
     .then((foundUpdatedUsers) => resolve(foundUpdatedUsers))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
@@ -652,6 +697,9 @@ function update(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and username fields. To NOT include a field, provide a '-'
+ * in front.
  *
  * @return {Promise} Array of user objects
  *
