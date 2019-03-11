@@ -2603,6 +2603,7 @@ function getElements(req, res) {
   let elemIDs;
   let options;
   let jmiOpt;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -2654,6 +2655,12 @@ function getElements(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Find elements
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
@@ -2681,19 +2688,20 @@ function getElements(req, res) {
       return res.status(error.status).send(error);
     }
 
+    let retData = elementsPublicData;
+
     // Check for JMI conversion
     if (jmiOpt) {
       // Convert data to JMI type 3 object
-      const jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
-
-      // Return a 200: OK and public JMI type 3 element data
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(formatJSON(jmiData));
+      retData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
     }
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? retData : formatJSON(retData);
 
     // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elementsPublicData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2713,6 +2721,7 @@ function postElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option type
   const validOptions = {
@@ -2739,6 +2748,12 @@ function postElements(req, res) {
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
 
   // Create the specified elements
   // NOTE: create() sanitizes input params
@@ -2760,9 +2775,12 @@ function postElements(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elementsPublicData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2783,6 +2801,7 @@ function putElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option type
   const validOptions = {
@@ -2809,6 +2828,12 @@ function putElements(req, res) {
 
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
 
   // Create or replace the specified elements
   // NOTE: createOrReplace() sanitizes input params
@@ -2830,9 +2855,12 @@ function putElements(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+
     // Return 200: OK and the new/replaced elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elementsPublicData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2852,6 +2880,7 @@ function patchElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option type
   const validOptions = {
@@ -2879,6 +2908,12 @@ function patchElements(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Update the specified elements
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
@@ -2899,9 +2934,12 @@ function patchElements(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elementsPublicData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2921,6 +2959,7 @@ function deleteElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -2946,14 +2985,25 @@ function deleteElements(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Remove the specified elements
   // NOTE: remove() sanitizes input params
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
+    const parsedIDs = elements.map(e => utils.parseID(e).pop());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+
     // Return 200: OK and the deleted element ids
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => utils.parseID(e).pop())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2974,6 +3024,7 @@ function searchElements(req, res) {
   // Note: Undefined if not set
   let options;
   let query = '';
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -3005,6 +3056,12 @@ function searchElements(req, res) {
     delete options.query;
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
@@ -3019,9 +3076,14 @@ function searchElements(req, res) {
       return res.status(error.status).send(error);
     }
 
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+
     // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -3041,6 +3103,7 @@ function getElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option type
   const validOptions = {
@@ -3070,6 +3133,12 @@ function getElement(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Find the element
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
@@ -3083,7 +3152,12 @@ function getElement(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    let elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the subtree option was not provided, return only the first element
+    if (!options.subtree) {
+      elementsPublicData = elementsPublicData[0];
+    }
 
     // If the fields options was specified
     if (options.fields) {
@@ -3098,16 +3172,12 @@ function getElement(req, res) {
       });
     }
 
-    // If subtree option was provided, return array of elements
-    if (options.subtree) {
-      // Return a 200: OK and the elements
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(formatJSON(elementsPublicData));
-    }
+    // Format JSON if minify option is not true
+    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
 
     // Return 200: OK and the elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elementsPublicData[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -3127,6 +3197,7 @@ function postElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option type
   const validOptions = {
@@ -3165,12 +3236,18 @@ function postElement(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create element with provided parameters
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData());
+    const elementsPublicData = element.map(e => e.getPublicData())[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -3185,9 +3262,12 @@ function postElement(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+
     // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elementsPublicData[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -3207,6 +3287,7 @@ function putElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option type
   const validOptions = {
@@ -3245,12 +3326,18 @@ function putElement(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create or replace element with provided parameters
   // NOTE: createOrReplace() sanitizes input params
   ElementController.createOrReplace(req.user, req.params.orgid,
     req.params.projectid, branchid, req.body, options)
   .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData());
+    const elementsPublicData = element.map(e => e.getPublicData())[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -3265,9 +3352,12 @@ function putElement(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+
     // Return 200: OK and the created/replaced element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elementsPublicData[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -3287,6 +3377,7 @@ function patchElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option type
   const validOptions = {
@@ -3325,12 +3416,18 @@ function patchElement(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Updates the specified element
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData());
+    const elementsPublicData = element.map(e => e.getPublicData())[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -3345,9 +3442,12 @@ function patchElement(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elementsPublicData[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -3368,6 +3468,7 @@ function deleteElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -3393,14 +3494,25 @@ function deleteElement(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Remove the specified element
   // NOTE: remove() sanitizes input params
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
     branchid, [req.params.elementid], options)
   .then((element) => {
+    const parsedID = utils.parseID(element[0]).pop();
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? parsedID : formatJSON(parsedID);
+
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element
-    return res.status(200).send(formatJSON(utils.parseID(element[0]).pop()));
+    return res.status(200).send(json);
   })
   .catch((error) => res.status(error.status || 500).send(error));
 }
