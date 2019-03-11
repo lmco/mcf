@@ -90,12 +90,21 @@ class Organization extends Component {
     }
 
     render() {
+        // Initialize variables
+        let title;
+
+        // Verify org exists
+        if(this.state.org){
+            // Set the title for sidebar
+            title = <h2> {this.state.org.name}</h2>;
+        }
+
         // Return organization page
         return (
             <Router>
                 <React.Fragment>
                     {/*Create the sidebar with sidebar links*/}
-                    <Sidebar>
+                    <Sidebar title={title}>
                         <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
                         <SidebarLink id='Projects' title='Projects' icon='fas fa-boxes' routerLink={`${this.props.match.url}/projects`} />
                         <SidebarLink id='Members' title='Members' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
