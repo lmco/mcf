@@ -59,6 +59,9 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
  *
  * @return {Promise} Array of found user objects.
  *
@@ -108,6 +111,7 @@ function find(requestingUser, users, options) {
     let archived = false;
     let populateString = '';
     let fieldsString = '';
+    let limit = 0;
 
     // Ensure options are valid
     if (options) {
@@ -154,6 +158,14 @@ function find(requestingUser, users, options) {
 
         fieldsString += options.fields.join(' ');
       }
+
+      // If the option 'limit' is supplied ensure it's a number
+      if (options.hasOwnProperty('limit')) {
+        if (typeof options.limit !== 'number') {
+          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        }
+        limit = options.limit;
+      }
     }
 
     // Define searchQuery
@@ -178,7 +190,7 @@ function find(requestingUser, users, options) {
     }
 
     // Find the users
-    User.find(searchQuery, fieldsString)
+    User.find(searchQuery, fieldsString, { limit: limit })
     .populate(populateString)
     .then((foundUser) => resolve(foundUser))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));

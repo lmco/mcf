@@ -162,6 +162,11 @@ api.route('/version')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET orgs, returns public org data.
@@ -737,6 +742,11 @@ api.route('/orgs/:orgid')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -815,6 +825,11 @@ api.route('/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -1499,6 +1514,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1595,6 +1615,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -2429,6 +2454,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
