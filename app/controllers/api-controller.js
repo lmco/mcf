@@ -213,6 +213,7 @@ function getOrgs(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
+    limit: 'number',
     ids: 'array'
   };
 
