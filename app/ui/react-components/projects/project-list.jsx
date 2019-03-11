@@ -11,7 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders the project list page.
+ * @description This renders the project list page with the orgs.
  */
 
 // React Modules
