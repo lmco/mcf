@@ -735,6 +735,11 @@ api.route('/orgs/:orgid')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -813,6 +818,11 @@ api.route('/projects')
  *                      of the field (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public

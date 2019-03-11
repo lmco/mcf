@@ -771,7 +771,8 @@ function getAllProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    limit: 'number'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -829,6 +830,7 @@ function getProjects(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
+    limit: 'number',
     ids: 'array'
   };
 
