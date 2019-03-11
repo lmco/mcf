@@ -225,6 +225,14 @@ textarea[name="custom"] {
         border-color: #9c9c9c;
     }
 
+    .sidebar-header {
+        padding: 10px 20px;
+        margin-top: 15px;
+        margin-bottom: 0px;
+        display: flex;
+        justify-content: center;
+    }
+
     .sidebar-links {
         height: 100vh;
         overflow: hidden;
@@ -453,6 +461,11 @@ textarea[name="custom"] {
             float: right;
             margin: 5px;
         }
+    }
+
+    .list .projects-list {
+        border-left: #eeeeee solid;
+        margin-left: 8px;
     }
 
     .list .list-item .list-header p {
