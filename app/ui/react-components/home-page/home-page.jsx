@@ -170,7 +170,7 @@ class HomePage extends Component {
     render() {
         // Loop through all orgs
         const list = this.state.orgs.map(org => {
-           return( <OrgList org={org} /> )
+           return( <OrgList org={org} admin={this.state.admin}/> )
         });
 
         // Render the homepage

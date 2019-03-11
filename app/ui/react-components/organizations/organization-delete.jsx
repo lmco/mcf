@@ -45,7 +45,14 @@ class DeleteOrganization extends Component{
 
     // Define the on submit function
     onSubmit(){
-        const url =  `/api/orgs/${this.state.id}`;
+        let url;
+
+        if(this.props.org) {
+            const url =  `/api/orgs/${this.org.id}`;
+        }
+        else {
+            url = `/api/orgs/${this.state.id}`;
+        }
         // Delete the organization selected
         ajaxRequest('DELETE', url)
         .then(() => {
@@ -59,11 +66,18 @@ class DeleteOrganization extends Component{
     }
 
     render() {
-        // Loop through orgs
-        const orgOptions = this.props.orgs.map((org) => {
-            // Create an org option
-            return (<option value={org.id}>{org.name}</option>)
-        });
+        let orgOptions;
+
+        if(this.props.orgs) {
+            // Loop through orgs
+            orgOptions = this.props.orgs.map((org) => {
+                // Create an org option
+                return (<option value={org.id}>{org.name}</option>)
+            });
+        }
+        else {
+            orgOptions = <option value={this.props.org.id}>{this.props.org.name}</option>
+        }
 
         // Return the form to delete org
         return (
@@ -72,19 +86,36 @@ class DeleteOrganization extends Component{
                 <hr />
                 <div>
                     <Form>
-                        {/*Select the organization*/}
-                        <FormGroup>
-                            <Label for="id">Organization ID</Label>
-                            <Input type="select"
-                                   name="id"
-                                   id="id"
-                                   value={this.state.id || ''}
-                                   onChange={this.handleChange}>
-                                {orgOptions}
-                            </Input>
-                        </FormGroup>
-                        {/*Delete the organization selected*/}
-                        <Button color='danger' onClick={this.onSubmit}> Delete </Button>
+                        {(!this.props.orgs)
+                            ? ''
+                            // Select the organization
+                            :(<React.Fragment>
+                                <FormGroup>
+                                <Label for="id">Organization ID</Label>
+                                <Input type="select"
+                                    name="id"
+                                    id="id"
+                                    value={this.state.id || ''}
+                                    onChange={this.handleChange}>
+                                    <option>Choose one...</option>
+                                    {orgOptions}
+                                </Input>
+                              </FormGroup>
+                              {/* Delete the organization selected*/}
+                              <Button color='danger' onClick={this.onSubmit}> Delete </Button>
+                            </React.Fragment>)
+                        }
+                        {(!this.props.org)
+                            ? ''
+                            // Select the organization
+                            :(<FormGroup>
+                                <Label for="id">Do you want to delete {this.props.org.name}?</Label>
+                                <div>
+                                    <Button color="danger" onClick={this.onSubmit}>Yes</Button> {'   '}
+                                    <Button color="secondary" onClick={this.props.toggle}>No</Button>
+                                </div>
+                              </FormGroup>)
+                        }
                     </Form>
                 </div>
             </div>

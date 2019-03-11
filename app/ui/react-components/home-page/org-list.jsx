@@ -16,11 +16,13 @@
 
 // React Modules
 import React, { Component } from 'react';
+import {Button, Modal, ModalBody} from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
+import DeleteOrganization from '../organizations/organization-delete.jsx';
 
 
 class OrgList extends Component {
@@ -32,17 +34,25 @@ class OrgList extends Component {
         this.state = {
             showProjs: false,
             width: null,
+            modalDelete: false,
             projects: []
         };
 
         // Bind component functions
         this.handleOrgToggle = this.handleOrgToggle.bind(this);
+        this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     }
 
     // Define org toggle functionality
     handleOrgToggle() {
         // Set the state to opposite of its initial state
         this.setState({ showProjs: !this.state.showProjs });
+    }
+
+    // Define toggle function
+    handleDeleteToggle() {
+        // Set the delete modal state
+        this.setState({ modalDelete: !this.state.modalDelete });
     }
 
     render() {
@@ -68,11 +78,23 @@ class OrgList extends Component {
         // Return the list of the orgs with projects
         return (
             <React.Fragment>
+                {/*Modal for deleting an org*/}
+                <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+                    <ModalBody>
+                        <DeleteOrganization org={this.props.org} toggle={this.handleDeleteToggle}/>
+                    </ModalBody>
+                </Modal>
                 <div className='org-proj-list'>
                     <div className='org-icon' onClick={this.handleOrgToggle}>
                         <i className={icon}/>
                     </div>
                     <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`}/>
+                    {(!this.props.admin)
+                        ? ''
+                        :(< div className='org-button' onClick={this.handleDeleteToggle}>
+                            <i className='fas fa-trash-alt'/>
+                          </div>)
+                    }
                 </div>
                 {(!this.state.showProjs)
                     ? ''

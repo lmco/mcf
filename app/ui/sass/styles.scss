@@ -376,8 +376,8 @@ textarea[name="custom"] {
 
     .org-proj-list {
         display: grid;
-        grid-template-columns: minmax(0, 15px) 1fr;
-        grid-template-areas: "icon org";
+        grid-template-columns: minmax(0, 15px) 1fr minmax(2px, 15px);
+        grid-template-areas: "icon org button";
         justify-content: left;
         align-items: center;
     }
@@ -391,6 +391,11 @@ textarea[name="custom"] {
     .org-info {
         grid-area: org;
         justify-content: space-around;
+    }
+
+    .org-button {
+        grid-area: button;
+        justify-content: flex-end;
     }
 
     .projects-list {
