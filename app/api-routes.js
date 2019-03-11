@@ -1492,6 +1492,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1588,6 +1593,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      include a '-' in front of the field (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
