@@ -36,7 +36,7 @@ function ProjectHome(props) {
                 </tr>
                 <tr>
                     <th>Org ID:</th>
-                    <td>{orgId}</td>
+                    <td><a href={'/'+orgId}>{orgId}</a></td>
                 </tr>
                 <tr>
                     <th>Custom:</th>
