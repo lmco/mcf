@@ -32,8 +32,6 @@ class OrganizationEdit extends Component{
         // Initialize state props
         this.state = {
             name: this.props.org.name,
-            username: '',
-            permissions: '',
             custom: JSON.stringify(this.props.org.custom || {}, null, 2)
         };
 
@@ -59,25 +57,11 @@ class OrganizationEdit extends Component{
     // Define the submit function
     onSubmit(){
         // Initialize variables
-        const username = this.state.username;
-        const permissions = this.state.permissions;
         const url = `/api/orgs/${this.props.org.id}`;
         let data = {
             name: this.state.name,
             custom: JSON.parse(this.state.custom)
         };
-
-        // Verify if username and permissions were updated
-        if(username && permissions) {
-            // Change data object
-            data = {
-                name: this.state.name,
-                permissions: {
-                    [username]: this.state.permissions
-                },
-                custom: JSON.parse(this.state.custom)
-            };
-        }
 
 
         // Send a patch request to update org data
@@ -139,36 +123,6 @@ class OrganizationEdit extends Component{
                             <FormFeedback >
                                 Invalid: An org name may only contain letters, numbers, space, or dashes.
                             </FormFeedback>
-                        </FormGroup>
-                        {/*Form section for permissions*/}
-                        <FormGroup>
-                            {/*Username input*/}
-                            <Label for="permissions">Organization Permissions</Label>
-                            <FormGroup className='nested-form'>
-                                <Label>Username</Label>
-                                <Input type="username"
-                                       name="username"
-                                       id="username"
-                                       placeholder="Username"
-                                       value={this.state.username || ''}
-                                       onChange={this.handleChange}/>
-                            </FormGroup>
-                            {/*Permissions user updates with*/}
-                            <FormGroup className="nested-form">
-                                <Label for="permissions">Permissions</Label>
-                                <Input type="select"
-                                       name='permissions'
-                                       id="permissions"
-                                       placeholder="Choose one..."
-                                       value={this.state.permissions}
-                                       onChange={this.handleChange}>
-                                    <option>Choose one...</option>
-                                    <option>read</option>
-                                    <option>write</option>
-                                    <option>admin</option>
-                                    <option>REMOVE_ALL</option>
-                                </Input>
-                            </FormGroup>
                         </FormGroup>
                         {/*Form section for custom data*/}
                         <FormGroup>

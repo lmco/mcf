@@ -60,8 +60,8 @@ class User extends Component {
                     {/*Create the sidebar with sidebar links*/}
                     <Sidebar>
                         <SidebarLink id='Home' title='Home' icon='fas fa-home' exact path="/whoami" />
-                        <SidebarLink id='Org' title='Organizations' icon='fas fa-boxes' href={`/organizations`} />
-                        <SidebarLink id='Proj' title='Projects' icon='fas fa-box' href={`/projects`} />
+                        <SidebarLink id='Organization' title='Organizations' icon='fas fa-boxes' href={`/organizations`} />
+                        <SidebarLink id='Project' title='Projects' icon='fas fa-box' href={`/projects`} />
                         <hr />
                         <SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={'/whoami/edit'} />
                     </Sidebar>

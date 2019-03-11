@@ -510,6 +510,39 @@ textarea[name="custom"] {
     padding: 2em;
 }
 
+.edit-role-title {
+    padding-bottom: 10px;
+}
+
+.username-label {
+    margin-bottom: 0;
+}
+
+.username-search {
+    display: grid;
+    grid-template-columns: minmax(auto, 600px) 1fr;
+    grid-template-areas: "searchbar button";
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-searchbar {
+    grid-area: searchbar;
+    justify-content: flex-start;
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+.search-button {
+    grid-area: button;
+    justify-content: flex-end;
+
+    .btn {
+        float: right;
+        margin: 5px;
+    }
+}
+
 /******************************************************************************
 /*                           List Component Styling                           *
 /******************************************************************************/
