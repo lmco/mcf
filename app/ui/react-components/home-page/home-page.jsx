@@ -23,8 +23,7 @@ import { Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
-import ListItem from '../general-components/list/list-item.jsx';
-import ProjectListItem from '../general-components/list/project-list-item.jsx';
+import OrgList from './org-list.jsx';
 import Space from '../general-components/space/space.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -39,9 +38,8 @@ class HomePage extends Component {
             modal: false,
             user: null,
             starredProjects: [],
-            width: null,
-            projects: [],
             orgs: [],
+            projects: [],
             admin: false,
             write: false,
             writePermOrgs: null,
@@ -52,7 +50,7 @@ class HomePage extends Component {
         this.ref = React.createRef();
 
         // Bind component functions
-        this.handleToggle = this.handleToggle.bind(this);
+        this.handleModalToggle = this.handleModalToggle.bind(this);
         this.handleResize = this.handleResize.bind(this);
     }
 
@@ -76,15 +74,14 @@ class HomePage extends Component {
                 //     });
                 //     this.setState({starredProjects: starredProjects});
                 // }
-
-                // Initialize variables
-                const writePermOrgs = [];
-                const allProjects = [];
-
                 // Add event listener for window resizing
                 window.addEventListener('resize', this.handleResize);
                 // Handle initial size of window
                 this.handleResize();
+
+                // Initialize variables
+                const writePermOrgs = [];
+                const allProjects = [];
 
                 // Loop through orgs
                 orgs.map((org) => {
@@ -133,7 +130,7 @@ class HomePage extends Component {
                         window.clearTimeout(latchId);
                         buffer.splice(0, 1);
                         if (buffer.length === 0) {
-                            this.handleToggle();
+                            this.handleModalToggle();
                         }
                         latchId = window.setTimeout(function () {
                             buffer = code.slice();
@@ -156,13 +153,6 @@ class HomePage extends Component {
     componentWillUnmount() {
         // Remove event listener
         window.removeEventListener('resize', this.handleResize);
-
-    }
-
-    // Define toggle functionality
-    handleToggle() {
-        // Set the state to opposite of its initial state
-        this.setState({ modal: !this.state.modal });
     }
 
     // Define resize functionality
@@ -171,70 +161,36 @@ class HomePage extends Component {
         this.setState({ width: this.ref.current.clientWidth })
     }
 
+    // Define modal toggle functionality
+    handleModalToggle() {
+        // Set the state to opposite of its initial state
+        this.setState({ modal: !this.state.modal });
+    }
+
     render() {
         // Loop through all orgs
         const list = this.state.orgs.map(org => {
-            // Initialize variables
-            const orgId = org.id;
-
-            // Loop through projects in each org
-            const projects = org.projects.map(project => {
-                // Create project links
-                return (
-                    <ProjectListItem project={project} href={`/${orgId}/${project.id}`}/>
-                )
-            });
-
-            // Return the list of the orgs with projects
-            return (
-                <React.Fragment>
-                    <ListItem href={`/${orgId}`}> {org.name} </ListItem>
-                    <List className='projects-list'>
-                        {projects}
-                    </List>
-                </React.Fragment>
-            )
-
+           return( <OrgList org={org} /> )
         });
 
         // Render the homepage
         return (
             <React.Fragment>
-                <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+                <Modal isOpen={this.state.modal} toggle={this.handleModalToggle}>
                     <ModalBody>
                         <Space />
                     </ModalBody>
                 </Modal>
                 {/*Display the list of projects*/}
-                <div id='view' className='project-list' ref={this.ref}>
-                    <div className='project-list-header'>
-                        <h2 className='project-header'>Projects</h2>
-                            {/*Verify user has admin permissions*/}
-                            {/*{(!this.state.admin)*/}
-                                {/*? ''*/}
-                                {/*// Display delete button*/}
-                                {/*:(<Button className='btn'*/}
-                                          {/*outline color="danger"*/}
-                                          {/*onClick={this.handleDeleteToggle}>*/}
-                                    {/*Delete*/}
-                                {/*</Button>)*/}
-                            {/*}*/}
-                            {/*/!*Verify user has write permission*!/*/}
-                            {/*{(!this.state.write)*/}
-                                {/*? ''*/}
-                                {/*// Display create button*/}
-                                {/*:(<Button className='btn'*/}
-                                          {/*outline color="secondary"*/}
-                                          {/*onClick={this.handleCreateToggle}>*/}
-                                    {/*Create*/}
-                                {/*</Button>)*/}
-                            {/*}*/}
-                    </div>
-                    <hr/>
+                <div id='view' className='org-list' ref={this.ref}>
+                    {/*<div className='org-list-header'>*/}
+                        {/*<h2 className='org-header'>Projects</h2>*/}
+                    {/*</div>*/}
+                    {/*<hr/>*/}
                     {/*Verify there are projects*/}
-                    {(this.state.projects.length === 0)
+                    {(this.state.orgs.length === 0)
                         ?(<div className='list-item'>
-                            <h3> No projects. </h3>
+                            <h3> No organizations. </h3>
                           </div>)
                         :(<List>
                             {list}

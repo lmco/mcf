@@ -351,28 +351,28 @@ textarea[name="custom"] {
         font-size: 18px
     }
 
-    .org-list-header {
+    .org-proj-list {
         display: grid;
-        grid-template-columns: minmax(auto, 600px) 1fr;
-        grid-template-areas: "header button";
-        justify-content: space-between;
+        grid-template-columns: minmax(0, 15px) 1fr;
+        grid-template-areas: "icon org";
+        justify-content: left;
         align-items: center;
     }
 
-    .org-header {
-        grid-area: header;
+    .org-icon {
+        grid-area: icon;
         justify-content: flex-start;
         margin: 0;
     }
 
-    .org-button {
-        grid-area: button;
-        justify-content: flex-end;
+    .org-info {
+        grid-area: org;
+        justify-content: space-around;
+    }
 
-        .btn {
-            float: right;
-            margin-right: 5px;
-        }
+    .projects-list {
+        border-left: #eeeeee solid;
+        margin-left: 25px;
     }
 
     .list .list-item .list-header p {
@@ -431,48 +431,6 @@ textarea[name="custom"] {
 /******************************************************************************
 /*                         Project Page Styling                               *
 /******************************************************************************/
-.project-list {
-    padding: 2em;
-
-    h2 {
-        margin-bottom: 1em;
-        font-size: 18px;
-    }
-
-    .project-list-header {
-        display: grid;
-        grid-template-columns: minmax(auto, 600px) 1fr;
-        grid-template-areas: "header button";
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .project-header {
-        grid-area: header;
-        justify-content: flex-start;
-        margin: 0;
-    }
-
-    .project-button {
-        grid-area: button;
-        justify-content: flex-end;
-
-        .btn {
-            float: right;
-            margin: 5px;
-        }
-    }
-
-    .list .projects-list {
-        border-left: #eeeeee solid;
-        margin-left: 8px;
-    }
-
-    .list .list-item .list-header p {
-        font-size: 15px;
-    }
-}
-
 .project-home {
     padding: 2em;
 }
@@ -548,7 +506,6 @@ textarea[name="custom"] {
 /******************************************************************************/
 .list {
     padding-left: 1em;
-    padding-right: 1em;
 
     a {
         display: block;
