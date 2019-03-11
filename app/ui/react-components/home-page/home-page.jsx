@@ -23,6 +23,8 @@ import {Button, Modal, ModalBody} from 'reactstrap';
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgList from './org-list.jsx';
+import CreateOrganization from '../organizations/organization-create.jsx';
+import DeleteOrganization from '../organizations/organization-delete.jsx';
 import Space from '../general-components/space/space.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -35,6 +37,8 @@ class HomePage extends Component {
         // Initialize state props
         this.state = {
             modal: false,
+            modalCreate: false,
+            modalDelete: false,
             user: null,
             starredProjects: [],
             orgs: [],
@@ -51,10 +55,11 @@ class HomePage extends Component {
         // Bind component functions
         this.handleModalToggle = this.handleModalToggle.bind(this);
         this.handleResize = this.handleResize.bind(this);
+        this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
+        this.handleCreateToggle = this.handleCreateToggle.bind(this);
     }
 
     componentDidMount() {
-
         const url = '/api/users/whoami';
 
         ajaxRequest('GET', `${url}`)
@@ -166,6 +171,18 @@ class HomePage extends Component {
         this.setState({ modal: !this.state.modal });
     }
 
+    // Define toggle function
+    handleDeleteToggle() {
+        // Set the delete modal state
+        this.setState({ modalDelete: !this.state.modalDelete });
+    }
+
+    // Define toggle function
+    handleCreateToggle() {
+        // Set the create modal state
+        this.setState({ modalCreate: !this.state.modalCreate });
+    }
+
     render() {
         // Loop through all orgs
         const list = this.state.orgs.map(org => {
@@ -178,6 +195,18 @@ class HomePage extends Component {
                 <Modal isOpen={this.state.modal} toggle={this.handleModalToggle}>
                     <ModalBody>
                         <Space />
+                    </ModalBody>
+                </Modal>
+                {/*Modal for creating an org*/}
+                <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
+                    <ModalBody>
+                        <CreateOrganization />
+                    </ModalBody>
+                </Modal>
+                {/*Modal for deleting an org*/}
+                <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+                    <ModalBody>
+                        <DeleteOrganization orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Display the list of projects*/}

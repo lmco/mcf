@@ -35,7 +35,7 @@ class OrgList extends Component {
         this.state = {
             showProjs: false,
             width: null,
-            modalCreate:false,
+            modalCreate: false,
             modalDelete: false,
             projects: []
         };
