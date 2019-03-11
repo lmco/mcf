@@ -350,6 +350,29 @@ textarea[name="custom"] {
         margin-bottom: 1em;
         font-size: 18px
     }
+    .project-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .project-header {
+        grid-area: header;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .project-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+            margin: 5px;
+        }
+    }
 
     .org-proj-list {
         display: grid;
@@ -433,6 +456,48 @@ textarea[name="custom"] {
 /******************************************************************************/
 .project-home {
     padding: 2em;
+}
+
+.project-list {
+    padding: 2em;
+
+    h2 {
+        margin-bottom: 1em;
+        font-size: 18px;
+    }
+
+    .project-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .project-header {
+        grid-area: header;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .project-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+            margin: 5px;
+        }
+    }
+
+    .list .projects-list {
+        border-left: #eeeeee solid;
+        margin-left: 8px;
+    }
+
+    .list .list-item .list-header p {
+        font-size: 15px;
+    }
 }
 
 .project-elements {
