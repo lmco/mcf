@@ -1781,6 +1781,7 @@ function getUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1824,13 +1825,24 @@ function getUsers(req, res) {
     usernames = req.body.map(p => p.id);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Get Users
   // NOTE: find() sanitizes req.usernames
   UserController.find(req.user, usernames, options)
   .then((users) => {
+    const publicUserData = users.map(u => u.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1851,6 +1863,7 @@ function postUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1875,13 +1888,24 @@ function postUsers(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create users
   // NOTE: create() sanitizes req.body
   UserController.create(req.user, req.body, options)
   .then((users) => {
+    const publicUserData = users.map(u => u.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1902,6 +1926,7 @@ function putUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1926,13 +1951,24 @@ function putUsers(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create or replace users
   // NOTE: createOrReplace() sanitizes req.body
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
+    const publicUserData = users.map(u => u.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1953,6 +1989,7 @@ function patchUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1977,13 +2014,24 @@ function patchUsers(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Update the specified users
   // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
+    const publicUserData = users.map(u => u.getPublicData());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Return 200: OK and the updated users
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2004,6 +2052,7 @@ function deleteUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -2026,13 +2075,22 @@ function deleteUsers(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Remove the specified users
   // NOTE: remove() sanitizes req.body
   UserController.remove(req.user, req.body, options)
   .then((usernames) => {
+    // Format JSON if minify option is not true
+    const json = (minified) ? usernames : formatJSON(usernames);
+
     // Return 200: OK and deleted usernames
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(usernames));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2052,6 +2110,7 @@ function getUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -2077,21 +2136,32 @@ function getUser(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Find the member from it's username
   // NOTE: find() sanitizes req.params.username
   UserController.find(req.user, req.params.username, options)
-  .then((user) => {
+  .then((users) => {
     // If no user found, return 404 error
-    if (user.length === 0) {
+    if (users.length === 0) {
       const error = new M.CustomError(
         `User [${req.params.username}] not found.`, 404, 'warn'
       );
       return res.status(error.status).send(error);
     }
 
+    const publicUserData = users.map(u => u.getPublicData())[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(user[0].getPublicData()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2112,6 +2182,7 @@ function postUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -2147,13 +2218,24 @@ function postUser(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create user with provided parameters
   // NOTE: create() sanitizes req.body
   UserController.create(req.user, req.body, options)
   .then((users) => {
+    const publicUserData = users.map(u => u.getPublicData())[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Return 200: OK and created user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users[0].getPublicData()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2174,6 +2256,7 @@ function putUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -2209,13 +2292,24 @@ function putUser(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Creates or replaces a user with provided parameters
   // NOTE: createOrReplace() sanitizes req.body
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
+    const publicUserData = users.map(u => u.getPublicData())[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Return 200: OK and created/replaced user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users[0].getPublicData()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2236,6 +2330,7 @@ function patchUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -2271,13 +2366,24 @@ function patchUser(req, res) {
   // Set body username
   req.body.username = req.params.username;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Update the specified user
   // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
+    const publicUserData = users.map(u => u.getPublicData())[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Return 200: OK and updated user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(users[0].getPublicData()));
+    return res.status(200).send(json);
   })
   .catch((error) => res.status(error.status || 500).send(error));
 }
@@ -2297,6 +2403,7 @@ function deleteUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -2319,13 +2426,24 @@ function deleteUser(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Remove the specified user
   // NOTE: remove() sanitizes req.params.username
   UserController.remove(req.user, req.params.username, options)
   .then((usernames) => {
+    const username = usernames[0];
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? username : formatJSON(username);
+
     // Return 200: OK and the deleted username
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(usernames[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2342,15 +2460,46 @@ function deleteUser(req, res) {
  * @return {Object} Response object with user's public data
  */
 function whoami(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
   // Sanity check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
     return res.status(error.status).send(error);
   }
 
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  const publicUserData = req.user.getPublicData();
+
+  // Format JSON if minify option is not true
+  const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
   // Returns 200: OK and the users public data
   res.header('Content-Type', 'application/json');
-  return res.status(200).send(formatJSON(req.user.getPublicData()));
+  return res.status(200).send(json);
 }
 
 /**
@@ -2364,6 +2513,16 @@ function whoami(req, res) {
  * @return {Object} Response object with updated user public data.
  */
 function patchPassword(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
@@ -2394,13 +2553,34 @@ function patchPassword(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Update the password
   UserController.updatePassword(req.user, req.body.oldPassword,
     req.body.password, req.body.confirmPassword)
-  .then((updatedUser) => {
+  .then((user) => {
+    const publicUserData = user.getPublicData();
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+
     // Returns 200: OK and the updated user's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(updatedUser.getPublicData()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
