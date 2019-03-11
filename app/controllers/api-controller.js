@@ -902,6 +902,7 @@ function getAllProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -925,6 +926,12 @@ function getAllProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
   }
 
   // Get all projects the requesting user has access to
@@ -951,9 +958,12 @@ function getAllProjects(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -975,6 +985,7 @@ function getProjects(req, res) {
   // Note: Undefined if not set
   let ids;
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1016,6 +1027,12 @@ function getProjects(req, res) {
     ids = req.body.map(p => p.id);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Get all projects the requesting user has access to in a specified org
   // NOTE: find() sanitizes req.params.orgid and ids
   ProjectController.find(req.user, req.params.orgid, ids, options)
@@ -1041,9 +1058,12 @@ function getProjects(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1063,6 +1083,7 @@ function postProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1085,6 +1106,12 @@ function postProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
   }
 
   // Create the specified projects
@@ -1106,9 +1133,12 @@ function postProjects(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1128,6 +1158,7 @@ function putProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1150,6 +1181,12 @@ function putProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
   }
 
   // Create or replace the specified projects
@@ -1171,9 +1208,12 @@ function putProjects(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1193,6 +1233,7 @@ function patchProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1217,6 +1258,12 @@ function patchProjects(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Update the specified projects
   // NOTE: update() sanitizes req.params.orgid req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
@@ -1236,9 +1283,12 @@ function patchProjects(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1259,6 +1309,7 @@ function deleteProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1286,12 +1337,23 @@ function deleteProjects(req, res) {
     req.body = req.body.map(p => p.id);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Remove the specified projects
   ProjectController.remove(req.user, req.params.orgid, req.body, options)
   .then((projectIDs) => {
+    const parsedIDs = projectIDs.map(p => utils.parseID(p).pop());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+
     // Return 200: OK and the deleted project IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projectIDs.map(p => utils.parseID(p).pop())));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1311,6 +1373,7 @@ function getProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1336,6 +1399,12 @@ function getProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Find the project
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
@@ -1348,7 +1417,7 @@ function getProject(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => p.getPublicData()[0]);
 
     // If the fields options was specified
     if (options.fields) {
@@ -1363,9 +1432,12 @@ function getProject(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
