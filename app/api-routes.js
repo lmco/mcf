@@ -730,6 +730,13 @@ api.route('/orgs/:orgid')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
