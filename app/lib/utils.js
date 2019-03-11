@@ -330,6 +330,15 @@ module.exports.parseOptions = function(options, validOptions) {
     else if (validOptions[option] === 'string') {
       parsedOptions[option] = options[option];
     }
+    else if (validOptions[option] === 'number') {
+      const number = parseInt(options[option], 10);
+      if (isNaN(number)) { // eslint-disable-line no-restricted-globals
+        throw new M.CustomError(`${options[option]} is not a number`, 400, 'warn');
+      }
+      else {
+        parsedOptions[option] = number;
+      }
+    }
   });
   return parsedOptions;
 };
