@@ -876,8 +876,10 @@ function deleteOrg(req, res) {
   // NOTE: remove() sanitizes req.params.orgid
   OrgController.remove(req.user, req.params.orgid, options)
   .then((orgIDs) => {
+    const orgID = orgIDs[0];
+
     // Format JSON if minify option is not true
-    const json = (minified) ? orgIDs : formatJSON(orgIDs);
+    const json = (minified) ? orgID : formatJSON(orgID);
 
     // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
@@ -1417,7 +1419,7 @@ function getProject(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => p.getPublicData()[0]);
+    const publicProjectData = projects.map(p => p.getPublicData())[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -1458,6 +1460,7 @@ function postProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1493,11 +1496,17 @@ function postProject(req, res) {
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create project with provided parameters
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => p.getPublicData())[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -1512,9 +1521,12 @@ function postProject(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1535,6 +1547,7 @@ function putProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1570,11 +1583,17 @@ function putProject(req, res) {
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Create or replace project with provided parameters
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => p.getPublicData())[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -1589,9 +1608,12 @@ function putProject(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1611,6 +1633,7 @@ function patchProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1646,11 +1669,17 @@ function patchProject(req, res) {
   // Set the orgid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Update the specified project
   // NOTE: update() sanitizes req.params.orgid and req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => p.getPublicData())[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -1665,9 +1694,12 @@ function patchProject(req, res) {
       });
     }
 
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(publicProjectData[0]));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1688,6 +1720,7 @@ function deleteProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -1710,13 +1743,24 @@ function deleteProject(req, res) {
     return res.status(error.status).send(error);
   }
 
+  // Check options for minified
+  if (options.minified) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Remove the specified project
   // NOTE: remove() sanitizes req.params.orgid and req.params.projectid
   ProjectController.remove(req.user, req.params.orgid, req.params.projectid, options)
   .then((projectIDs) => {
+    const parsedIDs = utils.parseID(projectIDs[0]).pop();
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+
     // Return 200: OK and the deleted project ID
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(utils.parseID(projectIDs[0]).pop()));
+    return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2755,7 +2799,7 @@ function searchElements(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    q: 'string',
+    query: 'string',
     minified: 'boolean'
   };
 
@@ -2776,9 +2820,9 @@ function searchElements(req, res) {
   }
 
   // Check options for q (query)
-  if (options.q) {
-    query = options.q;
-    delete options.q;
+  if (options.query) {
+    query = options.query;
+    delete options.query;
   }
 
   // Default branch to master
