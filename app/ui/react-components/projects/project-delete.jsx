@@ -72,12 +72,19 @@ class DeleteProject extends Component{
 
     // Define the on submit function
     onSubmit(){
-        const url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
+        let url;
+
+        if(this.props.projects) {
+            url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
+        }
+        else {
+            url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
+        }
         // Delete the project selected
         ajaxRequest('DELETE', url)
         .then(() => {
             // On success, return to the projects page
-            window.location.replace(`/projects`);
+            window.location.replace(`/`);
         })
         .catch((msg) => {
             // On failure, notify user of failure
@@ -86,21 +93,23 @@ class DeleteProject extends Component{
     }
 
     componentDidMount() {
-        // Get all the organizations user is apart of
-        ajaxRequest('GET', `/api/orgs/`)
-        .then(orgs => {
-            // Loop through organizations and make them options
-            const orgOptions = orgs.map((org) => {
-                return (<option value={org.id}>{org.name}</option>)
-            });
+        if(this.props.projects) {
+            // Get all the organizations user is apart of
+            ajaxRequest('GET', `/api/orgs/`)
+            .then(orgs => {
+                // Loop through organizations and make them options
+                const orgOptions = orgs.map((org) => {
+                    return (<option value={org.id}>{org.name}</option>)
+                });
 
-            // Set the org options state
-            this.setState({orgOpt: orgOptions});
-        })
-        .catch(err => {
-            // Set the error state if no orgs found
-            this.setState({error: 'Failed to grab organizations.'})
-        })
+                // Set the org options state
+                this.setState({orgOpt: orgOptions});
+            })
+            .catch(err => {
+                // Set the error state if no orgs found
+                this.setState({error: 'Failed to grab organizations.'})
+            })
+        }
     }
 
     render() {
@@ -111,32 +120,48 @@ class DeleteProject extends Component{
                 <hr />
                 <div>
                     <Form>
-                        {/*Create a form to choose the organization*/}
-                        <FormGroup>
-                            <Label for="org">Organization ID</Label>
-                            <Input type="select"
-                                   name="org"
-                                   id="org"
-                                   value={this.state.org || ''}
-                                   onChange={this.handleOrgChange}>
-                                <option>Choose one...</option>
-                                {this.state.orgOpt}
-                            </Input>
-                        </FormGroup>
-                        {/*Create a form to choose the project*/}
-                        <FormGroup>
-                            <Label for="id">Project ID</Label>
-                            <Input type="select"
-                                   name="id"
-                                   id="id"
-                                   value={this.state.id || ''}
-                                   onChange={this.handleChange}>
-                                <option>Choose one...</option>
-                                {this.state.projectOpt}
-                            </Input>
-                        </FormGroup>
-                        {/*Button to submit and delete project*/}
-                        <Button color='danger' onClick={this.onSubmit}> Delete </Button>
+                        {(!this.props.projects)
+                            ? ''
+                            // Create a form to choose the organization
+                            :(<React.Fragment>
+                                <FormGroup>
+                                    <Label for="org">Organization ID</Label>
+                                    <Input type="select"
+                                    name="org"
+                                    id="org"
+                                    value={this.state.org || ''}
+                                    onChange={this.handleOrgChange}>
+                                    <option>Choose one...</option>
+                                    {this.state.orgOpt}
+                                    </Input>
+                                </FormGroup>
+                                {/* Create a form to choose the project */}
+                                <FormGroup>
+                                    <Label for="id">Project ID</Label>
+                                    <Input type="select"
+                                    name="id"
+                                    id="id"
+                                    value={this.state.id || ''}
+                                    onChange={this.handleChange}>
+                                    <option>Choose one...</option>
+                                    {this.state.projectOpt}
+                                    </Input>
+                                    </FormGroup>
+                                    {/* Button to submit and delete project */}
+                                    <Button color='danger' onClick={this.onSubmit}> Delete </Button>
+                                  </React.Fragment>
+                            )
+                        }
+                        {(!this.props.project)
+                            ? ''
+                            :(<FormGroup>
+                                <Label for="id">Do you want to delete {this.props.project.name}?</Label>
+                                <div>
+                                    <Button color="danger" onClick={this.onSubmit}>Yes</Button> {'   '}
+                                    <Button color="secondary" onClick={this.props.toggle}>No</Button>
+                                </div>
+                              </FormGroup>)
+                        }
                     </Form>
                 </div>
             </div>

@@ -404,6 +404,14 @@ textarea[name="custom"] {
         }
     }
 
+    .proj-list {
+        display: grid;
+        grid-template-columns: 1fr minmax(2px, 50px);
+        grid-template-areas: "org button";
+        justify-content: left;
+        align-items: center;
+    }
+
     .projects-list {
         border-left: #eeeeee solid;
         margin-left: 25px;

@@ -57,7 +57,7 @@ class DeleteOrganization extends Component{
         ajaxRequest('DELETE', url)
         .then(() => {
             // On success, return to the organizations page
-            window.location.replace(`/organizations`);
+            window.location.replace(`/`);
         })
         .catch((err) => {
             // On failure, notify user of failure
