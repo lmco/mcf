@@ -167,6 +167,13 @@ api.route('/version')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET orgs, returns public org data.
@@ -740,6 +747,13 @@ api.route('/orgs/:orgid')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -821,6 +835,13 @@ api.route('/projects')
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
  *         in: query
  *         type: number
  *     responses:
@@ -1513,9 +1534,9 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: query
  *         type: number
  *       - name: skip
- *         description: The number of documents to skip returning. For example,
- *                      if 10 documents are found and skip is 5, the first five
- *                      documents will NOT be returned. NOTE, skip cannot be a
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
  *                      negative number.
  *         in: query
  *         type: number
@@ -1621,9 +1642,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         in: query
  *         type: number
  *       - name: skip
- *         description: The number of documents to skip returning. For example,
- *                      if 10 documents are found and skip is 5, the first five
- *                      documents will NOT be returned. NOTE, skip cannot be a
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
  *                      negative number.
  *         in: query
  *         type: number
@@ -2464,6 +2485,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
  *         in: query
  *         type: number
  *     responses:

@@ -62,6 +62,9 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
  *
  * @return {Promise} Array of found user objects.
  *
@@ -112,6 +115,7 @@ function find(requestingUser, users, options) {
     let populateString = '';
     let fieldsString = '';
     let limit = 0;
+    let skip = 0;
 
     // Ensure options are valid
     if (options) {
@@ -166,6 +170,18 @@ function find(requestingUser, users, options) {
         }
         limit = options.limit;
       }
+
+      // If the option 'skip' is supplied ensure it's a number
+      if (options.hasOwnProperty('skip')) {
+        if (typeof options.skip !== 'number') {
+          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+        }
+        // Ensure skip is not negative
+        if (options.skip < 0) {
+          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+        }
+        skip = options.skip;
+      }
     }
 
     // Define searchQuery
@@ -190,7 +206,7 @@ function find(requestingUser, users, options) {
     }
 
     // Find the users
-    User.find(searchQuery, fieldsString, { limit: limit })
+    User.find(searchQuery, fieldsString, { limit: limit, skip: skip })
     .populate(populateString)
     .then((foundUser) => resolve(foundUser))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));

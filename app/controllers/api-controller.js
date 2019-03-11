@@ -214,6 +214,7 @@ function getOrgs(req, res) {
     archived: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     ids: 'array'
   };
 
@@ -772,7 +773,8 @@ function getAllProjects(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    limit: 'number'
+    limit: 'number',
+    skip: 'number'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -831,6 +833,7 @@ function getProjects(req, res) {
     archived: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     ids: 'array'
   };
 
@@ -1390,6 +1393,7 @@ function getUsers(req, res) {
     archived: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     usernames: 'array'
   };
 
