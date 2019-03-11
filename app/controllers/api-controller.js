@@ -799,9 +799,24 @@ function getAllProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -873,9 +888,24 @@ function getProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -922,9 +952,24 @@ function postProjects(req, res) {
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and the created projects
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -971,9 +1016,24 @@ function putProjects(req, res) {
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and the created/replaced projects
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1020,9 +1080,24 @@ function patchProjects(req, res) {
   // NOTE: update() sanitizes req.params.orgid req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and the updated projects
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1129,9 +1204,24 @@ function getProject(req, res) {
       return res.status(error.status).send(error);
     }
 
-    // Return a 200: OK and the found project
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+    return res.status(200).send(formatJSON(publicProjectData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1190,9 +1280,24 @@ function postProject(req, res) {
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and created project
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+    return res.status(200).send(formatJSON(publicProjectData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1251,9 +1356,24 @@ function putProject(req, res) {
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and created/replaced project
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+    return res.status(200).send(formatJSON(publicProjectData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1311,9 +1431,24 @@ function patchProject(req, res) {
   // NOTE: update() sanitizes req.params.orgid and req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and the updated project
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+    return res.status(200).send(formatJSON(publicProjectData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2069,6 +2204,19 @@ function getElements(req, res) {
     // Return only public element data
     const elementsPublicData = elements.map(e => e.getPublicData());
 
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // Verify elements public data array is not empty
     if (elementsPublicData.length === 0) {
       const error = new M.CustomError('No elements found.', 404, 'warn');
@@ -2138,9 +2286,24 @@ function postElements(req, res) {
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(elementsPublicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2192,9 +2355,24 @@ function putElements(req, res) {
   ElementController.createOrReplace(req.user, req.params.orgid,
     req.params.projectid, branchid, req.body, options)
   .then((elements) => {
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // Return 200: OK and the new/replaced elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(elementsPublicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2245,9 +2423,24 @@ function patchElements(req, res) {
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(elementsPublicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2425,16 +2618,31 @@ function getElement(req, res) {
       return res.status(error.status).send(error);
     }
 
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // If subtree option was provided, return array of elements
     if (options.subtree) {
       // Return a 200: OK and the elements
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+      return res.status(200).send(formatJSON(elementsPublicData));
     }
 
-    // Return a 200: OK and the element
+    // Return 200: OK and the elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements[0].getPublicData()));
+    return res.status(200).send(formatJSON(elementsPublicData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2496,9 +2704,24 @@ function postElement(req, res) {
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((element) => {
-    // Return 200: OK and created element
+    const elementsPublicData = element.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element[0].getPublicData()));
+    return res.status(200).send(formatJSON(elementsPublicData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2560,9 +2783,24 @@ function putElement(req, res) {
   ElementController.createOrReplace(req.user, req.params.orgid,
     req.params.projectid, branchid, req.body, options)
   .then((element) => {
-    // Return 200: OK and created/replaced element
+    const elementsPublicData = element.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and the created/replaced element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element[0].getPublicData()));
+    return res.status(200).send(formatJSON(elementsPublicData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2624,9 +2862,24 @@ function patchElement(req, res) {
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((element) => {
+    const elementsPublicData = element.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element[0].getPublicData()));
+    return res.status(200).send(formatJSON(elementsPublicData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
