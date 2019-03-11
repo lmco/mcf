@@ -1512,6 +1512,13 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: skip
+ *         description: The number of documents to skip returning. For example,
+ *                      if 10 documents are found and skip is 5, the first five
+ *                      documents will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1611,6 +1618,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of documents to skip returning. For example,
+ *                      if 10 documents are found and skip is 5, the first five
+ *                      documents will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
  *         in: query
  *         type: number
  *     responses:

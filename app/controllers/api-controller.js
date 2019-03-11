@@ -2022,6 +2022,7 @@ function getElements(req, res) {
     subtree: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     ids: 'array',
     jmi3: 'boolean'
   };
@@ -2328,6 +2329,7 @@ function searchElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     limit: 'number',
+    skip: 'number',
     query: 'string'
   };
 
