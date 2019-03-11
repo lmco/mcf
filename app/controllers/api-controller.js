@@ -1389,6 +1389,7 @@ function getUsers(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
+    limit: 'number',
     usernames: 'array'
   };
 

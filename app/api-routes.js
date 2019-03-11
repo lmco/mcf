@@ -2447,6 +2447,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
