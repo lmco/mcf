@@ -59,7 +59,7 @@ class Project extends Component {
         ajaxRequest('GET',`${url}`)
         .then(project => {
             // Get project elements in JMI Type 3
-            ajaxRequest('GET',`${url}/branches/master/elements?jmi3=true`)
+            ajaxRequest('GET',`${url}/branches/master/elements?jmi3=true&minified=true`)
             .then(elements => {
                 // Initialize variables
                 const username = this.props.user.username;
