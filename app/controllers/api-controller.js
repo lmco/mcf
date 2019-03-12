@@ -2522,7 +2522,7 @@ function searchElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     limit: 'number',
-    query: 'string'
+    q: 'string'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2541,10 +2541,10 @@ function searchElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check options for query
-  if (options.query) {
-    query = options.query;
-    delete options.query;
+  // Check options for q (query)
+  if (options.q) {
+    query = options.q;
+    delete options.q;
   }
 
   // Default branch to master

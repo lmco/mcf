@@ -66,7 +66,7 @@ class Search extends Component{
         // Do ajax request
         $.ajax({
             method: "GET",
-            url: `${url}?query=${this.state.query}`
+            url: `${url}?q=${this.state.query}`
         })
         .done(data => {
             this.setState({ results: data });
