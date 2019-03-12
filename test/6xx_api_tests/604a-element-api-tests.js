@@ -507,7 +507,7 @@ function getElements(done) {
 function searchElement(done) {
   const elemData = testData.elements[0];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/search?query="${elemData.name}"`,
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements/search?q="${elemData.name}"`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'GET'
