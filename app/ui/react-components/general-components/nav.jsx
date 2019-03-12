@@ -135,13 +135,40 @@ class MbeeNav extends Component {
                             <NavItem>
                                 <NavLink href="/about">About</NavLink>
                             </NavItem>
+                            {/*Create links in navbar for documentation drop down*/}
+                            {(this.state.user === null)
+                                // Create link to login or logout
+                                ? <NavLink href="/login">Login</NavLink>
+                                :(<UncontrolledDropdown nav inNavbar>
+                                    <DropdownToggle nav caret>
+                                        User
+                                    </DropdownToggle>
+                                    <DropdownMenu right>
+                                        <DropdownItem href="/whoami">
+                                            Profile
+                                        </DropdownItem>
+                                        <DropdownItem href="/">
+                                            Home
+                                        </DropdownItem>
+                                        <DropdownItem href="/organizations">
+                                            Organizations
+                                        </DropdownItem>
+                                        <DropdownItem href="/projects">
+                                            Projects
+                                        </DropdownItem>
+                                        <DropdownItem divider />
+                                        <DropdownItem href="/doc/api">
+                                            {/*Check if user exists*/}
+                                            {(this.state.user === null)
+                                                // Create link to login or logout
+                                                ? <NavLink href="/login">Login</NavLink>
+                                                : <NavLink href="/logout">Logout</NavLink>
+                                            }
+                                        </DropdownItem>
+                                    </DropdownMenu>
+                                  </UncontrolledDropdown>)
+                            }
                             <NavItem>
-                                {/*Check if user exists*/}
-                                {(this.state.user === null)
-                                    // Create link to login or logout
-                                    ? <NavLink href="/login">Login</NavLink>
-                                    : <NavLink href="/logout">Logout</NavLink>
-                                }
                             </NavItem>
                         </Nav>
                     </Collapse>
