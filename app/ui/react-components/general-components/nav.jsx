@@ -141,12 +141,13 @@ class MbeeNav extends Component {
                                 ? <NavLink href="/login">Login</NavLink>
                                 :(<UncontrolledDropdown nav inNavbar>
                                     <DropdownToggle nav caret>
-                                        User
+                                        <i className='fas fa-user-circle'/>
                                     </DropdownToggle>
                                     <DropdownMenu right>
                                         <DropdownItem href="/whoami">
                                             Profile
                                         </DropdownItem>
+                                        <DropdownItem divider />
                                         <DropdownItem href="/">
                                             Home
                                         </DropdownItem>
@@ -161,8 +162,8 @@ class MbeeNav extends Component {
                                             {/*Check if user exists*/}
                                             {(this.state.user === null)
                                                 // Create link to login or logout
-                                                ? <NavLink href="/login">Login</NavLink>
-                                                : <NavLink href="/logout">Logout</NavLink>
+                                                ? <NavLink href="/login">Log In</NavLink>
+                                                : <NavLink href="/logout">Log Out</NavLink>
                                             }
                                         </DropdownItem>
                                     </DropdownMenu>
