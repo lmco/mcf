@@ -72,14 +72,19 @@ class DeleteProject extends Component{
 
     // Define the on submit function
     onSubmit(){
+        // Initialize variables
         let url;
 
+        // Verify if projects provided
         if(this.props.projects) {
+            // Set url to state options
             url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
         }
         else {
+            // Set url to project provided
             url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
         }
+
         // Delete the project selected
         ajaxRequest('DELETE', url)
         .then(() => {
@@ -93,9 +98,10 @@ class DeleteProject extends Component{
     }
 
     componentDidMount() {
+        // Verify if projects provided
         if(this.props.projects) {
             // Get all the organizations user is apart of
-            ajaxRequest('GET', `/api/orgs/`)
+            ajaxRequest('GET', `/api/orgs`)
             .then(orgs => {
                 // Loop through organizations and make them options
                 const orgOptions = orgs.map((org) => {
@@ -120,6 +126,7 @@ class DeleteProject extends Component{
                 <hr />
                 <div>
                     <Form>
+                        {/*Verify if projects provided*/}
                         {(!this.props.projects)
                             ? ''
                             // Create a form to choose the organization
@@ -152,13 +159,15 @@ class DeleteProject extends Component{
                                   </React.Fragment>
                             )
                         }
+                        {/*Verify if project provided*/}
                         {(!this.props.project)
                             ? ''
+                            // Display confirmation
                             :(<FormGroup>
                                 <Label for="id">Do you want to delete {this.props.project.name}?</Label>
-                                <div>
-                                    <Button color="danger" onClick={this.onSubmit}>Yes</Button> {'   '}
-                                    <Button color="secondary" onClick={this.props.toggle}>No</Button>
+                                <div className='delete-buttons'>
+                                    <Button color="danger" onClick={this.onSubmit}>Delete</Button>
+                                    <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
                                 </div>
                               </FormGroup>)
                         }

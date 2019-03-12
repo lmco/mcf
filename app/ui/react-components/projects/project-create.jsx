@@ -151,17 +151,18 @@ class CreateProject extends Component{
         // Return the form to create a project
         return (
             <div className='project-forms'>
+                {/*Verify if org provided*/}
                 {(!this.props.org)
+                    // Display header
                     ? (<h2>New Project</h2>)
                     : (<h2>New Project in {this.props.org.name}</h2>)
                 }
                 <hr />
                 <div>
                     <Form>
-                        {/*Verify if org is already provided*/}
+                        {/*Verify if org provided*/}
                         {(!this.props.org)
-                            // Let user choose which org
-                            ? (// Create options to choose the organization
+                            ? (// Display options to choose the organization
                                 <FormGroup>
                                     <Label for="org">Organization ID</Label>
                                     <Input type="select"
@@ -173,7 +174,6 @@ class CreateProject extends Component{
                                         {this.state.orgOpt}
                                     </Input>
                                 </FormGroup>)
-                            // Display org deleting from
                             : ''
                         }
                         {/*Create an input for project id*/}

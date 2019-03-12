@@ -277,6 +277,11 @@ textarea[name="custom"] {
     align-items: center;
 }
 
+.delete-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    padding-top: 15px;
+}
 /******************************************************************************
 /*                             Home Page Styling                              *
 /******************************************************************************/

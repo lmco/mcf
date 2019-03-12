@@ -45,19 +45,24 @@ class DeleteOrganization extends Component{
 
     // Define the on submit function
     onSubmit(){
+        // Initialize variables
         let url;
 
+        // Verify if orgs provided
         if(this.props.orgs) {
+            // Use the set state
             url = `/api/orgs/${this.state.id}`;
         }
         else {
+            // Use the org provided
             url =  `/api/orgs/${this.props.org.id}`;
         }
+
         // Delete the organization selected
         ajaxRequest('DELETE', url)
         .then(() => {
             // On success, return to the organizations page
-            window.location.replace(`/`);
+            window.location.replace(`/organizations`);
         })
         .catch((err) => {
             // On failure, notify user of failure
@@ -66,17 +71,16 @@ class DeleteOrganization extends Component{
     }
 
     render() {
+        // Initialize variables
         let orgOptions;
 
+        // Verify if orgs provided
         if(this.props.orgs) {
             // Loop through orgs
             orgOptions = this.props.orgs.map((org) => {
                 // Create an org option
                 return (<option value={org.id}>{org.name}</option>)
             });
-        }
-        else {
-            orgOptions = <option value={this.props.org.id}>{this.props.org.name}</option>
         }
 
         // Return the form to delete org
@@ -86,7 +90,9 @@ class DeleteOrganization extends Component{
                 <hr />
                 <div>
                     <Form>
+                        {/*Verify if orgs provided*/}
                         {(!this.props.orgs)
+                            // Display nothing
                             ? ''
                             // Select the organization
                             :(<React.Fragment>
@@ -105,14 +111,15 @@ class DeleteOrganization extends Component{
                               <Button color='danger' onClick={this.onSubmit}> Delete </Button>
                             </React.Fragment>)
                         }
+                        {/*Verify if org provided*/}
                         {(!this.props.org)
                             ? ''
-                            // Select the organization
+                            // Confirm deletion
                             :(<FormGroup>
                                 <Label for="id">Do you want to delete {this.props.org.name}?</Label>
-                                <div>
-                                    <Button color="danger" onClick={this.onSubmit}>Yes</Button> {'   '}
-                                    <Button color="secondary" onClick={this.props.toggle}>No</Button>
+                                <div className='delete-buttons'>
+                                    <Button color="danger" onClick={this.onSubmit}>Delete</Button>
+                                    <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
                                 </div>
                               </FormGroup>)
                         }
