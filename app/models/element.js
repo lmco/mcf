@@ -70,7 +70,7 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.element.id),
-    maxlength: [110, 'Too many characters in ID'],
+    maxlength: [255, 'Too many characters in ID'],
     minlength: [8, 'Too few characters in ID']
   },
   name: {
