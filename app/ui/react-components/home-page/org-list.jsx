@@ -96,7 +96,11 @@ class OrgList extends Component {
                         {(!this.props.admin)
                             ? ''
                             :(< div className='org-button'>
-                                    <i onClick={this.handleDeleteProjToggle} className='fas fa-trash-alt'/>
+                                    <Button className='btn'
+                                            outline color="danger"
+                                            onClick={this.handleDeleteProjToggle}>
+                                        <i className='fas fa-trash-alt'/>
+                                    </Button>
                                 </div>
                             )
                         }
@@ -133,21 +137,23 @@ class OrgList extends Component {
                         <i className={icon}/>
                     </div>
                     <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`}/>
-                    {(!this.props.admin)
-                        ? ''
-                        :(< div className='org-button'>
-                            <Button className='btn'
-                                    outline color="secondary"
-                                    onClick={this.handleCreateProjToggle}>
-                                <i className='fas fa-plus first-icon'/>
-                            </Button>
-                            <Button className='btn'
-                                    outline color="secondary"
-                                    onClick={this.handleDeleteOrgToggle}>
-                                <i className='fas fa-trash-alt'/>
-                            </Button>
-                          </div>
-                        )
+                    {((this.props.admin) || (this.props.write))
+                        ? (< div className='org-button'>
+                                <Button className='btn'
+                                        outline color="secondary"
+                                        onClick={this.handleCreateProjToggle}>
+                                    <i className='fas fa-plus'/>
+                                </Button>
+                                {(!this.props.admin)
+                                    ? ''
+                                    : (<Button className='btn'
+                                               outline color="danger"
+                                               onClick={this.handleDeleteOrgToggle}>
+                                        <i className='fas fa-trash-alt'/>
+                                    </Button>)
+                                }
+                            </div>)
+                        : ''
                     }
                 </div>
                 {(!this.state.showProjs)

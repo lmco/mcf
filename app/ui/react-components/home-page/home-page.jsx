@@ -67,17 +67,9 @@ class HomePage extends Component {
             // Get the organization and their projects
             ajaxRequest('GET', `/api/orgs?populate=projects`)
             .then(orgs => {
+                // Set user state
                 this.setState({user: user});
-                // if (user.custom.hasOwnProperty('starred_projects')) {
-                //     const starredProjects = user.custom.starred_projects.map(p => {
-                //         return (
-                //             <Tile key={'starred-' + p} href={'/' + p} icon={'fas fa-star'}>
-                //                 {p}
-                //             </Tile>
-                //         )
-                //     });
-                //     this.setState({starredProjects: starredProjects});
-                // }
+
                 // Add event listener for window resizing
                 window.addEventListener('resize', this.handleResize);
                 // Handle initial size of window
@@ -186,7 +178,15 @@ class HomePage extends Component {
     render() {
         // Loop through all orgs
         const list = this.state.orgs.map(org => {
-           return( <OrgList org={org} admin={this.state.admin}/> )
+            console.log(org);
+            const username = this.state.user.username;
+
+            if (org.permissions[username] === 'write') {
+                return( <OrgList org={org} write={this.state.write} admin={this.state.admin}/> )
+            }
+            else {
+                return (<OrgList org={org} admin={this.state.admin}/>)
+            }
         });
 
         // Render the homepage
@@ -221,12 +221,12 @@ class HomePage extends Component {
                                 <Button className='btn'
                                         outline color="secondary"
                                         onClick={this.handleCreateToggle}>
-                                    Create
+                                    <i className='fas fa-plus'/>
                                 </Button>
                                 <Button className='btn'
                                         outline color="danger"
                                         onClick={this.handleDeleteToggle}>
-                                    Delete
+                                    <i className='fas fa-trash-alt'/>
                                 </Button>
                             </div>)
                         }

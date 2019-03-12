@@ -47,11 +47,11 @@ class DeleteOrganization extends Component{
     onSubmit(){
         let url;
 
-        if(this.props.org) {
-            const url =  `/api/orgs/${this.org.id}`;
+        if(this.props.orgs) {
+            url = `/api/orgs/${this.state.id}`;
         }
         else {
-            url = `/api/orgs/${this.state.id}`;
+            url =  `/api/orgs/${this.props.org.id}`;
         }
         // Delete the organization selected
         ajaxRequest('DELETE', url)
