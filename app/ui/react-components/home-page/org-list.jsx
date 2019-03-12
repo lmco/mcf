@@ -136,8 +136,16 @@ class OrgList extends Component {
                     {(!this.props.admin)
                         ? ''
                         :(< div className='org-button'>
-                            <i onClick={this.handleCreateProjToggle} className='fas fa-plus first-icon'/>
-                            <i onClick={this.handleDeleteOrgToggle} className='fas fa-trash-alt'/>
+                            <Button className='btn'
+                                    outline color="secondary"
+                                    onClick={this.handleCreateProjToggle}>
+                                <i className='fas fa-plus first-icon'/>
+                            </Button>
+                            <Button className='btn'
+                                    outline color="secondary"
+                                    onClick={this.handleDeleteOrgToggle}>
+                                <i className='fas fa-trash-alt'/>
+                            </Button>
                           </div>
                         )
                     }

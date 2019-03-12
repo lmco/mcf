@@ -31,9 +31,6 @@ import {
     DropdownMenu,
     DropdownItem } from 'reactstrap';
 
-// MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-
 // Define component
 class MbeeNav extends Component {
     constructor(props) {
@@ -116,7 +113,7 @@ class MbeeNav extends Component {
                             {/*Create links in navbar for documentation drop down*/}
                             <UncontrolledDropdown nav inNavbar>
                                 <DropdownToggle nav caret>
-                                    Documentation
+                                    Docs
                                 </DropdownToggle>
                                 <DropdownMenu right>
                                     <DropdownItem href="/doc/flight-manual">
@@ -131,11 +128,6 @@ class MbeeNav extends Component {
                                     </DropdownItem>
                                 </DropdownMenu>
                             </UncontrolledDropdown>
-                            {/*Create about page link*/}
-                            <NavItem>
-                                <NavLink href="/about">About</NavLink>
-                            </NavItem>
-                            {/*Create links in navbar for documentation drop down*/}
                             {(this.state.user === null)
                                 // Create link to login or logout
                                 ? <NavLink href="/login">Login</NavLink>
@@ -148,14 +140,14 @@ class MbeeNav extends Component {
                                             Profile
                                         </DropdownItem>
                                         <DropdownItem divider />
-                                        <DropdownItem href="/">
-                                            Home
-                                        </DropdownItem>
                                         <DropdownItem href="/organizations">
-                                            Organizations
+                                            Your Organizations
                                         </DropdownItem>
                                         <DropdownItem href="/projects">
-                                            Projects
+                                            Your Projects
+                                        </DropdownItem>
+                                        <DropdownItem href="/about">
+                                            About
                                         </DropdownItem>
                                         <DropdownItem divider />
                                         <DropdownItem href="/doc/api">

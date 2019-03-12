@@ -212,7 +212,7 @@ class HomePage extends Component {
                 {/*Display the list of projects*/}
                 <div id='view' className='org-list' ref={this.ref}>
                     <div className='org-list-header'>
-                        <h2 className='org-header'>Organizations and Projects</h2>
+                        <h2 className='org-header'>Organizations</h2>
                         {/*Verify user is an admin */}
                         {(!this.state.admin)
                             ? ''
