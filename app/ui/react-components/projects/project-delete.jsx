@@ -155,7 +155,8 @@ class DeleteProject extends Component{
                                     </Input>
                                     </FormGroup>
                                     {/* Button to submit and delete project */}
-                                    <Button color='danger' onClick={this.onSubmit}> Delete </Button>
+                                    <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
+                                    <Button onClick={this.props.toggle}> Cancel </Button>
                                   </React.Fragment>
                             )
                         }
@@ -166,7 +167,7 @@ class DeleteProject extends Component{
                             :(<FormGroup>
                                 <Label for="id">Do you want to delete {this.props.project.name}?</Label>
                                 <div className='delete-buttons'>
-                                    <Button color="danger" onClick={this.onSubmit}>Delete</Button>
+                                    <Button color="danger" onClick={this.onSubmit}>Delete</Button>{' '}
                                     <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
                                 </div>
                               </FormGroup>)

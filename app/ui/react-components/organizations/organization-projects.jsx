@@ -41,7 +41,7 @@ function OrganizationProjects(props) {
             {/*Modal for creating a project*/}
             <Modal isOpen={props.modal} toggle={props.handleToggle}>
                 <ModalBody>
-                    <CreateProject org={org}/>
+                    <CreateProject org={org} toggle={props.handleToggle}/>
                 </ModalBody>
             </Modal>
             <div id='view' className='org-projects'>

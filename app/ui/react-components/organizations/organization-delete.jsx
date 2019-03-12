@@ -108,7 +108,8 @@ class DeleteOrganization extends Component{
                                 </Input>
                               </FormGroup>
                               {/* Delete the organization selected*/}
-                              <Button color='danger' onClick={this.onSubmit}> Delete </Button>
+                              <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
+                              <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
                             </React.Fragment>)
                         }
                         {/*Verify if org provided*/}
@@ -118,7 +119,7 @@ class DeleteOrganization extends Component{
                             :(<FormGroup>
                                 <Label for="id">Do you want to delete {this.props.org.name}?</Label>
                                 <div className='delete-buttons'>
-                                    <Button color="danger" onClick={this.onSubmit}>Delete</Button>
+                                    <Button color="danger" onClick={this.onSubmit}>Delete</Button>{' '}
                                     <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
                                 </div>
                               </FormGroup>)

@@ -200,7 +200,7 @@ class HomePage extends Component {
                 {/*Modal for creating an org*/}
                 <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                     <ModalBody>
-                        <CreateOrganization />
+                        <CreateOrganization toggle={this.handleCreateToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Modal for deleting an org*/}

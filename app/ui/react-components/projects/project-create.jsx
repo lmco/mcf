@@ -222,7 +222,8 @@ class CreateProject extends Component{
                             </FormFeedback>
                         </FormGroup>
                         {/*Button to create project*/}
-                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Create Project </Button>
+                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Create </Button>{' '}
+                        <Button outline onClick={this.props.toggle}> Cancel </Button>
                     </Form>
                 </div>
             </div>

@@ -123,7 +123,7 @@ class OrgList extends Component {
                 {/*Modal for creating an org*/}
                 <Modal isOpen={this.state.modalProjCreate} toggle={this.handleCreateProjToggle}>
                     <ModalBody>
-                        <CreateProject org={this.props.org}/>
+                        <CreateProject org={this.props.org} toggle={this.handleCreateProjToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Modal for deleting an org*/}

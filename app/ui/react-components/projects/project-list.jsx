@@ -189,9 +189,9 @@ class ProjectList extends Component {
                         {/*Verify user has write and admin permissions*/}
                         {(this.state.admin)
                             // Allow access to all orgs
-                            ? <DeleteProject projects={this.state.projects}/>
+                            ? <DeleteProject projects={this.state.projects} toggle={this.handleDeleteToggle}/>
                             // Allow access to write orgs only
-                            : <DeleteProject orgs={this.state.writePermOrgs}/>
+                            : <DeleteProject orgs={this.state.writePermOrgs} toggle={this.handleDeleteToggle}/>
                         }
                     </ModalBody>
                 </Modal>
