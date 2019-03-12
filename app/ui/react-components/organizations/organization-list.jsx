@@ -141,12 +141,12 @@ class OrganizationList extends Component {
                                     <Button className='btn'
                                             outline color="danger"
                                             onClick={this.handleDeleteToggle}>
-                                        Delete
+                                        <i className='fas fa-trash-alt'/>
                                     </Button>
                                     <Button className='btn'
                                             outline color="secondary"
                                             onClick={this.handleCreateToggle}>
-                                        Create
+                                        <i className='fas fa-plus'/>
                                     </Button>
                                 </div>)
                         }

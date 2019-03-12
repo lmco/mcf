@@ -82,7 +82,7 @@ class ProjectUsers extends Component {
                                     <Button className='btn'
                                             outline color="secondary"
                                             onClick={this.handleToggle}>
-                                        Edit
+                                        <i className='fas fa-user-edit'/>
                                     </Button>
                                 </div>
                             )
