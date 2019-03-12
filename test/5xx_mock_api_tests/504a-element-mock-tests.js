@@ -580,7 +580,7 @@ function getAllElements(done) {
       // Verify elements created properly
       chai.expect(foundElement.id).to.equal(elemObj.id);
       chai.expect(foundElement.name).to.equal(elemObj.name);
-      chai.expect(foundElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(foundElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(foundElement.project).to.equal(projID);
 
       // If documentation was provided, verify it

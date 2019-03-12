@@ -515,10 +515,9 @@ function findAllElements(done) {
       const foundElem = jmi2Elements[elementID];
 
       // Verify correct elements found
-      chai.expect(foundElem.id).to.equal(elementID);
       chai.expect(foundElem._id).to.equal(elementID);
       chai.expect(foundElem.name).to.equal(elemObj.name);
-      chai.expect(foundElem.custom).to.deep.equal(elemObj.custom);
+      chai.expect(foundElem.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(foundElem.project).to.equal(utils.createID(org.id, projID));
 
       // If documentation was provided, verify it
