@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.404a-element-controller-tests
+ * @module test.404a-element-controller-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -16,15 +16,15 @@
 
 // NPM modules
 const chai = require('chai');
-const path = require('path');
 
 // MBEE modules
 const ElementController = M.require('controllers.element-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
-const testUtils = require(path.join(M.root, 'test', 'test-utils'));
+const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
@@ -97,9 +97,12 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should create an element', createElement);
   it('should create multiple elements', createElements);
+  it('should create or replace an element', createOrReplaceElement);
+  it('should create or replace multiple elements', createOrReplaceElements);
   it('should find an element', findElement);
   it('should find multiple elements', findElements);
   it('should find all elements', findAllElements);
+  it('should find an element through text search', searchElement);
   it('should update an element', updateElement);
   it('should update multiple elements', updateElements);
   it('should delete an element', deleteElement);
@@ -170,8 +173,7 @@ function createElements(done) {
     testData.elements[2],
     testData.elements[3],
     testData.elements[4],
-    testData.elements[5],
-    testData.elements[6]
+    testData.elements[5]
   ];
 
   // Create elements via controller
@@ -181,7 +183,7 @@ function createElements(done) {
     chai.expect(createdElements.length).to.equal(elemDataObjects.length);
 
     // Convert createdElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, createdElements);
+    const jmi2Elements = jmi.convertJMI(1, 2, createdElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemObj) => {
       const elementID = utils.createID(org.id, projID, elemObj.id);
@@ -222,6 +224,133 @@ function createElements(done) {
       chai.expect(createdElem.createdOn).to.not.equal(null);
       chai.expect(createdElem.updatedOn).to.not.equal(null);
       chai.expect(createdElem.archivedOn).to.equal(null);
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates or replaces an element using the element controller
+ */
+function createOrReplaceElement(done) {
+  const elemData = testData.elements[0];
+
+  // Create or replace element via controller
+  ElementController.createOrReplace(adminUser, org.id, projID, 'master', elemData)
+  .then((replacedElements) => {
+    // Expect replacedElements array to contain 1 element
+    chai.expect(replacedElements.length).to.equal(1);
+    const replacedElem = replacedElements[0];
+
+    // Verify element created/replaced properly
+    chai.expect(replacedElem.id).to.equal(utils.createID(org.id, projID, elemData.id));
+    chai.expect(replacedElem._id).to.equal(utils.createID(org.id, projID, elemData.id));
+    chai.expect(replacedElem.name).to.equal(elemData.name);
+    chai.expect(replacedElem.custom).to.deep.equal(elemData.custom);
+    chai.expect(replacedElem.project).to.equal(utils.createID(org.id, projID));
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(replacedElem.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(replacedElem.source).to.equal(utils.createID(org.id, projID, elemData.source));
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(replacedElem.target).to.equal(utils.createID(org.id, projID, elemData.target));
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(replacedElem.parent).to.equal(utils.createID(org.id, projID, elemData.parent));
+    }
+
+    // Verify additional properties
+    chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.archivedBy).to.equal(null);
+    chai.expect(replacedElem.createdOn).to.not.equal(null);
+    chai.expect(replacedElem.updatedOn).to.not.equal(null);
+    chai.expect(replacedElem.archivedOn).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Creates or replaces multiple elements using the element
+ * controller.
+ */
+function createOrReplaceElements(done) {
+  const elemDataObjects = [
+    testData.elements[1],
+    testData.elements[2],
+    testData.elements[3],
+    testData.elements[4],
+    testData.elements[5],
+    testData.elements[6]
+  ];
+
+  // Create or replace elements via controller
+  ElementController.createOrReplace(adminUser, org.id, projID, 'master', elemDataObjects)
+  .then((replacedElements) => {
+    // Expect replacedElements not to be empty
+    chai.expect(replacedElements.length).to.equal(elemDataObjects.length);
+
+    // Convert replacedElements to JMI type 2 for easier lookup
+    const jmi2Elements = jmi.convertJMI(1, 2, replacedElements);
+    // Loop through each element data object
+    elemDataObjects.forEach((elemObj) => {
+      const elementID = utils.createID(org.id, projID, elemObj.id);
+      const replacedElem = jmi2Elements[elementID];
+
+      // Verify elements created/replaced properly
+      chai.expect(replacedElem.id).to.equal(elementID);
+      chai.expect(replacedElem._id).to.equal(elementID);
+      chai.expect(replacedElem.name).to.equal(elemObj.name);
+      chai.expect(replacedElem.custom).to.deep.equal(elemObj.custom);
+      chai.expect(replacedElem.project).to.equal(utils.createID(org.id, projID));
+
+      // If documentation was provided, verify it
+      if (elemObj.hasOwnProperty('documentation')) {
+        chai.expect(replacedElem.documentation).to.equal(elemObj.documentation);
+      }
+      // If type was provided, verify it
+      if (elemObj.hasOwnProperty('type')) {
+        chai.expect(replacedElem.type).to.equal(elemObj.type);
+      }
+      // If source was provided, verify it
+      if (elemObj.hasOwnProperty('source')) {
+        chai.expect(replacedElem.source).to.equal(utils.createID(org.id, projID, elemObj.source));
+      }
+      // If target was provided, verify it
+      if (elemObj.hasOwnProperty('target')) {
+        chai.expect(replacedElem.target).to.equal(utils.createID(org.id, projID, elemObj.target));
+      }
+      // If parent was provided, verify it
+      if (elemObj.hasOwnProperty('parent')) {
+        chai.expect(replacedElem.parent).to.equal(utils.createID(org.id, projID, elemObj.parent));
+      }
+
+      // Verify additional properties
+      chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.archivedBy).to.equal(null);
+      chai.expect(replacedElem.createdOn).to.not.equal(null);
+      chai.expect(replacedElem.updatedOn).to.not.equal(null);
+      chai.expect(replacedElem.archivedOn).to.equal(null);
     });
     done();
   })
@@ -310,7 +439,7 @@ function findElements(done) {
     chai.expect(foundElements.length).to.equal(elemDataObjects.length);
 
     // Convert foundElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, foundElements);
+    const jmi2Elements = jmi.convertJMI(1, 2, foundElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemObj) => {
       const elementID = utils.createID(org.id, projID, elemObj.id);
@@ -379,17 +508,16 @@ function findAllElements(done) {
     chai.expect(foundElements.length).to.not.equal(0);
 
     // Convert foundElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, foundElements);
+    const jmi2Elements = jmi.convertJMI(1, 2, foundElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemObj) => {
       const elementID = utils.createID(org.id, projID, elemObj.id);
       const foundElem = jmi2Elements[elementID];
 
       // Verify correct elements found
-      chai.expect(foundElem.id).to.equal(elementID);
       chai.expect(foundElem._id).to.equal(elementID);
       chai.expect(foundElem.name).to.equal(elemObj.name);
-      chai.expect(foundElem.custom).to.deep.equal(elemObj.custom);
+      chai.expect(foundElem.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(foundElem.project).to.equal(utils.createID(org.id, projID));
 
       // If documentation was provided, verify it
@@ -417,6 +545,61 @@ function findAllElements(done) {
       chai.expect(foundElem.updatedOn).to.not.equal(null);
       chai.expect(foundElem.archivedOn).to.equal(null);
     });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Finds an element through text based search via the element
+ * controller.
+ */
+function searchElement(done) {
+  const elemData = testData.elements[0];
+
+  // Find element via controller
+  ElementController.search(adminUser, org.id, projID, 'master', `"${elemData.name}"`)
+  .then((foundElements) => {
+    // Expect foundElements array to contains 1 element
+    chai.expect(foundElements.length).to.equal(1);
+    const foundElement = foundElements[0];
+
+    // Verify correct element found
+    chai.expect(foundElement.id).to.equal(utils.createID(org.id, projID, elemData.id));
+    chai.expect(foundElement._id).to.equal(utils.createID(org.id, projID, elemData.id));
+    chai.expect(foundElement.name).to.equal(elemData.name);
+    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.project).to.equal(utils.createID(org.id, projID));
+
+    // If documentation was provided, verify it
+    if (elemData.hasOwnProperty('documentation')) {
+      chai.expect(foundElement.documentation).to.equal(elemData.documentation);
+    }
+    // If source was provided, verify it
+    if (elemData.hasOwnProperty('source')) {
+      chai.expect(foundElement.source).to.equal(utils.createID(org.id, projID, elemData.source));
+    }
+    // If target was provided, verify it
+    if (elemData.hasOwnProperty('target')) {
+      chai.expect(foundElement.target).to.equal(utils.createID(org.id, projID, elemData.target));
+    }
+    // If parent was provided, verify it
+    if (elemData.hasOwnProperty('parent')) {
+      chai.expect(foundElement.parent).to.equal(utils.createID(org.id, projID, elemData.parent));
+    }
+
+    // Verify additional properties
+    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.archivedBy).to.equal(null);
+    chai.expect(foundElement.createdOn).to.not.equal(null);
+    chai.expect(foundElement.updatedOn).to.not.equal(null);
+    chai.expect(foundElement.archivedOn).to.equal(null);
     done();
   })
   .catch((error) => {
@@ -513,7 +696,7 @@ function updateElements(done) {
     chai.expect(updatedElements.length).to.equal(elemDataObjects.length);
 
     // Convert updatedElements to JMI type 2 for easier lookup
-    const jmi2Elements = utils.convertJMI(1, 2, updatedElements);
+    const jmi2Elements = jmi.convertJMI(1, 2, updatedElements);
     // Loop through each element data object
     elemDataObjects.forEach((elemObj) => {
       const elementID = utils.createID(org.id, projID, elemObj.id);

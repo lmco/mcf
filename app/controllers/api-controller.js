@@ -28,7 +28,9 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const Element = M.require('models.element');
 const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 // Expose `API Controller functions`
 module.exports = {
@@ -38,37 +40,46 @@ module.exports = {
   version,
   getOrgs,
   postOrgs,
+  putOrgs,
   patchOrgs,
   deleteOrgs,
   getOrg,
   postOrg,
+  putOrg,
   patchOrg,
   deleteOrg,
   getAllProjects,
   getProjects,
   postProjects,
+  putProjects,
   patchProjects,
   deleteProjects,
   getProject,
   postProject,
+  putProject,
   patchProject,
   deleteProject,
   getUsers,
   postUsers,
+  putUsers,
   patchUsers,
   deleteUsers,
   getUser,
   postUser,
+  putUser,
   patchUser,
   deleteUser,
   whoami,
   patchPassword,
   getElements,
   postElements,
+  putElements,
   patchElements,
   deleteElements,
+  searchElements,
   getElement,
   postElement,
+  putElement,
   patchElement,
   deleteElement,
   invalidRoute
@@ -202,6 +213,8 @@ function getOrgs(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
+    limit: 'number',
     ids: 'array'
   };
 
@@ -270,7 +283,8 @@ function postOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -302,6 +316,55 @@ function postOrgs(req, res) {
 }
 
 /**
+ * PUT /api/orgs
+ *
+ * @description Creates or replaces multiple orgs from an array of objects.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with orgs' public data
+ */
+function putOrgs(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Create or replace organizations in request body
+  // NOTE: createOrReplace() sanitizes req.body
+  OrgController.createOrReplace(req.user, req.body, options)
+  .then((orgs) => {
+    // Return 200: OK and created/replaced orgs
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgs.map(o => o.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * PATCH /api/orgs
  *
  * @description Updates multiple orgs from an array of objects.
@@ -318,7 +381,8 @@ function patchOrgs(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -419,7 +483,8 @@ function getOrg(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -476,7 +541,8 @@ function postOrg(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -519,6 +585,67 @@ function postOrg(req, res) {
 }
 
 /**
+ * PUT /api/orgs/:orgid
+ *
+ * @description Takes an organization in the request body and an
+ * organization ID in the URI and creates or replaces the organization.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with org's public data
+ */
+function putOrg(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
+    const error = new M.CustomError(
+      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the org ID in the body equal req.params.orgid
+  req.body.id = req.params.orgid;
+
+  // Create or replace the organization with provided parameters
+  // NOTE: createOrReplace() sanitizes req.body
+  OrgController.createOrReplace(req.user, req.body, options)
+  .then((orgs) => {
+    // Return 200: OK and created org
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(orgs[0].getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * PATCH /api/orgs/:orgid
  *
  * @description Updates the specified org. Takes an id in the URI and update
@@ -536,7 +663,8 @@ function patchOrg(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -644,7 +772,9 @@ function getAllProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array',
+    limit: 'number'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -672,9 +802,24 @@ function getAllProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -701,6 +846,8 @@ function getProjects(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
+    limit: 'number',
     ids: 'array'
   };
 
@@ -745,9 +892,24 @@ function getProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -771,7 +933,7 @@ function postProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -794,9 +956,88 @@ function postProjects(req, res) {
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and the created projects
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/org/:orgid/projects
+ *
+ * @description This function creates/replaces multiple projects.
+ *
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} Response object with created/replaced projects.
+ */
+function putProjects(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Create or replace the specified projects
+  // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
+  ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
+  .then((projects) => {
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and created/replaced project data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -820,7 +1061,7 @@ function patchProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -843,9 +1084,24 @@ function patchProjects(req, res) {
   // NOTE: update() sanitizes req.params.orgid req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and the updated projects
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects.map(p => p.getPublicData())));
+    return res.status(200).send(formatJSON(publicProjectData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -920,7 +1176,8 @@ function getProject(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -951,9 +1208,24 @@ function getProject(req, res) {
       return res.status(error.status).send(error);
     }
 
-    // Return a 200: OK and the found project
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+    return res.status(200).send(formatJSON(publicProjectData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -977,7 +1249,8 @@ function postProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1011,9 +1284,100 @@ function postProject(req, res) {
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and created project
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+    return res.status(200).send(formatJSON(publicProjectData[0]));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/orgs/:orgid/projects/:projectid
+ *
+ * @description Takes an organization ID and project ID in the URI and project
+ * data in the request body, and creates/replaces a project.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created project.
+ */
+function putProject(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If project ID was provided in the body, ensure it matches project ID in params
+  if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
+    const error = new M.CustomError(
+      'Project ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the orgid in req.body in case it wasn't provided
+  req.body.id = req.params.projectid;
+
+  // Create or replace project with provided parameters
+  // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
+  ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
+  .then((projects) => {
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and created/replaced project data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(publicProjectData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1036,7 +1400,8 @@ function patchProject(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1070,9 +1435,24 @@ function patchProject(req, res) {
   // NOTE: update() sanitizes req.params.orgid and req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    // Return 200: OK and the updated project
+    const publicProjectData = projects.map(p => p.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each project
+        if (!options.fields.includes(f)) {
+          publicProjectData.forEach((p => delete p[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(projects[0].getPublicData()));
+    return res.status(200).send(formatJSON(publicProjectData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1145,6 +1525,8 @@ function getUsers(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    fields: 'array',
+    limit: 'number',
     usernames: 'array'
   };
 
@@ -1211,7 +1593,8 @@ function postUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1243,6 +1626,56 @@ function postUsers(req, res) {
 }
 
 /**
+ * PUT /api/users
+ *
+ * @description Creates or replaced multiple users. NOTE: This endpoint is
+ * reserved for system-wide admins ONLY.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with users' public data
+ */
+function putUsers(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Create or replace users
+  // NOTE: createOrReplace() sanitizes req.body
+  UserController.createOrReplace(req.user, req.body, options)
+  .then((users) => {
+    // Return 200: OK and public user data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(users.map(u => u.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * PATCH /api/users
  *
  * @description Updates multiple users.
@@ -1260,7 +1693,8 @@ function patchUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1356,7 +1790,8 @@ function getUser(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean'
+    archived: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1413,7 +1848,8 @@ function postUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1456,6 +1892,67 @@ function postUser(req, res) {
 }
 
 /**
+ * PUT /api/users/:username
+ *
+ * @description Creates or replaces a user. NOTE: This endpoint is reserved for
+ * system-wide admins ONLY.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created user
+ */
+function putUser(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If username was provided in the body, ensure it matches username in params
+  if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
+    const error = new M.CustomError(
+      'Username in body does not match username in params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Set the username in req.body in case it wasn't provided
+  req.body.username = req.params.username;
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Creates or replaces a user with provided parameters
+  // NOTE: createOrReplace() sanitizes req.body
+  UserController.createOrReplace(req.user, req.body, options)
+  .then((users) => {
+    // Return 200: OK and created/replaced user
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(users[0].getPublicData()));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * PATCH /api/users/:username
  *
  * @description Updates the user.
@@ -1473,7 +1970,8 @@ function patchUser(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1652,13 +2150,17 @@ function getElements(req, res) {
   // Note: Undefined if not set
   let elemIDs;
   let options;
+  let jmiOpt;
 
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
     subtree: 'boolean',
-    ids: 'array'
+    fields: 'array',
+    limit: 'number',
+    ids: 'array',
+    jmi3: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1691,6 +2193,12 @@ function getElements(req, res) {
     elemIDs = req.body.map(p => p.id);
   }
 
+  // Check for JMI type 3 conversion option
+  if (options.hasOwnProperty('jmi3')) {
+    jmiOpt = options.jmi3;
+    delete options.jmi3;
+  }
+
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
@@ -1699,13 +2207,41 @@ function getElements(req, res) {
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, elemIDs, options)
   .then((elements) => {
-    // Return only public element data
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    const elementsPublicData = (elements.every(e => e instanceof Element))
+      ? elements.map(e => e.getPublicData())
+      : elements.map(e => Element.getPublicData(e));
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
 
     // Verify elements public data array is not empty
     if (elementsPublicData.length === 0) {
       const error = new M.CustomError('No elements found.', 404, 'warn');
       return res.status(error.status).send(error);
+    }
+
+    // Check for JMI conversion
+    if (jmiOpt) {
+      // Convert data to JMI type 3 object
+      try {
+        const jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
+        // Return a 200: OK and public JMI type 3 element data
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(formatJSON(jmiData));
+      }
+      catch (err) {
+        return res.status(err.status || 500).send(err);
+      }
     }
 
     // Return a 200: OK and public element data
@@ -1733,7 +2269,8 @@ function postElements(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1760,9 +2297,93 @@ function postElements(req, res) {
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(elementsPublicData));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
+ *
+ * @description Creates/replaces specified elements. NOTE: this route is
+ * reserved for system-wide admins ONLY.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created/replaced elements
+ */
+function putElements(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Create or replace the specified elements
+  // NOTE: createOrReplace() sanitizes input params
+  ElementController.createOrReplace(req.user, req.params.orgid,
+    req.params.projectid, branchid, req.body, options)
+  .then((elements) => {
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and the new/replaced elements
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elementsPublicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1785,7 +2406,8 @@ function patchElements(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1812,9 +2434,24 @@ function patchElements(req, res) {
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+    return res.status(200).send(formatJSON(elementsPublicData));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1871,6 +2508,74 @@ function deleteElements(req, res) {
 }
 
 /**
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search
+ *
+ * @description Does a text based search on elements and returns any matches.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with elements
+ */
+function searchElements(req, res) {
+  // Define options and query
+  // Note: Undefined if not set
+  let options;
+  let query = '';
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    limit: 'number',
+    q: 'string'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for q (query)
+  if (options.q) {
+    query = options.q;
+    delete options.q;
+  }
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Find elements
+  // NOTE: search() sanitizes input params
+  ElementController.search(req.user, req.params.orgid, req.params.projectid,
+    branchid, query, options)
+  .then((elements) => {
+    // Verify elements public data array is not empty
+    if (elements.length === 0) {
+      const error = new M.CustomError('No elements found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    // Return a 200: OK and public element data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
  * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
  * @description Gets an element.
@@ -1889,7 +2594,8 @@ function getElement(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    subtree: 'boolean'
+    subtree: 'boolean',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1924,16 +2630,31 @@ function getElement(req, res) {
       return res.status(error.status).send(error);
     }
 
+    const elementsPublicData = elements.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // If subtree option was provided, return array of elements
     if (options.subtree) {
       // Return a 200: OK and the elements
       res.header('Content-Type', 'application/json');
-      return res.status(200).send(formatJSON(elements.map(e => e.getPublicData())));
+      return res.status(200).send(formatJSON(elementsPublicData));
     }
 
-    // Return a 200: OK and the element
+    // Return 200: OK and the elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(elements[0].getPublicData()));
+    return res.status(200).send(formatJSON(elementsPublicData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -1956,7 +2677,8 @@ function postElement(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1994,9 +2716,103 @@ function postElement(req, res) {
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((element) => {
-    // Return 200: OK and created element
+    const elementsPublicData = element.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element[0].getPublicData()));
+    return res.status(200).send(formatJSON(elementsPublicData[0]));
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
+ *
+ * @description Creates or replaces an element.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created/replaced element
+ */
+function putElement(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
+    const error = new M.CustomError(
+      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the element ID in the body equal req.params.elementid
+  req.body.id = req.params.elementid;
+
+  // Default branch to master
+  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+
+  // Create or replace element with provided parameters
+  // NOTE: createOrReplace() sanitizes input params
+  ElementController.createOrReplace(req.user, req.params.orgid,
+    req.params.projectid, branchid, req.body, options)
+  .then((element) => {
+    const elementsPublicData = element.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
+    // Return 200: OK and the created/replaced element
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(formatJSON(elementsPublicData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
@@ -2019,7 +2835,8 @@ function patchElement(req, res) {
 
   // Define valid option type
   const validOptions = {
-    populate: 'array'
+    populate: 'array',
+    fields: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2057,9 +2874,24 @@ function patchElement(req, res) {
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((element) => {
+    const elementsPublicData = element.map(e => e.getPublicData());
+
+    // If the fields options was specified
+    if (options.fields) {
+      // Array of fields created in getPublicData()
+      const specialFields = ['org', 'project', 'parent', 'contains'];
+      // For each special field
+      specialFields.forEach((f) => {
+        // If the field is not specified in options, remove it from each element
+        if (!options.fields.includes(f)) {
+          elementsPublicData.forEach((e => delete e[f]));
+        }
+      });
+    }
+
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(formatJSON(element[0].getPublicData()));
+    return res.status(200).send(formatJSON(elementsPublicData[0]));
   })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));

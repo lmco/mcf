@@ -13,26 +13,31 @@
  *
  * @description This renders a project.
  */
+
+// React Modules
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
+// MBEE Modules
 import Sidebar from '../general-components/sidebar/sidebar.jsx'
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx'
 import ProjectHome from './project-home.jsx'
 import ProjectUsers from './project-users.jsx'
 import ProjectElements from './project-elements.jsx'
 import ProjectEdit from './project-edit.jsx'
+import Search from '../search/search.jsx'
+import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
-import { getRequest } from '../helper-functions/getRequest.js';
-
+// Define component
 class Project extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
 
+        // Initialize state props
         this.state = {
             project: null,
             orgid: null,
-            element: null,
             url: null,
             error: null,
             admin: false
@@ -40,63 +45,84 @@ class Project extends Component {
     }
 
     componentDidMount() {
+        // Initialize variables
         const orgId = this.props.match.params.orgid;
-        this.setState({orgid: orgId});
         const projId = this.props.match.params.projectid;
-
         const url = `/api/orgs/${orgId}/projects/${projId}`;
+
+        // Set states
         this.setState({url: url});
+        this.setState({orgid: orgId});
 
-        getRequest(`${url}`)
+        // Get project data
+        ajaxRequest('GET',`${url}`)
         .then(project => {
-            getRequest(`${url}/branches/master/elements/model`)
-            .then(element => {
-                const username = this.props.user.username;
-                const perm = project.permissions[username];
-                const admin = this.props.user.admin;
+            // Initialize variables
+            const username = this.props.user.username;
+            const perm = project.permissions[username];
+            const admin = this.props.user.admin;
 
-                if ((admin) || (perm === 'admin')){
-                    this.setState({admin: true});
-                }
+            // Verify if user is admin
+            if ((admin) || (perm === 'admin')){
+                // Set admin state
+                this.setState({admin: true});
+            }
 
-                this.setState({ project: project });
-                this.setState({ element: element });
-            })
-            .catch(err => {
-                    console.log(err);
-                    this.setState({error: 'Failed to load project.'});
-            });
+            // Set states
+            this.setState({ project: project });
         })
         .catch(err => {
-            console.log(err);
-            this.setState({error: 'Failed to load project.'});
+            // Throw error and set state
+            this.setState({error: `Failed to load project: ${err}`});
         });
     }
 
     render() {
+        // Initialize variables
+        let title;
+
+        // Verify if project exists
+        if(this.state.project){
+            // Set the title for sidebar
+            title = <h2> {this.state.project.name}</h2>;
+        }
+        // Return project page
         return (
             <Router>
                 <React.Fragment>
-                    <Sidebar>
-                        <SidebarLink title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
-                        <SidebarLink title='Users' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
-                        <SidebarLink title='Elements' icon='fas fa-sitemap' routerLink={`${this.props.match.url}/elements`} />
+                    {/*Create the sidebar with sidebar links*/}
+                    <Sidebar title={title}>
+                        <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink={`${this.props.match.url}`} />
+                        <SidebarLink id='Members' title='Members' icon='fas fa-users' routerLink={`${this.props.match.url}/users`} />
+                        <SidebarLink id='Elements' title='Elements' icon='fas fa-sitemap' routerLink={`${this.props.match.url}/elements`} />
+                        <SidebarLink id='Search' title='Search' icon='fas fa-search' routerLink={`${this.props.match.url}/search`} />
                         <hr />
+                        {/*Check if user is admin*/}
                         {(this.state.admin)
-                            ?(<SidebarLink title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
+                            // Add the edit router link for admin users ONLY
+                            ?(<SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
                             : ''
                         }
                     </Sidebar>
-                    {(!this.state.project && !this.state.elements)
+                    {/*Verify project and element data exists*/}
+                    {(!this.state.project)
+                        // Display loading page or error page if project is loading or failed to load
                         ? <div className="loading"> {this.state.error || 'Loading your project...'} </div>
                         : (<Switch>
+                                {/*Route to project home page*/}
                                 <Route exact path={`${this.props.match.url}/`}
                                        render={ (props) => <ProjectHome {...props} project={this.state.project} /> } />
+                                {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <ProjectUsers {...props} project={this.state.project} /> } />
+                                       render={ (props) => <ProjectUsers {...props} project={this.state.project} admin={this.state.admin}/> } />
+                                {/*Route to element page*/}
                                 <Route path={`${this.props.match.url}/elements`}
-                                   render={ (props) => <ProjectElements {...props} project={this.state.project} element={this.state.element} url={this.state.url}/> } />
+                                   render={ (props) => <ProjectElements {...props} project={this.state.project}/> } />
+                                <Route path={`${this.props.match.url}/search`}
+                                       render={ (props) => <Search {...props} project={this.state.project} /> } />
+                                {/*Verify admin user*/}
                                 {(this.state.admin)
+                                    // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}
                                               render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)
                                     : ''
@@ -109,4 +135,5 @@ class Project extends Component {
     }
 }
 
+// Export component
 export default Project

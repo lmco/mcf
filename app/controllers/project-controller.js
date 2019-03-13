@@ -24,11 +24,14 @@ module.exports = {
   find,
   create,
   update,
+  createOrReplace,
   remove
 };
 
 // Node.js Modules
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
 // MBEE Modules
 const Element = M.require('models.element');
@@ -38,6 +41,7 @@ const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
+const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -55,6 +59,12 @@ const validators = M.require('lib.validators');
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
  *
  * @return {Promise} Array of found project objects
  *
@@ -109,6 +119,8 @@ function find(requestingUser, organizationID, projects, options) {
     // Initialize valid options
     let archived = false;
     let populateString = '';
+    let fieldsString = '';
+    let limit = 0;
 
     // Ensure options are valid
     if (options) {
@@ -141,6 +153,28 @@ function find(requestingUser, organizationID, projects, options) {
 
         populateString = options.populate.join(' ');
       }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'limit' is supplied ensure it's a number
+      if (options.hasOwnProperty('limit')) {
+        if (typeof options.limit !== 'number') {
+          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        }
+        limit = options.limit;
+      }
     }
 
     // Define searchQuery
@@ -172,7 +206,7 @@ function find(requestingUser, organizationID, projects, options) {
     }
 
     // Find the projects
-    Project.find(searchQuery)
+    Project.find(searchQuery, fieldsString, { limit: limit })
     .populate(populateString)
     .then((foundProjects) => resolve(foundProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -204,6 +238,9 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of created project objects
  *
@@ -249,6 +286,7 @@ function create(requestingUser, organizationID, projects, options) {
 
     // Initialize valid options
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -272,6 +310,20 @@ function create(requestingUser, organizationID, projects, options) {
         });
 
         populateString = options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -438,7 +490,8 @@ function create(requestingUser, organizationID, projects, options) {
         // Create the elements
       return Element.insertMany(elemObjects);
     })
-    .then(() => resolve(Project.find({ _id: { $in: arrIDs } }).populate(populateString)))
+    .then(() => resolve(Project.find({ _id: { $in: arrIDs } }, fieldsString)
+    .populate(populateString)))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -475,6 +528,9 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of updated project objects
  *
@@ -524,6 +580,7 @@ function update(requestingUser, organizationID, projects, options) {
 
     // Initialize valid options
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -547,6 +604,20 @@ function update(requestingUser, organizationID, projects, options) {
         });
 
         populateString = options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -648,7 +719,7 @@ function update(requestingUser, organizationID, projects, options) {
       existingUsers = foundUsers.map(u => u._id);
 
       // Convert projectsToUpdate to JMI type 2
-      const jmiType2 = utils.convertJMI(1, 2, projectsToUpdate);
+      const jmiType2 = jmi.convertJMI(1, 2, projectsToUpdate);
       const bulkArray = [];
       const promises = [];
       // Get array of editable parameters
@@ -804,9 +875,191 @@ function update(requestingUser, organizationID, projects, options) {
       // Return when all promises have been complete
       return Promise.all(promises);
     })
-    .then(() => Project.find(searchQuery)
-    .populate(populateString))
+    .then(() => Project.find(searchQuery, fieldsString).populate(populateString))
     .then((foundUpdatedProjects) => resolve(foundUpdatedProjects))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
+ * @description This functions creates one or many projects from the provided
+ * data. If projects with matching ids already exist, the function replaces
+ * those projects. This function is restricted to system-wide admins ONLY.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {(Object|Object[])} projects - Either an array of objects containing
+ * project data or a single object containing project data to create.
+ * @param {string} projects.id - The ID of the project being created.
+ * @param {string} projects.name - The name of the project.
+ * @param {Object} [projects.custom] - The additions or changes to existing
+ * custom data. If the key/value pair already exists, the value will be changed.
+ * If the key/value pair does not exist, it will be added.
+ * @param {string} [projects.visibility = 'private'] - The visibility of the
+ * project being created. If 'internal', users not in the project but in the
+ * owning org will be able to view the project.
+ * @param {Object} [projects.permissions] - Any preset permissions on the
+ * project. Keys should be usernames and values should be the highest
+ * permissions the user has. NOTE: The requesting user gets added as an admin by
+ * default.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
+ *
+ * @return {Promise} Array of created project objects
+ *
+ * @example
+ * createOrReplace({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
+ * .then(function(projects) {
+ *   // Do something with the newly created/replaced projects
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createOrReplace(requestingUser, organizationID, projects, options) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions'
+        + 'to replace projects.');
+      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+      assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
+      assert.ok(projects !== null, 'Projects parameter cannot be null.');
+      // If projects is an array, ensure each item inside is an object
+      if (Array.isArray(projects)) {
+        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in projects is not an'
+          + ' object.');
+        assert.ok(projects.every(p => p !== null), 'One or more items in projects is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
+    }
+
+    // Sanitize input parameters and create function-wide variables
+    const orgID = sani.sanitize(organizationID);
+    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const duplicateCheck = {};
+    let foundProjects = [];
+    let projectsToLookUp = [];
+    let createdProjects = [];
+    const ts = Date.now();
+
+    // Check the type of the projects parameter
+    // TODO: Remove the && check, already do this check in the first try/catch
+    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
+      // projects is an array, replace/create many projects
+      projectsToLookUp = saniProjects;
+    }
+    else if (typeof saniProjects === 'object') {
+      // projects is an object, replace/create a single project
+      projectsToLookUp = [saniProjects];
+    }
+    else {
+      throw new M.CustomError('Invalid input for updating projects.', 400, 'warn');
+    }
+
+    // TODO: Reevaluate placement of code block, consider putting after org find (inspect other fxn)
+    // Create list of ids
+    const arrIDs = [];
+    try {
+      let index = 1;
+      projectsToLookUp.forEach((proj) => {
+        // Ensure each project has an id and that its a string
+        assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
+        assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
+        const tmpID = utils.createID(orgID, proj.id);
+        // If a duplicate ID, throw an error
+        if (duplicateCheck[tmpID]) {
+          throw new M.CustomError(`Multiple objects with the same ID [${proj.id}] exist in the`
+            + ' update.', 400, 'warn');
+        }
+        else {
+          duplicateCheck[tmpID] = tmpID;
+        }
+        arrIDs.push(tmpID);
+        index++;
+      });
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
+    }
+
+    // Create searchQuery
+    const searchQuery = { _id: { $in: arrIDs } };
+
+    // Find the organization containing the projects
+    Organization.findOne({ _id: orgID })
+    .then((_foundOrganization) => {
+      // Check if the organization was found
+      if (_foundOrganization === null) {
+        throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
+      }
+
+      // Find the projects to update
+      return Project.find(searchQuery);
+    })
+    .then((_foundProjects) => {
+      foundProjects = _foundProjects;
+
+      // If data directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data'))) {
+        fs.mkdirSync(path.join(M.root, 'data'));
+      }
+
+      // If org directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data', orgID))) {
+        fs.mkdirSync(path.join(M.root, 'data', orgID));
+      }
+
+      // Write contents to temporary file
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`),
+          JSON.stringify(_foundProjects), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+      });
+    })
+    // Delete root model elements from database
+    .then(() => Element.deleteMany({ _id: foundProjects.map(p => utils.createID(p._id, 'model')) }))
+    // Delete projects from database
+    .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
+    // Create the new/replaced projects
+    .then(() => create(requestingUser, orgID, projectsToLookUp, options))
+    .then((_createdProjects) => {
+      createdProjects = _createdProjects;
+
+      // Delete the temporary file.
+      if (fs.existsSync(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`))) {
+        return new Promise(function(res, rej) {
+          fs.unlink(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`),
+            function(err) { if (err) rej(err); else res(); });
+        });
+      }
+    })
+    .then(() => {
+      // Read all of the files in the org directory
+      const existingFiles = fs.readdirSync(path.join(M.root, 'data', orgID));
+
+      // If no files exist in the directory, delete it
+      if (existingFiles.length === 0) {
+        fs.rmdirSync(path.join(M.root, 'data', orgID));
+      }
+
+      // Return the newly created projects
+      return resolve(createdProjects);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

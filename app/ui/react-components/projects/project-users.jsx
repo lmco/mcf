@@ -13,28 +13,90 @@
  *
  * @description This renders a project's members.
  */
-import React from 'react';
-import ListItem from '../general-components/list/list-item.jsx';
+
+// React Modules
+import React, { Component } from 'react';
+
+// MBEE Modules
+import UserListItem from '../general-components/list/user-list-item.jsx';
 import List from '../general-components/list/list.jsx';
+import { Button, Modal, ModalBody } from 'reactstrap';
+import UserRoleEdit from '../user/user-role-edit.jsx';
 
+// Define function
+class ProjectUsers extends Component {
+    constructor(props) {
+        // Initialize parent props
+        super(props);
 
-function ProjectUsers(props) {
-    const users = Object.keys(props.project.permissions);
+        // Initialize state props
+        this.state = {
+            admin: false,
+            modal: false,
+            error: null
+        };
 
-    const listItems = users.map(user =>
-        <ListItem> {user} </ListItem>
-    );
+        // Bind component functions
+        this.handleToggle = this.handleToggle.bind(this);
+    }
 
-    return (
-        <div id='view' className='project-user'>
-            <h2>Users</h2>
-            <hr />
-            <List>
-                {listItems}
-            </List>
+    // Define toggle function
+    handleToggle() {
+        // Set the create modal state
+        this.setState({ modal: !this.state.modal });
+    }
 
-        </div>
-    )
+    render() {
+        // Initialize variables
+        const users = Object.keys(this.props.project.permissions);
+
+        // Loop through project members
+        const listItems = users.map(user =>
+        // Create user list item
+        <UserListItem user={user} permission={this.props.project.permissions[user]}/>
+        );
+
+        // Return project member list
+        return (
+            <React.Fragment>
+                {/*Verify admin user*/}
+                {(!this.props.admin)
+                    ? ''
+                    : (
+                        // Modal for editing user roles
+                        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+                            <ModalBody>
+                                <UserRoleEdit project={this.props.project} toggle={this.handleToggle}/>
+                            </ModalBody>
+                        </Modal>
+                    )
+                }
+                <div id='view' className='project-list'>
+                    <div className='project-list-header'>
+                    <h2 className='project-header'>Users</h2>
+                        {/*Verify user is admin*/}
+                        {(!this.props.admin)
+                            ? ''
+                            : ( // Button to edit user roles
+                                <div className='project-button'>
+                                    <Button className='btn'
+                                            outline color="secondary"
+                                            onClick={this.handleToggle}>
+                                        <i className='fas fa-user-edit'/>
+                                    </Button>
+                                </div>
+                            )
+                        }
+                    </div>
+                    <hr/>
+                    <List>
+                        {listItems}
+                    </List>
+                </div>
+            </React.Fragment>
+        )
+    }
 }
 
+// Export function
 export default ProjectUsers

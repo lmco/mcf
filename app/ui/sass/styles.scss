@@ -80,6 +80,12 @@ label {
     font-size: 15px;
 }
 
+textarea[name="custom"] {
+    font-family: Consolas, "Courier New";
+    resize: vertical;
+    outline: none;
+}
+
 /******************************************************************************
 /*                                  Themes                                    *
 /******************************************************************************/
@@ -101,7 +107,6 @@ label {
     width: 100%;
     position: absolute;
     display: grid;
-    grid-template-columns: 1fr;
     grid-template-rows: $banner-height 1fr $banner-height;
     grid-template-areas:
         "header"
@@ -220,12 +225,21 @@ label {
         border-color: #9c9c9c;
     }
 
+    .sidebar-header {
+        padding: 10px 20px;
+        margin-top: 15px;
+        margin-bottom: 0px;
+        display: flex;
+        justify-content: center;
+    }
+
     .sidebar-links {
         height: 100vh;
         overflow: hidden;
     }
 
     .sidebar-item {
+        padding:20px;
         height: 50px;
         font-size: 12px;
         display: flex;
@@ -263,39 +277,31 @@ label {
     align-items: center;
 }
 
+.delete-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    padding-top: 15px;
+}
 /******************************************************************************
 /*                             Home Page Styling                              *
 /******************************************************************************/
 .mbee-home {
-    .splash-row {
-        position: relative;
-        padding-top: 50px;
-        height: 75%;
-        width: 100%;
-        font-family: 'Helvetica Neue', Helvetica;
-
-        h1 {
-            font-weight: 100;
-            font-size: 114px;
-            line-height: 0.8;
-            color: #e7e7e8;
-        }
-
-        h2 {
-            font-weight: 100;
-            font-size: 18px;
-            color: #FFC610;
-            padding-left: 4px;
-        }
-    }
+    display:flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    padding: 0;
 
     .home-links {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 80px;
+        flex-flow: wrap;
+        justify-content: space-evenly;
+        align-items: baseline;
+        padding: 15% 0;
         height: 100%;
         width: 100%;
+        overflow-y: scroll;
 
         a:hover {
             background: darken($mbee-background, 10);
@@ -304,11 +310,21 @@ label {
         }
 
         .home-link {
-            border-radius: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: rgba(0,0,0,.1) 2px 4px 4px;
             color: inherit;
             display: flex;
             flex-direction: column;
+            padding: 20px 0 15px 0;
+            text-align: center;
+            transition:
+                transform .23s ease-in-out,
+                background .23s ease-in-out,
+                border .23s ease-in-out,
+                box-shadow .23s ease-in-out;
             width: 160px;
+            margin: 10px;
 
             .home-link-icon {
                 font-size: 50px;
@@ -317,6 +333,14 @@ label {
             .home-link-label {
             }
         }
+
+        .home-link:hover {
+            background: lighten($mbee-color-primary, 25%);
+            border: 1px solid $mbee-color-primary;
+            box-shadow: rgba(0,0,0,.1) 4px 6px 6px;
+            transform: scale(1.1);
+        }
+
     }
 }
 
@@ -331,6 +355,68 @@ label {
         margin-bottom: 1em;
         font-size: 18px
     }
+    .org-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .org-header {
+        grid-area: header;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .org-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+            margin: 5px;
+        }
+    }
+
+    .org-proj-list {
+        display: grid;
+        grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 100px);
+        grid-template-areas: "icon org button";
+        justify-content: left;
+        align-items: center;
+    }
+
+    .org-icon {
+        grid-area: icon;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .org-info {
+        grid-area: org;
+        justify-content: space-around;
+        margin: 5px;
+    }
+
+    .org-button {
+        display: flex;
+        grid-area: button;
+        justify-content: flex-end;
+    }
+
+    .proj-list {
+        display: grid;
+        grid-template-columns: 1fr minmax(2px, 50px);
+        grid-template-areas: "org button";
+        justify-content: left;
+        align-items: center;
+    }
+
+    .projects-list {
+        border-left: #eeeeee solid;
+        margin-left: 25px;
+    }
 
     .list .list-item .list-header p {
         font-size: 15px;
@@ -343,8 +429,33 @@ label {
 
 .org-projects {
     padding: 2em;
+
     .list .list-header p {
         font-size: 15px;
+    }
+
+    .project-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .project-header {
+        grid-area: header;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .project-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+            margin: 5px;
+        }
     }
 }
 
@@ -352,7 +463,7 @@ label {
     padding: 2em;
 }
 
-.org-edit {
+.org-forms {
     padding: 2em;
 
     .nested-form {
@@ -363,6 +474,10 @@ label {
 /******************************************************************************
 /*                         Project Page Styling                               *
 /******************************************************************************/
+.project-home {
+    padding: 2em;
+}
+
 .project-list {
     padding: 2em;
 
@@ -371,13 +486,38 @@ label {
         font-size: 18px;
     }
 
+    .project-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-areas: "header button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .project-header {
+        grid-area: header;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .project-button {
+        grid-area: button;
+        justify-content: flex-end;
+
+        .btn {
+            float: right;
+            margin: 5px;
+        }
+    }
+
+    .list .projects-list {
+        border-left: #eeeeee solid;
+        margin-left: 8px;
+    }
+
     .list .list-item .list-header p {
         font-size: 15px;
     }
-}
-
-.project-home {
-    padding: 2em;
 }
 
 .project-elements {
@@ -388,7 +528,7 @@ label {
     padding: 2em;
 }
 
-.project-edit {
+.project-forms {
     padding: 2em;
 
     .nested-form {
@@ -413,12 +553,44 @@ label {
     padding: 2em;
 }
 
+.edit-role-title {
+    padding-bottom: 10px;
+}
+
+.username-label {
+    margin-bottom: 0;
+}
+
+.username-search {
+    display: grid;
+    grid-template-columns: minmax(auto, 600px) 1fr;
+    grid-template-areas: "searchbar button";
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-searchbar {
+    grid-area: searchbar;
+    justify-content: flex-start;
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+.search-button {
+    grid-area: button;
+    justify-content: flex-end;
+
+    .btn {
+        float: right;
+        margin: 5px;
+    }
+}
+
 /******************************************************************************
 /*                           List Component Styling                           *
 /******************************************************************************/
 .list {
     padding-left: 1em;
-    padding-right: 1em;
 
     a {
         display: block;
@@ -448,6 +620,33 @@ label {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.element-item {
+    display: grid;
+    grid-template-columns: minmax(auto, 35px) 1fr;
+    grid-template-areas: "stats header";
+    justify-content: space-between;
+    align-items: center;
+
+    .list-header {
+        grid-area: header;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        p {
+            font-size: 15px;
+            margin: 0;
+            display: inline-block;
+        }
+    }
+
+    .stats-list {
+        grid-area: stats;
+        justify-self: flex-end;
+    }
+    padding: 2px;
+    cursor: pointer;
 }
 
 .stats-list-item {
@@ -496,5 +695,66 @@ label {
         p {
             margin: 0;
         }
+    }
+}
+
+/******************************************************************************
+/*                           Search Form Styling                              *
+/******************************************************************************/
+
+#search {
+    overflow-y: scroll;
+}
+
+.search-form {
+    padding: 80px;
+
+    .form-row {
+        width: 100%;
+
+        input {
+            width: 100%;
+        }
+    }
+}
+
+.search-results {
+    margin: 20px;
+
+    .search-result {
+
+        border: 1px solid #ccc;
+        border-radius: 2px;
+        padding: 10px;
+        margin: 20px;
+
+        .search-result-header {
+            span {
+                margin-left: 15px;
+            }
+        }
+
+        .search-result-raw {
+            background-color: #efefef;
+            border: 1px solid #e8e8e8;
+            font-family: Consolas, "Courier New";
+            margin: 20px;
+            overflow: scroll;
+        }
+    }
+}
+
+/******************************************************************************
+/*                           Element Tree                                     *
+/******************************************************************************/
+
+#element-tree-container {
+    i {
+        padding-right: 10px;
+    }
+
+    .element-tree {
+        padding-left: 30px;
+        border-left: 1px solid #e8e8e8;
     }
 }

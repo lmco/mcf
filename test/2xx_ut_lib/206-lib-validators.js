@@ -92,7 +92,7 @@ function verifyElementID(done) {
  */
 function verifyUserUsername(done) {
   // Valid usernames
-  chai.expect(RegExp(validators.user.username).test('ajbieber')).to.equal(true);
+  chai.expect(RegExp(validators.user.username).test('testuser')).to.equal(true);
   chai.expect(RegExp(validators.user.username).test('my_username01')).to.equal(true);
 
   // Invalid usernames
@@ -110,16 +110,16 @@ function verifyUserUsername(done) {
  */
 function verifyUserEmail(done) {
   // Valid emails
-  chai.expect(RegExp(validators.user.email).test('valid@lmco.com')).to.equal(true);
-  chai.expect(RegExp(validators.user.email).test('test-email.AJ123@mac.apple.uk')).to.equal(true);
+  chai.expect(RegExp(validators.user.email).test('valid@test.com')).to.equal(true);
+  chai.expect(RegExp(validators.user.email).test('test-email.123@test-email.com')).to.equal(true);
 
-  // Invaid emails
-  chai.expect(RegExp(validators.user.email).test('tooshortadd@lmco.a')).to.equal(false);
-  chai.expect(RegExp(validators.user.email).test('toolongadd@lmco.organization')).to.equal(false);
-  chai.expect(RegExp(validators.user.email).test('missingatlmco.com')).to.equal(false);
-  chai.expect(RegExp(validators.user.email).test('special*char@lmco.com')).to.equal(false);
-  chai.expect(RegExp(validators.user.email).test('missingdot@lmcocom')).to.equal(false);
-  chai.expect(RegExp(validators.user.email).test('@lmco.com')).to.equal(false);
+  // Invalid emails
+  chai.expect(RegExp(validators.user.email).test('tooshortadd@test.a')).to.equal(false);
+  chai.expect(RegExp(validators.user.email).test('toolongadd@test.organization')).to.equal(false);
+  chai.expect(RegExp(validators.user.email).test('missingattest.com')).to.equal(false);
+  chai.expect(RegExp(validators.user.email).test('special*char@test.com')).to.equal(false);
+  chai.expect(RegExp(validators.user.email).test('missingdot@testcom')).to.equal(false);
+  chai.expect(RegExp(validators.user.email).test('@test.com')).to.equal(false);
   chai.expect(RegExp(validators.user.email).test('missingadd@.a')).to.equal(false);
   done();
 }
@@ -129,11 +129,11 @@ function verifyUserEmail(done) {
  */
 function verifyUserName(done) {
   // Valid names
-  chai.expect(RegExp(validators.user.fname).test('Jake The Snake')).to.equal(true);
-  chai.expect(RegExp(validators.user.lname).test('John-Paul Smith')).to.equal(true);
+  chai.expect(RegExp(validators.user.fname).test('First Last')).to.equal(true);
+  chai.expect(RegExp(validators.user.lname).test('First-Middle Last')).to.equal(true);
 
   // Invalid names
-  chai.expect(RegExp(validators.user.fname).test('9mike')).to.equal(false);
+  chai.expect(RegExp(validators.user.fname).test('9first')).to.equal(false);
   chai.expect(RegExp(validators.user.lname).test(' space first')).to.equal(false);
   chai.expect(RegExp(validators.user.fname).test('-first')).to.equal(false);
   done();

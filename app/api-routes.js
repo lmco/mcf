@@ -155,6 +155,18 @@ api.route('/version')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET orgs, returns public org data.
@@ -204,6 +216,13 @@ api.route('/version')
  *                      of the object.
  *         in: query
  *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST orgs, returns orgs' public data.
@@ -218,6 +237,64 @@ api.route('/version')
  *                      orgs with same id.
  *       500:
  *         description: Internal Server Error, Failed to POST orgs due to a
+ *                      server side issue.
+ *   put:
+ *     tags:
+ *       - organizations
+ *     description: Creates or replaces multiple organizations from the data
+ *                  provided in the request body. If the organization already
+ *                  exists, it is updated with the provided data. NOTE This
+ *                  function is reserved for system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: orgs
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *                 description: Required if creating an organization.
+ *               custom:
+ *                 type: object
+ *               permissions:
+ *                 type: object
+ *                 description: Any preset permissions. Keys are the users
+ *                              usernames, and values are the permission.
+ *         description: An array of objects containing organization data.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT orgs, returns orgs' public data.
+ *       400:
+ *         description: Bad Request, Failed to PUT orgs due to invalid field in
+ *                      request body.
+ *       401:
+ *         description: Unauthorized, Failed to PUT orgs due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT orgs due to an invalid request
+ *                      body.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT orgs due to a
  *                      server side issue.
  *   patch:
  *     tags:
@@ -258,6 +335,13 @@ api.route('/version')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -319,6 +403,11 @@ api.route('/orgs')
   Middleware.logRoute,
   APIController.postOrgs
 )
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putOrgs
+)
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -358,6 +447,13 @@ api.route('/orgs')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET org, returns org public data.
@@ -410,6 +506,76 @@ api.route('/orgs')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST org, returns org public data.
+ *       400:
+ *         description: Bad Request, Failed to POST org due to invalid field in
+ *                      request data.
+ *       401:
+ *         description: Unauthorized, Failed to POST org due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST org due to an existing org
+ *                      with same id.
+ *       500:
+ *         description: Internal Server Error, Failed to POST org due to a
+ *                      server side issue.
+ *   put:
+ *     tags:
+ *       - organizations
+ *     description: Creates or replaces an organization from the given data in
+ *                  the request body. If the organization already exists it is
+ *                  replaced, otherwise it is created. This endpoint is reserved
+ *                  for system-admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: org
+ *         description: The object containing the new organization data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: Must match the id in the request parameters.
+ *             name:
+ *               type: string
+ *             custom:
+ *               type: object
+ *             permissions:
+ *               type: object
+ *               description: Any preset permissions. Keys are the users
+ *                            usernames, and values are the permission.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST org, returns org public data.
@@ -461,6 +627,13 @@ api.route('/orgs')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -523,6 +696,11 @@ api.route('/orgs/:orgid')
   Middleware.logRoute,
   APIController.postOrg
 )
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putOrg
+)
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -557,6 +735,18 @@ api.route('/orgs/:orgid')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -628,6 +818,18 @@ api.route('/projects')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -690,6 +892,13 @@ api.route('/projects')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST projects, returns project public
@@ -705,6 +914,76 @@ api.route('/projects')
  *                      already existing.
  *       500:
  *         description: Internal Server Error, Failed to POST projects due to a
+ *                      server side issue.
+ *   put:
+ *     tags:
+ *       - projects
+ *     description: Creates or replaces multiple projects from the supplied data
+ *                  in the request body. If the project already exists, it will
+ *                  be replaced along with the root model element. Returns the
+ *                  created projects' public data. NOTE this endpoint is
+ *                  reserved for system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization whose projects to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projects
+ *         in: body
+ *         description: An array of objects containing new project data.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               custom:
+ *                 type: object
+ *               visibility:
+ *                 type: string
+ *                 default: private
+ *                 enum: [internal, private]
+ *               permissions:
+ *                 type: object
+ *                 description: Any preset permissions. Keys are the users
+ *                              usernames, and values are the permission.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT projects, returns project public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT projects due to invalid
+ *                      project data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT projects due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT projects due to invalid
+ *                      parameters.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT projects due to a
  *                      server side issue.
  *   patch:
  *     tags:
@@ -752,6 +1031,13 @@ api.route('/projects')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -822,6 +1108,11 @@ api.route('/orgs/:orgid/projects')
   Middleware.logRoute,
   APIController.postProjects
 )
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putProjects
+)
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -866,6 +1157,13 @@ api.route('/orgs/:orgid/projects')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET project, returns project public
@@ -932,6 +1230,13 @@ api.route('/orgs/:orgid/projects')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST project, return project public
@@ -950,6 +1255,82 @@ api.route('/orgs/:orgid/projects')
  *                      found.
  *       500:
  *         description: Internal Server Error, Failed to POST project due to a
+ *                      server side issue.
+ *   put:
+ *     tags:
+ *       - projects
+ *     description: Creates or replaces a project from the given data in the
+ *                  request body. If the project already exists, it will be
+ *                  replaced. NOTE this function is reserved for system-wide
+ *                  admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project to create/replace.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: project
+ *         description: The object containing the project data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: Must match the id in the request parameters.
+ *             name:
+ *               type: string
+ *             custom:
+ *               type: object
+ *             visibility:
+ *               type: string
+ *               default: private
+ *               enum: [internal, private]
+ *             permissions:
+ *               type: object
+ *               description: Any preset permissions. Keys are the users
+ *                            usernames, and values are the permission.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT project, return project public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT project due to invalid
+ *                      project data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT project due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT project due to an invalid
+ *                      parameter.
+ *       404:
+ *         description: Not Found, Failed to PUT project due to org not being
+ *                      found.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT project due to a
  *                      server side issue.
  *   patch:
  *     tags:
@@ -992,6 +1373,13 @@ api.route('/orgs/:orgid/projects')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -1064,6 +1452,11 @@ api.route('/orgs/:orgid/projects/:projectid')
   Middleware.logRoute,
   APIController.postProject
 )
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putProject
+)
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -1073,6 +1466,83 @@ api.route('/orgs/:orgid/projects/:projectid')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteProject
+);
+
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/search:
+ *   get:
+ *     tags:
+ *       - elements
+ *     description: Finds multiple elements using text based search on the
+ *                  documentation, name, id, parent, source and target fields.
+ *                  Allows for exact searches by quoting the desired field
+ *                  "exact search", or the ability to not include a word in a
+ *                  search by using a dash -not. Returns the elements public
+ *                  data.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the searched elements.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: q
+ *         description: The desired text to be searched for.
+ *         in: query
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET elements, returns elements public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET elements due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET elements due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET elements due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET elements due to a non-existent
+ *                      org, project or branch.
+ *       500:
+ *         description: Internal Server Error, Failed to GET elements due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.searchElements
 );
 
 
@@ -1138,6 +1608,18 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      elements in the searched element's subtree.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1219,6 +1701,13 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST elements, return element public
@@ -1236,6 +1725,99 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Not Found, Failed to GET branch, project or org.
  *       500:
  *         description: Internal Server Error, Failed to POST elements due to a
+ *                      server side issue.
+ *   put:
+ *     tags:
+ *       - elements
+ *     description: Creates or replaces multiple elements from the supplied data
+ *                  in the request body. In an element with a matching ID
+ *                  already exists, it is replaced. Returns the element's public
+ *                  data. NOTE this route is reserved for system-wide admins
+ *                  ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch whose elements are being
+ *                      created/replaced.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: body
+ *         in: body
+ *         description: An array of objects containing element data.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               parent:
+ *                 type: string
+ *                 default: 'model'
+ *               source:
+ *                 type: string
+ *                 description: Required if target is provided.
+ *               target:
+ *                 type: string
+ *                 description: Required if source is provided.
+ *               documentation:
+ *                 type: string
+ *                 default: ''
+ *                 description: An optional field to provided notes or
+ *                              description about an element.
+ *               type:
+ *                 type: string
+ *                 default: ''
+ *               custom:
+ *                 type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT elements, return element public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT elements due to invalid
+ *                      element data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT elements due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT elements due to invalid
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to PUT elements because branch,
+ *                      project or org did not exist.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT elements due to a
  *                      server side issue.
  *   patch:
  *     tags:
@@ -1282,7 +1864,9 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                              updated.
  *               name:
  *                 type: string
- *               parent:
+ *               source:
+ *                 type: string
+ *               target:
  *                 type: string
  *               documentation:
  *                 type: string
@@ -1298,6 +1882,13 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH elements, returns element public
@@ -1375,6 +1966,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   Middleware.logRoute,
   APIController.postElements
 )
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putElements
+)
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -1434,6 +2030,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      than a single object.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET element, returns element public
@@ -1520,6 +2123,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST element, returns element public
@@ -1537,6 +2147,102 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      or org not existing.
  *       500:
  *         description: Internal Server Error, Failed to POST element due to
+ *                      server side issue.
+ *   put:
+ *     tags:
+ *       - elements
+ *     description: Creates or replaces an element from given data in the
+ *                  request body. If an element with the same ID already exists,
+ *                  it will be replaced. NOTE this route is reserved for system
+ *                  admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the element.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: elementid
+ *         description: The ID of the element to create/replace.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: body
+ *         description: The object containing the element data.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the element. If provided, it must
+ *                      match the element ID provided in the path.
+ *             name:
+ *               type: string
+ *             parent:
+ *               type: string
+ *               default: 'model'
+ *               description: The ID of the parent element.
+ *             source:
+ *               type: string
+ *               description: An optional field that stores the ID of a source
+ *                            element. If provided, target is required.
+ *             target:
+ *               type: string
+ *               description: An optional field that stores the ID of a target
+ *                            element. If provided, source is required.
+ *             documentation:
+ *               type: string
+ *               default: ''
+ *               description: The documentation for the element.
+ *             type:
+ *               type: string
+ *               default: ''
+ *             custom:
+ *               type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT element, returns element public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PUT element due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT element due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT element due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to PUT element due to branch, project
+ *                      or org not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT element due to
  *                      server side issue.
  *   patch:
  *     tags:
@@ -1581,6 +2287,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: string
  *             parent:
  *               type: string
+ *             source:
+ *               type: string
+ *             target:
+ *               type: string
  *             documentation:
  *               type: string
  *             type:
@@ -1595,6 +2305,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH element, returns element public
@@ -1676,6 +2393,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   Middleware.logRoute,
   APIController.postElement
 )
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.putElement
+)
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -1725,6 +2447,18 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
@@ -1790,6 +2524,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST users returns public users data.
@@ -1803,6 +2544,75 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      permissions.
  *       500:
  *         description: Internal Server Error, Failed to POST users due to
+ *                      server side issue.
+ *   put:
+ *     tags:
+ *       - users
+ *     description: Creates or replaces multiple users from the data provided in
+ *                  the request body. Returns the user's public data. NOTE This
+ *                  endpoint is reserved for system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: users
+ *         description: An array of objects containing user data.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - username
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 description: Required unless running LDAP auth.
+ *               fname:
+ *                 type: string
+ *                 description: User's first name.
+ *               lname:
+ *                 type: string
+ *                 description: User's last name.
+ *               preferredName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               provider:
+ *                 type: string
+ *                 default: 'local'
+ *               admin:
+ *                 type: boolean
+ *                 description: If true, user is system-wide admin.
+ *               custom:
+ *                 type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT users returns public users data.
+ *       400:
+ *         description: Bad Request, Failed to PUT users due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT users due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PUT users due to not having
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT users due to
  *                      server side issue.
  *   patch:
  *     tags:
@@ -1850,6 +2660,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH users, returns user's public
@@ -1911,6 +2728,12 @@ api.route('/users')
   Middleware.logRoute,
   Middleware.disableUserAPI,
   APIController.postUsers
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  Middleware.disableUserAPI,
+  APIController.putUsers
 )
 .patch(
   AuthController.authenticate,
@@ -1984,6 +2807,13 @@ api.route('/users/whoami')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET user, returns user's public data.
@@ -2049,6 +2879,13 @@ api.route('/users/whoami')
  *         in: query
  *         type: string
  *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST user, return user's public data.
@@ -2062,6 +2899,78 @@ api.route('/users/whoami')
  *                      that already exists.
  *       500:
  *         description: Internal Server Error, Failed to POST user due to server
+ *                      side issue.
+ *   put:
+ *     tags:
+ *       - users
+ *     description: Creates or replaces a user from the given data in the
+ *                  request body. If a user with the username already exists,
+ *                  they are replaced. NOTE This endpoint is reserved for
+ *                  system-wide admins ONLY.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: username
+ *         description: The username of the user to create/replace.
+ *         required: true
+ *         type: string
+ *         in: path
+ *       - name: user
+ *         description: The object containing the user data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             username:
+ *               type: string
+ *               description: The username of the user. If provided, this must
+ *                            match the username provided in the path.
+ *             password:
+ *               type: string
+ *               description: The password of the user. This field is required
+ *                            unless LDAP authentication is used.
+ *             fname:
+ *               type: string
+ *             lname:
+ *               type: string
+ *             preferredName:
+ *               type: string
+ *             email:
+ *               type: string
+ *             provider:
+ *               type: string
+ *               default: 'local'
+ *             admin:
+ *               type: boolean
+ *             custom:
+ *               type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PUT user, return user's public data.
+ *       400:
+ *         description: Bad Request, Failed to PUT user due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to PUT user due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST PUT due to an invalid request
+ *                      body.
+ *       500:
+ *         description: Internal Server Error, Failed to PUT user due to server
  *                      side issue.
  *   patch:
  *     tags:
@@ -2100,6 +3009,13 @@ api.route('/users/whoami')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name).
  *         in: query
  *         type: string
  *     responses:
@@ -2164,6 +3080,12 @@ api.route('/users/:username')
   Middleware.logRoute,
   Middleware.disableUserAPI,
   APIController.postUser
+)
+.put(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  Middleware.disableUserAPI,
+  APIController.putUser
 )
 .patch(
   AuthController.authenticate,

@@ -58,12 +58,12 @@ function md5HashTest(done) {
 
 /**
  * @description Encrypts and decrypts a string message. Expected to pass by
- * returning 'HULK SMASH' after encrypting and decrypting.
+ * returning 'Test String' after encrypting and decrypting.
  */
 function encryptTest(done) {
-  const encrypted = mbeeCrypto.encrypt('HULK SMASH');
+  const encrypted = mbeeCrypto.encrypt('Test String');
   const decrypted = mbeeCrypto.decrypt(encrypted);
-  chai.expect(encrypted).to.not.equal('HULK SMASH');
-  chai.expect(decrypted).to.equal('HULK SMASH');
+  chai.expect(encrypted).to.not.equal('Test String');
+  chai.expect(decrypted).to.equal('Test String');
   done();
 }
