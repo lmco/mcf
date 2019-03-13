@@ -202,16 +202,6 @@ class ProjectList extends Component {
                     <div className='project-list-header'>
                         <h2 className='project-header'>Your Projects</h2>
                         <div className='project-button'>
-                            {/*Verify user has admin permissions*/}
-                            {(!this.state.admin)
-                                ? ''
-                                // Display delete button
-                                :(<Button className='btn'
-                                          outline color="danger"
-                                          onClick={this.handleDeleteToggle}>
-                                    Delete
-                                </Button>)
-                            }
                             {/*Verify user has write permission*/}
                             {(!this.state.write)
                                 ? ''
@@ -220,6 +210,16 @@ class ProjectList extends Component {
                                           outline color="secondary"
                                           onClick={this.handleCreateToggle}>
                                     Create
+                                </Button>)
+                            }
+                            {/*Verify user has admin permissions*/}
+                            {(!this.state.admin)
+                                ? ''
+                                // Display delete button
+                                :(<Button className='btn'
+                                          outline color="danger"
+                                          onClick={this.handleDeleteToggle}>
+                                    Delete
                                 </Button>)
                             }
                         </div>

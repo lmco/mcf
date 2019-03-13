@@ -55,7 +55,7 @@ function OrganizationProjects(props) {
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={props.handleToggle}>
-                                <i className='fas fa-plus first-icon'/>
+                                Create
                             </Button>
                          </div>)
                     }
