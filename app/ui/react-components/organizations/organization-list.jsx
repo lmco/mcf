@@ -139,14 +139,14 @@ class OrganizationList extends Component {
                             // Display create and delete buttons
                             : (<div className='org-button'>
                                     <Button className='btn'
-                                            outline color="danger"
-                                            onClick={this.handleDeleteToggle}>
-                                        <i className='fas fa-trash-alt'/>
-                                    </Button>
-                                    <Button className='btn'
                                             outline color="secondary"
                                             onClick={this.handleCreateToggle}>
                                         <i className='fas fa-plus'/>
+                                    </Button>
+                                    <Button className='btn'
+                                            outline color="danger"
+                                            onClick={this.handleDeleteToggle}>
+                                        <i className='fas fa-trash-alt'/>
                                     </Button>
                                 </div>)
                         }

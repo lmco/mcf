@@ -48,7 +48,7 @@ class DeleteProject extends Component{
         this.setState({ [event.target.name]: event.target.value});
 
         // Get all the projects from that org
-        ajaxRequest('GET',`/api/orgs/${event.target.value}/projects`)
+        ajaxRequest('GET',`/api/orgs/${event.target.value}/projects?fields=id,name`)
         .then(projects => {
             // Loop through projects and create proj options
             const projectOptions = projects.map((project) => {
@@ -101,7 +101,7 @@ class DeleteProject extends Component{
         // Verify if projects provided
         if(this.props.projects) {
             // Get all the organizations user is apart of
-            ajaxRequest('GET', `/api/orgs`)
+            ajaxRequest('GET', `/api/orgs?fields=id,name`)
             .then(orgs => {
                 // Loop through organizations and make them options
                 const orgOptions = orgs.map((org) => {
