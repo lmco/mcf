@@ -19,7 +19,7 @@
 import React, { Component } from "react";
 
 // MBEE Modules
-import ElementTree from './element-tree.jsx';
+import ElementTree from '../elements/element-tree.jsx';
 
 // Define component
 class ProjectElements extends Component {
