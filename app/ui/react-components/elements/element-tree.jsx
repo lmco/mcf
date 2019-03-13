@@ -10,17 +10,13 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This renders the element tree in the project's page.
  */
 
 // React Modules
 import React, { Component } from 'react';
-
-// MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-//import List from '../general-components/list/list.jsx';
-//import ElementListItem from '../general-components/list/element-list-item.jsx';
 
 // Define component
 class ElementTree extends Component {
@@ -29,17 +25,13 @@ class ElementTree extends Component {
         // Initialize parent props
         super(props);
 
-        console.log(props);
-        console.log('Constructor');
-
         this.state = {
             id: props.id,
             isOpen: props.isOpen,
             data: null
-        }
+        };
 
         this.toggleCollapse = this.toggleCollapse.bind(this);
-
     }
 
     componentDidMount() {
@@ -53,7 +45,7 @@ class ElementTree extends Component {
             method: "GET",
             url: url,
             statusCode: {
-                200: (data) => { console.log('Got data'); console.log(data); this.setState({ data: data }); },
+                200: (data) => { this.setState({ data: data }); },
                 401: (data) => { this.setState({ data: null }); }
             },
             fail: () => {
@@ -95,10 +87,8 @@ class ElementTree extends Component {
         // Build the rendered element item
         let element = '';
         if (this.state.data !== null) {
-
             // Element should be rendered as the ID initially
-            element = (<span>{this.state.data.id}</span>)
-
+            element = (<span>{this.state.data.id}</span>);
             // If the name is not blank, render the name
             if (this.state.data.name !== '') {
                 element = (
