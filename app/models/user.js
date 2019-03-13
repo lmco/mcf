@@ -239,7 +239,7 @@ UserSchema.methods.getPublicData = function() {
 
   return {
     username: this._id,
-    name: this.name,
+    name: (this.fname && this.lname) ? this.name : undefined,
     fname: this.fname,
     preferredName: this.preferredName,
     lname: this.lname,

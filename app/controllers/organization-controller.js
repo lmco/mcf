@@ -57,6 +57,12 @@ const jmi = M.require('lib.jmi-conversions');
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
  *
  * @return {Promise} Array of found organization objects
  *
@@ -106,6 +112,8 @@ function find(requestingUser, orgs, options) {
     // Initialize valid options
     let archived = false;
     let populateString = '';
+    let fieldsString = '';
+    let limit = 0;
 
     // Ensure options are valid
     if (options) {
@@ -138,6 +146,28 @@ function find(requestingUser, orgs, options) {
 
         populateString = options.populate.join(' ');
       }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'limit' is supplied ensure it's a number
+      if (options.hasOwnProperty('limit')) {
+        if (typeof options.limit !== 'number') {
+          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        }
+        limit = options.limit;
+      }
     }
 
     // Define searchQuery
@@ -166,7 +196,7 @@ function find(requestingUser, orgs, options) {
     }
 
     // Find the orgs
-    Organization.find(searchQuery)
+    Organization.find(searchQuery, fieldsString, { limit: limit })
     .populate(populateString)
     .then((foundOrgs) => resolve(foundOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -192,6 +222,9 @@ function find(requestingUser, orgs, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of created organization objects
  *
@@ -234,7 +267,7 @@ function create(requestingUser, orgs, options) {
 
     // Initialize valid options
     let populateString = '';
-    let populate = false;
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -258,7 +291,20 @@ function create(requestingUser, orgs, options) {
         });
 
         populateString = options.populate.join(' ');
-        populate = true;
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -376,14 +422,8 @@ function create(requestingUser, orgs, options) {
       // Create the organizations
       return Organization.insertMany(orgObjects);
     })
-    .then((createdOrgs) => {
-      if (populate) {
-        return resolve(Organization.find({ _id: { $in: arrIDs } })
-        .populate(populateString));
-      }
-
-      return resolve(createdOrgs);
-    })
+    .then(() => resolve(Organization.find({ _id: { $in: arrIDs } }, fieldsString)
+    .populate(populateString)))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -417,6 +457,10 @@ function create(requestingUser, orgs, options) {
  * org will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of updated organization objects
  *
@@ -463,6 +507,7 @@ function update(requestingUser, orgs, options) {
 
     // Initialize valid options
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -486,6 +531,20 @@ function update(requestingUser, orgs, options) {
         });
 
         populateString = options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -722,7 +781,7 @@ function update(requestingUser, orgs, options) {
       // Update all orgs through a bulk write to the database
       return Organization.bulkWrite(bulkArray);
     })
-    .then(() => Organization.find(searchQuery)
+    .then(() => Organization.find(searchQuery, fieldsString)
     .populate(populateString))
     .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -749,8 +808,11 @@ function update(requestingUser, orgs, options) {
  * @param {boolean} [orgs.archived] - The archived field. If true, the org will
  * not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on
- * return.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and id fields. To NOT include a field, provide a '-' in
+ * front.
  *
  * @return {Promise} Array of replaced/created organization objects
  *

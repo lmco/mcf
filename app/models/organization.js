@@ -75,13 +75,13 @@ OrganizationSchema.plugin(extensions);
  * @memberOf OrganizationSchema
  */
 OrganizationSchema.methods.getPublicData = function() {
-  const permissions = {};
+  const permissions = (this.permissions) ? {} : undefined;
   let createdBy;
   let lastModifiedBy;
   let archivedBy;
 
   // Loop through each permission key/value pair
-  Object.keys(this.permissions).forEach((u) => {
+  Object.keys(this.permissions || {}).forEach((u) => {
     // Return highest permission
     permissions[u] = this.permissions[u].pop();
   });

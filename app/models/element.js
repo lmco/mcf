@@ -191,7 +191,7 @@ ElementSchema.methods.getPublicData = function() {
   let createdBy;
   let lastModifiedBy;
   let archivedBy;
-  let parent;
+  let parent = null;
   let source;
   let target;
 

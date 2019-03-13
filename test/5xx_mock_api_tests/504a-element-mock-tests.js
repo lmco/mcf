@@ -629,7 +629,7 @@ function searchElement(done) {
     projectid: projID,
     elementid: elemData.id
   };
-  const query = { query: `"${elemData.name}"` };
+  const query = { q: `"${elemData.name}"` };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method, query);
 

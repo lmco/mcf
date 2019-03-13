@@ -98,13 +98,13 @@ ProjectSchema.plugin(extensions);
  * @memberOf ProjectSchema
  */
 ProjectSchema.methods.getPublicData = function() {
-  const permissions = {};
+  const permissions = (this.permissions) ? {} : undefined;
   let createdBy;
   let lastModifiedBy;
   let archivedBy;
 
   // Loop through each permission key/value pair
-  Object.keys(this.permissions).forEach((u) => {
+  Object.keys(this.permissions || {}).forEach((u) => {
     // Return highest permission
     permissions[u] = this.permissions[u].pop();
   });
@@ -148,7 +148,9 @@ ProjectSchema.methods.getPublicData = function() {
   // Return the projects public fields
   return {
     id: utils.parseID(this._id).pop(),
-    org: (this.org.hasOwnProperty('_id')) ? this.org.getPublicData() : this.org,
+    org: (this.org && this.org.id)
+      ? this.org.getPublicData()
+      : utils.parseID(this._id)[0],
     name: this.name,
     permissions: permissions,
     custom: this.custom,
