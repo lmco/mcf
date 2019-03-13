@@ -19,13 +19,14 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 // MBEE Modules
-import Sidebar from '../general-components/sidebar/sidebar.jsx'
-import SidebarLink from '../general-components/sidebar/sidebar-link.jsx'
-import ProjectHome from './project-home.jsx'
-import ProjectUsers from './project-users.jsx'
-import ProjectElements from './project-elements.jsx'
-import ProjectEdit from './project-edit.jsx'
-import Search from '../search/search.jsx'
+import Sidebar from '../general-components/sidebar/sidebar.jsx';
+import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
+import ProjectHome from './project-home.jsx';
+import ProjectUsers from './project-users.jsx';
+import ProjectElements from './project-elements.jsx';
+import ProjectEdit from './project-edit.jsx';
+import Search from '../search/search.jsx';
+import NoMatch from '../general-components/no-match.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -74,11 +75,11 @@ class Project extends Component {
                 // Set states
                 this.setState({ project: project });
             })
-            .catch((err) => this.setState({error: err.responseJSON.description}))
+            .catch((err) => this.setState({error:`Failed to grab user: ${err.responseJSON.description}`}))
         })
         .catch(err => {
             // Throw error and set state
-            this.setState({error: `Failed to load project: ${err}`});
+            this.setState({error: `Failed to load project: ${err.responseJSON.description}`});
         });
     }
 
@@ -132,6 +133,7 @@ class Project extends Component {
                                               render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)
                                     : ''
                                 }
+                                <Route path={'/notfound'} component={NoMatch}/>
                             </Switch>)
                     }
                 </React.Fragment>
