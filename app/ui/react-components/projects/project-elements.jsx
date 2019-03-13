@@ -18,14 +18,16 @@
 import React, { Component } from "react";
 
 // MBEE Modules
-import ElementList from '../elements/element-list.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
+import ElementTreeContainer from '../elements/element-tree-container.jsx';
 
 // Define component
 class ProjectElements extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
+
+        console.log('Project Elements Props')
+        console.log(props)
 
         // Initialize state props
         this.state = {
@@ -35,53 +37,15 @@ class ProjectElements extends Component {
     }
 
     componentDidMount() {
-        // Verify if there are no elements
-        if (!this.props.elements){
-            const orgId = this.props.match.params.orgid;
-            const projId = this.props.match.params.projectid;
-            const url = `/api/orgs/${orgId}/projects/${projId}`;
-
-            // Grab all the elements
-            ajaxRequest('GET',`${url}/branches/master/elements?ids=model`)
-            .then(elements => {
-                // Set the element state
-                this.setState({ elements: elements });
-            })
-            .catch(err => {
-                this.setState({error: `Failed to load elements: ${err}`});
-            });
-        }
     }
 
     render() {
-        // Initialize element data
-        let elements = null;
-
-        // Verify if elements were in props
-        if (!this.props.elements){
-            // Set the element state
-            elements = this.state.elements;
-        }
-        else {
-            // Set the element state
-            elements = this.props.elements;
-        }
-
-        // Loop through root elements
-        const elementList = Object.keys(elements).map((key) => {
-            // Initialize root
-            const rootElement = elements[key];
-
-            // Create the element list
-            return (<ElementList element={rootElement} />)
-        });
-
         // Return element list
         return (
             <div id='view' className='project-elements'>
                 <h2>Elements</h2>
                 <hr/>
-                {elementList}
+                <ElementTreeContainer project={this.props.project}/>
             </div>
         )
     }
