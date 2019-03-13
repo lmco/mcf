@@ -381,7 +381,7 @@ textarea[name="custom"] {
 
     .org-proj-list {
         display: grid;
-        grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 50px);
+        grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 60px);
         grid-template-areas: "icon org button";
         justify-content: left;
         align-items: center;
@@ -413,7 +413,7 @@ textarea[name="custom"] {
 
         .add-btn {
             color: $color-secondary;
-            padding-right: 15px;
+            padding-right: 20px;
         }
         .add-btn:hover {
             color: darken($color-secondary, 10);
@@ -434,7 +434,7 @@ textarea[name="custom"] {
 
     .proj-list {
         display: grid;
-        grid-template-columns: 1fr minmax(0px, 55px);
+        grid-template-columns: 1fr minmax(0px, 65px);
         grid-template-areas: "org button";
         justify-content: left;
         align-items: center;
@@ -513,6 +513,15 @@ textarea[name="custom"] {
 /******************************************************************************/
 .project-home {
     padding: 2em;
+}
+
+.proj-org-header {
+    a {
+        width: 10%;
+    }
+    a:hover {
+        color: $color-primary;
+    }
 }
 
 .project-list {
@@ -626,6 +635,10 @@ textarea[name="custom"] {
 /******************************************************************************
 /*                           List Component Styling                           *
 /******************************************************************************/
+.hover-darken:hover {
+    background: #eff5fb;
+}
+
 .list {
     a {
         display: block;

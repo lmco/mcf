@@ -108,7 +108,7 @@ class OrganizationList extends Component {
         const orgs = this.state.orgs.map(org =>
             // Create org links
             <Link to={`/${org.id}`}>
-                <OrgListItem org={org} />
+                <OrgListItem className='hover-darken' org={org} />
             </Link>
         );
 
