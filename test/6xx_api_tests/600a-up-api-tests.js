@@ -16,13 +16,15 @@
  * started.
  */
 
-// NPM modules
-const fs = require('fs');
-const chai = require('chai');
+// Node Modules
 const request = require('request');
+
+// NPM modules
+const chai = require('chai');
 
 // MBEE modules
 const test = M.config.test;
+const testUtils = M.require('lib.test-utils');
 
 /* --------------------( Main )-------------------- */
 /**
@@ -45,7 +47,7 @@ function upTest(done) {
   // Make an API GET request
   request({
     url: `${test.url}/api/test`,
-    ca: readCaFile()
+    ca: testUtils.readCaFile()
   },
   (error, response, body) => {
     // Expect no error
@@ -65,7 +67,7 @@ function swaggerJSONTest(done) {
   // API GET request swagger documentation
   request({
     url: `${test.url}/api/doc/swagger.json`,
-    ca: readCaFile()
+    ca: testUtils.readCaFile()
   },
   (error, response, body) => {
     // Expect no error
@@ -76,14 +78,4 @@ function swaggerJSONTest(done) {
     chai.expect(JSON.parse(body)).to.be.an('object');
     done();
   });
-}
-
-/* ----------( Helper Functions )----------*/
-/**
- * @description Helper function for reading ca file.
- */
-function readCaFile() {
-  if (test.hasOwnProperty('ca')) {
-    return fs.readFileSync(`${M.root}/${test.ca}`);
-  }
 }

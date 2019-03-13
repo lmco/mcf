@@ -10,46 +10,40 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This renders a project's element page.
  */
-import React, { Component } from "react";
-import List from '../general-components/list/list.jsx';
-import ListItem from '../general-components/list/list-item.jsx';
-import ElementList from '../elements/element-list.jsx';
 
+// React Modules
+import React, { Component } from "react";
+
+// MBEE Modules
+import ElementTree from '../elements/element-tree.jsx';
+
+// Define component
 class ProjectElements extends Component {
     constructor(props) {
+        // Initialize parent props
         super(props);
-
-        this.toggle = this.toggle.bind(this);
-
-        this.state = {
-            isExpanded: false
-        };
-    }
-
-    toggle() {
-        this.setState({isExpanded: !this.state.isExpanded});
-    }
-
-    componentDidMount() {
-
     }
 
     render() {
-
+        // Return element list
         return (
             <div id='view' className='project-elements'>
                 <h2>Elements</h2>
                 <hr/>
-                <List>
-                    <ListItem element={this.props.element} />
-                    <ElementList element={this.props.element} url={this.props.url}/>
-                </List>
+                <div id={'element-tree-container'}>
+                    <ElementTree id={'model'}
+                                 project={this.props.project}
+                                 parent={null}
+                                 isOpen={true}/>
+                </div>
             </div>
         )
     }
 }
 
+// Export component
 export default ProjectElements

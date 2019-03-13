@@ -15,11 +15,14 @@
  * @description This defines the Sass variables.
  */
 
+$mbee-color-blue: #007bff;
+$mbee-color-purple: #727cf5;
 
 /* LM light theme colors */
 $mbee-background: white;
 $mbee-color: black;
 $mbee-font: "Avenir Next";
+$mbee-color-primary: $mbee-color-purple;
 
 /* sizing */
 $banner-height: 20px;

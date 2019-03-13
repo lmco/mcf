@@ -34,8 +34,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should check that the key project.id exists and succeed', projectIDExists);
   it('should check that the key project.user exists and fail', projectUserExists);
   it('should check that multiple keys exists and succeed', multipleExist);
-  it('should check that a user is an admin which they are', userIsAdmin);
-  it('should check that a user is an admin which they are not', userIsNotAdmin);
   it('should create a valid uid', validUID);
   it('should try to create a uid from invalid parameters and fail', invalidUID);
   it('should parse a valid uid', parseValidUID);
@@ -163,39 +161,6 @@ function multipleExist(done) {
     chai.expect(error.message).to.equal(null);
   }
   chai.expect(utils.checkExists(['project.name', 'project.org.id'], sampleObj)).to.equal(true);
-  done();
-}
-
-/**
- * @description Check that a user is an admin and succeed.
- */
-function userIsAdmin(done) {
-  const user = { name: 'Darth Vader', admin: true };
-  try {
-    utils.assertAdmin(user);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-  chai.expect(user.admin).to.equal(true);
-  done();
-}
-
-/**
- * @description Check that a user is an admin and fails.
- */
-function userIsNotAdmin(done) {
-  const user = { name: 'Stormtrooper 123', admin: false };
-  try {
-    utils.assertAdmin(user);
-    chai.expect(true).to.equal(false);
-  }
-  catch (error) {
-    chai.expect(error.message).to.equal('Unauthorized');
-  }
-  chai.expect(user.admin).to.equal(false);
   done();
 }
 

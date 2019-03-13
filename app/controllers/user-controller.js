@@ -23,12 +23,15 @@ module.exports = {
   find,
   create,
   update,
+  createOrReplace,
   remove,
   updatePassword
 };
 
 // Node.js Modules
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
 // MBEE Modules
 const Organization = M.require('models.organization');
@@ -37,6 +40,7 @@ const User = M.require('models.user');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
+const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -52,6 +56,12 @@ const validators = M.require('lib.validators');
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and username fields. To NOT include a field, provide a '-'
+ * in front.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
  *
  * @return {Promise} Array of found user objects.
  *
@@ -100,6 +110,8 @@ function find(requestingUser, users, options) {
     // Initialize valid options
     let archived = false;
     let populateString = '';
+    let fieldsString = '';
+    let limit = 0;
 
     // Ensure options are valid
     if (options) {
@@ -132,6 +144,28 @@ function find(requestingUser, users, options) {
 
         populateString = options.populate.join(' ');
       }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'limit' is supplied ensure it's a number
+      if (options.hasOwnProperty('limit')) {
+        if (typeof options.limit !== 'number') {
+          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        }
+        limit = options.limit;
+      }
     }
 
     // Define searchQuery
@@ -156,7 +190,7 @@ function find(requestingUser, users, options) {
     }
 
     // Find the users
-    User.find(searchQuery)
+    User.find(searchQuery, fieldsString, { limit: limit })
     .populate(populateString)
     .then((foundUser) => resolve(foundUser))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -188,6 +222,9 @@ function find(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and username fields. To NOT include a field, provide a '-'
+ * in front.
  *
  * @return {Promise} Array of created user objects
  *
@@ -231,7 +268,7 @@ function create(requestingUser, users, options) {
 
     // Initialize valid options
     let populateString = '';
-    let populate = false;
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -255,7 +292,20 @@ function create(requestingUser, users, options) {
         });
 
         populateString = options.populate.join(' ');
-        populate = true;
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -356,15 +406,8 @@ function create(requestingUser, users, options) {
       // Save the updated default org
       return defaultOrg.save();
     })
-    .then(() => {
-      // If user wants populated users, find and populate
-      if (populate) {
-        return resolve(User.find({ _id: { $in: arrUsernames } })
-        .populate(populateString));
-      }
-
-      return resolve(createdUsers);
-    })
+    .then(() => resolve(User.find({ _id: { $in: arrUsernames } }, fieldsString)
+    .populate(populateString)))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -397,6 +440,9 @@ function create(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and username fields. To NOT include a field, provide a '-'
+ * in front.
  *
  * @return {Promise} Array of updated user objects
  *
@@ -442,6 +488,7 @@ function update(requestingUser, users, options) {
 
     // Initialize valid options
     let populateString = '';
+    let fieldsString = '';
 
     // Ensure options are valid
     if (options) {
@@ -465,6 +512,20 @@ function update(requestingUser, users, options) {
         });
 
         populateString = options.populate.join(' ');
+      }
+
+      // If the option 'fields' is supplied, ensure it's an array of strings
+      if (options.hasOwnProperty('fields')) {
+        if (!Array.isArray(options.fields)) {
+          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        }
+        if (!options.fields.every(o => typeof o === 'string')) {
+          throw new M.CustomError(
+            'Every value in the fields array must be a string.', 400, 'warn'
+          );
+        }
+
+        fieldsString += options.fields.join(' ');
       }
     }
 
@@ -528,7 +589,7 @@ function update(requestingUser, users, options) {
       foundUsers = _foundUsers;
 
       // Convert usersToUpdate to JMI type 2
-      const jmiType2 = utils.convertJMI(1, 2, usersToUpdate);
+      const jmiType2 = jmi.convertJMI(1, 2, usersToUpdate);
       const bulkArray = [];
       // Get array of editable parameters
       const validFields = User.getValidUpdateFields();
@@ -619,8 +680,161 @@ function update(requestingUser, users, options) {
       // Update all users through a bulk write to the database
       return User.bulkWrite(bulkArray);
     })
-    .then(() => User.find(searchQuery).populate(populateString))
+    .then(() => User.find(searchQuery, fieldsString).populate(populateString))
     .then((foundUpdatedUsers) => resolve(foundUpdatedUsers))
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
+ * @description This function creates or replaces one or many users. If users
+ * with matching usernames already exist, this function updates those users.
+ * This function is restricted to system-wide admins ONLY.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {(Object|Object[])} users - Either an array of objects containing
+ * updates to users, or a single object containing updates.
+ * @param {string} users.id - The ID of the user being updated. Field cannot be
+ * updated but is required to find user.
+ * @param {string} [users.fname] - The updated first name of the user.
+ * @param {string} [users.lname] - The updated last name of the user.
+ * @param {string} [users.preferredName] - The updated preferred first name of
+ * the user.
+ * @param {string} [users.email] - The updated email of the user.
+ * @param {Object} [users.custom] - The additions or changes to existing custom
+ * data. If the key/value pair already exists, the value will be changed. If the
+ * key/value pair does not exist, it will be added.
+ * @param {boolean} [users.archived] - The updated archived field. If true, the
+ * user will not be able to be found until unarchived.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return of
+ * the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id and username fields. To NOT include a field, provide a '-'
+ * in front.
+ *
+ * @return {Promise} Array of user objects
+ *
+ * @example
+ * createOrReplace({User}, [{User 1}, {User 2}...], { populate: 'createdBy' })
+ * .then(function(users) {
+ *   // Do something with the created/replaced users
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function createOrReplace(requestingUser, users, options) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions'
+        + 'to replace users.');
+      assert.ok(typeof users === 'object', 'Users parameter is not an object.');
+      assert.ok(users !== null, 'Users parameter cannot be null.');
+      // If users is an array, ensure each item inside is an object
+      if (Array.isArray(users)) {
+        assert.ok(users.every(u => typeof u === 'object'), 'Every item in users is not an'
+          + ' object.');
+        assert.ok(users.every(u => u !== null), 'One or more items in users is null.');
+      }
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
+    }
+
+    // Sanitize input parameters and create function-wide variables
+    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const duplicateCheck = {};
+    let foundUsers = [];
+    let usersToLookup = [];
+    let createdUsers = [];
+    const ts = Date.now();
+
+    // Check the type of the users parameter
+    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
+      // users is an array, update many users
+      usersToLookup = saniUsers;
+    }
+    else if (typeof saniUsers === 'object') {
+      // users is an object, update a single user
+      usersToLookup = [saniUsers];
+    }
+    else {
+      throw new M.CustomError('Invalid input for updating users.', 400, 'warn');
+    }
+
+    // Create list of usernames
+    const arrUsernames = [];
+    try {
+      let index = 1;
+      usersToLookup.forEach((user) => {
+        // Ensure each user has a username and that its a string
+        assert.ok(user.hasOwnProperty('username'), `User #${index} does not have a username.`);
+        assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);
+        // If a duplicate ID, throw an error
+        if (duplicateCheck[user.username]) {
+          throw new M.CustomError(`Multiple objects with the same ID [${user.username}] exist in`
+            + ' the update.', 400, 'warn');
+        }
+        else {
+          duplicateCheck[user.username] = user.username;
+        }
+        arrUsernames.push(user.username);
+        index++;
+      });
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 403, 'warn');
+    }
+
+    // Create searchQuery
+    const searchQuery = { _id: { $in: arrUsernames } };
+
+    // Find the users to update
+    User.find(searchQuery)
+    .then((_foundUsers) => {
+      // Set the function-wide foundUsers
+      foundUsers = _foundUsers;
+
+      // If data directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data'))) {
+        fs.mkdirSync(path.join(M.root, 'data'));
+      }
+
+      // Write contents to temporary file
+      return new Promise(function(res, rej) {
+        fs.writeFile(path.join(M.root, 'data', `PUT-backup-users-${ts}.json`),
+          JSON.stringify(_foundUsers), function(err) {
+            if (err) rej(err);
+            else res();
+          });
+      });
+    })
+    .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }))
+    // Create the new users
+    .then(() => create(requestingUser, usersToLookup, options))
+    .then((_createdUsers) => {
+      createdUsers = _createdUsers;
+
+      // Delete the temporary file.
+      const filePath = path.join(M.root, 'data', `PUT-backup-users-${ts}.json`);
+      if (fs.existsSync(filePath)) {
+        return new Promise(function(res, rej) {
+          fs.unlink(filePath, function(err) {
+            if (err) rej(err);
+            else res();
+          });
+        });
+      }
+    })
+    .then(() => resolve(createdUsers))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

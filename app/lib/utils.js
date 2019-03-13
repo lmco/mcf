@@ -161,18 +161,6 @@ module.exports.checkExists = function(properties, obj) {
 };
 
 /**
- * @description Checks whether the user is an admin or not. Throws an error
- * if user is not an admin.
- *
- * @param {User} user - The user object being checked.
- */
-module.exports.assertAdmin = function(user) {
-  if (!user.admin) {
-    throw new M.CustomError('User does not have permissions.', 401);
-  }
-};
-
-/**
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *
@@ -286,41 +274,6 @@ module.exports.updateAndCombineObjects = function(originalObj, updateObj) {
 };
 
 /**
- * @description Converts data between different JMI types
- *
- * @param {number} from - The current JMI version of the data.
- * @param {number} to - The JMI version to convert the data to.
- * @param {Object|Object[]} data - The data to convert between JMI versions.
- * @param {string} [field=_id] - The field to parse type 1 on
- *
- * @return {Object|Object[]} The converted JMI.
- */
-module.exports.convertJMI = function(from, to, data, field = '_id') {
-  // Convert JMI type 1 to type 2
-  if (from === 1 && to === 2) {
-    // Error Check: Ensure data is in JMI type 1
-    try {
-      assert.ok(Array.isArray(data), 'Data is not in JMI type 1.');
-    }
-    catch (msg) {
-      throw new M.CustomError(msg, 400, 'warn');
-    }
-
-    const returnObj = {};
-    data.forEach((object) => {
-      if (returnObj[object[field]]) {
-        throw new M.CustomError('Invalid object, duplicate keys '
-          + `[${object[field]}] exist.`, 403, 'warn');
-      }
-      returnObj[object[field]] = object;
-    });
-    return returnObj;
-  }
-
-  throw new M.CustomError('JMI conversion not yet implemented.', 501, 'warn');
-};
-
-/**
  * @description Parse option string into option objects.
  * Error is thrown for invalid options.
  * Note: Boolean strings are converted to booleans
@@ -372,6 +325,18 @@ module.exports.parseOptions = function(options, validOptions) {
       else {
         // Set single option within array
         parsedOptions[option] = [options[option]];
+      }
+    }
+    else if (validOptions[option] === 'string') {
+      parsedOptions[option] = options[option];
+    }
+    else if (validOptions[option] === 'number') {
+      const number = parseInt(options[option], 10);
+      if (isNaN(number)) { // eslint-disable-line no-restricted-globals
+        throw new M.CustomError(`${options[option]} is not a number`, 400, 'warn');
+      }
+      else {
+        parsedOptions[option] = number;
       }
     }
   });
