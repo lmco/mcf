@@ -37,6 +37,7 @@ const path = require('path');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -390,6 +391,9 @@ function create(requestingUser, users, options) {
     .then((_createdUsers) => {
       // Set function-wide createdUsers;
       createdUsers = _createdUsers;
+
+      // Emit event that users were created
+      EventEmitter.emit('Users Created', createdUsers);
 
       // Find the default organization
       return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
@@ -981,7 +985,10 @@ function remove(requestingUser, users, options) {
     // Remove the users
     .then(() => User.deleteMany(searchQuery))
     // Return the deleted users
-    .then(() => resolve(foundUsernames))
+    .then(() => {
+      EventEmitter.emit('Users Deleted', foundUsers);
+      return resolve(foundUsernames);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
