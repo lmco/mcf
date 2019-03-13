@@ -455,6 +455,16 @@ textarea[name="custom"] {
 /******************************************************************************/
 .project-home {
     padding: 2em;
+
+    a {
+        display: block;
+        text-decoration: none;
+        color: black;
+    }
+
+    a:hover {
+        color: #ffc700;
+    }
 }
 
 .proj-org-header {
