@@ -27,6 +27,7 @@ function CustomMenu(props){
         className,
         'aria-labelledby': labeledBy,
     } = props;
+
     const  searchParam = props.username;
 
     // Return filtering list

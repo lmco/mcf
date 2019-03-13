@@ -381,7 +381,7 @@ textarea[name="custom"] {
 
     .org-proj-list {
         display: grid;
-        grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 100px);
+        grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 50px);
         grid-template-areas: "icon org button";
         justify-content: left;
         align-items: center;
@@ -397,12 +397,20 @@ textarea[name="custom"] {
         grid-area: org;
         justify-content: space-around;
         margin: 5px;
+        border-right: 1px #ccc solid;
     }
 
-    .org-button {
+    .controls-container {
         display: flex;
         grid-area: button;
         justify-content: flex-end;
+        .add-btn {
+            padding-right: 15px;
+            color: blue;
+        }
+        .delete-btn {
+            color: red;
+        }
     }
 
     .proj-list {

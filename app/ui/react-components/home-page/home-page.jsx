@@ -221,12 +221,12 @@ class HomePage extends Component {
                                 <Button className='btn'
                                         outline color="secondary"
                                         onClick={this.handleCreateToggle}>
-                                    <i className='fas fa-plus'/>
+                                    Create
                                 </Button>
                                 <Button className='btn'
                                         outline color="danger"
                                         onClick={this.handleDeleteToggle}>
-                                    <i className='fas fa-trash-alt'/>
+                                    Delete
                                 </Button>
                             </div>)
                         }
