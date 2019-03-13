@@ -26,7 +26,6 @@ import ProjectUsers from './project-users.jsx';
 import ProjectElements from './project-elements.jsx';
 import ProjectEdit from './project-edit.jsx';
 import Search from '../search/search.jsx';
-import NoMatch from '../general-components/no-match.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -133,7 +132,6 @@ class Project extends Component {
                                               render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)
                                     : ''
                                 }
-                                <Route path={'/notfound'} component={NoMatch}/>
                             </Switch>)
                     }
                 </React.Fragment>

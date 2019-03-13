@@ -26,7 +26,6 @@ import OrgHome from './organization-home.jsx';
 import OrgProjects from './organization-projects.jsx';
 import OrgUsers from './organization-users.jsx';
 import OrgEdit from './organization-edit.jsx';
-import NoMatch from '../general-components/no-match.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -139,7 +138,6 @@ class Organization extends Component {
                                              render={(props) => <OrgEdit {...props} org={this.state.org} />}/>)
                                     : ''
                                 }
-                                <Route component={NoMatch}/>
                             </Switch>)
                     }
                 </React.Fragment>
