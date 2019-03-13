@@ -712,6 +712,9 @@ textarea[name="custom"] {
             margin: 0;
             display: inline-block;
         }
+        a:hover {
+            color: $color-primary;
+        }
     }
 
     .stats-list {
