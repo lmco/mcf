@@ -416,7 +416,7 @@ textarea[name="custom"] {
             padding-right: 20px;
         }
         .add-btn:hover {
-            color: darken($color-secondary, 10);
+            color: darken($color-secondary, 20);
             cursor: pointer;
         }
 
@@ -424,7 +424,7 @@ textarea[name="custom"] {
             color: $color-danger;
         }
         .delete-btn:hover {
-            color: darken($color-danger, 10);
+            color: darken($color-danger, 20);
             cursor: pointer;
         }
         .fake-icon {
