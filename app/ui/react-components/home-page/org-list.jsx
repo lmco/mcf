@@ -92,10 +92,11 @@ class OrgList extends Component {
                         </ModalBody>
                     </Modal>
                     <div className='proj-list'>
-                        <ProjectListItem project={project} href={`/${orgId}/${project.id}`}/>
+                        <ProjectListItem className='homeproj-list' project={project} href={`/${orgId}/${project.id}`}/>
                         {(!this.props.admin)
                             ? ''
                             :(< div className='controls-container'>
+                                    <i className='fas fa-plus fake-icon'/>
                                     <i onClick={this.handleDeleteProjToggle} className='fas fa-trash-alt delete-btn'/>
                               </div>
                             )

@@ -388,8 +388,9 @@ textarea[name="custom"] {
         padding-left: 10px;
         padding-right: 10px;
     }
+
     .org-proj-list:hover {
-        background: #b8d6f4;
+        background: #eff5fb;
     }
 
     .org-icon {
@@ -409,26 +410,49 @@ textarea[name="custom"] {
         display: flex;
         grid-area: button;
         justify-content: flex-end;
+
         .add-btn {
+            color: $color-secondary;
             padding-right: 15px;
-            color: blue;
         }
+        .add-btn:hover {
+            color: darken($color-secondary, 10);
+            cursor: pointer;
+        }
+
         .delete-btn {
-            color: red;
+            color: $color-danger;
+        }
+        .delete-btn:hover {
+            color: darken($color-danger, 10);
+            cursor: pointer;
+        }
+        .fake-icon {
+            color: transparent;
         }
     }
 
     .proj-list {
         display: grid;
-        grid-template-columns: 1fr minmax(2px, 50px);
+        grid-template-columns: 1fr minmax(0px, 55px);
         grid-template-areas: "org button";
         justify-content: left;
         align-items: center;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .proj-list:hover {
+        background: #eff5fb;
     }
 
     .projects-list {
         border-left: #eeeeee solid;
         margin-left: 25px;
+    }
+
+    .homeproj-list {
+        border-right: 1px #ccc solid;
     }
 
     .list .list-item .list-header p {
