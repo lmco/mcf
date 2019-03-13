@@ -26,15 +26,6 @@ class ProjectElements extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
-
-        // Initialize state props
-        this.state = {
-            elements: null,
-            error: null
-        };
-    }
-
-    componentDidMount() {
     }
 
     render() {
