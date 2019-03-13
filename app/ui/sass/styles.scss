@@ -277,6 +277,11 @@ textarea[name="custom"] {
     align-items: center;
 }
 
+.delete-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    padding-top: 15px;
+}
 /******************************************************************************
 /*                             Home Page Styling                              *
 /******************************************************************************/
@@ -350,7 +355,6 @@ textarea[name="custom"] {
         margin-bottom: 1em;
         font-size: 18px
     }
-
     .org-list-header {
         display: grid;
         grid-template-columns: minmax(auto, 600px) 1fr;
@@ -371,8 +375,47 @@ textarea[name="custom"] {
 
         .btn {
             float: right;
-            margin-right: 5px;
+            margin: 5px;
         }
+    }
+
+    .org-proj-list {
+        display: grid;
+        grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 100px);
+        grid-template-areas: "icon org button";
+        justify-content: left;
+        align-items: center;
+    }
+
+    .org-icon {
+        grid-area: icon;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .org-info {
+        grid-area: org;
+        justify-content: space-around;
+        margin: 5px;
+    }
+
+    .org-button {
+        display: flex;
+        grid-area: button;
+        justify-content: flex-end;
+    }
+
+    .proj-list {
+        display: grid;
+        grid-template-columns: 1fr minmax(2px, 50px);
+        grid-template-areas: "org button";
+        justify-content: left;
+        align-items: center;
+    }
+
+    .projects-list {
+        border-left: #eeeeee solid;
+        margin-left: 25px;
     }
 
     .list .list-item .list-header p {
@@ -431,6 +474,10 @@ textarea[name="custom"] {
 /******************************************************************************
 /*                         Project Page Styling                               *
 /******************************************************************************/
+.project-home {
+    padding: 2em;
+}
+
 .project-list {
     padding: 2em;
 
@@ -471,10 +518,6 @@ textarea[name="custom"] {
     .list .list-item .list-header p {
         font-size: 15px;
     }
-}
-
-.project-home {
-    padding: 2em;
 }
 
 .project-elements {
@@ -548,7 +591,6 @@ textarea[name="custom"] {
 /******************************************************************************/
 .list {
     padding-left: 1em;
-    padding-right: 1em;
 
     a {
         display: block;

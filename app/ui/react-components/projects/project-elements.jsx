@@ -42,7 +42,7 @@ class ProjectElements extends Component {
             const url = `/api/orgs/${orgId}/projects/${projId}`;
 
             // Grab all the elements
-            ajaxRequest('GET',`${url}/branches/master/elements?jmi3=true`)
+            ajaxRequest('GET',`${url}/branches/master/elements?jmi3=true&fields=id,name`)
             .then(elements => {
                 // Set the element state
                 this.setState({ elements: elements });

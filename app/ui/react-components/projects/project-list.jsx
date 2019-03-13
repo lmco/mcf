@@ -189,9 +189,9 @@ class ProjectList extends Component {
                         {/*Verify user has write and admin permissions*/}
                         {(this.state.admin)
                             // Allow access to all orgs
-                            ? <DeleteProject projects={this.state.projects}/>
+                            ? <DeleteProject projects={this.state.projects} toggle={this.handleDeleteToggle}/>
                             // Allow access to write orgs only
-                            : <DeleteProject orgs={this.state.writePermOrgs}/>
+                            : <DeleteProject orgs={this.state.writePermOrgs} toggle={this.handleDeleteToggle}/>
                         }
                     </ModalBody>
                 </Modal>
@@ -207,7 +207,7 @@ class ProjectList extends Component {
                                 :(<Button className='btn'
                                           outline color="danger"
                                           onClick={this.handleDeleteToggle}>
-                                    Delete
+                                    <i className='fas fa-trash-alt'/>
                                   </Button>)
                             }
                             {/*Verify user has write permission*/}
@@ -217,7 +217,7 @@ class ProjectList extends Component {
                                 :(<Button className='btn'
                                           outline color="secondary"
                                           onClick={this.handleCreateToggle}>
-                                    Create
+                                    <i className='fas fa-plus'/>
                                 </Button>)
                             }
                         </div>

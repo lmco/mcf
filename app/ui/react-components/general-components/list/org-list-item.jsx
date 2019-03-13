@@ -73,13 +73,15 @@ class OrgListItem extends Component {
 
         // Render the organization stat list items
         return (
-            <div className='stats-list-item' ref={this.ref}>
-                <div className='list-header'>
-                    <p>{org.name}</p>
+            <a href={this.props.href} className={this.props.className}>
+                <div className='stats-list-item' ref={this.ref}>
+                    <div className='list-header'>
+                        <p>{org.name}</p>
+                    </div>
+                    {/*Verify width of client, remove stats based on width*/}
+                    {(this.state.width > 600) ? stats : ''}
                 </div>
-                {/*Verify width of client, remove stats based on width*/}
-                {(this.state.width > 600) ? stats : ''}
-            </div>
+            </a>
         )
     }
 }
