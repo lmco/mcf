@@ -385,6 +385,11 @@ textarea[name="custom"] {
         grid-template-areas: "icon org button";
         justify-content: left;
         align-items: center;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .org-proj-list:hover {
+        background: #b8d6f4;
     }
 
     .org-icon {
@@ -598,15 +603,10 @@ textarea[name="custom"] {
 /*                           List Component Styling                           *
 /******************************************************************************/
 .list {
-    padding-left: 1em;
-
     a {
         display: block;
         text-decoration: none;
         color: black;
-        :hover {
-            background: darken($mbee-background, 10);
-        }
     }
 
     hr {
