@@ -70,7 +70,7 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.element.id),
-    maxlength: [110, 'Too many characters in ID'],
+    maxlength: [255, 'Too many characters in ID'],
     minlength: [8, 'Too few characters in ID']
   },
   name: {
@@ -293,6 +293,120 @@ ElementSchema.methods.getPublicData = function() {
     data.contains = (this.contains.every(e => typeof e === 'object'))
       ? this.contains.map(e => utils.parseID(e._id).pop())
       : this.contains.map(e => utils.parseID(e).pop());
+  }
+
+  return data;
+};
+
+ElementSchema.statics.getPublicData = function(element) {
+  // Parse the element ID
+  const idParts = utils.parseID(element._id);
+
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+  let parent = null;
+  let source;
+  let target;
+
+  // If element.createdBy is defined
+  if (element.createdBy) {
+    // If element.createdBy is populated
+    if (typeof element.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = element.createdBy.getPublicData();
+    }
+    else {
+      createdBy = element.createdBy;
+    }
+  }
+
+  // If element.lastModifiedBy is defined
+  if (element.lastModifiedBy) {
+    // If element.lastModifiedBy is populated
+    if (typeof element.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = element.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = element.lastModifiedBy;
+    }
+  }
+
+  // If element.archivedBy is defined
+  if (element.archivedBy) {
+    // If element.archivedBy is populated
+    if (typeof element.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = element.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = element.archivedBy;
+    }
+  }
+
+  // If element.parent is defined
+  if (element.parent) {
+    // If element.parent is populated
+    if (typeof element.parent === 'object') {
+      // Get the public data of parent
+      parent = element.parent.getPublicData();
+    }
+    else {
+      parent = utils.parseID(element.parent).pop();
+    }
+  }
+
+  // If element.source is defined
+  if (element.source) {
+    // If element.source is populated
+    if (typeof element.source === 'object') {
+      // Get the public data of source
+      source = element.source.getPublicData();
+    }
+    else {
+      source = utils.parseID(element.source).pop();
+    }
+  }
+
+  // If element.target is defined
+  if (element.target) {
+    // If element.target is populated
+    if (typeof element.target === 'object') {
+      // Get the public data of target
+      target = element.target.getPublicData();
+    }
+    else {
+      target = utils.parseID(element.target).pop();
+    }
+  }
+
+  const data = {
+    id: idParts.pop(),
+    name: element.name,
+    project: idParts[1],
+    org: idParts[0],
+    parent: parent,
+    source: source,
+    target: target,
+    type: element.type,
+    documentation: element.documentation,
+    custom: element.custom,
+    createdOn: element.createdOn,
+    createdBy: createdBy,
+    updatedOn: element.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (element.archived) ? element : undefined,
+    archivedOn: (element.archivedOn) ? element.archivedOn : undefined,
+    archivedBy: archivedBy
+  };
+
+
+  if (element.contains) {
+    // Handle the virtual contains field
+    data.contains = (element.contains.every(e => typeof e === 'object'))
+      ? element.contains.map(e => utils.parseID(e._id).pop())
+      : element.contains.map(e => utils.parseID(e).pop());
   }
 
   return data;
