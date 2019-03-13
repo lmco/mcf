@@ -57,19 +57,24 @@ class Project extends Component {
         // Get project data
         ajaxRequest('GET',`${url}`)
         .then(project => {
-            // Initialize variables
-            const username = this.props.user.username;
-            const perm = project.permissions[username];
-            const admin = this.props.user.admin;
+            // Get user data
+            ajaxRequest('GET','/api/users/whoami')
+            .then(user => {
+                // Initialize variables
+                const username = user.username;
+                const perm = project.permissions[username];
+                const admin = user.admin;
 
-            // Verify if user is admin
-            if ((admin) || (perm === 'admin')){
-                // Set admin state
-                this.setState({admin: true});
-            }
+                // Verify if user is admin
+                if ((admin) || (perm === 'admin')){
+                    // Set admin state
+                    this.setState({admin: true});
+                }
 
-            // Set states
-            this.setState({ project: project });
+                // Set states
+                this.setState({ project: project });
+            })
+            .catch((err) => this.setState({error: err.responseJSON.description}))
         })
         .catch(err => {
             // Throw error and set state

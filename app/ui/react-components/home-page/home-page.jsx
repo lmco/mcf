@@ -178,7 +178,6 @@ class HomePage extends Component {
     render() {
         // Loop through all orgs
         const list = this.state.orgs.map(org => {
-            console.log(org);
             const username = this.state.user.username;
 
             if (org.permissions[username] === 'write') {

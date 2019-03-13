@@ -766,6 +766,12 @@ textarea[name="custom"] {
     }
 }
 
+.no-results {
+    display: flex;
+    justify-content: center;
+    margin: 20px;
+}
+
 .search-results {
     margin: 20px;
 
