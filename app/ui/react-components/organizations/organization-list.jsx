@@ -132,7 +132,7 @@ class OrganizationList extends Component {
                 {/*Display the list of organizations*/}
                 <div id='view' className='org-list' ref={this.ref}>
                     <div className='org-list-header'>
-                        <h2 className='org-header'>Organizations</h2>
+                        <h2 className='org-header'>Your Organizations</h2>
                         {/*Verify user is an admin */}
                         {(!this.state.admin)
                             ? ''
