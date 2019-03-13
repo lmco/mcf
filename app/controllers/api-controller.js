@@ -28,6 +28,7 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const Element = M.require('models.element');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 
@@ -2206,8 +2207,9 @@ function getElements(req, res) {
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, elemIDs, options)
   .then((elements) => {
-    // Return only public element data
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    const elementsPublicData = (elements.every(e => e instanceof Element))
+      ? elements.map(e => e.getPublicData())
+      : elements.map(e => Element.getPublicData(e));
 
     // If the fields options was specified
     if (options.fields) {
@@ -2231,11 +2233,15 @@ function getElements(req, res) {
     // Check for JMI conversion
     if (jmiOpt) {
       // Convert data to JMI type 3 object
-      const jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
-
-      // Return a 200: OK and public JMI type 3 element data
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(formatJSON(jmiData));
+      try {
+        const jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
+        // Return a 200: OK and public JMI type 3 element data
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(formatJSON(jmiData));
+      }
+      catch (err) {
+        return res.status(err.status || 500).send(err);
+      }
     }
 
     // Return a 200: OK and public element data
@@ -2522,7 +2528,7 @@ function searchElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     limit: 'number',
-    query: 'string'
+    q: 'string'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2541,10 +2547,10 @@ function searchElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Check options for query
-  if (options.query) {
-    query = options.query;
-    delete options.query;
+  // Check options for q (query)
+  if (options.q) {
+    query = options.q;
+    delete options.q;
   }
 
   // Default branch to master

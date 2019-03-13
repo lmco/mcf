@@ -152,7 +152,8 @@ class CreateOrganization extends Component{
                             </FormFeedback>
                         </FormGroup>
                         {/*Button to create org*/}
-                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Create Org </Button>
+                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Create </Button>{' '}
+                        <Button outline onClick={this.props.toggle}> Cancel </Button>
                     </Form>
                 </div>
             </div>

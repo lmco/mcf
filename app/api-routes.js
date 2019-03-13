@@ -1499,7 +1499,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: path
  *         required: true
  *         type: string
- *       - name: query
+ *       - name: q
  *         description: The desired text to be searched for.
  *         in: query
  *         type: string
