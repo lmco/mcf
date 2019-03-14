@@ -37,7 +37,6 @@ class OrgList extends Component {
             width: null,
             modalProjCreate: false,
             modalOrgDelete: false,
-            modalProjDelete: false,
             projects: []
         };
 
@@ -48,19 +47,12 @@ class OrgList extends Component {
         this.handleShowProjsToggle = this.handleShowProjsToggle.bind(this);
         this.handleDeleteOrgToggle = this.handleDeleteOrgToggle.bind(this);
         this.handleCreateProjToggle = this.handleCreateProjToggle.bind(this);
-        this.handleDeleteProjToggle = this.handleDeleteProjToggle.bind(this);
     }
 
     // Define org toggle functionality
     handleShowProjsToggle() {
         // Set the state to opposite of its initial state
         this.setState({ showProjs: !this.state.showProjs });
-    }
-
-    // Define toggle function
-    handleDeleteProjToggle() {
-        // Set the delete modal state
-        this.setState({ modalProjDelete: !this.state.modalProjDelete });
     }
 
     // Define toggle function
