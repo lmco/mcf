@@ -22,7 +22,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 // MBEE Modules
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
-import CreateProject from '../projects/project-create.jsx';
+import Create from '../general-components/create.jsx';
 
 // Define function
 function OrganizationProjects(props) {
@@ -45,7 +45,7 @@ function OrganizationProjects(props) {
             {/*Modal for creating a project*/}
             <Modal isOpen={props.modal} toggle={props.handleToggle}>
                 <ModalBody>
-                    <CreateProject org={org} toggle={props.handleToggle}/>
+                    <Create project={true} org={org} toggle={props.handleToggle}/>
                 </ModalBody>
             </Modal>
             <div id='view' className='org-projects'>

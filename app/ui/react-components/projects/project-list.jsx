@@ -23,7 +23,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 import List from '../general-components/list/list.jsx';
 import ListItem from '../general-components/list/list-item.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
-import CreateProject from './project-create.jsx';
+import Create from '../general-components/create.jsx';
 import DeleteProject from './project-delete.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -179,9 +179,9 @@ class ProjectList extends Component {
                         {/*Verify user has write and admin permissions*/}
                         {(this.state.admin)
                             // Allow access to all orgs
-                            ? <CreateProject />
+                            ? <Create project={true} orgs={this.state.orgs} toggle={this.handleCreateToggle}/>
                             // Allow access to write orgs only
-                            : <CreateProject orgs={this.state.writePermOrgs}/>
+                            : <Create project={true} orgs={this.state.writePermOrgs} toggle={this.handleCreateToggle}/>
                         }
                     </ModalBody>
                 </Modal>

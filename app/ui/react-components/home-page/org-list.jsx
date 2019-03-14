@@ -16,14 +16,14 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Button, Modal, ModalBody, UncontrolledTooltip} from 'reactstrap';
+import { Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
 import DeleteOrganization from '../organizations/organization-delete.jsx';
-import CreateProject from '../projects/project-create.jsx';
+import Create from '../general-components/create.jsx';
 import DeleteProject from '../projects/project-delete.jsx';
 
 
@@ -120,7 +120,7 @@ class OrgList extends Component {
                 {/*Modal for creating an org*/}
                 <Modal isOpen={this.state.modalProjCreate} toggle={this.handleCreateProjToggle}>
                     <ModalBody>
-                        <CreateProject org={this.props.org} toggle={this.handleCreateProjToggle}/>
+                        <Create project={true} org={this.props.org} toggle={this.handleCreateProjToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Modal for deleting an org*/}

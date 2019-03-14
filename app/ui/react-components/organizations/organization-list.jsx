@@ -23,7 +23,7 @@ import {Button, Modal, ModalBody} from 'reactstrap';
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
-import CreateOrganization from './organization-create.jsx';
+import Create from '../general-components/create.jsx';
 import DeleteOrganization from './organization-delete.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -119,7 +119,7 @@ class OrganizationList extends Component {
                     {/*Modal for creating an org*/}
                     <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                         <ModalBody>
-                            <CreateOrganization toggle={this.handleCreateToggle}/>
+                            <Create toggle={this.handleCreateToggle}/>
                         </ModalBody>
                     </Modal>
                     {/*Modal for deleting an org*/}

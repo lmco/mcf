@@ -103,6 +103,15 @@ class EditPage extends Component {
         // Initialize variables
         let customInvalid;
         let disableSubmit;
+        let title;
+
+        if (this.props.org) {
+            title = 'Organization';
+        }
+        else {
+            title = 'Project';
+        }
+
 
         // Verify if custom data is correct JSON format
         try {
@@ -117,7 +126,7 @@ class EditPage extends Component {
         // Render organization edit page
         return (
             <div className='org-forms'>
-                <h2>Edit</h2>
+                <h2>Edit {title}</h2>
                 <hr />
                 <div>
                     {/*Create form to update org data*/}
