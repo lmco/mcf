@@ -22,9 +22,9 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
 import InformationPage from '../general-components/information-page.jsx';
+import EditPage from '../general-components/edit-page.jsx';
 import MembersPage from '../user/members-page.jsx';
 import ProjectElements from './project-elements.jsx';
-import ProjectEdit from './project-edit.jsx';
 import Search from '../search/search.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -129,7 +129,7 @@ class Project extends Component {
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}
-                                              render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)
+                                              render={(props) => <EditPage {...props} project={this.state.project} orgid={this.state.orgid}/>}/>)
                                     : ''
                                 }
                             </Switch>)

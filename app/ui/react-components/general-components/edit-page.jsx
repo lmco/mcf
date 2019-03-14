@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.projects
+ * @module ui.react-components.general-components
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -10,33 +10,49 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This renders the project edit page.
+ * @description This renders the edit page.
  */
 
+// React Modules
 // React Modules
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-import validators from '../../../../build/json/validators.json';
 
-// Define component
-class ProjectEdit extends Component{
+class EditPage extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
 
         // Initialize state props
+        let name;
+        let custom;
+
+        if (this.props.org) {
+            name = this.props.org.name;
+            custom = this.props.org.custom;
+        }
+        else {
+            name = this.props.project.name;
+            custom = this.props.project.custom;
+        }
+
         this.state = {
-            name: this.props.project.name,
-            custom: JSON.stringify(this.props.project.custom || {}, null, 2)
+            name: name,
+            custom: JSON.stringify(custom || {}, null, 2)
         };
 
-        // Bind component functions
+        // Bind component function
         this.handleChange = this.handleChange.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+    }
+
+    componentDidMount() {
+        $('textarea[name="custom"]').autoResize();
     }
 
     // Define handle change function
@@ -51,40 +67,42 @@ class ProjectEdit extends Component{
     // Define the submit function
     onSubmit(){
         // Initialize variables
+        let url;
+        let redirect;
+
+        if (this.props.org) {
+            url = `/api/orgs/${this.props.org.id}`;
+            redirect = `/${this.props.org.id}`;
+        }
+        else {
+            url = `/api/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
+            redirect = `/${this.props.orgid}/${this.props.project.id}`;
+        }
+
         let data = {
             name: this.state.name,
             custom: JSON.parse(this.state.custom)
         };
 
-        // Send a patch request to update project data
-        ajaxRequest('PATCH', this.props.url, data)
-        .then(() => {
-            // Update the page to reload to project home page
-            window.location.replace(`/${this.props.orgid}/${this.props.project.id}`);
-        })
-        .catch((msg) => {
-            // Let user know update failed
-            alert( `Update Failed: ${msg.responseJSON.description}`);
-        })
-    }
 
-    componentDidMount() {
-        //$('textarea[name="custom"]').resizable();
-        $('textarea[name="custom"]').autoResize();
+        // Send a patch request to update org data
+        ajaxRequest('PATCH', url, data)
+        // On success
+            .then(() => {
+                // Update the page to reload to org home page
+                window.location.replace(redirect);
+            })
+            // On fail
+            .catch((err) => {
+                // Let user know update failed
+                alert( `Update Failed: ${err.responseJSON.description}`);
+            });
     }
 
     render() {
         // Initialize variables
-        let nameInvalid;
         let customInvalid;
         let disableSubmit;
-
-        // Verify if project name is valid
-        if(!RegExp(validators.project.name).test(this.state.name)) {
-            // Set invalid fields
-            nameInvalid = true;
-            disableSubmit = true;
-        }
 
         // Verify if custom data is correct JSON format
         try {
@@ -96,28 +114,23 @@ class ProjectEdit extends Component{
             disableSubmit = true;
         }
 
-        // Render project edit page
+        // Render organization edit page
         return (
-            <div className='project-forms'>
-                <h2>Project Edit</h2>
+            <div className='org-forms'>
+                <h2>Edit</h2>
                 <hr />
                 <div>
-                    {/*Create form to update project data*/}
+                    {/*Create form to update org data*/}
                     <Form>
-                        {/*Form section for project name*/}
+                        {/*Form section for org name*/}
                         <FormGroup>
-                            <Label for="name">Project Name</Label>
+                            <Label for="name">Name</Label>
                             <Input type="name"
                                    name="name"
                                    id="name"
-                                   placeholder="Project name"
+                                   placeholder="Name"
                                    value={this.state.name || ''}
-                                   invalid={nameInvalid}
                                    onChange={this.handleChange}/>
-                            {/*Verify fields are valid, or display feedback*/}
-                            <FormFeedback >
-                                Invalid: A project name may only contain letters, numbers, space, or dashes.
-                            </FormFeedback>
                         </FormGroup>
                         {/*Form section for custom data*/}
                         <FormGroup>
@@ -143,5 +156,4 @@ class ProjectEdit extends Component{
     }
 }
 
-// Export component
-export default ProjectEdit
+export default EditPage;

@@ -23,8 +23,8 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
 import InformationPage from '../general-components/information-page.jsx';
+import EditPage from '../general-components/edit-page.jsx';
 import OrgProjects from './organization-projects.jsx';
-import OrgEdit from './organization-edit.jsx';
 import MembersPage from '../user/members-page.jsx'
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -135,7 +135,7 @@ class Organization extends Component {
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}
-                                             render={(props) => <OrgEdit {...props} org={this.state.org} />}/>)
+                                             render={(props) => <EditPage {...props} org={this.state.org} />}/>)
                                     : ''
                                 }
                             </Switch>)
