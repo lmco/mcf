@@ -32,7 +32,11 @@ function OrganizationProjects(props) {
     // Loop through the org's projects
     const listItems = org.projects.map(project =>
         // Create the project list item
-        <ListItem href={`/${org.id}/${project.id}`}> {project.name} </ListItem>
+        <ListItem className='proj-org-header'>
+            <a href={`/${org.id}/${project.id}`} >
+                {project.name}
+            </a>
+        </ListItem>
     );
 
     // Return the org's project list
@@ -55,7 +59,7 @@ function OrganizationProjects(props) {
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={props.handleToggle}>
-                                <i className='fas fa-plus first-icon'/>
+                                Create
                             </Button>
                          </div>)
                     }

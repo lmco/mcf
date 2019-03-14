@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.projects
+ * @module ui.react-components.general-components
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -20,7 +20,9 @@ import { Route } from 'react-router-dom';
 
 function MakeRoute(route) {
     if (route.props){
-        const props = Object.keys(route.props);
+        const propsNames = Object.keys(route.props);
+
+        const propValues = routes.props.map(p => p);
     }
 
     return (

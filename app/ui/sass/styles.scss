@@ -162,6 +162,10 @@ textarea[name="custom"] {
             overflow: scroll;
         }
     }
+
+    #view {
+        overflow: scroll;
+    }
 }
 
 
@@ -282,68 +286,6 @@ textarea[name="custom"] {
     justify-content: space-evenly;
     padding-top: 15px;
 }
-/******************************************************************************
-/*                             Home Page Styling                              *
-/******************************************************************************/
-.mbee-home {
-    display:flex;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    padding: 0;
-
-    .home-links {
-        display: flex;
-        flex-flow: wrap;
-        justify-content: space-evenly;
-        align-items: baseline;
-        padding: 15% 0;
-        height: 100%;
-        width: 100%;
-        overflow-y: scroll;
-
-        a:hover {
-            background: darken($mbee-background, 10);
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .home-link {
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: rgba(0,0,0,.1) 2px 4px 4px;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0 15px 0;
-            text-align: center;
-            transition:
-                transform .23s ease-in-out,
-                background .23s ease-in-out,
-                border .23s ease-in-out,
-                box-shadow .23s ease-in-out;
-            width: 160px;
-            margin: 10px;
-
-            .home-link-icon {
-                font-size: 50px;
-            }
-
-            .home-link-label {
-            }
-        }
-
-        .home-link:hover {
-            background: lighten($mbee-color-primary, 25%);
-            border: 1px solid $mbee-color-primary;
-            box-shadow: rgba(0,0,0,.1) 4px 6px 6px;
-            transform: scale(1.1);
-        }
-
-    }
-}
-
 
 /******************************************************************************
 /*                         Organization Page Styling                          *
@@ -357,7 +299,7 @@ textarea[name="custom"] {
     }
     .org-list-header {
         display: grid;
-        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-columns: minmax(auto, 90%) 1fr;
         grid-template-areas: "header button";
         justify-content: space-between;
         align-items: center;
@@ -371,7 +313,7 @@ textarea[name="custom"] {
 
     .org-button {
         grid-area: button;
-        justify-content: flex-end;
+        display:flex;
 
         .btn {
             float: right;
@@ -381,10 +323,16 @@ textarea[name="custom"] {
 
     .org-proj-list {
         display: grid;
-        grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 100px);
+        grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 60px);
         grid-template-areas: "icon org button";
         justify-content: left;
         align-items: center;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .org-proj-list:hover {
+        background: #f7f7f7;
     }
 
     .org-icon {
@@ -397,25 +345,56 @@ textarea[name="custom"] {
         grid-area: org;
         justify-content: space-around;
         margin: 5px;
+        border-right: 1px #ccc solid;
     }
 
-    .org-button {
+    .controls-container {
         display: flex;
         grid-area: button;
         justify-content: flex-end;
+
+        .add-btn {
+            color: $color-secondary;
+            padding-right: 20px;
+        }
+        .add-btn:hover {
+            color: darken($color-secondary, 20);
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            color: $color-danger;
+        }
+        .delete-btn:hover {
+            color: darken($color-danger, 20);
+            cursor: pointer;
+        }
+        .fake-icon {
+            color: transparent;
+        }
     }
 
     .proj-list {
         display: grid;
-        grid-template-columns: 1fr minmax(2px, 50px);
+        grid-template-columns: 1fr minmax(0px, 65px);
         grid-template-areas: "org button";
         justify-content: left;
         align-items: center;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .proj-list:hover {
+        background: #f7f7f7;
     }
 
     .projects-list {
         border-left: #eeeeee solid;
         margin-left: 25px;
+    }
+
+    .homeproj-list {
+        border-right: 1px #ccc solid;
     }
 
     .list .list-item .list-header p {
@@ -436,7 +415,7 @@ textarea[name="custom"] {
 
     .project-list-header {
         display: grid;
-        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-columns: minmax(auto, 90%) 1fr;
         grid-template-areas: "header button";
         justify-content: space-between;
         align-items: center;
@@ -450,7 +429,7 @@ textarea[name="custom"] {
 
     .project-button {
         grid-area: button;
-        justify-content: flex-end;
+        display: flex;
 
         .btn {
             float: right;
@@ -476,6 +455,28 @@ textarea[name="custom"] {
 /******************************************************************************/
 .project-home {
     padding: 2em;
+
+    a {
+        display: block;
+        text-decoration: none;
+        color: black;
+    }
+
+    a:hover {
+        color: #ffc700;
+    }
+}
+
+.proj-org-header {
+    a {
+        width: 10%;
+    }
+    a:hover {
+        color: #ffc700;
+    }
+}
+.proj-org-header:hover {
+    background: #f7f7f7;
 }
 
 .project-list {
@@ -488,7 +489,7 @@ textarea[name="custom"] {
 
     .project-list-header {
         display: grid;
-        grid-template-columns: minmax(auto, 600px) 1fr;
+        grid-template-columns: minmax(auto, 90%) 1fr;
         grid-template-areas: "header button";
         justify-content: space-between;
         align-items: center;
@@ -502,7 +503,7 @@ textarea[name="custom"] {
 
     .project-button {
         grid-area: button;
-        justify-content: flex-end;
+        display: flex;
 
         .btn {
             float: right;
@@ -589,16 +590,15 @@ textarea[name="custom"] {
 /******************************************************************************
 /*                           List Component Styling                           *
 /******************************************************************************/
-.list {
-    padding-left: 1em;
+.hover-darken:hover {
+    background: #f7f7f7;
+}
 
+.list {
     a {
         display: block;
         text-decoration: none;
         color: black;
-        :hover {
-            background: darken($mbee-background, 10);
-        }
     }
 
     hr {
@@ -667,6 +667,9 @@ textarea[name="custom"] {
             margin: 0;
             display: inline-block;
         }
+        a:hover {
+            color: #ffc700;
+        }
     }
 
     .stats-list {
@@ -716,6 +719,12 @@ textarea[name="custom"] {
             width: 100%;
         }
     }
+}
+
+.no-results {
+    display: flex;
+    justify-content: center;
+    margin: 20px;
 }
 
 .search-results {

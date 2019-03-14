@@ -151,7 +151,7 @@ class ProjectList extends Component {
                 // Create project links
                 return (
                     <Link to={`/${orgId}/${project.id}`}>
-                        <ProjectListItem project={project}/>
+                        <ProjectListItem className='hover-darken' project={project}/>
                     </Link>
                 )
             });
@@ -159,7 +159,9 @@ class ProjectList extends Component {
             // Return the list of the orgs with projects
             return (
                 <React.Fragment>
-                    <ListItem href={`/${orgId}`}> {org.name} </ListItem>
+                    <ListItem className='proj-org-header'>
+                        <a href={`/${orgId}`}>{org.name}</a>
+                    </ListItem>
                     <List className='projects-list'>
                         {projects}
                     </List>
@@ -198,18 +200,8 @@ class ProjectList extends Component {
                 {/*Display the list of projects*/}
                 <div id='view' className='project-list' ref={this.ref}>
                     <div className='project-list-header'>
-                        <h2 className='project-header'>Projects</h2>
+                        <h2 className='project-header'>Your Projects</h2>
                         <div className='project-button'>
-                            {/*Verify user has admin permissions*/}
-                            {(!this.state.admin)
-                                ? ''
-                                // Display delete button
-                                :(<Button className='btn'
-                                          outline color="danger"
-                                          onClick={this.handleDeleteToggle}>
-                                    <i className='fas fa-trash-alt'/>
-                                  </Button>)
-                            }
                             {/*Verify user has write permission*/}
                             {(!this.state.write)
                                 ? ''
@@ -217,7 +209,17 @@ class ProjectList extends Component {
                                 :(<Button className='btn'
                                           outline color="secondary"
                                           onClick={this.handleCreateToggle}>
-                                    <i className='fas fa-plus'/>
+                                    Create
+                                </Button>)
+                            }
+                            {/*Verify user has admin permissions*/}
+                            {(!this.state.admin)
+                                ? ''
+                                // Display delete button
+                                :(<Button className='btn'
+                                          outline color="danger"
+                                          onClick={this.handleDeleteToggle}>
+                                    Delete
                                 </Button>)
                             }
                         </div>

@@ -92,16 +92,13 @@ class OrgList extends Component {
                         </ModalBody>
                     </Modal>
                     <div className='proj-list'>
-                        <ProjectListItem project={project} href={`/${orgId}/${project.id}`}/>
+                        <ProjectListItem className='homeproj-list' project={project} href={`/${orgId}/${project.id}`}/>
                         {(!this.props.admin)
                             ? ''
-                            :(< div className='org-button'>
-                                    <Button className='btn'
-                                            outline color="danger"
-                                            onClick={this.handleDeleteProjToggle}>
-                                        <i className='fas fa-trash-alt'/>
-                                    </Button>
-                                </div>
+                            :(< div className='controls-container'>
+                                    <i className='fas fa-plus fake-icon'/>
+                                    <i onClick={this.handleDeleteProjToggle} className='fas fa-trash-alt delete-btn'/>
+                              </div>
                             )
                         }
                     </div>
@@ -138,21 +135,14 @@ class OrgList extends Component {
                     </div>
                     <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`}/>
                     {((this.props.admin) || (this.props.write))
-                        ? (< div className='org-button'>
-                                <Button className='btn'
-                                        outline color="secondary"
-                                        onClick={this.handleCreateProjToggle}>
-                                    <i className='fas fa-plus'/>
-                                </Button>
+                        ?(<div className='controls-container'>
+                                    <i className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
                                 {(!this.props.admin)
                                     ? ''
-                                    : (<Button className='btn'
-                                               outline color="danger"
-                                               onClick={this.handleDeleteOrgToggle}>
-                                        <i className='fas fa-trash-alt'/>
-                                    </Button>)
+                                    : (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>)
                                 }
-                            </div>)
+                          </div>
+                        )
                         : ''
                     }
                 </div>
