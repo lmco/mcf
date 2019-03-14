@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.general-components.list
+ * @module ui.react-components.home-page
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,20 +11,19 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This creates the organization and project list .
+ * @description This creates the organization list.
  */
 
 // React Modules
 import React, { Component } from 'react';
-import {Button, Modal, ModalBody, UncontrolledTooltip} from 'reactstrap';
+import { Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
-import ProjectListItem from '../general-components/list/project-list-item.jsx';
+import ProjList from './proj-list.jsx';
 import DeleteOrganization from '../organizations/organization-delete.jsx';
 import CreateProject from '../projects/project-create.jsx';
-import DeleteProject from '../projects/project-delete.jsx';
 
 
 class OrgList extends Component {
@@ -84,25 +83,7 @@ class OrgList extends Component {
         const projects = this.props.org.projects.map(project => {
             // Create project links
             return (
-                <React.Fragment>
-                    {/*Modal for deleting an org*/}
-                    <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
-                        <ModalBody>
-                            <DeleteProject project={project} toggle={this.handleDeleteProjToggle}/>
-                        </ModalBody>
-                    </Modal>
-                    <div className='proj-list'>
-                        <ProjectListItem className='homeproj-list' project={project} href={`/${orgId}/${project.id}`}/>
-                        {(!this.props.admin)
-                            ? ''
-                            :(< div className='controls-container'>
-                                    <i className='fas fa-plus fake-icon'/>
-                                    <i onClick={this.handleDeleteProjToggle} className='fas fa-trash-alt delete-btn'/>
-                              </div>
-                            )
-                        }
-                    </div>
-                </React.Fragment>
+                <ProjList project={project} admin={this.props.admin} orgid={this.props.org.id}/>
             )
         });
 
