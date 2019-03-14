@@ -22,6 +22,7 @@ import ReactDOM from 'react-dom';
 // MBEE Moduels
 import ProjectList from './project-list.jsx';
 import Project from './project.jsx';
+import MakeRoute from '../general-components/make-route.jsx'
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -48,6 +49,17 @@ class Projects extends Component {
   }
 
   render() {
+      const routes = [{
+          path: '/projects',
+          component: ProjectList
+      },{
+          path: '/:orgid/:projectid',
+          component: Project,
+          props: {
+              user: this.state.user
+          }
+      }];
+
       // Return project routes
       return (
           <Router>
