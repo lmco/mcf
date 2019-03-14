@@ -2611,7 +2611,7 @@ function getElements(req, res) {
   // Note: Undefined if not set
   let elemIDs;
   let options;
-  let jmiOpt;
+  let format;
   let minified = false;
 
   // Define valid option and its parsed type
@@ -2623,7 +2623,7 @@ function getElements(req, res) {
     limit: 'number',
     skip: 'number',
     ids: 'array',
-    jmi3: 'boolean',
+    format: 'string',
     minified: 'boolean'
   };
 
@@ -2657,10 +2657,17 @@ function getElements(req, res) {
     elemIDs = req.body.map(p => p.id);
   }
 
-  // Check for JMI type 3 conversion option
-  if (options.hasOwnProperty('jmi3')) {
-    jmiOpt = options.jmi3;
-    delete options.jmi3;
+  // Check for format conversion option
+  if (options.hasOwnProperty('format')) {
+    const validFormats = ['jmi1', 'jmi2', 'jmi3'];
+    // If the provided format is not valid, error out
+    if (!validFormats.includes(options.format)) {
+      const error = new M.CustomError(`The format ${options.format} is not a `
+        + 'valid format.', 400, 'warn');
+      return res.status(error.status).send(error);
+    }
+    format = options.format;
+    delete options.format;
   }
 
   // Default branch to master
@@ -2703,12 +2710,25 @@ function getElements(req, res) {
     const retData = elementsPublicData;
 
     // Check for JMI conversion
-    if (jmiOpt) {
-      // Convert data to JMI type 3 object
+    if (format) {
+      // Convert data to correct JMI format
       try {
-        const jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
+        let jmiData = [];
+
+        // If JMI type 1, return plain element public data
+        if (format === 'jmi1') {
+          jmiData = elementsPublicData;
+        }
+        else if (format === 'jmi2') {
+          jmiData = jmi.convertJMI(1, 2, elementsPublicData, 'id');
+        }
+        else if (format === 'jmi3') {
+          jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
+        }
+
         // Format JSON if minify option is not true
         const json = (minified) ? jmiData : formatJSON(jmiData);
+
         // Return a 200: OK and public JMI type 3 element data
         res.header('Content-Type', 'application/json');
         return res.status(200).send(json);

@@ -37,6 +37,7 @@ const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -280,6 +281,7 @@ function create(requestingUser, orgs, options) {
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    let orgObjects = [];
 
     // Initialize valid options
     let populateString = '';
@@ -402,7 +404,7 @@ function create(requestingUser, orgs, options) {
       // Create array of usernames
       const foundUsernames = foundUsers.map(u => u.username);
       // For each object of org data, create the org object
-      const orgObjects = orgsToCreate.map((o) => {
+      orgObjects = orgsToCreate.map((o) => {
         const orgObj = new Organization(o);
         // Set permissions
         Object.keys(orgObj.permissions).forEach((u) => {
@@ -438,8 +440,13 @@ function create(requestingUser, orgs, options) {
       // Create the organizations
       return Organization.insertMany(orgObjects);
     })
-    .then(() => resolve(Organization.find({ _id: { $in: arrIDs } }, fieldsString)
-    .populate(populateString)))
+    .then(() => {
+      // Emit the event orgs-created
+      EventEmitter.emit('orgs-created', orgObjects);
+
+      return resolve(Organization.find({ _id: { $in: arrIDs } }, fieldsString)
+      .populate(populateString));
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -799,7 +806,12 @@ function update(requestingUser, orgs, options) {
     })
     .then(() => Organization.find(searchQuery, fieldsString)
     .populate(populateString))
-    .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
+    .then((foundUpdatedOrgs) => {
+      // Emit the event orgs-updated
+      EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
+
+      return resolve(foundUpdatedOrgs);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -936,8 +948,13 @@ function createOrReplace(requestingUser, orgs, options) {
     })
     // Delete orgs from database
     .then(() => Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }))
-    // Create the new orgs
-    .then(() => create(requestingUser, orgsToLookup, options))
+    .then(() => {
+      // Emit the event orgs-deleted
+      EventEmitter.emit('orgs-deleted', foundOrgs);
+
+      // Create the new orgs
+      return create(requestingUser, orgsToLookup, options);
+    })
     .then((_createdOrgs) => {
       createdOrgs = _createdOrgs;
 
@@ -1059,6 +1076,9 @@ function remove(requestingUser, orgs, options) {
     // Delete the orgs
     .then(() => Organization.deleteMany(searchQuery))
     .then((retQuery) => {
+      // Emit the event orgs-deleted
+      EventEmitter.emit('orgs-deleted', foundOrgs);
+
       // Verify that all of the orgs were correctly deleted
       if (retQuery.n !== foundOrgs.length) {
         M.log.error(`Some of the following orgs were not deleted [${saniOrgs.toString()}].`);
