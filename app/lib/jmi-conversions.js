@@ -87,64 +87,89 @@ function jmi12(data, field) {
  * @return {Object} The converted JMI type 3 object.
  */
 function jmi13(data, field) {
-  // Set data as JMI type 2
+  // Convert the array of objects to JMI2
   const jmi2Obj = jmi12(data, field);
+  // Convert the JMI2 object to JMI3
+  const jmi3Obj = jmi23(jmi2Obj);
 
-  // Create JMI type 3 object with helper function
-  const tree = jmi3Helper(jmi2Obj, null);
+  // Loop through all top level keys in JMI 3 object
+  Object.keys(jmi3Obj).forEach((k) => {
+    // Get the ID of the elements parent
+    const parentID = jmi3Obj[k].parent;
+    // If the parent is on the top level, a circular reference exists.
+    if (jmi3Obj[parentID]) {
+      throw new M.CustomError('A circular reference exists in the given data.', 403, 'warn');
+    }
+  });
 
-  // Error Check: Ensure there are no circular references
-  if (Object.keys(jmi2Obj).length > 0) {
-    throw new M.CustomError('A circular reference exists in the given data', 403, 'warn');
-  }
-
-  // Return JMI type 3 object
-  return tree;
+  return jmi3Obj;
 }
 
 /**
- * @description Recursive JMI type 3 function
+ * @description Converts a JMI 2 object into JMI 3 format.
  *
- * @param {Object} jmi2 - The data to convert between JMI versions.
- * @param {string} id - The field to parse on
+ * @param {Object} jmi2 - A JMI 2 object containing elements. Keys are the
+ * unique identifier (id by default), and values are the element objects.
  *
- * @return {Object} The converted JMI type 2 object.
+ * @return {Object} Modified JMI2 object which is now in JMI3 format.
  */
-function jmi3Helper(jmi2, id) {
-  // Initialize variables
-  const elementHead = [];
-  const treeObj = {};
+function jmi23(jmi2) {
+  // Create an array for elements with no children
+  const empty = [];
 
-  // Looping through object to find parent
-  Object.keys(jmi2).forEach((key) => {
-    // Initialize parent
-    const parent = jmi2[key].parent;
+  // Loop through each element
+  Object.keys(jmi2).forEach((e) => {
+    const element = jmi2[e];
 
-    // Not the first loop
-    if (id !== null) {
-      // Check if parent is the id
-      if (parent === id) {
-        // Push into head array
-        elementHead.push(jmi2[key]);
-      }
+    // If the element has no children, add to empty
+    if (element.contains.length === 0) {
+      empty.push(element.id);
     }
-    // If no parent is found or does not exist, set as head
-    else if (!parent || !jmi2[parent]) {
-      elementHead.push(jmi2[key]);
+
+    const obj = {};
+    // Convert array of strings to object
+    element.contains.forEach((i) => {
+      obj[i] = i;
+    });
+
+    // Set the contains equal to the object
+    element.contains = obj;
+  });
+
+  // Call JMI 2->3 Helper
+  jmi23Helper(jmi2, empty);
+
+  // Return modified JMI2 object
+  return jmi2;
+}
+
+/**
+ * @description Helper function for converting JMI 2 to JMI 3
+ *
+ * @param {Object} jmi2 - JMI type 2 object
+ * @param {string[]} ids - List of lowest level ids
+ */
+function jmi23Helper(jmi2, ids) {
+  // Create array for lowest level elements
+  const emptys = [];
+  // Loop through each id
+  ids.forEach((i) => {
+    const element = jmi2[i];
+    const parentID = element.parent;
+    const parent = jmi2[parentID];
+    // Move element to its parent's contains field
+    parent.contains[i] = element;
+    delete jmi2[i];
+
+    // If all of the items in contains are objects, the parent is lowest level
+    if (Object.keys(parent.contains).every(k => typeof parent.contains[k] === 'object')
+      && jmi2[parent.parent]) {
+      emptys.push(parentID);
     }
   });
 
-  // Looping through elements to create tree
-  elementHead.forEach((element) => {
-    // Initializing element object in tree
-    treeObj[element.id] = element;
-
-    // Deleting the child from the JMI Type 2 Object
-    delete jmi2[element.id];
-
-    treeObj[element.id].contains = jmi3Helper(jmi2, element.id);
-  });
-
-  // Return tree object
-  return treeObj;
+  // If there are still lowest level elements, recursively call function
+  if (emptys.length > 0) {
+    jmi23Helper(jmi2, emptys);
+  }
 }

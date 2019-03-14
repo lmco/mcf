@@ -38,7 +38,6 @@ class Project extends Component {
         this.state = {
             project: null,
             orgid: null,
-            elements: null,
             url: null,
             error: null,
             admin: false
@@ -58,28 +57,19 @@ class Project extends Component {
         // Get project data
         ajaxRequest('GET',`${url}`)
         .then(project => {
-            // Get project elements in JMI Type 3
-            ajaxRequest('GET',`${url}/branches/master/elements?jmi3=true&minified=true`)
-            .then(elements => {
-                // Initialize variables
-                const username = this.props.user.username;
-                const perm = project.permissions[username];
-                const admin = this.props.user.admin;
+            // Initialize variables
+            const username = this.props.user.username;
+            const perm = project.permissions[username];
+            const admin = this.props.user.admin;
 
-                // Verify if user is admin
-                if ((admin) || (perm === 'admin')){
-                    // Set admin state
-                    this.setState({admin: true});
-                }
+            // Verify if user is admin
+            if ((admin) || (perm === 'admin')){
+                // Set admin state
+                this.setState({admin: true});
+            }
 
-                // Set states
-                this.setState({ project: project });
-                this.setState({ elements: elements });
-            })
-            .catch(err => {
-                // Throw error and set state
-                this.setState({error: `Failed to load project: ${err}`});
-            });
+            // Set states
+            this.setState({ project: project });
         })
         .catch(err => {
             // Throw error and set state
@@ -115,7 +105,7 @@ class Project extends Component {
                         }
                     </Sidebar>
                     {/*Verify project and element data exists*/}
-                    {(!this.state.project && !this.state.elements)
+                    {(!this.state.project)
                         // Display loading page or error page if project is loading or failed to load
                         ? <div className="loading"> {this.state.error || 'Loading your project...'} </div>
                         : (<Switch>
@@ -127,9 +117,9 @@ class Project extends Component {
                                        render={ (props) => <ProjectUsers {...props} project={this.state.project} admin={this.state.admin}/> } />
                                 {/*Route to element page*/}
                                 <Route path={`${this.props.match.url}/elements`}
-                                   render={ (props) => <ProjectElements {...props} project={this.state.project} elements={this.state.elements} /> } />
+                                   render={ (props) => <ProjectElements {...props} project={this.state.project}/> } />
                                 <Route path={`${this.props.match.url}/search`}
-                                       render={ (props) => <Search {...props} project={this.state.project} elements={this.state.elements} /> } />
+                                       render={ (props) => <Search {...props} project={this.state.project} /> } />
                                 {/*Verify admin user*/}
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page

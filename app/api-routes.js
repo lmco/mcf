@@ -162,6 +162,11 @@ api.route('/version')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -807,6 +812,11 @@ api.route('/orgs/:orgid')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -892,6 +902,11 @@ api.route('/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -1631,7 +1646,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: path
  *         required: true
  *         type: string
- *       - name: query
+ *       - name: q
  *         description: The desired text to be searched for.
  *         in: query
  *         type: string
@@ -1646,6 +1661,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -1749,6 +1769,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -2653,6 +2678,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified

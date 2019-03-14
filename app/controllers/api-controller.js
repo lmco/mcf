@@ -28,6 +28,7 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const Element = M.require('models.element');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 
@@ -214,6 +215,7 @@ function getOrgs(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
+    limit: 'number',
     ids: 'array',
     minified: 'boolean'
   };
@@ -911,6 +913,7 @@ function getAllProjects(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
+    limit: 'number',
     minified: 'boolean'
   };
 
@@ -994,6 +997,7 @@ function getProjects(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
+    limit: 'number',
     ids: 'array',
     minified: 'boolean'
   };
@@ -1788,6 +1792,7 @@ function getUsers(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
+    limit: 'number',
     usernames: 'array',
     minified: 'boolean'
   };
@@ -2611,6 +2616,7 @@ function getElements(req, res) {
     archived: 'boolean',
     subtree: 'boolean',
     fields: 'array',
+    limit: 'number',
     ids: 'array',
     jmi3: 'boolean',
     minified: 'boolean'
@@ -2666,8 +2672,9 @@ function getElements(req, res) {
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, elemIDs, options)
   .then((elements) => {
-    // Return only public element data
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    const elementsPublicData = (elements.every(e => e instanceof Element))
+      ? elements.map(e => e.getPublicData())
+      : elements.map(e => Element.getPublicData(e));
 
     // If the fields options was specified
     if (options.fields) {
@@ -2693,7 +2700,17 @@ function getElements(req, res) {
     // Check for JMI conversion
     if (jmiOpt) {
       // Convert data to JMI type 3 object
-      retData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
+      try {
+        const jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
+        // Format JSON if minify option is not true
+        const json = (minified) ? jmiData : formatJSON(jmiData);
+        // Return a 200: OK and public JMI type 3 element data
+        res.header('Content-Type', 'application/json');
+        return res.status(200).send(json);
+      }
+      catch (err) {
+        return res.status(err.status || 500).send(err);
+      }
     }
 
     // Format JSON if minify option is not true
@@ -3030,7 +3047,8 @@ function searchElements(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
-    query: 'string',
+    limit: 'number',
+    q: 'string',
     minified: 'boolean'
   };
 
@@ -3051,9 +3069,9 @@ function searchElements(req, res) {
   }
 
   // Check options for q (query)
-  if (options.query) {
-    query = options.query;
-    delete options.query;
+  if (options.q) {
+    query = options.q;
+    delete options.q;
   }
 
   // Check options for minified

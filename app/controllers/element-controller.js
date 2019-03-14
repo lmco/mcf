@@ -66,6 +66,9 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
  *
  * @return {Promise} Array of found element objects
  *
@@ -126,6 +129,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     let populateString = 'contains ';
     let subtree = false;
     let fieldsString = '';
+    let limit = 0;
 
     // Ensure options are valid
     if (options) {
@@ -179,6 +183,14 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'limit' is supplied ensure it's a number
+      if (options.hasOwnProperty('limit')) {
+        if (typeof options.limit !== 'number') {
+          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        }
+        limit = options.limit;
       }
     }
 
@@ -237,7 +249,9 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       // If no IDs provided, find all elements in a project
       if (elementIDs.length === 0) {
         // Find all elements in a project
-        return Element.find(searchQuery, fieldsString).populate(populateString);
+        return Element.find(searchQuery, fieldsString, { limit: limit })
+        .populate(populateString)
+        .lean();
       }
       // Find elements by ID
 
@@ -249,7 +263,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery, fieldsString).populate(populateString)
+        promises.push(Element.find(searchQuery, fieldsString, { limit: limit })
+        .populate(populateString)
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
         }));
@@ -1571,6 +1586,9 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived] - If true, find results will include
  * archived objects. The default value is false.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
  *
  * @return {Promise} An array of found elements.
  *
@@ -1613,6 +1631,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     // Initialize valid options
     let archived = false;
     let populateString = 'contains ';
+    let limit = 0;
 
     // Ensure options are valid
     if (options) {
@@ -1645,6 +1664,14 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
         populateString += options.populate.join(' ');
       }
+
+      // If the option 'limit' is supplied ensure it's a number
+      if (options.hasOwnProperty('limit')) {
+        if (typeof options.limit !== 'number') {
+          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        }
+        limit = options.limit;
+      }
     }
 
     // Ensure the project exists
@@ -1670,7 +1697,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       }
 
       // Search for the elements
-      return Element.find(searchQuery, { score: { $meta: 'textScore' } })
+      return Element.find(searchQuery, { score: { $meta: 'textScore' } }, { limit: limit })
       .sort({ score: { $meta: 'textScore' } })
       .populate(populateString);
     })
