@@ -60,7 +60,7 @@ class CreateOrganization extends Component{
         ajaxRequest('POST', url, data)
         .then(() => {
             // On success, return the orgs page
-            window.location.replace(`/organizations`);
+            window.location.replace(`/${this.state.id}`);
         })
         .catch((err) => {
             // On failure, alert user

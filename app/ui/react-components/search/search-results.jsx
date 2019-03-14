@@ -31,12 +31,12 @@ class SearchResults extends Component {
     render() {
         // If no results yet, render empty div
         if (!this.props.results) {
-            return (<div></div>);
+            return (<div/>);
         }
 
         // If empty search results
         if (Array.isArray(this.props.results) && this.props.results.length === 0) {
-            return (<div>No search results found.</div>);
+            return (<div className='no-results'>No search results found.</div>);
         }
 
         const results = this.props.results.map(result => {

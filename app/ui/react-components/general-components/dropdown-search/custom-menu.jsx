@@ -27,6 +27,7 @@ function CustomMenu(props){
         className,
         'aria-labelledby': labeledBy,
     } = props;
+
     const  searchParam = props.username;
 
     // Return filtering list
@@ -41,9 +42,18 @@ function CustomMenu(props){
            {/* List of children */}
             <ul className="list-unstyled" onClick={props.onChange}>
                 {React.Children.toArray(children).filter(
-                    child =>
+                    child => {
+                        let ret = null;
                         // Verify if the children name or value start with search parameter
-                        !searchParam || child.props.children.toLowerCase().startsWith(searchParam) || child.props.value.startsWith(searchParam)
+                        try {
+                            ret = (!searchParam
+                                || child.props.children.toLowerCase().startsWith(searchParam));
+                        }
+                        catch (err) {
+                            ret = child.props.value.startsWith(searchParam)
+                        }
+                        return ret;
+                    }
                 )}
             </ul>
         </div>
