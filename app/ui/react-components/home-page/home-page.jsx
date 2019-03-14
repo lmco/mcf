@@ -178,7 +178,6 @@ class HomePage extends Component {
     render() {
         // Loop through all orgs
         const list = this.state.orgs.map(org => {
-            console.log(org);
             const username = this.state.user.username;
 
             if (org.permissions[username] === 'write') {
@@ -221,12 +220,12 @@ class HomePage extends Component {
                                 <Button className='btn'
                                         outline color="secondary"
                                         onClick={this.handleCreateToggle}>
-                                    <i className='fas fa-plus'/>
+                                    Create
                                 </Button>
                                 <Button className='btn'
                                         outline color="danger"
                                         onClick={this.handleDeleteToggle}>
-                                    <i className='fas fa-trash-alt'/>
+                                    Delete
                                 </Button>
                             </div>)
                         }

@@ -38,7 +38,7 @@ class SearchResult extends Component {
     render() {
         const iconClass = (this.state.collapsed) ? 'fa-chevron-right' : 'fa-chevron-down';
         const icon = (<i className={'fas ' + iconClass}
-                         onClick={this.toggleCollapse}></i>);
+                         onClick={this.toggleCollapse}/>);
 
         const element = this.props.data;
 
@@ -55,7 +55,7 @@ class SearchResult extends Component {
          */
         const rawJSONData = (
             <div id={'result-raw-' + element.id} className="search-result-raw">
-                <div dangerouslySetInnerHTML={{__html: htmlResult}}></div>
+                <div dangerouslySetInnerHTML={{__html: htmlResult}}/>
             </div>
         );
         return (

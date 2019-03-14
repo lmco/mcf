@@ -72,15 +72,13 @@ class ProjectListItem extends Component {
 
         // Render the organization stat list items
         return (
-            <a href={this.props.href}>
-                <div className='stats-list-item' ref={this.ref}>
-                    <div className='list-header'>
-                        <p>{project.name}</p>
-                    </div>
-                    {/*Verify width of client, remove stats based on width*/}
-                    {(this.state.width > 600) ? stats : ''}
+            <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
+                <div className='list-header'>
+                    <a href={this.props.href}>{project.name}</a>
                 </div>
-            </a>
+                {/*Verify width of client, remove stats based on width*/}
+                {(this.state.width > 600) ? stats : ''}
+            </div>
         )
     }
 }

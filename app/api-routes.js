@@ -167,6 +167,13 @@ api.route('/version')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET orgs, returns public org data.
@@ -223,6 +230,13 @@ api.route('/version')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST orgs, returns orgs' public data.
@@ -281,6 +295,13 @@ api.route('/version')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT orgs, returns orgs' public data.
@@ -344,6 +365,13 @@ api.route('/version')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH orgs, returns orgs' public data.
@@ -376,6 +404,13 @@ api.route('/version')
  *           type: array
  *           items:
  *             type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE orgs, returns deleted orgs' ids.
@@ -454,6 +489,13 @@ api.route('/orgs')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET org, returns org public data.
@@ -513,6 +555,13 @@ api.route('/orgs')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST org, returns org public data.
@@ -576,6 +625,13 @@ api.route('/orgs')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST org, returns org public data.
@@ -636,6 +692,13 @@ api.route('/orgs')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH org, returns updated org public
@@ -668,6 +731,13 @@ api.route('/orgs')
  *         in: path
  *         required: true
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE org, return deleted org ID.
@@ -747,6 +817,13 @@ api.route('/orgs/:orgid')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -830,6 +907,13 @@ api.route('/projects')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project public
@@ -899,6 +983,13 @@ api.route('/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST projects, returns project public
@@ -969,6 +1060,13 @@ api.route('/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT projects, returns project public
@@ -1040,6 +1138,13 @@ api.route('/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH project, returns project public
@@ -1080,6 +1185,13 @@ api.route('/projects')
  *           type: array
  *           items:
  *             type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE projects, return deleted
@@ -1164,6 +1276,13 @@ api.route('/orgs/:orgid/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET project, returns project public
@@ -1237,6 +1356,13 @@ api.route('/orgs/:orgid/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST project, return project public
@@ -1313,6 +1439,13 @@ api.route('/orgs/:orgid/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT project, return project public
@@ -1382,6 +1515,13 @@ api.route('/orgs/:orgid/projects')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH project, return updated project
@@ -1421,6 +1561,13 @@ api.route('/orgs/:orgid/projects')
  *         in: path
  *         required: true
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE project, return deleted project
@@ -1519,6 +1666,13 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1620,6 +1774,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1708,6 +1869,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST elements, return element public
@@ -1800,6 +1968,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT elements, return element public
@@ -1889,6 +2064,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH elements, returns element public
@@ -1938,6 +2120,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *           type: array
  *           items:
  *             type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE elements, return deleted
@@ -2037,6 +2226,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET element, returns element public
@@ -2130,6 +2326,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST element, returns element public
@@ -2226,6 +2429,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT element, returns element public
@@ -2312,6 +2522,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH element, returns element public
@@ -2362,6 +2579,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: path
  *         required: true
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE element, returns deleted
@@ -2459,6 +2683,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
@@ -2531,6 +2762,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST users returns public users data.
@@ -2600,6 +2838,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT users returns public users data.
@@ -2667,6 +2912,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH users, returns user's public
@@ -2700,6 +2952,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *           type: array
  *           items:
  *             type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE users, return deleted user's
@@ -2757,6 +3016,14 @@ api.route('/users')
  *     description: Returns the currently logged in user's public information.
  *     produces:
  *       - application/json
+ *     parameters:
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET current user information returns
@@ -2814,6 +3081,13 @@ api.route('/users/whoami')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET user, returns user's public data.
@@ -2886,6 +3160,13 @@ api.route('/users/whoami')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST user, return user's public data.
@@ -2958,6 +3239,13 @@ api.route('/users/whoami')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PUT user, return user's public data.
@@ -3018,6 +3306,13 @@ api.route('/users/whoami')
  *                      (-name).
  *         in: query
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH user, return user's public data.
@@ -3049,6 +3344,13 @@ api.route('/users/whoami')
  *         in: path
  *         required: true
  *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE user, returns deleted user's
@@ -3137,6 +3439,13 @@ api.route('/users/:username')
  *               type: string
  *               description: The users new password a second time, to confirm
  *                            they match.
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to PATCH user returns public user data.
