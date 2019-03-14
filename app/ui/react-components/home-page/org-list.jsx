@@ -22,9 +22,8 @@ import { Modal, ModalBody } from 'reactstrap';
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
-import DeleteOrganization from '../organizations/organization-delete.jsx';
+import Delete from '../general-components/delete.jsx';
 import Create from '../general-components/create.jsx';
-import DeleteProject from '../projects/project-delete.jsx';
 
 
 class OrgList extends Component {
@@ -88,7 +87,7 @@ class OrgList extends Component {
                     {/*Modal for deleting an org*/}
                     <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
                         <ModalBody>
-                            <DeleteProject project={project} toggle={this.handleDeleteProjToggle}/>
+                            <Delete project={project} toggle={this.handleDeleteProjToggle}/>
                         </ModalBody>
                     </Modal>
                     <div className='proj-list'>
@@ -126,7 +125,7 @@ class OrgList extends Component {
                 {/*Modal for deleting an org*/}
                 <Modal isOpen={this.state.modalOrgDelete} toggle={this.handleDeleteOrgToggle}>
                     <ModalBody>
-                        <DeleteOrganization org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
+                        <Delete org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
                     </ModalBody>
                 </Modal>
                 <div className='org-proj-list'>

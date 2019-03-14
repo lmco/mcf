@@ -24,7 +24,7 @@ import {Button, Modal, ModalBody} from 'reactstrap';
 import List from '../general-components/list/list.jsx';
 import OrgList from './org-list.jsx';
 import Create from '../general-components/create.jsx';
-import DeleteOrganization from '../organizations/organization-delete.jsx';
+import Delete from '../general-components/delete.jsx';
 import Space from '../general-components/space/space.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -205,7 +205,7 @@ class HomePage extends Component {
                 {/*Modal for deleting an org*/}
                 <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                     <ModalBody>
-                        <DeleteOrganization orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
+                        <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Display the list of projects*/}

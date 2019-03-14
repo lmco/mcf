@@ -24,7 +24,7 @@ import List from '../general-components/list/list.jsx';
 import ListItem from '../general-components/list/list-item.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
 import Create from '../general-components/create.jsx';
-import DeleteProject from './project-delete.jsx';
+import Delete from '../general-components/delete.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -188,13 +188,7 @@ class ProjectList extends Component {
                 {/*Modal for deleting a project*/}
                 <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                     <ModalBody>
-                        {/*Verify user has write and admin permissions*/}
-                        {(this.state.admin)
-                            // Allow access to all orgs
-                            ? <DeleteProject projects={this.state.projects} toggle={this.handleDeleteToggle}/>
-                            // Allow access to write orgs only
-                            : <DeleteProject orgs={this.state.writePermOrgs} toggle={this.handleDeleteToggle}/>
-                        }
+                        <Delete orgs={this.state.orgs} projects={this.state.projects} toggle={this.handleDeleteToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Display the list of projects*/}
