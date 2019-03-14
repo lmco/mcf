@@ -1620,6 +1620,16 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: format
+ *         description: The desired format of the response. If jmi1, the
+ *                      elements are returned in an array of element objects. If
+ *                      jmi2, an object is returned where keys are the element
+ *                      ids, and values are the element object. If jmi3, an
+ *                      object is returned in a tree-like structure.
+ *         in: query
+ *         type: string
+ *         default: jmi1
+ *         enum: [jmi1, jmi2, jmi3]
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
