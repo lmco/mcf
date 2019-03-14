@@ -38,6 +38,7 @@ const path = require('path');
 // MBEE Modules
 const Element = M.require('models.element');
 const Project = M.require('models.project');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -666,7 +667,12 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       // Return when all elements have been found
       return Promise.all(promises);
     })
-    .then(() => resolve(populatedElements))
+    .then(() => {
+      // Emit the event elements-created
+      EventEmitter.emit('elements-created', populatedElements);
+
+      return resolve(populatedElements);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -1065,7 +1071,12 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Return when all elements have been found
       return Promise.all(promises2);
     })
-    .then(() => resolve(foundUpdatedElements))
+    .then(() => {
+      // Emit the event elements-updated
+      EventEmitter.emit('elements-updated', foundUpdatedElements);
+
+      return resolve(foundUpdatedElements);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -1253,8 +1264,13 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     })
     // Delete elements from database
     .then(() => Element.deleteMany({ _id: foundElementIDs }))
-    // Create new elements
-    .then(() => create(requestingUser, orgID, projID, branch, elementsToLookup, options))
+    .then(() => {
+      // Emit the event elements-deleted
+      EventEmitter.emit('elements-deleted', foundElements);
+
+      // Create new elements
+      return create(requestingUser, orgID, projID, branch, elementsToLookup, options);
+    })
     .then((_createdElements) => {
       createdElements = _createdElements;
       const filePath = path.join(M.root, 'data', orgID, projID, `PUT-backup-elements-${ts}.json`);
@@ -1414,6 +1430,10 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
           uniqueIDs[id] = id;
         }
       });
+
+      // TODO: Change the emitter to return elements rather than ids
+      // Emit the event elements-deleted
+      EventEmitter.emit('elements-deleted', Object.keys(uniqueIDs));
 
       // Return just the unique ids
       return resolve(Object.keys(uniqueIDs));

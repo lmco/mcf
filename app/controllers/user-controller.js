@@ -37,6 +37,7 @@ const path = require('path');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -391,6 +392,9 @@ function create(requestingUser, users, options) {
       // Set function-wide createdUsers;
       createdUsers = _createdUsers;
 
+      // Emit the event users-created
+      EventEmitter.emit('users-created', createdUsers);
+
       // Find the default organization
       return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
     })
@@ -681,7 +685,12 @@ function update(requestingUser, users, options) {
       return User.bulkWrite(bulkArray);
     })
     .then(() => User.find(searchQuery, fieldsString).populate(populateString))
-    .then((foundUpdatedUsers) => resolve(foundUpdatedUsers))
+    .then((foundUpdatedUsers) => {
+      // Emit the event users-updated
+      EventEmitter.emit('users-updated', foundUpdatedUsers);
+
+      return resolve(foundUpdatedUsers);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -818,8 +827,13 @@ function createOrReplace(requestingUser, users, options) {
       });
     })
     .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }))
-    // Create the new users
-    .then(() => create(requestingUser, usersToLookup, options))
+    .then(() => {
+      // Emit the event users-deleted
+      EventEmitter.emit('users-deleted', foundUsers);
+
+      // Create the new users
+      return create(requestingUser, usersToLookup, options);
+    })
     .then((_createdUsers) => {
       createdUsers = _createdUsers;
 
@@ -981,7 +995,12 @@ function remove(requestingUser, users, options) {
     // Remove the users
     .then(() => User.deleteMany(searchQuery))
     // Return the deleted users
-    .then(() => resolve(foundUsernames))
+    .then(() => {
+      // Emit the event users-deleted
+      EventEmitter.emit('users-deleted', foundUsers);
+
+      return resolve(foundUsernames);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
