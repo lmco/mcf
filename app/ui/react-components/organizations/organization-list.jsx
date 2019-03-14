@@ -108,7 +108,7 @@ class OrganizationList extends Component {
         const orgs = this.state.orgs.map(org =>
             // Create org links
             <Link to={`/${org.id}`}>
-                <OrgListItem org={org} />
+                <OrgListItem className='hover-darken' org={org} />
             </Link>
         );
 
@@ -132,7 +132,7 @@ class OrganizationList extends Component {
                 {/*Display the list of organizations*/}
                 <div id='view' className='org-list' ref={this.ref}>
                     <div className='org-list-header'>
-                        <h2 className='org-header'>Organizations</h2>
+                        <h2 className='org-header'>Your Organizations</h2>
                         {/*Verify user is an admin */}
                         {(!this.state.admin)
                             ? ''
@@ -141,12 +141,12 @@ class OrganizationList extends Component {
                                     <Button className='btn'
                                             outline color="secondary"
                                             onClick={this.handleCreateToggle}>
-                                        <i className='fas fa-plus'/>
+                                        Create
                                     </Button>
                                     <Button className='btn'
                                             outline color="danger"
                                             onClick={this.handleDeleteToggle}>
-                                        <i className='fas fa-trash-alt'/>
+                                        Delete
                                     </Button>
                                 </div>)
                         }
