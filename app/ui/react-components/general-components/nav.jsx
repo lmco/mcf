@@ -31,9 +31,6 @@ import {
     DropdownMenu,
     DropdownItem } from 'reactstrap';
 
-// MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-
 // Define component
 class MbeeNav extends Component {
     constructor(props) {
@@ -116,7 +113,7 @@ class MbeeNav extends Component {
                             {/*Create links in navbar for documentation drop down*/}
                             <UncontrolledDropdown nav inNavbar>
                                 <DropdownToggle nav caret>
-                                    Documentation
+                                    Docs
                                 </DropdownToggle>
                                 <DropdownMenu right>
                                     <DropdownItem href="/doc/flight-manual">
@@ -131,17 +128,40 @@ class MbeeNav extends Component {
                                     </DropdownItem>
                                 </DropdownMenu>
                             </UncontrolledDropdown>
-                            {/*Create about page link*/}
+                            {(this.state.user === null)
+                                // Create link to login or logout
+                                ? <NavLink href="/login">Login</NavLink>
+                                :(<UncontrolledDropdown nav inNavbar>
+                                    <DropdownToggle nav caret>
+                                        <i className='fas fa-user-circle'/>
+                                    </DropdownToggle>
+                                    <DropdownMenu right>
+                                        <DropdownItem href="/whoami">
+                                            Profile
+                                        </DropdownItem>
+                                        <DropdownItem divider />
+                                        <DropdownItem href="/organizations">
+                                            Your Organizations
+                                        </DropdownItem>
+                                        <DropdownItem href="/projects">
+                                            Your Projects
+                                        </DropdownItem>
+                                        <DropdownItem href="/about">
+                                            About
+                                        </DropdownItem>
+                                        <DropdownItem divider />
+                                        <DropdownItem href="/doc/api">
+                                            {/*Check if user exists*/}
+                                            {(this.state.user === null)
+                                                // Create link to login or logout
+                                                ? <NavLink href="/login">Log In</NavLink>
+                                                : <NavLink href="/logout">Log Out</NavLink>
+                                            }
+                                        </DropdownItem>
+                                    </DropdownMenu>
+                                  </UncontrolledDropdown>)
+                            }
                             <NavItem>
-                                <NavLink href="/about">About</NavLink>
-                            </NavItem>
-                            <NavItem>
-                                {/*Check if user exists*/}
-                                {(this.state.user === null)
-                                    // Create link to login or logout
-                                    ? <NavLink href="/login">Login</NavLink>
-                                    : <NavLink href="/logout">Logout</NavLink>
-                                }
                             </NavItem>
                         </Nav>
                     </Collapse>

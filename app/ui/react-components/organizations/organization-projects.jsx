@@ -38,14 +38,12 @@ function OrganizationProjects(props) {
     // Return the org's project list
     return (
         <React.Fragment>
-            <div>
-                {/*Modal for creating a project*/}
-                <Modal isOpen={props.modal} toggle={props.handleToggle}>
-                    <ModalBody>
-                        <CreateProject org={org}/>
-                    </ModalBody>
-                </Modal>
-            </div>
+            {/*Modal for creating a project*/}
+            <Modal isOpen={props.modal} toggle={props.handleToggle}>
+                <ModalBody>
+                    <CreateProject org={org} toggle={props.handleToggle}/>
+                </ModalBody>
+            </Modal>
             <div id='view' className='org-projects'>
                 <div className='project-list-header'>
                      <h2 className='project-header'>Projects</h2>
@@ -57,7 +55,7 @@ function OrganizationProjects(props) {
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={props.handleToggle}>
-                                Create
+                                <i className='fas fa-plus first-icon'/>
                             </Button>
                          </div>)
                     }
