@@ -20,12 +20,12 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 // MBEE Modules
-import Sidebar from '../general-components/sidebar/sidebar.jsx'
-import SidebarLink from '../general-components/sidebar/sidebar-link.jsx'
-import OrgHome from './organization-home.jsx'
-import OrgProjects from './organization-projects.jsx'
-import OrgUsers from './organization-users.jsx'
-import OrgEdit from './organization-edit.jsx'
+import Sidebar from '../general-components/sidebar/sidebar.jsx';
+import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
+import OrgHome from './organization-home.jsx';
+import OrgProjects from './organization-projects.jsx';
+import OrgUsers from './organization-users.jsx';
+import OrgEdit from './organization-edit.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -75,7 +75,7 @@ class Organization extends Component {
             })
             .catch(err => {
                 // Throw error and set error state
-                this.setState({error: `Failed to load organization: ${err.responseJSON.description}`})
+                this.setState({error: `Failed to grab user: ${err.responseJSON.description}`})
             });
         })
         .catch(err => {

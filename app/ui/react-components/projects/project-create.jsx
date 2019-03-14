@@ -75,7 +75,7 @@ class CreateProject extends Component{
         ajaxRequest('POST', url, data)
         .then(() => {
             // On success, return to projects page
-            window.location.replace(`/projects`);
+            window.location.replace(`/${org}/${this.state.id}`);
         })
         .catch((msg) => {
             // On failure, alert user

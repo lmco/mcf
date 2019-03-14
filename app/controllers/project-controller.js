@@ -38,6 +38,7 @@ const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -473,6 +474,9 @@ function create(requestingUser, organizationID, projects, options) {
       return Promise.all(promises);
     })
     .then(() => {
+      // Emit the event projects-created
+      EventEmitter.emit('projects-created', projObjects);
+
       // Create a root model element for each project
       const elemObjects = projObjects.map((p) => new Element({
         _id: utils.createID(p._id, 'model'),
@@ -876,7 +880,12 @@ function update(requestingUser, organizationID, projects, options) {
       return Promise.all(promises);
     })
     .then(() => Project.find(searchQuery, fieldsString).populate(populateString))
-    .then((foundUpdatedProjects) => resolve(foundUpdatedProjects))
+    .then((foundUpdatedProjects) => {
+      // Emit the event projects-updated
+      EventEmitter.emit('projects-updated', foundUpdatedProjects);
+
+      return resolve(foundUpdatedProjects);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -1035,8 +1044,14 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     .then(() => Element.deleteMany({ _id: foundProjects.map(p => utils.createID(p._id, 'model')) }))
     // Delete projects from database
     .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
-    // Create the new/replaced projects
-    .then(() => create(requestingUser, orgID, projectsToLookUp, options))
+
+    .then(() => {
+      // Emit the event projects-deleted
+      EventEmitter.emit('projects-deleted', foundProjects);
+
+      // Create the new/replaced projects
+      return create(requestingUser, orgID, projectsToLookUp, options);
+    })
     .then((_createdProjects) => {
       createdProjects = _createdProjects;
 
@@ -1174,6 +1189,9 @@ function remove(requestingUser, organizationID, projects, options) {
     // Delete the projects
     .then(() => Project.deleteMany(searchQuery))
     .then((retQuery) => {
+      // Emit the event projects-deleted
+      EventEmitter.emit('projects-deleted', foundProjects);
+
       // Verify that all of the projects were correctly deleted
       if (retQuery.n !== foundProjects.length) {
         M.log.error('Some of the following projects were not '
