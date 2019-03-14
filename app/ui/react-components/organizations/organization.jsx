@@ -22,7 +22,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
-import OrgHome from './organization-home.jsx';
+import InformationPage from '../general-components/information-page.jsx';
 import OrgProjects from './organization-projects.jsx';
 import OrgEdit from './organization-edit.jsx';
 import MembersPage from '../user/members-page.jsx'
@@ -124,7 +124,7 @@ class Organization extends Component {
                         : (<Switch>
                                 {/*Route to org home page*/}
                                 <Route exact path={`${this.props.match.url}/`}
-                                       render={ (props) => <OrgHome {...props} org={this.state.org} /> } />
+                                       render={ (props) => <InformationPage {...props} org={this.state.org} /> } />
                                 {/*Route to projects page*/}
                                 <Route path={`${this.props.match.url}/projects`}
                                     render={ (props) => <OrgProjects {...props} org={this.state.org} write={this.state.write} modal={this.state.modal} handleToggle={this.handleToggle}/> } />

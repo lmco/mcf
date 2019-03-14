@@ -21,7 +21,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
-import ProjectHome from './project-home.jsx';
+import InformationPage from '../general-components/information-page.jsx';
 import MembersPage from '../user/members-page.jsx';
 import ProjectElements from './project-elements.jsx';
 import ProjectEdit from './project-edit.jsx';
@@ -116,7 +116,7 @@ class Project extends Component {
                         : (<Switch>
                                 {/*Route to project home page*/}
                                 <Route exact path={`${this.props.match.url}/`}
-                                       render={ (props) => <ProjectHome {...props} project={this.state.project} /> } />
+                                       render={ (props) => <InformationPage {...props} project={this.state.project} /> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
                                        render={ (props) => <MembersPage {...props} project={this.state.project} admin={this.state.admin}/> } />

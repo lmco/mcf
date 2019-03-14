@@ -11,7 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders a project's members.
+ * @description This renders an org or project members page.
  */
 
 // React Modules
@@ -49,13 +49,13 @@ class MembersPage extends Component {
         let userperm;
         let users;
 
-        if (this.props.project) {
-            userperm = this.props.project.permissions;
-            users = Object.keys(this.props.project.permissions);
-        }
-        else {
+        if (this.props.org) {
             userperm = this.props.org.permissions;
             users = Object.keys(this.props.org.permissions);
+        }
+        else {
+            userperm = this.props.project.permissions;
+            users = Object.keys(this.props.project.permissions);
         }
 
         // Loop through project members
