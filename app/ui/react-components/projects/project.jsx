@@ -22,7 +22,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
 import ProjectHome from './project-home.jsx';
-import ProjectUsers from './project-users.jsx';
+import MembersPage from '../user/members-page.jsx';
 import ProjectElements from './project-elements.jsx';
 import ProjectEdit from './project-edit.jsx';
 import Search from '../search/search.jsx';
@@ -119,7 +119,7 @@ class Project extends Component {
                                        render={ (props) => <ProjectHome {...props} project={this.state.project} /> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <ProjectUsers {...props} project={this.state.project} admin={this.state.admin}/> } />
+                                       render={ (props) => <MembersPage {...props} project={this.state.project} admin={this.state.admin}/> } />
                                 {/*Route to element page*/}
                                 <Route path={`${this.props.match.url}/elements`}
                                    render={ (props) => <ProjectElements {...props} project={this.state.project}/> } />

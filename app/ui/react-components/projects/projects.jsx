@@ -43,20 +43,14 @@ class Projects extends Component {
           component: ProjectList
       },{
           path: '/:orgid/:projectid',
-          component: Project,
-          props: {
-              user: this.state.user
-          }
+          component: Project
       }];
 
       // Return project routes
       return (
           <Router>
               <Switch>
-                  {/*Route to projects list*/}
-                  <Route exact path="/projects" component={ProjectList} />
-                  {/*Route to a project's home page*/}
-                  <Route path="/:orgid/:projectid" component={Project} />
+                  {routes.map((route, index) => <MakeRoute key={index} {...route}/>)}
               </Switch>
           </Router>
       );

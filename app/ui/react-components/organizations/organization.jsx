@@ -24,8 +24,8 @@ import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
 import OrgHome from './organization-home.jsx';
 import OrgProjects from './organization-projects.jsx';
-import OrgUsers from './organization-users.jsx';
 import OrgEdit from './organization-edit.jsx';
+import MembersPage from '../user/members-page.jsx'
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -130,7 +130,7 @@ class Organization extends Component {
                                     render={ (props) => <OrgProjects {...props} org={this.state.org} write={this.state.write} modal={this.state.modal} handleToggle={this.handleToggle}/> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <OrgUsers {...props} org={this.state.org} admin={this.state.admin}/> } />
+                                       render={ (props) => <MembersPage {...props} org={this.state.org} admin={this.state.admin}/> } />
                                {/*Verify if user is admin*/}
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
