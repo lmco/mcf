@@ -2695,7 +2695,7 @@ function getElements(req, res) {
       return res.status(error.status).send(error);
     }
 
-    let retData = elementsPublicData;
+    const retData = elementsPublicData;
 
     // Check for JMI conversion
     if (jmiOpt) {
