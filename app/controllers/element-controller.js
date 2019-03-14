@@ -266,7 +266,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       if (elementIDs.length === 0) {
         // Find all elements in a project
         return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-        .populate(populateString);
+        .populate(populateString)
+        .lean();
       }
       // Find elements by ID
 

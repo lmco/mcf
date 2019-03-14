@@ -151,15 +151,18 @@ class CreateProject extends Component{
         // Return the form to create a project
         return (
             <div className='project-forms'>
-                <h2>New Project </h2>
+                {/*Verify if org provided*/}
+                {(!this.props.org)
+                    // Display header
+                    ? (<h2>New Project</h2>)
+                    : (<h2>New Project in {this.props.org.name}</h2>)
+                }
                 <hr />
                 <div>
                     <Form>
-                        {/*Verify if org is already provided*/}
+                        {/*Verify if org provided*/}
                         {(!this.props.org)
-                            // Let user choose which org
-                            ? (
-                                // Create options to choose the organization
+                            ? (// Display options to choose the organization
                                 <FormGroup>
                                     <Label for="org">Organization ID</Label>
                                     <Input type="select"
@@ -170,10 +173,8 @@ class CreateProject extends Component{
                                         <option>Choose one...</option>
                                         {this.state.orgOpt}
                                     </Input>
-                                </FormGroup>
-                            )
-                            // Display org deleting from
-                            : (<h2>{this.props.org.name}</h2>)
+                                </FormGroup>)
+                            : ''
                         }
                         {/*Create an input for project id*/}
                         <FormGroup>
@@ -221,7 +222,8 @@ class CreateProject extends Component{
                             </FormFeedback>
                         </FormGroup>
                         {/*Button to create project*/}
-                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Create Project </Button>
+                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Create </Button>{' '}
+                        <Button outline onClick={this.props.toggle}> Cancel </Button>
                     </Form>
                 </div>
             </div>

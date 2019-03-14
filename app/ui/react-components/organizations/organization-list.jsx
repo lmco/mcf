@@ -119,13 +119,13 @@ class OrganizationList extends Component {
                     {/*Modal for creating an org*/}
                     <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                         <ModalBody>
-                            <CreateOrganization />
+                            <CreateOrganization toggle={this.handleCreateToggle}/>
                         </ModalBody>
                     </Modal>
                     {/*Modal for deleting an org*/}
                     <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                         <ModalBody>
-                            <DeleteOrganization orgs={this.state.orgs}/>
+                            <DeleteOrganization orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
                         </ModalBody>
                     </Modal>
                 </div>
@@ -139,14 +139,14 @@ class OrganizationList extends Component {
                             // Display create and delete buttons
                             : (<div className='org-button'>
                                     <Button className='btn'
-                                            outline color="danger"
-                                            onClick={this.handleDeleteToggle}>
-                                        Delete
-                                    </Button>
-                                    <Button className='btn'
                                             outline color="secondary"
                                             onClick={this.handleCreateToggle}>
-                                        Create
+                                        <i className='fas fa-plus'/>
+                                    </Button>
+                                    <Button className='btn'
+                                            outline color="danger"
+                                            onClick={this.handleDeleteToggle}>
+                                        <i className='fas fa-trash-alt'/>
                                     </Button>
                                 </div>)
                         }

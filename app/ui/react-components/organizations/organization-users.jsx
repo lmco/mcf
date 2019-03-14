@@ -66,7 +66,7 @@ class OrganizationUsers extends Component {
                     : ( // Modal for editing user roles
                         <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
                             <ModalBody>
-                                <UserRoleEdit org={this.props.org}/>
+                                <UserRoleEdit org={this.props.org} toggle={this.handleToggle}/>
                             </ModalBody>
                         </Modal>
                     )
@@ -82,7 +82,7 @@ class OrganizationUsers extends Component {
                                     <Button className='btn'
                                             outline color="secondary"
                                             onClick={this.handleToggle}>
-                                        Edit
+                                        <i className='fas fa-user-edit'/>
                                     </Button>
                                 </div>
                             )

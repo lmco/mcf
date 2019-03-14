@@ -193,7 +193,8 @@ class UserRoleEdit extends Component{
                             </Input>
                         </FormGroup>
                         {/*Button to submit changes*/}
-                        <Button onClick={this.onSubmit}> Submit </Button>
+                        <Button onClick={this.onSubmit}> Submit </Button>{' '}
+                        <Button outline color="secondary" onClick={this.props.toggle}>Cancel</Button>
                     </Form>
                 </div>
             </div>
