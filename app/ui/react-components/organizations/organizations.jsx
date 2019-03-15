@@ -23,6 +23,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 // MBEE Modules
 import OrganizationList from './organization-list.jsx';
 import Organization from './organization.jsx';
+import MakeRoute from '../general-components/make-route.jsx';
 
 // Define component
 class Organizations extends Component {
@@ -32,13 +33,18 @@ class Organizations extends Component {
     }
 
     render() {
+        const routes = [{
+            path: '/organizations',
+            component: OrganizationList
+        },{
+            path: '/:orgid',
+            component: Organization
+        }];
+
         return (
             <Router>
                 <Switch>
-                    {/*Route to organizations list*/}
-                    <Route exact path="/organizations" component={OrganizationList} />
-                    {/*Route to organization*/}
-                    <Route path="/:orgid" component={Organization} />
+                    {routes.map((route, index) => <MakeRoute key={index} {...route}/>)}
                 </Switch>
             </Router>
         );

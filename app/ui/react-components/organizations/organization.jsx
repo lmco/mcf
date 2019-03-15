@@ -22,10 +22,10 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
-import OrgHome from './organization-home.jsx';
+import InformationPage from '../general-components/information-page.jsx';
+import EditPage from '../general-components/edit-page.jsx';
 import OrgProjects from './organization-projects.jsx';
-import OrgUsers from './organization-users.jsx';
-import OrgEdit from './organization-edit.jsx';
+import MembersPage from '../user/members-page.jsx'
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -124,18 +124,18 @@ class Organization extends Component {
                         : (<Switch>
                                 {/*Route to org home page*/}
                                 <Route exact path={`${this.props.match.url}/`}
-                                       render={ (props) => <OrgHome {...props} org={this.state.org} /> } />
+                                       render={ (props) => <InformationPage {...props} org={this.state.org} /> } />
                                 {/*Route to projects page*/}
                                 <Route path={`${this.props.match.url}/projects`}
                                     render={ (props) => <OrgProjects {...props} org={this.state.org} write={this.state.write} modal={this.state.modal} handleToggle={this.handleToggle}/> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <OrgUsers {...props} org={this.state.org} admin={this.state.admin}/> } />
+                                       render={ (props) => <MembersPage {...props} org={this.state.org} admin={this.state.admin}/> } />
                                {/*Verify if user is admin*/}
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}
-                                             render={(props) => <OrgEdit {...props} org={this.state.org} />}/>)
+                                             render={(props) => <EditPage {...props} org={this.state.org} />}/>)
                                     : ''
                                 }
                             </Switch>)

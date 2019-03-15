@@ -21,9 +21,9 @@ import { Modal, ModalBody } from 'reactstrap';
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
+import Delete from '../general-components/delete.jsx';
+import Create from '../general-components/create.jsx';
 import ProjList from './proj-list.jsx';
-import DeleteOrganization from '../organizations/organization-delete.jsx';
-import CreateProject from '../projects/project-create.jsx';
 
 
 class OrgList extends Component {
@@ -74,9 +74,7 @@ class OrgList extends Component {
         // Loop through projects in each org
         const projects = this.props.org.projects.map(project => {
             // Create project links
-            return (
-                <ProjList project={project} admin={this.props.admin} orgid={this.props.org.id}/>
-            )
+            return (<ProjList project={project} admin={this.props.admin} orgid={this.props.org.id}/>)
         });
 
         let icon;
@@ -93,13 +91,13 @@ class OrgList extends Component {
                 {/*Modal for creating an org*/}
                 <Modal isOpen={this.state.modalProjCreate} toggle={this.handleCreateProjToggle}>
                     <ModalBody>
-                        <CreateProject org={this.props.org} toggle={this.handleCreateProjToggle}/>
+                        <Create project={true} org={this.props.org} toggle={this.handleCreateProjToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Modal for deleting an org*/}
                 <Modal isOpen={this.state.modalOrgDelete} toggle={this.handleDeleteOrgToggle}>
                     <ModalBody>
-                        <DeleteOrganization org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
+                        <Delete org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
                     </ModalBody>
                 </Modal>
                 <div className='org-proj-list'>

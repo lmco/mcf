@@ -21,10 +21,10 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
-import ProjectHome from './project-home.jsx';
-import ProjectUsers from './project-users.jsx';
+import InformationPage from '../general-components/information-page.jsx';
+import EditPage from '../general-components/edit-page.jsx';
+import MembersPage from '../user/members-page.jsx';
 import ProjectElements from './project-elements.jsx';
-import ProjectEdit from './project-edit.jsx';
 import Search from '../search/search.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -116,10 +116,10 @@ class Project extends Component {
                         : (<Switch>
                                 {/*Route to project home page*/}
                                 <Route exact path={`${this.props.match.url}/`}
-                                       render={ (props) => <ProjectHome {...props} project={this.state.project} /> } />
+                                       render={ (props) => <InformationPage {...props} project={this.state.project} /> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <ProjectUsers {...props} project={this.state.project} admin={this.state.admin}/> } />
+                                       render={ (props) => <MembersPage {...props} project={this.state.project} admin={this.state.admin}/> } />
                                 {/*Route to element page*/}
                                 <Route path={`${this.props.match.url}/elements`}
                                    render={ (props) => <ProjectElements {...props} project={this.state.project}/> } />
@@ -129,7 +129,7 @@ class Project extends Component {
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}
-                                              render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)
+                                              render={(props) => <EditPage {...props} project={this.state.project} orgid={this.state.orgid}/>}/>)
                                     : ''
                                 }
                             </Switch>)

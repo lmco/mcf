@@ -21,7 +21,7 @@ import { Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
-import DeleteProject from '../projects/project-delete.jsx';
+import Delete from '../general-components/delete.jsx';
 
 
 
@@ -60,7 +60,7 @@ class ProjList extends Component {
                 {/*Modal for deleting a project*/}
                 <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
                     <ModalBody>
-                        <DeleteProject project={project} toggle={this.handleDeleteProjToggle}/>
+                        <Delete project={project} toggle={this.handleDeleteProjToggle}/>
                     </ModalBody>
                 </Modal>
                 <div className='proj-list'>
