@@ -45,8 +45,8 @@ module.exports.down = function() {
 
 /**
  * @description Handles the database migration from 0.7.2 to 0.7.3.
- * If the username index in the users collection exists, we remove the
- * username index.
+ * If the username index in the users collection exists, the
+ * username index is removed.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
