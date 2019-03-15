@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 // MBEE Moduels
 import ProjectList from './project-list.jsx';
 import Project from './project.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
+import MakeRoute from '../general-components/make-route.jsx';
 
 // Define component
 class Projects extends Component {
@@ -37,25 +37,20 @@ class Projects extends Component {
       };
   }
 
-  componentDidMount(){
-    // Get user data
-    ajaxRequest('GET','/api/users/whoami')
-    .then(user => {
-        // Set user state
-        this.setState({user: user});
-    })
-    .catch((err) => this.setState({error: err.responseJSON.description}))
-  }
-
   render() {
+      const routes = [{
+          path: '/projects',
+          component: ProjectList
+      },{
+          path: '/:orgid/:projectid',
+          component: Project
+      }];
+
       // Return project routes
       return (
           <Router>
               <Switch>
-                  {/*Route to projects list*/}
-                  <Route exact path="/projects" component={ProjectList} />
-                  {/*Route to a project's home page*/}
-                  <Route path="/:orgid/:projectid" render={ (props) => <Project {...props} user={this.state.user}/> } />
+                  {routes.map((route, index) => <MakeRoute key={index} {...route}/>)}
               </Switch>
           </Router>
       );

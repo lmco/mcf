@@ -23,8 +23,8 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 import List from '../general-components/list/list.jsx';
 import ListItem from '../general-components/list/list-item.jsx';
 import ProjectListItem from '../general-components/list/project-list-item.jsx';
-import CreateProject from './project-create.jsx';
-import DeleteProject from './project-delete.jsx';
+import Create from '../general-components/create.jsx';
+import Delete from '../general-components/delete.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -151,7 +151,7 @@ class ProjectList extends Component {
                 // Create project links
                 return (
                     <Link to={`/${orgId}/${project.id}`}>
-                        <ProjectListItem project={project}/>
+                        <ProjectListItem className='hover-darken' project={project}/>
                     </Link>
                 )
             });
@@ -159,7 +159,9 @@ class ProjectList extends Component {
             // Return the list of the orgs with projects
             return (
                 <React.Fragment>
-                    <ListItem href={`/${orgId}`}> {org.name} </ListItem>
+                    <ListItem className='proj-org-header'>
+                        <a href={`/${orgId}`}>{org.name}</a>
+                    </ListItem>
                     <List className='projects-list'>
                         {projects}
                     </List>
@@ -177,39 +179,23 @@ class ProjectList extends Component {
                         {/*Verify user has write and admin permissions*/}
                         {(this.state.admin)
                             // Allow access to all orgs
-                            ? <CreateProject />
+                            ? <Create project={true} orgs={this.state.orgs} toggle={this.handleCreateToggle}/>
                             // Allow access to write orgs only
-                            : <CreateProject orgs={this.state.writePermOrgs}/>
+                            : <Create project={true} orgs={this.state.writePermOrgs} toggle={this.handleCreateToggle}/>
                         }
                     </ModalBody>
                 </Modal>
                 {/*Modal for deleting a project*/}
                 <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                     <ModalBody>
-                        {/*Verify user has write and admin permissions*/}
-                        {(this.state.admin)
-                            // Allow access to all orgs
-                            ? <DeleteProject projects={this.state.projects} toggle={this.handleDeleteToggle}/>
-                            // Allow access to write orgs only
-                            : <DeleteProject orgs={this.state.writePermOrgs} toggle={this.handleDeleteToggle}/>
-                        }
+                        <Delete orgs={this.state.orgs} projects={this.state.projects} toggle={this.handleDeleteToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Display the list of projects*/}
                 <div id='view' className='project-list' ref={this.ref}>
                     <div className='project-list-header'>
-                        <h2 className='project-header'>Projects</h2>
+                        <h2 className='project-header'>Your Projects</h2>
                         <div className='project-button'>
-                            {/*Verify user has admin permissions*/}
-                            {(!this.state.admin)
-                                ? ''
-                                // Display delete button
-                                :(<Button className='btn'
-                                          outline color="danger"
-                                          onClick={this.handleDeleteToggle}>
-                                    <i className='fas fa-trash-alt'/>
-                                  </Button>)
-                            }
                             {/*Verify user has write permission*/}
                             {(!this.state.write)
                                 ? ''
@@ -217,7 +203,17 @@ class ProjectList extends Component {
                                 :(<Button className='btn'
                                           outline color="secondary"
                                           onClick={this.handleCreateToggle}>
-                                    <i className='fas fa-plus'/>
+                                    Create
+                                </Button>)
+                            }
+                            {/*Verify user has admin permissions*/}
+                            {(!this.state.admin)
+                                ? ''
+                                // Display delete button
+                                :(<Button className='btn'
+                                          outline color="danger"
+                                          onClick={this.handleDeleteToggle}>
+                                    Delete
                                 </Button>)
                             }
                         </div>

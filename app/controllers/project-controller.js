@@ -38,6 +38,7 @@ const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -65,6 +66,9 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
  *
  * @return {Promise} Array of found project objects
  *
@@ -121,6 +125,7 @@ function find(requestingUser, organizationID, projects, options) {
     let populateString = '';
     let fieldsString = '';
     let limit = 0;
+    let skip = 0;
 
     // Ensure options are valid
     if (options) {
@@ -175,6 +180,18 @@ function find(requestingUser, organizationID, projects, options) {
         }
         limit = options.limit;
       }
+
+      // If the option 'skip' is supplied ensure it's a number
+      if (options.hasOwnProperty('skip')) {
+        if (typeof options.skip !== 'number') {
+          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+        }
+        // Ensure skip is not negative
+        if (options.skip < 0) {
+          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+        }
+        skip = options.skip;
+      }
     }
 
     // Define searchQuery
@@ -206,7 +223,7 @@ function find(requestingUser, organizationID, projects, options) {
     }
 
     // Find the projects
-    Project.find(searchQuery, fieldsString, { limit: limit })
+    Project.find(searchQuery, fieldsString, { limit: limit, skip: skip })
     .populate(populateString)
     .then((foundProjects) => resolve(foundProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -473,6 +490,9 @@ function create(requestingUser, organizationID, projects, options) {
       return Promise.all(promises);
     })
     .then(() => {
+      // Emit the event projects-created
+      EventEmitter.emit('projects-created', projObjects);
+
       // Create a root model element for each project
       const elemObjects = projObjects.map((p) => new Element({
         _id: utils.createID(p._id, 'model'),
@@ -876,7 +896,12 @@ function update(requestingUser, organizationID, projects, options) {
       return Promise.all(promises);
     })
     .then(() => Project.find(searchQuery, fieldsString).populate(populateString))
-    .then((foundUpdatedProjects) => resolve(foundUpdatedProjects))
+    .then((foundUpdatedProjects) => {
+      // Emit the event projects-updated
+      EventEmitter.emit('projects-updated', foundUpdatedProjects);
+
+      return resolve(foundUpdatedProjects);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -1035,8 +1060,14 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     .then(() => Element.deleteMany({ _id: foundProjects.map(p => utils.createID(p._id, 'model')) }))
     // Delete projects from database
     .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
-    // Create the new/replaced projects
-    .then(() => create(requestingUser, orgID, projectsToLookUp, options))
+
+    .then(() => {
+      // Emit the event projects-deleted
+      EventEmitter.emit('projects-deleted', foundProjects);
+
+      // Create the new/replaced projects
+      return create(requestingUser, orgID, projectsToLookUp, options);
+    })
     .then((_createdProjects) => {
       createdProjects = _createdProjects;
 
@@ -1174,6 +1205,9 @@ function remove(requestingUser, organizationID, projects, options) {
     // Delete the projects
     .then(() => Project.deleteMany(searchQuery))
     .then((retQuery) => {
+      // Emit the event projects-deleted
+      EventEmitter.emit('projects-deleted', foundProjects);
+
       // Verify that all of the projects were correctly deleted
       if (retQuery.n !== foundProjects.length) {
         M.log.error('Some of the following projects were not '

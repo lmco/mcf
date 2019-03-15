@@ -23,8 +23,8 @@ import {Button, Modal, ModalBody} from 'reactstrap';
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgList from './org-list.jsx';
-import CreateOrganization from '../organizations/organization-create.jsx';
-import DeleteOrganization from '../organizations/organization-delete.jsx';
+import Create from '../general-components/create.jsx';
+import Delete from '../general-components/delete.jsx';
 import Space from '../general-components/space/space.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -178,10 +178,9 @@ class HomePage extends Component {
     render() {
         // Loop through all orgs
         const list = this.state.orgs.map(org => {
-            console.log(org);
             const username = this.state.user.username;
 
-            if (org.permissions[username] === 'write') {
+            if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
                 return( <OrgList org={org} write={this.state.write} admin={this.state.admin}/> )
             }
             else {
@@ -200,13 +199,13 @@ class HomePage extends Component {
                 {/*Modal for creating an org*/}
                 <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                     <ModalBody>
-                        <CreateOrganization toggle={this.handleCreateToggle}/>
+                        <Create toggle={this.handleCreateToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Modal for deleting an org*/}
                 <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                     <ModalBody>
-                        <DeleteOrganization orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
+                        <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Display the list of projects*/}
@@ -221,12 +220,12 @@ class HomePage extends Component {
                                 <Button className='btn'
                                         outline color="secondary"
                                         onClick={this.handleCreateToggle}>
-                                    <i className='fas fa-plus'/>
+                                    Create
                                 </Button>
                                 <Button className='btn'
                                         outline color="danger"
                                         onClick={this.handleDeleteToggle}>
-                                    <i className='fas fa-trash-alt'/>
+                                    Delete
                                 </Button>
                             </div>)
                         }

@@ -150,13 +150,8 @@ class MbeeNav extends Component {
                                             About
                                         </DropdownItem>
                                         <DropdownItem divider />
-                                        <DropdownItem href="/doc/api">
-                                            {/*Check if user exists*/}
-                                            {(this.state.user === null)
-                                                // Create link to login or logout
-                                                ? <NavLink href="/login">Log In</NavLink>
-                                                : <NavLink href="/logout">Log Out</NavLink>
-                                            }
+                                        <DropdownItem>
+                                            <NavLink href="/logout">Log Out</NavLink>
                                         </DropdownItem>
                                     </DropdownMenu>
                                   </UncontrolledDropdown>)

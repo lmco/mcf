@@ -22,7 +22,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 // MBEE Modules
 import ListItem from '../general-components/list/list-item.jsx';
 import List from '../general-components/list/list.jsx';
-import CreateProject from '../projects/project-create.jsx';
+import Create from '../general-components/create.jsx';
 
 // Define function
 function OrganizationProjects(props) {
@@ -32,7 +32,11 @@ function OrganizationProjects(props) {
     // Loop through the org's projects
     const listItems = org.projects.map(project =>
         // Create the project list item
-        <ListItem href={`/${org.id}/${project.id}`}> {project.name} </ListItem>
+        <ListItem className='proj-org-header'>
+            <a href={`/${org.id}/${project.id}`} >
+                {project.name}
+            </a>
+        </ListItem>
     );
 
     // Return the org's project list
@@ -41,7 +45,7 @@ function OrganizationProjects(props) {
             {/*Modal for creating a project*/}
             <Modal isOpen={props.modal} toggle={props.handleToggle}>
                 <ModalBody>
-                    <CreateProject org={org} toggle={props.handleToggle}/>
+                    <Create project={true} org={org} toggle={props.handleToggle}/>
                 </ModalBody>
             </Modal>
             <div id='view' className='org-projects'>
@@ -55,7 +59,7 @@ function OrganizationProjects(props) {
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={props.handleToggle}>
-                                <i className='fas fa-plus first-icon'/>
+                                Create
                             </Button>
                          </div>)
                     }

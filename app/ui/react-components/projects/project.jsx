@@ -19,13 +19,13 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 // MBEE Modules
-import Sidebar from '../general-components/sidebar/sidebar.jsx'
-import SidebarLink from '../general-components/sidebar/sidebar-link.jsx'
-import ProjectHome from './project-home.jsx'
-import ProjectUsers from './project-users.jsx'
-import ProjectElements from './project-elements.jsx'
-import ProjectEdit from './project-edit.jsx'
-import Search from '../search/search.jsx'
+import Sidebar from '../general-components/sidebar/sidebar.jsx';
+import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
+import InformationPage from '../general-components/information-page.jsx';
+import EditPage from '../general-components/edit-page.jsx';
+import MembersPage from '../user/members-page.jsx';
+import ProjectElements from './project-elements.jsx';
+import Search from '../search/search.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -57,23 +57,28 @@ class Project extends Component {
         // Get project data
         ajaxRequest('GET',`${url}`)
         .then(project => {
-            // Initialize variables
-            const username = this.props.user.username;
-            const perm = project.permissions[username];
-            const admin = this.props.user.admin;
+            // Get user data
+            ajaxRequest('GET','/api/users/whoami')
+            .then(user => {
+                // Initialize variables
+                const username = user.username;
+                const perm = project.permissions[username];
+                const admin = user.admin;
 
-            // Verify if user is admin
-            if ((admin) || (perm === 'admin')){
-                // Set admin state
-                this.setState({admin: true});
-            }
+                // Verify if user is admin
+                if ((admin) || (perm === 'admin')){
+                    // Set admin state
+                    this.setState({admin: true});
+                }
 
-            // Set states
-            this.setState({ project: project });
+                // Set states
+                this.setState({ project: project });
+            })
+            .catch((err) => this.setState({error:`Failed to grab user: ${err.responseJSON.description}`}))
         })
         .catch(err => {
             // Throw error and set state
-            this.setState({error: `Failed to load project: ${err}`});
+            this.setState({error: `Failed to load project: ${err.responseJSON.description}`});
         });
     }
 
@@ -111,10 +116,10 @@ class Project extends Component {
                         : (<Switch>
                                 {/*Route to project home page*/}
                                 <Route exact path={`${this.props.match.url}/`}
-                                       render={ (props) => <ProjectHome {...props} project={this.state.project} /> } />
+                                       render={ (props) => <InformationPage {...props} project={this.state.project} /> } />
                                 {/*Route to members page*/}
                                 <Route path={`${this.props.match.url}/users`}
-                                       render={ (props) => <ProjectUsers {...props} project={this.state.project} admin={this.state.admin}/> } />
+                                       render={ (props) => <MembersPage {...props} project={this.state.project} admin={this.state.admin}/> } />
                                 {/*Route to element page*/}
                                 <Route path={`${this.props.match.url}/elements`}
                                    render={ (props) => <ProjectElements {...props} project={this.state.project}/> } />
@@ -124,7 +129,7 @@ class Project extends Component {
                                 {(this.state.admin)
                                     // Route for admin users ONLY to edit page
                                     ? (<Route path={`${this.props.match.url}/edit`}
-                                              render={(props) => <ProjectEdit {...props} project={this.state.project} url={this.state.url} orgid={this.state.orgid}/>}/>)
+                                              render={(props) => <EditPage {...props} project={this.state.project} orgid={this.state.orgid}/>}/>)
                                     : ''
                                 }
                             </Switch>)

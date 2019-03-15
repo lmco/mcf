@@ -37,6 +37,7 @@ const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -63,6 +64,9 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
  *
  * @return {Promise} Array of found organization objects
  *
@@ -114,6 +118,7 @@ function find(requestingUser, orgs, options) {
     let populateString = '';
     let fieldsString = '';
     let limit = 0;
+    let skip = 0;
 
     // Ensure options are valid
     if (options) {
@@ -168,6 +173,18 @@ function find(requestingUser, orgs, options) {
         }
         limit = options.limit;
       }
+
+      // If the option 'skip' is supplied ensure it's a number
+      if (options.hasOwnProperty('skip')) {
+        if (typeof options.skip !== 'number') {
+          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+        }
+        // Ensure skip is not negative
+        if (options.skip < 0) {
+          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+        }
+        skip = options.skip;
+      }
     }
 
     // Define searchQuery
@@ -196,7 +213,7 @@ function find(requestingUser, orgs, options) {
     }
 
     // Find the orgs
-    Organization.find(searchQuery, fieldsString, { limit: limit })
+    Organization.find(searchQuery, fieldsString, { limit: limit, skip: skip })
     .populate(populateString)
     .then((foundOrgs) => resolve(foundOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -264,6 +281,7 @@ function create(requestingUser, orgs, options) {
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    let orgObjects = [];
 
     // Initialize valid options
     let populateString = '';
@@ -386,7 +404,7 @@ function create(requestingUser, orgs, options) {
       // Create array of usernames
       const foundUsernames = foundUsers.map(u => u.username);
       // For each object of org data, create the org object
-      const orgObjects = orgsToCreate.map((o) => {
+      orgObjects = orgsToCreate.map((o) => {
         const orgObj = new Organization(o);
         // Set permissions
         Object.keys(orgObj.permissions).forEach((u) => {
@@ -422,8 +440,13 @@ function create(requestingUser, orgs, options) {
       // Create the organizations
       return Organization.insertMany(orgObjects);
     })
-    .then(() => resolve(Organization.find({ _id: { $in: arrIDs } }, fieldsString)
-    .populate(populateString)))
+    .then(() => {
+      // Emit the event orgs-created
+      EventEmitter.emit('orgs-created', orgObjects);
+
+      return resolve(Organization.find({ _id: { $in: arrIDs } }, fieldsString)
+      .populate(populateString));
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -783,7 +806,12 @@ function update(requestingUser, orgs, options) {
     })
     .then(() => Organization.find(searchQuery, fieldsString)
     .populate(populateString))
-    .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
+    .then((foundUpdatedOrgs) => {
+      // Emit the event orgs-updated
+      EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
+
+      return resolve(foundUpdatedOrgs);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -920,8 +948,13 @@ function createOrReplace(requestingUser, orgs, options) {
     })
     // Delete orgs from database
     .then(() => Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }))
-    // Create the new orgs
-    .then(() => create(requestingUser, orgsToLookup, options))
+    .then(() => {
+      // Emit the event orgs-deleted
+      EventEmitter.emit('orgs-deleted', foundOrgs);
+
+      // Create the new orgs
+      return create(requestingUser, orgsToLookup, options);
+    })
     .then((_createdOrgs) => {
       createdOrgs = _createdOrgs;
 
@@ -1043,6 +1076,9 @@ function remove(requestingUser, orgs, options) {
     // Delete the orgs
     .then(() => Organization.deleteMany(searchQuery))
     .then((retQuery) => {
+      // Emit the event orgs-deleted
+      EventEmitter.emit('orgs-deleted', foundOrgs);
+
       // Verify that all of the orgs were correctly deleted
       if (retQuery.n !== foundOrgs.length) {
         M.log.error(`Some of the following orgs were not deleted [${saniOrgs.toString()}].`);

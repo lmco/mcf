@@ -37,6 +37,7 @@ const path = require('path');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
@@ -62,6 +63,9 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
  *
  * @return {Promise} Array of found user objects.
  *
@@ -112,6 +116,7 @@ function find(requestingUser, users, options) {
     let populateString = '';
     let fieldsString = '';
     let limit = 0;
+    let skip = 0;
 
     // Ensure options are valid
     if (options) {
@@ -166,6 +171,18 @@ function find(requestingUser, users, options) {
         }
         limit = options.limit;
       }
+
+      // If the option 'skip' is supplied ensure it's a number
+      if (options.hasOwnProperty('skip')) {
+        if (typeof options.skip !== 'number') {
+          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+        }
+        // Ensure skip is not negative
+        if (options.skip < 0) {
+          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+        }
+        skip = options.skip;
+      }
     }
 
     // Define searchQuery
@@ -190,7 +207,7 @@ function find(requestingUser, users, options) {
     }
 
     // Find the users
-    User.find(searchQuery, fieldsString, { limit: limit })
+    User.find(searchQuery, fieldsString, { limit: limit, skip: skip })
     .populate(populateString)
     .then((foundUser) => resolve(foundUser))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -390,6 +407,9 @@ function create(requestingUser, users, options) {
     .then((_createdUsers) => {
       // Set function-wide createdUsers;
       createdUsers = _createdUsers;
+
+      // Emit the event users-created
+      EventEmitter.emit('users-created', createdUsers);
 
       // Find the default organization
       return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
@@ -681,7 +701,12 @@ function update(requestingUser, users, options) {
       return User.bulkWrite(bulkArray);
     })
     .then(() => User.find(searchQuery, fieldsString).populate(populateString))
-    .then((foundUpdatedUsers) => resolve(foundUpdatedUsers))
+    .then((foundUpdatedUsers) => {
+      // Emit the event users-updated
+      EventEmitter.emit('users-updated', foundUpdatedUsers);
+
+      return resolve(foundUpdatedUsers);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -818,8 +843,13 @@ function createOrReplace(requestingUser, users, options) {
       });
     })
     .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }))
-    // Create the new users
-    .then(() => create(requestingUser, usersToLookup, options))
+    .then(() => {
+      // Emit the event users-deleted
+      EventEmitter.emit('users-deleted', foundUsers);
+
+      // Create the new users
+      return create(requestingUser, usersToLookup, options);
+    })
     .then((_createdUsers) => {
       createdUsers = _createdUsers;
 
@@ -981,7 +1011,12 @@ function remove(requestingUser, users, options) {
     // Remove the users
     .then(() => User.deleteMany(searchQuery))
     // Return the deleted users
-    .then(() => resolve(foundUsernames))
+    .then(() => {
+      // Emit the event users-deleted
+      EventEmitter.emit('users-deleted', foundUsers);
+
+      return resolve(foundUsernames);
+    })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }

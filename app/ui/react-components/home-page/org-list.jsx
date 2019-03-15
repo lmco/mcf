@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.general-components.list
+ * @module ui.react-components.home-page
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,20 +11,19 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This creates the organization and project list .
+ * @description This creates the organization list.
  */
 
 // React Modules
 import React, { Component } from 'react';
-import {Button, Modal, ModalBody, UncontrolledTooltip} from 'reactstrap';
+import { Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
-import ProjectListItem from '../general-components/list/project-list-item.jsx';
-import DeleteOrganization from '../organizations/organization-delete.jsx';
-import CreateProject from '../projects/project-create.jsx';
-import DeleteProject from '../projects/project-delete.jsx';
+import Delete from '../general-components/delete.jsx';
+import Create from '../general-components/create.jsx';
+import ProjList from './proj-list.jsx';
 
 
 class OrgList extends Component {
@@ -38,7 +37,6 @@ class OrgList extends Component {
             width: null,
             modalProjCreate: false,
             modalOrgDelete: false,
-            modalProjDelete: false,
             projects: []
         };
 
@@ -49,19 +47,12 @@ class OrgList extends Component {
         this.handleShowProjsToggle = this.handleShowProjsToggle.bind(this);
         this.handleDeleteOrgToggle = this.handleDeleteOrgToggle.bind(this);
         this.handleCreateProjToggle = this.handleCreateProjToggle.bind(this);
-        this.handleDeleteProjToggle = this.handleDeleteProjToggle.bind(this);
     }
 
     // Define org toggle functionality
     handleShowProjsToggle() {
         // Set the state to opposite of its initial state
         this.setState({ showProjs: !this.state.showProjs });
-    }
-
-    // Define toggle function
-    handleDeleteProjToggle() {
-        // Set the delete modal state
-        this.setState({ modalProjDelete: !this.state.modalProjDelete });
     }
 
     // Define toggle function
@@ -83,30 +74,7 @@ class OrgList extends Component {
         // Loop through projects in each org
         const projects = this.props.org.projects.map(project => {
             // Create project links
-            return (
-                <React.Fragment>
-                    {/*Modal for deleting an org*/}
-                    <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
-                        <ModalBody>
-                            <DeleteProject project={project} toggle={this.handleDeleteProjToggle}/>
-                        </ModalBody>
-                    </Modal>
-                    <div className='proj-list'>
-                        <ProjectListItem project={project} href={`/${orgId}/${project.id}`}/>
-                        {(!this.props.admin)
-                            ? ''
-                            :(< div className='org-button'>
-                                    <Button className='btn'
-                                            outline color="danger"
-                                            onClick={this.handleDeleteProjToggle}>
-                                        <i className='fas fa-trash-alt'/>
-                                    </Button>
-                                </div>
-                            )
-                        }
-                    </div>
-                </React.Fragment>
-            )
+            return (<ProjList project={project} admin={this.props.admin} orgid={this.props.org.id}/>)
         });
 
         let icon;
@@ -123,13 +91,13 @@ class OrgList extends Component {
                 {/*Modal for creating an org*/}
                 <Modal isOpen={this.state.modalProjCreate} toggle={this.handleCreateProjToggle}>
                     <ModalBody>
-                        <CreateProject org={this.props.org} toggle={this.handleCreateProjToggle}/>
+                        <Create project={true} org={this.props.org} toggle={this.handleCreateProjToggle}/>
                     </ModalBody>
                 </Modal>
                 {/*Modal for deleting an org*/}
                 <Modal isOpen={this.state.modalOrgDelete} toggle={this.handleDeleteOrgToggle}>
                     <ModalBody>
-                        <DeleteOrganization org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
+                        <Delete org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
                     </ModalBody>
                 </Modal>
                 <div className='org-proj-list'>
@@ -138,21 +106,14 @@ class OrgList extends Component {
                     </div>
                     <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`}/>
                     {((this.props.admin) || (this.props.write))
-                        ? (< div className='org-button'>
-                                <Button className='btn'
-                                        outline color="secondary"
-                                        onClick={this.handleCreateProjToggle}>
-                                    <i className='fas fa-plus'/>
-                                </Button>
+                        ?(<div className='controls-container'>
+                                    <i className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
                                 {(!this.props.admin)
                                     ? ''
-                                    : (<Button className='btn'
-                                               outline color="danger"
-                                               onClick={this.handleDeleteOrgToggle}>
-                                        <i className='fas fa-trash-alt'/>
-                                    </Button>)
+                                    : (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>)
                                 }
-                            </div>)
+                          </div>
+                        )
                         : ''
                     }
                 </div>

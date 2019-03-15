@@ -23,8 +23,8 @@ import {Button, Modal, ModalBody} from 'reactstrap';
 // MBEE Modules
 import List from '../general-components/list/list.jsx';
 import OrgListItem from '../general-components/list/org-list-item.jsx';
-import CreateOrganization from './organization-create.jsx';
-import DeleteOrganization from './organization-delete.jsx';
+import Create from '../general-components/create.jsx';
+import Delete from '../general-components/delete.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -108,7 +108,7 @@ class OrganizationList extends Component {
         const orgs = this.state.orgs.map(org =>
             // Create org links
             <Link to={`/${org.id}`}>
-                <OrgListItem org={org} />
+                <OrgListItem className='hover-darken' org={org} />
             </Link>
         );
 
@@ -119,20 +119,20 @@ class OrganizationList extends Component {
                     {/*Modal for creating an org*/}
                     <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                         <ModalBody>
-                            <CreateOrganization toggle={this.handleCreateToggle}/>
+                            <Create toggle={this.handleCreateToggle}/>
                         </ModalBody>
                     </Modal>
                     {/*Modal for deleting an org*/}
                     <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
                         <ModalBody>
-                            <DeleteOrganization orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
+                            <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
                         </ModalBody>
                     </Modal>
                 </div>
                 {/*Display the list of organizations*/}
                 <div id='view' className='org-list' ref={this.ref}>
                     <div className='org-list-header'>
-                        <h2 className='org-header'>Organizations</h2>
+                        <h2 className='org-header'>Your Organizations</h2>
                         {/*Verify user is an admin */}
                         {(!this.state.admin)
                             ? ''
@@ -141,12 +141,12 @@ class OrganizationList extends Component {
                                     <Button className='btn'
                                             outline color="secondary"
                                             onClick={this.handleCreateToggle}>
-                                        <i className='fas fa-plus'/>
+                                        Create
                                     </Button>
                                     <Button className='btn'
                                             outline color="danger"
                                             onClick={this.handleDeleteToggle}>
-                                        <i className='fas fa-trash-alt'/>
+                                        Delete
                                     </Button>
                                 </div>)
                         }

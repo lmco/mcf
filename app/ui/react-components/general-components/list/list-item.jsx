@@ -23,7 +23,7 @@ function ListItem(props) {
 
     // Initialize basic list item html
     const listItem = (
-        <div className='list-item'>
+        <div className={`list-item ${props.className}`}>
             {props.children}
         </div>
     );
