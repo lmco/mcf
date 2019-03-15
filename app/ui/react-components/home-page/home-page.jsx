@@ -180,7 +180,7 @@ class HomePage extends Component {
         const list = this.state.orgs.map(org => {
             const username = this.state.user.username;
 
-            if (org.permissions[username] === 'write') {
+            if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
                 return( <OrgList org={org} write={this.state.write} admin={this.state.admin}/> )
             }
             else {
