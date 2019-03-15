@@ -167,6 +167,13 @@ api.route('/version')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -817,6 +824,13 @@ api.route('/orgs/:orgid')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -905,6 +919,13 @@ api.route('/projects')
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
  *         in: query
  *         type: number
  *       - name: minified
@@ -1666,6 +1687,13 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      equivalent to setting no limit.
  *         in: query
  *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -1772,6 +1800,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
  *         in: query
  *         type: number
  *       - name: format
@@ -2691,6 +2726,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
  *         in: query
  *         type: number
  *       - name: minified

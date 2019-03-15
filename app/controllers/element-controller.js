@@ -70,6 +70,9 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
  *
  * @return {Promise} Array of found element objects
  *
@@ -131,6 +134,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     let subtree = false;
     let fieldsString = '';
     let limit = 0;
+    let skip = 0;
 
     // Ensure options are valid
     if (options) {
@@ -193,6 +197,18 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         }
         limit = options.limit;
       }
+
+      // If the option 'skip' is supplied ensure it's a number
+      if (options.hasOwnProperty('skip')) {
+        if (typeof options.skip !== 'number') {
+          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+        }
+        // Ensure skip is not negative
+        if (options.skip < 0) {
+          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+        }
+        skip = options.skip;
+      }
     }
 
     // Find the project
@@ -250,7 +266,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       // If no IDs provided, find all elements in a project
       if (elementIDs.length === 0) {
         // Find all elements in a project
-        return Element.find(searchQuery, fieldsString, { limit: limit })
+        return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
         .populate(populateString)
         .lean();
       }
@@ -264,7 +280,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery, fieldsString, { limit: limit })
+        promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
         .populate(populateString)
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
@@ -1609,6 +1625,9 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
  *
  * @return {Promise} An array of found elements.
  *
@@ -1652,6 +1671,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     let archived = false;
     let populateString = 'contains ';
     let limit = 0;
+    let skip = 0;
 
     // Ensure options are valid
     if (options) {
@@ -1692,6 +1712,18 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         }
         limit = options.limit;
       }
+
+      // If the option 'skip' is supplied ensure it's a number
+      if (options.hasOwnProperty('skip')) {
+        if (typeof options.skip !== 'number') {
+          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+        }
+        // Ensure skip is not negative
+        if (options.skip < 0) {
+          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+        }
+        skip = options.skip;
+      }
     }
 
     // Ensure the project exists
@@ -1717,7 +1749,8 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       }
 
       // Search for the elements
-      return Element.find(searchQuery, { score: { $meta: 'textScore' } }, { limit: limit })
+      return Element.find(searchQuery, { score: { $meta: 'textScore' } },
+        { limit: limit, skip: skip })
       .sort({ score: { $meta: 'textScore' } })
       .populate(populateString);
     })

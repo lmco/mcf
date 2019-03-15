@@ -216,6 +216,7 @@ function getOrgs(req, res) {
     archived: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     ids: 'array',
     minified: 'boolean'
   };
@@ -914,6 +915,7 @@ function getAllProjects(req, res) {
     archived: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     minified: 'boolean'
   };
 
@@ -998,6 +1000,7 @@ function getProjects(req, res) {
     archived: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     ids: 'array',
     minified: 'boolean'
   };
@@ -1793,6 +1796,7 @@ function getUsers(req, res) {
     archived: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     usernames: 'array',
     minified: 'boolean'
   };
@@ -2617,6 +2621,7 @@ function getElements(req, res) {
     subtree: 'boolean',
     fields: 'array',
     limit: 'number',
+    skip: 'number',
     ids: 'array',
     format: 'string',
     minified: 'boolean'
@@ -3068,6 +3073,7 @@ function searchElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     limit: 'number',
+    skip: 'number',
     q: 'string',
     minified: 'boolean'
   };
