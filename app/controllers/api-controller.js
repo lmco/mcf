@@ -3198,11 +3198,6 @@ function getElement(req, res) {
 
     let elementsPublicData = elements.map(e => e.getPublicData());
 
-    // If the subtree option was not provided, return only the first element
-    if (!options.subtree) {
-      elementsPublicData = elementsPublicData[0];
-    }
-
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
@@ -3214,6 +3209,11 @@ function getElement(req, res) {
           elementsPublicData.forEach((e => delete e[f]));
         }
       });
+    }
+
+    // If the subtree option was not provided, return only the first element
+    if (!options.subtree) {
+      elementsPublicData = elementsPublicData[0];
     }
 
     // Format JSON if minify option is not true
