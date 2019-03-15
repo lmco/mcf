@@ -33,6 +33,7 @@ const ldap = require('ldapjs');
 const LocalStrategy = M.require('auth.local-strategy');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
+const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 
 // Allocate LDAP configuration variable for convenience
@@ -352,6 +353,8 @@ function ldapSync(ldapUserObj) {
     .then(savedUser => {
       // Save user to function-wide variable
       userObject = savedUser;
+
+      EventEmitter.emit('users-created', [savedUser]);
 
       // Find the default org
       return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
