@@ -1701,6 +1701,38 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: parent
+ *         description: Search for elements with a specific parent.
+ *         in: query
+ *         type: string
+ *       - name: source
+ *         description: Search for elements with a specific source.
+ *         in: query
+ *         type: string
+ *       - name: target
+ *         description: Search for elements with a specific target.
+ *         in: query
+ *         type: string
+ *       - name: type
+ *         description: Search for elements with a specific type.
+ *         in: query
+ *         type: string
+ *       - name: name
+ *         description: Search for elements with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for elements created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for elements last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for elements archived by a specific user.
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1826,6 +1858,38 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: parent
+ *         description: Search for elements with a specific parent.
+ *         in: query
+ *         type: string
+ *       - name: source
+ *         description: Search for elements with a specific source.
+ *         in: query
+ *         type: string
+ *       - name: target
+ *         description: Search for elements with a specific target.
+ *         in: query
+ *         type: string
+ *       - name: type
+ *         description: Search for elements with a specific type.
+ *         in: query
+ *         type: string
+ *       - name: name
+ *         description: Search for elements with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for elements created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for elements last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for elements archived by a specific user.
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
