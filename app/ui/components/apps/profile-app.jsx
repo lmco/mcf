@@ -22,10 +22,10 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general-components/sidebar/sidebar.jsx'
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx'
-import UserHome from './user-home.jsx';
-import UserEdit from './user-edit.jsx';
-import OrganizationList from '../organizations/organization-list.jsx';
-import ProjectList from '../projects/project-list.jsx';
+import UserHome from '../profile-views/user-home.jsx';
+import UserEdit from '../profile-views/user-edit.jsx';
+import OrganizationList from '../profile-views/organization-list.jsx';
+import ProjectList from '../profile-views/project-list.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component

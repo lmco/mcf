@@ -36,12 +36,12 @@ class HomeApp extends Component {
         return (
             <Router>
                 <Switch>
-                    {/*Route to homepage*/}
-                    <Route exact path={'/'} component={HomePage}/> } />
-                    {/*Route to organization*/}
-                    <Route path="/:orgid" component={Organization} />
                     {/*Route to project*/}
                     <Route path="/:orgid/:projectid" component={Project}/> } />
+                    {/*Route to organization*/}
+                    <Route path="/:orgid" component={Organization} />
+                    {/*Route to homepage*/}
+                    <Route exact path={'/'} component={HomePage}/> } />
                 </Switch>
             </Router>
 
@@ -49,4 +49,4 @@ class HomeApp extends Component {
     }
 }
 
-ReactDOM.render(<HomeApp />, document.getElementById('view'));
+ReactDOM.render(<HomeApp />, document.getElementById('main'));

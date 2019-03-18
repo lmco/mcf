@@ -23,14 +23,13 @@
 module.exports = {
   home,
   flightManual,
-  organizations,
-  projects,
   whoami,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
   login,
-  logout
+  logout,
+  notFound
 };
 
 // Node modules
@@ -54,6 +53,22 @@ function home(req, res) {
   }
   // Render the MBEE home screen
   return utils.render(req, res, 'home', {
+    title: 'MBEE | Model-Based Engineering Environment'
+  });
+}
+
+/**
+ * @description Renders the current user's page.
+ */
+function whoami(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/whoami executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  utils.render(req, res, 'user', {
+    name: 'user',
     title: 'MBEE | Model-Based Engineering Environment'
   });
 }
@@ -84,54 +99,6 @@ function flightManual(req, res) {
     return utils.render(req, res, 'flight-manual', {
       sections: sections
     });
-  });
-}
-
-/**
- * @description Renders an organization page.
- */
-function organizations(req, res) {
-  // Sanity check: confirm req.user exists
-  if (!req.user) {
-    M.log.critical(new M.CustomError('/:orgid executed with invalid req.user object'));
-    // redirect to the login screen
-    res.redirect('/login');
-  }
-  utils.render(req, res, 'organizations', {
-    name: 'organizations',
-    title: 'MBEE | Model-Based Engineering Environment'
-  });
-}
-
-/**
- * @description Renders the project list page.
- */
-function projects(req, res) {
-  // Sanity check: confirm req.user exists
-  if (!req.user) {
-    M.log.critical(new M.CustomError('/:orgid/:projectid executed with invalid req.user object'));
-    // redirect to the login screen
-    res.redirect('/login');
-  }
-  utils.render(req, res, 'projects', {
-    name: 'projects',
-    title: 'MBEE | Model-Based Engineering Environment'
-  });
-}
-
-/**
- * @description Renders the current user's page.
- */
-function whoami(req, res) {
-  // Sanity check: confirm req.user exists
-  if (!req.user) {
-    M.log.critical(new M.CustomError('/whoami executed with invalid req.user object'));
-    // redirect to the login screen
-    res.redirect('/login');
-  }
-  utils.render(req, res, 'user', {
-    name: 'user',
-    title: 'MBEE | Model-Based Engineering Environment'
   });
 }
 
@@ -241,4 +208,9 @@ function logout(req, res) {
 
   // redirect to the login screen
   res.redirect('/login');
+}
+
+function notFound(req, res) {
+  // render the 404 not found page
+  return utils.render(req, res, '404');
 }
