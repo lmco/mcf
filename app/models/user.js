@@ -173,7 +173,7 @@ UserSchema.methods.verifyPassword = function(pass) {
  * @memberOf UserSchema
  */
 UserSchema.methods.getValidUpdateFields = function() {
-  return ['fname', 'preferredName', 'lname', 'email', 'custom', 'archived'];
+  return ['fname', 'preferredName', 'lname', 'email', 'custom', 'archived', 'admin'];
 };
 
 UserSchema.statics.getValidUpdateFields = function() {
