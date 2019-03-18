@@ -1568,6 +1568,11 @@ function moveElementCheck(organizationID, projectID, branch, element) {
       throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
     }
 
+    // Error Check: ensure the root model element is not being moved
+    if (element.id === 'model') {
+      throw new M.CustomError('Cannot move the root model element.', 403, 'warn');
+    }
+
     // Define nested helper function
     function findElementParentRecursive(e) {
       return new Promise((res, rej) => {
