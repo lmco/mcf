@@ -15,7 +15,7 @@
  */
 
 import React, { Component } from 'react';
-import SearchResult from '../search/search-result.jsx';
+import SearchResult from './search-result.jsx';
 
 class SearchResults extends Component {
 

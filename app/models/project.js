@@ -34,7 +34,7 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} org - A reference to the project's organization.
  * @property {string} name - The project's non-unique project name.
  * @property {Object} permissions - An object whose keys identify a
- * projects's roles. The keys are the users username, and values are arrays of
+ * project-views's roles. The keys are the users username, and values are arrays of
  * given permissions.
  * @property {Object} custom - JSON used to store additional data.
  * @property {string} visibility - The visibility level of a project defining
@@ -145,7 +145,7 @@ ProjectSchema.methods.getPublicData = function() {
     }
   }
 
-  // Return the projects public fields
+  // Return the project-views public fields
   return {
     id: utils.parseID(this._id).pop(),
     org: (this.org && this.org.id)

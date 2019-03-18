@@ -71,7 +71,7 @@ class OrgList extends Component {
         // Initialize variables
         const orgId = this.props.org.id;
 
-        // Loop through projects in each org
+        // Loop through project-views in each org
         const projects = this.props.org.projects.map(project => {
             // Create project links
             return (<ProjList project={project} admin={this.props.admin} orgid={this.props.org.id}/>)
@@ -85,7 +85,7 @@ class OrgList extends Component {
             icon = 'fas fa-angle-right'
         }
 
-        // Return the list of the orgs with projects
+        // Return the list of the orgs with project-views
         return (
             <React.Fragment>
                 {/*Modal for creating an org*/}

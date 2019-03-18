@@ -59,7 +59,7 @@ class ProjectList extends Component {
         // Get user information
         ajaxRequest('GET','/api/users/whoami')
         .then(user => {
-            // Get the organization and their projects
+            // Get the organization and their project-views
             ajaxRequest('GET', `/api/orgs?populate=projects`)
             .then(orgs => {
                 // Initialize variables
@@ -73,7 +73,7 @@ class ProjectList extends Component {
 
                 // Loop through orgs
                 orgs.map((org) => {
-                    // Loop through projects and push to array
+                    // Loop through project-views and push to array
                     org.projects.map(project => {
                         allProjects.push(project);
                     });
@@ -146,7 +146,7 @@ class ProjectList extends Component {
             // Initialize variables
             const orgId = org.id;
 
-            // Loop through projects in each org
+            // Loop through project-views in each org
             const projects = org.projects.map(project => {
                 // Create project links
                 return (
@@ -156,7 +156,7 @@ class ProjectList extends Component {
                 )
             });
 
-            // Return the list of the orgs with projects
+            // Return the list of the orgs with project-views
             return (
                 <React.Fragment>
                     <ListItem className='proj-org-header'>
@@ -191,7 +191,7 @@ class ProjectList extends Component {
                         <Delete orgs={this.state.orgs} projects={this.state.projects} toggle={this.handleDeleteToggle}/>
                     </ModalBody>
                 </Modal>
-                {/*Display the list of projects*/}
+                {/*Display the list of project-views*/}
                 <div id='view' className='project-list' ref={this.ref}>
                     <div className='project-list-header'>
                         <h2 className='project-header'>Your Projects</h2>
@@ -219,7 +219,7 @@ class ProjectList extends Component {
                         </div>
                     </div>
                     <hr/>
-                    {/*Verify there are projects*/}
+                    {/*Verify there are project-views*/}
                     {(this.state.projects.length === 0)
                         ? (<div className='list-item'>
                             <h3> No projects. </h3>

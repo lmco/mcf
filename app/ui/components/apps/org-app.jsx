@@ -24,9 +24,9 @@ import ReactDOM from 'react-dom';
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
 import InformationPage from '../general-components/information-page.jsx';
+import MembersPage from '../general-components/members-page.jsx'
 import EditPage from '../general-components/edit-page.jsx';
-import OrgProjects from '../organizations/organization-projects.jsx';
-import MembersPage from '../user/members-page.jsx'
+import OrgProjects from '../org-views/organization-projects.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component

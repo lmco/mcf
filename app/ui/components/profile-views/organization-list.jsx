@@ -12,7 +12,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This renders the organizations list.
+ * @description This renders the orgs list.
  */
 
 // React Modules
@@ -129,7 +129,7 @@ class OrganizationList extends Component {
                         </ModalBody>
                     </Modal>
                 </div>
-                {/*Display the list of organizations*/}
+                {/*Display the list of orgs*/}
                 <div id='view' className='org-list' ref={this.ref}>
                     <div className='org-list-header'>
                         <h2 className='org-header'>Your Organizations</h2>

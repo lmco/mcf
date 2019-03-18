@@ -46,10 +46,10 @@ class Delete extends Component {
         this.setState({ [event.target.name]: event.target.value});
 
         if (this.props.projects) {
-            // Get all the projects from that org
+            // Get all the project-views from that org
             ajaxRequest('GET', `/api/orgs/${event.target.value}/projects?fields=id,name`)
             .then(projects => {
-                // Loop through projects and create proj options
+                // Loop through project-views and create proj options
                 const projectOptions = projects.map((project) => {
                     return (<option value={project.id}>{project.name}</option>)
                 });
@@ -75,7 +75,7 @@ class Delete extends Component {
         // Initialize variables
         let url;
 
-        // Verify if projects provided
+        // Verify if project-views provided
         if (this.props.projects) {
             // Set url to state options
             url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
@@ -97,7 +97,7 @@ class Delete extends Component {
         // Delete the project selected
         ajaxRequest('DELETE', url)
         .then(() => {
-            // On success, return to the projects page
+            // On success, return to the project-views page
             window.location.replace(`/`);
         })
         .catch((msg) => {
@@ -156,7 +156,7 @@ class Delete extends Component {
                                 </Input>
                               </FormGroup>)
                         }
-                        {/*Verify if projects provided*/}
+                        {/*Verify if project-views provided*/}
                         {(!this.props.projects)
                             ? ''
                             // Create a form to choose the organization

@@ -20,8 +20,7 @@ import React, { Component } from 'react';
 import {Input, Form, FormGroup, Button, Row, Col} from 'reactstrap';
 
 // MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-import SearchResults from '../search/search-results.jsx';
+import SearchResults from './search-results.jsx';
 
 class Search extends Component{
     constructor(props) {

@@ -24,9 +24,9 @@ import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
 import InformationPage from '../general-components/information-page.jsx';
 import EditPage from '../general-components/edit-page.jsx';
-import MembersPage from '../user/members-page.jsx';
-import ProjectElements from '../projects/project-elements.jsx';
-import Search from '../search/search.jsx';
+import MembersPage from '../general-components/members-page.jsx';
+import ProjectElements from '../project-views/project-elements.jsx';
+import Search from '../project-views/search/search.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component

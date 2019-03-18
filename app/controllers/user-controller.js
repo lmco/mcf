@@ -969,7 +969,7 @@ function remove(requestingUser, users, options) {
         }
       });
 
-      // Find any organizations the users were apart of
+      // Find any org-views the users were apart of
       return Organization.find(memberQuery);
     })
     .then((orgs) => {
@@ -989,7 +989,7 @@ function remove(requestingUser, users, options) {
       // Save all orgs and return once all are saved
       return Promise.all(promises);
     })
-    // Find any projects the users were apart of
+    // Find any project-views the users were apart of
     .then(() => Project.find(memberQuery))
     .then((projects) => {
       const promises = [];
@@ -1005,7 +1005,7 @@ function remove(requestingUser, users, options) {
         promises.push(proj.save());
       });
 
-      // Save all projects and return once all are saved
+      // Save all project-views and return once all are saved
       return Promise.all(promises);
     })
     // Remove the users

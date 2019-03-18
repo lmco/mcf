@@ -81,7 +81,7 @@ class Create extends Component {
         // Post the new project
         ajaxRequest('POST', url, data)
         .then(() => {
-            // On success, return to projects page
+            // On success, return to project-views page
             window.location.replace(redirect);
         })
         .catch((msg) => {

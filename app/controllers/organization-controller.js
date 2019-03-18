@@ -44,13 +44,13 @@ const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 
 /**
- * @description This function finds one or many organizations. Depending on the
+ * @description This function finds one or many org-views. Depending on the
  * given parameters, this function can find a single org by ID, multiple orgs by
- * ID, or all orgs in the system. Only organizations which a user has read
+ * ID, or all orgs in the system. Only org-views which a user has read
  * access to will be returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {(string|string[])} [orgs] - The organizations to find. Can either be
+ * @param {(string|string[])} [orgs] - The org-views to find. Can either be
  * an array of org ids, a single org id, or not provided, which defaults to
  * every org being found.
  * @param {Object} [options] - A parameter that provides supported options.
@@ -209,7 +209,7 @@ function find(requestingUser, orgs, options) {
     }
     else if (!((typeof orgs === 'object' && orgs !== null) || orgs === undefined)) {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for finding organizations.', 400, 'warn');
+      throw new M.CustomError('Invalid input for finding org-views.', 400, 'warn');
     }
 
     // Find the orgs
@@ -340,7 +340,7 @@ function create(requestingUser, orgs, options) {
     }
     else {
       // orgs is not an object or array, throw an error
-      throw new M.CustomError('Invalid input for creating organizations.', 400, 'warn');
+      throw new M.CustomError('Invalid input for creating org-views.', 400, 'warn');
     }
 
     // Create array of id's for lookup and array of valid keys
@@ -437,7 +437,7 @@ function create(requestingUser, orgs, options) {
         return orgObj;
       });
 
-      // Create the organizations
+      // Create the org-views
       return Organization.insertMany(orgObjects);
     })
     .then(() => {
@@ -466,7 +466,7 @@ function create(requestingUser, orgs, options) {
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing
- * updates to organizations, or a single object containing updates.
+ * updates to org-views, or a single object containing updates.
  * @param {string} orgs.id - The ID of the org being updated. Field cannot be
  * updated but is required to find org.
  * @param {string} [orgs.name] - The updated name of the organization.
@@ -581,7 +581,7 @@ function update(requestingUser, orgs, options) {
       orgsToUpdate = [saniOrgs];
     }
     else {
-      throw new M.CustomError('Invalid input for updating organizations.', 400, 'warn');
+      throw new M.CustomError('Invalid input for updating org-views.', 400, 'warn');
     }
 
     // Create list of ids
@@ -823,7 +823,7 @@ function update(requestingUser, orgs, options) {
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing
- * updates/new data for organizations, or a single object containing updates.
+ * updates/new data for org-views, or a single object containing updates.
  * @param {string} orgs.id - The ID of the org being updated/created. Field
  * cannot be updated but is required to find/created org.
  * @param {string} [orgs.name] - The updated/new name of the organization.
@@ -897,7 +897,7 @@ function createOrReplace(requestingUser, orgs, options) {
     }
     else {
       throw new M.CustomError('Invalid input for creating/replacing '
-        + 'organizations.', 400, 'warn');
+        + 'org-views.', 400, 'warn');
     }
 
     // Create list of ids
@@ -974,12 +974,12 @@ function createOrReplace(requestingUser, orgs, options) {
 }
 
 /**
- * @description This function removes one or many organizations as well as the
- * projects and elements that belong to them. This function can be used by
+ * @description This function removes one or many org-views as well as the
+ * project-views and elements that belong to them. This function can be used by
  * system-wide admins ONLY. NOTE: Cannot delete the default org.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {(string|string[])} orgs - The organizations to remove. Can either be
+ * @param {(string|string[])} orgs - The org-views to remove. Can either be
  * an array of org ids or a single org id.
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
@@ -1040,7 +1040,7 @@ function remove(requestingUser, orgs, options) {
     }
     else {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for removing organizations.', 400, 'warn');
+      throw new M.CustomError('Invalid input for removing org-views.', 400, 'warn');
     }
 
     // Find the orgs to delete
@@ -1071,7 +1071,7 @@ function remove(requestingUser, orgs, options) {
       // Delete any elements in the org
       return Element.deleteMany(ownedQuery);
     })
-    // Delete any projects in the org
+    // Delete any project-views in the org
     .then(() => Project.deleteMany({ org: { $in: saniOrgs } }))
     // Delete the orgs
     .then(() => Organization.deleteMany(searchQuery))

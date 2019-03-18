@@ -61,9 +61,9 @@ class ProfileApp extends Component {
                 <React.Fragment>
                     {/*Create the sidebar with sidebar links*/}
                     <Sidebar>
-                        <SidebarLink id='Home' title='Home' icon='fas fa-home' exact path="/profile" />
-                        <SidebarLink id='Organization' title='Organizations' icon='fas fa-boxes' href={`/profile/orgs`} />
-                        <SidebarLink id='Project' title='Projects' icon='fas fa-box' href={`/profile/projects`} />
+                        <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink='/profile' />
+                        <SidebarLink id='Organization' title='Organizations' icon='fas fa-boxes' routerLink='/profile/orgs'/>
+                        <SidebarLink id='Project' title='Projects' icon='fas fa-box' routerLink='/profile/projects'/>
                         <hr />
                         <SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={'/profile/edit'} />
                     </Sidebar>

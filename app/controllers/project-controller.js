@@ -45,14 +45,14 @@ const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 
 /**
- * @description This function finds one or many projects. Depending on the given
- * parameters, this function can find a single project by ID, multiple projects
- * by ID, or all projects in the given org. This function will return only the
- * projects a user has read access to.
+ * @description This function finds one or many project-views. Depending on the given
+ * parameters, this function can find a single project by ID, multiple project-views
+ * by ID, or all project-views in the given org. This function will return only the
+ * project-views a user has read access to.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
- * @param {(string|string[])} [projects] - The projects to find. Can either be
+ * @param {(string|string[])} [projects] - The project-views to find. Can either be
  * an array of project ids, a single project id, or not provided, which defaults
  * to every project being found.
  * @param {Object} [options] - A parameter that provides supported options.
@@ -74,8 +74,8 @@ const jmi = M.require('lib.jmi-conversions');
  *
  * @example
  * find({User}, 'orgID', ['proj1', 'proj2'], { populate: 'org' })
- * .then(function(projects) {
- *   // Do something with the found projects
+ * .then(function(project-views) {
+ *   // Do something with the found project-views
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -95,7 +95,7 @@ function find(requestingUser, organizationID, projects, options) {
       const projectTypes = ['undefined', 'object', 'string'];
       const optionsTypes = ['undefined', 'object'];
       assert.ok(projectTypes.includes(typeof projects), 'Projects parameter is an invalid type.');
-      // If projects is an object, ensure it's an array of strings
+      // If project-views is an object, ensure it's an array of strings
       if (typeof projects === 'object') {
         assert.ok(Array.isArray(projects), 'Projects is an object, but not an array.');
         assert.ok(projects.every(p => typeof p === 'string'), 'Projects is not an array of'
@@ -114,7 +114,7 @@ function find(requestingUser, organizationID, projects, options) {
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
-    // Set options if no projects were provided, but options were
+    // Set options if no project-views were provided, but options were
     if (((typeof projects === 'object' && projects !== null && !Array.isArray(projects))
       || (orgID === null)) && options === undefined) {
       options = projects; // eslint-disable-line no-param-reassign
@@ -208,7 +208,7 @@ function find(requestingUser, organizationID, projects, options) {
       searchQuery.org = orgID;
     }
 
-    // Check the type of the projects parameter
+    // Check the type of the project-views parameter
     if (Array.isArray(projects) && projects.every(p => typeof p === 'string')) {
       // An array of project ids, find all
       searchQuery._id = { $in: saniProjects.map(p => utils.createID(orgID, p)) };
@@ -219,10 +219,10 @@ function find(requestingUser, organizationID, projects, options) {
     }
     else if (!((typeof projects === 'object' && projects !== null) || projects === undefined)) {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for finding projects.', 400, 'warn');
+      throw new M.CustomError('Invalid input for finding project-views.', 400, 'warn');
     }
 
-    // Find the projects
+    // Find the project-views
     Project.find(searchQuery, fieldsString, { limit: limit, skip: skip })
     .populate(populateString)
     .then((foundProjects) => resolve(foundProjects))
@@ -231,9 +231,9 @@ function find(requestingUser, organizationID, projects, options) {
 }
 
 /**
- * @description This functions creates one or many projects from the provided
+ * @description This functions creates one or many project-views from the provided
  * data. This function is restricted to org writers or system-wide admins ONLY.
- * This function checks for any existing projects with duplicate IDs and creates
+ * This function checks for any existing project-views with duplicate IDs and creates
  * the root model element for each project that is created.
  *
  * @param {User} requestingUser - The object containing the requesting user.
@@ -263,8 +263,8 @@ function find(requestingUser, organizationID, projects, options) {
  *
  * @example
  * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
- * .then(function(projects) {
- *   // Do something with the newly created projects
+ * .then(function(project-views) {
+ *   // Do something with the newly created project-views
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -281,11 +281,11 @@ function create(requestingUser, organizationID, projects, options) {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
       assert.ok(projects !== null, 'Projects parameter cannot be null.');
-      // If projects is an array, ensure each item inside is an object
+      // If project-views is an array, ensure each item inside is an object
       if (Array.isArray(projects)) {
-        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in projects is not an'
+        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in project-views is not an'
           + ' object.');
-        assert.ok(projects.every(p => p !== null), 'One or more items in projects is null.');
+        assert.ok(projects.every(p => p !== null), 'One or more items in project-views is null.');
       }
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
@@ -347,18 +347,18 @@ function create(requestingUser, organizationID, projects, options) {
     // Define array to store project data
     let projectsToCreate = [];
 
-    // Check the type of the projects parameter
+    // Check the type of the project-views parameter
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
-      // projects is an array, create many projects
+      // project-views is an array, create many project-views
       projectsToCreate = saniProjects;
     }
     else if (typeof saniProjects === 'object') {
-      // projects is an object, create a single project
+      // project-views is an object, create a single project
       projectsToCreate = [saniProjects];
     }
     else {
-      // projects is not an object or array, throw an error
-      throw new M.CustomError('Invalid input for creating projects.', 400, 'warn');
+      // project-views is not an object or array, throw an error
+      throw new M.CustomError('Invalid input for creating project-views.', 400, 'warn');
     }
 
     // Create array of id's for lookup and array of valid keys
@@ -379,7 +379,7 @@ function create(requestingUser, organizationID, projects, options) {
         assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
         proj.id = utils.createID(orgID, proj.id);
         // Check if project with same ID is already being created
-        assert.ok(!arrIDs.includes(proj.id), 'Multiple projects with the same '
+        assert.ok(!arrIDs.includes(proj.id), 'Multiple project-views with the same '
           + `ID [${utils.parseID(proj.id).pop()}] cannot be created.`);
         arrIDs.push(proj.id);
         proj._id = proj.id;
@@ -399,7 +399,7 @@ function create(requestingUser, organizationID, projects, options) {
       throw new M.CustomError(err.message, 403, 'warn');
     }
 
-    // Create searchQuery to search for any existing, conflicting projects
+    // Create searchQuery to search for any existing, conflicting project-views
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the organization to verify existence and permissions
@@ -418,7 +418,7 @@ function create(requestingUser, organizationID, projects, options) {
           + ` projects on the org [${foundOrg._id}].`, 403, 'warn');
       }
 
-      // Find any existing, conflicting projects
+      // Find any existing, conflicting project-views
       return Project.find(searchQuery, '_id');
     })
     .then((foundProjects) => {
@@ -427,7 +427,7 @@ function create(requestingUser, organizationID, projects, options) {
         // Get arrays of the foundProjects's ids and names
         const foundProjectIDs = foundProjects.map(p => utils.parseID(p._id).pop());
 
-        // There are one or more projects with conflicting IDs
+        // There are one or more project-views with conflicting IDs
         throw new M.CustomError('Projects with the following IDs already exist'
           + ` [${foundProjectIDs.toString()}].`, 403, 'warn');
       }
@@ -483,15 +483,15 @@ function create(requestingUser, organizationID, projects, options) {
         return projObj;
       });
 
-      // Create the projects
+      // Create the project-views
       promises.push(Project.insertMany(projObjects));
 
       // Return when all promises are complete
       return Promise.all(promises);
     })
     .then(() => {
-      // Emit the event projects-created
-      EventEmitter.emit('projects-created', projObjects);
+      // Emit the event project-views-created
+      EventEmitter.emit('project-views-created', projObjects);
 
       // Create a root model element for each project
       const elemObjects = projObjects.map((p) => new Element({
@@ -517,8 +517,8 @@ function create(requestingUser, organizationID, projects, options) {
 }
 
 /**
- * @description This function updates one or many projects. Multiple fields in
- * multiple projects can be updated at once, provided that the fields are
+ * @description This function updates one or many project-views. Multiple fields in
+ * multiple project-views can be updated at once, provided that the fields are
  * allowed to be updated. If updating project permissions, to add one or more
  * users, provide a permissions object containing key/value pairs where the
  * username of the user is the key, and the value is the role the user is given.
@@ -527,12 +527,12 @@ function create(requestingUser, organizationID, projects, options) {
  * don't exist in the current custom data, the key/value pair will be added. If
  * the key/value pairs do exist, the value will be changed. If a project is
  * archived, it must first be unarchived before any other updates occur. This
- * function is restricted to admins of projects and system-wide admins ONLY.
+ * function is restricted to admins of project-views and system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {(Object|Object[])} projects - Either an array of objects containing
- * updates to projects, or a single object containing updates.
+ * updates to project-views, or a single object containing updates.
  * @param {string} projects.id - The ID of the project being updated. Field
  * cannot be updated but is required to find project.
  * @param {string} [projects.name] - The updated name of the project.
@@ -556,8 +556,8 @@ function create(requestingUser, organizationID, projects, options) {
  *
  * @example
  * update({User}, 'orgID', [{Updated Proj 1}, {Updated Proj 2}...], { populate: 'org' })
- * .then(function(projects) {
- *   // Do something with the newly updated projects
+ * .then(function(project-views) {
+ *   // Do something with the newly updated project-views
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -574,11 +574,11 @@ function update(requestingUser, organizationID, projects, options) {
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
       assert.ok(projects !== null, 'Projects parameter cannot be null.');
-      // If projects is an array, ensure each item inside is an object
+      // If project-views is an array, ensure each item inside is an object
       if (Array.isArray(projects)) {
-        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in projects is not an'
+        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in project-views is not an'
           + ' object.');
-        assert.ok(projects.every(p => p !== null), 'One or more items in projects is null.');
+        assert.ok(projects.every(p => p !== null), 'One or more items in project-views is null.');
       }
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
@@ -641,17 +641,17 @@ function update(requestingUser, organizationID, projects, options) {
       }
     }
 
-    // Check the type of the projects parameter
+    // Check the type of the project-views parameter
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
-      // projects is an array, update many projects
+      // project-views is an array, update many project-views
       projectsToUpdate = saniProjects;
     }
     else if (typeof saniProjects === 'object') {
-      // projects is an object, update a single project
+      // project-views is an object, update a single project
       projectsToUpdate = [saniProjects];
     }
     else {
-      throw new M.CustomError('Invalid input for updating projects.', 400, 'warn');
+      throw new M.CustomError('Invalid input for updating project-views.', 400, 'warn');
     }
 
     // Create list of ids
@@ -689,7 +689,7 @@ function update(requestingUser, organizationID, projects, options) {
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
 
-    // Find the organization containing the projects
+    // Find the organization containing the project-views
     Organization.findOne({ _id: orgID })
     .then((_foundOrganization) => {
       // Check if the organization was found
@@ -700,7 +700,7 @@ function update(requestingUser, organizationID, projects, options) {
       // Set function-wide foundOrg
       foundOrg = _foundOrganization;
 
-      // Find the projects to update
+      // Find the project-views to update
       return Project.find(searchQuery);
     })
     .then((_foundProjects) => {
@@ -716,7 +716,7 @@ function update(requestingUser, organizationID, projects, options) {
         }
       });
 
-      // Verify the same number of projects are found as desired
+      // Verify the same number of project-views are found as desired
       if (foundProjects.length !== arrIDs.length) {
         const foundIDs = foundProjects.map(p => p._id);
         const notFound = arrIDs.filter(p => !foundIDs.includes(p)).map(p => utils.parseID(p).pop());
@@ -889,7 +889,7 @@ function update(requestingUser, organizationID, projects, options) {
         });
       });
 
-      // Update all projects through a bulk write to the database
+      // Update all project-views through a bulk write to the database
       promises.push(Project.bulkWrite(bulkArray));
 
       // Return when all promises have been complete
@@ -897,8 +897,8 @@ function update(requestingUser, organizationID, projects, options) {
     })
     .then(() => Project.find(searchQuery, fieldsString).populate(populateString))
     .then((foundUpdatedProjects) => {
-      // Emit the event projects-updated
-      EventEmitter.emit('projects-updated', foundUpdatedProjects);
+      // Emit the event project-views-updated
+      EventEmitter.emit('project-views-updated', foundUpdatedProjects);
 
       return resolve(foundUpdatedProjects);
     })
@@ -907,9 +907,9 @@ function update(requestingUser, organizationID, projects, options) {
 }
 
 /**
- * @description This functions creates one or many projects from the provided
- * data. If projects with matching ids already exist, the function replaces
- * those projects. This function is restricted to system-wide admins ONLY.
+ * @description This functions creates one or many project-views from the provided
+ * data. If project-views with matching ids already exist, the function replaces
+ * those project-views. This function is restricted to system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -938,8 +938,8 @@ function update(requestingUser, organizationID, projects, options) {
  *
  * @example
  * createOrReplace({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
- * .then(function(projects) {
- *   // Do something with the newly created/replaced projects
+ * .then(function(project-views) {
+ *   // Do something with the newly created/replaced project-views
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -954,15 +954,15 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       // Ensure that requesting user has an _id field
       assert.ok(requestingUser._id, 'Requesting user is not populated.');
       assert.ok(requestingUser.admin === true, 'User does not have permissions'
-        + 'to replace projects.');
+        + 'to replace project-views.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
       assert.ok(projects !== null, 'Projects parameter cannot be null.');
-      // If projects is an array, ensure each item inside is an object
+      // If project-views is an array, ensure each item inside is an object
       if (Array.isArray(projects)) {
-        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in projects is not an'
+        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in project-views is not an'
           + ' object.');
-        assert.ok(projects.every(p => p !== null), 'One or more items in projects is null.');
+        assert.ok(projects.every(p => p !== null), 'One or more items in project-views is null.');
       }
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
@@ -980,18 +980,18 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     let createdProjects = [];
     const ts = Date.now();
 
-    // Check the type of the projects parameter
+    // Check the type of the project-views parameter
     // TODO: Remove the && check, already do this check in the first try/catch
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
-      // projects is an array, replace/create many projects
+      // project-views is an array, replace/create many project-views
       projectsToLookUp = saniProjects;
     }
     else if (typeof saniProjects === 'object') {
-      // projects is an object, replace/create a single project
+      // project-views is an object, replace/create a single project
       projectsToLookUp = [saniProjects];
     }
     else {
-      throw new M.CustomError('Invalid input for updating projects.', 400, 'warn');
+      throw new M.CustomError('Invalid input for updating project-views.', 400, 'warn');
     }
 
     // TODO: Reevaluate placement of code block, consider putting after org find (inspect other fxn)
@@ -1023,7 +1023,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     // Create searchQuery
     const searchQuery = { _id: { $in: arrIDs } };
 
-    // Find the organization containing the projects
+    // Find the organization containing the project-views
     Organization.findOne({ _id: orgID })
     .then((_foundOrganization) => {
       // Check if the organization was found
@@ -1031,7 +1031,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
         throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
       }
 
-      // Find the projects to update
+      // Find the project-views to update
       return Project.find(searchQuery);
     })
     .then((_foundProjects) => {
@@ -1058,14 +1058,14 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     })
     // Delete root model elements from database
     .then(() => Element.deleteMany({ _id: foundProjects.map(p => utils.createID(p._id, 'model')) }))
-    // Delete projects from database
+    // Delete project-views from database
     .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
 
     .then(() => {
-      // Emit the event projects-deleted
-      EventEmitter.emit('projects-deleted', foundProjects);
+      // Emit the event project-views-deleted
+      EventEmitter.emit('project-views-deleted', foundProjects);
 
-      // Create the new/replaced projects
+      // Create the new/replaced project-views
       return create(requestingUser, orgID, projectsToLookUp, options);
     })
     .then((_createdProjects) => {
@@ -1088,7 +1088,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
         fs.rmdirSync(path.join(M.root, 'data', orgID));
       }
 
-      // Return the newly created projects
+      // Return the newly created project-views
       return resolve(createdProjects);
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
@@ -1096,13 +1096,13 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
 }
 
 /**
- * @description This function removes one or many projects as well as the
+ * @description This function removes one or many project-views as well as the
  * elements that belong to them. This function can be used by system-wide admins
  * ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
- * @param {(string|string[])} projects - The projects to remove. Can either be
+ * @param {(string|string[])} projects - The project-views to remove. Can either be
  * an array of project ids or a single project id.
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
@@ -1111,8 +1111,8 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
  *
  * @example
  * remove({User}, 'orgID', ['proj1', 'proj2'])
- * .then(function(projects) {
- *   // Do something with the deleted projects
+ * .then(function(project-views) {
+ *   // Do something with the deleted project-views
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -1133,7 +1133,7 @@ function remove(requestingUser, organizationID, projects, options) {
       const projectTypes = ['object', 'string'];
       const optionsTypes = ['undefined', 'object'];
       assert.ok(projectTypes.includes(typeof projects), 'Projects parameter is an invalid type.');
-      // If projects is an object, ensure it's an array of strings
+      // If project-views is an object, ensure it's an array of strings
       if (typeof projects === 'object') {
         assert.ok(Array.isArray(projects), 'Projects is an object, but not an array.');
         assert.ok(projects.every(p => typeof p === 'string'), 'Projects is not an array of'
@@ -1156,7 +1156,7 @@ function remove(requestingUser, organizationID, projects, options) {
     try {
       // Ensure that requesting user has an _id field
       assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-      assert.ok(reqUser.admin, 'User does not have permissions to delete projects.');
+      assert.ok(reqUser.admin, 'User does not have permissions to delete project-views.');
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
     }
     catch (err) {
@@ -1167,7 +1167,7 @@ function remove(requestingUser, organizationID, projects, options) {
     const searchQuery = {};
     const ownedQuery = {};
 
-    // Check the type of the projects parameter
+    // Check the type of the project-views parameter
     if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'string')) {
       // An array of project ids, remove all
       searchedIDs = saniProjects.map(p => utils.createID(orgID, p));
@@ -1180,10 +1180,10 @@ function remove(requestingUser, organizationID, projects, options) {
     }
     else {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for removing projects.', 400, 'warn');
+      throw new M.CustomError('Invalid input for removing project-views.', 400, 'warn');
     }
 
-    // Find the projects to delete
+    // Find the project-views to delete
     Project.find(searchQuery)
     .then((_foundProjects) => {
       // Set the function-wide foundProjects and create ownedQuery
@@ -1191,26 +1191,26 @@ function remove(requestingUser, organizationID, projects, options) {
       const foundProjectIDs = foundProjects.map(p => p._id);
       ownedQuery.project = { $in: foundProjectIDs };
 
-      // Check if all projects were found
+      // Check if all project-views were found
       const notFoundIDs = searchedIDs.filter(p => !foundProjectIDs.includes(p));
-      // Some projects not found, throw an error
+      // Some project-views not found, throw an error
       if (notFoundIDs.length > 0) {
-        throw new M.CustomError('The following projects were not found: '
+        throw new M.CustomError('The following project-views were not found: '
           + `[${notFoundIDs.map(p => utils.parseID(p).pop())}].`, 404, 'warn');
       }
 
       // Delete any elements in the project
       return Element.deleteMany(ownedQuery);
     })
-    // Delete the projects
+    // Delete the project-views
     .then(() => Project.deleteMany(searchQuery))
     .then((retQuery) => {
-      // Emit the event projects-deleted
-      EventEmitter.emit('projects-deleted', foundProjects);
+      // Emit the event project-views-deleted
+      EventEmitter.emit('project-views-deleted', foundProjects);
 
-      // Verify that all of the projects were correctly deleted
+      // Verify that all of the project-views were correctly deleted
       if (retQuery.n !== foundProjects.length) {
-        M.log.error('Some of the following projects were not '
+        M.log.error('Some of the following project-views were not '
             + `deleted [${saniProjects.toString()}].`);
       }
       return resolve(foundProjects.map(p => p._id));
