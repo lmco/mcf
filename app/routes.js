@@ -78,7 +78,7 @@ router.route('/')
 );
 
 /* This renders the user page for logged in users */
-router.route('/whoami')
+router.route('/profile')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -86,28 +86,27 @@ router.route('/whoami')
 );
 
 /* This renders the user page for logged in users */
-router.route('/whoami/edit')
+router.route('/profile/orgs')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   UIController.whoami
 );
 
-
-/* This renders the organization list page for logged in users */
-router.route('/organizations')
+/* This renders the user page for logged in users */
+router.route('/profile/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.organizations
+  UIController.whoami
 );
 
-/* This renders the project list page for logged in users */
-router.route('/projects')
+/* This renders the user page for logged in users */
+router.route('/profile/edit')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.projects
+  UIController.whoami
 );
 
 /**

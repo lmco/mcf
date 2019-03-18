@@ -136,14 +136,14 @@ class MbeeNav extends Component {
                                         <i className='fas fa-user-circle'/>
                                     </DropdownToggle>
                                     <DropdownMenu right>
-                                        <DropdownItem href="/whoami">
+                                        <DropdownItem href="/profile">
                                             Profile
                                         </DropdownItem>
                                         <DropdownItem divider />
-                                        <DropdownItem href="/organizations">
+                                        <DropdownItem href="/profile/orgs">
                                             Your Organizations
                                         </DropdownItem>
-                                        <DropdownItem href="/projects">
+                                        <DropdownItem href="/profile/projects">
                                             Your Projects
                                         </DropdownItem>
                                         <DropdownItem href="/about">

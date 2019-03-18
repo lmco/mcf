@@ -24,6 +24,8 @@ import Sidebar from '../general-components/sidebar/sidebar.jsx'
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx'
 import UserHome from './user-home.jsx';
 import UserEdit from './user-edit.jsx';
+import OrganizationList from '../organizations/organization-list.jsx';
+import ProjectList from '../projects/project-list.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
@@ -59,11 +61,11 @@ class User extends Component {
                 <React.Fragment>
                     {/*Create the sidebar with sidebar links*/}
                     <Sidebar>
-                        <SidebarLink id='Home' title='Home' icon='fas fa-home' exact path="/whoami" />
-                        <SidebarLink id='Organization' title='Organizations' icon='fas fa-boxes' href={`/organizations`} />
-                        <SidebarLink id='Project' title='Projects' icon='fas fa-box' href={`/projects`} />
+                        <SidebarLink id='Home' title='Home' icon='fas fa-home' exact path="/profile" />
+                        <SidebarLink id='Organization' title='Organizations' icon='fas fa-boxes' href={`/profile/orgs`} />
+                        <SidebarLink id='Project' title='Projects' icon='fas fa-box' href={`/profile/projects`} />
                         <hr />
-                        <SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={'/whoami/edit'} />
+                        <SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={'/profile/edit'} />
                     </Sidebar>
                     {/*Verify user data exists*/}
                     {(!this.state.user)
@@ -72,10 +74,16 @@ class User extends Component {
                             className="loading"> {this.state.error || 'Loading your information...'} </div>
                         : (<Switch>
                                 {/*Route to user home page*/}
-                                <Route exact path="/whoami"
+                                <Route exact path="/profile"
                                        render={ (props) => <UserHome {...props} user={this.state.user} /> } />
+                                {/*Route to org list page*/}
+                                <Route exact path={'/profile/orgs'}
+                                       render={ (props) => <OrganizationList {...props} user={this.state.user} /> } />
+                                {/*Route to project list page*/}
+                                <Route exact path={'/profile/projects'}
+                                       render={ (props) => <ProjectList {...props} user={this.state.user} /> } />
                                 {/*Route to user edit page*/}
-                                <Route exact path={'/whoami/edit'}
+                                <Route exact path={'/profile/edit'}
                                        render={ (props) => <UserEdit {...props} user={this.state.user} /> } />
                             </Switch>)
                     }
