@@ -21,11 +21,11 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 
 // MBEE Modules
-import Sidebar from '../general-components/sidebar/sidebar.jsx';
-import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
-import InformationPage from '../general-components/information-page.jsx';
-import MembersPage from '../general-components/members-page.jsx'
-import EditPage from '../general-components/edit-page.jsx';
+import Sidebar from '../general/sidebar/sidebar.jsx';
+import SidebarLink from '../general/sidebar/sidebar-link.jsx';
+import InformationPage from '../org-proj-components/information-page.jsx';
+import MembersPage from '../org-proj-components/members/members-page.jsx'
+import EditPage from '../org-proj-components/edit-page.jsx';
 import OrgProjects from '../org-views/organization-projects.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 

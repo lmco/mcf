@@ -20,8 +20,8 @@ import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 // MBEE Modules
-import Sidebar from '../general-components/sidebar/sidebar.jsx'
-import SidebarLink from '../general-components/sidebar/sidebar-link.jsx'
+import Sidebar from '../general/sidebar/sidebar.jsx'
+import SidebarLink from '../general/sidebar/sidebar-link.jsx'
 import UserHome from '../profile-views/user-home.jsx';
 import UserEdit from '../profile-views/user-edit.jsx';
 import OrganizationList from '../profile-views/organization-list.jsx';

@@ -21,11 +21,11 @@ import {Button, Modal, ModalBody} from 'reactstrap';
 import ReactDOM from 'react-dom';
 
 // MBEE Modules
-import List from '../general-components/list/list.jsx';
+import List from '../general/list/list.jsx';
 import OrgList from '../home-views/org-list.jsx';
-import Create from '../general-components/create.jsx';
-import Delete from '../general-components/delete.jsx';
-import Space from '../general-components/space/space.jsx';
+import Create from '../org-proj-components/create.jsx';
+import Delete from '../org-proj-components/delete.jsx';
+import Space from '../general/space/space.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define HomePage Component

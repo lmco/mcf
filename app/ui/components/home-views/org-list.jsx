@@ -19,10 +19,10 @@ import React, { Component } from 'react';
 import { Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
-import List from '../general-components/list/list.jsx';
-import OrgListItem from '../general-components/list/org-list-item.jsx';
-import Delete from '../general-components/delete.jsx';
-import Create from '../general-components/create.jsx';
+import List from '../general/list/list.jsx';
+import OrgListItem from '../general/list/org-list-item.jsx';
+import Delete from '../org-proj-components/delete.jsx';
+import Create from '../org-proj-components/create.jsx';
 import ProjList from './proj-list.jsx';
 
 

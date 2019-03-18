@@ -18,10 +18,10 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import UserListItem from '../general-components/list/user-list-item.jsx';
-import List from '../general-components/list/list.jsx';
+import UserListItem from '../../general/list/user-list-item.jsx';
+import List from '../../general/list/list.jsx';
 import { Button, Modal, ModalBody } from 'reactstrap';
-import UserRoleEdit from './user-role-edit.jsx';
+import MemberEdit from './member-edit.jsx';
 
 class MembersPage extends Component {
     constructor(props) {
@@ -75,8 +75,8 @@ class MembersPage extends Component {
                         <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
                             <ModalBody>
                                 {(this.props.project && !this.props.org)
-                                    ? (<UserRoleEdit project={this.props.project} toggle={this.handleToggle}/>)
-                                    : (<UserRoleEdit org={this.props.org} toggle={this.handleToggle}/>)
+                                    ? (<MemberEdit project={this.props.project} toggle={this.handleToggle}/>)
+                                    : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
                                 }
                             </ModalBody>
                         </Modal>

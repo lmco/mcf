@@ -20,9 +20,9 @@ import React from 'react';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
-import ListItem from '../general-components/list/list-item.jsx';
-import List from '../general-components/list/list.jsx';
-import Create from '../general-components/create.jsx';
+import ListItem from '../general/list/list-item.jsx';
+import List from '../general/list/list.jsx';
+import Create from '../org-proj-components/create.jsx';
 
 // Define function
 function OrganizationProjects(props) {

@@ -20,11 +20,11 @@ import { Link } from 'react-router-dom';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
-import List from '../general-components/list/list.jsx';
-import ListItem from '../general-components/list/list-item.jsx';
-import ProjectListItem from '../general-components/list/project-list-item.jsx';
-import Create from '../general-components/create.jsx';
-import Delete from '../general-components/delete.jsx';
+import List from '../general/list/list.jsx';
+import ListItem from '../general/list/list-item.jsx';
+import ProjectListItem from '../general/list/project-list-item.jsx';
+import Create from '../org-proj-components/create.jsx';
+import Delete from '../org-proj-components/delete.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component

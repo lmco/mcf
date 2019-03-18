@@ -27,11 +27,11 @@ import { Form,
         DropdownItem } from 'reactstrap';
 
 // MBEE Modules
-import CustomMenu from '../general-components/dropdown-search/custom-menu.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
+import CustomMenu from '../../general/dropdown-search/custom-menu.jsx';
+import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 
 // Define component
-class UserRoleEdit extends Component{
+class MemberEdit extends Component{
     constructor(props) {
         // Initialize parent props
         super(props);
@@ -203,5 +203,5 @@ class UserRoleEdit extends Component{
 }
 
 // Export component
-export default UserRoleEdit
+export default MemberEdit
 
