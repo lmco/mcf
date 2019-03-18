@@ -1568,6 +1568,11 @@ function moveElementCheck(organizationID, projectID, branch, element) {
       throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
     }
 
+    // Error Check: ensure the root model element is not being moved
+    if (element.id === 'model') {
+      throw new M.CustomError('Cannot move the root model element.', 403, 'warn');
+    }
+
     // Define nested helper function
     function findElementParentRecursive(e) {
       return new Promise((res, rej) => {
@@ -1575,11 +1580,13 @@ function moveElementCheck(organizationID, projectID, branch, element) {
         .then((foundElement) => {
           // If foundElement is null, reject with error
           if (!foundElement) {
-            throw new M.CustomError(`Parent element ${e.parent} not found.`, 404, 'warn');
+            throw new M.CustomError('Parent element '
+              + `[${utils.parseID(e.parent).pop()}] not found.`, 404, 'warn');
           }
 
           // If element.parent is root, resolve... there is no conflict
-          if (utils.parseID(foundElement.parent).pop() === 'model') {
+          if (foundElement.parent === null
+            || utils.parseID(foundElement.parent).pop() === 'model') {
             return '';
           }
 
