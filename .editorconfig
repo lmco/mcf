@@ -16,6 +16,10 @@ trim_trailing_whitespace = true
 [*.{js,json}]
 indent_size = 2
 
+# JSX
+[*.{jsx}]
+indent_size = 2
+
 # JSON-like files
 [{.eslintrc,*.cfg}]
 indent_size = 2
