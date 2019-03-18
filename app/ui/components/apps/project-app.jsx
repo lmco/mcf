@@ -17,6 +17,7 @@
 // React Modules
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import ReactDOM from 'react-dom';
 
 // MBEE Modules
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
@@ -24,12 +25,12 @@ import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
 import InformationPage from '../general-components/information-page.jsx';
 import EditPage from '../general-components/edit-page.jsx';
 import MembersPage from '../user/members-page.jsx';
-import ProjectElements from './project-elements.jsx';
+import ProjectElements from '../projects/project-elements.jsx';
 import Search from '../search/search.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
-class Project extends Component {
+class ProjectApp extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
@@ -142,4 +143,6 @@ class Project extends Component {
 }
 
 // Export component
-export default Project
+ReactDOM.render(<Router>
+                    <Route path={'/:orgid/:projectid'} component={ProjectApp} />
+                </Router>, document.getElementById('main'));

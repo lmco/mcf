@@ -50,7 +50,7 @@ RUN mkdir logs \
     && mkdir -p public \
     && mkdir -p app
 
-# Copy Project
+# Copy ProjectApp
 COPY ./config config
 COPY ./scripts scripts
 COPY ./mbee.js mbee.js

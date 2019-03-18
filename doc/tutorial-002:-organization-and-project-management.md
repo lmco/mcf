@@ -1,4 +1,4 @@
-## Tutorial: Organization and Project Management
+## Tutorial: OrgApp and ProjectApp Management
 
 In this tutorial we will show how to manage organizations and projects. By 
 default every user is a member of the *default* organization and has permission
@@ -64,7 +64,7 @@ organization with a similar approach.
 ```python
 # Create a project
 url = '{}/api/orgs/demo/projects/demo-project'.format(server)
-r = requests.post(url, auth=creds, json={'name': 'Demo Project'})
+r = requests.post(url, auth=creds, json={'name': 'Demo ProjectApp'})
 print r.status_code
 
 # Get the project
@@ -78,10 +78,10 @@ The above code creates our project by calling the
 `/api/orgs/:orgid/projects/:projectid` API endpoint. In this case we pass in the
 same org ID as the one we created previously and we provide a project ID of
 `demo-project`. We also provide a JSON body giving our project a name of 
-`Demo Project`. Finally, we make a GET request to the server requesting the 
+`Demo ProjectApp`. Finally, we make a GET request to the server requesting the 
 project we just created to verify it got created.
 
-> NOTE: Project IDs follow the same rules as organization IDs;
+> NOTE: ProjectApp IDs follow the same rules as organization IDs;
 > An ID can only contain lowercase letters, numbers, dashes (`-`), and 
 > underscores (`_`) and must begin with a lowercase letter or a number.
 
@@ -110,7 +110,7 @@ r = requests.get(url, auth=creds)
 
 # Create a project
 url = '{}/api/orgs/demo/projects/demo-project'.format(server)
-r = requests.post(url, auth=creds, json={'name': 'Demo Project'})
+r = requests.post(url, auth=creds, json={'name': 'Demo ProjectApp'})
 
 # Get the project
 url = '{}/api/orgs/demo/projects/demo-project'.format(server)

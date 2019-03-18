@@ -24,6 +24,8 @@ module.exports = {
   home,
   flightManual,
   whoami,
+  organization,
+  project,
   swaggerDoc,
   showAboutPage,
   showLoginPage,
@@ -69,6 +71,38 @@ function whoami(req, res) {
   }
   utils.render(req, res, 'user', {
     name: 'user',
+    title: 'MBEE | Model-Based Engineering Environment'
+  });
+}
+
+/**
+ * @description Renders the organization page.
+ */
+function organization(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/ executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Render the MBEE home screen
+  return utils.render(req, res, 'organization', {
+    title: 'MBEE | Model-Based Engineering Environment'
+  });
+}
+
+/**
+ * @description Renders the project page.
+ */
+function project(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical(new M.CustomError('/ executed with invalid req.user object'));
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  // Render the MBEE home screen
+  return utils.render(req, res, 'project', {
     title: 'MBEE | Model-Based Engineering Environment'
   });
 }

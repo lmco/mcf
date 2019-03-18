@@ -18,18 +18,19 @@
 // React Modules
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import ReactDOM from 'react-dom';
 
 // MBEE Modules
 import Sidebar from '../general-components/sidebar/sidebar.jsx';
 import SidebarLink from '../general-components/sidebar/sidebar-link.jsx';
 import InformationPage from '../general-components/information-page.jsx';
 import EditPage from '../general-components/edit-page.jsx';
-import OrgProjects from './organization-projects.jsx';
+import OrgProjects from '../organizations/organization-projects.jsx';
 import MembersPage from '../user/members-page.jsx'
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
-class Organization extends Component {
+class OrgApp extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
@@ -64,7 +65,7 @@ class Organization extends Component {
                     // Set the admin state
                     this.setState({admin: true});
                 }
-                
+
                 // Set the org state
                 this.setState({org: org})
 
@@ -112,7 +113,7 @@ class Organization extends Component {
                         {/*Check if user is admin*/}
                         {(this.state.admin)
                             // Add the edit router link for admin users ONLY
-                            ?(<SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
+                            ?(<SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`}  />)
                             : ''
                         }
                     </Sidebar>
@@ -123,7 +124,7 @@ class Organization extends Component {
                         // Display page based on route on clients side
                         : (<Switch>
                                 {/*Route to org home page*/}
-                                <Route exact path={`${this.props.match.url}/`}
+                                <Route exact path={`${this.props.match.url}`}
                                        render={ (props) => <InformationPage {...props} org={this.state.org} /> } />
                                 {/*Route to projects page*/}
                                 <Route path={`${this.props.match.url}/projects`}
@@ -147,4 +148,6 @@ class Organization extends Component {
 }
 
 // Export component
-export default Organization
+ReactDOM.render(<Router>
+                    <Route path={'/:orgid'} component={OrgApp} />
+                </Router>, document.getElementById('main'));

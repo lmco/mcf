@@ -61,7 +61,7 @@ RUN mkdir logs \
     && mkdir -p app \
     && mkdir -p /lm/mbee/data/db/log
 
-# Copy Project
+# Copy ProjectApp
 COPY ./config config
 COPY ./scripts scripts
 COPY ./mbee.js mbee.js
