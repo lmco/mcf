@@ -1580,7 +1580,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
         .then((foundElement) => {
           // If foundElement is null, reject with error
           if (!foundElement) {
-            throw new M.CustomError(`Parent element ${e.parent} not found.`, 404, 'warn');
+            throw new M.CustomError('Parent element '
+              + `[${utils.parseID(e.parent).pop()}] not found.`, 404, 'warn');
           }
 
           // If element.parent is root, resolve... there is no conflict
