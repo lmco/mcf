@@ -20,7 +20,7 @@ import React, { Component } from 'react';
 import { Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
-import ProjectListItem from '../general/list/project-list-item.jsx';
+import ProjectListItem from '../org-proj-components/list-items/project-list-item.jsx';
 import Delete from '../org-proj-components/delete.jsx';
 
 

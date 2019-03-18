@@ -544,6 +544,48 @@ textarea[name="custom"] {
 }
 
 /******************************************************************************
+/*                           Members Page Styling                             *
+/******************************************************************************/
+.user-list {
+    padding: 2em;
+
+    h2 {
+        margin-bottom: 1em;
+        font-size: 18px;
+    }
+
+    .user-list-header {
+        display: grid;
+        grid-template-columns: minmax(auto, 48%) minmax(auto, 48%) 1fr;
+        grid-template-areas: "header descriptor button";
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .user-header {
+        grid-area: header;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .user-descriptor {
+        grid-area: descriptor;
+        justify-content: flex-start;
+        margin: 0;
+    }
+
+    .user-button {
+        grid-area: button;
+        display: flex;
+
+        .btn {
+            float: right;
+            margin: 5px;
+        }
+    }
+}
+
+/******************************************************************************
 /*                           User Page Styling                                *
 /******************************************************************************/
 .user-home {
@@ -701,6 +743,32 @@ textarea[name="custom"] {
     }
 }
 
+.user-list-item {
+    display: grid;
+    grid-template-columns: minmax(auto, 48%) minmax(auto, 48%) 1fr;
+    grid-template-areas: "username perm";
+    justify-content: space-between;
+    align-items: center;
+
+    .username {
+        margin: 1em;
+        grid-area: username;
+        p {
+            font-size: 15px;
+            margin: 0;
+            display: inline-block;
+        }
+    }
+
+    .permission {
+        grid-area: perm;
+        p {
+            font-size: 15px;
+            margin: 0;
+            display: inline-block;
+        }
+    }
+}
 /******************************************************************************
 /*                           Search Form Styling                              *
 /******************************************************************************/

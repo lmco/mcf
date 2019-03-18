@@ -18,7 +18,7 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import UserListItem from '../../general/list/user-list-item.jsx';
+import UserListItem from '../list-items/user-list-item.jsx';
 import List from '../../general/list/list.jsx';
 import { Button, Modal, ModalBody } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
@@ -82,14 +82,15 @@ class MembersPage extends Component {
                         </Modal>
                     )
                 }
-                <div id='view' className='project-list'>
-                    <div className='project-list-header'>
-                        <h2 className='project-header'>Users</h2>
+                <div id='view' className='user-list'>
+                    <div className='user-list-header'>
+                        <h2 className='user-header'>Users</h2>
+                        <h2 className='user-descriptor'>Permissions</h2>
                         {/*Verify user is admin*/}
                         {(!this.props.admin)
                             ? ''
                             : ( // Button to edit user roles
-                                <div className='project-button'>
+                                <div className='user-button'>
                                     <Button className='btn'
                                             outline color="secondary"
                                             onClick={this.handleToggle}>

@@ -22,9 +22,13 @@ import React from 'react';
 function UserListItem(props) {
     // Return the user list item
     return (
-        <div className='stats-list-item'>
-            <p> {props.user} </p>
-            <p> {props.permission} </p>
+        <div className='user-list-item'>
+            <div className='username'>
+                <p>{props.user} </p>
+            </div>
+            <div className='permission'>
+                <p>{props.permission} </p>
+            </div>
         </div>
     );
 }

@@ -12,19 +12,18 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This renders the project list items.
+ * @description This renders the organization list items.
  */
 
 // React Modules
 import React, { Component } from 'react';
-import { Breadcrumb, BreadcrumbItem } from 'reactstrap';
 
 // MBEE Modules
-import StatsList from '../stats/stats-list.jsx';
-import Stat from '../stats/stat.jsx';
+import StatsList from '../../general/stats/stats-list.jsx';
+import Stat from '../../general/stats/stat.jsx';
 
 // Define component
-class ProjectListItem extends Component {
+class OrgListItem extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
@@ -42,19 +41,19 @@ class ProjectListItem extends Component {
     }
 
     componentDidMount() {
-        // Event listener of the size of the window
+        // Create event listener to resize window
         window.addEventListener('resize', this.handleResize);
 
-        // Call function on resize of window
+        // Set initial size of window
         this.handleResize();
     }
 
     componentWillUnmount() {
-        // Remove event listener on the window
+        // Remove event listener on window
         window.removeEventListener('resize', this.handleResize);
     }
 
-    // Define handle size function
+    // Define handle resize function
     handleResize() {
         // Set the state prop to the client width
         this.setState({ width: this.ref.current.clientWidth })
@@ -62,26 +61,28 @@ class ProjectListItem extends Component {
 
     render() {
         // Initialize variables
-        const project = this.props.project;
+        const org = this.props.org;
+
         const stats = (
             // Create the stat list for the organization
             <StatsList>
-                <Stat title='Users' icon='fas fa-users' value={Object.keys(project.permissions).length} _key={`project-${project.id.split(':').join('-')}-users`} />
+                <Stat title='Projects' icon='fas fa-boxes' value={org.projects.length} _key={`org-${org.id}-projects`} />
+                <Stat title='Users' icon='fas fa-users' value={Object.keys(org.permissions).length} _key={`org-${org.id}-users`} />
             </StatsList>
         );
 
         // Render the organization stat list items
         return (
-            <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
-                <div className='list-header'>
-                    <a href={this.props.href}>{project.name}</a>
+                <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
+                    <div className='list-header'>
+                        <a href={this.props.href}>{org.name}</a>
+                    </div>
+                    {/*Verify width of client, remove stats based on width*/}
+                    {(this.state.width > 600) ? stats : ''}
                 </div>
-                {/*Verify width of client, remove stats based on width*/}
-                {(this.state.width > 600) ? stats : ''}
-            </div>
         )
     }
 }
 
 // Export component
-export default ProjectListItem
+export default OrgListItem
