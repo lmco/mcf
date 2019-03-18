@@ -18,7 +18,7 @@
 import React from 'react';
 
 // Define function
-function UserHome(props) {
+function ProfileHome(props) {
     // Initialize variables
     const user = props.user;
 
@@ -46,4 +46,4 @@ function UserHome(props) {
 }
 
 // Export function
-export default UserHome
+export default ProfileHome

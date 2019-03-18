@@ -17,7 +17,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Button, Modal, ModalBody} from 'reactstrap';
+import { Button, Modal, ModalBody } from 'reactstrap';
 import ReactDOM from 'react-dom';
 
 // MBEE Modules

@@ -22,8 +22,8 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx'
 import SidebarLink from '../general/sidebar/sidebar-link.jsx'
-import UserHome from '../profile-views/user-home.jsx';
-import UserEdit from '../profile-views/user-edit.jsx';
+import ProfileHome from '../profile-views/profile-home.jsx';
+import ProfileEdit from '../profile-views/profile-edit.jsx';
 import OrganizationList from '../profile-views/organization-list.jsx';
 import ProjectList from '../profile-views/project-list.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
@@ -75,7 +75,7 @@ class ProfileApp extends Component {
                         : (<Switch>
                                 {/*Route to user home page*/}
                                 <Route exact path="/profile"
-                                       render={ (props) => <UserHome {...props} user={this.state.user} /> } />
+                                       render={ (props) => <ProfileHome {...props} user={this.state.user} /> } />
                                 {/*Route to org list page*/}
                                 <Route exact path={'/profile/orgs'}
                                        render={ (props) => <OrganizationList {...props} user={this.state.user} /> } />
@@ -84,7 +84,7 @@ class ProfileApp extends Component {
                                        render={ (props) => <ProjectList {...props} user={this.state.user} /> } />
                                 {/*Route to user edit page*/}
                                 <Route exact path={'/profile/edit'}
-                                       render={ (props) => <UserEdit {...props} user={this.state.user} /> } />
+                                       render={ (props) => <ProfileEdit {...props} user={this.state.user} /> } />
                             </Switch>)
                     }
                 </React.Fragment>

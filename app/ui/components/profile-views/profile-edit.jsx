@@ -16,14 +16,14 @@
 
 // React Modules
 import React, { Component } from 'react';
-import {Form, FormGroup, Label, Input, FormFeedback, Button} from 'reactstrap';
+import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
 
 // Define component
-class UserEdit extends Component{
+class ProfileEdit extends Component{
     constructor(props) {
         // Initialize parent props
         super(props);
@@ -158,4 +158,4 @@ class UserEdit extends Component{
 }
 
 // Export component
-export default UserEdit
+export default ProfileEdit
