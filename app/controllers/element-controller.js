@@ -1584,7 +1584,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
           }
 
           // If element.parent is root, resolve... there is no conflict
-          if (utils.parseID(foundElement.parent).pop() === 'model') {
+          if (foundElement.parent === null
+            || utils.parseID(foundElement.parent).pop() === 'model') {
             return '';
           }
 
