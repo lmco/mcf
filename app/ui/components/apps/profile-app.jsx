@@ -29,7 +29,7 @@ import ProjectList from '../projects/project-list.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
-class User extends Component {
+class ProfileApp extends Component {
     constructor(props) {
         // Initialize parent props
         super(props);
@@ -94,4 +94,4 @@ class User extends Component {
 }
 
 // Render on main html element
-ReactDOM.render(<User />, document.getElementById('main'));
+ReactDOM.render(<ProfileApp />, document.getElementById('main'));

@@ -17,7 +17,6 @@
 
 // React Modules
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import {Button, Modal, ModalBody} from 'reactstrap';
 
 // MBEE Modules
@@ -247,5 +246,5 @@ class HomePage extends Component {
     }
 }
 
-ReactDOM.render(<HomePage />, document.getElementById('view'));
+export default HomePage;
 
