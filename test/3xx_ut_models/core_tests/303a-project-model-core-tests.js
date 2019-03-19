@@ -13,7 +13,7 @@
  * @author  Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests the Project Model functionality. The project
- * model tests, create, find, update, and delete project-views. THe tests also
+ * model tests, create, find, update, and delete projects. THe tests also
  * test the max character limit on the ID field.
  */
 
@@ -47,7 +47,7 @@ describe(M.getModuleName(module.filename), () => {
   before((done) => {
     db.connect()
     .then(() => {
-      // Create a parent organization before creating any project-views
+      // Create a parent organization before creating any projects
       org = new Org({
         _id: testData.orgs[0].id,
         name: testData.orgs[0].name
@@ -135,7 +135,7 @@ function findProject(done) {
 }
 
 /**
- * @description Updates a project-views name
+ * @description Updates a projects name
  */
 function updateProject(done) {
   // Find and update project previously created in createProject test
@@ -167,7 +167,7 @@ function deleteProject(done) {
   Project.findOneAndRemove({ _id: utils.createID(org._id, testData.projects[0].id) })
   .then(() => Project.find({ _id: utils.createID(org._id, testData.projects[0].id) }))
   .then((projects) => {
-    // Expect to find no project-views
+    // Expect to find no projects
     chai.expect(projects.length).to.equal(0);
     done();
   })

@@ -86,22 +86,22 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   it('should POST a project', postProject);
-  it('should POST multiple project-views', postProjects);
+  it('should POST multiple projects', postProjects);
   it('should PUT a project', putProject);
-  it('should PUT multiple project-views', putProjects);
+  it('should PUT multiple projects', putProjects);
   it('should GET a project', getProject);
-  it('should GET multiple project-views', getProjects);
-  it('should GET all project-views on an organization', getAllProjectsOnOrg);
-  it('should GET all project-views a user has access to', getAllProjects);
+  it('should GET multiple projects', getProjects);
+  it('should GET all projects on an organization', getAllProjectsOnOrg);
+  it('should GET all projects a user has access to', getAllProjects);
   it('should PATCH a project', patchProject);
-  it('should PATCH multiple project-views', patchProjects);
+  it('should PATCH multiple projects', patchProjects);
   it('should DELETE a project', deleteProject);
-  it('should DELETE multiple project-views', deleteProjects);
+  it('should DELETE multiple projects', deleteProjects);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies POST /api/orgs/:orgid/project-views/:projectid creates a
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid creates a
  * project.
  */
 function postProject(done) {
@@ -143,8 +143,8 @@ function postProject(done) {
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/project-views creates multiple
- * project-views.
+ * @description Verifies POST /api/orgs/:orgid/projects creates multiple
+ * projects.
  */
 function postProjects(done) {
   const projData = [
@@ -197,7 +197,7 @@ function postProjects(done) {
 }
 
 /**
- * @description Verifies PUT /api/orgs/:orgid/project-views/:projectid creates or
+ * @description Verifies PUT /api/orgs/:orgid/projects/:projectid creates or
  * replaces a project.
  */
 function putProject(done) {
@@ -239,8 +239,8 @@ function putProject(done) {
 }
 
 /**
- * @description Verifies PUT /api/orgs/:orgid/project-views creates or replaces
- * multiple project-views.
+ * @description Verifies PUT /api/orgs/:orgid/projects creates or replaces
+ * multiple projects.
  */
 function putProjects(done) {
   const projData = [
@@ -294,7 +294,7 @@ function putProjects(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/project-views/:projectid finds a
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid finds a
  * project.
  */
 function getProject(done) {
@@ -336,8 +336,8 @@ function getProject(done) {
 
 
 /**
- * @description Verifies GET /api/orgs/:orgid/project-views finds multiple
- * project-views.
+ * @description Verifies GET /api/orgs/:orgid/projects finds multiple
+ * projects.
  */
 function getProjects(done) {
   const projData = [
@@ -391,7 +391,7 @@ function getProjects(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/project-views finds all project-views in
+ * @description Verifies GET /api/orgs/:orgid/projects finds all projects in
  * an org when no body or query parameters are provided.
  */
 function getAllProjectsOnOrg(done) {
@@ -446,7 +446,7 @@ function getAllProjectsOnOrg(done) {
 }
 
 /**
- * @description Verifies GET /api/project-views finds all project-views a user has access
+ * @description Verifies GET /api/projects finds all projects a user has access
  * to.
  */
 function getAllProjects(done) {
@@ -501,7 +501,7 @@ function getAllProjects(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/project-views/:projectid updates a
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid updates a
  * project.
  */
 function patchProject(done) {
@@ -547,8 +547,8 @@ function patchProject(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/project-views updates multiple
- * project-views.
+ * @description Verifies PATCH /api/orgs/:orgid/projects updates multiple
+ * projects.
  */
 function patchProjects(done) {
   const projData = [
@@ -607,7 +607,7 @@ function patchProjects(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/project-views/:projectid deletes a
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid deletes a
  * project.
  */
 function deleteProject(done) {
@@ -633,8 +633,8 @@ function deleteProject(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/project-views deletes multiple
- * project-views.
+ * @description Verifies DELETE /api/orgs/:orgid/projects deletes multiple
+ * projects.
  */
 function deleteProjects(done) {
   const projData = [

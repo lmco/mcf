@@ -13,7 +13,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Tests the organization controller functionality: create,
- * delete, update, and find org-views.
+ * delete, update, and find organizations.
  */
 
 // NPM modules
@@ -130,7 +130,7 @@ function createOrg(done) {
 }
 
 /**
- * @description Creates multiple org-views using the org controller
+ * @description Creates multiple organizations using the org controller
  */
 function createOrgs(done) {
   const orgDataObjects = [
@@ -217,7 +217,7 @@ function createOrReplaceOrg(done) {
 }
 
 /**
- * @description Creates and replaces multiple org-views using the org
+ * @description Creates and replaces multiple organizations using the org
  * controller.
  */
 function createOrReplaceOrgs(done) {
@@ -306,7 +306,7 @@ function findOrg(done) {
 }
 
 /**
- * @description Finds multiple org-views using the org controller
+ * @description Finds multiple organizations using the org controller
  */
 function findOrgs(done) {
   const orgDataObjects = [
@@ -358,7 +358,7 @@ function findOrgs(done) {
 }
 
 /**
- * @description Finds all org-views the user has access to using the org
+ * @description Finds all organizations the user has access to using the org
  * controller
  */
 function findAllOrgs(done) {
@@ -467,7 +467,7 @@ function updateOrg(done) {
 }
 
 /**
- * @description Updates multiple org-views using the org controller
+ * @description Updates multiple organizations using the org controller
  */
 function updateOrgs(done) {
   const orgDataObjects = [
@@ -554,7 +554,7 @@ function deleteOrg(done) {
 }
 
 /**
- * @description Deletes multiple org-views using the org controller
+ * @description Deletes multiple organizations using the org controller
  */
 function deleteOrgs(done) {
   const orgDataObjects = [

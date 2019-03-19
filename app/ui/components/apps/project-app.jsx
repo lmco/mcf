@@ -25,7 +25,7 @@ import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import InformationPage from '../org-proj-components/information-page.jsx';
 import EditPage from '../org-proj-components/edit-page.jsx';
 import MembersPage from '../org-proj-components/members/members-page.jsx';
-import ProjectElements from '../project-views/project-elements.jsx';
+import ProjectElements from '../project-views/elements/project-elements.jsx';
 import Search from '../project-views/search/search.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
@@ -76,9 +76,13 @@ class ProjectApp extends Component {
                 // Set states
                 this.setState({ project: project });
             })
-            .catch((err) => this.setState({error:`Failed to grab user: ${err.responseJSON.description}`}))
+            .catch((err) => {
+                console.log(err);
+                this.setState({error: `Failed to grab user: ${err.responseJSON.description}`})
+            })
         })
         .catch(err => {
+            console.log(err);
             // Throw error and set state
             this.setState({error: `Failed to load project: ${err.responseJSON.description}`});
         });

@@ -129,7 +129,7 @@ function postOrg(done) {
 }
 
 /**
- * @description Verifies POST /api/orgs creates multiple org-views.
+ * @description Verifies POST /api/orgs creates multiple organizations.
  */
 function postOrgs(done) {
   const orgData = [
@@ -216,7 +216,7 @@ function putOrg(done) {
 }
 
 /**
- * @description Verifies PUT /api/orgs creates/replaces multiple org-views.
+ * @description Verifies PUT /api/orgs creates/replaces multiple organizations.
  */
 function putOrgs(done) {
   const orgData = [
@@ -302,7 +302,7 @@ function getOrg(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs returns the two org-views to which
+ * @description Verifies GET /api/orgs returns the two organizations to which
  * the user belongs.
  */
 function getOrgs(done) {
@@ -355,7 +355,7 @@ function getOrgs(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs returns all org-views
+ * @description Verifies GET /api/orgs returns all organizations
  * the user belongs to.
  */
 function getAllOrgs(done) {
@@ -535,7 +535,7 @@ function deleteOrg(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs deletes multiple org-views.
+ * @description Verifies DELETE /api/orgs deletes multiple organizations.
  */
 function deleteOrgs(done) {
   const orgData = [

@@ -12,7 +12,7 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE org-views.
+ * GET, POST, PATCH, and DELETE organizations.
  */
 
 // NPM modules
@@ -131,7 +131,7 @@ function postOrg(done) {
 }
 
 /**
- * @description Verifies mock POST request to create multiple org-views.
+ * @description Verifies mock POST request to create multiple organizations.
  */
 function postOrgs(done) {
   // Create request object
@@ -228,7 +228,7 @@ function putOrg(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace multiple
- * org-views.
+ * organizations.
  */
 function putOrgs(done) {
   // Create request object
@@ -324,7 +324,7 @@ function getOrg(done) {
 }
 
 /**
- * @description Verifies mock GET request to get multiple org-views.
+ * @description Verifies mock GET request to get multiple organizations.
  */
 function getOrgs(done) {
   const orgData = [
@@ -380,7 +380,7 @@ function getOrgs(done) {
 }
 
 /**
- * @description Verifies mock GET request to get all org-views.
+ * @description Verifies mock GET request to get all organizations.
  */
 function getAllOrgs(done) {
   const orgData = [
@@ -567,7 +567,7 @@ function deleteOrg(done) {
 }
 
 /**
- * @description Verifies mock DELETE request to delete multiple org-views.
+ * @description Verifies mock DELETE request to delete multiple organizations.
  */
 function deleteOrgs(done) {
   // Create request object

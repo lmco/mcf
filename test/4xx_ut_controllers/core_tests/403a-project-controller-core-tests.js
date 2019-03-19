@@ -15,7 +15,7 @@
  * @description  This tests the Project Controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project controller tests create,
- * update, find, and delete project-views
+ * update, find, and delete projects
  */
 
 // NPM modules
@@ -90,16 +90,16 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create a project', createProject);
-  it('should create multiple project-views', createProjects);
+  it('should create multiple projects', createProjects);
   it('should create or replace a project', createOrReplaceProject);
-  it('should create and replace multiple project-views', createOrReplaceProjects);
+  it('should create and replace multiple projects', createOrReplaceProjects);
   it('should find a project', findProject);
-  it('should find multiple project-views', findProjects);
-  it('should find all project-views', findAllProjects);
+  it('should find multiple projects', findProjects);
+  it('should find all projects', findAllProjects);
   it('should update a project', updateProject);
-  it('should update multiple project-views', updateProjects);
+  it('should update multiple projects', updateProjects);
   it('should delete a project', deleteProject);
-  it('should delete multiple project-views', deleteProjects);
+  it('should delete multiple projects', deleteProjects);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -144,7 +144,7 @@ function createProject(done) {
 }
 
 /**
- * @description Creates multiple project-views using the project controller
+ * @description Creates multiple projects using the project controller
  */
 function createProjects(done) {
   const projDataObjects = [
@@ -153,7 +153,7 @@ function createProjects(done) {
     testData.projects[3]
   ];
 
-  // Create project-views via controller
+  // Create projects via controller
   ProjController.create(adminUser, org.id, projDataObjects)
   .then((createdProjects) => {
     // Expect createdProjects not to be empty
@@ -235,7 +235,7 @@ function createOrReplaceProject(done) {
 }
 
 /**
- * @description Creates or replaces multiple project-views using the project
+ * @description Creates or replaces multiple projects using the project
  * controller.
  */
 function createOrReplaceProjects(done) {
@@ -246,7 +246,7 @@ function createOrReplaceProjects(done) {
     testData.projects[4]
   ];
 
-  // Create project-views via controller
+  // Create projects via controller
   ProjController.createOrReplace(adminUser, org.id, projDataObjects)
   .then((replacedProjects) => {
     // Expect replacedProjects not to be empty
@@ -328,7 +328,7 @@ function findProject(done) {
 }
 
 /**
- * @description Finds multiple project-views using the project controller
+ * @description Finds multiple projects using the project controller
  */
 function findProjects(done) {
   const projDataObjects = [
@@ -341,7 +341,7 @@ function findProjects(done) {
   // Create list of project ids to find
   const projIDs = projDataObjects.map(p => p.id);
 
-  // Find project-views via controller
+  // Find projects via controller
   ProjController.find(adminUser, org.id, projIDs)
   .then((foundProjects) => {
     // Expect foundProjects not to be empty
@@ -383,7 +383,7 @@ function findProjects(done) {
 }
 
 /**
- * @description Finds all project-views on a given organization using the project
+ * @description Finds all projects on a given organization using the project
  * controller
  */
 function findAllProjects(done) {
@@ -395,7 +395,7 @@ function findAllProjects(done) {
     testData.projects[4]
   ];
 
-  // Find project-views via controller
+  // Find projects via controller
   ProjController.find(adminUser, org.id)
   .then((foundProjects) => {
     // Expect foundProjects not to be empty. Cannot know exact number in db
@@ -483,7 +483,7 @@ function updateProject(done) {
 }
 
 /**
- * @description Updates multiple project-views using the project controller
+ * @description Updates multiple projects using the project controller
  */
 function updateProjects(done) {
   const projDataObjects = [
@@ -493,13 +493,13 @@ function updateProjects(done) {
     testData.projects[4]
   ];
 
-  // Create objects to update project-views
+  // Create objects to update projects
   const updateObjects = projDataObjects.map(p => ({
     name: `${p.name}_edit`,
     id: p.id
   }));
 
-  // Update project-views via controller
+  // Update projects via controller
   ProjController.update(adminUser, org.id, updateObjects)
   .then((updatedProjects) => {
     // Expect updatedProjects not to be empty
@@ -571,7 +571,7 @@ function deleteProject(done) {
 }
 
 /**
- * @description Deletes multiple project-views using the project controller
+ * @description Deletes multiple projects using the project controller
  */
 function deleteProjects(done) {
   const projDataObjects = [
@@ -584,7 +584,7 @@ function deleteProjects(done) {
   // Create list of project ids to delete
   const projIDs = projDataObjects.map(p => p.id);
 
-  // Delete project-views via controller
+  // Delete projects via controller
   ProjController.remove(adminUser, org.id, projIDs)
   .then((deletedProjects) => {
     // Expect deletedProjects not to be empty
@@ -598,7 +598,7 @@ function deleteProjects(done) {
       chai.expect(deletedProjects).to.include(projectID);
     });
 
-    // Attempt to find the deleted project-views
+    // Attempt to find the deleted projects
     return ProjController.find(adminUser, org.id, projIDs, { archived: true });
   })
   .then((foundProjects) => {

@@ -85,7 +85,7 @@ module.exports.up = function() {
     }
 
     // Find all orgs
-    mongoose.connection.db.collection('org-views').find({}).toArray()
+    mongoose.connection.db.collection('organizations').find({}).toArray()
     .then((foundOrgs) => {
       orgs = foundOrgs;
       jmiOrgs = jmi.convertJMI(1, 2, orgs);
@@ -98,7 +98,7 @@ module.exports.up = function() {
         });
       });
     })
-    // Find all project-views
+    // Find all projects
     .then(() => mongoose.connection.db.collection('projects').find({}).toArray())
     .then((foundProjects) => {
       projects = foundProjects;
@@ -150,12 +150,12 @@ module.exports.up = function() {
       existingCollections = collections.map(c => c.s.name);
 
       // If the orgs collection exists, run the helper function
-      if (existingCollections.includes('org-views')) {
+      if (existingCollections.includes('organizations')) {
         return sixToSevenOrgHelper(orgs, jmiUsers);
       }
     })
     .then(() => {
-      // If the project-views collection exists, run the helper function
+      // If the projects collection exists, run the helper function
       if (existingCollections.includes('projects')) {
         return sixToSevenProjectHelper(projects, jmiUsers, jmiOrgs);
       }
@@ -197,7 +197,7 @@ module.exports.up = function() {
  * @description Helper function for 0.6.0 to 0.6.0.1 migration. Handles all
  * updates to the organization collection.
  *
- * @param {Array} orgs - The org-views being updated.
+ * @param {Array} orgs - The organizations being updated.
  * @param {Object} jmi2Users - The found users in JMI Type 2 format.
  */
 function sixToSevenOrgHelper(orgs, jmi2Users) {
@@ -265,20 +265,20 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
     orgsToInsert.forEach((org) => delete org.id);
 
     // Delete all currently existing orgs
-    mongoose.connection.db.collection('org-views').deleteMany({})
-    // Find all indexes in the org-views collections
-    .then(() => mongoose.connection.db.collection('org-views').indexes())
+    mongoose.connection.db.collection('organizations').deleteMany({})
+    // Find all indexes in the organizations collections
+    .then(() => mongoose.connection.db.collection('organizations').indexes())
     .then((indexes) => {
       const promises = [];
       // Loop through the found indexes
       indexes.forEach((index) => {
         // If unique ID index exists, delete from orgs collection
         if (index.name === 'id_1') {
-          promises.push(mongoose.connection.db.collection('org-views').dropIndex('id_1'));
+          promises.push(mongoose.connection.db.collection('organizations').dropIndex('id_1'));
         }
         // If unique name index exists, delete from orgs collection
         else if (index.name === 'name_1') {
-          promises.push(mongoose.connection.db.collection('org-views').dropIndex('name_1'));
+          promises.push(mongoose.connection.db.collection('organizations').dropIndex('name_1'));
         }
       });
 
@@ -289,7 +289,7 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
     .then(() => {
       // If there are orgs to add, add them
       if (orgsToInsert.length > 0) {
-        return mongoose.connection.db.collection('org-views').insertMany(orgsToInsert);
+        return mongoose.connection.db.collection('organizations').insertMany(orgsToInsert);
       }
     })
     .then(() => {
@@ -311,7 +311,7 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
  * @description Helper function for 0.6.0 to 0.6.0.1 migration. Handles all
  * updates to the project collection.
  *
- * @param {Array} projects - The project-views being updated.
+ * @param {Array} projects - The projects being updated.
  * @param {Object} jmi2Users - The found users in JMI Type 2 format.
  * @param {Object} jmi2Orgs - The found orgs in JMI Type 2 format.
  */
@@ -386,20 +386,20 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
     // Remove the id field from all objects
     projectsToInsert.forEach((project) => delete project.id);
 
-    // Delete all project-views
+    // Delete all projects
     mongoose.connection.db.collection('projects').deleteMany({})
-    // Find all indexes in the project-views collections
+    // Find all indexes in the projects collections
     .then(() => mongoose.connection.db.collection('projects').indexes())
     .then((indexes) => {
       const indexNames = indexes.map(i => i.name);
-      // If unique ID index exists, delete from project-views collection
+      // If unique ID index exists, delete from projects collection
       if (indexNames.includes('id_1')) {
         return mongoose.connection.db.collection('projects').dropIndex('id_1');
       }
     })
-    // Insert updated project-views
+    // Insert updated projects
     .then(() => {
-      // If there are project-views to add, add them
+      // If there are projects to add, add them
       if (projectsToInsert.length > 0) {
         mongoose.connection.db.collection('projects').insertMany(projectsToInsert);
       }
@@ -425,7 +425,7 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
  *
  * @param {Array} elements - The elements being updated.
  * @param {Object} jmi2Users - The found users in JMI Type 2 format.
- * @param {Object} jmi2Projects - The found project-views in JMI Type 2 format.
+ * @param {Object} jmi2Projects - The found projects in JMI Type 2 format.
  * @param {Object} jmi2Elements - The found elements in JMI Type 2 format.
  */
 function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements) {

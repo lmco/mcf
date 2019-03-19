@@ -192,8 +192,8 @@ function version(req, res) {
 /**
  * GET /api/orgs
  *
- * @description Gets an array of all org-views that a user has access to.
- * Returns a 404 error in no org-views are found.
+ * @description Gets an array of all organizations that a user has access to.
+ * Returns a 404 error in no organizations are found.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -257,7 +257,7 @@ function getOrgs(req, res) {
     delete options.minified;
   }
 
-  // Get all org-views the requesting user has access to
+  // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
   OrgController.find(req.user, ids, options)
   .then((orgs) => {
@@ -326,7 +326,7 @@ function postOrgs(req, res) {
     delete options.minified;
   }
 
-  // Create org-views in request body
+  // Create organizations in request body
   // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
@@ -389,7 +389,7 @@ function putOrgs(req, res) {
     delete options.minified;
   }
 
-  // Create or replace org-views in request body
+  // Create or replace organizations in request body
   // NOTE: createOrReplace() sanitizes req.body
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
@@ -894,14 +894,14 @@ function deleteOrg(req, res) {
 
 /* -----------------------( Project API Endpoints )-------------------------- */
 /**
- * GET /api/project-views
+ * GET /api/projects
  *
- * @description Gets all project-views a user has access to across all orgs.
+ * @description Gets all projects a user has access to across all orgs.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with project-views' public data
+ * @return {Object} Response object with projects' public data
  */
 function getAllProjects(req, res) {
   // Define options
@@ -941,12 +941,12 @@ function getAllProjects(req, res) {
     delete options.minified;
   }
 
-  // Get all project-views the requesting user has access to
+  // Get all projects the requesting user has access to
   ProjectController.find(req.user, null, undefined, options)
   .then((projects) => {
     // Verify project array is not empty
     if (projects.length === 0) {
-      const error = new M.CustomError('No project-views found.', 404, 'warn');
+      const error = new M.CustomError('No projects found.', 404, 'warn');
       return res.status(error.status).send(error);
     }
 
@@ -977,15 +977,15 @@ function getAllProjects(req, res) {
 }
 
 /**
- * GET /api/org/:orgid/project-views
+ * GET /api/org/:orgid/projects
  *
- * @description Gets an array of all project-views that a user has access to on
- * a specified org or an array of specified project-views on the specified org.
+ * @description Gets an array of all projects that a user has access to on
+ * a specified org or an array of specified projects on the specified org.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with project-views' public data
+ * @return {Object} Response object with projects' public data
  */
 function getProjects(req, res) {
   // Define options and ids
@@ -1042,13 +1042,13 @@ function getProjects(req, res) {
     delete options.minified;
   }
 
-  // Get all project-views the requesting user has access to in a specified org
+  // Get all projects the requesting user has access to in a specified org
   // NOTE: find() sanitizes req.params.orgid and ids
   ProjectController.find(req.user, req.params.orgid, ids, options)
   .then((projects) => {
     // Verify project array is not empty
     if (projects.length === 0) {
-      const error = new M.CustomError('No project-views found.', 404, 'warn');
+      const error = new M.CustomError('No projects found.', 404, 'warn');
       return res.status(error.status).send(error);
     }
 
@@ -1079,14 +1079,14 @@ function getProjects(req, res) {
 }
 
 /**
- * POST /api/org/:orgid/project-views
+ * POST /api/org/:orgid/projects
  *
- * @description This function creates multiple project-views.
+ * @description This function creates multiple projects.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} Response object with created project-views.
+ * @return {Object} Response object with created projects.
  */
 function postProjects(req, res) {
   // Define options
@@ -1123,7 +1123,7 @@ function postProjects(req, res) {
     delete options.minified;
   }
 
-  // Create the specified project-views
+  // Create the specified projects
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
@@ -1154,14 +1154,14 @@ function postProjects(req, res) {
 }
 
 /**
- * PUT /api/org/:orgid/project-views
+ * PUT /api/org/:orgid/projects
  *
- * @description This function creates/replaces multiple project-views.
+ * @description This function creates/replaces multiple projects.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} Response object with created/replaced project-views.
+ * @return {Object} Response object with created/replaced projects.
  */
 function putProjects(req, res) {
   // Define options
@@ -1198,7 +1198,7 @@ function putProjects(req, res) {
     delete options.minified;
   }
 
-  // Create or replace the specified project-views
+  // Create or replace the specified projects
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
@@ -1229,14 +1229,14 @@ function putProjects(req, res) {
 }
 
 /**
- * PATCH /api/org/:orgid/project-views
+ * PATCH /api/org/:orgid/projects
  *
- * @description This function updates multiple project-views.
+ * @description This function updates multiple projects.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} Response object with updated project-views.
+ * @return {Object} Response object with updated projects.
  */
 function patchProjects(req, res) {
   // Define options
@@ -1273,7 +1273,7 @@ function patchProjects(req, res) {
     delete options.minified;
   }
 
-  // Update the specified project-views
+  // Update the specified projects
   // NOTE: update() sanitizes req.params.orgid req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
@@ -1304,9 +1304,9 @@ function patchProjects(req, res) {
 }
 
 /**
- * DELETE /api/org/:orgid/project-views
+ * DELETE /api/org/:orgid/projects
  *
- * @description This function deletes multiple project-views.
+ * @description This function deletes multiple projects.
  * NOTE: This function is for system-wide admins ONLY.
  *
  * @param {Object} req - request express object
@@ -1352,7 +1352,7 @@ function deleteProjects(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified project-views
+  // Remove the specified projects
   ProjectController.remove(req.user, req.params.orgid, req.body, options)
   .then((projectIDs) => {
     const parsedIDs = projectIDs.map(p => utils.parseID(p).pop());
@@ -1369,7 +1369,7 @@ function deleteProjects(req, res) {
 }
 
 /**
- * GET /api/org/:orgid/project-views/:projectid
+ * GET /api/org/:orgid/projects/:projectid
  *
  * @description Gets a project by its project ID.
  *
@@ -1418,7 +1418,7 @@ function getProject(req, res) {
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
   .then((projects) => {
-    // If no project-views found, return 404 error
+    // If no projects found, return 404 error
     if (projects.length === 0) {
       const error = new M.CustomError(
         `Project [${req.params.projectid}] not found.`, 404, 'warn'
@@ -1453,7 +1453,7 @@ function getProject(req, res) {
 }
 
 /**
- * POST /api/orgs/:orgid/project-views/:projectid
+ * POST /api/orgs/:orgid/projects/:projectid
  *
  * @description Takes an organization ID and project ID in the URI and project
  * data in the request body, and creates a project.
@@ -1540,7 +1540,7 @@ function postProject(req, res) {
 }
 
 /**
- * PUT /api/orgs/:orgid/project-views/:projectid
+ * PUT /api/orgs/:orgid/projects/:projectid
  *
  * @description Takes an organization ID and project ID in the URI and project
  * data in the request body, and creates/replaces a project.
@@ -1627,7 +1627,7 @@ function putProject(req, res) {
 }
 
 /**
- * PATCH /api/orgs/:orgid/project-views/:projectid
+ * PATCH /api/orgs/:orgid/projects/:projectid
  *
  * @description Updates the project specified in the URI.
  *
@@ -1713,7 +1713,7 @@ function patchProject(req, res) {
 }
 
 /**
- * DELETE /api/orgs/:orgid/project-views/:projectid
+ * DELETE /api/orgs/:orgid/projects/:projectid
  *
  * @description Takes an orgid and projectid in the URI and deletes a project.
  * NOTE: This function is for system-wide admins ONLY.
@@ -2597,7 +2597,7 @@ function patchPassword(req, res) {
 
 /* -----------------------( Elements API Endpoints )------------------------- */
 /**
- * GET /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Gets all elements or get specified elements.
  *
@@ -2750,7 +2750,7 @@ function getElements(req, res) {
 }
 
 /**
- * POST /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Creates specified elements.
  *
@@ -2829,7 +2829,7 @@ function postElements(req, res) {
 }
 
 /**
- * PUT /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Creates/replaces specified elements. NOTE: this route is
  * reserved for system-wide admins ONLY.
@@ -2909,7 +2909,7 @@ function putElements(req, res) {
 }
 
 /**
- * PATCH /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Updates specified elements.
  *
@@ -2988,7 +2988,7 @@ function patchElements(req, res) {
 }
 
 /**
- * DELETE /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Deletes multiple elements.
  * NOTE: This function is system-admin ONLY.
@@ -3052,7 +3052,7 @@ function deleteElements(req, res) {
 }
 
 /**
- * GET /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/search
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search
  *
  * @description Does a text based search on elements and returns any matches.
  *
@@ -3134,7 +3134,7 @@ function searchElements(req, res) {
 }
 
 /**
- * GET /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
  * @description Gets an element.
  *
@@ -3228,7 +3228,7 @@ function getElement(req, res) {
 }
 
 /**
- * POST /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
  * @description Creates an element.
  *
@@ -3318,7 +3318,7 @@ function postElement(req, res) {
 }
 
 /**
- * PUT /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
  * @description Creates or replaces an element.
  *
@@ -3408,7 +3408,7 @@ function putElement(req, res) {
 }
 
 /**
- * PATCH /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
  * @description Updates the specified element.
  *
@@ -3498,7 +3498,7 @@ function patchElement(req, res) {
 }
 
 /**
- * DELETE /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
  * @description Deletes an element.
  * NOTE: This function is system-admin ONLY.

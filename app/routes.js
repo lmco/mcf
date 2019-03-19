@@ -94,7 +94,7 @@ router.route('/profile/orgs')
 );
 
 /* This renders the user page for logged in users */
-router.route('/profile/project-views')
+router.route('/profile/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -153,8 +153,8 @@ router.route('/:orgid/users')
   UIController.organization
 );
 
-/* This renders an organization's project-views page for a user */
-router.route('/:orgid/project-views')
+/* This renders an organization's projects page for a user */
+router.route('/:orgid/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,

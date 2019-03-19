@@ -13,7 +13,7 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE project-views.
+ * GET, POST, PATCH, and DELETE projects.
  */
 
 // NPM modules
@@ -85,17 +85,17 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   it('should POST a project', postProject);
-  it('should POST multiple project-views', postProjects);
+  it('should POST multiple projects', postProjects);
   it('should PUT a project', putProject);
-  it('should PUT multiple project-views', putProjects);
+  it('should PUT multiple projects', putProjects);
   it('should GET a project', getProject);
-  it('should GET multiple project-views', getProjects);
-  it('should GET all project-views on an organization', getAllProjectsOnOrg);
-  it('should GET all project-views a user has access to', getAllProjects);
+  it('should GET multiple projects', getProjects);
+  it('should GET all projects on an organization', getAllProjectsOnOrg);
+  it('should GET all projects a user has access to', getAllProjects);
   it('should PATCH a project', patchProject);
-  it('should PATCH multiple project-views', patchProjects);
+  it('should PATCH multiple projects', patchProjects);
   it('should DELETE a project', deleteProject);
-  it('should DELETE multiple project-views', deleteProjects);
+  it('should DELETE multiple projects', deleteProjects);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -148,7 +148,7 @@ function postProject(done) {
 }
 
 /**
- * @description Verifies mock POST request to create multiple project-views.
+ * @description Verifies mock POST request to create multiple projects.
  */
 function postProjects(done) {
   // Create request object
@@ -202,7 +202,7 @@ function postProjects(done) {
     done();
   };
 
-  // POSTs multiple project-views
+  // POSTs multiple projects
   APIController.postProjects(req, res);
 }
 
@@ -255,7 +255,7 @@ function putProject(done) {
 }
 
 /**
- * @description Verifies mock PUT request to create/replace multiple project-views.
+ * @description Verifies mock PUT request to create/replace multiple projects.
  */
 function putProjects(done) {
   // Create request object
@@ -310,7 +310,7 @@ function putProjects(done) {
     done();
   };
 
-  // PUTs multiple project-views
+  // PUTs multiple projects
   APIController.putProjects(req, res);
 }
 
@@ -363,7 +363,7 @@ function getProject(done) {
 }
 
 /**
- * @description Verifies mock GET request to find multiple project-views.
+ * @description Verifies mock GET request to find multiple projects.
  */
 function getProjects(done) {
   // Create request object
@@ -419,12 +419,12 @@ function getProjects(done) {
     done();
   };
 
-  // GETs multiple project-views
+  // GETs multiple projects
   APIController.getProjects(req, res);
 }
 
 /**
- * @description Verifies mock GET request to find all project-views in an org.
+ * @description Verifies mock GET request to find all projects in an org.
  */
 function getAllProjectsOnOrg(done) {
   // Create request object
@@ -481,12 +481,12 @@ function getAllProjectsOnOrg(done) {
     done();
   };
 
-  // GETs multiple project-views
+  // GETs multiple projects
   APIController.getProjects(req, res);
 }
 
 /**
- * @description Verifies mock GET request to find all project-views a user has access
+ * @description Verifies mock GET request to find all projects a user has access
  * to.
  */
 function getAllProjects(done) {
@@ -541,7 +541,7 @@ function getAllProjects(done) {
     done();
   };
 
-  // GETs multiple project-views
+  // GETs multiple projects
   APIController.getAllProjects(req, res);
 }
 
@@ -598,7 +598,7 @@ function patchProject(done) {
 }
 
 /**
- * @description Verifies mock PATCH request to update multiple project-views.
+ * @description Verifies mock PATCH request to update multiple projects.
  */
 function patchProjects(done) {
   // Create request object
@@ -658,7 +658,7 @@ function patchProjects(done) {
     done();
   };
 
-  // PATCHs multiple project-views
+  // PATCHs multiple projects
   APIController.patchProjects(req, res);
 }
 

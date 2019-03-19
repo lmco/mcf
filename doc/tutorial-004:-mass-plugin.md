@@ -42,7 +42,7 @@ with open('data.json', 'r') as f:
 url = '{}/api/orgs/default/projects/demo-mass-rollup'.format(server)
 r = requests.post(url, auth=creds, json={'name': 'Demo - Mass Rollup'})
 if (r.status_code != 200):
-    print 'ProjectApp creation failed!'
+    print 'Project creation failed!'
     print r.text
     exit(1)
  
@@ -351,7 +351,7 @@ a project ID of <code>demo-mass-rollup</code>.<br/>
     <input type="text" id="org" class="form-control mx-sm-3">
   </div>
   <div class="form-group">
-    <label for="project">ProjectApp</label>
+    <label for="project">Project</label>
     <input type="text" id="project" class="form-control mx-sm-3">
   </div>
   <div class="form-group">

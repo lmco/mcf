@@ -12,7 +12,7 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Helper function for MBEE test.
- * - Used to create users, org-views, project-views, elements in the database.
+ * - Used to create users, organizations, projects, elements in the database.
  * - Assumes database connection already established
  *
  * This function takes the complexity out of MBEE tests,
@@ -220,7 +220,7 @@ module.exports.removeTestOrg = function() {
 
     // Delete elements
     Element.deleteMany(ownedQuery)
-    // Delete any project-views in the org
+    // Delete any projects in the org
     .then(() => Project.deleteMany({ org: testData.orgs[0].id }))
     // Delete the orgs
     .then(() => Organization.deleteMany({ _id: testData.orgs[0].id }))

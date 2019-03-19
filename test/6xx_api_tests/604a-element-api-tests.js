@@ -109,7 +109,7 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies POST
- * /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * creates a single element.
  */
 function postElement(done) {
@@ -166,7 +166,7 @@ function postElement(done) {
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * @description Verifies POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * creates multiple elements.
  */
 function postElements(done) {
@@ -239,7 +239,7 @@ function postElements(done) {
 
 /**
  * @description Verifies PUT
- * /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * creates or replaces a single element.
  */
 function putElement(done) {
@@ -296,7 +296,7 @@ function putElement(done) {
 }
 
 /**
- * @description Verifies PUT /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * @description Verifies PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * creates or replaces multiple elements.
  */
 function putElements(done) {
@@ -370,7 +370,7 @@ function putElements(done) {
 
 /**
  * @description Verifies GET
- * /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * finds a single element.
  */
 function getElement(done) {
@@ -426,7 +426,7 @@ function getElement(done) {
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * @description Verifies GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * finds multiple elements.
  */
 function getElements(done) {
@@ -501,7 +501,7 @@ function getElements(done) {
 
 /**
  * @description Verifies GET
- * /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/search
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search
  * searches for elements using text based search.
  */
 function searchElement(done) {
@@ -562,7 +562,7 @@ function searchElement(done) {
 
 /**
  * @description Verifies PATCH
- * /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * updates a single element.
  */
 function patchElement(done) {
@@ -623,7 +623,7 @@ function patchElement(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * updates multiple elements.
  */
 function patchElements(done) {
@@ -702,7 +702,7 @@ function patchElements(done) {
 
 /**
  * @description Verifies DELETE
- * /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * deletes a single element.
  */
 function deleteElement(done) {
@@ -728,7 +728,7 @@ function deleteElement(done) {
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/project-views/:projectid/branches/:branchid/elements
+ * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * deletes multiple elements.
  */
 function deleteElements(done) {
