@@ -17,6 +17,7 @@
 
 // React Modules
 import React, { Component } from 'react';
+import { Label } from 'reactstrap';
 
 // Define component
 class ElementTree extends Component {
@@ -28,10 +29,22 @@ class ElementTree extends Component {
     this.state = {
       id: props.id,
       isOpen: props.isOpen,
-      data: null
+      data: null,
+      modalEdit: false,
+      elementWindow: false
     };
 
     this.toggleCollapse = this.toggleCollapse.bind(this);
+    this.handleEditToggle = this.handleEditToggle.bind(this);
+    this.handleElementToggle = this.handleElementToggle.bind(this);
+  }
+
+  handleEditToggle() {
+    this.setState({ modalEdit: !this.state.modalEdit });
+  }
+
+  handleElementToggle() {
+    this.setState({ elementWindow: !this.state.elementWindow });
   }
 
   componentDidMount() {
@@ -42,20 +55,20 @@ class ElementTree extends Component {
     let url = `${base}/elements/${this.props.id}?fields=id,name,contains`;
 
     $.ajax({
-      method: "GET",
+      method: 'GET',
       url: url,
       statusCode: {
         200: (data) => { this.setState({ data: data }); },
         401: (data) => { this.setState({ data: null }); }
       },
       fail: () => {
-        console.log('A failure occurred.')
+        console.log('A failure occurred.');
       }
     });
   }
 
   toggleCollapse() {
-    this.setState({isOpen: !this.state.isOpen})
+    this.setState({ isOpen: !this.state.isOpen });
   }
 
   // Create the element tree list
@@ -75,12 +88,12 @@ class ElementTree extends Component {
       // Create Subtrees
       for (let i = 0; i < this.state.data.contains.length; i++) {
         subtree.push(
-                    <ElementTree key={'tree-' +this.state.data.contains[i]}
+                    <ElementTree key={`tree-${this.state.data.contains[i]}`}
                                  id={this.state.data.contains[i]}
                                  project={this.props.project}
                                  parent={this.state}
                                  isOpen={false}/>
-        )
+        );
       }
     }
 
@@ -88,18 +101,25 @@ class ElementTree extends Component {
     let element = '';
     if (this.state.data !== null) {
       // Element should be rendered as the ID initially
-      element = (<span>{this.state.data.id}</span>);
+      element = (
+        <Label className='element' onClick={this.handleEditToggle}>
+          {this.state.data.id}
+        </Label>
+      );
       // If the name is not blank, render the name
       if (this.state.data.name !== '') {
         element = (
-                    <span>{this.state.data.name} ({this.state.data.id})</span>
+          <Label className='element' onClick={this.handleEditToggle}>
+            {this.state.data.name}({this.state.data.id})
+          </Label>
+
         );
       }
     }
 
     return (
-            <div id={'tree-' + this.props.id} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
-                <i className={'fas fa-' + icon}
+            <div id={`tree-${this.props.id}`} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
+                <i className={`fas fa-${icon}`}
                    onClick={this.toggleCollapse}>
                 </i>
                 {element}

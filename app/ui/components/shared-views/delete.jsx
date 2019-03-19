@@ -160,8 +160,7 @@ class Delete extends Component {
                         {(!this.props.projects)
                           ? ''
                         // Create a form to choose the organization
-                          :({/* Create a form to choose the project */}
-                            <FormGroup>
+                          :(<FormGroup>
                                 <Label for="id">Project ID</Label>
                                 <Input type="select"
                                        name="id"
@@ -174,7 +173,7 @@ class Delete extends Component {
                             </FormGroup>
                           )
                         }
-                        {/*Verify if project provided*/}
+                        {/* Verify if project provided */}
                         {(this.props.org || this.props.project)
                           ?(<FormGroup>
                               <Label for="id">Do you want to delete {name}?</Label>

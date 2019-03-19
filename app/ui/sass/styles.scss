@@ -148,19 +148,19 @@ textarea[name="custom"] {
             "view view";
 
         &.main-sidebar {
-            grid-template-areas:
-                "sidebar view";
+           grid-template-areas:
+             "sidebar view";
         }
 
-        #sidebar {
-            grid-area: sidebar;
-            overflow: hidden;
-        }
+      #sidebar {
+        grid-area: sidebar;
+        overflow: hidden;
+      }
 
-        #view {
-            grid-area: view;
-            overflow: scroll;
-        }
+      #view {
+        grid-area: view;
+        overflow: scroll;
+      }
     }
 
     #view {
@@ -835,3 +835,95 @@ textarea[name="custom"] {
         border-left: 1px solid #e8e8e8;
     }
 }
+
+/******************************************************************************
+/*                           Element                                          *
+/******************************************************************************/
+#elements-page {
+  grid-area: view;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: minmax(0px, 900px) 1fr;
+  grid-template-areas:
+    "view view";
+
+  &.main-element {
+    grid-template-areas:
+      "view element";
+  }
+
+  #view {
+    grid-area: view;
+    overflow: scroll;
+  }
+
+  #element-description {
+    height: 90vh;
+    grid-area: element;
+    overflow: hidden;
+  }
+}
+
+
+.element-description {
+  background: whitesmoke;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: $sidebar-min-width;
+
+  &.element-expanded {
+    width: $sidebar-full-width
+  }
+
+  a {
+    display: block;
+    text-decoration: none;
+    color: black;
+    &.active {
+      :hover {
+        color: grey;
+      }
+      color: grey;
+    }
+    :hover {
+      color: #ffc700;
+    }
+  }
+
+  hr {
+    margin: .75em;
+    border-color: #9c9c9c;
+  }
+
+  .element-header {
+    padding: 10px 20px;
+    margin-top: 15px;
+    margin-bottom: 0px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .element-links {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .element-item {
+    padding:20px;
+    height: 50px;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    h4, p {
+      margin: 0 auto 0 0;
+      padding: 10px 10px 10px 20px;
+      font-size: 1.5em;
+    }
+  }
+
+
+}
+

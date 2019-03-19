@@ -20,6 +20,7 @@ import React, { Component } from "react";
 
 // MBEE Modules
 import ElementTree from './element-tree.jsx';
+import Element from './element.jsx';
 
 // Define component
 class ProjectElements extends Component {
@@ -31,16 +32,23 @@ class ProjectElements extends Component {
   render() {
     // Return element list
     return (
-            <div id='view' className='project-elements'>
-                <h2>Elements</h2>
-                <hr/>
-                <div id={'element-tree-container'}>
-                    <ElementTree id={'model'}
-                                 project={this.props.project}
-                                 parent={null}
-                                 isOpen={true}/>
-                </div>
+        <React.Fragment>
+          <div id='elements-page' className='elements-page'>
+            <div>
+              <h2>Elements</h2>
+              <hr/>
+              <div id={'element-tree-container'}>
+                  <ElementTree id={'model'}
+                               project={this.props.project}
+                               parent={null}
+                               isOpen={true}/>
+              </div>
             </div>
+            <Element>
+              <h2>Hello World.</h2>
+            </Element>
+          </div>
+        </React.Fragment>
     )
   }
 }

@@ -46,7 +46,6 @@ class ProjectApp extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props);
     // Initialize variables
     const orgId = this.props.match.params.orgid;
     const projId = this.props.match.params.projectid;
