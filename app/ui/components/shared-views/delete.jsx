@@ -156,31 +156,30 @@ class Delete extends Component {
                                 </Input>
                               </FormGroup>)
                         }
-                        {/*Verify if project-views provided*/}
+                        {/* Verify if project-views provided */}
                         {(!this.props.projects)
                           ? ''
                         // Create a form to choose the organization
-                          :(<React.Fragment>
-                                {/* Create a form to choose the project */}
-                                <FormGroup>
-                                    <Label for="id">Project ID</Label>
-                                    <Input type="select"
-                                           name="id"
-                                           id="id"
-                                           value={this.state.id || ''}
-                                           onChange={this.handleChange}>
-                                        <option>Choose one...</option>
-                                        {this.state.projectOpt}
-                                    </Input>
-                                </FormGroup>
-                              </React.Fragment>)
+                          :({/* Create a form to choose the project */}
+                            <FormGroup>
+                                <Label for="id">Project ID</Label>
+                                <Input type="select"
+                                       name="id"
+                                       id="id"
+                                       value={this.state.id || ''}
+                                       onChange={this.handleChange}>
+                                    <option>Choose one...</option>
+                                    {this.state.projectOpt}
+                                </Input>
+                            </FormGroup>
+                          )
                         }
                         {/*Verify if project provided*/}
                         {(this.props.org || this.props.project)
                           ?(<FormGroup>
-                                <Label for="id">Do you want to delete {name}?</Label>
-                              </FormGroup>)
-                        // Display confirmation
+                              <Label for="id">Do you want to delete {name}?</Label>
+                            </FormGroup>)
+                          // Display confirmation
                           : ''
                         }
                         {/* Button to submit and delete project */}
