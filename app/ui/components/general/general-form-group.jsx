@@ -26,7 +26,7 @@ function GeneralForms(props) {
              name={props.for}
              id={props.for}
              placeholder={props.placeholder}
-             value={props.value}
+             value={props.value || ''}
              invalid={props.invalid}
              onChange={props.onChange}/>
       {/* If invalid name, notify user */}

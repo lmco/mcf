@@ -19,7 +19,7 @@ import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
 
 // MBEE Modules
-import GeneralForms from '../general/form-group.jsx';
+import GeneralForms from '../general/general-form-group.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
 
@@ -153,6 +153,38 @@ class Create extends Component {
       disableSubmit = true;
     }
 
+    const forms = [
+      {
+        title: `${header} ID`,
+        for: 'id',
+        type: 'text',
+        placeholder: 'ID',
+        value: this.state.id,
+        invalid: idInvalid,
+        onChange: this.handleChange,
+        formfeedback: 'Invalid: A id may only contain lower case letters, numbers, or dashes.'
+      },
+      {
+        title: `${header} Name`,
+        for: 'name',
+        type: 'text',
+        placeholder: 'Name',
+        value: this.state.name,
+        invalid: nameInvalid,
+        onChange: this.handleChange,
+        formfeedback: 'Invalid: A name may only contain letters, numbers, space, or dashes.'
+      },
+      {
+        title: 'Custom Data',
+        for: 'custom',
+        type: 'text',
+        placeholder: 'Custom Data',
+        value: this.state.custom,
+        invalid: customInvalid,
+        onChange: this.handleChange,
+        formfeedback: 'Invalid: Custom data must be valid JSON'
+      }
+    ];
 
     // Return the form to create a project
     return (
@@ -178,32 +210,19 @@ class Create extends Component {
                              </FormGroup>)
                           : ''
                         }
-                        {/* Create an input for project id */}
-                      <GeneralForms title={`${header} ID`}
-                                    for='id'
-                                    type='text'
-                                    placeholder='ID'
-                                    value={this.state.id || ''}
-                                    invalid={idInvalid}
-                                    onChange={this.handleChange}
-                                    formfeedback='Invalid: A id may only contain lower case letters, numbers, or dashes.'/>
-                        {/* Create an input for project name */}
-                      <GeneralForms title={`${header} Name`}
-                                    for='name'
-                                    type='text'
-                                    placeholder='Name'
-                                    value={this.state.name || ''}
-                                    invalid={nameInvalid}
-                                    onChange={this.handleChange}
-                                    formfeedback='Invalid: A name may only contain letters, numbers, space, or dashes.'/>
-                      <GeneralForms title='Custom Data'
-                                    for='custom'
-                                    type='text'
-                                    placeholder='Custom Data'
-                                    value={this.state.custom || ''}
-                                    invalid={customInvalid}
-                                    onChange={this.handleChange}
-                                    formfeedback='Invalid: Custom data must be valid JSON'/>
+                      {forms.map((form, index) => (
+                        <GeneralForms
+                          key={index}
+                          title={form.title}
+                          for={form.for}
+                          type={form.type}
+                          placeholder={form.placeholder}
+                          value={form.value}
+                          invalid={form.invalid}
+                          onChange={form.onChange}
+                          formfeedback={form.formfeedback}
+                        />
+                      ))}
                         {/* Button to create project */}
                         <Button disabled={disableSubmit} onClick={this.onSubmit}> Create </Button>{' '}
                         <Button outline onClick={this.props.toggle}> Cancel </Button>

@@ -148,11 +148,7 @@ class ProjectList extends Component {
       // Loop through project-views in each org
       const projects = org.projects.map(project => {
         // Create project links
-        return (
-          <a href={`/${orgId}/${project.id}`}>
-              <ProjectListItem className='hover-darken' project={project}/>
-          </a>
-        );
+        return (<ProjectListItem className='hover-darken' project={project} href={`/${orgId}/${project.id}`}/>);
       });
 
       // Return the list of the orgs with project-views
