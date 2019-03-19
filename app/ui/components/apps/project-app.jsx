@@ -22,9 +22,9 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
-import InformationPage from '../org-proj-components/information-page.jsx';
-import EditPage from '../org-proj-components/edit-page.jsx';
-import MembersPage from '../org-proj-components/members/members-page.jsx';
+import InformationPage from '../shared-views/information-page.jsx';
+import EditPage from '../shared-views/edit-page.jsx';
+import MembersPage from '../shared-views/members/members-page.jsx';
 import ProjectElements from '../project-views/elements/project-elements.jsx';
 import Search from '../project-views/search/search.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';

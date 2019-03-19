@@ -23,8 +23,8 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import List from '../general/list/list.jsx';
 import OrgList from '../home-views/org-list.jsx';
-import Create from '../org-proj-components/create.jsx';
-import Delete from '../org-proj-components/delete.jsx';
+import Create from '../shared-views/create.jsx';
+import Delete from '../shared-views/delete.jsx';
 import Space from '../general/space/space.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 

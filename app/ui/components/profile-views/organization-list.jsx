@@ -22,9 +22,9 @@ import {Button, Modal, ModalBody} from 'reactstrap';
 
 // MBEE Modules
 import List from '../general/list/list.jsx';
-import OrgListItem from '../org-proj-components/list-items/org-list-item.jsx';
-import Create from '../org-proj-components/create.jsx';
-import Delete from '../org-proj-components/delete.jsx';
+import OrgListItem from '../shared-views/list-items/org-list-item.jsx';
+import Create from '../shared-views/create.jsx';
+import Delete from '../shared-views/delete.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
