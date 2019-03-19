@@ -122,9 +122,9 @@ api.route('/version')
  * /api/orgs:
  *   get:
  *     tags:
- *       - org-views
- *     description: Returns an array of org-views the requesting user has
- *                  read access to. By default, returns all org-views the
+ *       - organizations
+ *     description: Returns an array of organizations the requesting user has
+ *                  read access to. By default, returns all organizations the
  *                  user has read access to. Optionally, an array of IDs can be
  *                  provided in the request body or a comma separated list in
  *                  the request parameters to find multiple, specific orgs.
@@ -197,8 +197,8 @@ api.route('/version')
  *                      server side issue.
  *   post:
  *     tags:
- *       - org-views
- *     description: Creates multiple org-views from the data provided in the
+ *       - organizations
+ *     description: Creates multiple organizations from the data provided in the
  *                  request body. Returns the created organization's public
  *                  data. This endpoint is reserved for system-wide admins ONLY.
  *     produces:
@@ -261,8 +261,8 @@ api.route('/version')
  *                      server side issue.
  *   put:
  *     tags:
- *       - org-views
- *     description: Creates or replaces multiple org-views from the data
+ *       - organizations
+ *     description: Creates or replaces multiple organizations from the data
  *                  provided in the request body. If the organization already
  *                  exists, it is updated with the provided data. NOTE This
  *                  function is reserved for system-wide admins ONLY.
@@ -326,8 +326,8 @@ api.route('/version')
  *                      server side issue.
  *   patch:
  *     tags:
- *       - org-views
- *     description: Updates multiple org-views from the data provided in the
+ *       - organizations
+ *     description: Updates multiple organizations from the data provided in the
  *                  request body. Orgs that are currently archived must first be
  *                  unarchived before making any other updates. The following
  *                  fields can be updated [name, custom, archived, permissions].
@@ -395,8 +395,8 @@ api.route('/version')
  *                      server side issue.
  *   delete:
  *     tags:
- *       - org-views
- *     description: Deletes multiple org-views and any project-views and elements
+ *       - organizations
+ *     description: Deletes multiple organizations and any projects and elements
  *                  name-spaced under the specified orgs. NOTE this endpoint can
  *                  be used by system-admins ONLY.
  *     produces:
@@ -467,8 +467,8 @@ api.route('/orgs')
  * /api/orgs/{orgid}:
  *   get:
  *     tags:
- *       - org-views
- *     description: Finds and returns an org-views public data if the user
+ *       - organizations
+ *     description: Finds and returns an organizations public data if the user
  *                  has read permissions on that org.
  *     produces:
  *       - application/json
@@ -518,7 +518,7 @@ api.route('/orgs')
  *                      side issue.
  *   post:
  *     tags:
- *       - org-views
+ *       - organizations
  *     description: Create a new organization from the given data in the request
  *                  body. This endpoint is reserved for system-admins ONLY.
  *     produces:
@@ -586,7 +586,7 @@ api.route('/orgs')
  *                      server side issue.
  *   put:
  *     tags:
- *       - org-views
+ *       - organizations
  *     description: Creates or replaces an organization from the given data in
  *                  the request body. If the organization already exists it is
  *                  replaced, otherwise it is created. This endpoint is reserved
@@ -656,7 +656,7 @@ api.route('/orgs')
  *                      server side issue.
  *   patch:
  *     tags:
- *       - org-views
+ *       - organizations
  *     description: Updates an existing organization. The following fields can
  *                  be updated [name, custom, archived, permissions]. Orgs that
  *                  are currently archived must first be unarchived before
@@ -726,8 +726,8 @@ api.route('/orgs')
  *                      server side issue.
  *   delete:
  *     tags:
- *       - org-views
- *     description: Deletes the specified organization and any project-views and
+ *       - organizations
+ *     description: Deletes the specified organization and any projects and
  *                  elements name-spaced under the org. NOTE this endpoint is
  *                  reserved for system-wide admins ONLY.
  *     produces:
@@ -792,11 +792,11 @@ api.route('/orgs/:orgid')
 
 /**
  * @swagger
- * /api/project-views:
+ * /api/projects:
  *   get:
  *     tags:
- *       - project-views
- *     description: Returns a list of all project-views and their public data that
+ *       - projects
+ *     description: Returns a list of all projects and their public data that
  *                  the requesting user has access to.
  *     produces:
  *       - application/json
@@ -840,24 +840,24 @@ api.route('/orgs/:orgid')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET project-views, returns project public
+ *         description: OK, Succeeded to GET projects, returns project public
  *                      data.
  *       400:
- *         description: Bad Request, Failed to GET project-views due to invalid data.
+ *         description: Bad Request, Failed to GET projects due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET project-views due to not being
+ *         description: Unauthorized, Failed to GET projects due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET project-views due to not having
+ *         description: Forbidden, Failed to GET projects due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET project-views due to project-views not
+ *         description: Not Found, Failed to GET projects due to projects not
  *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET project-views due to a
+ *         description: Internal Server Error, Failed to GET projects due to a
  *                      server side issue.
  */
-api.route('/project-views')
+api.route('/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -866,22 +866,22 @@ api.route('/project-views')
 
 /**
  * @swagger
- * /api/orgs/{orgid}/project-views:
+ * /api/orgs/{orgid}/projects:
  *   get:
  *     tags:
- *       - project-views
- *     description: Returns an array of project-views the requesting user has read
+ *       - projects
+ *     description: Returns an array of projects the requesting user has read
  *                  access to on a specified org. By default, returns all
- *                  project-views on the specified org that the user has read access
+ *                  projects on the specified org that the user has read access
  *                  to. Optionally, an array of IDs can be provided in the
  *                  request body or a comma separated list in the request
- *                  parameters to find multiple, specific project-views.
+ *                  parameters to find multiple, specific projects.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization which contains the searched
- *                      project-views.
+ *                      projects.
  *         in: path
  *         required: true
  *         type: string
@@ -937,36 +937,36 @@ api.route('/project-views')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET project-views, returns project public
+ *         description: OK, Succeeded to GET projects, returns project public
  *                      data.
  *       400:
- *         description: Bad Request, Failed to GET project-views due to invalid data.
+ *         description: Bad Request, Failed to GET projects due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET project-views due to not being
+ *         description: Unauthorized, Failed to GET projects due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET project-views due to not having
+ *         description: Forbidden, Failed to GET projects due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET project-views due to project-views not
+ *         description: Not Found, Failed to GET projects due to projects not
  *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET project-views due to a
+ *         description: Internal Server Error, Failed to GET projects due to a
  *                      server side issue.
  *   post:
  *     tags:
- *       - project-views
- *     description: Creates multiple project-views from the supplied data in the
- *                  request body. Returns the created project-views' public data.
+ *       - projects
+ *     description: Creates multiple projects from the supplied data in the
+ *                  request body. Returns the created projects' public data.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose project-views to create.
+ *         description: The ID of the organization whose projects to create.
  *         in: path
  *         required: true
  *         type: string
- *       - name: project-views
+ *       - name: projects
  *         in: body
  *         description: An array of objects containing new project data.
  *         schema:
@@ -1013,37 +1013,37 @@ api.route('/project-views')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST project-views, returns project public
+ *         description: OK, Succeeded to POST projects, returns project public
  *                      data.
  *       400:
- *         description: Bad Request, Failed to POST project-views due to invalid
+ *         description: Bad Request, Failed to POST projects due to invalid
  *                      project data.
  *       401:
- *         description: Unauthorized, Failed to POST project-views due to not being
+ *         description: Unauthorized, Failed to POST projects due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST project-views due to project ids
+ *         description: Forbidden, Failed to POST projects due to project ids
  *                      already existing.
  *       500:
- *         description: Internal Server Error, Failed to POST project-views due to a
+ *         description: Internal Server Error, Failed to POST projects due to a
  *                      server side issue.
  *   put:
  *     tags:
- *       - project-views
- *     description: Creates or replaces multiple project-views from the supplied data
+ *       - projects
+ *     description: Creates or replaces multiple projects from the supplied data
  *                  in the request body. If the project already exists, it will
  *                  be replaced along with the root model element. Returns the
- *                  created project-views' public data. NOTE this endpoint is
+ *                  created projects' public data. NOTE this endpoint is
  *                  reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose project-views to create.
+ *         description: The ID of the organization whose projects to create.
  *         in: path
  *         required: true
  *         type: string
- *       - name: project-views
+ *       - name: projects
  *         in: body
  *         description: An array of objects containing new project data.
  *         schema:
@@ -1090,24 +1090,24 @@ api.route('/project-views')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PUT project-views, returns project public
+ *         description: OK, Succeeded to PUT projects, returns project public
  *                      data.
  *       400:
- *         description: Bad Request, Failed to PUT project-views due to invalid
+ *         description: Bad Request, Failed to PUT projects due to invalid
  *                      project data.
  *       401:
- *         description: Unauthorized, Failed to PUT project-views due to not being
+ *         description: Unauthorized, Failed to PUT projects due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to PUT project-views due to invalid
+ *         description: Forbidden, Failed to PUT projects due to invalid
  *                      parameters.
  *       500:
- *         description: Internal Server Error, Failed to PUT project-views due to a
+ *         description: Internal Server Error, Failed to PUT projects due to a
  *                      server side issue.
  *   patch:
  *     tags:
- *       - project-views
- *     description: Updates multiple project-views from the data provided in the
+ *       - projects
+ *     description: Updates multiple projects from the data provided in the
  *                  request body. Projects that are currently archived must
  *                  first be unarchived before making any other updates. The
  *                  following fields can be updated [name, custom, archived,
@@ -1117,14 +1117,14 @@ api.route('/project-views')
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose project-views to update.
+ *         description: The ID of the organization whose projects to update.
  *         in: path
  *         required: true
  *         type: string
  *       - in: body
- *         name: project-views
+ *         name: projects
  *         description: An array of objects containing updates to multiple
- *                      project-views.
+ *                      projects.
  *         schema:
  *           type: array
  *           items:
@@ -1184,15 +1184,15 @@ api.route('/project-views')
  *                      server side issue.
  *   delete:
  *     tags:
- *       - project-views
- *     description: Deletes multiple project-views and any elements name-spaced under
+ *       - projects
+ *     description: Deletes multiple projects and any elements name-spaced under
  *                  the specified project. NOTE this endpoint can be used by
  *                  system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose project-views are to be
+ *         description: The ID of the organization whose projects are to be
  *                      deleted.
  *         in: path
  *         required: true
@@ -1215,8 +1215,8 @@ api.route('/project-views')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE project-views, return deleted
- *                      project-views' ids.
+ *         description: OK, Succeeded to DELETE projects, return deleted
+ *                      projects' ids.
  *       400:
  *         description: Bad Request, Failed to DELETE project due to invalid
  *                      data.
@@ -1230,7 +1230,7 @@ api.route('/project-views')
  *         description: Internal Server Error, Failed to DELETE org due to a
  *                      server side issue.
  */
-api.route('/orgs/:orgid/project-views')
+api.route('/orgs/:orgid/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -1260,11 +1260,11 @@ api.route('/orgs/:orgid/project-views')
 
 /**
  * @swagger
- * /api/orgs/{orgid}/project-views/{projectid}:
+ * /api/orgs/{orgid}/projects/{projectid}:
  *   get:
  *     tags:
- *       - project-views
- *     description: Finds and returns a project-views public data if the user has
+ *       - projects
+ *     description: Finds and returns a projects public data if the user has
  *                  read permissions on that project.
  *     produces:
  *       - application/json
@@ -1324,7 +1324,7 @@ api.route('/orgs/:orgid/project-views')
  *                      server side issue.
  *   post:
  *     tags:
- *       - project-views
+ *       - projects
  *     description: Creates a new project from the given data in the request
  *                  body.
  *     produces:
@@ -1405,7 +1405,7 @@ api.route('/orgs/:orgid/project-views')
  *                      server side issue.
  *   put:
  *     tags:
- *       - project-views
+ *       - projects
  *     description: Creates or replaces a project from the given data in the
  *                  request body. If the project already exists, it will be
  *                  replaced. NOTE this function is reserved for system-wide
@@ -1488,7 +1488,7 @@ api.route('/orgs/:orgid/project-views')
  *                      server side issue.
  *   patch:
  *     tags:
- *       - project-views
+ *       - projects
  *     description: Updates an existing project. The following fields can be
  *                  updated [name, custom, archived, permissions]. Projects that
  *                  are currently archived must first be unarchived before
@@ -1564,7 +1564,7 @@ api.route('/orgs/:orgid/project-views')
  *                      server side issue.
  *   delete:
  *     tags:
- *       - project-views
+ *       - projects
  *     description: Deletes the specified project and any elements name-spaced
  *                  under the project. NOTE this endpoint is reserved for
  *                  system-wide admins ONLY.
@@ -1609,7 +1609,7 @@ api.route('/orgs/:orgid/project-views')
  *         description: Internal Server Error, Failed to DELETE project due to
  *                      server side issue.
  */
-api.route('/orgs/:orgid/project-views/:projectid')
+api.route('/orgs/:orgid/projects/:projectid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -1638,7 +1638,7 @@ api.route('/orgs/:orgid/project-views/:projectid')
 
 /**
  * @swagger
- * /api/orgs/{orgid}/project-views/{projectid}/branches/{branchid}/elements/search:
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/search:
  *   get:
  *     tags:
  *       - elements
@@ -1720,7 +1720,7 @@ api.route('/orgs/:orgid/project-views/:projectid')
  *         description: Internal Server Error, Failed to GET elements due to
  *                      server side issue.
  */
-api.route('/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/search')
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -1730,7 +1730,7 @@ api.route('/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/sea
 
 /**
  * @swagger
- * /api/orgs/{orgid}/project-views/{projectid}/branches/{branchid}/elements:
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements:
  *   get:
  *     tags:
  *       - elements
@@ -2189,7 +2189,7 @@ api.route('/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/sea
  *         description: Internal Server Error, Failed to DELETE elements due to
  *                      server side issue.
  */
-api.route('/orgs/:orgid/project-views/:projectid/branches/:branchid/elements')
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -2218,7 +2218,7 @@ api.route('/orgs/:orgid/project-views/:projectid/branches/:branchid/elements')
 
 /**
  * @swagger
- * /api/orgs/{orgid}/project-views/{projectid}/branches/{branchid}/elements/{elementid}:
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/{elementid}:
  *   get:
  *     tags:
  *       - elements
@@ -2651,7 +2651,7 @@ api.route('/orgs/:orgid/project-views/:projectid/branches/:branchid/elements')
  *         description: Internal Server Error, Failed to DELETE element due to
  *                      server side issue.
  */
-api.route('/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:elementid')
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -2990,7 +2990,7 @@ api.route('/orgs/:orgid/project-views/:projectid/branches/:branchid/elements/:el
  *     tags:
  *       - users
  *     description: Deletes multiple users. Removes them from any orgs or
- *                  project-views which they have permissions on. NOTE this endpoint
+ *                  projects which they have permissions on. NOTE this endpoint
  *                  is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
@@ -3386,7 +3386,7 @@ api.route('/users/whoami')
  *     tags:
  *       - users
  *     description: Deletes the specified user. Removes them from any orgs or
- *                  project-views which they have permissions on. NOTE this endpoint
+ *                  projects which they have permissions on. NOTE this endpoint
  *                  is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
