@@ -58,7 +58,7 @@ not the original source code has been modified. Details about any modifications
 can be helpful if they can be provided.
 - A detailed description of the issue (the more detail, the better) so our team
 can quickly reproduce the issue.
-- OrgApp(s) impacted/affected
+- Organization(s) impacted/affected
 
 ## Security Update Policy
 
