@@ -19,20 +19,20 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 
 function MakeRoute(route) {
-    if (route.props){
-        const propsNames = Object.keys(route.props);
+  if (route.props){
+    const propsNames = Object.keys(route.props);
 
-        const propValues = routes.props.map(p => p);
-    }
+    const propValues = routes.props.map(p => p);
+  }
 
-    return (
+  return (
         <Route
             path={route.path}
             render={props => (
                 <route.component {...props} />
             )}
         />
-    );
+  );
 }
 
 // Export component

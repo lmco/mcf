@@ -19,11 +19,11 @@ import React from 'react';
 
 // Define function
 function ProfileHome(props) {
-    // Initialize variables
-    const user = props.user;
+  // Initialize variables
+  const user = props.user;
 
-    // Render user data in table format
-    return (
+  // Render user data in table format
+  return (
         <div id='view' className='user-home'>
             <h2>{user.name}</h2>
             <hr />
@@ -42,7 +42,7 @@ function ProfileHome(props) {
                 </tr>
             </table>
         </div>
-    )
+  )
 }
 
 // Export function

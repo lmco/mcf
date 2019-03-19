@@ -23,62 +23,62 @@ import {Input, Form, FormGroup, Button, Row, Col} from 'reactstrap';
 import SearchResults from './search-results.jsx';
 
 class Search extends Component{
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Parse the get parameters
-        let getParams = {};
-        let getParamsRaw = this.props.location.search.slice(1);
-        getParamsRaw.split('&').forEach(keyValuePair => {
-            let arr = keyValuePair.split('=');
-            getParams[arr[0]] = arr[1];
-        });
+    // Parse the get parameters
+    let getParams = {};
+    let getParamsRaw = this.props.location.search.slice(1);
+    getParamsRaw.split('&').forEach(keyValuePair => {
+      let arr = keyValuePair.split('=');
+      getParams[arr[0]] = arr[1];
+    });
 
-        this.state = {
-            query: getParams['query'] || null,
-            results: null
-        };
+    this.state = {
+      query: getParams['query'] || null,
+      results: null
+    };
 
-        // Bind component functions
-        this.onChange = this.onChange.bind(this);
-        this.doSearch = this.doSearch.bind(this);
+    // Bind component functions
+    this.onChange = this.onChange.bind(this);
+    this.doSearch = this.doSearch.bind(this);
+  }
+
+  componentDidMount() {
+    if (this.state.query) {
+      this.doSearch();
     }
+  }
 
-    componentDidMount() {
-        if (this.state.query) {
-            this.doSearch();
-        }
-    }
+  // Define change function
+  onChange(event) {
+    this.setState({ [event.target.name]: event.target.value});
+  }
 
-    // Define change function
-    onChange(event) {
-        this.setState({ [event.target.name]: event.target.value});
-    }
+  doSearch() {
+    // Build query URL
+    const oid = this.props.project.org;
+    const pid = this.props.project.id;
+    const url = `/api/orgs/${oid}/projects/${pid}/branches/master/elements/search`;
 
-    doSearch() {
-        // Build query URL
-        const oid = this.props.project.org;
-        const pid = this.props.project.id;
-        const url = `/api/orgs/${oid}/projects/${pid}/branches/master/elements/search`;
+    // Do ajax request
+    $.ajax({
+      method: "GET",
+      url: `${url}?q=${this.state.query}`
+    })
+    .done(data => {
+      this.setState({ results: data });
+    })
+    .fail(res => {
+      if (res.status === 404) {
+        this.setState({ results: []});
+      }
+    });
+  }
 
-        // Do ajax request
-        $.ajax({
-            method: "GET",
-            url: `${url}?q=${this.state.query}`
-        })
-        .done(data => {
-            this.setState({ results: data });
-        })
-        .fail(res => {
-            if (res.status === 404) {
-                this.setState({ results: []});
-            }
-        });
-    }
-
-    render() {
-        return (
+  render() {
+    return (
             <div id={'search'}>
                 <Form id={'search-form'} className={'search-form'} inline>
                     <Row form>
@@ -107,8 +107,8 @@ class Search extends Component{
                     <SearchResults results={this.state.results}/>
                 </div>
             </div>
-        )
-    }
+    )
+  }
 }
 
 // Export component

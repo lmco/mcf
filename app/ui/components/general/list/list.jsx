@@ -20,27 +20,27 @@ import React from 'react';
 
 // Define component
 function List(props) {
-    // Loops through the children and puts them in a react-fragment
-    const listItems = React.Children.map(props.children, (child) =>
+  // Loops through the children and puts them in a react-fragment
+  const listItems = React.Children.map(props.children, (child) =>
         <React.Fragment>
             {child}
         </React.Fragment>
-    );
+  );
 
     // Initializes the classes
-    let appliedClasses = 'list';
+  let appliedClasses = 'list';
 
-    // Verify class name provided
-    if(props.className) {
-        // Add class name to the element
-        appliedClasses += ` ${props.className}`;
-    }
+  // Verify class name provided
+  if(props.className) {
+    // Add class name to the element
+    appliedClasses += ` ${props.className}`;
+  }
 
-    // Return the list of items with the classes
-    return (<div className={appliedClasses}>
+  // Return the list of items with the classes
+  return (<div className={appliedClasses}>
                 {listItems}
             </div>
-    )
+  )
 }
 
 // Export component

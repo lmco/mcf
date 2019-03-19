@@ -21,27 +21,27 @@ import React from 'react';
 // Define function
 function ListItem(props) {
 
-    // Initialize basic list item html
-    const listItem = (
+  // Initialize basic list item html
+  const listItem = (
         <div className={`list-item ${props.className}`}>
             {props.children}
         </div>
-    );
+  );
 
     // Verify router link provided
-    if (props.routerLink) {
+  if (props.routerLink) {
         // Create a navLink item
         <NavLink exact to={props.routerLink}> {listItem} </NavLink>
-    }
-    // Verify href provided
-    else if (props.href) {
-        // Create a href item
-        return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
-    }
-    else {
-        // Create basic item
-        return listItem;
-    }
+  }
+  // Verify href provided
+  else if (props.href) {
+    // Create a href item
+    return  <a href={props.href} onClick={props.onClick}> {listItem} </a>
+  }
+  else {
+    // Create basic item
+    return listItem;
+  }
 }
 
 // Export function

@@ -21,39 +21,39 @@ import start from './space.js';
 
 // Define component
 class Space extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
-    }
+  constructor(props) {
+    // Initialize parent props
+    super(props);
+  }
 
-    componentDidMount() {
-        start();
-    }
+  componentDidMount() {
+    start();
+  }
 
-    render() {
-        // Render space
-        return (
+  render() {
+    // Render space
+    return (
             <canvas id="game-canvas"
                     style={{
-                        display: 'block',
-                        margin: 'auto',
-                        position: 'absolute',
-                        top: '0',
-                        left: '0',
-                        right: '0',
-                        bottom: '0',
-                        'image-rendering': 'optimizeSpeed',
-                        'image-rendering': '-moz-crisp-edges',
-                        'image-rendering': '-webkit-optimize-contrast',
-                        'image-rendering': 'optimize-contrast',
-                        width: '50%',
-                        height: '100%',
-                        'z-index': '1000',
-                        'background': '#000'
+                      display: 'block',
+                      margin: 'auto',
+                      position: 'absolute',
+                      top: '0',
+                      left: '0',
+                      right: '0',
+                      bottom: '0',
+                      'image-rendering': 'optimizeSpeed',
+                      'image-rendering': '-moz-crisp-edges',
+                      'image-rendering': '-webkit-optimize-contrast',
+                      'image-rendering': 'optimize-contrast',
+                      width: '50%',
+                      height: '100%',
+                      'z-index': '1000',
+                      'background': '#000'
                     }}>
             </canvas>
-        );
-    }
+    );
+  }
 }
 
 // Export component

@@ -19,86 +19,86 @@
 import React, { Component } from 'react';
 import ReactDom from 'react-dom';
 import {
-    Collapse,
-    Navbar,
-    NavbarToggler,
-    NavbarBrand,
-    Nav,
-    NavItem,
-    NavLink,
-    UncontrolledDropdown,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem } from 'reactstrap';
+  Collapse,
+  Navbar,
+  NavbarToggler,
+  NavbarBrand,
+  Nav,
+  NavItem,
+  NavLink,
+  UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem } from 'reactstrap';
 
 // Define component
 class MbeeNav extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Initialize state props
-        this.state = {
-            isOpen: false,
-            user: null,
-            width: 0,
-            height: 0
-        };
+    // Initialize state props
+    this.state = {
+      isOpen: false,
+      user: null,
+      width: 0,
+      height: 0
+    };
 
-        // Bind component functions
-        this.toggle = this.toggle.bind(this);
-        this.setComponentSize = this.setComponentSize.bind(this);
-    }
+    // Bind component functions
+    this.toggle = this.toggle.bind(this);
+    this.setComponentSize = this.setComponentSize.bind(this);
+  }
 
-    componentDidMount() {
-        // Add event listener for window sizing
-        window.addEventListener('resize', this.setComponentSize);
+  componentDidMount() {
+    // Add event listener for window sizing
+    window.addEventListener('resize', this.setComponentSize);
 
-        // Initialize url
-        const url = '/api/users/whoami';
+    // Initialize url
+    const url = '/api/users/whoami';
 
-        // Do ajax request
-        $.ajax({
-            method: "GET",
-            url: url,
-            statusCode: {
-                200: (data) => { this.setState({ user: data }); },
-                401: (data) => { this.setState({ user: null}); }
-            },
-            fail: () => {
-                console.log('A failure occurred.')
-            }
-        });
+    // Do ajax request
+    $.ajax({
+      method: "GET",
+      url: url,
+      statusCode: {
+        200: (data) => { this.setState({ user: data }); },
+        401: (data) => { this.setState({ user: null}); }
+      },
+      fail: () => {
+        console.log('A failure occurred.')
+      }
+    });
 
-        // Set component size
-        this.setComponentSize();
-    }
+    // Set component size
+    this.setComponentSize();
+  }
 
-    componentWillUnmount() {
-        // Remove event listener on window
-        window.removeEventListener('resize', this.setComponentSize);
-    }
+  componentWillUnmount() {
+    // Remove event listener on window
+    window.removeEventListener('resize', this.setComponentSize);
+  }
 
-    // Define initialization of component size function
-    setComponentSize() {
-        // Set states
-        this.setState(
-            {
-                width: this.refs.navbar.clientWidth,
-                height: this.refs.navbar.clientHeight
-            })
-    }
+  // Define initialization of component size function
+  setComponentSize() {
+    // Set states
+    this.setState(
+      {
+        width: this.refs.navbar.clientWidth,
+        height: this.refs.navbar.clientHeight
+      })
+  }
 
-    // Define the open and close function
-    toggle() {
-        this.setState({
-            // set open state
-            isOpen: !this.state.isOpen
-        });
-    }
+  // Define the open and close function
+  toggle() {
+    this.setState({
+      // set open state
+      isOpen: !this.state.isOpen
+    });
+  }
 
-    render() {
-        return (
+  render() {
+    return (
             <div ref="navbar" style={{width: '100%'}}>
                 <Navbar color="light" light expand="md">
                     {/*Create the MBEE Logo on navbar*/}
@@ -129,9 +129,9 @@ class MbeeNav extends Component {
                                 </DropdownMenu>
                             </UncontrolledDropdown>
                             {(this.state.user === null)
-                                // Create link to login or logout
-                                ? <NavLink href="/login">Login</NavLink>
-                                :(<UncontrolledDropdown nav inNavbar>
+                            // Create link to login or logout
+                              ? <NavLink href="/login">Login</NavLink>
+                              :(<UncontrolledDropdown nav inNavbar>
                                     <DropdownToggle nav caret>
                                         <i className='fas fa-user-circle'/>
                                     </DropdownToggle>
@@ -162,8 +162,8 @@ class MbeeNav extends Component {
                     </Collapse>
                 </Navbar>
             </div>
-        );
-    }
+    );
+  }
 }
 
 // Render the navbar on the nav html element

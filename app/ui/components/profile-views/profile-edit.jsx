@@ -24,81 +24,81 @@ import validators from '../../../../build/json/validators.json';
 
 // Define component
 class ProfileEdit extends Component{
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Initialize state props
-        this.state = {
-            fname: this.props.user.fname,
-            lname: this.props.user.lname,
-            custom: JSON.stringify(this.props.user.custom || {}, null, 2)
-        };
+    // Initialize state props
+    this.state = {
+      fname: this.props.user.fname,
+      lname: this.props.user.lname,
+      custom: JSON.stringify(this.props.user.custom || {}, null, 2)
+    };
 
-        // Bind component functions
-        this.handleChange = this.handleChange.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
+    // Bind component functions
+    this.handleChange = this.handleChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  // Define handle change function
+  handleChange(event) {
+    // Change the state with new value
+    this.setState({ [event.target.name]: event.target.value});
+  }
+
+  // Define the submit function
+  onSubmit(){
+    const url = `/api/users/${this.props.user.username}`;
+    const data= {
+      fname: this.state.fname,
+      lname: this.state.lname,
+      custom: JSON.parse(this.state.custom)
+    };
+    // Send a patch request to update user data
+    ajaxRequest('PATCH', url, data)
+    .then(() => {
+      // Update the page to reload to user home page
+      window.location.replace('/whoami');
+    })
+    .catch((msg) => {
+      // Let user know update failed
+      alert( `Update Failed: ${msg.responseJSON.description}`);
+    });
+  }
+
+  render() {
+    // Initialize variables
+    let fnameInvalid;
+    let lnameInvalid;
+    let customInvalid;
+    let disableSubmit;
+
+    // Verify if user's first name is valid
+    if(!RegExp(validators.user.fname).test(this.state.fname)) {
+      // Set invalid fields
+      fnameInvalid = true;
+      disableSubmit = true;
     }
 
-    // Define handle change function
-    handleChange(event) {
-        // Change the state with new value
-        this.setState({ [event.target.name]: event.target.value});
+    // Verify if user's last name is valid
+    if(!RegExp(validators.user.lname).test(this.state.lname)) {
+      // Set invalid fields
+      lnameInvalid = true;
+      disableSubmit = true;
     }
 
-    // Define the submit function
-    onSubmit(){
-        const url = `/api/users/${this.props.user.username}`;
-        const data= {
-            fname: this.state.fname,
-            lname: this.state.lname,
-            custom: JSON.parse(this.state.custom)
-        };
-        // Send a patch request to update user data
-        ajaxRequest('PATCH', url, data)
-        .then(() => {
-            // Update the page to reload to user home page
-            window.location.replace('/whoami');
-        })
-        .catch((msg) => {
-            // Let user know update failed
-            alert( `Update Failed: ${msg.responseJSON.description}`);
-        });
+    // Verify if custom data is correct JSON format
+    try {
+      JSON.parse(this.state.custom);
+    }
+    catch(err) {
+      // Set invalid fields
+      customInvalid = true;
+      disableSubmit = true;
     }
 
-    render() {
-        // Initialize variables
-        let fnameInvalid;
-        let lnameInvalid;
-        let customInvalid;
-        let disableSubmit;
-
-        // Verify if user's first name is valid
-        if(!RegExp(validators.user.fname).test(this.state.fname)) {
-            // Set invalid fields
-            fnameInvalid = true;
-            disableSubmit = true;
-        }
-
-        // Verify if user's last name is valid
-        if(!RegExp(validators.user.lname).test(this.state.lname)) {
-            // Set invalid fields
-            lnameInvalid = true;
-            disableSubmit = true;
-        }
-
-        // Verify if custom data is correct JSON format
-        try {
-            JSON.parse(this.state.custom);
-        }
-        catch(err) {
-            // Set invalid fields
-            customInvalid = true;
-            disableSubmit = true;
-        }
-
-        // Render user edit page
-        return (
+    // Render user edit page
+    return (
             <div className='user-edit'>
                 <h2>User Edit</h2>
                 <hr />
@@ -153,8 +153,8 @@ class ProfileEdit extends Component{
                     <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
                 </Form>
             </div>
-        )
-    }
+    )
+  }
 }
 
 // Export component

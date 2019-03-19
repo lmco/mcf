@@ -20,8 +20,8 @@ import React from 'react';
 
 // Define function
 function UserListItem(props) {
-    // Return the user list item
-    return (
+  // Return the user list item
+  return (
         <div className='user-list-item'>
             <div className='username'>
                 <p>{props.user} </p>
@@ -30,7 +30,7 @@ function UserListItem(props) {
                 <p>{props.permission} </p>
             </div>
         </div>
-    );
+  );
 }
 
 // Export function

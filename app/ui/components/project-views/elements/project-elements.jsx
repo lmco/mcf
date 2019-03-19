@@ -23,14 +23,14 @@ import ElementTree from './element-tree.jsx';
 
 // Define component
 class ProjectElements extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
-    }
+  constructor(props) {
+    // Initialize parent props
+    super(props);
+  }
 
-    render() {
-        // Return element list
-        return (
+  render() {
+    // Return element list
+    return (
             <div id='view' className='project-elements'>
                 <h2>Elements</h2>
                 <hr/>
@@ -41,8 +41,8 @@ class ProjectElements extends Component {
                                  isOpen={true}/>
                 </div>
             </div>
-        )
-    }
+    )
+  }
 }
 
 // Export component

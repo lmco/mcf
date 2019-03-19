@@ -18,25 +18,25 @@
 import React from 'react';
 
 function InformationPage(props) {
-    // Initialize variables
-    let name;
-    let id;
-    let orgid = null;
-    let custom;
+  // Initialize variables
+  let name;
+  let id;
+  let orgid = null;
+  let custom;
 
-    if (props.org){
-        name = props.org.name;
-        id = props.org.id;
-        custom = props.org.custom;
-    }
-    else {
-        name = props.project.name;
-        id = props.project.id;
-        orgid = props.project.org;
-        custom = props.project.custom;
-    }
+  if (props.org){
+    name = props.org.name;
+    id = props.org.id;
+    custom = props.org.custom;
+  }
+  else {
+    name = props.project.name;
+    id = props.project.id;
+    orgid = props.project.org;
+    custom = props.project.custom;
+  }
 
-    return (
+  return (
         <div id='view' className='org-home'>
             <h2>{name}</h2>
             <hr />
@@ -47,8 +47,8 @@ function InformationPage(props) {
                         <td>{id}</td>
                     </tr>
                     {(orgid === null)
-                        ? <tr/>
-                        :(<tr>
+                      ? <tr/>
+                      :(<tr>
                             <th>Org ID:</th>
                             <td><a href={'/'+orgid}>{orgid}</a></td>
                           </tr>)
@@ -60,7 +60,7 @@ function InformationPage(props) {
                 </tbody>
             </table>
         </div>
-    )
+  )
 }
 
 export default InformationPage;

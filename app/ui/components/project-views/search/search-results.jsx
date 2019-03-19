@@ -19,36 +19,36 @@ import SearchResult from './search-result.jsx';
 
 class SearchResults extends Component {
 
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        this.state = {
-            results: props.results
-        };
+    this.state = {
+      results: props.results
+    };
+  }
+
+  render() {
+    // If no results yet, render empty div
+    if (!this.props.results) {
+      return (<div/>);
     }
 
-    render() {
-        // If no results yet, render empty div
-        if (!this.props.results) {
-            return (<div/>);
-        }
+    // If empty search results
+    if (Array.isArray(this.props.results) && this.props.results.length === 0) {
+      return (<div className='no-results'>No search results found.</div>);
+    }
 
-        // If empty search results
-        if (Array.isArray(this.props.results) && this.props.results.length === 0) {
-            return (<div className='no-results'>No search results found.</div>);
-        }
+    const results = this.props.results.map(result => {
+      return (<SearchResult key={result.id} data={result}/>)
+    });
 
-        const results = this.props.results.map(result => {
-            return (<SearchResult key={result.id} data={result}/>)
-        });
-
-        return (
+    return (
             <div className={'search-results'}>
                 {results}
             </div>
-        )
-    }
+    )
+  }
 }
 
 // Export component

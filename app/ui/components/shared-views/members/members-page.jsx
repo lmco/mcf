@@ -24,63 +24,63 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
 
 class MembersPage extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Initialize state props
-        this.state = {
-            admin: false,
-            modal: false,
-            error: null
-        };
+    // Initialize state props
+    this.state = {
+      admin: false,
+      modal: false,
+      error: null
+    };
 
-        // Bind component functions
-        this.handleToggle = this.handleToggle.bind(this);
+    // Bind component functions
+    this.handleToggle = this.handleToggle.bind(this);
+  }
+
+  // Define toggle function
+  handleToggle() {
+    // Set the create modal state
+    this.setState({ modal: !this.state.modal });
+  }
+  render() {
+    // Initialize variables
+    let userperm;
+    let users;
+
+    if (this.props.org) {
+      userperm = this.props.org.permissions;
+      users = Object.keys(this.props.org.permissions);
+    }
+    else {
+      userperm = this.props.project.permissions;
+      users = Object.keys(this.props.project.permissions);
     }
 
-    // Define toggle function
-    handleToggle() {
-        // Set the create modal state
-        this.setState({ modal: !this.state.modal });
-    }
-    render() {
-        // Initialize variables
-        let userperm;
-        let users;
-
-        if (this.props.org) {
-            userperm = this.props.org.permissions;
-            users = Object.keys(this.props.org.permissions);
-        }
-        else {
-            userperm = this.props.project.permissions;
-            users = Object.keys(this.props.project.permissions);
-        }
-
-        // Loop through project members
-        const listItems = users.map(user =>
+    // Loop through project members
+    const listItems = users.map(user =>
             // Create user list item
             <UserListItem user={user} permission={userperm[user]}/>
-        );
+    );
 
-        // Return project member list
-        return (
+    // Return project member list
+    return (
             <React.Fragment>
                 {/*Verify admin user*/}
                 {(!this.props.admin)
-                    ? ''
-                    : (
+                  ? ''
+                  : (
                         // Modal for editing user roles
                         <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
                             <ModalBody>
                                 {(this.props.project && !this.props.org)
-                                    ? (<MemberEdit project={this.props.project} toggle={this.handleToggle}/>)
-                                    : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
+                                  ? (<MemberEdit project={this.props.project} toggle={this.handleToggle}/>)
+                                  : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
                                 }
                             </ModalBody>
                         </Modal>
-                    )
+                  )
                 }
                 <div id='view' className='user-list'>
                     <div className='user-list-header'>
@@ -88,8 +88,8 @@ class MembersPage extends Component {
                         <h2 className='user-descriptor'>Permissions</h2>
                         {/*Verify user is admin*/}
                         {(!this.props.admin)
-                            ? ''
-                            : ( // Button to edit user roles
+                          ? ''
+                          : ( // Button to edit user roles
                                 <div className='user-button'>
                                     <Button className='btn'
                                             outline color="secondary"
@@ -97,7 +97,7 @@ class MembersPage extends Component {
                                         Edit
                                     </Button>
                                 </div>
-                            )
+                          )
                         }
                     </div>
                     <hr/>
@@ -106,8 +106,8 @@ class MembersPage extends Component {
                     </List>
                 </div>
             </React.Fragment>
-        )
-    }
+    )
+  }
 }
 
 export default MembersPage
