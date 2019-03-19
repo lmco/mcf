@@ -140,24 +140,24 @@ class ProjectList extends Component {
     this.setState({ modalDelete: !this.state.modalDelete });
   }
 
-    render() {
-        // Loop through all orgs
-        const list = this.state.orgs.map(org => {
-            // Initialize variables
-            const orgId = org.id;
+  render() {
+    // Loop through all orgs
+    const list = this.state.orgs.map(org => {
+      // Initialize variables
+      const orgId = org.id;
 
-            // Loop through project-views in each org
-            const projects = org.projects.map(project => {
-                // Create project links
-                return (
-                    <Link to={`/${orgId}/${project.id}`}>
-                        <ProjectListItem className='hover-darken' project={project}/>
-                    </Link>
-                )
-            });
+      // Loop through project-views in each org
+      const projects = org.projects.map(project => {
+        // Create project links
+        return (
+          <Link to={`/${orgId}/${project.id}`}>
+              <ProjectListItem className='hover-darken' project={project}/>
+          </Link>
+        );
+      });
 
-            // Return the list of the orgs with project-views
-            return (
+      // Return the list of the orgs with project-views
+      return (
                 <React.Fragment>
                     <ListItem className='proj-org-header'>
                         <a href={`/${orgId}`}>{org.name}</a>
@@ -166,22 +166,22 @@ class ProjectList extends Component {
                         {projects}
                     </List>
                 </React.Fragment>
-            )
+      )
 
-        });
+    });
 
-        // Return project list
-        return (
+    // Return project list
+    return (
             <React.Fragment>
                 {/*Modal for creating a project*/}
                 <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
                     <ModalBody>
                         {/*Verify user has write and admin permissions*/}
                         {(this.state.admin)
-                            // Allow access to all orgs
-                            ? <Create project={true} orgs={this.state.orgs} toggle={this.handleCreateToggle}/>
-                            // Allow access to write orgs only
-                            : <Create project={true} orgs={this.state.writePermOrgs} toggle={this.handleCreateToggle}/>
+                        // Allow access to all orgs
+                          ? <Create project={true} orgs={this.state.orgs} toggle={this.handleCreateToggle}/>
+                        // Allow access to write orgs only
+                          : <Create project={true} orgs={this.state.writePermOrgs} toggle={this.handleCreateToggle}/>
                         }
                     </ModalBody>
                 </Modal>
@@ -198,9 +198,9 @@ class ProjectList extends Component {
                         <div className='project-button'>
                             {/*Verify user has write permission*/}
                             {(!this.state.write)
-                                ? ''
-                                // Display create button
-                                :(<Button className='btn'
+                              ? ''
+                            // Display create button
+                              :(<Button className='btn'
                                           outline color="secondary"
                                           onClick={this.handleCreateToggle}>
                                     Create
@@ -208,9 +208,9 @@ class ProjectList extends Component {
                             }
                             {/*Verify user has admin permissions*/}
                             {(!this.state.admin)
-                                ? ''
-                                // Display delete button
-                                :(<Button className='btn'
+                              ? ''
+                            // Display delete button
+                              :(<Button className='btn'
                                           outline color="danger"
                                           onClick={this.handleDeleteToggle}>
                                     Delete
@@ -221,17 +221,17 @@ class ProjectList extends Component {
                     <hr/>
                     {/*Verify there are project-views*/}
                     {(this.state.projects.length === 0)
-                        ? (<div className='list-item'>
+                      ? (<div className='list-item'>
                             <h3> No projects. </h3>
                            </div>)
-                        : (<List>
+                      : (<List>
                             {list}
                            </List>)
                     }
                 </div>
             </React.Fragment>
-        )
-    }
+    )
+  }
 }
 
 // Export component

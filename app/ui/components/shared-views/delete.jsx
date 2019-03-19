@@ -22,129 +22,129 @@ import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 class Delete extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Initialize state props
-        this.state = {
-            org: null,
-            id: null,
-            projectOpt: null,
-            error: null
-        };
+    // Initialize state props
+    this.state = {
+      org: null,
+      id: null,
+      projectOpt: null,
+      error: null
+    };
 
-        // Bind component functions
-        this.handleOrgChange = this.handleOrgChange.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
-    }
+    // Bind component functions
+    this.handleOrgChange = this.handleOrgChange.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+  }
 
-    // Define handle org change function
-    handleOrgChange(event) {
-        // Set the state of the changed orgs in the form
-        this.setState({ [event.target.name]: event.target.value});
+  // Define handle org change function
+  handleOrgChange(event) {
+    // Set the state of the changed orgs in the form
+    this.setState({ [event.target.name]: event.target.value});
 
-        if (this.props.projects) {
-            // Get all the project-views from that org
-            ajaxRequest('GET', `/api/orgs/${event.target.value}/projects?fields=id,name`)
-            .then(projects => {
-                // Loop through project-views and create proj options
-                const projectOptions = projects.map((project) => {
-                    return (<option value={project.id}>{project.name}</option>)
-                });
-
-                // Set the new project options
-                this.setState({projectOpt: projectOptions});
-            })
-            .catch(err => {
-                // Set the project options to empty if none found
-                this.setState({projectOpt: []});
-            })
-        }
-    }
-
-    // Define handle change function
-    handleChange(event) {
-        // Set the state of the changed states in the form
-        this.setState({ [event.target.name]: event.target.value});
-    }
-
-    // Define the on submit function
-    onSubmit(){
-        // Initialize variables
-        let url;
-
-        // Verify if project-views provided
-        if (this.props.projects) {
-            // Set url to state options
-            url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
-        }
-        else if (this.props.project){
-            // Set url to project provided
-            url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
-        }
-        else if (this.props.orgs) {
-            // Use the set state
-            url = `/api/orgs/${this.state.org}`;
-        }
-        else {
-            // Use the org provided
-            url =  `/api/orgs/${this.props.org.id}`;
-        }
-
-
-        // Delete the project selected
-        ajaxRequest('DELETE', url)
-        .then(() => {
-            // On success, return to the project-views page
-            window.location.replace(`/`);
-        })
-        .catch((msg) => {
-            // On failure, notify user of failure
-            alert( `Delete Failed: ${msg.responseJSON.description}`);
+    if (this.props.projects) {
+      // Get all the project-views from that org
+      ajaxRequest('GET', `/api/orgs/${event.target.value}/projects?fields=id,name`)
+      .then(projects => {
+        // Loop through project-views and create proj options
+        const projectOptions = projects.map((project) => {
+          return (<option value={project.id}>{project.name}</option>)
         });
+
+        // Set the new project options
+        this.setState({projectOpt: projectOptions});
+      })
+      .catch(err => {
+        // Set the project options to empty if none found
+        this.setState({projectOpt: []});
+      })
+    }
+  }
+
+  // Define handle change function
+  handleChange(event) {
+    // Set the state of the changed states in the form
+    this.setState({ [event.target.name]: event.target.value});
+  }
+
+  // Define the on submit function
+  onSubmit(){
+    // Initialize variables
+    let url;
+
+    // Verify if project-views provided
+    if (this.props.projects) {
+      // Set url to state options
+      url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
+    }
+    else if (this.props.project){
+      // Set url to project provided
+      url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
+    }
+    else if (this.props.orgs) {
+      // Use the set state
+      url = `/api/orgs/${this.state.org}`;
+    }
+    else {
+      // Use the org provided
+      url =  `/api/orgs/${this.props.org.id}`;
     }
 
-    render() {
-        // Initialize variables
-        let title;
-        let orgOptions;
-        let name;
 
-        if (this.props.project || this.props.projects) {
-            title = 'Project';
-        }
-        else {
-            title = 'Organization';
-        }
+    // Delete the project selected
+    ajaxRequest('DELETE', url)
+    .then(() => {
+      // On success, return to the project-views page
+      window.location.replace(`/`);
+    })
+    .catch((msg) => {
+      // On failure, notify user of failure
+      alert( `Delete Failed: ${msg.responseJSON.description}`);
+    });
+  }
 
-        // Verify if orgs provided
-        if (this.props.orgs) {
-            // Loop through orgs
-            orgOptions = this.props.orgs.map((org) => {
-                // Create an org option
-                return (<option value={org.id}>{org.name}</option>)
-            });
-        }
+  render() {
+    // Initialize variables
+    let title;
+    let orgOptions;
+    let name;
 
-        if (this.props.org) {
-            name = this.props.org.name;
-        }
-        else if (this.props.project) {
-            name = this.props.project.name;
-        }
+    if (this.props.project || this.props.projects) {
+      title = 'Project';
+    }
+    else {
+      title = 'Organization';
+    }
 
-        // Return the project delete form
-        return (
+    // Verify if orgs provided
+    if (this.props.orgs) {
+      // Loop through orgs
+      orgOptions = this.props.orgs.map((org) => {
+        // Create an org option
+        return (<option value={org.id}>{org.name}</option>)
+      });
+    }
+
+    if (this.props.org) {
+      name = this.props.org.name;
+    }
+    else if (this.props.project) {
+      name = this.props.project.name;
+    }
+
+    // Return the project delete form
+    return (
             <div className='project-forms'>
                 <h2>Delete {title}</h2>
                 <hr />
                 <div>
                     <Form>
                         {(!this.props.orgs)
-                            ? ''
-                            :(<FormGroup>
+                          ? ''
+                          :(<FormGroup>
                                 <Label for="org">Organization ID</Label>
                                 <Input type="select"
                                        name="org"
@@ -158,9 +158,9 @@ class Delete extends Component {
                         }
                         {/*Verify if project-views provided*/}
                         {(!this.props.projects)
-                            ? ''
-                            // Create a form to choose the organization
-                            :(<React.Fragment>
+                          ? ''
+                        // Create a form to choose the organization
+                          :(<React.Fragment>
                                 {/* Create a form to choose the project */}
                                 <FormGroup>
                                     <Label for="id">Project ID</Label>
@@ -177,11 +177,11 @@ class Delete extends Component {
                         }
                         {/*Verify if project provided*/}
                         {(this.props.org || this.props.project)
-                            ?(<FormGroup>
+                          ?(<FormGroup>
                                 <Label for="id">Do you want to delete {name}?</Label>
                               </FormGroup>)
-                            // Display confirmation
-                            : ''
+                        // Display confirmation
+                          : ''
                         }
                         {/* Button to submit and delete project */}
                         <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
@@ -189,8 +189,8 @@ class Delete extends Component {
                     </Form>
                 </div>
             </div>
-        )
-    }
+    )
+  }
 }
 
 export default Delete;

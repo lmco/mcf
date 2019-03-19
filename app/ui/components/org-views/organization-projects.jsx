@@ -26,21 +26,21 @@ import Create from '../shared-views/create.jsx';
 
 // Define function
 function OrganizationProjects(props) {
-    // Initialize variables
-    const org = props.org;
+  // Initialize variables
+  const org = props.org;
 
-    // Loop through the org's projects
-    const listItems = org.projects.map(project =>
+  // Loop through the org's projects
+  const listItems = org.projects.map(project =>
         // Create the project list item
         <ListItem className='proj-org-header'>
             <a href={`/${org.id}/${project.id}`} >
                 {project.name}
             </a>
         </ListItem>
-    );
+  );
 
     // Return the org's project list
-    return (
+  return (
         <React.Fragment>
             {/*Modal for creating a project*/}
             <Modal isOpen={props.modal} toggle={props.handleToggle}>
@@ -53,9 +53,9 @@ function OrganizationProjects(props) {
                      <h2 className='project-header'>Projects</h2>
                     {/*Verify user has write permissions*/}
                     {(!props.write)
-                        ? ''
-                        // Display project create button
-                        :(<div className='project-button'>
+                      ? ''
+                    // Display project create button
+                      :(<div className='project-button'>
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={props.handleToggle}>
@@ -71,7 +71,7 @@ function OrganizationProjects(props) {
                 </List>
             </div>
         </React.Fragment>
-    )
+  )
 }
 
 // Export function

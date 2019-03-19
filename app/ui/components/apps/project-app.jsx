@@ -31,74 +31,74 @@ import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProjectApp extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Initialize state props
-        this.state = {
-            project: null,
-            orgid: null,
-            url: null,
-            error: null,
-            admin: false
-        };
-    }
+    // Initialize state props
+    this.state = {
+      project: null,
+      orgid: null,
+      url: null,
+      error: null,
+      admin: false
+    };
+  }
 
-    componentDidMount() {
-        console.log(this.props);
+  componentDidMount() {
+    console.log(this.props);
+    // Initialize variables
+    const orgId = this.props.match.params.orgid;
+    const projId = this.props.match.params.projectid;
+    const url = `/api/orgs/${orgId}/projects/${projId}`;
+
+    // Set states
+    this.setState({url: url});
+    this.setState({orgid: orgId});
+
+    // Get project data
+    ajaxRequest('GET',`${url}`)
+    .then(project => {
+      // Get user data
+      ajaxRequest('GET','/api/users/whoami')
+      .then(user => {
         // Initialize variables
-        const orgId = this.props.match.params.orgid;
-        const projId = this.props.match.params.projectid;
-        const url = `/api/orgs/${orgId}/projects/${projId}`;
+        const username = user.username;
+        const perm = project.permissions[username];
+        const admin = user.admin;
+
+        // Verify if user is admin
+        if ((admin) || (perm === 'admin')){
+          // Set admin state
+          this.setState({admin: true});
+        }
 
         // Set states
-        this.setState({url: url});
-        this.setState({orgid: orgId});
+        this.setState({ project: project });
+      })
+      .catch((err) => {
+        console.log(err);
+        this.setState({error: `Failed to grab user: ${err.responseJSON.description}`})
+      })
+    })
+    .catch(err => {
+      console.log(err);
+      // Throw error and set state
+      this.setState({error: `Failed to load project: ${err.responseJSON.description}`});
+    });
+  }
 
-        // Get project data
-        ajaxRequest('GET',`${url}`)
-        .then(project => {
-            // Get user data
-            ajaxRequest('GET','/api/users/whoami')
-            .then(user => {
-                // Initialize variables
-                const username = user.username;
-                const perm = project.permissions[username];
-                const admin = user.admin;
+  render() {
+    // Initialize variables
+    let title;
 
-                // Verify if user is admin
-                if ((admin) || (perm === 'admin')){
-                    // Set admin state
-                    this.setState({admin: true});
-                }
-
-                // Set states
-                this.setState({ project: project });
-            })
-            .catch((err) => {
-                console.log(err);
-                this.setState({error: `Failed to grab user: ${err.responseJSON.description}`})
-            })
-        })
-        .catch(err => {
-            console.log(err);
-            // Throw error and set state
-            this.setState({error: `Failed to load project: ${err.responseJSON.description}`});
-        });
+    // Verify if project exists
+    if(this.state.project){
+      // Set the title for sidebar
+      title = <h2> {this.state.project.name}</h2>;
     }
-
-    render() {
-        // Initialize variables
-        let title;
-
-        // Verify if project exists
-        if(this.state.project){
-            // Set the title for sidebar
-            title = <h2> {this.state.project.name}</h2>;
-        }
-        // Return project page
-        return (
+    // Return project page
+    return (
             <Router>
                 <React.Fragment>
                     {/*Create the sidebar with sidebar links*/}
@@ -110,16 +110,16 @@ class ProjectApp extends Component {
                         <hr />
                         {/*Check if user is admin*/}
                         {(this.state.admin)
-                            // Add the edit router link for admin users ONLY
-                            ?(<SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
-                            : ''
+                        // Add the edit router link for admin users ONLY
+                          ?(<SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={`${this.props.match.url}/edit`} />)
+                          : ''
                         }
                     </Sidebar>
                     {/*Verify project and element data exists*/}
                     {(!this.state.project)
-                        // Display loading page or error page if project is loading or failed to load
-                        ? <div className="loading"> {this.state.error || 'Loading your project...'} </div>
-                        : (<Switch>
+                    // Display loading page or error page if project is loading or failed to load
+                      ? <div className="loading"> {this.state.error || 'Loading your project...'} </div>
+                      : (<Switch>
                                 {/*Route to project home page*/}
                                 <Route exact path={`${this.props.match.url}/`}
                                        render={ (props) => <InformationPage {...props} project={this.state.project} /> } />
@@ -133,17 +133,17 @@ class ProjectApp extends Component {
                                        render={ (props) => <Search {...props} project={this.state.project} /> } />
                                 {/*Verify admin user*/}
                                 {(this.state.admin)
-                                    // Route for admin users ONLY to edit page
-                                    ? (<Route path={`${this.props.match.url}/edit`}
+                                // Route for admin users ONLY to edit page
+                                  ? (<Route path={`${this.props.match.url}/edit`}
                                               render={(props) => <EditPage {...props} project={this.state.project} orgid={this.state.orgid}/>}/>)
-                                    : ''
+                                  : ''
                                 }
                             </Switch>)
                     }
                 </React.Fragment>
             </Router>
-        );
-    }
+    );
+  }
 }
 
 // Export component

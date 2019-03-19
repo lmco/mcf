@@ -30,33 +30,33 @@ import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProfileApp extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Initialize state props
-        this.state = {
-            user: null,
-            error: null
-        };
-    }
+    // Initialize state props
+    this.state = {
+      user: null,
+      error: null
+    };
+  }
 
-    componentDidMount() {
-        // Get user data
-        ajaxRequest('GET','/api/users/whoami')
-        .then(user => {
-            // Set user state
-            this.setState({ user: user});
-        })
-        .catch(err => {
-            // Throw error and set state
-            this.setState({error: `Failed to load user information: ${err}`});
-        });
-    }
+  componentDidMount() {
+    // Get user data
+    ajaxRequest('GET','/api/users/whoami')
+    .then(user => {
+      // Set user state
+      this.setState({ user: user});
+    })
+    .catch(err => {
+      // Throw error and set state
+      this.setState({error: `Failed to load user information: ${err}`});
+    });
+  }
 
-    render() {
-        // Return user page
-        return (
+  render() {
+    // Return user page
+    return (
             <Router>
                 <React.Fragment>
                     {/*Create the sidebar with sidebar links*/}
@@ -69,10 +69,10 @@ class ProfileApp extends Component {
                     </Sidebar>
                     {/*Verify user data exists*/}
                     {(!this.state.user)
-                        // Display loading page or error page if user data is loading or failed to load
-                        ? <div
+                    // Display loading page or error page if user data is loading or failed to load
+                      ? <div
                             className="loading"> {this.state.error || 'Loading your information...'} </div>
-                        : (<Switch>
+                      : (<Switch>
                                 {/*Route to user home page*/}
                                 <Route exact path="/profile"
                                        render={ (props) => <ProfileHome {...props} user={this.state.user} /> } />
@@ -89,8 +89,8 @@ class ProfileApp extends Component {
                     }
                 </React.Fragment>
             </Router>
-        );
-    }
+    );
+  }
 }
 
 // Render on main html element

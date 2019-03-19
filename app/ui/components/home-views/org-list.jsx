@@ -27,66 +27,66 @@ import ProjList from './proj-list.jsx';
 
 
 class OrgList extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Initialize state props
-        this.state = {
-            showProjs: false,
-            width: null,
-            modalProjCreate: false,
-            modalOrgDelete: false,
-            projects: []
-        };
+    // Initialize state props
+    this.state = {
+      showProjs: false,
+      width: null,
+      modalProjCreate: false,
+      modalOrgDelete: false,
+      projects: []
+    };
 
-        // Create reference
-        this.ref = React.createRef();
+    // Create reference
+    this.ref = React.createRef();
 
-        // Bind component functions
-        this.handleShowProjsToggle = this.handleShowProjsToggle.bind(this);
-        this.handleDeleteOrgToggle = this.handleDeleteOrgToggle.bind(this);
-        this.handleCreateProjToggle = this.handleCreateProjToggle.bind(this);
+    // Bind component functions
+    this.handleShowProjsToggle = this.handleShowProjsToggle.bind(this);
+    this.handleDeleteOrgToggle = this.handleDeleteOrgToggle.bind(this);
+    this.handleCreateProjToggle = this.handleCreateProjToggle.bind(this);
+  }
+
+  // Define org toggle functionality
+  handleShowProjsToggle() {
+    // Set the state to opposite of its initial state
+    this.setState({ showProjs: !this.state.showProjs });
+  }
+
+  // Define toggle function
+  handleDeleteOrgToggle() {
+    // Set the delete modal state
+    this.setState({ modalOrgDelete: !this.state.modalOrgDelete });
+  }
+
+  // Define toggle function
+  handleCreateProjToggle() {
+    // Set the create modal state
+    this.setState({ modalProjCreate: !this.state.modalProjCreate });
+  }
+
+  render() {
+    // Initialize variables
+    const orgId = this.props.org.id;
+
+    // Loop through project-views in each org
+    const projects = this.props.org.projects.map(project => {
+      // Create project links
+      return (<ProjList project={project} admin={this.props.admin} orgid={this.props.org.id}/>)
+    });
+
+    let icon;
+
+    if (this.state.showProjs) {
+      icon = 'fas fa-angle-down'
+    } else {
+      icon = 'fas fa-angle-right'
     }
 
-    // Define org toggle functionality
-    handleShowProjsToggle() {
-        // Set the state to opposite of its initial state
-        this.setState({ showProjs: !this.state.showProjs });
-    }
-
-    // Define toggle function
-    handleDeleteOrgToggle() {
-        // Set the delete modal state
-        this.setState({ modalOrgDelete: !this.state.modalOrgDelete });
-    }
-
-    // Define toggle function
-    handleCreateProjToggle() {
-        // Set the create modal state
-        this.setState({ modalProjCreate: !this.state.modalProjCreate });
-    }
-
-    render() {
-        // Initialize variables
-        const orgId = this.props.org.id;
-
-        // Loop through project-views in each org
-        const projects = this.props.org.projects.map(project => {
-            // Create project links
-            return (<ProjList project={project} admin={this.props.admin} orgid={this.props.org.id}/>)
-        });
-
-        let icon;
-
-        if (this.state.showProjs) {
-            icon = 'fas fa-angle-down'
-        } else {
-            icon = 'fas fa-angle-right'
-        }
-
-        // Return the list of the orgs with project-views
-        return (
+    // Return the list of the orgs with project-views
+    return (
             <React.Fragment>
                 {/*Modal for creating an org*/}
                 <Modal isOpen={this.state.modalProjCreate} toggle={this.handleCreateProjToggle}>
@@ -106,26 +106,26 @@ class OrgList extends Component {
                     </div>
                     <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`}/>
                     {((this.props.admin) || (this.props.write))
-                        ?(<div className='controls-container'>
+                      ?(<div className='controls-container'>
                                     <i className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
                                 {(!this.props.admin)
-                                    ? ''
-                                    : (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>)
+                                  ? ''
+                                  : (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>)
                                 }
                           </div>
-                        )
-                        : ''
+                      )
+                      : ''
                     }
                 </div>
                 {(!this.state.showProjs)
-                    ? ''
-                    :(<List className='projects-list'>
+                  ? ''
+                  :(<List className='projects-list'>
                         {projects}
                       </List>)
                 }
             </React.Fragment>
-        )
-    }
+    )
+  }
 }
 
 // Export component

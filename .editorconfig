@@ -17,7 +17,7 @@ trim_trailing_whitespace = true
 indent_size = 2
 
 # JSX
-[*.{jsx}]
+[*.jsx]
 indent_size = 2
 
 # JSON-like files

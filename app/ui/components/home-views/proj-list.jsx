@@ -26,36 +26,36 @@ import Delete from '../shared-views/delete.jsx';
 
 
 class ProjList extends Component {
-    constructor(props) {
-        // Initialize parent props
-        super(props);
+  constructor(props) {
+    // Initialize parent props
+    super(props);
 
-        // Initialize state props
-        this.state = {
-            width: null,
-            modalProjDelete: false,
-            projects: []
-        };
+    // Initialize state props
+    this.state = {
+      width: null,
+      modalProjDelete: false,
+      projects: []
+    };
 
-        // Create reference
-        this.ref = React.createRef();
+    // Create reference
+    this.ref = React.createRef();
 
-        // Bind component functions
-        this.handleDeleteProjToggle = this.handleDeleteProjToggle.bind(this);
-    }
+    // Bind component functions
+    this.handleDeleteProjToggle = this.handleDeleteProjToggle.bind(this);
+  }
 
-    // Define toggle function
-    handleDeleteProjToggle() {
-        // Set the delete modal state
-        this.setState({modalProjDelete: !this.state.modalProjDelete});
-    }
+  // Define toggle function
+  handleDeleteProjToggle() {
+    // Set the delete modal state
+    this.setState({modalProjDelete: !this.state.modalProjDelete});
+  }
 
-    render() {
-        // Initialize variables
-        const project = this.props.project;
-        const orgId = this.props.orgid;
+  render() {
+    // Initialize variables
+    const project = this.props.project;
+    const orgId = this.props.orgid;
 
-        return (
+    return (
             <React.Fragment>
                 {/*Modal for deleting a project*/}
                 <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
@@ -66,18 +66,18 @@ class ProjList extends Component {
                 <div className='proj-list'>
                     <ProjectListItem className='homeproj-list' project={project} href={`/${orgId}/${project.id}`}/>
                     {(!this.props.admin)
-                        ? ''
-                        : (< div className='controls-container'>
+                      ? ''
+                      : (< div className='controls-container'>
                                 <i className='fas fa-plus fake-icon'/>
                                 <i onClick={this.handleDeleteProjToggle} className='fas fa-trash-alt delete-btn'/>
                             </div>
-                        )
+                      )
                     }
                 </div>
             </React.Fragment>
-        )
-    }
+    )
+  }
 }
 
-    // Export component
-    export default ProjList;
+// Export component
+export default ProjList;
