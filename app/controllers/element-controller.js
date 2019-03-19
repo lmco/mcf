@@ -1614,7 +1614,7 @@ function moveElementCheck(organizationID, projectID, branch, element) {
 }
 
 /**
- * @description A function which searches elements within a certain project-views
+ * @description A function which searches elements within a certain projects
  * using mongo's built in text search. Returns any elements that match the text
  * search, in order of the best matches to the worst. Searches the _id, name,
  * documentation, parent, source and target fields.
