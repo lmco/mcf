@@ -150,9 +150,9 @@ class ProjectList extends Component {
       const projects = org.projects.map(project => {
         // Create project links
         return (
-          <Link to={`/${orgId}/${project.id}`}>
+          <a href={`/${orgId}/${project.id}`}>
               <ProjectListItem className='hover-darken' project={project}/>
-          </Link>
+          </a>
         );
       });
 

@@ -107,9 +107,9 @@ class OrganizationList extends Component {
     // Loop through all orgs
     const orgs = this.state.orgs.map(org =>
         // Create org links
-        <Link to={`/${org.id}`}>
+        <a href={`/${org.id}`}>
             <OrgListItem className='hover-darken' org={org} />
-        </Link>
+        </a>
     );
 
     // Return org list
