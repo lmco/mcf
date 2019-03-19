@@ -153,15 +153,15 @@ class ProjectList extends Component {
 
       // Return the list of the orgs with project-views
       return (
-                <React.Fragment>
-                    <ListItem className='proj-org-header'>
-                        <a href={`/${orgId}`}>{org.name}</a>
-                    </ListItem>
-                    <List className='projects-list'>
-                        {projects}
-                    </List>
-                </React.Fragment>
-      )
+        <React.Fragment>
+            <ListItem className='proj-org-header'>
+                <a href={`/${orgId}`}>{org.name}</a>
+            </ListItem>
+            <List className='projects-list'>
+                {projects}
+            </List>
+        </React.Fragment>
+      );
 
     });
 
