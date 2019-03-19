@@ -17,7 +17,6 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
@@ -106,63 +105,63 @@ class OrganizationList extends Component {
   render() {
     // Loop through all orgs
     const orgs = this.state.orgs.map(org =>
-        // Create org links
-        <a href={`/${org.id}`}>
-            <OrgListItem className='hover-darken' org={org} />
-        </a>
+      // Create org links
+      <a href={`/${org.id}`}>
+        <OrgListItem className='hover-darken' org={org} />
+      </a>
     );
 
     // Return org list
     return (
-        <React.Fragment>
-            <div>
-                {/* Modal for creating an org */}
-                <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
-                    <ModalBody>
-                        <Create toggle={this.handleCreateToggle}/>
-                    </ModalBody>
-                </Modal>
-                {/* Modal for deleting an org */}
-                <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
-                    <ModalBody>
-                        <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
-                    </ModalBody>
-                </Modal>
-            </div>
-            {/* Display the list of orgs */}
-            <div id='view' className='org-list' ref={this.ref}>
-                <div className='org-list-header'>
-                    <h2 className='org-header'>Your Organizations</h2>
-                    {/* Verify user is an admin */}
-                    {(!this.state.admin)
-                      ? ''
-                      // Display create and delete buttons
-                      : (<div className='org-button'>
-                            <Button className='btn'
-                                    outline color="secondary"
-                                    onClick={this.handleCreateToggle}>
-                                Create
-                            </Button>
-                            <Button className='btn'
-                                    outline color="danger"
-                                    onClick={this.handleDeleteToggle}>
-                                Delete
-                            </Button>
-                        </div>)
-                    }
-                </div>
-                <hr/>
-                {/* Verify there are orgs */}
-                {(this.state.orgs.length === 0)
-                  ? (<div className='list-item'>
-                        <h3> No organizations. </h3>
-                     </div>)
-                  : (<List>
-                        {orgs}
-                     </List>)
-                }
-            </div>
-        </React.Fragment>
+      <React.Fragment>
+        <div>
+          {/* Modal for creating an org */}
+          <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
+            <ModalBody>
+              <Create toggle={this.handleCreateToggle}/>
+            </ModalBody>
+          </Modal>
+          {/* Modal for deleting an org */}
+          <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+            <ModalBody>
+              <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
+            </ModalBody>
+          </Modal>
+        </div>
+        {/* Display the list of orgs */}
+        <div id='view' className='org-list' ref={this.ref}>
+          <div className='org-list-header'>
+            <h2 className='org-header'>Your Organizations</h2>
+            {/* Verify user is an admin */}
+            {(!this.state.admin)
+              ? ''
+              // Display create and delete buttons
+              : (<div className='org-button'>
+                  <Button className='btn'
+                          outline color="secondary"
+                          onClick={this.handleCreateToggle}>
+                      Create
+                  </Button>
+                  <Button className='btn'
+                          outline color="danger"
+                          onClick={this.handleDeleteToggle}>
+                      Delete
+                  </Button>
+                </div>)
+            }
+          </div>
+          <hr/>
+          {/* Verify there are orgs */}
+          {(this.state.orgs.length === 0)
+            ? (<div className='list-item'>
+                <h3> No organizations. </h3>
+               </div>)
+            : (<List>
+                {orgs}
+               </List>)
+          }
+        </div>
+      </React.Fragment>
     );
   }
 

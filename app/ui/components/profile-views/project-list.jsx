@@ -16,7 +16,6 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
@@ -172,67 +171,72 @@ class ProjectList extends Component {
 
     // Return project list
     return (
-            <React.Fragment>
-                {/*Modal for creating a project*/}
-                <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
-                    <ModalBody>
-                        {/*Verify user has write and admin permissions*/}
-                        {(this.state.admin)
-                        // Allow access to all orgs
-                          ? <Create project={true} orgs={this.state.orgs} toggle={this.handleCreateToggle}/>
-                        // Allow access to write orgs only
-                          : <Create project={true} orgs={this.state.writePermOrgs} toggle={this.handleCreateToggle}/>
-                        }
-                    </ModalBody>
-                </Modal>
-                {/*Modal for deleting a project*/}
-                <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
-                    <ModalBody>
-                        <Delete orgs={this.state.orgs} projects={this.state.projects} toggle={this.handleDeleteToggle}/>
-                    </ModalBody>
-                </Modal>
-                {/*Display the list of project-views*/}
-                <div id='view' className='project-list' ref={this.ref}>
-                    <div className='project-list-header'>
-                        <h2 className='project-header'>Your Projects</h2>
-                        <div className='project-button'>
-                            {/*Verify user has write permission*/}
-                            {(!this.state.write)
-                              ? ''
-                            // Display create button
-                              :(<Button className='btn'
-                                          outline color="secondary"
-                                          onClick={this.handleCreateToggle}>
-                                    Create
-                                </Button>)
-                            }
-                            {/*Verify user has admin permissions*/}
-                            {(!this.state.admin)
-                              ? ''
-                            // Display delete button
-                              :(<Button className='btn'
-                                          outline color="danger"
-                                          onClick={this.handleDeleteToggle}>
-                                    Delete
-                                </Button>)
-                            }
-                        </div>
-                    </div>
-                    <hr/>
-                    {/*Verify there are project-views*/}
-                    {(this.state.projects.length === 0)
-                      ? (<div className='list-item'>
-                            <h3> No projects. </h3>
-                           </div>)
-                      : (<List>
-                            {list}
-                           </List>)
-                    }
-                </div>
-            </React.Fragment>
-    )
+      <React.Fragment>
+        {/* Modal for creating a project */}
+        <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
+          <ModalBody>
+            {/* Verify user has write and admin permissions */}
+            {(this.state.admin)
+              // Allow access to all orgs
+              ? <Create project={true} orgs={this.state.orgs} toggle={this.handleCreateToggle}/>
+              // Allow access to write orgs only
+              : <Create project={true}
+                        orgs={this.state.writePermOrgs}
+                        toggle={this.handleCreateToggle}/>
+            }
+            </ModalBody>
+        </Modal>
+        {/* Modal for deleting a project */}
+        <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+          <ModalBody>
+            <Delete orgs={this.state.orgs}
+                    projects={this.state.projects}
+                    toggle={this.handleDeleteToggle}/>
+          </ModalBody>
+        </Modal>
+        {/* Display the list of project-views */}
+        <div id='view' className='project-list' ref={this.ref}>
+          <div className='project-list-header'>
+            <h2 className='project-header'>Your Projects</h2>
+            <div className='project-button'>
+              {/* Verify user has write permission */}
+              {(!this.state.write)
+                ? ''
+                // Display create button
+                :(<Button className='btn'
+                            outline color="secondary"
+                            onClick={this.handleCreateToggle}>
+                      Create
+                  </Button>)
+              }
+              {/* Verify user has admin permissions */}
+              {(!this.state.admin)
+                ? ''
+                // Display delete button
+                : (<Button className='btn'
+                            outline color="danger"
+                            onClick={this.handleDeleteToggle}>
+                      Delete
+                  </Button>)
+              }
+            </div>
+          </div>
+          <hr/>
+          {/* Verify there are project-views */}
+          {(this.state.projects.length === 0)
+            ? (<div className='list-item'>
+                  <h3> No projects. </h3>
+                 </div>)
+            : (<List>
+                  {list}
+                 </List>)
+          }
+        </div>
+      </React.Fragment>
+    );
   }
+
 }
 
 // Export component
-export default ProjectList
+export default ProjectList;
