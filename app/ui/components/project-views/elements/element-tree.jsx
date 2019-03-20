@@ -51,8 +51,9 @@ class ElementTree extends Component {
     // Build URL to get element data
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
+    const elementId = this.props.id.replace('tree-', '');
     let base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    let url = `${base}/elements/${this.props.id}?fields=id,name,contains,type`;
+    let url = `${base}/elements/${elementId}?fields=id,name,contains,type`;
 
     $.ajax({
       method: 'GET',
