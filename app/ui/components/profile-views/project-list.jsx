@@ -14,6 +14,10 @@
  * @description This renders the project list page with the orgs.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+/* eslint no-undef: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Button, Modal, ModalBody } from 'reactstrap';
@@ -28,6 +32,7 @@ import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProjectList extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -56,10 +61,10 @@ class ProjectList extends Component {
 
   componentDidMount() {
     // Get user information
-    ajaxRequest('GET','/api/users/whoami')
+    ajaxRequest('GET', '/api/users/whoami')
     .then(user => {
       // Get the organization and their project-views
-      ajaxRequest('GET', `/api/orgs?populate=projects`)
+      ajaxRequest('GET', '/api/orgs?populate=projects')
       .then(orgs => {
         // Initialize variables
         const writePermOrgs = [];
@@ -71,9 +76,9 @@ class ProjectList extends Component {
         this.handleResize();
 
         // Loop through orgs
-        orgs.map((org) => {
+        orgs.forEach((org) => {
           // Loop through project-views and push to array
-          org.projects.map(project => {
+          org.projects.forEach(project => {
             allProjects.push(project);
           });
 
@@ -88,32 +93,32 @@ class ProjectList extends Component {
         });
 
         // Verify there are orgs
-        if(writePermOrgs.length > 0) {
+        if (writePermOrgs.length > 0) {
           // Set write states
-          this.setState({write: true});
-          this.setState({writePermOrgs: writePermOrgs});
+          this.setState({ write: true });
+          this.setState({ writePermOrgs: writePermOrgs });
         }
 
         // Verify user is admin
         if (user.admin) {
           // Set admin state
-          this.setState({admin: user.admin});
+          this.setState({ admin: user.admin });
         }
 
         // Set the org state
-        this.setState({orgs: orgs});
+        this.setState({ orgs: orgs });
 
         // Set the org state
-        this.setState({projects: allProjects});
+        this.setState({ projects: allProjects });
       })
       .catch(err => {
         // Throw error and set error state
-        this.setState({error: `Failed to grab orgs: ${err}`});
+        this.setState({ error: `Failed to grab orgs: ${err}` });
       });
     })
     // Throw error and set error state
     .catch(err => {
-      this.setState({error: `Failed to grab user information: ${err}`});
+      this.setState({ error: `Failed to grab user information: ${err}` });
     });
   }
 
@@ -124,7 +129,7 @@ class ProjectList extends Component {
 
   handleResize() {
     // Set state to width of window
-    this.setState({ width: this.ref.current.clientWidth })
+    this.setState({ width: this.ref.current.clientWidth });
   }
 
   // Define toggle function
@@ -146,10 +151,7 @@ class ProjectList extends Component {
       const orgId = org.id;
 
       // Loop through project-views in each org
-      const projects = org.projects.map(project => {
-        // Create project links
-        return (<ProjectListItem className='hover-darken' project={project} href={`/${orgId}/${project.id}`}/>);
-      });
+      const projects = org.projects.map(project => (<ProjectListItem className='hover-darken' project={project} href={`/${orgId}/${project.id}`}/>));
 
       // Return the list of the orgs with project-views
       return (
@@ -162,7 +164,6 @@ class ProjectList extends Component {
             </List>
         </React.Fragment>
       );
-
     });
 
     // Return project list
@@ -199,7 +200,7 @@ class ProjectList extends Component {
               {(!this.state.write)
                 ? ''
                 // Display create button
-                :(<Button className='btn'
+                : (<Button className='btn'
                             outline color="secondary"
                             onClick={this.handleCreateToggle}>
                       Create

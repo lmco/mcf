@@ -14,6 +14,11 @@
  * @description This creates the organization list.
  */
 
+
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+/* eslint no-undef: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Modal, ModalBody } from 'reactstrap';
@@ -27,6 +32,7 @@ import ProjList from './proj-list.jsx';
 
 
 class OrgList extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -72,29 +78,32 @@ class OrgList extends Component {
     const orgId = this.props.org.id;
 
     // Loop through project-views in each org
-    const projects = this.props.org.projects.map(project => {
-      // Create project links
-      return (<ProjList project={project} admin={this.props.admin} orgid={this.props.org.id}/>)
-    });
+    const projects = this.props.org.projects.map(
+      project => (<ProjList project={project}
+                            admin={this.props.admin}
+                            orgid={this.props.org.id}/>)
+    );
 
     let icon;
 
     if (this.state.showProjs) {
-      icon = 'fas fa-angle-down'
-    } else {
-      icon = 'fas fa-angle-right'
+      icon = 'fas fa-angle-down';
+    }
+    else {
+      icon = 'fas fa-angle-right';
     }
 
     // Return the list of the orgs with project-views
     return (
             <React.Fragment>
-                {/*Modal for creating an org*/}
+                {/* Modal for creating an org */}
                 <Modal isOpen={this.state.modalProjCreate} toggle={this.handleCreateProjToggle}>
                     <ModalBody>
-                        <Create project={true} org={this.props.org} toggle={this.handleCreateProjToggle}/>
+                        <Create project={true} org={this.props.org}
+                                toggle={this.handleCreateProjToggle}/>
                     </ModalBody>
                 </Modal>
-                {/*Modal for deleting an org*/}
+                {/* Modal for deleting an org */}
                 <Modal isOpen={this.state.modalOrgDelete} toggle={this.handleDeleteOrgToggle}>
                     <ModalBody>
                         <Delete org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
@@ -106,12 +115,12 @@ class OrgList extends Component {
                     </div>
                     <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`}/>
                     {((this.props.admin) || (this.props.write))
-                      ?(<div className='controls-container'>
-                                    <i className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
-                                {(!this.props.admin)
-                                  ? ''
-                                  : (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>)
-                                }
+                      ? (<div className='controls-container'>
+                          <i className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
+                            {(!this.props.admin)
+                              ? ''
+                              : (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>)
+                            }
                           </div>
                       )
                       : ''
@@ -119,13 +128,14 @@ class OrgList extends Component {
                 </div>
                 {(!this.state.showProjs)
                   ? ''
-                  :(<List className='projects-list'>
+                  : (<List className='projects-list'>
                         {projects}
                       </List>)
                 }
             </React.Fragment>
-    )
+    );
   }
+
 }
 
 // Export component
