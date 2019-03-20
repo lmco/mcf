@@ -26,6 +26,7 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
+import Divider from '../general/sidebar/divider.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import EditPage from '../shared-views/edit-page.jsx';
@@ -122,7 +123,7 @@ class OrgApp extends Component {
                          title='Members'
                          icon='fas fa-users'
                          routerLink={`${this.props.match.url}/users`} />
-            <hr/>
+            <Divider/>
             { /* Check if user is admin */ }
             {(this.state.admin)
             // Add the edit router link for admin users ONLY

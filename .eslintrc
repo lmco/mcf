@@ -1039,7 +1039,8 @@
     // react components better.
     "class-methods-use-this": ["error", {
       "exceptMethods": [
-        "componentDidMount"
+        "componentDidMount",
+        "render"
       ],
     }],
 
