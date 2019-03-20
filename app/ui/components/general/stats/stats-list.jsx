@@ -100,9 +100,9 @@ class StatsList extends Component {
 
     // Return the stat list
     return (
-            <div className='stats-list' ref={this.ref}>
-                {statsItems}
-            </div>
+      <div className='stats-list' ref={this.ref}>
+        {statsItems}
+      </div>
     );
   }
 
