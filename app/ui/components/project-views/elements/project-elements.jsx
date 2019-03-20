@@ -52,7 +52,7 @@ class ProjectElements extends Component {
     // }
 
     // Change the expanded state
-    //this.setState( { id: event.target.id });
+    this.setState( { id: event.target.id });
   }
 
   render() {
@@ -84,4 +84,4 @@ class ProjectElements extends Component {
 }
 
 // Export component
-export default ProjectElements
+export default ProjectElements;

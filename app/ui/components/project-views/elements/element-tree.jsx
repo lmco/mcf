@@ -93,12 +93,12 @@ class ElementTree extends Component {
       // Create Subtrees
       for (let i = 0; i < this.state.data.contains.length; i++) {
         subtree.push(
-                    <ElementTree key={`tree-${this.state.data.contains[i]}`}
-                                 id={`tree-${this.state.data.contains[i]}`}
-                                 project={this.props.project}
-                                 parent={this.state}
-                                 onClick={this.props.onClick}
-                                 isOpen={false}/>
+          <ElementTree key={`tree-${this.state.data.contains[i]}`}
+                       id={`tree-${this.state.data.contains[i]}`}
+                       project={this.props.project}
+                       parent={this.state}
+                       onClick={this.props.onClick}
+                       isOpen={false}/>
         );
       }
     }
@@ -166,26 +166,26 @@ class ElementTree extends Component {
     if (this.state.data !== null
       && iconMappings.hasOwnProperty(this.state.data.type)) {
       let icon = iconMappings[this.state.data.type]['icon'];
-      let color = iconMappings[this.state.data.type]['color'];;
+      let color = iconMappings[this.state.data.type]['color'];
       elementIcon = (
         <i className={`fas fa-${icon}`}
-        style={{color: color}}></i>
+           style={{color: color}}></i>
       );
     }
 
     return (
-            <div id={`tree-${this.props.id}`}
-                 className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
-                <i className={`fas ${expandIcon}`}
-                   onClick={this.toggleCollapse}>
-                </i>
-                <div onClick={this.props.onClick}>
-                  {elementIcon}
-                  {element}
-                </div>
-                {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
-            </div>
-    )
+      <div id={`tree-${this.props.id}`}
+           className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
+        <i className={`fas ${expandIcon}`}
+           onClick={this.toggleCollapse}>
+        </i>
+        <span onClick={this.props.onClick}>
+          {elementIcon}
+          {element}
+        </span>
+        {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
+      </div>
+    );
   }
 }
 
