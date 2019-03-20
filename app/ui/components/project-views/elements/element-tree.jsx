@@ -15,6 +15,9 @@
  * @description This renders the element tree in the project's page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 
@@ -38,24 +41,24 @@ class ElementTree extends Component {
     // Build URL to get element data
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
-    let base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    let url = `${base}/elements/${this.props.id}?fields=id,name,contains,type`;
+    const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
+    const url = `${base}/elements/${this.props.id}?fields=id,name,contains,type`;
 
     $.ajax({
-      method: "GET",
+      method: 'GET',
       url: url,
       statusCode: {
         200: (data) => { this.setState({ data: data }); },
-        401: (data) => { this.setState({ data: null }); }
+        401: () => { this.setState({ data: null }); }
       },
       fail: () => {
-        console.log('A failure occurred.')
+        console.log('A failure occurred.');
       }
     });
   }
 
   toggleCollapse() {
-    this.setState({isOpen: !this.state.isOpen})
+    this.setState({ isOpen: !this.state.isOpen });
   }
 
   // Create the element tree list
@@ -63,16 +66,15 @@ class ElementTree extends Component {
     // Initialize variables
     let elementIcon = (
       <i className={'fas fa-cube'}
-         style={{color: '#333'}}></i>
+         style={{ color: '#333' }}></i>
     );
     let expandIcon = 'fa-caret-right transparent';
-    let subtree = [];
+    const subtree = [];
 
     // If the element contains other elements, handle the subtree
     if (this.state.data !== null
             && Array.isArray(this.state.data.contains)
             && this.state.data.contains.length >= 1) {
-
       // Icon should be chevron to show subtree is collapsible
       expandIcon = (this.state.isOpen) ? 'fa-caret-down' : 'fa-caret-right';
 
@@ -80,15 +82,14 @@ class ElementTree extends Component {
       // Create Subtrees
       for (let i = 0; i < this.state.data.contains.length; i++) {
         subtree.push(
-                    <ElementTree key={'tree-' + this.state.data.contains[i]}
+                    <ElementTree key={`tree-${this.state.data.contains[i]}`}
                                  id={this.state.data.contains[i]}
                                  project={this.props.project}
                                  parent={this.state}
                                  isOpen={false}/>
-        )
+        );
       }
     }
-
 
 
     // Build the rendered element item
@@ -112,11 +113,11 @@ class ElementTree extends Component {
     }
 
     const iconMappings = {
-      'Package': {
+      Package: {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
         color: 'lightblue'
       },
-      'package': {
+      package: {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
         color: 'lightblue'
       },
@@ -124,11 +125,11 @@ class ElementTree extends Component {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
         color: 'lightblue'
       },
-      'Diagram': {
+      Diagram: {
         icon: 'sitemap',
         color: 'lightgreen'
       },
-      'diagram': {
+      diagram: {
         icon: 'sitemap',
         color: 'lightgreen'
       },
@@ -151,26 +152,27 @@ class ElementTree extends Component {
     };
     if (this.state.data !== null
       && iconMappings.hasOwnProperty(this.state.data.type)) {
-      let icon = iconMappings[this.state.data.type]['icon'];
-      let color = iconMappings[this.state.data.type]['color'];;
+      const icon = iconMappings[this.state.data.type].icon;
+      const color = iconMappings[this.state.data.type].color;
       elementIcon = (
         <i className={`fas fa-${icon}`}
-        style={{color: color}}></i>
+        style={{ color: color }}></i>
       );
     }
 
     return (
-            <div id={'tree-' + this.props.id} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
-                <i className={'fas ' + expandIcon}
+            <div id={`tree-${this.props.id}`} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
+                <i className={`fas ${expandIcon}`}
                    onClick={this.toggleCollapse}>
                 </i>
                 {elementIcon}
                 {element}
                 {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
             </div>
-    )
+    );
   }
+
 }
 
 // Export component
-export default ElementTree
+export default ElementTree;
