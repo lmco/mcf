@@ -874,14 +874,17 @@ textarea[name="custom"] {
   width: 100%;
 }
 
-.element-description {
+.element-information {
   display: table-cell;
   border-left: black solid 2px;
   width: 30%;
   background: whitesmoke;
 
-  .other {
+  .element-info-display{
     padding: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: row-reverse;
   }
 }
 

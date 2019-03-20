@@ -36,16 +36,21 @@ class ProjectElements extends Component {
       id: null
     };
 
-    this.handleElementClick = this.handleElementClick.bind(this);
+    this.openElementInfo = this.openElementInfo.bind(this);
+    this.closeElementInfo = this.closeElementInfo.bind(this);
   }
 
   // Define the open and close of the element side panel function
-  handleElementClick(id) {
+  openElementInfo(id) {
     // Toggle the element side panel
-    this.setState({ sidePanelOpen: !this.state.sidePanelOpen });
+    this.setState({ sidePanelOpen: true });
 
     // Change the expanded state
     this.setState( { id: id });
+  }
+
+  closeElementInfo() {
+    this.setState({ sidePanelOpen: false });
   }
 
   render() {
@@ -60,11 +65,14 @@ class ProjectElements extends Component {
                          project={this.props.project}
                          parent={null}
                          isOpen={true}
-                         clickHandler={this.handleElementClick}/>
+                         clickHandler={this.openElementInfo}/>
           </div>
           {(!this.state.sidePanelOpen)
             ? ''
-            : (<Element id={this.state.id} url={this.props.url}/>)
+            : (<Element id={this.state.id}
+                        project={this.props.project}
+                        url={this.props.url}
+                        closeElementInfo={this.closeElementInfo}/>)
           }
         </div>
       </div>
