@@ -159,7 +159,26 @@ textarea[name="custom"] {
 
       #view {
         grid-area: view;
+        display: grid;
+        grid-template-rows: 1fr;
+        grid-template-columns: auto minmax(10px, 1fr);
+        grid-template-areas:
+          "view view";
         overflow: scroll;
+
+        &.main-element {
+          grid-template-areas: "view element-description";
+        }
+
+        #view {
+          grid-area: view;
+          overflow: scroll;
+        }
+
+        #element-description {
+          grid-area: element-description;
+          overflow: hidden;
+        }
       }
     }
 
@@ -839,30 +858,30 @@ textarea[name="custom"] {
 /******************************************************************************
 /*                           Element                                          *
 /******************************************************************************/
-#elements-page {
-  grid-area: view;
-  display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: minmax(0px, 900px) 1fr;
-  grid-template-areas:
-    "view view";
-
-  &.main-element {
-    grid-template-areas:
-      "view element";
-  }
-
-  #view {
-    grid-area: view;
-    overflow: scroll;
-  }
-
-  #element-description {
-    height: 90vh;
-    grid-area: element;
-    overflow: hidden;
-  }
-}
+//#elements-page {
+//  grid-area: view;
+//  display: grid;
+//  grid-template-rows: 1fr;
+//  grid-template-columns: minmax(0px, 900px) 1fr;
+//  grid-template-areas:
+//    "view view";
+//
+//  &-element {
+//    grid-template-areas:
+//      "view element";
+//  }
+//
+//  #view {
+//    grid-area: view;
+//    overflow: scroll;
+//  }
+//
+//  #element-description {
+//    height: 90vh;
+//    grid-area: element;
+//    overflow: hidden;
+//  }
+//}
 
 
 .element-description {

@@ -20,6 +20,7 @@ import React, { Component } from "react";
 
 // MBEE Modules
 import ElementTree from './element-tree.jsx';
+import TestGrid from '../../apps/testing-grid.jsx';
 import Element from './element.jsx';
 
 // Define component
@@ -33,7 +34,6 @@ class ProjectElements extends Component {
     // Return element list
     return (
         <React.Fragment>
-          <div id='elements-page' className='elements-page'>
             <div>
               <h2>Elements</h2>
               <hr/>
@@ -44,10 +44,7 @@ class ProjectElements extends Component {
                                isOpen={true}/>
               </div>
             </div>
-            <Element>
-              <h2>Hello World.</h2>
-            </Element>
-          </div>
+            <TestGrid/>
         </React.Fragment>
     )
   }
