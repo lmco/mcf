@@ -25,6 +25,7 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
+import Divider from '../general/sidebar/divider.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import EditPage from '../shared-views/edit-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
@@ -124,7 +125,7 @@ class ProjectApp extends Component {
                            title='Search'
                            icon='fas fa-search'
                            routerLink={`${this.props.match.url}/search`}/>
-              <hr/>
+              <Divider/>
               { /* Check if user is admin */ }
               { // Add the edit router link for admin users ONLY
                 (this.state.admin)
