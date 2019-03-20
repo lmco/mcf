@@ -64,10 +64,11 @@ class ProjectElements extends Component {
         <div className="t">
           <div className="c1">
             <div id='element-tree-container'>
-              <ElementTree id='model'
+              <ElementTree id='tree-model'
                            project={this.props.project}
                            parent={null}
-                           isOpen={true} onClick={this.handleElementClick}/>
+                           isOpen={true}
+                           onClick={this.handleElementClick}/>
             </div>
           </div>
           {(!this.state.sidePanelOpen)

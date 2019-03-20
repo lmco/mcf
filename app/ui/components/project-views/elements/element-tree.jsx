@@ -94,7 +94,7 @@ class ElementTree extends Component {
       for (let i = 0; i < this.state.data.contains.length; i++) {
         subtree.push(
                     <ElementTree key={`tree-${this.state.data.contains[i]}`}
-                                 id={this.state.data.contains[i]}
+                                 id={`tree-${this.state.data.contains[i]}`}
                                  project={this.props.project}
                                  parent={this.state}
                                  onClick={this.props.onClick}
