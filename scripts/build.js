@@ -175,7 +175,7 @@ function build(_args) {
     if (args.includes('--all') || args.includes('--react')) {
       M.log.info('  + Transpiling react ...');
       webpack({
-        mode: 'development',
+        mode: 'production',
         entry: {
           navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
           'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
