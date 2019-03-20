@@ -164,11 +164,12 @@ class HomeApp extends Component {
     const list = this.state.orgs.map(org => {
       const username = this.state.user.username;
 
-      // TODO (jk->ld) - Discuss this one.
       if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
         return (<OrgList org={org} write={this.state.write} admin={this.state.admin}/>);
       }
-      return (<OrgList org={org} admin={this.state.admin}/>);
+      else {
+        return (<OrgList org={org} admin={this.state.admin}/>);
+      }
     });
 
     // Render the homepage

@@ -112,9 +112,25 @@ class ElementTree extends Component {
     }
 
     const iconMappings = {
+      'Package': {
+        icon: (this.state.isOpen) ? 'folder-open' : 'folder',
+        color: 'lightblue'
+      },
+      'package': {
+        icon: (this.state.isOpen) ? 'folder-open' : 'folder',
+        color: 'lightblue'
+      },
       'uml:Package': {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
         color: 'lightblue'
+      },
+      'Diagram': {
+        icon: 'sitemap',
+        color: 'lightgreen'
+      },
+      'diagram': {
+        icon: 'sitemap',
+        color: 'lightgreen'
       },
       'uml:Diagram': {
         icon: 'sitemap',
