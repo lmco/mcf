@@ -833,18 +833,20 @@ textarea[name="custom"] {
     .element-tree {
         padding-left: 30px;
         border-left: 1px solid #e8e8e8;
-
-      i.fa-caret-right, i.fa-caret-down {
-        width: 20px;
-      }
-
-      .element-id {
-        font-weight: 600;
-        font-size: 12px;
-        color: #dcdcdc;
-        padding-left: 10px
-      }
     }
+
+  .element-tree, .element-tree-root {
+    i.fa-caret-right, i.fa-caret-down {
+      width: 20px;
+    }
+
+    .element-id {
+      font-weight: 600;
+      font-size: 12px;
+      color: #dcdcdc;
+      padding-left: 10px
+    }
+  }
 
   .transparent {
     color: transparent;

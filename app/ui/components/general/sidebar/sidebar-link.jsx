@@ -14,6 +14,10 @@
  * @description This renders a sidebar link.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+/* eslint no-undef: "warn" */
+
 // React Modules
 import React from 'react';
 import { NavLink } from 'react-router-dom';
@@ -25,9 +29,9 @@ function SidebarLink(props) {
   const sidebarItem = (
         <div className='sidebar-item' id={props.id}>
             <i className={props.icon}/>
-            {/*if sidebar is not expanded, set a name when hovering over icon*/}
-            {(!props.isExpanded) ?
-                <UncontrolledTooltip placement='right'
+            {/* if sidebar is not expanded, set a name when hovering over icon */}
+            {(!props.isExpanded)
+              ? <UncontrolledTooltip placement='right'
                                      target={props.id}
                                      delay={{
                                        show: 0,
@@ -38,7 +42,7 @@ function SidebarLink(props) {
                     {props.tooltip || props.title}
                 </UncontrolledTooltip>
               : ''}
-            {/*if sidebar is expanded, set the name of link*/}
+            {/* if sidebar is expanded, set the name of link */}
             {(props.isExpanded) ? <p> {props.title} </p> : ''}
         </div>
   );
@@ -50,4 +54,4 @@ function SidebarLink(props) {
 }
 
 // Export function
-export default SidebarLink
+export default SidebarLink;

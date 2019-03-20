@@ -144,7 +144,7 @@ class ElementTree extends Component {
     }
 
     return (
-            <div id={'tree-' + this.props.id} className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
+            <div id={'tree-' + this.props.id} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
                 <i className={'fas ' + expandIcon}
                    onClick={this.toggleCollapse}>
                 </i>

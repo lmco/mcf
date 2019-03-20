@@ -14,11 +14,16 @@
  * @description This renders the stat list.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+/* eslint no-undef: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 
 // Define component
 class StatsList extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -39,13 +44,13 @@ class StatsList extends Component {
   // Define handle resize function
   handleResize() {
     // Set width state of window width
-    this.setState({ width: this.ref.current.clientWidth })
+    this.setState({ width: this.ref.current.clientWidth });
   }
 
   // Define child width function
   setChildWidth(title, width) {
     // Set the state of the child width
-    this.setState({[`stat-${title}`]: width})
+    this.setState({ [`stat-${title}`]: width });
   }
 
   componentDidMount() {
@@ -76,30 +81,31 @@ class StatsList extends Component {
         const statWidth = this.state[`stat-${child.props.title}`];
 
         // Check stats width is less than window width
-        if (totalStatsWidth + statWidth <= this.state.width ) {
+        if (totalStatsWidth + statWidth <= this.state.width) {
           // Add the stat width to the total stat width
           totalStatsWidth += statWidth;
 
           // Create the stat element to get rendered
-          return React.cloneElement(child, {setChildWidth: this.setChildWidth});
+          return React.cloneElement(child, { setChildWidth: this.setChildWidth });
         }
       });
     }
     else {
       // Loop through stat items
-      statsItems = React.Children.map(this.props.children, child =>
-      // Create the stat items and set width
-        React.cloneElement(child, {setChildWidth: this.setChildWidth})
+      statsItems = React.Children.map(
+        this.props.children,
+        child => React.cloneElement(child, { setChildWidth: this.setChildWidth })
       );
     }
 
     // Return the stat list
-    return(
+    return (
             <div className='stats-list' ref={this.ref}>
                 {statsItems}
             </div>
     );
   }
+
 }
 
 // Export component

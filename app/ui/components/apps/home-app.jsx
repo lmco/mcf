@@ -29,7 +29,6 @@ import List from '../general/list/list.jsx';
 import OrgList from '../home-views/org-list.jsx';
 import Create from '../shared-views/create.jsx';
 import Delete from '../shared-views/delete.jsx';
-import Space from '../general/space/space.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define HomePage Component
@@ -169,19 +168,12 @@ class HomeApp extends Component {
       if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
         return (<OrgList org={org} write={this.state.write} admin={this.state.admin}/>);
       }
-      else {
-        return (<OrgList org={org} admin={this.state.admin}/>);
-      }
+      return (<OrgList org={org} admin={this.state.admin}/>);
     });
 
     // Render the homepage
     return (
       <React.Fragment>
-        <Modal isOpen={this.state.modal} toggle={this.handleModalToggle}>
-          <ModalBody>
-            <Space />
-          </ModalBody>
-        </Modal>
         { /* Modal for creating an org */ }
         <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
           <ModalBody>

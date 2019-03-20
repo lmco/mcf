@@ -14,51 +14,55 @@
  * @description This renders the filter list of the usernames.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+/* eslint no-undef: "warn" */
+
 // React Modules
 import React from 'react';
 import { Input } from 'reactstrap';
 
 // Define function
-function CustomMenu(props){
+function CustomMenu(props) {
   // Initialize props
   const {
     children,
     style,
     className,
-    'aria-labelledby': labeledBy,
+    'aria-labelledby': labeledBy
   } = props;
 
-  const  searchParam = props.username;
+  const searchParam = props.username;
 
   // Return filtering list
   return (
-        <div style={style} className={className} aria-labelledby={labeledBy}>
-            {/* Input to filter list*/}
-            <Input autoFocus
-                   className="mx-3 my-2 w-auto"
-                   placeholder="Type to filter..."
-                   onChange={props.onChange}
-                   value={searchParam}/>
-           {/* List of children */}
-            <ul className="list-unstyled" onClick={props.onChange}>
-                {React.Children.toArray(children).filter(
-                  child => {
-                    let ret = null;
-                    // Verify if the children name or value start with search parameter
-                    try {
-                      ret = (!searchParam
-                                || child.props.children.toLowerCase().startsWith(searchParam));
-                    }
-                    catch (err) {
-                      ret = child.props.value.startsWith(searchParam)
-                    }
-                    return ret;
-                  }
-                )}
-            </ul>
-        </div>
+    <div style={style} className={className} aria-labelledby={labeledBy}>
+      {/* Input to filter list */}
+      <Input autoFocus
+             className="mx-3 my-2 w-auto"
+             placeholder="Type to filter..."
+             onChange={props.onChange}
+             value={searchParam}/>
+      {/* List of children */}
+      <ul className="list-unstyled" onClick={props.onChange}>
+          {React.Children.toArray(children).filter(
+            child => {
+              let ret = null;
+              // Verify if the children name or value start with search parameter
+              try {
+                ret = (!searchParam
+                          || child.props.children.toLowerCase().startsWith(searchParam));
+              }
+              catch (err) {
+                ret = child.props.value.startsWith(searchParam);
+              }
+              return ret;
+            }
+          )}
+      </ul>
+    </div>
   );
 }
 
 // Export component
-export default CustomMenu
+export default CustomMenu;
