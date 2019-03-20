@@ -39,7 +39,6 @@ const Project = M.require('models.project');
 const User = M.require('models.user');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
-const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 
@@ -452,11 +451,14 @@ function create(requestingUser, users, options) {
  * @param {string} [users.preferredName] - The updated preferred first name of
  * the user.
  * @param {string} [users.email] - The updated email of the user.
- * @param {Object} [users.custom] - The additions or changes to existing custom
- * data. If the key/value pair already exists, the value will be changed. If the
- * key/value pair does not exist, it will be added.
+ * @param {Object} [users.custom] - The new custom data object. Please note,
+ * updating the custom data object completely replaces the old custom data
+ * object.
  * @param {boolean} [users.archived] - The updated archived field. If true, the
  * user will not be able to be found until unarchived.
+ * @param {boolean} [users.admin] - The updated admin field. If true, the
+ * user is a system-wide admin. NOTE: Only system-wide admins can update this
+ * property.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -475,7 +477,6 @@ function create(requestingUser, users, options) {
  *   M.log.error(error);
  * });
  */
-// TODO: Allow admins to update the admin field.
 function update(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
@@ -646,6 +647,12 @@ function update(requestingUser, users, options) {
             }
           }
 
+          // If updating the admin key, ensure the requesting user is an admin
+          if (key === 'admin' && !reqUser.admin) {
+            throw new M.CustomError(`${reqUser.username} does not have`
+              + ' permissions to update the admin field.', 403, 'warn');
+          }
+
           // If the type of field is mixed
           if (User.schema.obj[key]
             && User.schema.obj[key].type.schemaName === 'Mixed') {
@@ -653,16 +660,6 @@ function update(requestingUser, users, options) {
             if (typeof updateUser !== 'object') {
               throw new M.CustomError(`${key} must be an object`, 400, 'warn');
             }
-
-            // Add and replace parameters of the type 'Mixed'
-            utils.updateAndCombineObjects(user[key], updateUser[key]);
-
-            // Mark mixed fields as updated, required for mixed fields to update in mongoose
-            // http://mongoosejs.com/docs/schematypes.html#mixed
-            user.markModified(key);
-
-            // Set the updateUser mixed field to the modified version
-            updateUser[key] = user[key];
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {

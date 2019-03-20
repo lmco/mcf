@@ -720,9 +720,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - The additions or changes to existing
- * custom data. If the key/value pair already exists, the value will be changed.
- * If the key/value pair does not exist, it will be added.
+ * @param {Object} [elements.custom] - The new custom data object. Please note,
+ * updating the custom data object completely replaces the old custom data
+ * object.
  * @param {boolean} [elements.archived] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
@@ -1016,26 +1016,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             }
           }
 
-          // If the type of field is mixed
-          if (Element.schema.obj[key]
-            && Element.schema.obj[key].type.schemaName === 'Mixed') {
-            // Only objects should be passed into mixed data
-            if (typeof updateElement !== 'object') {
-              throw new M.CustomError(`${key} must be an object`, 400, 'warn');
-            }
-
-            // Add and replace parameters of the type 'Mixed'
-            utils.updateAndCombineObjects(element[key], updateElement[key]);
-
-            // Set updateElement mixed field
-            updateElement[key] = element[key];
-
-            // Mark mixed fields as updated, required for mixed fields to update in mongoose
-            // http://mongoosejs.com/docs/schematypes.html#mixed
-            element.markModified(key);
-          }
           // Set archivedBy if archived field is being changed
-          else if (key === 'archived') {
+          if (key === 'archived') {
             // Error Check: ensure user cannot archive the root model element
             if (element._id === utils.createID(orgID, projID, 'model')) {
               throw new M.CustomError('User cannot archive the root model element.', 403, 'warn');

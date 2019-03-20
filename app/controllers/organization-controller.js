@@ -473,9 +473,9 @@ function create(requestingUser, orgs, options) {
  * @param {Object} [orgs.permissions] - An object of key value pairs, where the
  * key is the username, and the value is the role which the user is to have in
  * the org. To remove a user from an org, the value must be 'remove_all'.
- * @param {Object} [orgs.custom] - The additions or changes to existing custom
- * data. If the key/value pair already exists, the value will be changed. If the
- * key/value pair does not exist, it will be added.
+ * @param {Object} [orgs.custom] - The new custom data object. Please note,
+ * updating the custom data object completely replaces the old custom data
+ * object.
  * @param {boolean} [orgs.archived] - The updated archived field. If true, the
  * org will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
@@ -762,16 +762,6 @@ function update(requestingUser, orgs, options) {
                 updateOrg.permissions = org.permissions;
               });
             }
-            else {
-              // Add and replace parameters of the type 'Mixed'
-              utils.updateAndCombineObjects(org[key], updateOrg[key]);
-
-              // Set mixed field in updateOrg
-              updateOrg[key] = org[key];
-            }
-            // Mark mixed fields as updated, required for mixed fields to update in mongoose
-            // http://mongoosejs.com/docs/schematypes.html#mixed
-            org.markModified(key);
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
