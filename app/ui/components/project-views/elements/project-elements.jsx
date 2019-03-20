@@ -52,7 +52,7 @@ class ProjectElements extends Component {
     // }
 
     // Change the expanded state
-    this.setState( { id: event.target.id });
+    this.setState( { id: id });
   }
 
   render() {
@@ -74,7 +74,7 @@ class ProjectElements extends Component {
           {(!this.state.sidePanelOpen)
             ? ''
             : (<div id='column' className="c2">
-                <TestGrid/>
+                <TestGrid id={this.state.id}/>
                </div>)
           }
         </div>
