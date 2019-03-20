@@ -53,7 +53,9 @@ class ProjectElements extends Component {
   }
 
   closeSidePanel() {
-    this.setState({editOpen: !this.state.editOpen})
+    if (this.state.editOpen) {
+      this.setState({ editOpen: false });
+    }
     this.setState({ sidePanelOpen: false });
   }
 
@@ -71,7 +73,7 @@ class ProjectElements extends Component {
     if (this.state.editOpen) {
       sidePanelView = <ElementEdit id={this.state.id}
                                    project={this.props.project}
-                                   closeSidePanel={this.closeSidePanel}
+                                   closeEditElementInfo={this.editElementInfo}
                                    url={this.props.url}/>;
     }
 

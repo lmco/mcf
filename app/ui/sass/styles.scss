@@ -140,21 +140,22 @@ textarea[name="custom"] {
     }
 
     #main {
-      grid-area: main;
-      display: grid;
-      grid-template-rows: 1fr;
-      grid-template-columns: auto minmax(10px, 1fr);
-      grid-template-areas:
-          "view view";
+        grid-area: main;
+        display: grid;
+        grid-template-rows: 1fr;
+        grid-template-columns: auto minmax(10px, 1fr);
+        grid-template-areas:
+            "view view";
 
-      &.main-sidebar {
-         grid-template-areas:
-           "sidebar view";
-      }
+        &.main-sidebar {
+            grid-template-areas:
+                "sidebar view";
+        }
 
-      #sidebar {
-        grid-area: sidebar;
-        overflow: hidden;
+        #sidebar {
+            grid-area: sidebar;
+            overflow: hidden;
+            border-right: 1px solid #e8e8e8;
       }
 
       #view {
@@ -204,6 +205,7 @@ textarea[name="custom"] {
     flex-direction: column;
     justify-content: space-between;
     width: $sidebar-min-width;
+    border-right: 1px solid #e8e8e8;
 
     &.sidebar-expanded {
         width: $sidebar-full-width
@@ -227,6 +229,11 @@ textarea[name="custom"] {
     hr {
         margin: .75em;
         border-color: #9c9c9c;
+    }
+
+    hr.divider {
+      margin: .75em 0;
+      border-color: #e8e8e8;
     }
 
     .sidebar-header {
@@ -254,6 +261,11 @@ textarea[name="custom"] {
             margin: 0 auto 0 0;
             padding: 10px 10px 10px 20px;
             font-size: 1.5em;
+        }
+
+        i.fas, i.fa {
+          width: 12px;
+          text-align: center;
         }
     }
 
@@ -876,7 +888,9 @@ textarea[name="custom"] {
 
 .element-information {
   display: table-cell;
-  border-left: black solid 2px;
+  border-left:  1px solid #e8e8e8;
+  border-right:  1px solid #e8e8e8;
+  border-bottom:  1px solid #e8e8e8;
   width: 400px;
   background: whitesmoke;
 

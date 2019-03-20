@@ -238,7 +238,7 @@ class ElementEdit extends Component {
             {/*/!*Button to submit changes*!/*/}
             {/*<Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>*/}
             {/*{' '}*/}
-            <Button onClick={this.props.closeSidePanel}> Cancel </Button>
+            <Button onClick={this.props.closeEditElementInfo}> Cancel </Button>
           </Form>
         </div>
         </div>

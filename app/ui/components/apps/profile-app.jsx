@@ -25,6 +25,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
+import Divider from '../general/sidebar/divider.jsx';
 import ProfileHome from '../profile-views/profile-home.jsx';
 import ProfileEdit from '../profile-views/profile-edit.jsx';
 import OrganizationList from '../profile-views/organization-list.jsx';
@@ -59,17 +60,41 @@ class ProfileApp extends Component {
   }
 
   render() {
+    let title = 'Loading ...';
+    if (this.state.user && this.state.user.preferredName) {
+      title = `${this.state.user.preferredName}'s Profile`;
+    }
+    else if (this.state.user && this.state.user.fname) {
+      title = `${this.state.user.fname}'s Profile`;
+    }
+    else if (this.state.user) {
+      title = `${this.state.user.username}'s Profile`;
+    }
+
     // Return user page
     return (
       <Router>
         <React.Fragment>
           { /* Create the sidebar with sidebar links */ }
-          <Sidebar>
-            <SidebarLink id='Home' title='Home' icon='fas fa-home' routerLink='/profile' />
-            <SidebarLink id='Organization' title='Organizations' icon='fas fa-boxes' routerLink='/profile/orgs'/>
-            <SidebarLink id='Project' title='Projects' icon='fas fa-box' routerLink='/profile/projects'/>
-            <hr />
-            <SidebarLink id='Edit' title='Edit' icon='fas fa-cog' routerLink={'/profile/edit'} />
+          <Sidebar
+            title={title}>
+            <SidebarLink id='Info'
+                         title='Info'
+                         icon='fas fa-info'
+                         routerLink='/profile' />
+            <SidebarLink id='Organization'
+                         title='Organizations'
+                         icon='fas fa-boxes'
+                         routerLink='/profile/orgs'/>
+            <SidebarLink id='Project'
+                         title='Projects'
+                         icon='fas fa-box'
+                         routerLink='/profile/projects'/>
+            <Divider/>
+            <SidebarLink id='Edit'
+                         title='Edit'
+                         icon='fas fa-cog'
+                         routerLink={'/profile/edit'} />
           </Sidebar>
           { /* Verify user data exists */ }
           { // Display loading page or error page if user data is loading or failed to load
