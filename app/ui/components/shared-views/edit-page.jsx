@@ -15,6 +15,9 @@
  * @description This renders the edit page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
@@ -23,6 +26,7 @@ import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap'
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 class EditPage extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -57,14 +61,14 @@ class EditPage extends Component {
   // Define handle change function
   handleChange(event) {
     // Change the state with new value
-    this.setState({ [event.target.name]: event.target.value});
+    this.setState({ [event.target.name]: event.target.value });
 
     // Resize custom data field
     $('textarea[name="custom"]').autoResize();
   }
 
   // Define the submit function
-  onSubmit(){
+  onSubmit() {
     // Initialize variables
     let url;
     let redirect;
@@ -78,7 +82,7 @@ class EditPage extends Component {
       redirect = `/${this.props.orgid}/${this.props.project.id}`;
     }
 
-    let data = {
+    const data = {
       name: this.state.name,
       custom: JSON.parse(this.state.custom)
     };
@@ -94,7 +98,7 @@ class EditPage extends Component {
     // On fail
     .catch((err) => {
       // Let user know update failed
-      alert( `Update Failed: ${err.responseJSON.description}`);
+      alert(`Update Failed: ${err.responseJSON.description}`);
     });
   }
 
@@ -116,7 +120,7 @@ class EditPage extends Component {
     try {
       JSON.parse(this.state.custom);
     }
-    catch(err) {
+    catch (err) {
       // Set invalid fields
       customInvalid = true;
       disableSubmit = true;
@@ -128,9 +132,9 @@ class EditPage extends Component {
                 <h2>Edit {title}</h2>
                 <hr />
                 <div>
-                    {/*Create form to update org data*/}
+                    {/* Create form to update org data */}
                     <Form>
-                        {/*Form section for org name*/}
+                        {/* Form section for org name */}
                         <FormGroup>
                             <Label for="name">Name</Label>
                             <Input type="name"
@@ -140,7 +144,7 @@ class EditPage extends Component {
                                    value={this.state.name || ''}
                                    onChange={this.handleChange}/>
                         </FormGroup>
-                        {/*Form section for custom data*/}
+                        {/* Form section for custom data */}
                         <FormGroup>
                             <Label for="custom">Custom Data</Label>
                             <Input type="textarea"
@@ -150,18 +154,19 @@ class EditPage extends Component {
                                    value={this.state.custom || ''}
                                    invalid={customInvalid}
                                    onChange={this.handleChange}/>
-                            {/*Verify fields are valid, or display feedback*/}
+                            {/* Verify fields are valid, or display feedback */}
                             <FormFeedback>
                                 Invalid: Custom data must be valid JSON
                             </FormFeedback>
                         </FormGroup>
-                        {/*Button to submit changes*/}
+                        {/* Button to submit changes */}
                         <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
                     </Form>
                 </div>
             </div>
-    )
+    );
   }
+
 }
 
 export default EditPage;

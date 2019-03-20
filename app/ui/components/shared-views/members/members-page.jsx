@@ -14,6 +14,9 @@
  * @description This renders an org or project members page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 
@@ -24,6 +27,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
 
 class MembersPage extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -44,6 +48,7 @@ class MembersPage extends Component {
     // Set the create modal state
     this.setState({ modal: !this.state.modal });
   }
+
   render() {
     // Initialize variables
     let userperm;
@@ -59,15 +64,12 @@ class MembersPage extends Component {
     }
 
     // Loop through project members
-    const listItems = users.map(user =>
-            // Create user list item
-            <UserListItem user={user} permission={userperm[user]}/>
-    );
+    const listItems = users.map(user => <UserListItem user={user} permission={userperm[user]}/>);
 
     // Return project member list
     return (
             <React.Fragment>
-                {/*Verify admin user*/}
+                {/* Verify admin user */}
                 {(!this.props.admin)
                   ? ''
                   : (
@@ -75,7 +77,8 @@ class MembersPage extends Component {
                         <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
                             <ModalBody>
                                 {(this.props.project && !this.props.org)
-                                  ? (<MemberEdit project={this.props.project} toggle={this.handleToggle}/>)
+                                  ? (<MemberEdit project={this.props.project}
+                                                 toggle={this.handleToggle}/>)
                                   : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
                                 }
                             </ModalBody>
@@ -86,7 +89,7 @@ class MembersPage extends Component {
                     <div className='user-list-header'>
                         <h2 className='user-header'>Users</h2>
                         <h2 className='user-descriptor'>Permissions</h2>
-                        {/*Verify user is admin*/}
+                        {/* Verify user is admin */}
                         {(!this.props.admin)
                           ? ''
                           : ( // Button to edit user roles
@@ -106,8 +109,9 @@ class MembersPage extends Component {
                     </List>
                 </div>
             </React.Fragment>
-    )
+    );
   }
+
 }
 
-export default MembersPage
+export default MembersPage;

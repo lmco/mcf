@@ -15,6 +15,9 @@
  * @description This renders a user list item.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React from 'react';
 

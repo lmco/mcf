@@ -1035,8 +1035,12 @@
 
     // enforce that class methods use "this"
     // https://eslint.org/docs/rules/class-methods-use-this
+    // LM (jk): added componentDidMount as except method to handle some
+    // react components better.
     "class-methods-use-this": ["error", {
-      "exceptMethods": [],
+      "exceptMethods": [
+        "componentDidMount"
+      ],
     }],
 
     // require return statements to either always or never specify values

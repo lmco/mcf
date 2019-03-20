@@ -15,6 +15,9 @@
  * @description This renders the project list items.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Breadcrumb, BreadcrumbItem } from 'reactstrap';
@@ -25,13 +28,14 @@ import Stat from '../../general/stats/stat.jsx';
 
 // Define component
 class ProjectListItem extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
 
     // Initialize state props
     this.state = {
-      width: 0,
+      width: 0
     };
 
     // Create reference
@@ -57,7 +61,7 @@ class ProjectListItem extends Component {
   // Define handle size function
   handleResize() {
     // Set the state prop to the client width
-    this.setState({ width: this.ref.current.clientWidth })
+    this.setState({ width: this.ref.current.clientWidth });
   }
 
   render() {
@@ -76,12 +80,13 @@ class ProjectListItem extends Component {
                 <div className='list-header'>
                     <a href={this.props.href}>{project.name}</a>
                 </div>
-                {/*Verify width of client, remove stats based on width*/}
+                {/* Verify width of client, remove stats based on width */}
                 {(this.state.width > 600) ? stats : ''}
             </div>
-    )
+    );
   }
+
 }
 
 // Export component
-export default ProjectListItem
+export default ProjectListItem;
