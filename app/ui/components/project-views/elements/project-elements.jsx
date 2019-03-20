@@ -23,7 +23,6 @@ import React, { Component } from 'react';
 
 // MBEE Modules
 import ElementTree from './element-tree.jsx';
-import TestGrid from '../../apps/testing-grid.jsx';
 import Element from './element.jsx';
 
 // Define component
@@ -40,19 +39,10 @@ class ProjectElements extends Component {
     this.handleElementClick = this.handleElementClick.bind(this);
   }
 
-  // Define the open and close of the sidebar function
+  // Define the open and close of the element side panel function
   handleElementClick(id) {
-    // Get the sidebar html element and toggle it
+    // Toggle the element side panel
     this.setState({ sidePanelOpen: !this.state.sidePanelOpen });
-    // If window width changes force sidebar closed
-    // if (event) {
-    //   if (window.innerWidth >= 1200 && this.state.isExpanded) {
-    //     this.setState({forceClosed: true});
-    //   }
-    //   else {
-    //     this.setState({forceClosed: false});
-    //   }
-    // }
 
     // Change the expanded state
     this.setState( { id: id });
@@ -61,24 +51,20 @@ class ProjectElements extends Component {
   render() {
     // Return element list
     return (
-      <div>
+      <div className='project-elements'>
         <h2>Elements</h2>
         <hr/>
-        <div className="t">
-          <div className="c1">
-            <div id='element-tree-container'>
-              <ElementTree id='tree-model'
-                           project={this.props.project}
-                           parent={null}
-                           isOpen={true}
-                           clickHandler={this.handleElementClick}/>
-            </div>
+        <div className='element-table'>
+          <div id='element-tree-container'>
+            <ElementTree id='tree-model'
+                         project={this.props.project}
+                         parent={null}
+                         isOpen={true}
+                         clickHandler={this.handleElementClick}/>
           </div>
           {(!this.state.sidePanelOpen)
             ? ''
-            : (<div id='column' className="c2">
-                <TestGrid id={this.state.id}/>
-               </div>)
+            : (<Element id={this.state.id}/>)
           }
         </div>
       </div>

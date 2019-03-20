@@ -90,7 +90,7 @@ class ElementTree extends Component {
     // Initialize variables
     let elementIcon = (
       <i className={'fas fa-cube'}
-         style={{ color: '#333' }}></i>
+         style={{ color: '#333' }}/>
     );
     let expandIcon = 'fa-caret-right transparent';
     const subtree = [];
@@ -181,7 +181,7 @@ class ElementTree extends Component {
       const color = iconMappings[this.state.data.type]['color'];
       elementIcon = (
         <i className={`fas fa-${icon}`}
-           style={{color: color}}></i>
+           style={{color: color}}/>
       );
     }
 

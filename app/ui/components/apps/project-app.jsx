@@ -150,8 +150,9 @@ class ProjectApp extends Component {
                                                           admin={this.state.admin}/> } />
                   { /* Route to element page */ }
                   <Route path={`${this.props.match.url}/elements`}
-                     render={ (props) => <ProjectElements {...props}
-                                                          project={this.state.project}/> } />
+                         render={ (props) => <ProjectElements {...props}
+                                                              url={this.state.url}
+                                                              project={this.state.project}/> } />
                   <Route path={`${this.props.match.url}/search`}
                          render={ (props) => <Search {...props}
                                                      project={this.state.project} /> } />
