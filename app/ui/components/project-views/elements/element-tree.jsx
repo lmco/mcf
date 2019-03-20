@@ -97,6 +97,7 @@ class ElementTree extends Component {
                                  id={this.state.data.contains[i]}
                                  project={this.props.project}
                                  parent={this.state}
+                                 onClick={this.props.onClick}
                                  isOpen={false}/>
         );
       }
@@ -173,12 +174,15 @@ class ElementTree extends Component {
     }
 
     return (
-            <div id={`tree-${this.props.id}`} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
+            <div id={`tree-${this.props.id}`}
+                 className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
                 <i className={`fas ${expandIcon}`}
                    onClick={this.toggleCollapse}>
                 </i>
-                {elementIcon}
-                {element}
+                <div onClick={this.props.onClick}>
+                  {elementIcon}
+                  {element}
+                </div>
                 {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
             </div>
     )

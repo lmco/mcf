@@ -856,30 +856,21 @@ textarea[name="custom"] {
 /******************************************************************************
 /*                           Element                                          *
 /******************************************************************************/
-//#elements-page {
-//  grid-area: view;
-//  display: grid;
-//  grid-template-rows: 1fr;
-//  grid-template-columns: minmax(0px, 900px) 1fr;
-//  grid-template-areas:
-//    "view view";
-//
-//  &-element {
-//    grid-template-areas:
-//      "view element";
-//  }
-//
-//  #view {
-//    grid-area: view;
-//    overflow: scroll;
-//  }
-//
-//  #element-description {
-//    height: 90vh;
-//    grid-area: element;
-//    overflow: hidden;
-//  }
-//}
+.t {
+  display: table;
+  border: 2px solid greenyellow;
+  width: 100%;
+}
+.c1 {
+  display: table-cell;
+  border: 2px solid lightcoral;
+
+}
+.c2 {
+  display: table-cell;
+  border: 2px solid lightblue;
+  width: 30%;
+}
 
 
 .element-description {
