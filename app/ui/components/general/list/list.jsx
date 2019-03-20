@@ -15,23 +15,25 @@
  * @description This renders a list.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+/* eslint no-undef: "warn" */
+
 // React Modules
 import React from 'react';
 
 // Define component
 function List(props) {
   // Loops through the children and puts them in a react-fragment
-  const listItems = React.Children.map(props.children, (child) =>
-        <React.Fragment>
+  const listItems = React.Children.map(props.children, (child) => <React.Fragment>
             {child}
-        </React.Fragment>
-  );
+        </React.Fragment>);
 
     // Initializes the classes
   let appliedClasses = 'list';
 
   // Verify class name provided
-  if(props.className) {
+  if (props.className) {
     // Add class name to the element
     appliedClasses += ` ${props.className}`;
   }
@@ -40,8 +42,8 @@ function List(props) {
   return (<div className={appliedClasses}>
                 {listItems}
             </div>
-  )
+  );
 }
 
 // Export component
-export default List
+export default List;

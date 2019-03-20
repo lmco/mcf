@@ -169,8 +169,8 @@ class Delete extends Component {
                                        onChange={this.handleChange}>
                                     <option>Choose one...</option>
                                     {this.state.projectOpt}
-                                </Input>
-                            </FormGroup>
+                                </Input>)
+                            </FormGroup>)
                           )
                         }
                         {/* Verify if project provided */}

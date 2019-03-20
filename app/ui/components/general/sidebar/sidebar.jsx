@@ -14,6 +14,10 @@
  * @description This renders the sidebar.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+/* eslint no-undef: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 
@@ -22,6 +26,7 @@ import SidebarLink from './sidebar-link.jsx';
 
 // Define component
 class Sidebar extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -60,20 +65,20 @@ class Sidebar extends Component {
   // Define handle resize function
   handleResize() {
     // Check the forceClosed state
-    if (!this.state.forceClosed){
+    if (!this.state.forceClosed) {
       // Check for min window width and if sidebar is not expanded state
       if (this.state.windowWidth < 1200 && window.innerWidth >= 1200 && !this.state.isExpanded) {
         // toggle sidebar
-        this.toggle()
+        this.toggle();
       }
       // Check for max window width and if sidebar is expanded state
       if (this.state.windowWidth >= 1200 && window.innerWidth < 1200 && this.state.isExpanded) {
         // toggle sidebar
-        this.toggle()
+        this.toggle();
       }
     }
     // Set the window width state
-    this.setState({ windowWidth: window.innerWidth })
+    this.setState({ windowWidth: window.innerWidth });
   }
 
   // Define the open and close of the sidebar function
@@ -83,32 +88,33 @@ class Sidebar extends Component {
     // If window width changes force sidebar closed
     if (event) {
       if (window.innerWidth >= 1200 && this.state.isExpanded) {
-        this.setState({forceClosed: true});
+        this.setState({ forceClosed: true });
       }
       else {
-        this.setState({forceClosed: false});
+        this.setState({ forceClosed: false });
       }
     }
     // Change the expanded state
-    this.setState({isExpanded: !this.state.isExpanded});
+    this.setState({ isExpanded: !this.state.isExpanded });
   }
 
   render() {
     // Create the sidebar links
-    const sidebarLink = React.Children.map(this.props.children, child => {
-      return (child.type === SidebarLink)
-      // Clone the react element sidebar link and change expanded state
-        ? React.cloneElement(child, {isExpanded: this.state.isExpanded})
-        : child;
-    });
+    const sidebarLink = React.Children.map(this.props.children, child => (
+      ( // Clone the react element sidebar link and change expanded state
+        (child.type === SidebarLink)
+          ? React.cloneElement(child, { isExpanded: this.state.isExpanded })
+          : child
+      )
+    ));
 
     // Render the sidebar with the links above
     return (
             <div id='sidebar' className='sidebar'>
-                {/*Verify if title was provided and is expanded*/}
+                {/* Verify if title was provided and is expanded */}
                 {(this.props.title && this.state.isExpanded)
                 // Display the title
-                  ?(<React.Fragment>
+                  ? (<React.Fragment>
                         <div className='sidebar-header'>
                             {this.props.title}
                         </div>
@@ -131,6 +137,7 @@ class Sidebar extends Component {
             </div>
     );
   }
+
 }
 
 // Export component

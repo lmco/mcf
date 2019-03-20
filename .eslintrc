@@ -838,6 +838,8 @@
     "no-label-var": "error",
 
     // disallow specific globals
+    // Use Number.isNaN instead of global isNaN. The global isNaN coerces
+    // non-numbers to numbers, returning true for anything that coerces to NaN.
     "no-restricted-globals": ["error", "isFinite", "isNaN"],
 
     // disallow declaration of variables already declared in the outer scope
@@ -861,6 +863,7 @@
     // LM: Changing args from "after-used" to none. We want to disable warnings
     // on unused function arguments because we think it is better to leave the function
     // call consistent with the function definition even if there are unused args.
+    // TODO (jk) - Look into using 'caughtErrors' option
     "no-unused-vars": ["error", {
       "vars": "all",
       "args": "none",
@@ -1080,7 +1083,9 @@
 
     // disallow else after a return in an if
     // https://eslint.org/docs/rules/no-else-return
-    "no-else-return": ["error", { "allowElseIf": false }],
+    // TODO (jk) - This was set to error, I changed it because we've encountered
+    // several cases where code is more readable by using if/else statements
+    "no-else-return": ["off", { "allowElseIf": false }],
 
     // disallow empty functions, except for standalone funcs/arrows
     // https://eslint.org/docs/rules/no-empty-function
