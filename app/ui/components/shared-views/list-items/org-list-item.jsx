@@ -15,6 +15,9 @@
  * @description This renders the organization list items.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 
@@ -24,13 +27,14 @@ import Stat from '../../general/stats/stat.jsx';
 
 // Define component
 class OrgListItem extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
 
     // Initialize state props
     this.state = {
-      width: 0,
+      width: 0
     };
 
     // Create reference
@@ -56,7 +60,7 @@ class OrgListItem extends Component {
   // Define handle resize function
   handleResize() {
     // Set the state prop to the client width
-    this.setState({ width: this.ref.current.clientWidth })
+    this.setState({ width: this.ref.current.clientWidth });
   }
 
   render() {
@@ -77,12 +81,13 @@ class OrgListItem extends Component {
                     <div className='list-header'>
                         <a href={this.props.href}>{org.name}</a>
                     </div>
-                    {/*Verify width of client, remove stats based on width*/}
+                    {/* Verify width of client, remove stats based on width */}
                     {(this.state.width > 600) ? stats : ''}
                 </div>
-    )
+    );
   }
+
 }
 
 // Export component
-export default OrgListItem
+export default OrgListItem;

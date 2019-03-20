@@ -15,6 +15,9 @@
  * the organization.
 */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Modal, ModalBody } from 'reactstrap';
@@ -24,8 +27,8 @@ import ProjectListItem from '../shared-views/list-items/project-list-item.jsx';
 import Delete from '../shared-views/delete.jsx';
 
 
-
 class ProjList extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -47,7 +50,7 @@ class ProjList extends Component {
   // Define toggle function
   handleDeleteProjToggle() {
     // Set the delete modal state
-    this.setState({modalProjDelete: !this.state.modalProjDelete});
+    this.setState({ modalProjDelete: !this.state.modalProjDelete });
   }
 
   render() {
@@ -57,7 +60,7 @@ class ProjList extends Component {
 
     return (
             <React.Fragment>
-                {/*Modal for deleting a project*/}
+                {/* Modal for deleting a project */}
                 <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
                     <ModalBody>
                         <Delete project={project} toggle={this.handleDeleteProjToggle}/>
@@ -75,8 +78,9 @@ class ProjList extends Component {
                     }
                 </div>
             </React.Fragment>
-    )
+    );
   }
+
 }
 
 // Export component

@@ -15,6 +15,9 @@
  * @description This renders an organization's projects list.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React from 'react';
 import { Button, Modal, ModalBody } from 'reactstrap';
@@ -30,19 +33,16 @@ function OrganizationProjects(props) {
   const org = props.org;
 
   // Loop through the org's projects
-  const listItems = org.projects.map(project =>
-        // Create the project list item
-        <ListItem className='proj-org-header'>
+  const listItems = org.projects.map(project => <ListItem className='proj-org-header'>
             <a href={`/${org.id}/${project.id}`} >
                 {project.name}
             </a>
-        </ListItem>
-  );
+        </ListItem>);
 
     // Return the org's project list
   return (
         <React.Fragment>
-            {/*Modal for creating a project*/}
+            {/* Modal for creating a project */}
             <Modal isOpen={props.modal} toggle={props.handleToggle}>
                 <ModalBody>
                     <Create project={true} org={org} toggle={props.handleToggle}/>
@@ -51,11 +51,11 @@ function OrganizationProjects(props) {
             <div id='view' className='org-projects'>
                 <div className='project-list-header'>
                      <h2 className='project-header'>Projects</h2>
-                    {/*Verify user has write permissions*/}
+                    {/* Verify user has write permissions */}
                     {(!props.write)
                       ? ''
                     // Display project create button
-                      :(<div className='project-button'>
+                      : (<div className='project-button'>
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={props.handleToggle}>
@@ -65,14 +65,14 @@ function OrganizationProjects(props) {
                     }
                 </div>
                 <hr />
-                {/*Display list of projects*/}
+                {/* Display list of projects */}
                 <List>
                     {listItems}
                 </List>
             </div>
         </React.Fragment>
-  )
+  );
 }
 
 // Export function
-export default OrganizationProjects
+export default OrganizationProjects;

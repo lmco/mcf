@@ -16,7 +16,6 @@
 
 /* Modified ESLint rules for React. */
 /* eslint no-unused-vars: "warn" */
-/* eslint no-undef: "warn" */
 
 // React Modules
 import React, { Component } from 'react';

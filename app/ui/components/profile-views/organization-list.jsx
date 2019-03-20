@@ -15,6 +15,9 @@
  * @description This renders the orgs list.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Button, Modal, ModalBody } from 'reactstrap';
@@ -28,6 +31,7 @@ import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class OrganizationList extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -52,15 +56,15 @@ class OrganizationList extends Component {
 
   componentDidMount() {
     // Get all orgs with their projects
-    ajaxRequest('GET','/api/orgs?populate=projects')
+    ajaxRequest('GET', '/api/orgs?populate=projects')
     .then(orgs => {
       // Get the users information
-      ajaxRequest('GET','/api/users/whoami')
+      ajaxRequest('GET', '/api/users/whoami')
       .then(user => {
         // Verify if admin user
         if (user.admin) {
           // Set admin state
-          this.setState({admin: user.admin});
+          this.setState({ admin: user.admin });
         }
 
         // Set org state
@@ -73,11 +77,11 @@ class OrganizationList extends Component {
       })
       .catch(err => {
         // Throw error and set error state
-        this.setState({error: `Failed to grab user information: ${err}`});
+        this.setState({ error: `Failed to grab user information: ${err}` });
       });
     })
     // Throw error and set error state
-    .catch(err => this.setState({error: `Failed to load organizations: ${err}`}));
+    .catch(err => this.setState({ error: `Failed to load organizations: ${err}` }));
   }
 
   componentWillUnmount() {
@@ -87,7 +91,7 @@ class OrganizationList extends Component {
 
   handleResize() {
     // Set state to width of window
-    this.setState({ width: this.ref.current.clientWidth })
+    this.setState({ width: this.ref.current.clientWidth });
   }
 
   // Define toggle function

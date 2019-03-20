@@ -14,6 +14,9 @@
  * @description This renders the delete page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
@@ -22,6 +25,7 @@ import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 class Delete extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -43,7 +47,7 @@ class Delete extends Component {
   // Define handle org change function
   handleOrgChange(event) {
     // Set the state of the changed orgs in the form
-    this.setState({ [event.target.name]: event.target.value});
+    this.setState({ [event.target.name]: event.target.value });
 
     if (this.props.projects) {
       // Get all the project-views from that org
@@ -51,27 +55,27 @@ class Delete extends Component {
       .then(projects => {
         // Loop through project-views and create proj options
         const projectOptions = projects.map((project) => {
-          return (<option value={project.id}>{project.name}</option>)
+          return (<option value={project.id}>{project.name}</option>);
         });
 
         // Set the new project options
-        this.setState({projectOpt: projectOptions});
+        this.setState({ projectOpt: projectOptions });
       })
       .catch(err => {
         // Set the project options to empty if none found
-        this.setState({projectOpt: []});
-      })
+        this.setState({ projectOpt: [] });
+      });
     }
   }
 
   // Define handle change function
   handleChange(event) {
     // Set the state of the changed states in the form
-    this.setState({ [event.target.name]: event.target.value});
+    this.setState({ [event.target.name]: event.target.value });
   }
 
   // Define the on submit function
-  onSubmit(){
+  onSubmit() {
     // Initialize variables
     let url;
 
@@ -80,7 +84,7 @@ class Delete extends Component {
       // Set url to state options
       url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
     }
-    else if (this.props.project){
+    else if (this.props.project) {
       // Set url to project provided
       url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
     }
@@ -90,7 +94,7 @@ class Delete extends Component {
     }
     else {
       // Use the org provided
-      url =  `/api/orgs/${this.props.org.id}`;
+      url = `/api/orgs/${this.props.org.id}`;
     }
 
 
@@ -98,11 +102,11 @@ class Delete extends Component {
     ajaxRequest('DELETE', url)
     .then(() => {
       // On success, return to the project-views page
-      window.location.replace(`/`);
+      window.location.replace('/');
     })
     .catch((msg) => {
       // On failure, notify user of failure
-      alert( `Delete Failed: ${msg.responseJSON.description}`);
+      alert(`Delete Failed: ${msg.responseJSON.description}`);
     });
   }
 
@@ -124,7 +128,7 @@ class Delete extends Component {
       // Loop through orgs
       orgOptions = this.props.orgs.map((org) => {
         // Create an org option
-        return (<option value={org.id}>{org.name}</option>)
+        return (<option value={org.id}>{org.name}</option>);
       });
     }
 
@@ -142,9 +146,11 @@ class Delete extends Component {
                 <hr />
                 <div>
                     <Form>
-                        {(!this.props.orgs)
-                          ? ''
-                          :(<FormGroup>
+                        {
+                          (!this.props.orgs)
+                            ? ''
+                            : (
+                              <FormGroup>
                                 <Label for="org">Organization ID</Label>
                                 <Input type="select"
                                        name="org"
@@ -154,15 +160,17 @@ class Delete extends Component {
                                     <option>Choose one...</option>
                                     {orgOptions}
                                 </Input>
-                              </FormGroup>)
+                              </FormGroup>
+                            )
                         }
                         {/* Verify if project-views provided */}
-                        {(!this.props.projects)
-                          ? ''
-                        // Create a form to choose the organization
-                          :(<FormGroup>
-                                <Label for="id">Project ID</Label>
-                                <Input type="select"
+                        { // Create a form to choose the project
+                          (!this.props.projects)
+                            ? ''
+                            : (
+                              <FormGroup>
+                                (<Label for="id">Project ID</Label>)
+                                (<Input type="select"
                                        name="id"
                                        id="id"
                                        value={this.state.id || ''}
@@ -186,8 +194,9 @@ class Delete extends Component {
                     </Form>
                 </div>
             </div>
-    )
+    );
   }
+
 }
 
 export default Delete;

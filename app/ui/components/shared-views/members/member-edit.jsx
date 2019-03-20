@@ -14,6 +14,9 @@
  * @description This renders the user role edit page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Form,
@@ -31,7 +34,8 @@ import CustomMenu from '../../general/dropdown-search/custom-menu.jsx';
 import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 
 // Define component
-class MemberEdit extends Component{
+class MemberEdit extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -59,7 +63,7 @@ class MemberEdit extends Component{
   }
 
   // Define the submit function
-  onSubmit(){
+  onSubmit() {
     // Initialize variables
     const username = this.state.username;
     let url;
@@ -79,7 +83,7 @@ class MemberEdit extends Component{
     else {
       // Set url and redirect to project information
       url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
-      redirect = `/${this.props.project.org}/${this.props.project.id}/users`
+      redirect = `/${this.props.project.org}/${this.props.project.id}/users`;
     }
 
     // Send a patch request to update data
@@ -90,14 +94,14 @@ class MemberEdit extends Component{
     })
     .catch((msg) => {
       // Update user if failed
-      alert( `Update Failed: ${msg.responseJSON.description}`);
-    })
+      alert(`Update Failed: ${msg.responseJSON.description}`);
+    });
   }
 
   // Define toggle function
-  toggle(){
+  toggle() {
     // Set the drop down states
-    this.setState({ dropDownOpen: !this.state.dropDownOpen })
+    this.setState({ dropDownOpen: !this.state.dropDownOpen });
   }
 
   // Define update username
@@ -111,18 +115,17 @@ class MemberEdit extends Component{
     ajaxRequest('GET', '/api/users')
     .then((users) => {
       // Loop through users
-      const userOpts = users.map((user) => {
-        // Create a DropdownItem for each user
-        return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
-      });
+      const userOpts = users.map(
+        (user) => (<DropdownItem value={user.username}>{user.name}</DropdownItem>)
+      );
 
       // Set the user state
-      this.setState({users: userOpts});
+      this.setState({ users: userOpts });
     })
     .catch((msg) => {
       // Update user if failed
-      alert( `Grabbing users failed: ${msg.responseJSON.description}`);
-    })
+      alert(`Grabbing users failed: ${msg.responseJSON.description}`);
+    });
   }
 
   render() {
@@ -146,10 +149,10 @@ class MemberEdit extends Component{
                 <hr />
                 <div>
                     <h3 className='edit-role-title'> {title} </h3>
-                    {/*Create form to update user roles*/}
+                    {/* Create form to update user roles */}
                     <Form>
                         <FormGroup>
-                            {/* Create a search bar for username input*/}
+                            {/* Create a search bar for username input */}
                             <Label className='username-label' for='username'>Username</Label>
                             <div className='username-search'>
                                 {/* Input field for username */}
@@ -160,24 +163,25 @@ class MemberEdit extends Component{
                                        placeholder="Choose a user..."
                                        onChange={this.handleChange}
                                        value={this.state.username || ''} />
-                               {/* Drop down menu to choose a user*/}
+                               {/* Drop down menu to choose a user */}
                                 <Dropdown className='search-button' isOpen={this.state.dropDownOpen} toggle={this.toggle}>
-                                    {/* Button to toggle drop down menu*/}
+                                    {/* Button to toggle drop down menu */}
                                     <DropdownToggle
                                         onClick={this.toggle}
                                         aria-expanded={this.state.dropDownOpen}>
                                             Search
                                     </DropdownToggle>
                                     <DropdownMenu >
-                                        {/* List all the usernames with a filter option*/}
-                                        <CustomMenu username={this.state.username} onChange={this.updateUsername}>
+                                        {/* List all the usernames with a filter option */}
+                                        <CustomMenu username={this.state.username}
+                                                    onChange={this.updateUsername}>
                                             {this.state.users}
                                         </CustomMenu>
                                     </DropdownMenu>
                                 </Dropdown>
                             </div>
                         </FormGroup>
-                        {/*Permissions user updates with*/}
+                        {/* Permissions user updates with */}
                         <FormGroup>
                             <Label for="permissions">Permissions</Label>
                             <Input type="select"
@@ -192,16 +196,16 @@ class MemberEdit extends Component{
                                 <option>REMOVE_ALL</option>
                             </Input>
                         </FormGroup>
-                        {/*Button to submit changes*/}
+                        {/* Button to submit changes */}
                         <Button onClick={this.onSubmit}> Submit </Button>{' '}
                         <Button outline color="secondary" onClick={this.props.toggle}>Cancel</Button>
                     </Form>
                 </div>
             </div>
-    )
+    );
   }
+
 }
 
 // Export component
-export default MemberEdit
-
+export default MemberEdit;

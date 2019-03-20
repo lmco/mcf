@@ -14,6 +14,9 @@
  * @description This renders the create page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
@@ -23,6 +26,7 @@ import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
 
 class Create extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -33,7 +37,7 @@ class Create extends Component {
       org: null,
       name: null,
       id: null,
-      custom: JSON.stringify( {}, null, 2)
+      custom: JSON.stringify({}, null, 2)
     };
 
     // Bind component functions
@@ -44,11 +48,11 @@ class Create extends Component {
   // Define handle change function
   handleChange(event) {
     // Set state of the changed states in form
-    this.setState({ [event.target.name]: event.target.value});
+    this.setState({ [event.target.name]: event.target.value });
   }
 
   // Define the submit function
-  onSubmit(){
+  onSubmit() {
     // Initialize variables
     let url;
     let redirect;
@@ -72,7 +76,7 @@ class Create extends Component {
     }
 
     // Initialize project data
-    let data = {
+    const data = {
       id: this.state.id,
       name: this.state.name,
       custom: JSON.parse(this.state.custom)
@@ -86,7 +90,7 @@ class Create extends Component {
     })
     .catch((msg) => {
       // On failure, alert user
-      alert( `Create Failed: ${msg.responseJSON.description}`);
+      alert(`Create Failed: ${msg.responseJSON.description}`);
     });
   }
 
@@ -94,13 +98,10 @@ class Create extends Component {
     // Verify no orgs were passed in props
     if (this.props.project && this.props.orgs) {
       // Loop through orgs
-      const orgOptions = this.props.orgs.map((org) => {
-        // Create them as options
-        return (<option value={org.id}>{org.name}</option>)
-      });
+      const orgOptions = this.props.orgs.map((org) => (<option value={org.id}>{org.name}</option>));
 
       // Set the org options state
-      this.setState({orgOpt: orgOptions});
+      this.setState({ orgOpt: orgOptions });
     }
   }
 
@@ -115,7 +116,7 @@ class Create extends Component {
     let disableSubmit;
 
     if (this.props.project) {
-      if(this.props.org) {
+      if (this.props.org) {
         title = `New Project in ${this.props.org.name}`;
       }
       else {
@@ -136,7 +137,7 @@ class Create extends Component {
     }
 
     // Verify if project name is valid
-    if(!RegExp(validators.project.name).test(this.state.name)) {
+    if (!RegExp(validators.project.name).test(this.state.name)) {
       // Set invalid fields
       nameInvalid = true;
       disableSubmit = true;
@@ -146,7 +147,7 @@ class Create extends Component {
     try {
       JSON.parse(this.state.custom);
     }
-    catch(err) {
+    catch (err) {
       // Set invalid fields
       customInvalid = true;
       disableSubmit = true;
@@ -228,8 +229,9 @@ class Create extends Component {
                     </Form>
                 </div>
             </div>
-    )
+    );
   }
+
 }
 
-export default Create
+export default Create;

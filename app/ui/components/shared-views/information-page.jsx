@@ -14,6 +14,9 @@
  * @description This renders an organization or project home page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React from 'react';
 
@@ -24,7 +27,7 @@ function InformationPage(props) {
   let orgid = null;
   let custom;
 
-  if (props.org){
+  if (props.org) {
     name = props.org.name;
     id = props.org.id;
     custom = props.org.custom;
@@ -48,9 +51,9 @@ function InformationPage(props) {
                     </tr>
                     {(orgid === null)
                       ? <tr/>
-                      :(<tr>
+                      : (<tr>
                             <th>Org ID:</th>
-                            <td><a href={'/'+orgid}>{orgid}</a></td>
+                            <td><a href={`/${orgid}`}>{orgid}</a></td>
                           </tr>)
                     }
                     <tr>
@@ -60,7 +63,7 @@ function InformationPage(props) {
                 </tbody>
             </table>
         </div>
-  )
+  );
 }
 
 export default InformationPage;

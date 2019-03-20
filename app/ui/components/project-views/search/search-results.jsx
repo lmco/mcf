@@ -14,6 +14,9 @@
  * @description This renders the search page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 import React, { Component } from 'react';
 import SearchResult from './search-result.jsx';
 
@@ -39,17 +42,18 @@ class SearchResults extends Component {
       return (<div className='no-results'>No search results found.</div>);
     }
 
-    const results = this.props.results.map(result => {
-      return (<SearchResult key={result.id} data={result}/>)
-    });
+    const results = this.props.results.map(
+      result => (<SearchResult key={result.id} data={result}/>)
+    );
 
     return (
             <div className={'search-results'}>
                 {results}
             </div>
-    )
+    );
   }
+
 }
 
 // Export component
-export default SearchResults
+export default SearchResults;
