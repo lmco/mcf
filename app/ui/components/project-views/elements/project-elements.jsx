@@ -38,7 +38,7 @@ class ProjectElements extends Component {
   }
 
   // Define the open and close of the sidebar function
-  handleElementClick(event) {
+  handleElementClick(id) {
     // Get the sidebar html element and toggle it
     this.setState({ sidePanelOpen: !this.state.sidePanelOpen });
     // If window width changes force sidebar closed
@@ -68,7 +68,7 @@ class ProjectElements extends Component {
                            project={this.props.project}
                            parent={null}
                            isOpen={true}
-                           onClick={this.handleElementClick}/>
+                           clickHandler={this.handleElementClick}/>
             </div>
           </div>
           {(!this.state.sidePanelOpen)

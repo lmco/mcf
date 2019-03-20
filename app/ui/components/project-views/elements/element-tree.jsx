@@ -37,6 +37,7 @@ class ElementTree extends Component {
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.handleEditToggle = this.handleEditToggle.bind(this);
     this.handleElementToggle = this.handleElementToggle.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   handleEditToggle() {
@@ -72,6 +73,15 @@ class ElementTree extends Component {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
+  /**
+   * When an element is clicked, parses the ID and calls the passed in
+   * click handler function.
+   */
+  handleClick() {
+    const elementId = this.props.id.replace('tree-', '');
+    this.props.clickHandler(elementId);
+  }
+
   // Create the element tree list
   render() {
     // Initialize variables
@@ -98,7 +108,7 @@ class ElementTree extends Component {
                        id={`tree-${this.state.data.contains[i]}`}
                        project={this.props.project}
                        parent={this.state}
-                       onClick={this.props.onClick}
+                       clickHandler={this.props.clickHandler}
                        isOpen={false}/>
         );
       }
@@ -180,7 +190,7 @@ class ElementTree extends Component {
         <i className={`fas ${expandIcon}`}
            onClick={this.toggleCollapse}>
         </i>
-        <span onClick={this.props.onClick}>
+        <span onClick={this.handleClick}>
           {elementIcon}
           {element}
         </span>
