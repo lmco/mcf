@@ -44,7 +44,7 @@ class ProjectElements extends Component {
                                isOpen={true}/>
               </div>
             </div>
-            <TestGrid/>
+            {/*<TestGrid/>*/}
         </React.Fragment>
     )
   }

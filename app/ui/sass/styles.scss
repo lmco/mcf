@@ -140,17 +140,17 @@ textarea[name="custom"] {
     }
 
     #main {
-        grid-area: main;
-        display: grid;
-        grid-template-rows: 1fr;
-        grid-template-columns: auto minmax(10px, 1fr);
-        grid-template-areas:
-            "view view";
+      grid-area: main;
+      display: grid;
+      grid-template-rows: 1fr;
+      grid-template-columns: auto minmax(10px, 1fr);
+      grid-template-areas:
+          "view view";
 
-        &.main-sidebar {
-           grid-template-areas:
-             "sidebar view";
-        }
+      &.main-sidebar {
+         grid-template-areas:
+           "sidebar view";
+      }
 
       #sidebar {
         grid-area: sidebar;
@@ -159,26 +159,7 @@ textarea[name="custom"] {
 
       #view {
         grid-area: view;
-        display: grid;
-        grid-template-rows: 1fr;
-        grid-template-columns: auto minmax(10px, 1fr);
-        grid-template-areas:
-          "view view";
         overflow: scroll;
-
-        &.main-element {
-          grid-template-areas: "view element-description";
-        }
-
-        #view {
-          grid-area: view;
-          overflow: scroll;
-        }
-
-        #element-description {
-          grid-area: element-description;
-          overflow: hidden;
-        }
       }
     }
 

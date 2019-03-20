@@ -174,7 +174,7 @@ class HomeApp extends Component {
 
     // Render the homepage
     return (
-      <React.Fragment>
+      <div id='view'>
         { /* Modal for creating an org */ }
         <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
           <ModalBody>
@@ -217,7 +217,7 @@ class HomeApp extends Component {
             : (<List>{list}</List>)
           }
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 
