@@ -15,6 +15,9 @@
  * @description This renders the element tree in the project's page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Label } from 'reactstrap';
@@ -61,7 +64,7 @@ class ElementTree extends Component {
       url: url,
       statusCode: {
         200: (data) => { this.setState({ data: data }); },
-        401: (data) => { this.setState({ data: null }); }
+        401: () => { this.setState({ data: null }); }
       },
       fail: () => {
         console.log('A failure occurred.');
@@ -87,16 +90,15 @@ class ElementTree extends Component {
     // Initialize variables
     let elementIcon = (
       <i className={'fas fa-cube'}
-         style={{color: '#333'}}></i>
+         style={{ color: '#333' }}></i>
     );
     let expandIcon = 'fa-caret-right transparent';
-    let subtree = [];
+    const subtree = [];
 
     // If the element contains other elements, handle the subtree
     if (this.state.data !== null
             && Array.isArray(this.state.data.contains)
             && this.state.data.contains.length >= 1) {
-
       // Icon should be chevron to show subtree is collapsible
       expandIcon = (this.state.isOpen) ? 'fa-caret-down' : 'fa-caret-right';
 
@@ -113,7 +115,6 @@ class ElementTree extends Component {
         );
       }
     }
-
 
 
     // Build the rendered element item
@@ -137,11 +138,11 @@ class ElementTree extends Component {
     }
 
     const iconMappings = {
-      'Package': {
+      Package: {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
         color: 'lightblue'
       },
-      'package': {
+      package: {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
         color: 'lightblue'
       },
@@ -149,11 +150,11 @@ class ElementTree extends Component {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
         color: 'lightblue'
       },
-      'Diagram': {
+      Diagram: {
         icon: 'sitemap',
         color: 'lightgreen'
       },
-      'diagram': {
+      diagram: {
         icon: 'sitemap',
         color: 'lightgreen'
       },
@@ -176,8 +177,8 @@ class ElementTree extends Component {
     };
     if (this.state.data !== null
       && iconMappings.hasOwnProperty(this.state.data.type)) {
-      let icon = iconMappings[this.state.data.type]['icon'];
-      let color = iconMappings[this.state.data.type]['color'];
+      const icon = iconMappings[this.state.data.type]['icon'];
+      const color = iconMappings[this.state.data.type]['color'];
       elementIcon = (
         <i className={`fas fa-${icon}`}
            style={{color: color}}></i>
@@ -198,7 +199,8 @@ class ElementTree extends Component {
       </div>
     );
   }
+
 }
 
 // Export component
-export default ElementTree
+export default ElementTree;

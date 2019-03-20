@@ -15,8 +15,11 @@
  * @description This renders a project's element page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 // MBEE Modules
 import ElementTree from './element-tree.jsx';
@@ -79,8 +82,9 @@ class ProjectElements extends Component {
           }
         </div>
       </div>
-    )
+    );
   }
+
 }
 
 // Export component

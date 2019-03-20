@@ -540,9 +540,9 @@ function create(requestingUser, organizationID, projects, options) {
  * the key is the username, and the value is the role which the user is to have
  * in the project. To remove a user from a project, the value must be
  * 'remove_all'.
- * @param {Object} [projects.custom] - The additions or changes to existing
- * custom data. If the key/value pair already exists, the value will be changed.
- * If the key/value pair does not exist, it will be added.
+ * @param {Object} [projects.custom] - The new custom data object. Please note,
+ * updating the custom data object completely replaces the old custom data
+ * object.
  * @param {boolean} [projects.archived] - The updated archived field. If true,
  * the project will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
@@ -849,13 +849,6 @@ function update(requestingUser, organizationID, projects, options) {
                 // Copy permissions from proj to update object
                 updateProj.permissions = proj.permissions;
               });
-            }
-            else {
-              // Add and replace parameters of the type 'Mixed'
-              utils.updateAndCombineObjects(proj[key], updateProj[key]);
-
-              // Set mixed field in updateProj
-              updateProj[key] = proj[key];
             }
             // Mark mixed fields as updated, required for mixed fields to update in mongoose
             // http://mongoosejs.com/docs/schematypes.html#mixed
