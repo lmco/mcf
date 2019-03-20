@@ -39,7 +39,7 @@ class ElementTree extends Component {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     let base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    let url = `${base}/elements/${this.props.id}?fields=id,name,contains`;
+    let url = `${base}/elements/${this.props.id}?fields=id,name,contains,type`;
 
     $.ajax({
       method: "GET",
@@ -61,7 +61,11 @@ class ElementTree extends Component {
   // Create the element tree list
   render() {
     // Initialize variables
-    let icon = 'cube';
+    let elementIcon = (
+      <i className={'fas fa-cube'}
+         style={{color: '#333'}}></i>
+    );
+    let expandIcon = 'fa-caret-right transparent';
     let subtree = [];
 
     // If the element contains other elements, handle the subtree
@@ -70,12 +74,13 @@ class ElementTree extends Component {
             && this.state.data.contains.length >= 1) {
 
       // Icon should be chevron to show subtree is collapsible
-      icon = (this.state.isOpen) ? 'chevron-down' : 'chevron-right';
+      expandIcon = (this.state.isOpen) ? 'fa-caret-down' : 'fa-caret-right';
+
 
       // Create Subtrees
       for (let i = 0; i < this.state.data.contains.length; i++) {
         subtree.push(
-                    <ElementTree key={'tree-' +this.state.data.contains[i]}
+                    <ElementTree key={'tree-' + this.state.data.contains[i]}
                                  id={this.state.data.contains[i]}
                                  project={this.props.project}
                                  parent={this.state}
@@ -84,24 +89,59 @@ class ElementTree extends Component {
       }
     }
 
+
+
     // Build the rendered element item
     let element = '';
     if (this.state.data !== null) {
       // Element should be rendered as the ID initially
-      element = (<span>{this.state.data.id}</span>);
+      element = (<span>[{this.state.data.type}] {this.state.data.id}</span>);
       // If the name is not blank, render the name
       if (this.state.data.name !== '') {
         element = (
-                    <span>{this.state.data.name} ({this.state.data.id})</span>
+                    <span>[{this.state.data.type}] {this.state.data.name} ({this.state.data.id})</span>
         );
       }
     }
 
+    const iconMappings = {
+      'uml:Package': {
+        icon: (this.state.isOpen) ? 'folder-open' : 'folder',
+        color: 'lightblue'
+      },
+      'uml:Diagram': {
+        icon: 'sitemap',
+        color: 'lightgreen'
+      },
+      'uml:Association': {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      'uml:Slot': {
+        icon: 'circle',
+        color: 'MediumPurple'
+      },
+      'uml:Property': {
+        icon: 'circle',
+        color: 'Gold'
+      }
+    };
+    if (this.state.data !== null
+      && iconMappings.hasOwnProperty(this.state.data.type)) {
+      let icon = iconMappings[this.state.data.type]['icon'];
+      let color = iconMappings[this.state.data.type]['color'];;
+      elementIcon = (
+        <i className={`fas fa-${icon}`}
+        style={{color: color}}></i>
+      );
+    }
+
     return (
             <div id={'tree-' + this.props.id} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
-                <i className={'fas fa-' + icon}
+                <i className={'fas ' + expandIcon}
                    onClick={this.toggleCollapse}>
                 </i>
+                {elementIcon}
                 {element}
                 {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
             </div>

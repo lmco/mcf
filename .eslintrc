@@ -861,6 +861,7 @@
     // LM: Changing args from "after-used" to none. We want to disable warnings
     // on unused function arguments because we think it is better to leave the function
     // call consistent with the function definition even if there are unused args.
+    // TODO (jk) - Look into using 'caughtErrors' option
     "no-unused-vars": ["error", {
       "vars": "all",
       "args": "none",

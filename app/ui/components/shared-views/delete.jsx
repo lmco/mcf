@@ -161,17 +161,17 @@ class Delete extends Component {
                           ? ''
                         // Create a form to choose the organization
                           :({/* Create a form to choose the project */}
-                            <FormGroup>
-                                <Label for="id">Project ID</Label>
-                                <Input type="select"
+                          (<FormGroup>
+                                (<Label for="id">Project ID</Label>)
+                                (<Input type="select"
                                        name="id"
                                        id="id"
                                        value={this.state.id || ''}
                                        onChange={this.handleChange}>
                                     <option>Choose one...</option>
                                     {this.state.projectOpt}
-                                </Input>
-                            </FormGroup>
+                                </Input>)
+                            </FormGroup>)
                           )
                         }
                         {/*Verify if project provided*/}
