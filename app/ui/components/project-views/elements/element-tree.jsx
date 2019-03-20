@@ -191,7 +191,7 @@ class ElementTree extends Component {
         <i className={`fas ${expandIcon}`}
            onClick={this.toggleCollapse}>
         </i>
-        <span onClick={this.handleClick}>
+        <span className='element-name' onClick={this.handleClick}>
           {elementIcon}
           {element}
         </span>

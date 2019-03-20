@@ -830,18 +830,18 @@ textarea[name="custom"] {
 
 #element-tree-container {
   display: table-cell;
-  margin-top: 1rem;
+  padding-top: 10px;
   padding-right: 10px;
   padding-left: 10px;
 
-    i {
-        padding-right: 10px;
-    }
+  i {
+      padding-right: 10px;
+  }
 
-    .element-tree {
-        padding-left: 30px;
-        border-left: 1px solid #e8e8e8;
-    }
+  .element-tree {
+      padding-left: 30px;
+      border-left: 1px solid #e8e8e8;
+  }
 
   .element-tree, .element-tree-root {
     i.fa-caret-right, i.fa-caret-down {
@@ -858,6 +858,11 @@ textarea[name="custom"] {
 
   .transparent {
     color: transparent;
+  }
+
+  .element-name:hover {
+    cursor: pointer;
+    text-decoration: underline;
   }
 }
 

@@ -17,6 +17,7 @@
 // React Modules
 import React, { Component } from 'react';
 import { Button } from 'reactstrap';
+import {ajaxRequest} from "../../helper-functions/ajaxRequests";
 
 // Define component
 class Element extends Component {
@@ -26,8 +27,24 @@ class Element extends Component {
 
     // Initialize state props
     this.state = {
-
+      element: null,
+      error: null
     };
+  }
+
+  componentDidMount() {
+    // Initialize variables
+    const elementId = this.props.id;
+    const url = `${this.props.url}/branches/master/elements/${elementId}`;
+    // Get project data
+    ajaxRequest('GET', `${url}`)
+    .then(element => {
+      this.setState({ element: element });
+    })
+    .catch(err => {
+      // Throw error and set state
+      this.setState({ error: `Failed to load element: ${err.responsetext}` });
+    });
   }
 
   render() {
@@ -35,8 +52,10 @@ class Element extends Component {
     return (
       <div className='element-description'>
         <div className='other'>
-          <h2>Hello World.</h2>
-          <h2>{this.props.id}</h2>
+          {(!this.state.element)
+            ? <div className="loading"> {this.state.error || 'Loading your element...'} </div>
+            : <h2> {this.state.element.id} </h2>
+          }
         </div>
       </div>
     );

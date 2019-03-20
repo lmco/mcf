@@ -64,7 +64,7 @@ class ProjectElements extends Component {
           </div>
           {(!this.state.sidePanelOpen)
             ? ''
-            : (<Element id={this.state.id}/>)
+            : (<Element id={this.state.id} url={this.props.url}/>)
           }
         </div>
       </div>
