@@ -95,11 +95,18 @@ class ElementTree extends Component {
     let element = '';
     if (this.state.data !== null) {
       // Element should be rendered as the ID initially
-      element = (<span>[{this.state.data.type}] {this.state.data.id}</span>);
+      element = (
+        <span className={'element-id'}>
+           {this.state.data.id} : {this.state.data.type}
+        </span>
+      );
       // If the name is not blank, render the name
       if (this.state.data.name !== '') {
         element = (
-                    <span>[{this.state.data.type}] {this.state.data.name} ({this.state.data.id})</span>
+          <span>
+            {this.state.data.name}
+            <span className={'element-id'}>({this.state.data.id} : {this.state.data.type})</span>
+          </span>
         );
       }
     }
@@ -137,7 +144,7 @@ class ElementTree extends Component {
     }
 
     return (
-            <div id={'tree-' + this.props.id} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
+            <div id={'tree-' + this.props.id} className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
                 <i className={'fas ' + expandIcon}
                    onClick={this.toggleCollapse}>
                 </i>

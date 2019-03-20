@@ -176,55 +176,55 @@ class HomeApp extends Component {
 
     // Render the homepage
     return (
-            <React.Fragment>
-                <Modal isOpen={this.state.modal} toggle={this.handleModalToggle}>
-                    <ModalBody>
-                        <Space />
-                    </ModalBody>
-                </Modal>
-                { /* Modal for creating an org */ }
-                <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
-                    <ModalBody>
-                        <Create toggle={this.handleCreateToggle}/>
-                    </ModalBody>
-                </Modal>
-                { /* Modal for deleting an org */ }
-                <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
-                    <ModalBody>
-                        <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
-                    </ModalBody>
-                </Modal>
-                { /* Display the list of projects */ }
-                <div id='view' className='org-list' ref={this.ref}>
-                    <div className='org-list-header'>
-                        <h2 className='org-header'>Organizations</h2>
-                        { /* Verify user is an admin */ }
-                        {(!this.state.admin)
-                          ? ''
-                          // Display create and delete buttons
-                          : (<div className='org-button'>
-                                <Button className='btn'
-                                        outline color="secondary"
-                                        onClick={this.handleCreateToggle}>
-                                    Create
-                                </Button>
-                                <Button className='btn'
-                                        outline color="danger"
-                                        onClick={this.handleDeleteToggle}>
-                                    Delete
-                                </Button>
-                            </div>)
-                        }
-                    </div>
-                    <hr/>
-                    { /* Verify there are projects */ }
-                    {(this.state.orgs.length === 0)
-                      ? (<div className='list-item'><h3> No organizations.</h3></div>)
-                      : (<List>{list}</List>)
-                    }
+      <React.Fragment>
+        <Modal isOpen={this.state.modal} toggle={this.handleModalToggle}>
+          <ModalBody>
+            <Space />
+          </ModalBody>
+        </Modal>
+        { /* Modal for creating an org */ }
+        <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
+          <ModalBody>
+            <Create toggle={this.handleCreateToggle}/>
+          </ModalBody>
+        </Modal>
+        { /* Modal for deleting an org */ }
+        <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+          <ModalBody>
+            <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
+          </ModalBody>
+        </Modal>
+        { /* Display the list of projects */ }
+        <div id='view' className='org-list' ref={this.ref}>
+          <div className='org-list-header'>
+            <h2 className='org-header'>Organizations</h2>
+            { /* Verify user is an admin */ }
+            {(!this.state.admin)
+              ? ''
+              // Display create and delete buttons
+              : (
+                <div className='org-button'>
+                  <Button className='btn'
+                          outline
+                          color="secondary" onClick={this.handleCreateToggle}>
+                      Create
+                  </Button>
+                  <Button className='btn' outline color="danger"
+                          onClick={this.handleDeleteToggle}>
+                      Delete
+                  </Button>
                 </div>
-            </React.Fragment>
-
+              )
+            }
+          </div>
+          <hr/>
+          { /* Verify there are projects */ }
+          {(this.state.orgs.length === 0)
+            ? (<div className='list-item'><h3> No organizations.</h3></div>)
+            : (<List>{list}</List>)
+          }
+        </div>
+      </React.Fragment>
     );
   }
 
