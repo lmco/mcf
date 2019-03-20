@@ -15,35 +15,36 @@
  * @description This renders a project's element page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 // MBEE Modules
 import ElementTree from './element-tree.jsx';
 
 // Define component
 class ProjectElements extends Component {
-  constructor(props) {
-    // Initialize parent props
-    super(props);
-  }
+
 
   render() {
     // Return element list
     return (
-            <div id='view' className='project-elements'>
-                <h2>Elements</h2>
-                <hr/>
-                <div id={'element-tree-container'}>
-                    <ElementTree id={'model'}
-                                 project={this.props.project}
-                                 parent={null}
-                                 isOpen={true}/>
-                </div>
-            </div>
-    )
+      <div id='view' className='project-elements'>
+        <h2>Elements</h2>
+        <hr/>
+        <div id={'element-tree-container'}>
+            <ElementTree id={'model'}
+                         project={this.props.project}
+                         parent={null}
+                         isOpen={true}/>
+        </div>
+      </div>
+    );
   }
+
 }
 
 // Export component
-export default ProjectElements
+export default ProjectElements;
