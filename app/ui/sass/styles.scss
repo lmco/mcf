@@ -877,7 +877,7 @@ textarea[name="custom"] {
 .element-information {
   display: table-cell;
   border-left: black solid 2px;
-  width: 30%;
+  width: 400px;
   background: whitesmoke;
 
   .element-info-display{
@@ -885,6 +885,15 @@ textarea[name="custom"] {
     display: flex;
     justify-content: center;
     flex-direction: row-reverse;
+  }
+
+  .exit-icon {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .element-table {
+    width: 95%;
   }
 }
 
