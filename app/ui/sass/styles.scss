@@ -890,6 +890,15 @@ textarea[name="custom"] {
   .exit-icon {
     display: flex;
     justify-content: flex-end;
+
+    i {
+      height: 5%;
+    }
+
+    i:hover {
+      cursor: pointer;
+      color: grey;
+    }
   }
 
   .element-table {
