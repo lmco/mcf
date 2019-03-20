@@ -18,10 +18,6 @@
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
 
-// MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-import validators from '../../../../build/json/validators.json';
-
 class ElementEdit extends Component {
   constructor(props) {
     // Initialize parent props
@@ -31,7 +27,7 @@ class ElementEdit extends Component {
       id: this.props.id,
       name: '',
       type: '',
-      parent: this.props.parent,
+      parent: '',
       target: null,
       source: null,
       custom: null,
@@ -46,32 +42,32 @@ class ElementEdit extends Component {
   }
 
   componentDidMount() {
-    //Send a patch request to update element data
-    ajaxRequest('GET', this.props.url)
-    // On success
-      .then((element) => {
-        this.setState( {element: element})
-        this.setState( {name: element.name})
-        this.setState( {custom: JSON.stringify(element.custom, null, 2) })
-        this.setState( {type: element.type})
-
-        if (element.parent) {
-          this.setState( {parent: element.parent})
-        }
-        if (element.source) {
-          this.setState( {source: element.source})
-        }
-        if (element.target) {
-          this.setState( {target: element.target})
-        }
-
-        $('textarea[name="custom"]').autoResize();
-      })
-      // On fail
-      .catch((err) => {
-        // Let user know update failed
-        alert(`Update Failed: ${err.responseJSON.description}`);
-      });
+    // //Send a patch request to update element data
+    // ajaxRequest('GET', this.props.url)
+    // // On success
+    //   .then((element) => {
+    //     this.setState( {element: element})
+    //     this.setState( {name: element.name})
+    //     this.setState( {custom: JSON.stringify(element.custom, null, 2) })
+    //     this.setState( {type: element.type})
+    //
+    //     if (element.parent) {
+    //       this.setState( {parent: element.parent})
+    //     }
+    //     if (element.source) {
+    //       this.setState( {source: element.source})
+    //     }
+    //     if (element.target) {
+    //       this.setState( {target: element.target})
+    //     }
+    //
+    //     $('textarea[name="custom"]').autoResize();
+    //   })
+    //   // On fail
+    //   .catch((err) => {
+    //     // Let user know update failed
+    //     alert(`Update Failed: ${err.responseJSON.description}`);
+    //   });
   }
 
   // Define handle change function
@@ -107,39 +103,39 @@ class ElementEdit extends Component {
     // Send a patch request to update element data
     ajaxRequest('PATCH', this.props.url, data)
     // On success
-      .then(() => {
-        // Update the page
-        window.location.replace('/');
-      })
-      // On fail
-      .catch((err) => {
-        // Let user know update failed
-        alert(`Update Failed: ${err.responseJSON.description}`);
-      });
+    .then(() => {
+      // Update the page
+      window.location.replace('/');
+    })
+    // On fail
+    .catch((err) => {
+      // Let user know update failed
+      alert(`Update Failed: ${err.responseJSON.description}`);
+    });
   }
 
   render() {
-    // Initialize variables
+    // // Initialize variables
     let disableSubmit, customInvalid;
     let parentInvalid, targetInvalid, sourceInvalid;
 
-    // Verify id
-    if(!RegExp(validators.id).test(this.state.parent) ) {
-      parentInvalid = true;
-      disableSubmit = true;
-    }
-
-    // Verify id
-    if(!RegExp(validators.id).test(this.state.target) ) {
-      targetInvalid = true;
-      disableSubmit = true;
-    }
-    // Verify id
-    if(!RegExp(validators.id).test(this.state.source) ) {
-      sourceInvalid = true;
-      disableSubmit = true;
-    }
-
+    // // Verify id
+    // if(!RegExp(validators.id).test(this.state.parent) ) {
+    //   parentInvalid = true;
+    //   disableSubmit = true;
+    // }
+    //
+    // // Verify id
+    // if(!RegExp(validators.id).test(this.state.target) ) {
+    //   targetInvalid = true;
+    //   disableSubmit = true;
+    // }
+    // // Verify id
+    // if(!RegExp(validators.id).test(this.state.source) ) {
+    //   sourceInvalid = true;
+    //   disableSubmit = true;
+    // }
+    //
     // Verify if custom data is correct JSON format
     try {
       JSON.parse(this.state.custom);
@@ -152,7 +148,8 @@ class ElementEdit extends Component {
 
     // Render organization edit page
     return (
-      <div className='elem-forms'>
+      <div className='element-information'>
+        <div className='element-info-display'>
         <h2>Element Edit</h2>
         <hr />
         <div>
@@ -186,7 +183,6 @@ class ElementEdit extends Component {
                      id="parent"
                      placeholder="Element parent"
                      value={this.state.parent || ''}
-                     invalid={parentInvalid}
                      onChange={this.handleChange}/>
               {/*Verify fields are valid, or display feedback*/}
               <FormFeedback >
@@ -201,7 +197,7 @@ class ElementEdit extends Component {
                      id="target"
                      placeholder="Element target"
                      value={this.state.target || ''}
-                     invalid={targetInvalid}
+                     // invalid={targetInvalid}
                      onChange={this.handleChange}/>
               {/*Verify fields are valid, or display feedback*/}
               <FormFeedback >
@@ -216,7 +212,6 @@ class ElementEdit extends Component {
                      id="source"
                      placeholder="Element source"
                      value={this.state.source || ''}
-                     invalid={sourceInvalid}
                      onChange={this.handleChange}/>
               {/*Verify fields are valid, or display feedback*/}
               <FormFeedback >
@@ -243,8 +238,9 @@ class ElementEdit extends Component {
             {/*/!*Button to submit changes*!/*/}
             {/*<Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>*/}
             {/*{' '}*/}
-            {/*<Button onClick={this.props.onToggle}> Cancel </Button>*/}
+            <Button onClick={this.props.closeSidePanel}> Cancel </Button>
           </Form>
+        </div>
         </div>
       </div>
     )
@@ -252,4 +248,4 @@ class ElementEdit extends Component {
 }
 
 // Export component
-export default ElementEdit
+export default ElementEdit;

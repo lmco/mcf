@@ -17,7 +17,9 @@
 // React Modules
 import React, { Component } from 'react';
 import { Button } from 'reactstrap';
-import {ajaxRequest} from "../../helper-functions/ajaxRequests";
+
+// MBEE Modules
+import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 
 // Define component
 class Element extends Component {
@@ -138,6 +140,7 @@ class Element extends Component {
                     {/*</tr>*/}
                     </tbody>
                   </table>
+                  <Button onClick={this.props.editElementInfo}>Edit</Button>
                 </div>
               </React.Fragment>
             )
