@@ -175,16 +175,16 @@ function build(_args) {
     if (args.includes('--all') || args.includes('--react')) {
       M.log.info('  + Transpiling react ...');
       webpack({
-        mode: 'production',
+        mode: 'development',
         entry: {
-          navbar: path.join(M.root, 'app', 'ui', 'react-components', 'general-components', 'nav.jsx'),
-          'home-page': path.join(M.root, 'app', 'ui', 'react-components', 'home-page', 'home-page.jsx'),
-          organizations: path.join(M.root, 'app', 'ui', 'react-components', 'organizations', 'organizations.jsx'),
-          projects: path.join(M.root, 'app', 'ui', 'react-components', 'projects', 'projects.jsx'),
-          user: path.join(M.root, 'app', 'ui', 'react-components', 'user', 'user.jsx')
+          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
+          'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
+          'org-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'org-app.jsx'),
+          'project-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'project-app.jsx'),
+          'profile-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'profile-app.jsx')
         },
         output: {
-          path: path.join(M.root, 'build', 'public', 'react-js'),
+          path: path.join(M.root, 'build', 'public', 'js'),
           filename: '[name].js'
         },
         devServer: {
