@@ -16,7 +16,6 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Button } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
@@ -32,9 +31,11 @@ class Element extends Component {
       element: null,
       error: null
     };
+
+    this.getElement = this.getElement.bind(this);
   }
 
-  componentDidMount() {
+  getElement() {
     // Initialize variables
     const elementId = this.props.id;
     const url = `${this.props.url}/branches/master/elements/${elementId}`;
@@ -49,21 +50,15 @@ class Element extends Component {
     });
   }
 
+  componentDidMount() {
+    this.getElement();
+  }
+
+
   componentDidUpdate(prevProps) {
     // Typical usage (don't forget to compare props):
     if (this.props.id !== prevProps.id) {
-      // Initialize variables
-      const elementId = this.props.id;
-      const url = `${this.props.url}/branches/master/elements/${elementId}`;
-      // Get project data
-      ajaxRequest('GET', `${url}`)
-      .then(element => {
-        this.setState({ element: element });
-      })
-      .catch(err => {
-        // Throw error and set state
-        this.setState({ error: `Failed to load element: ${err.responsetext}` });
-      });
+      this.getElement();
     }
   }
 
@@ -72,33 +67,38 @@ class Element extends Component {
     let orgid;
     let projid;
     let name;
+    let custom;
 
     if (this.state.element) {
       element = this.state.element;
       orgid = element.org;
       projid = element.project;
+      custom = element.custom;
 
       if (element.name !== null) {
         name = element.name;
-      } else {
+      }
+      else {
         name = element.id;
       }
     }
 
     // Render the sidebar with the links above
     return (
-      <div className='element-info-display'>
+      <div className='element-panel-display'>
         {(!this.state.element)
           ? <div className="loading"> {this.state.error || 'Loading your element...'} </div>
           : (<React.Fragment>
               <div className='exit-icon'>
                 <i className='fas fa-times' onClick={this.props.closeElementInfo}/>
               </div>
-              <div className='element-table'>
+              <div className='element-data'>
                 <table>
                   <tr>
-                    <th> {this.props.project.name} /</th>
-                    <th> {name} </th>
+                    <th>
+                      <span> {name} </span>
+                      <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                    </th>
                   </tr>
                   <tbody>
                   <tr>
@@ -133,13 +133,12 @@ class Element extends Component {
                     <th>Updated On:</th>
                     <td>{element.updatedOn}</td>
                   </tr>
-                  {/*<tr>*/}
-                  {/*<th>Custom:</th>*/}
-                  {/*<td>{JSON.stringify(custom, null, 2)}</td>*/}
-                  {/*</tr>*/}
+                  <tr>
+                  <th>Custom:</th>
+                  <td>{JSON.stringify(custom, null, 2)}</td>
+                  </tr>
                   </tbody>
                 </table>
-                <Button onClick={this.props.editElementInfo}>Edit</Button>
               </div>
             </React.Fragment>
           )

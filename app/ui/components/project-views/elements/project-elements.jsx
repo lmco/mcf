@@ -74,9 +74,9 @@ class ProjectElements extends Component {
 
     if (this.state.editOpen) {
       sidePanelView = <ElementEdit id={this.state.id}
-                                   project={this.props.project}
+                                   url={this.props.url}
                                    closeEditElementInfo={this.editElementInfo}
-                                   url={this.props.url}/>;
+                                   closeElementInfo={this.closeSidePanel}/>;
     }
 
     // Return element list

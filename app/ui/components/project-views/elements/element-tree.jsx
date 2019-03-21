@@ -20,7 +20,6 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Label } from 'reactstrap';
 
 // Define component
 class ElementTree extends Component {
