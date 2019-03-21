@@ -35,6 +35,7 @@ class ElementEdit extends Component {
       parent: '',
       target: null,
       source: null,
+      documentation: '',
       custom: null,
       org: null,
       project: null
@@ -57,6 +58,7 @@ class ElementEdit extends Component {
         element: element,
         name: element.name,
         type: element.type,
+        documentation: element.documentation,
         custom: JSON.stringify(element.custom, null, 2),
         org: element.org,
         project: element.project
@@ -73,6 +75,8 @@ class ElementEdit extends Component {
       }
 
       $('textarea[name="custom"]').autoResize();
+      // Resize custom data field
+      $('textarea[name="documentation"]').autoResize();
     })
     .catch(err => {
       // Throw error and set state
@@ -96,8 +100,14 @@ class ElementEdit extends Component {
     // Change the state with new value
     this.setState({ [event.target.name]: event.target.value });
 
-    // Resize custom data field
-    $('textarea[name="custom"]').autoResize();
+    if(event.target.name === 'custom') {
+      // Resize custom data field
+      $('textarea[name="custom"]').autoResize();
+    }
+    else if(event.target.name === 'documentation') {
+      // Resize custom data field
+      $('textarea[name="documentation"]').autoResize();
+    }
   }
 
   // Define the submit function
@@ -109,6 +119,7 @@ class ElementEdit extends Component {
       name: this.state.name,
       type: this.state.type,
       parent: this.state.parent,
+      documentation: this.state.documentation,
       custom: JSON.parse(this.state.custom)
     };
 
@@ -137,8 +148,11 @@ class ElementEdit extends Component {
 
   render() {
     // // Initialize variables
-    let disableSubmit, customInvalid;
-    let parentInvalid, targetInvalid, sourceInvalid;
+    let disableSubmit;
+    let customInvalid;
+    let parentInvalid;
+    let targetInvalid;
+    let sourceInvalid;
 
     // Verify id
     if(!RegExp(validators.id).test(this.state.parent) ) {
@@ -204,6 +218,7 @@ class ElementEdit extends Component {
               <Input type="text"
                      name="parent"
                      id="parent"
+                     invalid={parentInvalid}
                      placeholder="Parent"
                      value={this.state.parent || ''}
                      onChange={this.handleChange}/>
@@ -221,6 +236,7 @@ class ElementEdit extends Component {
                          name="target"
                          id="target"
                          placeholder="Target ID"
+                         invalid={targetInvalid}
                          value={this.state.target || ''}
                     // invalid={targetInvalid}
                          onChange={this.handleChange}/>
@@ -238,6 +254,7 @@ class ElementEdit extends Component {
                          name="source"
                          id="source"
                          placeholder="Source ID"
+                         invalid={sourceInvalid}
                          value={this.state.source || ''}
                          onChange={this.handleChange}/>
                   {/* Verify fields are valid, or display feedback */}
@@ -247,6 +264,16 @@ class ElementEdit extends Component {
                 </FormGroup>
               </Col>
             </Row>
+            {/* Form section for custom data */}
+            <FormGroup>
+              <Label for="documentation">Documentation</Label>
+              <Input type="textarea"
+                     name="documentation"
+                     id="documentation"
+                     placeholder="Documentation"
+                     value={this.state.documentation || ''}
+                     onChange={this.handleChange}/>
+            </FormGroup>
             {/* Form section for custom data */}
             <FormGroup>
               <Label for="custom">Custom Data</Label>
