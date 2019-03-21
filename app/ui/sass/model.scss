@@ -2,28 +2,34 @@
 @import 'variables';
 @import 'panel';
 
-
-.project-elements {
-  overflow: scroll;
-  padding-top: 2em;
-  hr {
-    margin-bottom: 0;
-  }
-}
-
 #element-tree-container {
   display: table-cell;
   padding-top: 10px;
   padding-right: 10px;
   padding-left: 10px;
 
+  /* TODO (jk) - Figure this one out.
+  I have no idea why, but the nowrap is causing the main workspace to
+  push the side panel to the right, compressing the side panel. For reasons
+  I am even less certain of, the max-width of zero prevents that.
+  */
+  white-space: nowrap;
+  max-width: 0;
+  overflow-x: scroll;
+
+  max-height: 100%;
+
   i {
     padding-right: 10px;
   }
 
   .element-tree {
-    padding-left: 30px;
+    padding-left: 24px;
     border-left: 1px solid #e8e8e8;
+  }
+
+  .element-tree-root {
+    border-left: none;
   }
 
   .element-tree, .element-tree-root {
@@ -34,18 +40,27 @@
     .element-id {
       font-weight: 600;
       font-size: 12px;
-      color: #dcdcdc;
+      color: #cccccc;
       padding-left: 10px
     }
+  }
+
+  .element-tree > .element-name > span {
+    transition: all .15s ease-in-out;
+  }
+
+  .element-tree > .element-name:hover > span:not(.element-id) {
+    cursor: default;
+    color: lighten($mbee-color, 20%);
+  }
+
+  .element-tree.tree-selected > .element-name > span {
+    background: $highlight-color-primary;
   }
 
   .transparent {
     color: transparent;
   }
 
-  .element-name:hover {
-    cursor: pointer;
-    text-decoration: underline;
-  }
 }
 

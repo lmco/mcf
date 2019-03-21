@@ -85,7 +85,7 @@ class Element extends Component {
           : (<React.Fragment>
               <div className='side-icons'>
                 <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
-                <i className='fas fa-times exit-btn' onClick={this.props.closeElementInfo}/>
+                <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
               </div>
               <div className='element-data'>
                 <h2>

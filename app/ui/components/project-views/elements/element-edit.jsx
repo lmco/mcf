@@ -185,7 +185,7 @@ class ElementEdit extends Component {
     return (
       <div className='element-panel-display'>
         <div className='side-icons'>
-          <i className='fas fa-times exit-btn' onClick={this.props.closeElementInfo}/>
+          <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
         </div>
         <div className='element-data'>
           <h2>Element Edit</h2>
@@ -294,7 +294,7 @@ class ElementEdit extends Component {
             {/* Button to submit changes */}
             <Button outline color="primary" disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
             {' '}
-            <Button outline onClick={this.props.closeEditElementInfo}> Cancel </Button>
+            <Button outline onClick={() => { this.props.openElementInfo(this.props.id); }}> Cancel </Button>
           </Form>
         </div>
       </div>

@@ -79,7 +79,7 @@
     }
 
     #main {
-        grid-area: main;
+        /*grid-area: main;
         display: grid;
         grid-template-rows: 1fr;
         grid-template-columns: auto minmax(10px, 1fr);
@@ -89,20 +89,21 @@
         &.main-sidebar {
             grid-template-areas:
                 "sidebar view";
-        }
+        }*/
+        display: table;
+        height: 100%;
 
         #sidebar {
-            grid-area: sidebar;
+            /*grid-area: sidebar;*/
+            display: table-cell;
             overflow: hidden;
             border-right: 1px solid #e8e8e8;
-
-
         }
 
-        #view {
+        /*#view {
           grid-area: view;
           overflow: scroll;
-        }
+        }*/
     }
 
 }

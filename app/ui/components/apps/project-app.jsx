@@ -111,18 +111,18 @@ class ProjectApp extends Component {
                            title='Home'
                            icon='fas fa-home'
                            routerLink={`${this.props.match.url}`}/>
-              <SidebarLink id='Members'
-                           title='Members'
-                           icon='fas fa-users'
-                           routerLink={`${this.props.match.url}/users`}/>
               <SidebarLink id='Elements'
-                           title='Elements'
+                           title='Model'
                            icon='fas fa-sitemap'
                            routerLink={`${this.props.match.url}/elements`}/>
               <SidebarLink id='Search'
                            title='Search'
                            icon='fas fa-search'
                            routerLink={`${this.props.match.url}/search`}/>
+            <SidebarLink id='Members'
+                         title='Members'
+                         icon='fas fa-users'
+                         routerLink={`${this.props.match.url}/users`}/>
               <Divider/>
               { /* Check if user is admin */ }
               { // Add the edit router link for admin users ONLY
