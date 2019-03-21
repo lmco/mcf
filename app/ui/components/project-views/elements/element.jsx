@@ -87,66 +87,65 @@ class Element extends Component {
 
     // Render the sidebar with the links above
     return (
-      <div className='element-information'>
-        <div className='element-info-display'>
-          {(!this.state.element)
-            ? <div className="loading"> {this.state.error || 'Loading your element...'} </div>
-            : (<React.Fragment>
-                <div className='exit-icon'>
-                  <i className='fas fa-times' onClick={this.props.closeElementInfo}/>
-                </div>
-                <div className='element-table'>
-                  <table>
-                    <tr>
-                      <th> {this.props.project.name} /</th>
-                      <th> {name} </th>
-                    </tr>
-                    <tbody>
-                    <tr>
-                      <th>ID:</th>
-                      <td>{element.id}</td>
-                    </tr>
-                    <tr>
-                      <th>Parent:</th>
-                      <td>{element.parent}</td>
-                    </tr>
-                    <tr>
-                      <th>Type:</th>
-                      <td>{element.type}</td>
-                    </tr>
-                    <tr>
-                      <th>Documentation:</th>
-                      <td>{element.documentation}</td>
-                    </tr>
-                    <tr>
-                      <th>Org ID:</th>
-                      <td><a href={`/${orgid}`}>{orgid}</a></td>
-                    </tr>
-                    <tr>
-                      <th>Project ID:</th>
-                      <td><a href={`/${orgid}/${projid}`}>{projid}</a></td>
-                    </tr>
-                    <tr>
-                      <th>Last Modified By:</th>
-                      <td>{element.lastModifiedBy}</td>
-                    </tr>
-                    <tr>
-                      <th>Updated On:</th>
-                      <td>{element.updatedOn}</td>
-                    </tr>
-                    {/*<tr>*/}
-                      {/*<th>Custom:</th>*/}
-                      {/*<td>{JSON.stringify(custom, null, 2)}</td>*/}
-                    {/*</tr>*/}
-                    </tbody>
-                  </table>
-                  <Button onClick={this.props.editElementInfo}>Edit</Button>
-                </div>
-              </React.Fragment>
-            )
-          }
-        </div>
+      <div className='element-info-display'>
+        {(!this.state.element)
+          ? <div className="loading"> {this.state.error || 'Loading your element...'} </div>
+          : (<React.Fragment>
+              <div className='exit-icon'>
+                <i className='fas fa-times' onClick={this.props.closeElementInfo}/>
+              </div>
+              <div className='element-table'>
+                <table>
+                  <tr>
+                    <th> {this.props.project.name} /</th>
+                    <th> {name} </th>
+                  </tr>
+                  <tbody>
+                  <tr>
+                    <th>ID:</th>
+                    <td>{element.id}</td>
+                  </tr>
+                  <tr>
+                    <th>Parent:</th>
+                    <td>{element.parent}</td>
+                  </tr>
+                  <tr>
+                    <th>Type:</th>
+                    <td>{element.type}</td>
+                  </tr>
+                  <tr>
+                    <th>Documentation:</th>
+                    <td>{element.documentation}</td>
+                  </tr>
+                  <tr>
+                    <th>Org ID:</th>
+                    <td><a href={`/${orgid}`}>{orgid}</a></td>
+                  </tr>
+                  <tr>
+                    <th>Project ID:</th>
+                    <td><a href={`/${orgid}/${projid}`}>{projid}</a></td>
+                  </tr>
+                  <tr>
+                    <th>Last Modified By:</th>
+                    <td>{element.lastModifiedBy}</td>
+                  </tr>
+                  <tr>
+                    <th>Updated On:</th>
+                    <td>{element.updatedOn}</td>
+                  </tr>
+                  {/*<tr>*/}
+                  {/*<th>Custom:</th>*/}
+                  {/*<td>{JSON.stringify(custom, null, 2)}</td>*/}
+                  {/*</tr>*/}
+                  </tbody>
+                </table>
+                <Button onClick={this.props.editElementInfo}>Edit</Button>
+              </div>
+            </React.Fragment>
+          )
+        }
       </div>
+
     );
   }
 }

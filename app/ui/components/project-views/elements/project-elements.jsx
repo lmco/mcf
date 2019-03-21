@@ -25,6 +25,7 @@ import React, { Component } from 'react';
 import ElementTree from './element-tree.jsx';
 import Element from './element.jsx';
 import ElementEdit from './element-edit.jsx';
+import SidePanel from './side-panel.jsx';
 
 // Define component
 class ProjectElements extends Component {
@@ -82,7 +83,7 @@ class ProjectElements extends Component {
       <div className='project-elements'>
         <h2>Elements</h2>
         <hr/>
-        <div className='element-table'>
+        <div id='panel'>
           <div id='element-tree-container'>
             <ElementTree id='tree-model'
                          project={this.props.project}
@@ -92,7 +93,7 @@ class ProjectElements extends Component {
           </div>
           {(!this.state.sidePanelOpen)
             ? ''
-            : sidePanelView
+            : (<SidePanel> { sidePanelView } </SidePanel>)
           }
         </div>
       </div>

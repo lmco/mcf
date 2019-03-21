@@ -22,52 +22,19 @@ import React, { Component } from 'react';
 
 // Define component
 class SidePanel extends Component {
-
   constructor(props) {
     // Initialize parent props
     super(props);
-
-    // Initialize state props
-    this.state = {
-    };
   }
 
   render() {
     // Create the sidebar links
-    const sidebarLink = React.Children.map(this.props.children, child => (
-      ( // Clone the react element sidebar link and change expanded state
-        (child.type === SidebarLink)
-          ? React.cloneElement(child, { isExpanded: this.state.isExpanded })
-          : child
-      )
-    ));
+    const sidepanelDisplay = React.Children.map(this.props.children, child => child);
 
     // Render the sidebar with the links above
     return (
-      <div id='sidebar' className='sidebar'>
-        {/* Verify if title was provided and is expanded */}
-        {(this.props.title && this.state.isExpanded)
-          // Display the title
-          ? (<React.Fragment>
-            <div className='sidebar-header'>
-              {this.props.title}
-            </div>
-            <hr/>
-          </React.Fragment>)
-          : ''
-        }
-        <div className='sidebar-links'>
-          {sidebarLink}
-        </div>
-        <div className='sidebar-collapse'>
-          <hr/>
-          <SidebarLink id='Collapse'
-                       title='Collapse'
-                       icon='fas fa-angle-right'
-                       tooltip='Expand Sidebar'
-                       onClick={this.toggle}
-                       isExpanded={this.state.isExpanded}/>
-        </div>
+      <div className='side-panel'>
+        {sidepanelDisplay}
       </div>
     );
   }
@@ -75,4 +42,4 @@ class SidePanel extends Component {
 }
 
 // Export component
-export default Sidebar;
+export default SidePanel;
