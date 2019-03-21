@@ -170,8 +170,8 @@ class ElementEdit extends Component {
     // Render organization edit page
     return (
       <div className='element-panel-display'>
-        <div className='exit-icon'>
-          <i className='fas fa-times' onClick={this.props.closeElementInfo}/>
+        <div className='side-icons'>
+          <i className='fas fa-times exit-btn' onClick={this.props.closeElementInfo}/>
         </div>
         <div className='element-data'>
           <h2>Element Edit</h2>
@@ -265,9 +265,9 @@ class ElementEdit extends Component {
               </FormFeedback>
             </FormGroup>
             {/* Button to submit changes */}
-            <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+            <Button outline color="primary" disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
             {' '}
-            <Button onClick={this.props.closeEditElementInfo}> Cancel </Button>
+            <Button outline onClick={this.props.closeEditElementInfo}> Cancel </Button>
           </Form>
         </div>
       </div>

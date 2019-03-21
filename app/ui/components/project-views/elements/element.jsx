@@ -74,13 +74,7 @@ class Element extends Component {
       orgid = element.org;
       projid = element.project;
       custom = element.custom;
-
-      if (element.name !== null) {
-        name = element.name;
-      }
-      else {
-        name = element.id;
-      }
+      name = element.name;
     }
 
     // Render the sidebar with the links above
@@ -89,18 +83,21 @@ class Element extends Component {
         {(!this.state.element)
           ? <div className="loading"> {this.state.error || 'Loading your element...'} </div>
           : (<React.Fragment>
-              <div className='exit-icon'>
-                <i className='fas fa-times' onClick={this.props.closeElementInfo}/>
+              <div className='side-icons'>
+                <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                <i className='fas fa-times exit-btn' onClick={this.props.closeElementInfo}/>
               </div>
               <div className='element-data'>
+                <h2>
+                  Element Information
+                </h2>
+                <hr/>
                 <table>
-                  <tr>
-                    <th>
-                      <span> {name} </span>
-                      <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
-                    </th>
-                  </tr>
                   <tbody>
+                  <tr>
+                    <th>Name:</th>
+                    <td>{name}</td>
+                  </tr>
                   <tr>
                     <th>ID:</th>
                     <td>{element.id}</td>

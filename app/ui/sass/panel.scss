@@ -5,7 +5,7 @@
   display: table;
   width: 100%;
   height: 100%;
-  margin: 0px;
+  margin: 0;
 
   td, th {
     border: none;
@@ -27,18 +27,31 @@
     justify-content: center;
     flex-direction: row-reverse;
 
-    .exit-icon {
+    hr {
+      width: 95%;
+    }
+
+    .side-icons {
       display: flex;
       justify-content: flex-end;
 
-      i {
+      .exit-btn {
         height: 5%;
         color: $color-secondary;
       }
 
-      i:hover {
+      .exit-btn:hover {
         cursor: pointer;
         color: darken($color-secondary, 30);
+      }
+      .edit-btn {
+        color: $color-primary;
+        padding-right: 15px;
+      }
+
+      .edit-btn:hover {
+        cursor: pointer;
+        color: $color-secondary
       }
     }
 
