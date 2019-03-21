@@ -3,7 +3,7 @@
 /******************************************************************************/
 
 @import 'variables';
-@import './model.scss';
+@import 'model';
 
 #login-form {
   margin-top: 40%;
@@ -555,6 +555,40 @@
       margin: 20px;
       overflow: scroll;
     }
+  }
+}
+
+#workspace {
+  display: table-cell;
+  padding: 0;
+  overflow: hidden;
+
+  #workspace-header {
+    border-bottom: 1px solid $mbee-color;
+    display: table;
+    width: 100%;
+    padding: 12px 28px;
+
+    h2 {
+      display: table-cell;
+      font-size: 20px;
+      padding-top: 10px;
+    }
+
+    .ws-button-group {
+      display: table-cell;
+      text-align: right;
+
+      button {
+        margin-left: 10px;
+      }
+
+    }
+
+  }
+
+  #workspace-body {
+    max-height: 100%;
   }
 }
 

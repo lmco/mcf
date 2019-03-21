@@ -40,4 +40,19 @@
       color: grey;
     }
   }
+
+  .element-create {
+
+    padding: 24px;
+
+    h2 {
+      padding-bottom: 5px;
+      border-bottom: 1px solid $mbee-color;
+    }
+
+    button {
+      margin-right: 10px;
+    }
+
+  }
 }

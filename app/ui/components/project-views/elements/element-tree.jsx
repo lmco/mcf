@@ -34,13 +34,15 @@ class ElementTree extends Component {
       isOpen: props.isOpen,
       data: null,
       modalEdit: false,
-      elementWindow: false
+      elementWindow: false,
+      isSelected: true
     };
 
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.handleEditToggle = this.handleEditToggle.bind(this);
     this.handleElementToggle = this.handleElementToggle.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.refresh = this.refresh.bind(this);
   }
 
   handleEditToggle() {
@@ -76,13 +78,17 @@ class ElementTree extends Component {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
+  refresh() {
+    this.componentDidMount();
+  }
+
   /**
    * When an element is clicked, parses the ID and calls the passed in
    * click handler function.
    */
   handleClick() {
     const elementId = this.props.id.replace('tree-', '');
-    this.props.clickHandler(elementId);
+    this.props.clickHandler(elementId, this.refresh);
   }
 
   // Create the element tree list
@@ -107,7 +113,7 @@ class ElementTree extends Component {
       for (let i = 0; i < this.state.data.contains.length; i++) {
         subtree.push(
           <ElementTree key={`tree-${this.state.data.contains[i]}`}
-                       id={`tree-${this.state.data.contains[i]}`}
+                       id={`${this.state.data.contains[i]}`}
                        project={this.props.project}
                        parent={this.state}
                        clickHandler={this.props.clickHandler}
