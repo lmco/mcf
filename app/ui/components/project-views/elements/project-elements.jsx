@@ -126,7 +126,7 @@ class ProjectElements extends Component {
         </div>
         <div id='workspace-body' className='table'>
           <div id='element-tree-container'>
-            <ElementTree id='tree-model'
+            <ElementTree id='model'
                          project={this.props.project}
                          parent={null}
                          isOpen={true}

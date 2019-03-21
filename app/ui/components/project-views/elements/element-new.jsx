@@ -111,19 +111,7 @@ class ElementNew extends Component {
   }
 
   render() {
-    // // Initialize variables
-    let disableSubmit, customInvalid;
-    let parentInvalid, targetInvalid, sourceInvalid;
-
-    // Verify if custom data is correct JSON format
-    try {
-      JSON.parse(this.state.custom);
-    }
-    catch(err) {
-      // Set invalid fields
-      customInvalid = true;
-      disableSubmit = true;
-    }
+    const disableSubmit = false;
 
     // Render organization edit page
     return (
@@ -166,17 +154,10 @@ class ElementNew extends Component {
           <FormGroup row>
             <Label for="parent" sm={2}>Parent</Label>
             <Col sm={10}>
-              <Input type="text"
-                     disabled
-                     name="parent"
-                     id="parent"
-                     placeholder="Element parent"
-                     value={this.state.parent || 'model'}
-                     onChange={this.handleChange}/>
+              <p id="parent">
+                {this.state.parent || 'Select an element in the model tree.'}
+              </p>
             </Col>
-            <UncontrolledTooltip placement="top" target={'parent'}>
-              Select parent in model tree.
-            </UncontrolledTooltip>
           </FormGroup>
           <div className={'text-danger'}>
             {this.state.formFeedback}
