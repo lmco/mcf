@@ -25,7 +25,7 @@ import React, { Component } from 'react';
 import ElementTree from './element-tree.jsx';
 import Element from './element.jsx';
 import ElementEdit from './element-edit.jsx';
-import SidePanel from './side-panel.jsx';
+import SidePanel from '../../general/side-panel.jsx';
 
 // Define component
 class ProjectElements extends Component {
