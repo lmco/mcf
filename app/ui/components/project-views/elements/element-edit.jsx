@@ -17,11 +17,11 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
+import { Form, FormGroup, Label, Input, FormFeedback, Button, Row, Col } from 'reactstrap';
 
 // MBEE Modules
 import validators from '../../../../../build/json/validators.json';
-import {ajaxRequest} from "../../helper-functions/ajaxRequests";
+import { ajaxRequest } from "../../helper-functions/ajaxRequests";
 
 class ElementEdit extends Component {
   constructor(props) {
@@ -212,35 +212,41 @@ class ElementEdit extends Component {
                 Invalid: An Element parent may only contain letters, numbers, space, or dashes.
               </FormFeedback>
             </FormGroup>
-            {/* Form section for Element target */}
-            <FormGroup>
-              <Label for="name">Element Target</Label>
-              <Input type="text"
-                     name="target"
-                     id="target"
-                     placeholder="Target"
-                     value={this.state.target || ''}
-                // invalid={targetInvalid}
-                     onChange={this.handleChange}/>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback >
-                Invalid: An Element target may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
-            </FormGroup>
-            {/* Form section for Element source */}
-            <FormGroup>
-              <Label for="name">Element Source</Label>
-              <Input type="text"
-                     name="source"
-                     id="source"
-                     placeholder="Source"
-                     value={this.state.source || ''}
-                     onChange={this.handleChange}/>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback >
-                Invalid: An Element source may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
-            </FormGroup>
+            <Row form>
+              <Col md={6}>
+                {/* Form section for Element target */}
+                <FormGroup>
+                  <Label for="name">Element Target ID</Label>
+                  <Input type="text"
+                         name="target"
+                         id="target"
+                         placeholder="Target ID"
+                         value={this.state.target || ''}
+                    // invalid={targetInvalid}
+                         onChange={this.handleChange}/>
+                  {/* Verify fields are valid, or display feedback */}
+                  <FormFeedback >
+                    Invalid: An Element target may only contain letters, numbers, space, or dashes.
+                  </FormFeedback>
+                </FormGroup>
+              </Col>
+              <Col md={6}>
+                {/* Form section for Element source */}
+                <FormGroup>
+                  <Label for="name">Element Source ID</Label>
+                  <Input type="text"
+                         name="source"
+                         id="source"
+                         placeholder="Source ID"
+                         value={this.state.source || ''}
+                         onChange={this.handleChange}/>
+                  {/* Verify fields are valid, or display feedback */}
+                  <FormFeedback >
+                    Invalid: An Element source may only contain letters, numbers, space, or dashes.
+                  </FormFeedback>
+                </FormGroup>
+              </Col>
+            </Row>
             {/* Form section for custom data */}
             <FormGroup>
               <Label for="custom">Custom Data</Label>
