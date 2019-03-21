@@ -57,6 +57,7 @@ class ProjectElements extends Component {
     if (this.state.editOpen) {
       this.setState({ editOpen: false });
     }
+
     this.setState({ sidePanelOpen: false });
   }
 
@@ -83,7 +84,7 @@ class ProjectElements extends Component {
       <div className='project-elements'>
         <h2>Elements</h2>
         <hr/>
-        <div id='panel'>
+        <div id='workspace-body' className='table'>
           <div id='element-tree-container'>
             <ElementTree id='tree-model'
                          project={this.props.project}
