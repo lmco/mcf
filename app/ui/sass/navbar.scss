@@ -1,0 +1,27 @@
+/******************************************************************************
+/*                              Navbar Styling                               *
+/******************************************************************************/
+
+@import 'variables';
+
+.navbar {
+  width: 100%;
+  border-bottom: 1px solid darkgray;
+  padding-top: 5px;
+  padding-bottom: 3px;
+
+  .navbar-brand {
+    display:flex;
+    align-items: center;
+    img {
+      height: 2em;
+      padding-right: .5em;
+    }
+  }
+}
+
+.navbar-brand img {
+  height: 32px;
+  position: relative;
+  top: -2px;
+}
