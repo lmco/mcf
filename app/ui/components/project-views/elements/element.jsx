@@ -14,6 +14,9 @@
 * @description This renders the sidebar.
 */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 
@@ -22,6 +25,7 @@ import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 
 // Define component
 class Element extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -144,6 +148,7 @@ class Element extends Component {
 
     );
   }
+
 }
 
 // Export component

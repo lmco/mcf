@@ -15,15 +15,19 @@
  * @description This renders the element component
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button, Row, Col } from 'reactstrap';
 
 // MBEE Modules
 import validators from '../../../../../build/json/validators.json';
-import { ajaxRequest } from "../../helper-functions/ajaxRequests";
+import { ajaxRequest } from '../../helper-functions/ajaxRequests';
 
 class ElementEdit extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -74,7 +78,7 @@ class ElementEdit extends Component {
         this.setState({ target: element.target });
       }
 
-      $('textarea[name="custom"]').autoResize();
+      $('textarea[name="custom""]').autoResize();
       // Resize custom data field
       $('textarea[name="documentation"]').autoResize();
     })
@@ -100,11 +104,11 @@ class ElementEdit extends Component {
     // Change the state with new value
     this.setState({ [event.target.name]: event.target.value });
 
-    if(event.target.name === 'custom') {
+    if (event.target.name === 'custom') {
       // Resize custom data field
       $('textarea[name="custom"]').autoResize();
     }
-    else if(event.target.name === 'documentation') {
+    else if (event.target.name === 'documentation') {
       // Resize custom data field
       $('textarea[name="documentation"]').autoResize();
     }
@@ -155,18 +159,18 @@ class ElementEdit extends Component {
     let sourceInvalid;
 
     // Verify id
-    if(!RegExp(validators.id).test(this.state.parent) ) {
+    if (!RegExp(validators.id).test(this.state.parent)) {
       parentInvalid = true;
       disableSubmit = true;
     }
 
     // Verify id
-    if(!RegExp(validators.id).test(this.state.target) ) {
+    if (!RegExp(validators.id).test(this.state.target)) {
       targetInvalid = true;
       disableSubmit = true;
     }
     // Verify id
-    if(!RegExp(validators.id).test(this.state.source) ) {
+    if (!RegExp(validators.id).test(this.state.source)) {
       sourceInvalid = true;
       disableSubmit = true;
     }
@@ -175,7 +179,7 @@ class ElementEdit extends Component {
     try {
       JSON.parse(this.state.custom);
     }
-    catch(err) {
+    catch (err) {
       // Set invalid fields
       customInvalid = true;
       disableSubmit = true;
@@ -194,32 +198,32 @@ class ElementEdit extends Component {
           <Form>
             {/* Form section for Element name */}
             <FormGroup>
-              <Label for="name">Element Name</Label>
-              <Input type="text"
-                     name="name"
-                     id="name"
-                     placeholder="Name"
+              <Label for='name'>Element Name</Label>
+              <Input type='text'
+                     name='name'
+                     id='name'
+                     placeholder='Name'
                      value={this.state.name || ''}
                      onChange={this.handleChange}/>
             </FormGroup>
             {/* Form section for Element type */}
             <FormGroup>
-              <Label for="type">Element Type</Label>
-              <Input type="text"
-                     name="type"
-                     id="type"
-                     placeholder="Type"
+              <Label for='type'>Element Type</Label>
+              <Input type='text'
+                     name='type'
+                     id='type'
+                     placeholder='Type'
                      value={this.state.type || ''}
                      onChange={this.handleChange}/>
             </FormGroup>
             {/* Form section for Element parent */}
             <FormGroup>
-              <Label for="name">Element Parent</Label>
-              <Input type="text"
-                     name="parent"
-                     id="parent"
+              <Label for='name'>Element Parent</Label>
+              <Input type='text'
+                     name='parent'
+                     id='parent'
                      invalid={parentInvalid}
-                     placeholder="Parent"
+                     placeholder='Parent'
                      value={this.state.parent || ''}
                      onChange={this.handleChange}/>
               {/* Verify fields are valid, or display feedback */}
@@ -231,14 +235,13 @@ class ElementEdit extends Component {
               <Col md={6}>
                 {/* Form section for Element target */}
                 <FormGroup>
-                  <Label for="name">Element Target ID</Label>
-                  <Input type="text"
-                         name="target"
-                         id="target"
-                         placeholder="Target ID"
+                  <Label for='name'>Element Target ID</Label>
+                  <Input type='text'
+                         name='target'
+                         id='target'
+                         placeholder='Target ID'
                          invalid={targetInvalid}
                          value={this.state.target || ''}
-                    // invalid={targetInvalid}
                          onChange={this.handleChange}/>
                   {/* Verify fields are valid, or display feedback */}
                   <FormFeedback >
@@ -249,11 +252,11 @@ class ElementEdit extends Component {
               <Col md={6}>
                 {/* Form section for Element source */}
                 <FormGroup>
-                  <Label for="name">Element Source ID</Label>
-                  <Input type="text"
-                         name="source"
-                         id="source"
-                         placeholder="Source ID"
+                  <Label for='name'>Element Source ID</Label>
+                  <Input type='text'
+                         name='source'
+                         id='source'
+                         placeholder='Source ID'
                          invalid={sourceInvalid}
                          value={this.state.source || ''}
                          onChange={this.handleChange}/>
@@ -266,22 +269,22 @@ class ElementEdit extends Component {
             </Row>
             {/* Form section for custom data */}
             <FormGroup>
-              <Label for="documentation">Documentation</Label>
-              <Input type="textarea"
-                     name="documentation"
-                     id="documentation"
-                     placeholder="Documentation"
+              <Label for='documentation'>Documentation</Label>
+              <Input type='textarea'
+                     name='documentation'
+                     id='documentation'
+                     placeholder='Documentation'
                      value={this.state.documentation || ''}
                      onChange={this.handleChange}/>
             </FormGroup>
             {/* Form section for custom data */}
             <FormGroup>
-              <Label for="custom">Custom Data</Label>
+              <Label for='custom'>Custom Data</Label>
               <pre>
-                <Input type="textarea"
-                       name="custom"
-                       id="custom"
-                       placeholder="{}"
+                <Input type='textarea'
+                       name='custom'
+                       id='custom'
+                       placeholder='{}'
                        value={this.state.custom || ''}
                        invalid={customInvalid}
                        onChange={this.handleChange}/>
@@ -292,9 +295,13 @@ class ElementEdit extends Component {
               </FormFeedback>
             </FormGroup>
             {/* Button to submit changes */}
-            <Button outline color="primary" disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+            <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}>
+              Submit
+            </Button>
             {' '}
-            <Button outline onClick={() => { this.props.openElementInfo(this.props.id); }}> Cancel </Button>
+            <Button outline onClick={() => { this.props.openElementInfo(this.props.id); }}>
+              Cancel
+            </Button>
           </Form>
         </div>
       </div>

@@ -14,6 +14,9 @@
  * @description This renders create element component.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import {

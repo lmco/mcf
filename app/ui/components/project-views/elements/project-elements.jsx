@@ -31,6 +31,7 @@ import SidePanel from '../../general/side-panel.jsx';
 
 // Define component
 class ProjectElements extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -61,7 +62,7 @@ class ProjectElements extends Component {
 
 
     // Select the clicked element
-    $(`.element-tree`).removeClass('tree-selected');
+    $('.element-tree').removeClass('tree-selected');
     $(`#tree-${id}`).addClass('tree-selected');
 
     if (this.state.sidePanel === 'addElement') {
@@ -71,8 +72,6 @@ class ProjectElements extends Component {
       // Toggle the element side panel
       this.setState({ sidePanel: 'elementInfo' });
     }
-
-
   }
 
   closeSidePanel(event, refresh) {
@@ -118,9 +117,10 @@ class ProjectElements extends Component {
           <h2>{this.props.project.name} Model</h2>
           <div className='ws-button-group'>
             <Button className='btn btn-sm'
-                    outline color="primary"
+                    outline color='primary'
                     onClick={this.createNewElement}>
-              <i className="fas fa-plus"></i> Add Element
+              <i className='fas fa-plus'/>
+              Add Element
             </Button>
           </div>
         </div>
