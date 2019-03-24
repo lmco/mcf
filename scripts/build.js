@@ -173,9 +173,18 @@ function build(_args) {
   return new Promise((resolve, reject) => {
     // Transpile React components
     if (args.includes('--all') || args.includes('--react')) {
-      M.log.info('  + Transpiling react ...');
+      // Set default mode
+      let mode = 'production';
+
+      // Verify if mode provided
+      if (M.config.server.ui.mode) {
+        // Set config mode
+        mode = M.config.server.ui.mode;
+      }
+
+      M.log.info(`  + Transpiling react in ${mode} mode...`);
       webpack({
-        mode: 'development',
+        mode: mode,
         entry: {
           navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
           'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
