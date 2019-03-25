@@ -87,18 +87,18 @@ class EditPage extends Component {
       custom: JSON.parse(this.state.custom)
     };
 
-
-    // Send a patch request to update org data
-    ajaxRequest('PATCH', url, data)
-    // On success
-    .then(() => {
-      // Update the page to reload to org home page
-      window.location.replace(redirect);
-    })
-    // On fail
-    .catch((err) => {
-      // Let user know update failed
-      alert(`Update Failed: ${err.responseJSON.description}`);
+    $.ajax({
+      method: 'PATCH',
+      url: url,
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      statusCode: {
+        200: (_data) => { window.location.replace(redirect); },
+        401: (_data) => { window.location.replace(redirect); }
+      },
+      fail: (err) => {
+        alert(`Update Failed: ${err.responseJSON.description}`);
+      }
     });
   }
 
