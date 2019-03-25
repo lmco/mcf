@@ -98,6 +98,7 @@ class ElementEdit extends Component {
       this.getElement();
     }
   }
+
   // Define handle change function
   handleChange(event) {
     // Change the state with new value
