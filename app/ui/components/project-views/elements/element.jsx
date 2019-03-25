@@ -79,6 +79,13 @@ class Element extends Component {
       projid = element.project;
       custom = element.custom;
       name = element.name;
+
+      if (element.name !== null) {
+        name = element.name;
+      }
+      else {
+        name = element.id;
+      }
     }
 
     // Render the sidebar with the links above
