@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.general-components.sidebar
+ * @module ui.components.general.sidebar.sidebar
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

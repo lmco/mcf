@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.general-components.dropdown-search
+ * @module ui.components.general.dropdown-search.custom-menu
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

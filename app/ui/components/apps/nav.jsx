@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.general-components
+ * @module ui.components.apps.nav
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

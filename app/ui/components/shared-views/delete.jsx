@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.general-components
+ * @module ui.components.shared-views.delete
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

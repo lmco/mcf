@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.projects
+ * @module ui.components.shared-views.members.members-page
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

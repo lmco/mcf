@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.elements.element-edit
+ * @module ui.components.project-views.elements.element-edit
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
