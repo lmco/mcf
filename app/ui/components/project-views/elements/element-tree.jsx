@@ -38,14 +38,9 @@ class ElementTree extends Component {
     };
 
     this.toggleCollapse = this.toggleCollapse.bind(this);
-    this.handleEditToggle = this.handleEditToggle.bind(this);
     this.handleElementToggle = this.handleElementToggle.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.refresh = this.refresh.bind(this);
-  }
-
-  handleEditToggle() {
-    this.setState({ modalEdit: !this.state.modalEdit });
   }
 
   handleElementToggle() {
@@ -127,14 +122,14 @@ class ElementTree extends Component {
     if (this.state.data !== null) {
       // Element should be rendered as the ID initially
       element = (
-        <span className={'element-id'} onClick={this.handleEditToggle}>
+        <span className={'element-id'}>
            {this.state.data.id} : {this.state.data.type}
         </span>
       );
       // If the name is not blank, render the name
       if (this.state.data.name !== '') {
         element = (
-          <span onClick={this.handleEditToggle}>
+          <span>
             {this.state.data.name}
             <span className={'element-id'}>({this.state.data.id} : {this.state.data.type})</span>
           </span>

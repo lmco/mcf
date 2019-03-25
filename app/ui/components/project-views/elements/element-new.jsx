@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.elements.element-edit
+ * @module ui.components.elements.element-new
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -58,9 +58,6 @@ class ElementNew extends Component {
     // Bind component function
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-  }
-
-  componentDidMount() {
   }
 
   componentDidUpdate(prevProps) {
