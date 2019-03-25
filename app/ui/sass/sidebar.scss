@@ -1,0 +1,78 @@
+/******************************************************************************
+/*                              Sidebar Styling                               *
+/******************************************************************************/
+
+@import 'variables';
+
+.sidebar {
+  background: whitesmoke;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: $sidebar-min-width;
+  border-right: 1px solid #e8e8e8;
+
+  &.sidebar-expanded {
+    width: $sidebar-full-width
+  }
+
+  a {
+    display: block;
+    text-decoration: none;
+    color: black;
+    &.active {
+      :hover {
+        color: grey;
+      }
+      color: grey;
+    }
+    :hover {
+      color: #ffc700;
+    }
+  }
+
+  hr {
+    margin: .75em;
+    border-color: #9c9c9c;
+  }
+
+  hr.divider {
+    margin: .75em 0;
+    border-color: #e8e8e8;
+  }
+
+  .sidebar-header {
+    padding: 10px 20px;
+    margin-top: 15px;
+    margin-bottom: 0px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .sidebar-links {
+    /*height: 100vh;*/
+    overflow: hidden;
+  }
+
+  .sidebar-item {
+    padding:20px;
+    height: 50px;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    h4, p {
+      margin: 0 auto 0 0;
+      padding: 10px 10px 10px 20px;
+      font-size: 1.5em;
+    }
+
+    i.fas, i.fa {
+      width: 12px;
+      text-align: center;
+    }
+  }
+
+
+}

@@ -51,8 +51,6 @@ class ProjectApp extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props);
-
     // Initialize variables
     const orgId = this.props.match.params.orgid;
     const projId = this.props.match.params.projectid;
@@ -113,18 +111,18 @@ class ProjectApp extends Component {
                            title='Home'
                            icon='fas fa-home'
                            routerLink={`${this.props.match.url}`}/>
-              <SidebarLink id='Members'
-                           title='Members'
-                           icon='fas fa-users'
-                           routerLink={`${this.props.match.url}/users`}/>
               <SidebarLink id='Elements'
-                           title='Elements'
+                           title='Model'
                            icon='fas fa-sitemap'
                            routerLink={`${this.props.match.url}/elements`}/>
               <SidebarLink id='Search'
                            title='Search'
                            icon='fas fa-search'
                            routerLink={`${this.props.match.url}/search`}/>
+            <SidebarLink id='Members'
+                         title='Members'
+                         icon='fas fa-users'
+                         routerLink={`${this.props.match.url}/users`}/>
               <Divider/>
               { /* Check if user is admin */ }
               { // Add the edit router link for admin users ONLY
@@ -153,8 +151,9 @@ class ProjectApp extends Component {
                                                           admin={this.state.admin}/> } />
                   { /* Route to element page */ }
                   <Route path={`${this.props.match.url}/elements`}
-                     render={ (props) => <ProjectElements {...props}
-                                                          project={this.state.project}/> } />
+                         render={ (props) => <ProjectElements {...props}
+                                                              url={this.state.url}
+                                                              project={this.state.project}/> } />
                   <Route path={`${this.props.match.url}/search`}
                          render={ (props) => <Search {...props}
                                                      project={this.state.project} /> } />

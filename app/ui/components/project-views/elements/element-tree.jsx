@@ -20,6 +20,7 @@
 
 // React Modules
 import React, { Component } from 'react';
+import { Label } from 'reactstrap';
 
 // Define component
 class ElementTree extends Component {
@@ -31,18 +32,29 @@ class ElementTree extends Component {
     this.state = {
       id: props.id,
       isOpen: props.isOpen,
-      data: null
+      data: null,
+      modalEdit: false,
+      elementWindow: false,
+      isSelected: true
     };
 
     this.toggleCollapse = this.toggleCollapse.bind(this);
+    this.handleElementToggle = this.handleElementToggle.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.refresh = this.refresh.bind(this);
+  }
+
+  handleElementToggle() {
+    this.setState({ elementWindow: !this.state.elementWindow });
   }
 
   componentDidMount() {
     // Build URL to get element data
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
+    const elementId = this.props.id.replace('tree-', '');
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    const url = `${base}/elements/${this.props.id}?fields=id,name,contains,type`;
+    const url = `${base}/elements/${elementId}?fields=id,name,contains,type`;
 
     $.ajax({
       method: 'GET',
@@ -61,12 +73,25 @@ class ElementTree extends Component {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
+  refresh() {
+    this.componentDidMount();
+  }
+
+  /**
+   * When an element is clicked, parses the ID and calls the passed in
+   * click handler function.
+   */
+  handleClick() {
+    const elementId = this.props.id.replace('tree-', '');
+    this.props.clickHandler(elementId, this.refresh);
+  }
+
   // Create the element tree list
   render() {
     // Initialize variables
     let elementIcon = (
       <i className={'fas fa-cube'}
-         style={{ color: '#333' }}></i>
+         style={{ color: '#333' }}/>
     );
     let expandIcon = 'fa-caret-right transparent';
     const subtree = [];
@@ -82,11 +107,12 @@ class ElementTree extends Component {
       // Create Subtrees
       for (let i = 0; i < this.state.data.contains.length; i++) {
         subtree.push(
-                    <ElementTree key={`tree-${this.state.data.contains[i]}`}
-                                 id={this.state.data.contains[i]}
-                                 project={this.props.project}
-                                 parent={this.state}
-                                 isOpen={false}/>
+          <ElementTree key={`tree-${this.state.data.contains[i]}`}
+                       id={`${this.state.data.contains[i]}`}
+                       project={this.props.project}
+                       parent={this.state}
+                       clickHandler={this.props.clickHandler}
+                       isOpen={false}/>
         );
       }
     }
@@ -156,19 +182,22 @@ class ElementTree extends Component {
       const color = iconMappings[this.state.data.type].color;
       elementIcon = (
         <i className={`fas fa-${icon}`}
-        style={{ color: color }}></i>
+           style={{ color: color }}/>
       );
     }
 
     return (
-            <div id={`tree-${this.props.id}`} className={(this.props.parent) ? 'element-tree' : 'element-tree-root'}>
-                <i className={`fas ${expandIcon}`}
-                   onClick={this.toggleCollapse}>
-                </i>
-                {elementIcon}
-                {element}
-                {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
-            </div>
+      <div id={`tree-${this.props.id}`}
+           className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
+        <i className={`fas ${expandIcon}`}
+           onClick={this.toggleCollapse}>
+        </i>
+        <span className='element-name' onClick={this.handleClick}>
+          {elementIcon}
+          {element}
+        </span>
+        {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
+      </div>
     );
   }
 

@@ -177,17 +177,16 @@ class Delete extends Component {
                                        onChange={this.handleChange}>
                                     <option>Choose one...</option>
                                     {this.state.projectOpt}
-                                </Input>)
-                              </FormGroup>
-                            )
+                                </Input>
+                            </FormGroup>)
                         }
-                        { /* Verify if project provided */ }
-                        { // Display confirmation
-                          (this.props.org || this.props.project)
-                            ? (<FormGroup>
-                                <Label for="id">Do you want to delete {name}?</Label>
-                              </FormGroup>)
-                            : ''
+                        {/* Verify if project provided */}
+                        {(this.props.org || this.props.project)
+                          ? (<FormGroup>
+                              <Label for="id">Do you want to delete {name}?</Label>
+                            </FormGroup>)
+                          // Display confirmation
+                          : ''
                         }
                         {/* Button to submit and delete project */}
                         <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}

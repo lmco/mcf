@@ -1,0 +1,62 @@
+
+@import 'variables';
+
+.table {
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.side-panel {
+  display: table-cell;
+  border-left:  1px solid darken($mbee-background, 10%);
+  border-right:  1px solid darken($mbee-background, 10%);
+  border-bottom:  1px solid darken($mbee-background, 10%);
+  width: 50%;
+  background: $mbee-background;
+
+  .element-info-display {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: row-reverse;
+
+
+    .element-table {
+      width: 95%;
+    }
+  }
+
+  .exit-icon {
+    display: flex;
+    justify-content: flex-end;
+
+    i {
+      height: 5%;
+    }
+
+    i:hover {
+      cursor: pointer;
+      color: grey;
+    }
+  }
+
+  .element-create {
+
+    padding: 24px;
+
+    h2 {
+      padding-bottom: 5px;
+      border-bottom: 1px solid $mbee-color;
+    }
+
+    button {
+      margin-right: 10px;
+    }
+
+    p {
+      padding: 8px 0;
+    }
+
+  }
+}

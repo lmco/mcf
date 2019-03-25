@@ -1,0 +1,68 @@
+
+/******************************************************************************
+/*                                  General                                   *
+/******************************************************************************/
+
+@import 'variables';
+
+html,
+body {
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
+
+
+table {
+  width: 60%;
+}
+
+th, td {
+  padding: 5px;
+}
+
+th {
+  text-align: left;
+}
+
+hr {
+  border-color: #9c9c9c;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+h3 {
+  font-size: 15px;
+}
+
+.container {
+  padding: 2em;
+  overflow: scroll;
+}
+
+label {
+  font-size: 15px;
+}
+
+textarea[name="custom"] {
+  font-family: Consolas, "Courier New";
+  resize: vertical;
+  outline: none;
+}
+
+/******************************************************************************
+/*                                  Themes                                    *
+/******************************************************************************/
+//LM Light Theme (default)
+//This is the default color scheme.
+.mbee-theme {
+  background-color: $mbee-background;
+  color: $mbee-color;
+  font-family: $mbee-font;
+  height: 100%;
+}
