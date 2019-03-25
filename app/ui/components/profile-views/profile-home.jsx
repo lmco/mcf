@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.user
+ * @module ui.components.profile-views.profile-home
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

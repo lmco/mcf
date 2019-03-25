@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.helper-functions
+ * @module ui.components.helper-functions.ajaxRequest
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.home-page
+ * @module ui.components.home-views.org-list
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

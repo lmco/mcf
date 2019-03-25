@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.organizations
+ * @module ui.components.apps.org-app
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

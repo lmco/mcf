@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.elements
+ * @module ui.components.project-views.elements.element-tree
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -20,7 +20,6 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Label } from 'reactstrap';
 
 // Define component
 class ElementTree extends Component {

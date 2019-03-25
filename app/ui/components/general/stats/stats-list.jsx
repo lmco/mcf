@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.general-components.stats
+ * @module ui.components.general.stats.stats-list
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

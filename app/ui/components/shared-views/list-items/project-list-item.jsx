@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.general-components.list
+ * @module ui.components.shared-views.list-items.project-list-item
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
