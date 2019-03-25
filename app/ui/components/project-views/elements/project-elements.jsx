@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.projects
+ * @module ui.components.project-views.elements.project-elements
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -93,13 +93,13 @@ class ProjectElements extends Component {
                                  project={this.props.project}
                                  url={this.props.url}
                                  editElementInfo={this.editElementInfo}
-                                 closeElementInfo={this.closeSidePanel}/>;
+                                 closeSidePanel={this.closeSidePanel}/>;
 
     if (this.state.sidePanel === 'elementEdit') {
       sidePanelView = <ElementEdit id={this.state.id}
-                                   project={this.props.project}
-                                   closeEditElementInfo={this.editElementInfo}
-                                   url={this.props.url}/>;
+                                   url={this.props.url}
+                                   openElementInfo={this.openElementInfo}
+                                   closeSidePanel={this.closeSidePanel}/>;
     }
 
     else if (this.state.sidePanel === 'addElement') {
@@ -117,9 +117,10 @@ class ProjectElements extends Component {
           <h2>{this.props.project.name} Model</h2>
           <div className='ws-button-group'>
             <Button className='btn btn-sm'
-                    outline color="primary"
+                    outline color='primary'
                     onClick={this.createNewElement}>
-              <i className="fas fa-plus"></i> Add Element
+              <i className='fas fa-plus'/>
+              Add Element
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.projects
+ * @module ui.components.profile-views.project-list
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

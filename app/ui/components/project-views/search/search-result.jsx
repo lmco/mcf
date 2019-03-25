@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.react-components.search.search-results
+ * @module ui.components.project-views.search.search-result
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
