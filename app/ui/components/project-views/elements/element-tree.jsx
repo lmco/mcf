@@ -58,8 +58,8 @@ class ElementTree extends Component {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const elementId = this.props.id.replace('tree-', '');
-    let base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    let url = `${base}/elements/${elementId}?fields=id,name,contains,type`;
+    const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
+    const url = `${base}/elements/${elementId}?fields=id,name,contains,type`;
 
     $.ajax({
       method: 'GET',
@@ -183,11 +183,11 @@ class ElementTree extends Component {
     };
     if (this.state.data !== null
       && iconMappings.hasOwnProperty(this.state.data.type)) {
-      const icon = iconMappings[this.state.data.type]['icon'];
-      const color = iconMappings[this.state.data.type]['color'];
+      const icon = iconMappings[this.state.data.type].icon;
+      const color = iconMappings[this.state.data.type].color;
       elementIcon = (
         <i className={`fas fa-${icon}`}
-           style={{color: color}}/>
+           style={{ color: color }}/>
       );
     }
 

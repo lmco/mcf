@@ -14,6 +14,9 @@
  * @description This renders create element component.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import {
@@ -34,17 +37,12 @@ class ElementNew extends Component {
     super(props);
 
     // Generate a pseudo-UUID
-    let randomID = '';
-    randomID += Math.random().toString(16).slice(2,10);
-    randomID += '-' + Math.random().toString(16).slice(2,6);
-    randomID += '-' + Math.random().toString(16).slice(2,6);
-    randomID += '-' + Math.random().toString(16).slice(2,6);
-    randomID += '-' + Math.random().toString(16).slice(2, 8);
-    randomID += Math.random().toString(16).slice(2, 8);
+    const rnd = (n) => Math.random().toString(16).slice(2, 2 + n);
+    const rndID = `${rnd(8)}-${rnd(4)}-${rnd(4)}-${rnd(4)}-${rnd(8)}${rnd(8)}`;
 
     // Initialize state props
     this.state = {
-      id: randomID,
+      id: rndID,
       name: '',
       type: '',
       parent: this.props.parent,
@@ -60,8 +58,6 @@ class ElementNew extends Component {
     // Bind component function
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-
-
   }
 
   componentDidMount() {
@@ -100,7 +96,7 @@ class ElementNew extends Component {
       dataType: 'json',
       data: data,
       statusCode: {
-        200: (data) => {
+        200: (retData) => {
           this.props.closeSidePanel(null, true);
         }
       },
@@ -174,8 +170,9 @@ class ElementNew extends Component {
           </Button>
         </Form>
       </div>
-    )
+    );
   }
+
 }
 
 // Export component

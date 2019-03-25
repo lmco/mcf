@@ -14,6 +14,9 @@
 * @description This renders the sidebar.
 */
 
+/* Modified ESLint rules for React. */
+/* eslint no-unused-vars: "warn" */
+
 // React Modules
 import React, { Component } from 'react';
 import { Button } from 'reactstrap';
@@ -23,6 +26,7 @@ import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 
 // Define component
 class Element extends Component {
+
   constructor(props) {
     // Initialize parent props
     super(props);
@@ -80,7 +84,8 @@ class Element extends Component {
 
       if (element.name !== null) {
         name = element.name;
-      } else {
+      }
+      else {
         name = element.id;
       }
     }
@@ -133,10 +138,10 @@ class Element extends Component {
                     <th>Updated On:</th>
                     <td>{element.updatedOn}</td>
                   </tr>
-                  {/*<tr>*/}
-                  {/*<th>Custom:</th>*/}
-                  {/*<td>{JSON.stringify(custom, null, 2)}</td>*/}
-                  {/*</tr>*/}
+                  {/* <tr> */}
+                  {/* <th>Custom:</th> */}
+                  {/* <td>{JSON.stringify(custom, null, 2)}</td> */}
+                  {/* </tr> */}
                   </tbody>
                 </table>
                 <Button onClick={this.props.editElementInfo}>Edit</Button>
@@ -148,6 +153,7 @@ class Element extends Component {
 
     );
   }
+
 }
 
 // Export component

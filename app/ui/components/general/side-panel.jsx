@@ -22,10 +22,6 @@ import React, { Component } from 'react';
 
 // Define component
 class SidePanel extends Component {
-  constructor(props) {
-    // Initialize parent props
-    super(props);
-  }
 
   render() {
     // Create the sidebar links

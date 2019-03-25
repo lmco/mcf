@@ -182,7 +182,7 @@ class Delete extends Component {
                         }
                         {/* Verify if project provided */}
                         {(this.props.org || this.props.project)
-                          ?(<FormGroup>
+                          ? (<FormGroup>
                               <Label for="id">Do you want to delete {name}?</Label>
                             </FormGroup>)
                           // Display confirmation
