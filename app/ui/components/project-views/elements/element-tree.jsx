@@ -72,25 +72,21 @@ class ElementTree extends Component {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
+  /**
+   * When an element is delete or created, the component
+   * will update.
+   */
   refresh(isDelete) {
+    // Element is being deleted
     if (isDelete) {
+      // Call the parent refresh
       this.props.parentRefresh();
     }
     else {
+      // Update the component
       this.componentDidMount();
     }
   }
-
-  // componentDidUpdate(prevProps, prevState) {
-  //   // Typical usage (don't forget to compare props):
-  //   if (prevState.data) {
-  //     if (prevState.data.contains !== this.state.data.contains) {
-  //       console.log('in the update');
-  //       console.log(this.state.data.id);
-  //       this.componentDidMount();
-  //     }
-  //   }
-  // }
 
   /**
    * When an element is clicked, parses the ID and calls the passed in
