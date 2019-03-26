@@ -79,31 +79,27 @@
     }
 
     #main {
-        /*grid-area: main;
+        grid-area: main;
         display: grid;
         grid-template-rows: 1fr;
-        grid-template-columns: auto minmax(10px, 1fr);
-        grid-template-areas:
-            "view view";
-
-        &.main-sidebar {
-            grid-template-areas:
-                "sidebar view";
-        }*/
-        display: table;
+        grid-template-columns: 300px minmax(10px, 1fr);
         height: 100%;
+        //display: table;
+        //height: 100%;
 
         #sidebar {
-            /*grid-area: sidebar;*/
-            display: table-cell;
+            grid-row-start: 1;
+            grid-row-end: 2;
+            //display: table-cell;
             overflow: hidden;
             border-right: 1px solid #e8e8e8;
         }
 
-        /*#view {
-          grid-area: view;
+        #view {
+          grid-column-start: 2;
+          grid-column-end: end;
           overflow: scroll;
-        }*/
+        }
     }
 
 }
