@@ -25,7 +25,7 @@ import React from 'react';
 function UserListItem(props) {
   // Return the user list item
   return (
-        <div className='user-list-item'>
+        <div id='view' className='user-list-item'>
             <div className='username'>
                 <p>{props.user} </p>
             </div>

@@ -195,37 +195,43 @@ class ElementEdit extends Component {
           <h2>Element Edit</h2>
           <hr />
           {/* Create form to update element data */}
-          <Form>
+          <Form className='element-edit-form'>
             {/* Form section for Element name */}
-            <FormGroup>
-              <Label for='name'>Element Name</Label>
-              <Input type='text'
-                     name='name'
-                     id='name'
-                     placeholder='Name'
-                     value={this.state.name || ''}
-                     onChange={this.handleChange}/>
+            <FormGroup row>
+              <Label for='name' sm={2}>Name</Label>
+              <Col sm={10}>
+                <Input type='text'
+                       name='name'
+                       id='name'
+                       placeholder='Name'
+                       value={this.state.name || ''}
+                       onChange={this.handleChange}/>
+              </Col>
             </FormGroup>
             {/* Form section for Element type */}
-            <FormGroup>
-              <Label for='type'>Element Type</Label>
-              <Input type='text'
-                     name='type'
-                     id='type'
-                     placeholder='Type'
-                     value={this.state.type || ''}
-                     onChange={this.handleChange}/>
+            <FormGroup row>
+              <Label for='type' sm={2}>Type</Label>
+              <Col sm={10}>
+                <Input type='text'
+                       name='type'
+                       id='type'
+                       placeholder='Type'
+                       value={this.state.type || ''}
+                       onChange={this.handleChange}/>
+              </Col>
             </FormGroup>
             {/* Form section for Element parent */}
-            <FormGroup>
-              <Label for='name'>Element Parent</Label>
-              <Input type='text'
-                     name='parent'
-                     id='parent'
-                     invalid={parentInvalid}
-                     placeholder='Parent'
-                     value={this.state.parent || ''}
-                     onChange={this.handleChange}/>
+            <FormGroup row>
+              <Label for='name' sm={2}>Parent</Label>
+              <Col sm={10}>
+                <Input type='text'
+                       name='parent'
+                       id='parent'
+                       invalid={parentInvalid}
+                       placeholder='Parent'
+                       value={this.state.parent || ''}
+                       onChange={this.handleChange}/>
+              </Col>
               {/* Verify fields are valid, or display feedback */}
               <FormFeedback >
                 Invalid: An Element parent may only contain letters, numbers, space, or dashes.
@@ -235,7 +241,7 @@ class ElementEdit extends Component {
               <Col md={6}>
                 {/* Form section for Element target */}
                 <FormGroup>
-                  <Label for='name'>Element Target ID</Label>
+                  <Label for='name'>Target ID</Label>
                   <Input type='text'
                          name='target'
                          id='target'
@@ -252,7 +258,7 @@ class ElementEdit extends Component {
               <Col md={6}>
                 {/* Form section for Element source */}
                 <FormGroup>
-                  <Label for='name'>Element Source ID</Label>
+                  <Label for='name'>Source ID</Label>
                   <Input type='text'
                          name='source'
                          id='source'

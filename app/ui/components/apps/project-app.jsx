@@ -104,7 +104,7 @@ class ProjectApp extends Component {
     // Return project page
     return (
       <Router>
-        <React.Fragment>
+        <div id='container'>
           { /* Create the sidebar with sidebar links */ }
           <Sidebar title={title}>
               <SidebarLink id='Home'
@@ -137,7 +137,7 @@ class ProjectApp extends Component {
           { /* Verify project and element data exists */ }
           { // Display loading page or error page if project is loading or failed to load
             (!this.state.project)
-              ? <div className="loading"> {this.state.error || 'Loading your project...'} </div>
+              ? <div id='view' className="loading"> {this.state.error || 'Loading your project...'} </div>
               : (
                 <Switch>
                   { /* Route to project home page */ }
@@ -169,7 +169,7 @@ class ProjectApp extends Component {
                 </Switch>
               )
           }
-        </React.Fragment>
+        </div>
       </Router>
     );
   }

@@ -76,7 +76,7 @@ class ProjectListItem extends Component {
 
     // Render the organization stat list items
     return (
-            <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
+            <div id='view' className={`stats-list-item ${this.props.className}`} ref={this.ref}>
                 <div className='list-header'>
                     <a href={this.props.href}>{project.name}</a>
                 </div>

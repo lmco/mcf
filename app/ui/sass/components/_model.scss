@@ -1,6 +1,6 @@
 
-@import 'variables';
-@import 'panel';
+@import '../base/variables';
+@import './_panel';
 
 #element-tree-container {
   display: table-cell;

@@ -74,7 +74,7 @@ class ProfileApp extends Component {
     // Return user page
     return (
       <Router>
-        <React.Fragment>
+        <div id='container'>
           { /* Create the sidebar with sidebar links */ }
           <Sidebar
             title={title}>
@@ -99,7 +99,7 @@ class ProfileApp extends Component {
           { /* Verify user data exists */ }
           { // Display loading page or error page if user data is loading or failed to load
             (!this.state.user)
-              ? <div className="loading"> {this.state.error || 'Loading your information...'}</div>
+              ? <div id='view' className="loading"> {this.state.error || 'Loading your information...'}</div>
               : (
                 <Switch>
                   { /* Route to user home page */ }
@@ -121,7 +121,7 @@ class ProfileApp extends Component {
                 </Switch>
               )
           }
-        </React.Fragment>
+        </div>
       </Router>
     );
   }

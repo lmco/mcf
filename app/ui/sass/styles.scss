@@ -16,9 +16,6 @@
  * @description This defines the style and layout for MBEE.
  */
 
-// Import MBEE variables
-@import 'variables';
-
 // Import Bootstrap Sass
 @import '../../../node_modules/bootstrap/scss/bootstrap';
 @import '../../../node_modules/bootstrap/scss/_variables';
@@ -28,79 +25,9 @@
 @import '../../../node_modules/@fortawesome/fontawesome-free/scss/solid';
 @import '../../../node_modules/@fortawesome/fontawesome-free/scss/brands';
 
-// MBEE Imports
-@import './general.scss';
-@import './navbar.scss';
-@import './sidebar.scss';
-@import './workspace.scss';
-
-
-
-/******************************************************************************
-/*                               Grid Definition                              *
-/******************************************************************************/
-#header-footer {
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    display: grid;
-    grid-template-rows: $banner-height 1fr $banner-height;
-    grid-template-areas:
-        "header"
-        "root"
-        "footer";
-
-
-    #header {
-        grid-area: header;
-    }
-
-    #footer {
-        grid-area: footer;
-    }
-}
-
-#root {
-    grid-area: root;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    display: grid;
-    grid-template-rows: auto minmax(10px, 1fr);
-    grid-template-columns: 1fr;
-    grid-template-areas:
-        "nav"
-        "main";
-
-
-    #nav {
-        grid-area: nav;
-
-    }
-
-    #main {
-        grid-area: main;
-        display: grid;
-        grid-template-rows: 1fr;
-        grid-template-columns: 300px minmax(10px, 1fr);
-        height: 100%;
-        //display: table;
-        //height: 100%;
-
-        #sidebar {
-            grid-row-start: 1;
-            grid-row-end: 2;
-            //display: table-cell;
-            overflow: hidden;
-            border-right: 1px solid #e8e8e8;
-        }
-
-        #view {
-          grid-column-start: 2;
-          grid-column-end: end;
-          overflow: scroll;
-        }
-    }
-
-}
-
+@import './base/_variables';
+@import './utils/_grid.scss';
+@import './components/_general.scss';
+@import './components/_navbar.scss';
+@import './components/_sidebar.scss';
+@import './components/_workspace.scss';

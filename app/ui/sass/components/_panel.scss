@@ -1,5 +1,5 @@
 
-@import 'variables';
+@import '../base/_variables';
 
 .table {
   display: table;
@@ -71,6 +71,11 @@
       }
       hr {
         margin: 5px 0px 5px 0px;
+      }
+
+      .element-edit-form {
+        padding-top: 15px;
+        padding-left: 5px;
       }
     }
   }
