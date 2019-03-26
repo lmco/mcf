@@ -66,8 +66,8 @@ class ProfileEdit extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: (_data) => { window.location.replace('/whoami'); },
-        401: (_data) => { window.location.replace('/whoami'); }
+        200: (_data) => { window.location.replace('/profile'); },
+        401: (_data) => { window.location.replace('/profile'); }
       },
       fail: (err) => {
         alert(`Update Failed: ${err.responseJSON.description}`);
