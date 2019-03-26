@@ -58,15 +58,20 @@ class ProfileEdit extends Component {
       lname: this.state.lname,
       custom: JSON.parse(this.state.custom)
     };
+
     // Send a patch request to update user data
-    ajaxRequest('PATCH', url, data)
-    .then(() => {
-      // Update the page to reload to user home page
-      window.location.replace('/profile');
-    })
-    .catch((msg) => {
-      // Let user know update failed
-      alert(`Update Failed: ${msg.responseJSON.description}`);
+    $.ajax({
+      method: 'PATCH',
+      url: url,
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      statusCode: {
+        200: (_data) => { window.location.replace('/whoami'); },
+        401: (_data) => { window.location.replace('/whoami'); }
+      },
+      fail: (err) => {
+        alert(`Update Failed: ${err.responseJSON.description}`);
+      }
     });
   }
 
