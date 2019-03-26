@@ -116,6 +116,7 @@ class ProjectElements extends Component {
 
     // Return element list
     return (
+      <div id='view'>
       <div id='workspace' className='project-elements'>
         <div id='workspace-header'>
           <h2>{this.props.project.name} Model</h2>
@@ -142,6 +143,7 @@ class ProjectElements extends Component {
             : (<SidePanel> { sidePanelView } </SidePanel>)
           }
         </div>
+      </div>
       </div>
     );
   }

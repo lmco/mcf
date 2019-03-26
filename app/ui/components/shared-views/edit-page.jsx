@@ -128,7 +128,7 @@ class EditPage extends Component {
 
     // Render organization edit page
     return (
-            <div className='org-forms'>
+            <div id='view' className='org-forms'>
                 <h2>Edit {title}</h2>
                 <hr />
                 <div>

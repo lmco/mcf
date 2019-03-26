@@ -108,7 +108,7 @@ class ProfileEdit extends Component {
 
     // Render user edit page
     return (
-      <div className='user-edit'>
+      <div id='view' className='user-edit'>
         <h2>User Edit</h2>
         <hr />
         {/* Create form to update user data */}

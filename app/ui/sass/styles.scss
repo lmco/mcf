@@ -27,82 +27,8 @@
 
 // MBEE Imports
 @import './base/_variables';
+@import './utils/_grid.scss';
 @import './components/_general.scss';
 @import './components/_navbar.scss';
 @import './components/_sidebar.scss';
 @import './components/_workspace.scss';
-
-
-
-/******************************************************************************
-/*                               Grid Definition                              *
-/******************************************************************************/
-#header-footer {
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    display: grid;
-    grid-template-rows: $banner-height 1fr $banner-height;
-    grid-template-areas:
-        "header"
-        "root"
-        "footer";
-
-
-    #header {
-        grid-area: header;
-    }
-
-    #footer {
-        grid-area: footer;
-    }
-}
-
-#root {
-    grid-area: root;
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    display: grid;
-    grid-template-rows: auto minmax(10px, 1fr);
-    grid-template-columns: 1fr;
-    grid-template-areas:
-        "nav"
-        "main";
-
-
-    #nav {
-        grid-area: nav;
-
-    }
-
-    #main {
-        /*grid-area: main;
-        display: grid;
-        grid-template-rows: 1fr;
-        grid-template-columns: auto minmax(10px, 1fr);
-        grid-template-areas:
-            "view view";
-
-        &.main-sidebar {
-            grid-template-areas:
-                "sidebar view";
-        }*/
-        display: table;
-        height: 100%;
-
-        #sidebar {
-            /*grid-area: sidebar;*/
-            display: table-cell;
-            overflow: hidden;
-            border-right: 1px solid #e8e8e8;
-        }
-
-        /*#view {
-          grid-area: view;
-          overflow: scroll;
-        }*/
-    }
-
-}
-
