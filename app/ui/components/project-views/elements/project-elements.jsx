@@ -88,6 +88,10 @@ class ProjectElements extends Component {
     });
   }
 
+  componentDidMount() {
+    console.log('testing something');
+  }
+
   render() {
     let sidePanelView = <Element id={this.state.id}
                                  project={this.props.project}
@@ -130,8 +134,8 @@ class ProjectElements extends Component {
                          project={this.props.project}
                          parent={null}
                          isOpen={true}
-                         clickHandler={this.openElementInfo}
-                         refreshHandler={this.refreshSubtree}/>
+                         parentRefresh={this.componentDidMount}
+                         clickHandler={this.openElementInfo}/>
           </div>
           {(!this.state.sidePanel)
             ? ''

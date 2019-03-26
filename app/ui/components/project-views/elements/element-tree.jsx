@@ -73,16 +73,24 @@ class ElementTree extends Component {
   }
 
   refresh(isDelete) {
-    if (!isDelete) {
-      console.log('not in the else');
-      this.componentDidMount();
+    if (isDelete) {
+      this.props.parentRefresh();
     }
     else {
-      console.log(`tree-${this.props.id}`);
-      console.log(`tree-${this.state.data.parent}`);
-      $(`#tree-${this.state.data.parent}-icon`).click();
+      this.componentDidMount();
     }
   }
+
+  // componentDidUpdate(prevProps, prevState) {
+  //   // Typical usage (don't forget to compare props):
+  //   if (prevState.data) {
+  //     if (prevState.data.contains !== this.state.data.contains) {
+  //       console.log('in the update');
+  //       console.log(this.state.data.id);
+  //       this.componentDidMount();
+  //     }
+  //   }
+  // }
 
   /**
    * When an element is clicked, parses the ID and calls the passed in
@@ -118,6 +126,7 @@ class ElementTree extends Component {
                        id={`${this.state.data.contains[i]}`}
                        project={this.props.project}
                        parent={this.state}
+                       parentRefresh={this.refresh}
                        clickHandler={this.props.clickHandler}
                        isOpen={false}/>
         );
