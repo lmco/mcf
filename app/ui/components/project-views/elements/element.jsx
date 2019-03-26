@@ -105,7 +105,9 @@ class Element extends Component {
         {/* Modal for deleting an org */}
         <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
           <ModalBody>
-            <Delete element={this.state.element} closeSidePanel={this.props.closeSidePanel} toggle={this.handleDeleteToggle}/>
+            <Delete element={this.state.element}
+                    closeSidePanel={this.props.closeSidePanel}
+                    toggle={this.handleDeleteToggle}/>
           </ModalBody>
         </Modal>
         {(!this.state.element)
