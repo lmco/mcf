@@ -22,6 +22,8 @@ import React, { Component } from 'react';
 
 // MBEE Modules
 import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
+import { Button, Modal, ModalBody } from 'reactstrap';
+import Delete from '../../shared-views/delete.jsx';
 
 // Define component
 class Element extends Component {
@@ -33,10 +35,13 @@ class Element extends Component {
     // Initialize state props
     this.state = {
       element: null,
+      modalDelete: false,
       error: null
     };
 
+    // Bind component functions
     this.getElement = this.getElement.bind(this);
+    this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
   }
 
   getElement() {
@@ -52,6 +57,12 @@ class Element extends Component {
       // Throw error and set state
       this.setState({ error: `Failed to load element: ${err.responsetext}` });
     });
+  }
+
+  // Define toggle function
+  handleDeleteToggle() {
+    // Set the delete modal state
+    this.setState({ modalDelete: !this.state.modalDelete });
   }
 
   componentDidMount() {
@@ -91,6 +102,12 @@ class Element extends Component {
     // Render the sidebar with the links above
     return (
       <div className='element-panel-display'>
+        {/* Modal for deleting an org */}
+        <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+          <ModalBody>
+            <Delete element={this.state.element} closeSidePanel={this.props.closeSidePanel} toggle={this.handleDeleteToggle}/>
+          </ModalBody>
+        </Modal>
         {(!this.state.element)
           ? <div className="loading"> {this.state.error || 'Loading your element...'} </div>
           : (<React.Fragment>
@@ -147,6 +164,11 @@ class Element extends Component {
                   </tr>
                   </tbody>
                 </table>
+                <Button className='btn'
+                        outline color="danger"
+                        onClick={this.handleDeleteToggle}>
+                  Delete
+                </Button>
               </div>
             </React.Fragment>
           )

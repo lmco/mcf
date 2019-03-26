@@ -78,7 +78,6 @@ class Delete extends Component {
   onSubmit() {
     // Initialize variables
     let url;
-    let redirect;
 
     // Verify if project-views provided
     if (this.props.element) {
@@ -87,8 +86,7 @@ class Delete extends Component {
       const elemid = this.props.element.id;
 
       // Set url to state options
-      url = `api/orgs/${orgid}/projects/${projid}/branches/master/elements/${elemid}`;
-      redirect = `${orgid}/${projid}/elements`;
+      url = `/api/orgs/${orgid}/projects/${projid}/branches/master/elements/${elemid}`;
     }
     else if (this.props.projects) {
       // Set url to state options
@@ -111,12 +109,17 @@ class Delete extends Component {
     // Delete the project selected
     ajaxRequest('DELETE', url)
     .then(() => {
-      // On success, return to the project-views page
-      window.location.replace('/');
+      if (this.props.element) {
+        this.props.closeSidePanel(null, true, true);
+      }
+      else {
+        // On success, return to the project-views page
+        window.location.replace('/');
+      }
     })
     .catch((msg) => {
       // On failure, notify user of failure
-      alert(`Delete Failed: ${msg.responseJSON.description}`);
+      alert(`Delete Failed: ${msg.statusText}`);
     });
   }
 
@@ -152,7 +155,11 @@ class Delete extends Component {
       name = this.props.project.name;
     }
     else if (this.props.element) {
-      name = this.props.element.name;
+      name = (<span className='element-name'>
+                {this.props.element.name} {' '}
+                <span className={'element-id'}>({this.props.element.id} : {this.props.element.type})</span>
+              </span>
+      );
     }
 
     // Return the project delete form

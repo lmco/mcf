@@ -53,7 +53,7 @@ class ElementTree extends Component {
     const projId = this.props.project.id;
     const elementId = this.props.id.replace('tree-', '');
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    const url = `${base}/elements/${elementId}?fields=id,name,contains,type`;
+    const url = `${base}/elements/${elementId}?fields=id,name,contains,type,parent`;
 
     $.ajax({
       method: 'GET',
@@ -72,8 +72,16 @@ class ElementTree extends Component {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
-  refresh() {
-    this.componentDidMount();
+  refresh(isDelete) {
+    if (!isDelete) {
+      console.log('not in the else');
+      this.componentDidMount();
+    }
+    else {
+      console.log(`tree-${this.props.id}`);
+      console.log(`tree-${this.state.data.parent}`);
+      $(`#tree-${this.state.data.parent}-icon`).click();
+    }
   }
 
   /**
@@ -188,7 +196,7 @@ class ElementTree extends Component {
     return (
       <div id={`tree-${this.props.id}`}
            className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
-        <i className={`fas ${expandIcon}`}
+        <i id={`tree-${this.props.id}-icon`} className={`fas ${expandIcon}`}
            onClick={this.toggleCollapse}>
         </i>
         <span className='element-name' onClick={this.handleClick}>

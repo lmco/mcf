@@ -74,11 +74,11 @@ class ProjectElements extends Component {
     }
   }
 
-  closeSidePanel(event, refresh) {
+  closeSidePanel(event, refresh, isDelete) {
     this.setState({ sidePanel: false });
 
     if (refresh) {
-      this.state.refreshFunction();
+      this.state.refreshFunction(isDelete);
     }
   }
 
