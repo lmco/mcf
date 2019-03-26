@@ -89,7 +89,7 @@ class ProjectElements extends Component {
   }
 
   componentDidMount() {
-    console.log('testing something');
+
   }
 
   render() {
