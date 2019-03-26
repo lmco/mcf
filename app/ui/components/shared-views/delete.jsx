@@ -78,9 +78,19 @@ class Delete extends Component {
   onSubmit() {
     // Initialize variables
     let url;
+    let redirect;
 
     // Verify if project-views provided
-    if (this.props.projects) {
+    if (this.props.element) {
+      const orgid = this.props.element.org;
+      const projid = this.props.element.project;
+      const elemid = this.props.element.id;
+
+      // Set url to state options
+      url = `api/orgs/${orgid}/projects/${projid}/branches/master/elements/${elemid}`;
+      redirect = `${orgid}/${projid}/elements`;
+    }
+    else if (this.props.projects) {
       // Set url to state options
       url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
     }
@@ -119,6 +129,9 @@ class Delete extends Component {
     if (this.props.project || this.props.projects) {
       title = 'Project';
     }
+    else if (this.props.element) {
+      title = 'Element';
+    }
     else {
       title = 'Organization';
     }
@@ -137,6 +150,9 @@ class Delete extends Component {
     }
     else if (this.props.project) {
       name = this.props.project.name;
+    }
+    else if (this.props.element) {
+      name = this.props.element.name;
     }
 
     // Return the project delete form
@@ -181,7 +197,7 @@ class Delete extends Component {
                             </FormGroup>)
                         }
                         {/* Verify if project provided */}
-                        {(this.props.org || this.props.project)
+                        {(this.props.org || this.props.project || this.props.element)
                           ? (<FormGroup>
                               <Label for="id">Do you want to delete {name}?</Label>
                              </FormGroup>)
