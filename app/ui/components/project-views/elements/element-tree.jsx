@@ -72,8 +72,20 @@ class ElementTree extends Component {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
-  refresh() {
-    this.componentDidMount();
+  /**
+   * When an element is delete or created, the component
+   * will update.
+   */
+  refresh(isDelete) {
+    // Element is being deleted
+    if (isDelete) {
+      // Call the parent refresh
+      this.props.parentRefresh();
+    }
+    else {
+      // Update the component
+      this.componentDidMount();
+    }
   }
 
   /**
@@ -110,6 +122,7 @@ class ElementTree extends Component {
                        id={`${this.state.data.contains[i]}`}
                        project={this.props.project}
                        parent={this.state}
+                       parentRefresh={this.refresh}
                        clickHandler={this.props.clickHandler}
                        isOpen={false}/>
         );

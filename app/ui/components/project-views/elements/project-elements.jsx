@@ -74,11 +74,11 @@ class ProjectElements extends Component {
     }
   }
 
-  closeSidePanel(event, refresh) {
+  closeSidePanel(event, refresh, isDelete) {
     this.setState({ sidePanel: false });
 
     if (refresh) {
-      this.state.refreshFunction();
+      this.state.refreshFunction(isDelete);
     }
   }
 
@@ -86,6 +86,10 @@ class ProjectElements extends Component {
     this.setState({
       sidePanel: 'elementEdit'
     });
+  }
+
+  componentDidMount() {
+
   }
 
   render() {
@@ -130,8 +134,8 @@ class ProjectElements extends Component {
                          project={this.props.project}
                          parent={null}
                          isOpen={true}
-                         clickHandler={this.openElementInfo}
-                         refreshHandler={this.refreshSubtree}/>
+                         parentRefresh={this.componentDidMount}
+                         clickHandler={this.openElementInfo}/>
           </div>
           {(!this.state.sidePanel)
             ? ''
