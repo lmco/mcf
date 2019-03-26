@@ -2,8 +2,8 @@
 /*                        General Components Styling                          *
 /******************************************************************************/
 
-@import 'variables';
-@import 'model';
+@import '../base/_variables';
+@import './_model';
 
 #login-form {
   margin-top: 40%;
