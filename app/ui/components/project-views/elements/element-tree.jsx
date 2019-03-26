@@ -53,7 +53,7 @@ class ElementTree extends Component {
     const projId = this.props.project.id;
     const elementId = this.props.id.replace('tree-', '');
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    const url = `${base}/elements/${elementId}?fields=id,name,contains,type,parent`;
+    const url = `${base}/elements/${elementId}?fields=id,name,contains,type`;
 
     $.ajax({
       method: 'GET',
@@ -201,7 +201,7 @@ class ElementTree extends Component {
     return (
       <div id={`tree-${this.props.id}`}
            className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
-        <i id={`tree-${this.props.id}-icon`} className={`fas ${expandIcon}`}
+        <i className={`fas ${expandIcon}`}
            onClick={this.toggleCollapse}>
         </i>
         <span className='element-name' onClick={this.handleClick}>
