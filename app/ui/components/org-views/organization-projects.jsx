@@ -49,13 +49,13 @@ function OrganizationProjects(props) {
                 </ModalBody>
             </Modal>
             <div id='view' className='org-projects'>
-                <div className='project-list-header'>
-                     <h2 className='project-header'>Projects</h2>
+                <div className='workspace-header'>
+                     <h2 className='workspace-title'>Projects</h2>
                     {/* Verify user has write permissions */}
                     {(!props.write)
                       ? ''
                     // Display project create button
-                      : (<div className='project-button'>
+                      : (<div className='workspace-header-button'>
                             <Button className='btn'
                                     outline color="secondary"
                                     onClick={props.handleToggle}>

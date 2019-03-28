@@ -129,9 +129,9 @@ class ProjectElements extends Component {
     return (
       <React.Fragment>
         <div id='workspace'>
-          <div id='workspace-header'>
-            <h2>{this.props.project.name} Model</h2>
-            <div className='ws-button-group'>
+          <div id='workspace-header' className='workspace-header'>
+            <h2 className='workspace-title'>{this.props.project.name} Model</h2>
+            <div id='workspace-header-btn' className='workspace-header-button ws-button-group'>
               <Button className='btn btn-sm'
                       outline color='primary'
                       onClick={this.createNewElement}>

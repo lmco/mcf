@@ -192,9 +192,9 @@ class ProjectList extends Component {
         </Modal>
         {/* Display the list of project-views */}
         <div className='project-list' ref={this.ref}>
-          <div className='project-list-header'>
-            <h2 className='project-header'>Your Projects</h2>
-            <div className='project-button'>
+          <div className='workspace-header'>
+            <h2 className='workspace-title'>Your Projects</h2>
+            <div className='workspace-header-button'>
               {/* Verify user has write permission */}
               {(!this.state.write)
                 ? ''
