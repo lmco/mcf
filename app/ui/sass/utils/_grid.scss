@@ -65,19 +65,19 @@
         overflow: scroll;
       }
 
-      .sidepanel {
+      #side-panel {
         grid-column-start: 3;
         grid-column-end: 4;
-        overflow: hidden;
         display: none;
         width: 0;
+        overflow: hidden;
+        border-left:  1px solid darken($mbee-background, 10%);
+        border-right:  1px solid darken($mbee-background, 10%);
+        background: $mbee-background;
 
         &.side-panel-expanded {
-          background: $mbee-background;
           display: flex;
           width: 300px;
-          border-left:  1px solid darken($mbee-background, 10%);
-          border-right:  1px solid darken($mbee-background, 10%);
         }
 
         .element-panel-display {

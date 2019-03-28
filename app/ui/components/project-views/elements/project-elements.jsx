@@ -50,6 +50,9 @@ class ProjectElements extends Component {
 
 
   createNewElement() {
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
+
     this.setState({
       sidePanel: 'addElement'
     });
@@ -61,7 +64,7 @@ class ProjectElements extends Component {
     this.setState({ id: id, refreshFunction: refreshFunction });
 
     // Get the sidebar html element and toggle it
-    document.getElementById('sidepanel').classList.toggle('side-panel-expanded');
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
 
 
     // Select the clicked element
@@ -79,7 +82,7 @@ class ProjectElements extends Component {
 
   closeSidePanel(event, refresh, isDelete) {
     // Get the sidebar html element and toggle it
-    document.getElementById('sidepanel').classList.toggle('side-panel-expanded');
+    document.getElementById('side-panel').classList.remove('side-panel-expanded');
 
     if (refresh) {
       this.state.refreshFunction(isDelete);
@@ -87,6 +90,9 @@ class ProjectElements extends Component {
   }
 
   editElementInfo() {
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
+
     this.setState({
       sidePanel: 'elementEdit'
     });
@@ -144,12 +150,6 @@ class ProjectElements extends Component {
             </div>
           </div>
         </div>
-        {/*{(!this.state.id)*/}
-          {/*? ''*/}
-          {/*: (<SidePanel>*/}
-              {/*sidePanelView*/}
-             {/*</SidePanel>)*/}
-        {/*}*/}
         <SidePanel>
           { sidePanelView }
         </SidePanel>
