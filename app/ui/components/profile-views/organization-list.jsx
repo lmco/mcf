@@ -112,30 +112,28 @@ class OrganizationList extends Component {
 
     // Return org list
     return (
-      <React.Fragment>
-        <div>
-          {/* Modal for creating an org */}
-          <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
-            <ModalBody>
-              <Create toggle={this.handleCreateToggle}/>
-            </ModalBody>
-          </Modal>
-          {/* Modal for deleting an org */}
-          <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
-            <ModalBody>
-              <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
-            </ModalBody>
-          </Modal>
-        </div>
+      <div  id='view'>
+        {/* Modal for creating an org */}
+        <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
+          <ModalBody>
+            <Create toggle={this.handleCreateToggle}/>
+          </ModalBody>
+        </Modal>
+        {/* Modal for deleting an org */}
+        <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
+          <ModalBody>
+            <Delete orgs={this.state.orgs} toggle={this.handleDeleteToggle}/>
+          </ModalBody>
+        </Modal>
         {/* Display the list of orgs */}
-        <div id='view' className='org-list' ref={this.ref}>
-          <div className='org-list-header'>
-            <h2 className='org-header'>Your Organizations</h2>
+        <div className='org-list' ref={this.ref}>
+          <div className='workspace-header'>
+            <h2 className='workspace-title'>Your Organizations</h2>
             {/* Verify user is an admin */}
             {(!this.state.admin)
               ? ''
               // Display create and delete buttons
-              : (<div className='org-button'>
+              : (<div className='workspace-header-button'>
                   <Button className='btn'
                           outline color="secondary"
                           onClick={this.handleCreateToggle}>
@@ -160,7 +158,7 @@ class OrganizationList extends Component {
                </List>)
           }
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 

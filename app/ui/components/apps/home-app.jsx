@@ -188,20 +188,21 @@ class HomeApp extends Component {
         </Modal>
         { /* Display the list of projects */ }
         <div className='org-list' ref={this.ref}>
-          <div className='org-list-header'>
-            <h2 className='org-header'>Organizations</h2>
+          <div className='workspace-header'>
+            <h2 className='workspace-title'>Organizations</h2>
             { /* Verify user is an admin */ }
             {(!this.state.admin)
               ? ''
               // Display create and delete buttons
               : (
-                <div className='org-button'>
+                <div className='workspace-header-button'>
                   <Button className='btn'
-                          outline
-                          color="secondary" onClick={this.handleCreateToggle}>
+                          outline color="secondary"
+                          onClick={this.handleCreateToggle}>
                       Create
                   </Button>
-                  <Button className='btn' outline color="danger"
+                  <Button className='btn'
+                          outline color="danger"
                           onClick={this.handleDeleteToggle}>
                       Delete
                   </Button>

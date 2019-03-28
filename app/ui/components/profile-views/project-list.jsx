@@ -167,7 +167,7 @@ class ProjectList extends Component {
 
     // Return project list
     return (
-      <React.Fragment>
+      <div id='view'>
         {/* Modal for creating a project */}
         <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
           <ModalBody>
@@ -191,7 +191,7 @@ class ProjectList extends Component {
           </ModalBody>
         </Modal>
         {/* Display the list of project-views */}
-        <div id='view' className='project-list' ref={this.ref}>
+        <div className='project-list' ref={this.ref}>
           <div className='project-list-header'>
             <h2 className='project-header'>Your Projects</h2>
             <div className='project-button'>
@@ -228,7 +228,7 @@ class ProjectList extends Component {
                  </List>)
           }
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 
