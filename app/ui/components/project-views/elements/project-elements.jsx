@@ -83,6 +83,8 @@ class ProjectElements extends Component {
     // Get the sidebar html element and toggle it
     document.getElementById('side-panel').classList.remove('side-panel-expanded');
 
+    this.setState({ sidePanel: null });
+
     if (refresh) {
       this.state.refreshFunction(isDelete);
     }
