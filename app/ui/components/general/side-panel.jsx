@@ -29,7 +29,7 @@ class SidePanel extends Component {
 
     // Render the sidebar with the links above
     return (
-      <div className='side-panel'>
+      <div id='sidepanel' className='side-panel'>
         {sidepanelDisplay}
       </div>
     );

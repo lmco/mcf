@@ -558,25 +558,21 @@
   }
 }
 
-#workspace {
-  display: table-cell;
+.workspace {
   padding: 0;
   overflow: hidden;
 
   #workspace-header {
     border-bottom: 1px solid $mbee-color;
-    display: table;
     width: 100%;
     padding: 12px 28px;
 
     h2 {
-      display: table-cell;
       font-size: 20px;
       padding-top: 10px;
     }
 
     .ws-button-group {
-      display: table-cell;
       text-align: right;
 
       button {

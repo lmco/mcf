@@ -43,9 +43,6 @@ class Sidebar extends Component {
   }
 
   componentDidMount() {
-    // Grab html element and add a class to it
-    document.getElementById('main').classList.add('main-sidebar');
-
     // Add event listener for window sizing
     window.addEventListener('resize', this.handleResize);
 
@@ -54,9 +51,6 @@ class Sidebar extends Component {
   }
 
   componentWillUnmount() {
-    // Grab html element and remove class added
-    document.getElementById('root').classList.remove('root-sidebar');
-
     // Remove event listener on window
     window.removeEventListener('resize', this.handleResize);
   }

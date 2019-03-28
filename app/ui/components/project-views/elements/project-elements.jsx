@@ -60,6 +60,9 @@ class ProjectElements extends Component {
     // The currently selected element
     this.setState({ id: id, refreshFunction: refreshFunction });
 
+    // Get the sidebar html element and toggle it
+    document.getElementById('sidepanel').classList.toggle('side-panel-expanded');
+
 
     // Select the clicked element
     $('.element-tree').removeClass('tree-selected');
@@ -75,7 +78,8 @@ class ProjectElements extends Component {
   }
 
   closeSidePanel(event, refresh, isDelete) {
-    this.setState({ sidePanel: false });
+    // Get the sidebar html element and toggle it
+    document.getElementById('sidepanel').classList.toggle('side-panel-expanded');
 
     if (refresh) {
       this.state.refreshFunction(isDelete);
@@ -116,35 +120,40 @@ class ProjectElements extends Component {
 
     // Return element list
     return (
-      <div id='view'>
-      <div id='workspace' className='project-elements'>
-        <div id='workspace-header'>
-          <h2>{this.props.project.name} Model</h2>
-          <div className='ws-button-group'>
-            <Button className='btn btn-sm'
-                    outline color='primary'
-                    onClick={this.createNewElement}>
-              <i className='fas fa-plus'/>
-              Add Element
-            </Button>
+      <React.Fragment>
+        <div id='view' className='workspace'>
+          <div id='workspace-header'>
+            <h2>{this.props.project.name} Model</h2>
+            <div className='ws-button-group'>
+              <Button className='btn btn-sm'
+                      outline color='primary'
+                      onClick={this.createNewElement}>
+                <i className='fas fa-plus'/>
+                Add Element
+              </Button>
+            </div>
+          </div>
+          <div id='workspace-body'>
+            <div id='element-tree-container'>
+              <ElementTree id='model'
+                           project={this.props.project}
+                           parent={null}
+                           isOpen={true}
+                           parentRefresh={this.componentDidMount}
+                           clickHandler={this.openElementInfo}/>
+            </div>
           </div>
         </div>
-        <div id='workspace-body' className='table'>
-          <div id='element-tree-container'>
-            <ElementTree id='model'
-                         project={this.props.project}
-                         parent={null}
-                         isOpen={true}
-                         parentRefresh={this.componentDidMount}
-                         clickHandler={this.openElementInfo}/>
-          </div>
-          {(!this.state.sidePanel)
-            ? ''
-            : (<SidePanel> { sidePanelView } </SidePanel>)
-          }
-        </div>
-      </div>
-      </div>
+        {/*{(!this.state.id)*/}
+          {/*? ''*/}
+          {/*: (<SidePanel>*/}
+              {/*sidePanelView*/}
+             {/*</SidePanel>)*/}
+        {/*}*/}
+        <SidePanel>
+          { sidePanelView }
+        </SidePanel>
+      </React.Fragment>
     );
   }
 

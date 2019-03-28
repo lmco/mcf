@@ -173,7 +173,7 @@ class HomeApp extends Component {
 
     // Render the homepage
     return (
-      <div id='view'>
+      <React.Fragment>
         { /* Modal for creating an org */ }
         <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
           <ModalBody>
@@ -187,7 +187,7 @@ class HomeApp extends Component {
           </ModalBody>
         </Modal>
         { /* Display the list of projects */ }
-        <div id='view' className='org-list' ref={this.ref}>
+        <div className='org-list' ref={this.ref}>
           <div className='org-list-header'>
             <h2 className='org-header'>Organizations</h2>
             { /* Verify user is an admin */ }
@@ -216,7 +216,7 @@ class HomeApp extends Component {
             : (<List>{list}</List>)
           }
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 
