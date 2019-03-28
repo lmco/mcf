@@ -49,7 +49,7 @@
     #container {
       display: grid;
       grid-template-rows: 1fr;
-      grid-template-columns: auto minmax(10px, 1fr) auto;
+      grid-template-columns: auto minmax(10px, 1fr);
       height: 100%;
 
       #sidebar {
@@ -63,100 +63,6 @@
         grid-column-start: 2;
         grid-column-end: 3;
         overflow: scroll;
-      }
-
-      #side-panel {
-        grid-column-start: 3;
-        grid-column-end: 4;
-        display: none;
-        width: 0;
-        overflow: hidden;
-        border-left:  1px solid darken($mbee-background, 10%);
-        border-right:  1px solid darken($mbee-background, 10%);
-        background: $mbee-background;
-
-        &.side-panel-expanded {
-          display: flex;
-          width: 300px;
-        }
-
-        .element-panel-display {
-          padding: 15px;
-          display: flex;
-          justify-content: center;
-          flex-direction: row-reverse;
-
-          hr {
-            width: 95%;
-          }
-
-          .side-icons {
-            display: flex;
-            justify-content: flex-end;
-
-            .exit-btn {
-              height: 5%;
-              color: $color-secondary;
-            }
-
-            .exit-btn:hover {
-              cursor: pointer;
-              color: darken($color-secondary, 30);
-            }
-            .edit-btn {
-              color: $color-primary;
-              padding-right: 15px;
-            }
-
-            .edit-btn:hover {
-              cursor: pointer;
-              color: $color-secondary
-            }
-          }
-
-          .edit-btn {
-            color: $color-primary;
-          }
-
-          .edit-btn:hover {
-            cursor: pointer;
-            color: $color-secondary
-          }
-
-          .element-data {
-            width: 100%;
-            table {
-              width: 100%;
-            }
-            hr {
-              margin: 5px 0px 5px 0px;
-            }
-
-            .element-edit-form {
-              padding-top: 15px;
-              padding-left: 5px;
-            }
-          }
-        }
-
-        .element-create {
-
-          padding: 24px;
-
-          h2 {
-            padding-bottom: 5px;
-            border-bottom: 1px solid $mbee-color;
-          }
-
-          button {
-            margin-right: 10px;
-          }
-
-          p {
-            padding: 8px 0;
-          }
-
-        }
       }
     }
   }

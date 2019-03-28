@@ -127,7 +127,7 @@ class ProjectElements extends Component {
     // Return element list
     return (
       <React.Fragment>
-        <div id='view' className='workspace'>
+        <div id='workspace'>
           <div id='workspace-header'>
             <h2>{this.props.project.name} Model</h2>
             <div className='ws-button-group'>
@@ -140,7 +140,7 @@ class ProjectElements extends Component {
             </div>
           </div>
           <div id='workspace-body'>
-            <div id='element-tree-container'>
+            <div id='element-tree-container' className='main-workspace'>
               <ElementTree id='model'
                            project={this.props.project}
                            parent={null}
@@ -148,11 +148,11 @@ class ProjectElements extends Component {
                            parentRefresh={this.componentDidMount}
                            clickHandler={this.openElementInfo}/>
             </div>
+            <SidePanel>
+              { sidePanelView }
+            </SidePanel>
           </div>
         </div>
-        <SidePanel>
-          { sidePanelView }
-        </SidePanel>
       </React.Fragment>
     );
   }
