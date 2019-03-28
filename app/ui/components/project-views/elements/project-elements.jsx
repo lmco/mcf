@@ -50,22 +50,18 @@ class ProjectElements extends Component {
 
 
   createNewElement() {
-    // Get the sidebar html element and toggle it
-    document.getElementById('side-panel').classList.add('side-panel-expanded');
-
     this.setState({
       sidePanel: 'addElement'
     });
+
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
   // Define the open and close of the element side panel function
   openElementInfo(id, refreshFunction) {
     // The currently selected element
     this.setState({ id: id, refreshFunction: refreshFunction });
-
-    // Get the sidebar html element and toggle it
-    document.getElementById('side-panel').classList.add('side-panel-expanded');
-
 
     // Select the clicked element
     $('.element-tree').removeClass('tree-selected');
@@ -78,6 +74,9 @@ class ProjectElements extends Component {
       // Toggle the element side panel
       this.setState({ sidePanel: 'elementInfo' });
     }
+
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
   closeSidePanel(event, refresh, isDelete) {
@@ -90,12 +89,12 @@ class ProjectElements extends Component {
   }
 
   editElementInfo() {
-    // Get the sidebar html element and toggle it
-    document.getElementById('side-panel').classList.add('side-panel-expanded');
-
     this.setState({
       sidePanel: 'elementEdit'
     });
+
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
   componentDidMount() {
