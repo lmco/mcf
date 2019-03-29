@@ -40,7 +40,7 @@ function InformationPage(props) {
   }
 
   return (
-        <div id='view' className='org-home'>
+        <div id='view' className='extra-padding'>
             <h2>{name}</h2>
             <hr />
             <table>

@@ -22,6 +22,10 @@
   align-items: center;
 }
 
+.extra-padding {
+  padding: 2em;
+}
+
 /******************************************************************************
 /*                        Workspace Headers                         *
 /******************************************************************************/
@@ -183,100 +187,28 @@
   .homeproj-list {
     border-right: 1px #ccc solid;
   }
-
-  .list .list-item .list-header p {
-    font-size: 15px;
-  }
-}
-
-.org-home {
-  padding: 2em;
-}
-
-.org-projects {
-  padding: 2em;
-
-  .list .list-header p {
-    font-size: 15px;
-  }
-}
-
-.org-users {
-  padding: 2em;
-}
-
-.org-forms {
-  padding: 2em;
-
-  .nested-form {
-    padding-left: 20px;
-  }
 }
 
 /******************************************************************************
 /*                         Project Page Styling                               *
 /******************************************************************************/
-
-.project-home {
-  padding: 2em;
-
-  a {
-    display: block;
-    text-decoration: none;
-    color: black;
-  }
-
-  a:hover {
-    color: #ffc700;
-  }
-}
-
 .proj-org-header {
   a {
     width: 10%;
-  }
-  a:hover {
-    color: #ffc700;
-  }
-}
-.proj-org-header:hover {
-  background: #f7f7f7;
-}
 
-.project-list {
-  padding: 2em;
-
-  h2 {
-    margin-bottom: 1em;
-    font-size: 18px;
+    &:hover {
+      color: #ffc700;
+    }
   }
 
-  .list .projects-list {
-    border-left: #eeeeee solid;
-    margin-left: 8px;
-  }
-
-  .list .list-item .list-header p {
-    font-size: 15px;
+  &:hover {
+    background: #f7f7f7;
   }
 }
 
-.project-user {
-  padding: 2em;
-}
-
-.project-forms {
-  padding: 2em;
-
-  .nested-form {
-    padding-left: 20px;
-    vertical-align: middle;
-    line-height: 34px;
-  }
-}
-
-.element-children {
-  padding-left: 30px;
+.projects-list {
+  border-left: #eeeeee solid;
+  margin-left: 8px;
 }
 
 /******************************************************************************
@@ -365,146 +297,6 @@
   }
 }
 
-/******************************************************************************
-/*                           List Component Styling                           *
-/******************************************************************************/
-.hover-darken:hover {
-  background: #f7f7f7;
-}
-
-.list {
-  a {
-    display: block;
-    text-decoration: none;
-    color: black;
-  }
-
-  hr {
-    border-color: darkgrey;
-    margin: 0;
-  }
-}
-
-.guideline {
-  border-left: 1px solid #eee;
-}
-
-.list-item {
-  margin: 0;
-  padding: .5em;
-  height: 100%;
-  width: 100%;
-  font-size: 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.element-item {
-  display: grid;
-  grid-template-columns: minmax(auto, 35px) 1fr;
-  grid-template-areas: "stats header";
-  justify-content: space-between;
-  align-items: center;
-
-  .list-header {
-    grid-area: header;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    p {
-      font-size: 15px;
-      margin: 0;
-      display: inline-block;
-    }
-  }
-
-  .stats-list {
-    grid-area: stats;
-    justify-self: flex-end;
-  }
-  padding: 2px;
-  cursor: pointer;
-}
-
-.stats-list-item {
-  display: grid;
-  grid-template-columns: minmax(auto, 600px) 1fr;
-  grid-template-areas: "header stats";
-  justify-content: space-between;
-  align-items: center;
-
-  .list-header {
-    margin: 1em;
-    grid-area: header;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    p {
-      font-size: 15px;
-      margin: 0;
-      display: inline-block;
-    }
-    a:hover {
-      color: #ffc700;
-    }
-  }
-
-  .stats-list {
-    grid-area: stats;
-    justify-self: flex-end;
-  }
-}
-
-.stats-list {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  height: 100%;
-  min-width: 100%;
-  max-width: 100%;
-
-  .stats-item {
-    display: flex;
-    justify-content: flex-start;
-    padding-left: 1em;
-    padding-right: 1em;
-    align-items: center;
-    i {
-      padding-right: .3em;
-    }
-    p {
-      margin: 0;
-    }
-  }
-}
-
-.user-list-item {
-  display: grid;
-  grid-template-columns: minmax(auto, 48%) minmax(auto, 48%) 1fr;
-  grid-template-areas: "username perm";
-  justify-content: space-between;
-  align-items: center;
-
-  .username {
-    margin: 1em;
-    grid-area: username;
-    p {
-      font-size: 15px;
-      margin: 0;
-      display: inline-block;
-    }
-  }
-
-  .permission {
-    grid-area: perm;
-    p {
-      font-size: 15px;
-      margin: 0;
-      display: inline-block;
-    }
-  }
-}
 /******************************************************************************
 /*                           Search Form Styling                              *
 /******************************************************************************/

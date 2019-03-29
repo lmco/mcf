@@ -155,7 +155,7 @@ class Create extends Component {
 
     // Return the form to create a project
     return (
-            <div className='project-forms'>
+            <div className='extra-padding'>
                 {/* Verify if org provided */}
                 {title}
                 <hr />

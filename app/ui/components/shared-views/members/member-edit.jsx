@@ -144,7 +144,7 @@ class MemberEdit extends Component {
 
     // Render project edit page
     return (
-            <div className='project-forms'>
+            <div className='extra-padding'>
                 <h2>User Roles</h2>
                 <hr />
                 <div>

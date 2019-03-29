@@ -164,7 +164,7 @@ class Delete extends Component {
 
     // Return the project delete form
     return (
-            <div className='project-forms'>
+            <div className='extra-padding'>
                 <h2>Delete {title}</h2>
                 <hr />
                 <div>

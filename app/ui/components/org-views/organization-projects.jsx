@@ -48,7 +48,7 @@ function OrganizationProjects(props) {
                     <Create project={true} org={org} toggle={props.handleToggle}/>
                 </ModalBody>
             </Modal>
-            <div id='view' className='org-projects'>
+            <div id='view' className='extra-padding'>
                 <div className='workspace-header'>
                      <h2 className='workspace-title'>Projects</h2>
                     {/* Verify user has write permissions */}
