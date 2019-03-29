@@ -18,6 +18,7 @@
 const mongoose = require('mongoose');
 
 // MBEE modules
+const Element = M.require('models.element');
 const validators = M.require('lib.validators');
 const utils = M.require('lib.utils');
 const extensions = M.require('models.plugin.extensions');
@@ -152,6 +153,7 @@ ProjectSchema.methods.getPublicData = function() {
       ? this.org.getPublicData()
       : utils.parseID(this._id)[0],
     name: this.name,
+    element_count: this.count || undefined,
     permissions: permissions,
     custom: this.custom,
     visibility: this.visibility,
@@ -240,6 +242,44 @@ ProjectSchema.statics.validateObjectKeys = function(object) {
   // All object keys found in project model or object was an instance of
   // project model, return true
   return returnBool;
+};
+
+/**
+ * @description Adds a field of total number of elements to projects. NOTE:
+ * There is the ability to create a virtual which does the same thing.
+ * Unfortunately, this virtual is SIGNIFICANTLY slower. See
+ * https://mongoosejs.com/docs/populate.html#count if interested in virtual.
+ *
+ * @param {Project[]} projects - An array of project objects to retrieve element
+ * count for.
+ *
+ * @returns {Promise} - Resolves all projects with added count field.
+ */
+ProjectSchema.statics.getElementCount = function(projects) {
+  return new Promise((resolve, reject) => {
+    const query = { $facet: {} };
+    const project = { $project: {} };
+    projects.forEach((proj) => {
+      query.$facet[proj._id] = [
+        { $match: { project: proj._id } },
+        { $count: proj._id }
+      ];
+      project.$project[proj._id] = {
+        $arrayElemAt: [`$${proj._id}.${proj._id}`, 0]
+      };
+    });
+    // Find all elements on this project
+    Element.aggregate([query, project])
+    .then((count) => {
+      const countStats = count[0];
+      projects.forEach((proj) => {
+        proj.count = countStats[proj._id];
+      });
+
+      return resolve(projects);
+    })
+    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
 };
 
 
