@@ -153,7 +153,7 @@ ProjectSchema.methods.getPublicData = function() {
       ? this.org.getPublicData()
       : utils.parseID(this._id)[0],
     name: this.name,
-    element_count: this.count || undefined,
+    elementCount: this.count || undefined,
     permissions: permissions,
     custom: this.custom,
     visibility: this.visibility,
@@ -257,27 +257,20 @@ ProjectSchema.statics.validateObjectKeys = function(object) {
  */
 ProjectSchema.statics.getElementCount = function(projects) {
   return new Promise((resolve, reject) => {
-    const query = { $facet: {} };
-    const project = { $project: {} };
+    const promises = [];
+    // For each project
     projects.forEach((proj) => {
-      query.$facet[proj._id] = [
-        { $match: { project: proj._id } },
-        { $count: proj._id }
-      ];
-      project.$project[proj._id] = {
-        $arrayElemAt: [`$${proj._id}.${proj._id}`, 0]
-      };
+      // Count all elements in this project
+      promises.push(Element.countDocuments({ project: proj._id })
+      .then((count) => {
+        // Set the count field on the project
+        proj.count = count;
+      }));
     });
-    // Find all elements on this project
-    Element.aggregate([query, project])
-    .then((count) => {
-      const countStats = count[0];
-      projects.forEach((proj) => {
-        proj.count = countStats[proj._id];
-      });
 
-      return resolve(projects);
-    })
+    // Return when all promises are complete
+    Promise.all(promises)
+    .then(() => resolve(projects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 };
