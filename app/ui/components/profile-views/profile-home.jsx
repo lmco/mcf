@@ -27,7 +27,7 @@ function ProfileHome(props) {
 
   // Render user data in table format
   return (
-    <div id='view' className='user-home'>
+    <div id='view' className='extra-padding'>
       <h2>{user.name}</h2>
       <hr />
       <table>

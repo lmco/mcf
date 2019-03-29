@@ -153,7 +153,7 @@ class MemberEdit extends Component {
                     <Form>
                         <FormGroup>
                             {/* Create a search bar for username input */}
-                            <Label className='username-label' for='username'>Username</Label>
+                            <Label for='username'>Username</Label>
                             <div className='username-search'>
                                 {/* Input field for username */}
                                 <Input autoFocus

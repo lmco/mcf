@@ -85,7 +85,7 @@ class MembersPage extends Component {
                         </Modal>
                   )
                 }
-                <div id='view' className='user-list'>
+                <div id='view' className='extra-padding'>
                     <div className='user-list-header'>
                         <h2 className='user-header'>Users</h2>
                         <h2 className='user-descriptor'>Permissions</h2>
