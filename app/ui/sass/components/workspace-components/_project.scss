@@ -1,0 +1,23 @@
+@import '../../base/_variables';
+
+/******************************************************************************
+/*                         Project Page Styling                               *
+/******************************************************************************/
+.proj-org-header {
+  a {
+    width: 10%;
+
+    &:hover {
+      color: #ffc700;
+    }
+  }
+
+  &:hover {
+    background: #f7f7f7;
+  }
+}
+
+.projects-list {
+  border-left: #eeeeee solid;
+  margin-left: 8px;
+}

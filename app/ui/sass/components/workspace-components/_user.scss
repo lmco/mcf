@@ -1,0 +1,65 @@
+@import '../../base/_variables';
+
+/******************************************************************************
+/*                           Members Page Styling                             *
+/******************************************************************************/
+
+.user-list-header {
+  display: grid;
+  grid-template-columns: minmax(auto, 48%) minmax(auto, 48%) 1fr;
+  grid-template-areas: "header descriptor button";
+  justify-content: space-between;
+  align-items: center;
+
+  .user-header {
+    grid-area: header;
+    justify-content: flex-start;
+    margin: 0;
+  }
+
+  .user-descriptor {
+    grid-area: descriptor;
+    justify-content: flex-start;
+    margin: 0;
+  }
+
+  .user-button {
+    grid-area: button;
+    display: flex;
+
+    .btn {
+      float: right;
+      margin: 5px;
+    }
+  }
+}
+
+.edit-role-title {
+  padding-bottom: 10px;
+}
+
+.username-search {
+  display: grid;
+  grid-template-columns: minmax(auto, 600px) 1fr;
+  grid-template-areas: "searchbar button";
+  justify-content: space-between;
+  align-items: center;
+
+  .user-searchbar {
+    grid-area: searchbar;
+    justify-content: flex-start;
+    margin-left: 0;
+    margin-right: 5px;
+  }
+
+  .search-button {
+    grid-area: button;
+    justify-content: flex-end;
+
+    .btn {
+      float: right;
+      margin: 5px;
+    }
+  }
+}
+
