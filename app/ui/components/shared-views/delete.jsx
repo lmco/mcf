@@ -111,6 +111,7 @@ class Delete extends Component {
     .then(() => {
       if (this.props.element) {
         this.props.closeSidePanel(null, true, true);
+        this.props.toggle();
       }
       else {
         // On success, return to the project-views page
@@ -164,59 +165,59 @@ class Delete extends Component {
 
     // Return the project delete form
     return (
-            <div className='extra-padding'>
-                <h2>Delete {title}</h2>
-                <hr />
-                <div>
-                    <Form>
-                        {
-                          (!this.props.orgs)
-                            ? ''
-                            : (
-                              <FormGroup>
-                                <Label for="org">Organization ID</Label>
-                                <Input type="select"
-                                       name="org"
-                                       id="org"
-                                       value={this.state.org || ''}
-                                       onChange={this.handleOrgChange}>
-                                    <option>Choose one...</option>
-                                    {orgOptions}
-                                </Input>
-                              </FormGroup>
-                            )
-                        }
-                        {/* Verify if project-views provided */}
-                        { // Create a form to choose the project
-                          (!this.props.projects)
-                            ? ''
-                            : (
-                              <FormGroup>
-                                (<Label for="id">Project ID</Label>)
-                                (<Input type="select"
-                                       name="id"
-                                       id="id"
-                                       value={this.state.id || ''}
-                                       onChange={this.handleChange}>
-                                    <option>Choose one...</option>
-                                    {this.state.projectOpt}
-                                </Input>
-                            </FormGroup>)
-                        }
-                        {/* Verify if project provided */}
-                        {(this.props.org || this.props.project || this.props.element)
-                          ? (<FormGroup>
-                              <Label for="id">Do you want to delete {name}?</Label>
-                             </FormGroup>)
-                          // Display confirmation
-                          : ''
-                        }
-                        {/* Button to submit and delete project */}
-                        <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
-                        <Button onClick={this.props.toggle}> Cancel </Button>
-                    </Form>
-                </div>
-            </div>
+      <div className='extra-padding'>
+        <h2>Delete {title}</h2>
+        <hr />
+        <div>
+          <Form>
+            {
+              (!this.props.orgs)
+                ? ''
+                : (
+                  <FormGroup>
+                    <Label for="org">Organization ID</Label>
+                    <Input type="select"
+                           name="org"
+                           id="org"
+                           value={this.state.org || ''}
+                           onChange={this.handleOrgChange}>
+                      <option>Choose one...</option>
+                      {orgOptions}
+                    </Input>
+                  </FormGroup>
+                )
+            }
+            {/* Verify if project-views provided */}
+            { // Create a form to choose the project
+              (!this.props.projects)
+                ? ''
+                : (
+                  <FormGroup>
+                    (<Label for="id">Project ID</Label>)
+                    (<Input type="select"
+                           name="id"
+                           id="id"
+                           value={this.state.id || ''}
+                           onChange={this.handleChange}>
+                      <option>Choose one...</option>
+                      {this.state.projectOpt}
+                    </Input>
+                </FormGroup>)
+            }
+            {/* Verify if project provided */}
+            {(this.props.org || this.props.project || this.props.element)
+              ? (<FormGroup>
+                  <Label for="id">Do you want to delete {name}?</Label>
+                 </FormGroup>)
+              // Display confirmation
+              : ''
+            }
+            {/* Button to submit and delete project */}
+            <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
+            <Button onClick={this.props.toggle}> Cancel </Button>
+          </Form>
+        </div>
+      </div>
     );
   }
 
