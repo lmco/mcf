@@ -225,7 +225,8 @@ function find(requestingUser, organizationID, projects, options) {
     // Find the projects
     Project.find(searchQuery, fieldsString, { limit: limit, skip: skip })
     .populate(populateString)
-    .then((foundProjects) => resolve(foundProjects))
+    .then((foundProjects) => Project.getElementCount(foundProjects))
+    .then((finishedProjects) => resolve(finishedProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
