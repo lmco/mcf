@@ -32,6 +32,7 @@
       }
 
       .edit-btn {
+        height: 5%;
         color: $color-primary;
         padding-right: 15px;
       }
@@ -40,15 +41,6 @@
         cursor: pointer;
         color: $color-secondary
       }
-    }
-
-    .edit-btn {
-      color: $color-primary;
-    }
-
-    .edit-btn:hover {
-      cursor: pointer;
-      color: $color-secondary
     }
 
     .element-data {
