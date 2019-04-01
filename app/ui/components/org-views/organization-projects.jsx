@@ -33,7 +33,7 @@ function OrganizationProjects(props) {
   const org = props.org;
 
   // Loop through the org's projects
-  const listItems = org.projects.map(project => <ListItem className='proj-org-header'>
+  const listItems = org.projects.map(project => <ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
             <a href={`/${org.id}/${project.id}`} >
                 {project.name}
             </a>

@@ -79,8 +79,9 @@ class OrgList extends Component {
     // Loop through project-views in each org
     const projects = this.props.org.projects.map(
       project => (<ProjList project={project}
-                            admin={this.props.admin}
-                            orgid={this.props.org.id}/>)
+                                      admin={this.props.admin}
+                                      key={`proj-key-${project.id}`}
+                                      orgid={this.props.org.id}/>)
     );
 
     let icon;

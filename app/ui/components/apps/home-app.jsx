@@ -164,10 +164,10 @@ class HomeApp extends Component {
       const username = this.state.user.username;
 
       if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
-        return (<OrgList org={org} write={this.state.write} admin={this.state.admin}/>);
+        return (<OrgList org={org} key={`org-key-${org.id}`} write={this.state.write} admin={this.state.admin}/>);
       }
       else {
-        return (<OrgList org={org} admin={this.state.admin}/>);
+        return (<OrgList key={`org-key-${org.id}`} org={org} admin={this.state.admin}/>);
       }
     });
 

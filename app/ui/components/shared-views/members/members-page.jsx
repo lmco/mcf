@@ -64,7 +64,7 @@ class MembersPage extends Component {
     }
 
     // Loop through project members
-    const listItems = users.map(user => <UserListItem user={user} permission={userperm[user]}/>);
+    const listItems = users.map(user => <UserListItem key={`user-key-${user}`} user={user} permission={userperm[user]}/>);
 
     // Return project member list
     return (
