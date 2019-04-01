@@ -200,12 +200,18 @@ class HomeApp extends Component {
                   <Button className='btn'
                           outline color="secondary"
                           onClick={this.handleCreateToggle}>
-                      Create
+                    {(this.state.width > 800)
+                      ? 'Create'
+                      : (<i className='fas fa-plus add-btn'/>)
+                    }
                   </Button>
                   <Button className='btn'
                           outline color="danger"
                           onClick={this.handleDeleteToggle}>
-                      Delete
+                    {(this.state.width > 800)
+                      ? 'Delete'
+                      : (<i className='fas fa-trash-alt delete-btn'/>)
+                    }
                   </Button>
                 </div>
               )
