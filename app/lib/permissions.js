@@ -15,9 +15,14 @@
  */
 
 /**
- * Returns true if the user has permission to create users, false otherwise.
+ * @description Returns true if the user has permission to create users,
+ * false otherwise.
+ *
+ * @params
+ *
+ * @returns {boolean} The user's permissions.
  */
-module.exports.userCreate = function(user) {
+module.exports.createUser = function(user) {
   return user.admin;
 };
 
@@ -25,7 +30,7 @@ module.exports.userCreate = function(user) {
  * Returns true if the user has permission to read other user objects,
  * false otherwise.
  */
-module.exports.userRead = function(user) {
+module.exports.readUser = function(user) {
   return true;
 };
 
@@ -33,7 +38,7 @@ module.exports.userRead = function(user) {
 /**
  * Returns true if the user has permission to update users, false otherwise.
  */
-module.exports.userUpdate = function(user, userToUpdate) {
+module.exports.updateUser = function(user, userToUpdate) {
   return user.admin || user.username === userToUpdate.username;
 };
 
@@ -41,7 +46,7 @@ module.exports.userUpdate = function(user, userToUpdate) {
 /**
  * Returns true if the user has permission to delete users, false otherwise.
  */
-module.exports.userDelete = function(user) {
+module.exports.deleteUser = function(user) {
   return user.admin;
 };
 
@@ -49,7 +54,7 @@ module.exports.userDelete = function(user) {
  * Returns true if the user has permission to create an organization,
  * false otherwise.
  */
-module.exports.orgCreate = function(user) {
+module.exports.createOrg = function(user) {
   return user.admin;
 };
 
@@ -57,7 +62,7 @@ module.exports.orgCreate = function(user) {
  * Returns true if the user has permission to read the organization,
  * false otherwise.
  */
-module.exports.orgRead = function(user, org) {
+module.exports.readOrg = function(user, org) {
   // Admin's can access any org
   if (user.admin) {
     return true;
@@ -71,7 +76,7 @@ module.exports.orgRead = function(user, org) {
  * Returns true if the user has permission to update organization object,
  * false otherwise.
  */
-module.exports.orgUpdate = function(user, org) {
+module.exports.updateOrg = function(user, org) {
   // Admin's can update orgs
   if (user.admin) {
     return true;
@@ -89,7 +94,7 @@ module.exports.orgUpdate = function(user, org) {
  * Returns true if the user has permission to delete the organization object,
  * false otherwise.
  */
-module.exports.orgDelete = function(user) {
+module.exports.deleteOrg = function(user) {
   return user.admin;
 };
 
@@ -98,7 +103,7 @@ module.exports.orgDelete = function(user) {
  * Returns true if the user has permission to create a project within the org,
  * false otherwise.
  */
-module.exports.projectCreate = function(user, org) {
+module.exports.createProject = function(user, org) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -115,7 +120,7 @@ module.exports.projectCreate = function(user, org) {
  * Returns true if the user has permission to read the project,
  * false otherwise.
  */
-module.exports.projectRead = function(user, org, project) {
+module.exports.readProject = function(user, org, project) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -144,7 +149,7 @@ module.exports.projectRead = function(user, org, project) {
  * Returns true if the user has permission to update project object,
  * false otherwise.
  */
-module.exports.projectUpdate = function(user, org, project) {
+module.exports.updateProject = function(user, org, project) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -163,7 +168,7 @@ module.exports.projectUpdate = function(user, org, project) {
  * Returns true if the user has permission to delete the project object,
  * false otherwise.
  */
-module.exports.projectDelete = function(user, org) {
+module.exports.deleteProject = function(user, org) {
   return user.admin;
 };
 
@@ -172,7 +177,7 @@ module.exports.projectDelete = function(user, org) {
  * Returns true if the user has permission to create elements in the project,
  * false otherwise.
  */
-module.exports.elementCreate = function(user, org, project, branch) {
+module.exports.createElement = function(user, org, project, branch) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -190,7 +195,7 @@ module.exports.elementCreate = function(user, org, project, branch) {
  * Returns true if the user has permission to read elements in the project,
  * false otherwise.
  */
-module.exports.elementRead = function(user, org, project, branch) {
+module.exports.readElement = function(user, org, project, branch) {
 // Admin's can create projects
   if (user.admin) {
     return true;
@@ -219,7 +224,7 @@ module.exports.elementRead = function(user, org, project, branch) {
  * Returns true if the user has permission to update project element objects,
  * false otherwise.
  */
-module.exports.elementUpdate = function(user, org, project, branch) {
+module.exports.updateElement = function(user, org, project, branch) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -238,6 +243,6 @@ module.exports.elementUpdate = function(user, org, project, branch) {
  * Returns true if the user has permission to delete the project elements,
  * false otherwise.
  */
-module.exports.elementDelete = function(user, org, project, branch) {
+module.exports.deleteElement = function(user, org, project, branch) {
   return user.admin;
 };
