@@ -139,6 +139,71 @@ OrganizationSchema.methods.getPublicData = function() {
   };
 };
 
+OrganizationSchema.statics.getPublicData = function(org) {
+  const permissions = (org.permissions) ? {} : undefined;
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+
+  // Loop through each permission key/value pair
+  Object.keys(org.permissions || {}).forEach((u) => {
+    // Return highest permission
+    permissions[u] = org.permissions[u].pop();
+  });
+
+  // If org.createdBy is defined
+  if (org.createdBy) {
+    // If org.createdBy is populated
+    if (typeof org.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = org.createdBy.getPublicData();
+    }
+    else {
+      createdBy = org.createdBy;
+    }
+  }
+
+  // If org.lastModifiedBy is defined
+  if (org.lastModifiedBy) {
+    // If org.lastModifiedBy is populated
+    if (typeof org.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = org.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = org.lastModifiedBy;
+    }
+  }
+
+  // If org.archivedBy is defined
+  if (org.archivedBy) {
+    // If org.archivedBy is populated
+    if (typeof org.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = org.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = org.archivedBy;
+    }
+  }
+
+  // Return the organization public fields
+  return {
+    id: org._id,
+    name: org.name,
+    permissions: permissions,
+    custom: org.custom,
+    createdOn: org.createdOn,
+    createdBy: createdBy,
+    updatedOn: org.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (org.archived) ? org : undefined,
+    archivedOn: (org.archivedOn) ? org.archivedOn : undefined,
+    archivedBy: archivedBy,
+    projects: (org.projects) ? org.projects.map(p => p.getPublicData()) : undefined
+  };
+};
+
 /**
  * @description Returns supported permission levels
  * @memberOf OrganizationSchema

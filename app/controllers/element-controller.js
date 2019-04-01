@@ -74,6 +74,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.parent] - Search for elements with a specific
  * parent.
  * @param {string} [options.source] - Search for elements with a specific
@@ -153,6 +155,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     let fieldsString = '';
     let limit = 0;
     let skip = 0;
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -228,6 +231,14 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         skip = options.skip;
       }
 
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
+      }
+
       // Create array of valid search options
       const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
         'createdBy', 'lastModifiedBy', 'archivedBy'];
@@ -254,7 +265,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     }
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((project) => {
       // Check that the project was found
       if (!project) {
@@ -305,10 +316,17 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
       // If no IDs provided, find all elements in a project
       if (elementIDs.length === 0) {
-        // Find all elements in a project
-        return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-        .populate(populateString)
-        .lean();
+        // If the lean option is supplied
+        if (lean) {
+          // Find all elements in a project
+          return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+          .populate(populateString)
+          .lean();
+        }
+        else {
+          return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+          .populate(populateString);
+        }
       }
       // Find elements by ID
 
@@ -319,12 +337,24 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         // Split elementIDs list into batches of 50000
         searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
 
-        // Add find operation to promises array
-        promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-        .populate(populateString)
-        .then((_foundElements) => {
-          foundElements = foundElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (lean) {
+          // Add find operation to promises array
+          promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+          .populate(populateString)
+          .lean()
+          .then((_foundElements) => {
+            foundElements = foundElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+          .populate(populateString)
+          .then((_foundElements) => {
+            foundElements = foundElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -376,6 +406,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created element objects
  *
@@ -428,6 +460,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     // Initialize valid options
     let populateString = 'contains ';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -465,6 +498,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -544,7 +585,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Find the project to verify existence and permissions
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -565,7 +606,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         // Split arrIDs into batches of 50000
         const tmpQuery = { _id: { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) } };
         // Attempt to find any elements with matching _id
-        promises.push(Element.find(tmpQuery, '_id')
+        promises.push(Element.find(tmpQuery, '_id').lean()
         .then((foundElements) => {
           if (foundElements.length > 0) {
             // Get array of the foundElements's ids
@@ -658,7 +699,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       const findExtraElementsQuery = { _id: { $in: elementsToFind } };
 
       // Find extra elements, and only return _id for faster lookup
-      return Element.find(findExtraElementsQuery, '_id');
+      return Element.find(findExtraElementsQuery, '_id').lean();
     })
     .then((extraElements) => {
       // Convert extraElements to JMI type 2 for easier lookup
@@ -713,11 +754,21 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         // Split elementIDs list into batches of 50000
         const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
-        // Add find operation to promises array
-        promises.push(Element.find(tmpQuery, fieldsString).populate(populateString)
-        .then((_foundElements) => {
-          populatedElements = populatedElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (lean) {
+          // Add find operation to promises array
+          promises.push(Element.find(tmpQuery, fieldsString).populate(populateString).lean()
+          .then((_foundElements) => {
+            populatedElements = populatedElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises.push(Element.find(tmpQuery, fieldsString).populate(populateString)
+          .then((_foundElements) => {
+            populatedElements = populatedElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -771,6 +822,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of updated element objects
  *
@@ -828,6 +881,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     // Initialize valid options
     let populateString = 'contains ';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -866,10 +920,18 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
         fieldsString += options.fields.join(' ');
       }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
+      }
     }
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -967,7 +1029,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery)
+        promises.push(Element.find(searchQuery).lean()
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
         }));
@@ -987,7 +1049,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         );
       }
 
-      return Element.find(sourceTargetQuery);
+      return Element.find(sourceTargetQuery).lean();
     })
     .then((foundSourceTarget) => {
       // Convert elementsToUpdate to JMI type 2
@@ -1102,11 +1164,21 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         // Split arrIDs list into batches of 50000
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
-        // Add find operation to promises array
-        promises2.push(Element.find(searchQuery, fieldsString).populate(populateString)
-        .then((_foundElements) => {
-          foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (lean) {
+          // Add find operation to promises array
+          promises2.push(Element.find(searchQuery, fieldsString).populate(populateString).lean()
+          .then((_foundElements) => {
+            foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises2.push(Element.find(searchQuery, fieldsString).populate(populateString)
+          .then((_foundElements) => {
+            foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -1152,6 +1224,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created/replaced element objects
  *
@@ -1206,7 +1280,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     const ts = Date.now();
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -1262,7 +1336,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery)
+        promises.push(Element.find(searchQuery).lean()
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
         }));
@@ -1308,7 +1382,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       });
     })
     // Delete elements from database
-    .then(() => Element.deleteMany({ _id: foundElementIDs }))
+    .then(() => Element.deleteMany({ _id: foundElementIDs }).lean())
     .then(() => {
       // Emit the event elements-deleted
       EventEmitter.emit('elements-deleted', foundElements);
@@ -1432,7 +1506,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Find the elements to delete
-    Element.find({ _id: { $in: elementsToFind } })
+    Element.find({ _id: { $in: elementsToFind } }).lean()
     .then((foundElements) => {
       const foundElementIDs = foundElements.map(e => e._id);
 
@@ -1465,7 +1539,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       for (let i = 0; i < foundIDs.length / 50000; i++) {
         const batchIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
         // Delete batch
-        promises.push(Element.deleteMany({ _id: { $in: batchIDs } }));
+        promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
       }
       // Return when all deletes have completed
       return Promise.all(promises);
@@ -1530,7 +1604,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
   function findElementTreeHelper(ids) {
     return new Promise((resolve, reject) => {
       // Find all elements whose parent is in the list of given ids
-      Element.find({ parent: { $in: ids } }, '_id')
+      Element.find({ parent: { $in: ids } }, '_id').lean()
       .then(elements => {
         // Get a list of element ids
         const foundIDs = elements.map(e => e._id);
@@ -1611,7 +1685,7 @@ function moveElementCheck(organizationID, projectID, branch, element) {
     // Define nested helper function
     function findElementParentRecursive(e) {
       return new Promise((res, rej) => {
-        Element.findOne({ _id: e.parent })
+        Element.findOne({ _id: e.parent }).lean()
         .then((foundElement) => {
           // If foundElement is null, reject with error
           if (!foundElement) {
@@ -1670,6 +1744,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.parent] - Search for elements with a specific
  * parent.
  * @param {string} [options.source] - Search for elements with a specific
@@ -1731,6 +1807,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     let populateString = 'contains ';
     let limit = 0;
     let skip = 0;
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -1784,6 +1861,14 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         skip = options.skip;
       }
 
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
+      }
+
       // Create array of valid search options
       const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
         'createdBy', 'lastModifiedBy', 'archivedBy'];
@@ -1810,7 +1895,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     }
 
     // Ensure the project exists
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((project) => {
       // Ensure the project was found
       if (project === null) {
@@ -1831,11 +1916,19 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         delete searchQuery.archived;
       }
 
-      // Search for the elements
-      return Element.find(searchQuery, { score: { $meta: 'textScore' } },
-        { limit: limit, skip: skip })
-      .sort({ score: { $meta: 'textScore' } })
-      .populate(populateString);
+      // If the lean option is supplied
+      if (lean) {
+        // Search for the elements
+        return Element.find(searchQuery, { score: { $meta: 'textScore' } },
+          { limit: limit, skip: skip })
+        .sort({ score: { $meta: 'textScore' } }).populate(populateString).lean();
+      }
+      else {
+        // Search for the elements
+        return Element.find(searchQuery, { score: { $meta: 'textScore' } },
+          { limit: limit, skip: skip })
+        .sort({ score: { $meta: 'textScore' } }).populate(populateString);
+      }
     })
     .then((foundElements) => resolve(foundElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));

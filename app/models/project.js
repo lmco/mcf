@@ -167,6 +167,75 @@ ProjectSchema.methods.getPublicData = function() {
   };
 };
 
+ProjectSchema.statics.getPublicData = function(project) {
+  const permissions = (project.permissions) ? {} : undefined;
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+
+  // Loop through each permission key/value pair
+  Object.keys(project.permissions || {}).forEach((u) => {
+    // Return highest permission
+    permissions[u] = project.permissions[u].pop();
+  });
+
+  // If project.createdBy is defined
+  if (project.createdBy) {
+    // If project.createdBy is populated
+    if (typeof project.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = project.createdBy.getPublicData();
+    }
+    else {
+      createdBy = project.createdBy;
+    }
+  }
+
+  // If project.lastModifiedBy is defined
+  if (project.lastModifiedBy) {
+    // If project.lastModifiedBy is populated
+    if (typeof project.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = project.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = project.lastModifiedBy;
+    }
+  }
+
+  // If project.archivedBy is defined
+  if (project.archivedBy) {
+    // If project.archivedBy is populated
+    if (typeof project.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = project.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = project.archivedBy;
+    }
+  }
+
+  // Return the projects public fields
+  return {
+    id: utils.parseID(project._id).pop(),
+    org: (project.org && project.org.id)
+      ? project.org.getPublicData()
+      : utils.parseID(project._id)[0],
+    name: project.name,
+    elementCount: project.count || undefined,
+    permissions: permissions,
+    custom: project.custom,
+    visibility: project.visibility,
+    createdOn: project.createdOn,
+    createdBy: createdBy,
+    updatedOn: project.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (project.archived) ? project : undefined,
+    archivedOn: (project.archivedOn) ? project.archivedOn : undefined,
+    archivedBy: archivedBy
+  };
+};
+
 /**
  * @description Returns supported permission levels
  * @memberOf ProjectSchema

@@ -256,6 +256,66 @@ UserSchema.methods.getPublicData = function() {
   };
 };
 
+UserSchema.statics.getPublicData = function(user) {
+  let createdBy;
+  let lastModifiedBy;
+  let archivedBy;
+
+  // If user.createdBy is defined
+  if (user.createdBy) {
+    // If user.createdBy is populated
+    if (typeof user.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = user.createdBy.getPublicData();
+    }
+    else {
+      createdBy = user.createdBy;
+    }
+  }
+
+  // If user.lastModifiedBy is defined
+  if (user.lastModifiedBy) {
+    // If user.lastModifiedBy is populated
+    if (typeof user.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = user.lastModifiedBy.getPublicData();
+    }
+    else {
+      lastModifiedBy = user.lastModifiedBy;
+    }
+  }
+
+  // If user.archivedBy is defined
+  if (user.archivedBy) {
+    // If user.archivedBy is populated
+    if (typeof user.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = user.archivedBy.getPublicData();
+    }
+    else {
+      archivedBy = user.archivedBy;
+    }
+  }
+
+  return {
+    username: user._id,
+    name: (user.fname && user.lname) ? user.name : undefined,
+    fname: user.fname,
+    preferredName: user.preferredName,
+    lname: user.lname,
+    email: user.email,
+    custom: user.custom,
+    createdOn: user.createdOn,
+    createdBy: createdBy,
+    updatedOn: user.updatedOn,
+    lastModifiedBy: lastModifiedBy,
+    archived: (user.archived) ? user : undefined,
+    archivedOn: (user.archivedOn) ? user.archivedOn : undefined,
+    archivedBy: archivedBy,
+    admin: user.admin
+  };
+};
+
 /* ---------------------------( User Properties )---------------------------- */
 // Required for virtual getters
 UserSchema.set('toJSON', { virtuals: true });
