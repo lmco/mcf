@@ -87,6 +87,8 @@ const jmi = M.require('lib.jmi-conversions');
  * specific lastModifiedBy value.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found element objects
  *
@@ -1668,6 +1670,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * specific lastModifiedBy value.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} An array of found elements.
  *

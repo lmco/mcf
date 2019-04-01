@@ -1741,6 +1741,12 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Search for elements archived by a specific user.
  *         in: query
  *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello.
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1896,6 +1902,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         type: string
  *       - name: archivedBy
  *         description: Search for elements archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello.
  *         in: query
  *         type: string
  *     responses:
