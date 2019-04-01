@@ -10,6 +10,7 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This implements the behavior and logic for elements.
  * It also provides function for interacting with elements.
@@ -73,6 +74,22 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {string} [options.parent] - Search for elements with a specific
+ * parent.
+ * @param {string} [options.source] - Search for elements with a specific
+ * source.
+ * @param {string} [options.target] - Search for elements with a specific
+ * target.
+ * @param {string} [options.type] - Search for elements with a specific type.
+ * @param {string} [options.name] - Search for elements with a specific name.
+ * @param {string} [options.createdBy] - Search for elements with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for elements with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for elements with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found element objects
  *
@@ -122,6 +139,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     let foundElements = [];
+    const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Set options if no elements were provided, but options were
     if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
@@ -209,6 +227,30 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         }
         skip = options.skip;
       }
+
+      // Create array of valid search options
+      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+        'createdBy', 'lastModifiedBy', 'archivedBy'];
+
+      // Loop through provided options
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+          }
+
+          // If the search option is an element reference
+          if (['parent', 'source', 'target'].includes(o)) {
+            // Make value the concatenated ID
+            options[o] = utils.createID(orgID, projID, options[o]);
+          }
+
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
     }
 
     // Find the project
@@ -256,8 +298,6 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       return elementsToFind;
     })
     .then((elementIDs) => {
-      // Define searchQuery
-      const searchQuery = { project: utils.createID(orgID, projID), archived: false };
       // If the archived field is true, remove it from the query
       if (archived) {
         delete searchQuery.archived;
@@ -1018,9 +1058,12 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
           // Set archivedBy if archived field is being changed
           if (key === 'archived') {
-            // Error Check: ensure user cannot archive the root model element
-            if (element._id === utils.createID(orgID, projID, 'model')) {
-              throw new M.CustomError('User cannot archive the root model element.', 403, 'warn');
+            const elemID = utils.parseID(element._id).pop();
+            // Error Check: ensure user cannot archive root elements
+            if (Element.getValidRootElements().includes(elemID)) {
+              throw new M.CustomError(
+                `User cannot archive the root element: ${elemID}.`, 403, 'warn'
+              );
             }
 
             // If the element is being archived
@@ -1231,10 +1274,14 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then(() => {
       foundElementIDs = foundElements.map(e => e._id);
 
-      // Error Check: ensure user cannot replace root model element
-      if (foundElementIDs.includes(utils.createID(orgID, projID, 'model'))) {
-        throw new M.CustomError('User cannot replace the root model element.', 403, 'warn');
-      }
+      // Error Check: ensure user cannot replace root element
+      foundElementIDs.forEach((id) => {
+        if (Element.getValidRootElements().includes(utils.parseID(id).pop())) {
+          throw new M.CustomError(
+            `User cannot replace root element: ${utils.parseID(id).pop()}.`, 403, 'warn'
+          );
+        }
+      });
 
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
@@ -1404,11 +1451,15 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     .then((_foundIDs) => {
       foundIDs = _foundIDs;
       const promises = [];
-
-      // Error Check: ensure user cannot delete root model element
-      if (foundIDs.includes(utils.createID(orgID, projID, 'model'))) {
-        throw new M.CustomError('User cannot delete the root model element.', 403, 'warn');
-      }
+      // Error Check: ensure user cannot delete root elements
+      foundIDs.forEach((id) => {
+        const elemID = utils.parseID(id).pop();
+        if (Element.getValidRootElements().includes(elemID)) {
+          throw new M.CustomError(
+            `User cannot delete root element: ${elemID}.`, 403, 'warn'
+          );
+        }
+      });
 
       // Split elements into batches of 50000 or less
       for (let i = 0; i < foundIDs.length / 50000; i++) {
@@ -1550,9 +1601,11 @@ function moveElementCheck(organizationID, projectID, branch, element) {
       throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
     }
 
-    // Error Check: ensure the root model element is not being moved
-    if (element.id === 'model') {
-      throw new M.CustomError('Cannot move the root model element.', 403, 'warn');
+    // Error Check: ensure the root elements is not being moved
+    if (Element.getValidRootElements().includes(element.id)) {
+      throw new M.CustomError(
+        `Cannot move the root element: ${element.id}.`, 403, 'warn'
+      );
     }
 
     // Define nested helper function
@@ -1617,6 +1670,22 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {string} [options.parent] - Search for elements with a specific
+ * parent.
+ * @param {string} [options.source] - Search for elements with a specific
+ * source.
+ * @param {string} [options.target] - Search for elements with a specific
+ * target.
+ * @param {string} [options.type] - Search for elements with a specific type.
+ * @param {string} [options.name] - Search for elements with a specific name.
+ * @param {string} [options.createdBy] - Search for elements with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for elements with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for elements with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} An array of found elements.
  *
@@ -1655,6 +1724,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
+    const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Initialize valid options
     let archived = false;
@@ -1713,6 +1783,30 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         }
         skip = options.skip;
       }
+
+      // Create array of valid search options
+      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+        'createdBy', 'lastModifiedBy', 'archivedBy'];
+
+      // Loop through provided options
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+          }
+
+          // If the search option is an element reference
+          if (['parent', 'source', 'target'].includes(o)) {
+            // Make value the concatenated ID
+            options[o] = utils.createID(orgID, projID, options[o]);
+          }
+
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
     }
 
     // Ensure the project exists
@@ -1731,7 +1825,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
           + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
       }
 
-      const searchQuery = { project: project._id, $text: { $search: query }, archived: false };
+      searchQuery.$text = { $search: query };
       // If the archived field is true, remove it from the query
       if (archived) {
         delete searchQuery.archived;
