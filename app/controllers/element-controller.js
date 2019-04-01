@@ -73,6 +73,22 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {string} [options.parent] - Search for elements with a specific
+ * parent.
+ * @param {string} [options.source] - Search for elements with a specific
+ * source.
+ * @param {string} [options.target] - Search for elements with a specific
+ * target.
+ * @param {string} [options.type] - Search for elements with a specific type.
+ * @param {string} [options.name] - Search for elements with a specific name.
+ * @param {string} [options.createdBy] - Search for elements with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for elements with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for elements with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found element objects
  *
@@ -122,6 +138,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
     let foundElements = [];
+    const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Set options if no elements were provided, but options were
     if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
@@ -209,6 +226,30 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         }
         skip = options.skip;
       }
+
+      // Create array of valid search options
+      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+        'createdBy', 'lastModifiedBy', 'archivedBy'];
+
+      // Loop through provided options
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+          }
+
+          // If the search option is an element reference
+          if (['parent', 'source', 'target'].includes(o)) {
+            // Make value the concatenated ID
+            options[o] = utils.createID(orgID, projID, options[o]);
+          }
+
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
     }
 
     // Find the project
@@ -256,8 +297,6 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       return elementsToFind;
     })
     .then((elementIDs) => {
-      // Define searchQuery
-      const searchQuery = { project: utils.createID(orgID, projID), archived: false };
       // If the archived field is true, remove it from the query
       if (archived) {
         delete searchQuery.archived;
@@ -1617,6 +1656,22 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {string} [options.parent] - Search for elements with a specific
+ * parent.
+ * @param {string} [options.source] - Search for elements with a specific
+ * source.
+ * @param {string} [options.target] - Search for elements with a specific
+ * target.
+ * @param {string} [options.type] - Search for elements with a specific type.
+ * @param {string} [options.name] - Search for elements with a specific name.
+ * @param {string} [options.createdBy] - Search for elements with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for elements with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for elements with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} An array of found elements.
  *
@@ -1655,6 +1710,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.sanitize(organizationID);
     const projID = sani.sanitize(projectID);
+    const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Initialize valid options
     let archived = false;
@@ -1713,6 +1769,30 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         }
         skip = options.skip;
       }
+
+      // Create array of valid search options
+      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+        'createdBy', 'lastModifiedBy', 'archivedBy'];
+
+      // Loop through provided options
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+          }
+
+          // If the search option is an element reference
+          if (['parent', 'source', 'target'].includes(o)) {
+            // Make value the concatenated ID
+            options[o] = utils.createID(orgID, projID, options[o]);
+          }
+
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
     }
 
     // Ensure the project exists
@@ -1731,7 +1811,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
           + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
       }
 
-      const searchQuery = { project: project._id, $text: { $search: query }, archived: false };
+      searchQuery.$text = { $search: query };
       // If the archived field is true, remove it from the query
       if (archived) {
         delete searchQuery.archived;
