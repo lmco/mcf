@@ -150,12 +150,15 @@ class ProjectList extends Component {
       const orgId = org.id;
 
       // Loop through project-views in each org
-      const projects = org.projects.map(project => (<ProjectListItem className='hover-darken' project={project} href={`/${orgId}/${project.id}`}/>));
+      const projects = org.projects.map(project => (<ProjectListItem className='hover-darken'
+                                                                               key={`proj-key-${project.id}`}
+                                                                               project={project}
+                                                                               href={`/${orgId}/${project.id}`}/>));
 
       // Return the list of the orgs with project-views
       return (
         <React.Fragment>
-            <ListItem className='proj-org-header'>
+            <ListItem key={`org-key-${org.id}`} className='proj-org-header'>
                 <a href={`/${orgId}`}>{org.name}</a>
             </ListItem>
             <List className='projects-list'>
@@ -202,7 +205,10 @@ class ProjectList extends Component {
                 : (<Button className='btn'
                             outline color="secondary"
                             onClick={this.handleCreateToggle}>
-                      Create
+                  {(this.state.width > 800)
+                    ? 'Create'
+                    : (<i className='fas fa-plus add-btn'/>)
+                  }
                   </Button>)
               }
               {/* Verify user has admin permissions */}
@@ -212,7 +218,10 @@ class ProjectList extends Component {
                 : (<Button className='btn'
                             outline color="danger"
                             onClick={this.handleDeleteToggle}>
-                      Delete
+                  {(this.state.width > 800)
+                    ? 'Delete'
+                    : (<i className='fas fa-trash-alt delete-btn'/>)
+                  }
                   </Button>)
               }
             </div>
@@ -220,10 +229,10 @@ class ProjectList extends Component {
           <div className='extra-padding'>
             {/* Verify there are project-views */}
             {(this.state.projects.length === 0)
-              ? (<div className='list-item'>
+              ? (<div key='no-list' className='list-item'>
                   <h3> No projects. </h3>
                  </div>)
-              : (<List>
+              : (<List key='main-list'>
                   {list}
                  </List>)
             }

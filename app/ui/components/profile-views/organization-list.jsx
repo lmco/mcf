@@ -52,6 +52,7 @@ class OrganizationList extends Component {
     // Bind component functions
     this.handleCreateToggle = this.handleCreateToggle.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
+    this.handleResize = this.handleResize.bind(this);
   }
 
   componentDidMount() {
@@ -108,7 +109,7 @@ class OrganizationList extends Component {
 
   render() {
     // Loop through all orgs
-    const orgs = this.state.orgs.map(org => <OrgListItem className='hover-darken' org={org} href={`/${org.id}`}/>);
+    const orgs = this.state.orgs.map(org => <OrgListItem className='hover-darken' key={`org-key-${org.id}`} org={org} href={`/${org.id}`}/>);
 
     // Return org list
     return (
@@ -139,12 +140,18 @@ class OrganizationList extends Component {
                     <Button className='btn'
                             outline color="secondary"
                             onClick={this.handleCreateToggle}>
-                      Create
+                      {(this.state.width > 800)
+                        ? 'Create'
+                        : (<i className='fas fa-plus add-btn'/>)
+                      }
                     </Button>
                     <Button className='btn'
                             outline color="danger"
                             onClick={this.handleDeleteToggle}>
-                      Delete
+                      {(this.state.width > 800)
+                        ? 'Delete'
+                        : (<i className='fas fa-trash-alt delete-btn'/>)
+                      }
                     </Button>
                   </div>)
               }
