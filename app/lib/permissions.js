@@ -45,7 +45,7 @@ module.exports = {
  */
 function createUser(user) {
   return user.admin;
-};
+}
 
 /**
  * @description Returns true if the user has permission to read other user
@@ -58,7 +58,7 @@ function createUser(user) {
  */
 function readUser(user) {
   return true;
-};
+}
 
 
 /**
@@ -73,7 +73,7 @@ function readUser(user) {
  */
 function updateUser(user, userToUpdate) {
   return user.admin || user.username === userToUpdate.username;
-};
+}
 
 
 /**
@@ -87,7 +87,7 @@ function updateUser(user, userToUpdate) {
  */
 function deleteUser(user) {
   return user.admin;
-};
+}
 
 /**
  * @description Returns true if the user has permission to create an organization,
@@ -100,7 +100,7 @@ function deleteUser(user) {
  */
 function createOrg(user) {
   return user.admin;
-};
+}
 
 /**
  * @description Returns true if the user has permission to read the
@@ -119,7 +119,7 @@ function readOrg(user, org) {
   }
   // User must be a member of the org to read it
   return org.permissions.hasOwnProperty(user.username);
-};
+}
 
 
 /**
@@ -143,7 +143,7 @@ function updateOrg(user, org) {
     return false;
   }
   return org.permissions[user.username].includes('admin');
-};
+}
 
 
 /**
@@ -157,7 +157,7 @@ function updateOrg(user, org) {
  */
 function deleteOrg(user) {
   return user.admin;
-};
+}
 
 
 /**
@@ -181,7 +181,8 @@ function createProject(user, org) {
     return false;
   }
   return org.permissions[user.username].includes('write');
-};
+}
+
 
 /**
  * @description Returns true if the user has permission to read the project,
@@ -216,7 +217,7 @@ function readProject(user, org, project) {
     return false;
   }
   return project.permissions[user.username].includes('read');
-};
+}
 
 
 /**
@@ -242,7 +243,7 @@ function updateProject(user, org, project) {
     return false;
   }
   return project.permissions[user.username].includes('admin');
-};
+}
 
 
 /**
@@ -258,7 +259,7 @@ function updateProject(user, org, project) {
  */
 function deleteProject(user, org, project) {
   return user.admin;
-};
+}
 
 
 /**
@@ -285,7 +286,8 @@ function createElement(user, org, project, branch) {
     return false;
   }
   return project.permissions[user.username].includes('write');
-};
+}
+
 
 /**
  * @description Returns true if the user has permission to read elements in the
@@ -321,7 +323,7 @@ function readElement(user, org, project, branch) {
     return false;
   }
   return project.permissions[user.username].includes('read');
-};
+}
 
 
 /**
@@ -348,7 +350,7 @@ function updateElement(user, org, project, branch) {
     return false;
   }
   return project.permissions[user.username].includes('write');
-};
+}
 
 
 /**
@@ -365,5 +367,4 @@ function updateElement(user, org, project, branch) {
  */
 function deleteElement(user, org, project, branch) {
   return user.admin;
-};
-
+}
