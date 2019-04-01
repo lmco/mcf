@@ -73,6 +73,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.parent] - Search for elements with a specific
  * parent.
  * @param {string} [options.source] - Search for elements with a specific
@@ -152,6 +154,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     let fieldsString = '';
     let limit = 0;
     let skip = 0;
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -225,6 +228,14 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
         }
         skip = options.skip;
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
 
       // Create array of valid search options
@@ -304,10 +315,17 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
       // If no IDs provided, find all elements in a project
       if (elementIDs.length === 0) {
-        // Find all elements in a project
-        return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-        .populate(populateString)
-        .lean();
+        // If the lean option is supplied
+        if (lean) {
+          // Find all elements in a project
+          return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+          .populate(populateString)
+          .lean();
+        }
+        else {
+          return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+          .populate(populateString);
+        }
       }
       // Find elements by ID
 
@@ -318,12 +336,24 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         // Split elementIDs list into batches of 50000
         searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
 
-        // Add find operation to promises array
-        promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-        .populate(populateString)
-        .then((_foundElements) => {
-          foundElements = foundElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (lean) {
+          // Add find operation to promises array
+          promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+          .populate(populateString)
+          .lean()
+          .then((_foundElements) => {
+            foundElements = foundElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+          .populate(populateString)
+          .then((_foundElements) => {
+            foundElements = foundElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -375,6 +405,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created element objects
  *
@@ -427,6 +459,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     // Initialize valid options
     let populateString = 'contains ';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -464,6 +497,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -712,11 +753,21 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         // Split elementIDs list into batches of 50000
         const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
-        // Add find operation to promises array
-        promises.push(Element.find(tmpQuery, fieldsString).populate(populateString)
-        .then((_foundElements) => {
-          populatedElements = populatedElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (lean) {
+          // Add find operation to promises array
+          promises.push(Element.find(tmpQuery, fieldsString).populate(populateString).lean()
+          .then((_foundElements) => {
+            populatedElements = populatedElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises.push(Element.find(tmpQuery, fieldsString).populate(populateString)
+          .then((_foundElements) => {
+            populatedElements = populatedElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -770,6 +821,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of updated element objects
  *
@@ -827,6 +880,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     // Initialize valid options
     let populateString = 'contains ';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -864,6 +918,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -1098,11 +1160,21 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         // Split arrIDs list into batches of 50000
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
-        // Add find operation to promises array
-        promises2.push(Element.find(searchQuery, fieldsString).populate(populateString)
-        .then((_foundElements) => {
-          foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (lean) {
+          // Add find operation to promises array
+          promises2.push(Element.find(searchQuery, fieldsString).populate(populateString).lean()
+          .then((_foundElements) => {
+            foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises2.push(Element.find(searchQuery, fieldsString).populate(populateString)
+          .then((_foundElements) => {
+            foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -1148,6 +1220,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created/replaced element objects
  *
@@ -1656,6 +1730,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.parent] - Search for elements with a specific
  * parent.
  * @param {string} [options.source] - Search for elements with a specific
@@ -1717,6 +1793,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     let populateString = 'contains ';
     let limit = 0;
     let skip = 0;
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -1770,6 +1847,14 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         skip = options.skip;
       }
 
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
+      }
+
       // Create array of valid search options
       const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
         'createdBy', 'lastModifiedBy', 'archivedBy'];
@@ -1817,11 +1902,19 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         delete searchQuery.archived;
       }
 
-      // Search for the elements
-      return Element.find(searchQuery, { score: { $meta: 'textScore' } },
-        { limit: limit, skip: skip })
-      .sort({ score: { $meta: 'textScore' } })
-      .populate(populateString);
+      // If the lean option is supplied
+      if (lean) {
+        // Search for the elements
+        return Element.find(searchQuery, { score: { $meta: 'textScore' } },
+          { limit: limit, skip: skip })
+        .sort({ score: { $meta: 'textScore' } }).populate(populateString).lean();
+      }
+      else {
+        // Search for the elements
+        return Element.find(searchQuery, { score: { $meta: 'textScore' } },
+          { limit: limit, skip: skip })
+        .sort({ score: { $meta: 'textScore' } }).populate(populateString);
+      }
     })
     .then((foundElements) => resolve(foundElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));

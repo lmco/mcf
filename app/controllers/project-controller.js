@@ -69,6 +69,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of found project objects
  *
@@ -126,6 +128,7 @@ function find(requestingUser, organizationID, projects, options) {
     let fieldsString = '';
     let limit = 0;
     let skip = 0;
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -192,6 +195,14 @@ function find(requestingUser, organizationID, projects, options) {
         }
         skip = options.skip;
       }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
+      }
     }
 
     // Define searchQuery
@@ -222,12 +233,23 @@ function find(requestingUser, organizationID, projects, options) {
       throw new M.CustomError('Invalid input for finding projects.', 400, 'warn');
     }
 
-    // Find the projects
-    Project.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-    .populate(populateString)
-    .then((foundProjects) => Project.getElementCount(foundProjects))
-    .then((finishedProjects) => resolve(finishedProjects))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    // If the lean option is supplied
+    if (lean) {
+      // Find the projects
+      Project.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+      .populate(populateString).lean()
+      .then((foundProjects) => Project.getElementCount(foundProjects))
+      .then((finishedProjects) => resolve(finishedProjects))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
+    else {
+      // Find the projects
+      Project.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+      .populate(populateString)
+      .then((foundProjects) => Project.getElementCount(foundProjects))
+      .then((finishedProjects) => resolve(finishedProjects))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
   });
 }
 
@@ -259,6 +281,8 @@ function find(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created project objects
  *
@@ -305,6 +329,7 @@ function create(requestingUser, organizationID, projects, options) {
     // Initialize valid options
     let populateString = '';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -342,6 +367,14 @@ function create(requestingUser, organizationID, projects, options) {
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -511,8 +544,18 @@ function create(requestingUser, organizationID, projects, options) {
         // Create the elements
       return Element.insertMany(elemObjects);
     })
-    .then(() => resolve(Project.find({ _id: { $in: arrIDs } }, fieldsString)
-    .populate(populateString)))
+    .then(() => {
+      // If the lean option is supplied
+      if (lean) {
+        return Project.find({ _id: { $in: arrIDs } }, fieldsString)
+        .populate(populateString).lean();
+      }
+      else {
+        return Project.find({ _id: { $in: arrIDs } }, fieldsString)
+        .populate(populateString);
+      }
+    })
+    .then((foundCreatedProjects) => resolve(foundCreatedProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -552,6 +595,8 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of updated project objects
  *
@@ -602,6 +647,7 @@ function update(requestingUser, organizationID, projects, options) {
     // Initialize valid options
     let populateString = '';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -639,6 +685,14 @@ function update(requestingUser, organizationID, projects, options) {
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -889,7 +943,15 @@ function update(requestingUser, organizationID, projects, options) {
       // Return when all promises have been complete
       return Promise.all(promises);
     })
-    .then(() => Project.find(searchQuery, fieldsString).populate(populateString))
+    .then(() => {
+      // If the lean option is supplied
+      if (lean) {
+        return Project.find(searchQuery, fieldsString).populate(populateString).lean();
+      }
+      else {
+        return Project.find(searchQuery, fieldsString).populate(populateString);
+      }
+    })
     .then((foundUpdatedProjects) => {
       // Emit the event projects-updated
       EventEmitter.emit('projects-updated', foundUpdatedProjects);
@@ -927,6 +989,8 @@ function update(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created project objects
  *

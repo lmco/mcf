@@ -65,6 +65,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of found user objects.
  *
@@ -116,6 +118,7 @@ function find(requestingUser, users, options) {
     let fieldsString = '';
     let limit = 0;
     let skip = 0;
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -182,6 +185,14 @@ function find(requestingUser, users, options) {
         }
         skip = options.skip;
       }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
+      }
     }
 
     // Define searchQuery
@@ -205,11 +216,21 @@ function find(requestingUser, users, options) {
       throw new M.CustomError('Invalid input for finding users.', 400, 'warn');
     }
 
-    // Find the users
-    User.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-    .populate(populateString)
-    .then((foundUser) => resolve(foundUser))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    // If the lean option is supplied
+    if (lean) {
+      // Find the users
+      User.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+      .populate(populateString).lean()
+      .then((foundUser) => resolve(foundUser))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
+    else {
+      // Find the users
+      User.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+      .populate(populateString)
+      .then((foundUser) => resolve(foundUser))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
   });
 }
 
@@ -241,6 +262,8 @@ function find(requestingUser, users, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created user objects
  *
@@ -285,6 +308,7 @@ function create(requestingUser, users, options) {
     // Initialize valid options
     let populateString = '';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -322,6 +346,14 @@ function create(requestingUser, users, options) {
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -425,8 +457,18 @@ function create(requestingUser, users, options) {
       // Save the updated default org
       return defaultOrg.save();
     })
-    .then(() => resolve(User.find({ _id: { $in: arrUsernames } }, fieldsString)
-    .populate(populateString)))
+    .then(() => {
+      // If the lean option is supplied
+      if (lean) {
+        return User.find({ _id: { $in: arrUsernames } }, fieldsString)
+        .populate(populateString).lean();
+      }
+      else {
+        return User.find({ _id: { $in: arrUsernames } }, fieldsString)
+        .populate(populateString);
+      }
+    })
+    .then((foundCreatedUsers) => resolve(foundCreatedUsers))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -465,6 +507,8 @@ function create(requestingUser, users, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of updated user objects
  *
@@ -510,6 +554,7 @@ function update(requestingUser, users, options) {
     // Initialize valid options
     let populateString = '';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -547,6 +592,14 @@ function update(requestingUser, users, options) {
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -697,7 +750,15 @@ function update(requestingUser, users, options) {
       // Update all users through a bulk write to the database
       return User.bulkWrite(bulkArray);
     })
-    .then(() => User.find(searchQuery, fieldsString).populate(populateString))
+    .then(() => {
+      // If the lean option is supplied
+      if (lean) {
+        return User.find(searchQuery, fieldsString).populate(populateString).lean();
+      }
+      else {
+        return User.find(searchQuery, fieldsString).populate(populateString);
+      }
+    })
     .then((foundUpdatedUsers) => {
       // Emit the event users-updated
       EventEmitter.emit('users-updated', foundUpdatedUsers);
@@ -734,6 +795,8 @@ function update(requestingUser, users, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of user objects
  *

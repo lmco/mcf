@@ -67,6 +67,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of found organization objects
  *
@@ -119,6 +121,7 @@ function find(requestingUser, orgs, options) {
     let fieldsString = '';
     let limit = 0;
     let skip = 0;
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -185,6 +188,14 @@ function find(requestingUser, orgs, options) {
         }
         skip = options.skip;
       }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
+      }
     }
 
     // Define searchQuery
@@ -212,11 +223,20 @@ function find(requestingUser, orgs, options) {
       throw new M.CustomError('Invalid input for finding organizations.', 400, 'warn');
     }
 
-    // Find the orgs
-    Organization.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-    .populate(populateString)
-    .then((foundOrgs) => resolve(foundOrgs))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    // If the lean option is supplied
+    if (lean) {
+      // Find the orgs
+      Organization.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+      .populate(populateString).lean()
+      .then((foundOrgs) => resolve(foundOrgs))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
+    else {
+      Organization.find(searchQuery, fieldsString, { limit: limit, skip: skip })
+      .populate(populateString)
+      .then((foundOrgs) => resolve(foundOrgs))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
   });
 }
 
@@ -242,6 +262,8 @@ function find(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created organization objects
  *
@@ -286,6 +308,7 @@ function create(requestingUser, orgs, options) {
     // Initialize valid options
     let populateString = '';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -323,6 +346,14 @@ function create(requestingUser, orgs, options) {
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -444,9 +475,17 @@ function create(requestingUser, orgs, options) {
       // Emit the event orgs-created
       EventEmitter.emit('orgs-created', orgObjects);
 
-      return resolve(Organization.find({ _id: { $in: arrIDs } }, fieldsString)
-      .populate(populateString));
+      // If the lean option is supplied
+      if (lean) {
+        return Organization.find({ _id: { $in: arrIDs } }, fieldsString)
+        .populate(populateString).lean();
+      }
+      else {
+        return Organization.find({ _id: { $in: arrIDs } }, fieldsString)
+        .populate(populateString);
+      }
     })
+    .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -484,6 +523,8 @@ function create(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of updated organization objects
  *
@@ -531,6 +572,7 @@ function update(requestingUser, orgs, options) {
     // Initialize valid options
     let populateString = '';
     let fieldsString = '';
+    let lean = false;
 
     // Ensure options are valid
     if (options) {
@@ -568,6 +610,14 @@ function update(requestingUser, orgs, options) {
         }
 
         fieldsString += options.fields.join(' ');
+      }
+
+      // If the option 'lean' is supplied, ensure its a boolean
+      if (options.hasOwnProperty('lean')) {
+        if (typeof options.lean !== 'boolean') {
+          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        }
+        lean = options.lean;
       }
     }
 
@@ -794,8 +844,15 @@ function update(requestingUser, orgs, options) {
       // Update all orgs through a bulk write to the database
       return Organization.bulkWrite(bulkArray);
     })
-    .then(() => Organization.find(searchQuery, fieldsString)
-    .populate(populateString))
+    .then(() => {
+      // If the lean option is supplied
+      if (lean) {
+        return Organization.find(searchQuery, fieldsString).populate(populateString).lean();
+      }
+      else {
+        return Organization.find(searchQuery, fieldsString).populate(populateString);
+      }
+    })
     .then((foundUpdatedOrgs) => {
       // Emit the event orgs-updated
       EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
@@ -831,6 +888,8 @@ function update(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of replaced/created organization objects
  *
