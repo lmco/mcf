@@ -34,7 +34,7 @@ module.exports.userRead = function(user) {
  * Returns true if the user has permission to update users, false otherwise.
  */
 module.exports.userUpdate = function(user, userToUpdate) {
-  return user.admin || user === userToUpdate;
+  return user.admin || user.username === userToUpdate.username;
 };
 
 
@@ -164,16 +164,7 @@ module.exports.projectUpdate = function(user, org, project) {
  * false otherwise.
  */
 module.exports.projectDelete = function(user, org) {
-// Admin's can create projects
-  if (user.admin) {
-    return true;
-  }
-
-  // Only org admins can delete projects in the org
-  if (!org.permissions.hasOwnProperty(user.username)) {
-    return false;
-  }
-  return org.permissions[user.username].includes('admin');
+  return user.admin;
 };
 
 
@@ -181,7 +172,7 @@ module.exports.projectDelete = function(user, org) {
  * Returns true if the user has permission to create elements in the project,
  * false otherwise.
  */
-module.exports.elementCreate = function(user, org, project) {
+module.exports.elementCreate = function(user, org, project, branch) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -199,7 +190,7 @@ module.exports.elementCreate = function(user, org, project) {
  * Returns true if the user has permission to read elements in the project,
  * false otherwise.
  */
-module.exports.elementRead = function(user, org, project) {
+module.exports.elementRead = function(user, org, project, branch) {
 // Admin's can create projects
   if (user.admin) {
     return true;
@@ -228,7 +219,7 @@ module.exports.elementRead = function(user, org, project) {
  * Returns true if the user has permission to update project element objects,
  * false otherwise.
  */
-module.exports.elementUpdate = function(user, org, project) {
+module.exports.elementUpdate = function(user, org, project, branch) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -247,16 +238,6 @@ module.exports.elementUpdate = function(user, org, project) {
  * Returns true if the user has permission to delete the project elements,
  * false otherwise.
  */
-module.exports.elementDelete = function(user, org, project) {
-  // Admin's can create projects
-  if (user.admin) {
-    return true;
-  }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
-  }
-  return project.permissions[user.username].includes('write');
+module.exports.elementDelete = function(user, org, project, branch) {
+  return user.admin;
 };
