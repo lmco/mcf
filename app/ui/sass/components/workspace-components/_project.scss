@@ -20,6 +20,10 @@
 .projects-list {
   border-left: #eeeeee solid;
   margin-left: 8px;
+
+  &:hover {
+    border-left: $mbee-navbar-color solid;
+  }
 }
 
 /******************************************************************************
