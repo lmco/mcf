@@ -5,23 +5,29 @@
 @import '../utils/_variables';
 
 .navbar {
+  height: 36px;
+  background-color: $mbee-navbar-color;
   width: 100%;
   border-bottom: 1px solid darkgray;
   padding-top: 5px;
   padding-bottom: 3px;
 
   .navbar-brand {
+    color: $mbee-navbar-text;
     display:flex;
+    font-size: 16px;
     align-items: center;
     img {
-      height: 2em;
+      height: 28px;
+      //height: 2em;
       padding-right: .5em;
+      position: relative;
+      top: -2px;
     }
   }
-}
 
-.navbar-brand img {
-  height: 32px;
-  position: relative;
-  top: -2px;
+  .nav-link {
+    color: $mbee-navbar-text;
+    font-size: 16px;
+  }
 }

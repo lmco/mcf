@@ -103,7 +103,7 @@ class MbeeNav extends Component {
   render() {
     return (
       <div ref="navbar" style={{ width: '100%' }}>
-        <Navbar color="light" light expand="md">
+        <Navbar className='navbar' expand="md">
           { /* Create the MBEE Logo on navbar */ }
           <NavbarBrand href="/">
             <img src="/img/logo-alt.png" />
