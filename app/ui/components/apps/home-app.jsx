@@ -39,6 +39,7 @@ class HomeApp extends Component {
 
     // Initialize state props
     this.state = {
+      width: 0,
       modal: false,
       modalCreate: false,
       modalDelete: false,
