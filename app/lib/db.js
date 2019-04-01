@@ -41,7 +41,7 @@ module.exports.connect = function() {
     }
     connectURL = `${connectURL + url}:${dbPort}/${dbName}`;
 
-    const options = { poolSize: 20 };
+    const options = {};
 
     // Configure an SSL connection
     // The 'sslCAFile' references file located in /certs.
