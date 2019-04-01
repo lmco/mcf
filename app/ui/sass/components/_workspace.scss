@@ -114,7 +114,11 @@
 /******************************************************************************
 /*                  List and List Item Component Styling                      *
 /******************************************************************************/
-.hover-darken {
+.hover-darken:hover {
+    background: #f7f7f7;
+}
+
+.project-hover {
   border-left: #eeeeee solid;
   margin-left: 10px;
 

@@ -150,7 +150,7 @@ class ProjectList extends Component {
       const orgId = org.id;
 
       // Loop through project-views in each org
-      const projects = org.projects.map(project => (<ProjectListItem className='hover-darken'
+      const projects = org.projects.map(project => (<ProjectListItem className='hover-darken project-hover'
                                                                                key={`proj-key-${project.id}`}
                                                                                project={project}
                                                                                href={`/${orgId}/${project.id}`}/>));
