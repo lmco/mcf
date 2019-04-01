@@ -24,7 +24,8 @@
     font-weight: 200;
     &.active {
       :hover {
-        color: darken($mbee-navbar-color, 10);
+        color: $mbee-navbar-color;
+        font-weight: 600;
       }
       color: $mbee-navbar-color;
       background-color: darken(whitesmoke, 5);
@@ -32,6 +33,7 @@
     }
     :hover {
       color: darken($sidebar-text, 20);
+      font-weight: 300;
     }
   }
 
