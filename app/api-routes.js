@@ -1907,7 +1907,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: custom
  *         description: Search for a specific key/value pair in the custom data.
  *                      To find a specific key, separate the keys using dot
- *                      notation. For example, custom.hello.
+ *                      notation. For example, custom.hello
  *         in: query
  *         type: string
  *     responses:
