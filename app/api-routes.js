@@ -353,6 +353,8 @@ api.route('/version')
  *                 type: string
  *               custom:
  *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
  *               archived:
  *                 type: boolean
  *               permissions:
@@ -680,6 +682,8 @@ api.route('/orgs')
  *               type: string
  *             custom:
  *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
  *             archived:
  *               type: boolean
  *             permissions:
@@ -1140,6 +1144,8 @@ api.route('/projects')
  *                 type: string
  *               custom:
  *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
  *               archived:
  *                 type: boolean
  *               permissions:
@@ -1517,6 +1523,8 @@ api.route('/orgs/:orgid/projects')
  *               type: string
  *             custom:
  *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
  *             archived:
  *               type: boolean
  *             permissions:
@@ -2158,6 +2166,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: string
  *               custom:
  *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
  *               archived:
  *                 type: boolean
  *       - name: populate
@@ -2616,6 +2626,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: string
  *             custom:
  *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
  *             archived:
  *               type: boolean
  *       - name: populate
@@ -2982,8 +2994,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                  body. Users that are currently archived must first be
  *                  unarchived before making any other updates. The following
  *                  fields can be updated [custom, archived, fname, lname,
- *                  preferredName, email]. NOTE, the username is required in the
- *                  request body, but CANNOT be updated. This endpoint is
+ *                  preferredName, email, admin]. NOTE, the username is required
+ *                  in the request body, but CANNOT be updated. This endpoint is
  *                  reserved for admins only, unless user is updating self.
  *     produces:
  *       - application/json
@@ -3013,8 +3025,14 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: string
  *               custom:
  *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
  *               archived:
  *                 type: boolean
+ *               admin:
+ *                 type: boolean
+ *                 description: NOTE only current system-wide admins can update
+ *                              this field.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -3381,8 +3399,8 @@ api.route('/users/whoami')
  *       - users
  *     description: Updates an existing user. The following fields can be
  *                  updated [fname, lname, preferredName, email, custom,
- *                  archived]. Users that are currently archived must first be
- *                  unarchived before making any other updates.
+ *                  archived, admin]. Users that are currently archived must
+ *                  first be unarchived before making any other updates.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3408,8 +3426,14 @@ api.route('/users/whoami')
  *               type: string
  *             custom:
  *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
  *             archived:
  *               type: boolean
+ *             admin:
+ *               type: boolean
+ *               description: NOTE only current system-wide admins can update
+ *                            this field.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
