@@ -114,8 +114,14 @@
 /******************************************************************************
 /*                  List and List Item Component Styling                      *
 /******************************************************************************/
-.hover-darken:hover {
-  background: #f7f7f7;
+.hover-darken {
+  border-left: #eeeeee solid;
+  margin-left: 10px;
+
+  &:hover {
+    background: #f7f7f7;
+    border-left: $mbee-navbar-color solid;
+  }
 }
 
 .list {

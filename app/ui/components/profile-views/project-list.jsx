@@ -161,7 +161,7 @@ class ProjectList extends Component {
             <ListItem key={`org-key-${org.id}`} className='proj-org-header'>
                 <a href={`/${orgId}`}>{org.name}</a>
             </ListItem>
-            <List className='projects-list'>
+            <List>
                 {projects}
             </List>
         </React.Fragment>
@@ -229,7 +229,7 @@ class ProjectList extends Component {
           <div className='extra-padding'>
             {/* Verify there are project-views */}
             {(this.state.projects.length === 0)
-              ? (<div key='no-list' className='list-item'>
+              ? (<div className='list-item'>
                   <h3> No projects. </h3>
                  </div>)
               : (<List key='main-list'>

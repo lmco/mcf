@@ -40,9 +40,12 @@
   align-items: center;
   padding-left: 10px;
   padding-right: 10px;
+  border-left: #eeeeee solid;
+  margin-left: 25px;
 
   &:hover {
     background: #f7f7f7;
+    border-left: $mbee-navbar-color solid;
   }
 }
 

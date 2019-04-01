@@ -128,7 +128,7 @@ class OrgList extends Component {
                 </div>
                 {(!this.state.showProjs)
                   ? ''
-                  : (<List className='projects-list'>
+                  : (<List>
                         {projects}
                       </List>)
                 }
