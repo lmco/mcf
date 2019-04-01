@@ -34,6 +34,8 @@
 /*                        Workspace Headers                         *
 /******************************************************************************/
 #workspace {
+  overflow: scroll;
+
   #workspace-header {
     border-bottom: 1px solid $mbee-color;
     padding: 12px 28px;
@@ -54,7 +56,6 @@
     .main-workspace {
       grid-column-start: 1;
       grid-column-end: 2;
-      overflow: scroll;
       width: 100%
     }
 
