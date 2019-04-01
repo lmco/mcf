@@ -187,8 +187,8 @@ class HomeApp extends Component {
           </ModalBody>
         </Modal>
         { /* Display the list of projects */ }
-        <div className='extra-padding' ref={this.ref}>
-          <div className='workspace-header'>
+        <div id='workspace' ref={this.ref}>
+          <div id='workspace-header' className='workspace-header'>
             <h2 className='workspace-title'>Organizations</h2>
             { /* Verify user is an admin */ }
             {(!this.state.admin)
@@ -210,12 +210,13 @@ class HomeApp extends Component {
               )
             }
           </div>
-          <hr/>
           { /* Verify there are projects */ }
+          <div className='extra-padding'>
           {(this.state.orgs.length === 0)
             ? (<div className='list-item'><h3> No organizations.</h3></div>)
             : (<List>{list}</List>)
           }
+          </div>
         </div>
       </React.Fragment>
     );

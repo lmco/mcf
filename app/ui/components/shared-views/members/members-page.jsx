@@ -68,47 +68,48 @@ class MembersPage extends Component {
 
     // Return project member list
     return (
-            <React.Fragment>
-                {/* Verify admin user */}
-                {(!this.props.admin)
-                  ? ''
-                  : (
-                        // Modal for editing user roles
-                        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
-                            <ModalBody>
-                                {(this.props.project && !this.props.org)
-                                  ? (<MemberEdit project={this.props.project}
-                                                 toggle={this.handleToggle}/>)
-                                  : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
-                                }
-                            </ModalBody>
-                        </Modal>
-                  )
+      <React.Fragment>
+        {/* Verify admin user */}
+        {(!this.props.admin)
+          ? ''
+          : (
+            // Modal for editing user roles
+            <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+              <ModalBody>
+                {(this.props.project && !this.props.org)
+                  ? (<MemberEdit project={this.props.project}
+                                 toggle={this.handleToggle}/>)
+                  : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
                 }
-                <div id='view' className='extra-padding'>
-                    <div className='user-list-header'>
-                        <h2 className='user-header'>Users</h2>
-                        <h2 className='user-descriptor'>Permissions</h2>
-                        {/* Verify user is admin */}
-                        {(!this.props.admin)
-                          ? ''
-                          : ( // Button to edit user roles
-                                <div className='user-button'>
-                                    <Button className='btn'
-                                            outline color="secondary"
-                                            onClick={this.handleToggle}>
-                                        Edit
-                                    </Button>
-                                </div>
-                          )
-                        }
-                    </div>
-                    <hr/>
-                    <List>
-                        {listItems}
-                    </List>
+              </ModalBody>
+            </Modal>
+          )
+        }
+        <div id='workspace'>
+          <div id='workspace-header' className='user-list-header'>
+            <h2 className='user-title'>Users</h2>
+            <h2 className='user-descriptor'>Permissions</h2>
+            {/* Verify user is admin */}
+            {(!this.props.admin)
+              ? ''
+              : ( // Button to edit user roles
+                <div className='user-button'>
+                  <Button className='btn'
+                          outline color="secondary"
+                          onClick={this.handleToggle}>
+                    Edit
+                  </Button>
                 </div>
-            </React.Fragment>
+              )
+            }
+          </div>
+          <div id='workspace-body' className='extra-padding'>
+            <List>
+              {listItems}
+            </List>
+          </div>
+        </div>
+      </React.Fragment>
     );
   }
 

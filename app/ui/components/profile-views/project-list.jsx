@@ -167,7 +167,7 @@ class ProjectList extends Component {
 
     // Return project list
     return (
-      <div id='view'>
+      <React.Fragment>
         {/* Modal for creating a project */}
         <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
           <ModalBody>
@@ -191,8 +191,8 @@ class ProjectList extends Component {
           </ModalBody>
         </Modal>
         {/* Display the list of project-views */}
-        <div className='extra-padding' ref={this.ref}>
-          <div className='workspace-header'>
+        <div id='workspace' ref={this.ref}>
+          <div id='workspace-header' className='workspace-header'>
             <h2 className='workspace-title'>Your Projects</h2>
             <div className='workspace-header-button'>
               {/* Verify user has write permission */}
@@ -217,18 +217,19 @@ class ProjectList extends Component {
               }
             </div>
           </div>
-          <hr/>
-          {/* Verify there are project-views */}
-          {(this.state.projects.length === 0)
-            ? (<div className='list-item'>
+          <div className='extra-padding'>
+            {/* Verify there are project-views */}
+            {(this.state.projects.length === 0)
+              ? (<div className='list-item'>
                   <h3> No projects. </h3>
                  </div>)
-            : (<List>
+              : (<List>
                   {list}
                  </List>)
-          }
+            }
+          </div>
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 

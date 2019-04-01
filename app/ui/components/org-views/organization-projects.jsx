@@ -34,43 +34,44 @@ function OrganizationProjects(props) {
 
   // Loop through the org's projects
   const listItems = org.projects.map(project => <ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
-            <a href={`/${org.id}/${project.id}`} >
-                {project.name}
-            </a>
-        </ListItem>);
+      <a href={`/${org.id}/${project.id}`} >
+        {project.name}
+      </a>
+    </ListItem>);
 
     // Return the org's project list
   return (
-        <React.Fragment>
-            {/* Modal for creating a project */}
-            <Modal isOpen={props.modal} toggle={props.handleToggle}>
-                <ModalBody>
-                    <Create project={true} org={org} toggle={props.handleToggle}/>
-                </ModalBody>
-            </Modal>
-            <div id='view' className='extra-padding'>
-                <div className='workspace-header'>
-                     <h2 className='workspace-title'>Projects</h2>
-                    {/* Verify user has write permissions */}
-                    {(!props.write)
-                      ? ''
-                    // Display project create button
-                      : (<div className='workspace-header-button'>
-                            <Button className='btn'
-                                    outline color="secondary"
-                                    onClick={props.handleToggle}>
-                                Create
-                            </Button>
-                         </div>)
-                    }
-                </div>
-                <hr />
-                {/* Display list of projects */}
-                <List>
-                    {listItems}
-                </List>
-            </div>
-        </React.Fragment>
+    <React.Fragment>
+      {/* Modal for creating a project */}
+      <Modal isOpen={props.modal} toggle={props.handleToggle}>
+        <ModalBody>
+          <Create project={true} org={org} toggle={props.handleToggle}/>
+        </ModalBody>
+      </Modal>
+      <div id='workspace'>
+        <div id='workspace-header' className='workspace-header'>
+           <h2 className='workspace-title workspace-title-padding'>Projects</h2>
+          {/* Verify user has write permissions */}
+          {(!props.write)
+            ? ''
+          // Display project create button
+            : (<div className='workspace-header-button'>
+                <Button className='btn'
+                        outline color="secondary"
+                        onClick={props.handleToggle}>
+                  Create
+                </Button>
+              </div>)
+          }
+        </div>
+        <div className='extra-padding'>
+          {/* Display list of projects */}
+          <List>
+            {listItems}
+          </List>
+        </div>
+      </div>
+    </React.Fragment>
   );
 }
 

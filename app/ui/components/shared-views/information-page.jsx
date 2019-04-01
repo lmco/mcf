@@ -40,29 +40,32 @@ function InformationPage(props) {
   }
 
   return (
-        <div id='view' className='extra-padding'>
-            <h2>{name}</h2>
-            <hr />
-            <table>
-                <tbody>
-                    <tr>
-                        <th>ID:</th>
-                        <td>{id}</td>
-                    </tr>
-                    {(orgid === null)
-                      ? <tr/>
-                      : (<tr>
-                            <th>Org ID:</th>
-                            <td><a href={`/${orgid}`}>{orgid}</a></td>
-                          </tr>)
-                    }
-                    <tr>
-                        <th>Custom:</th>
-                        <td>{JSON.stringify(custom, null, 2)}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <div id='workspace'>
+      <div id='workspace-header' className='workspace-header'>
+        <h2 className='workspace-title workspace-title-padding'>{name}</h2>
+      </div>
+      <div id='workspace-body' className='extra-padding'>
+        <table>
+          <tbody>
+            <tr>
+              <th>ID:</th>
+              <td>{id}</td>
+            </tr>
+            {(orgid === null)
+              ? <tr/>
+              : (<tr>
+                  <th>Org ID:</th>
+                  <td><a href={`/${orgid}`}>{orgid}</a></td>
+                 </tr>)
+            }
+            <tr>
+              <th>Custom:</th>
+              <td>{JSON.stringify(custom, null, 2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 

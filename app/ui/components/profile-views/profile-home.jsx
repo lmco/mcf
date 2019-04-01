@@ -27,23 +27,26 @@ function ProfileHome(props) {
 
   // Render user data in table format
   return (
-    <div id='view' className='extra-padding'>
-      <h2>{user.name}</h2>
-      <hr />
-      <table>
-        <tr>
-          <th>Username:</th>
-          <td>{user.username}</td>
-        </tr>
-        <tr>
-          <th>Email:</th>
-          <td>{user.email}</td>
-        </tr>
-        <tr>
-          <th>Custom:</th>
-          <td>{JSON.stringify(user.custom, null, 2)}</td>
-        </tr>
-      </table>
+    <div id='workspace'>
+      <div id='workspace-header' className='workspace-header'>
+        <h2 className='workspace-title workspace-title-padding'>{user.name}</h2>
+      </div>
+      <div id='workspace-body' className='extra-padding'>
+        <table>
+          <tr>
+            <th>Username:</th>
+            <td>{user.username}</td>
+          </tr>
+          <tr>
+            <th>Email:</th>
+            <td>{user.email}</td>
+          </tr>
+          <tr>
+            <th>Custom:</th>
+            <td>{JSON.stringify(user.custom, null, 2)}</td>
+          </tr>
+        </table>
+      </div>
     </div>
   );
 }

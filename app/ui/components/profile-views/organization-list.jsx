@@ -112,7 +112,7 @@ class OrganizationList extends Component {
 
     // Return org list
     return (
-      <div  id='view'>
+      <React.Fragment>
         {/* Modal for creating an org */}
         <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
           <ModalBody>
@@ -126,39 +126,42 @@ class OrganizationList extends Component {
           </ModalBody>
         </Modal>
         {/* Display the list of orgs */}
-        <div className='extra-padding' ref={this.ref}>
-          <div className='workspace-header'>
-            <h2 className='workspace-title'>Your Organizations</h2>
-            {/* Verify user is an admin */}
-            {(!this.state.admin)
-              ? ''
-              // Display create and delete buttons
-              : (<div className='workspace-header-button'>
-                  <Button className='btn'
-                          outline color="secondary"
-                          onClick={this.handleCreateToggle}>
+        <div id='workspace' ref={this.ref}>
+          <div id='workspace-header' className='workspace-header'>
+            <h2 className='workspace-title workspace-title-padding'>
+              Your Organizations
+            </h2>
+              {/* Verify user is an admin */}
+              {(!this.state.admin)
+                ? ''
+                // Display create and delete buttons
+                : (<div className='workspace-header-button'>
+                    <Button className='btn'
+                            outline color="secondary"
+                            onClick={this.handleCreateToggle}>
                       Create
-                  </Button>
-                  <Button className='btn'
-                          outline color="danger"
-                          onClick={this.handleDeleteToggle}>
+                    </Button>
+                    <Button className='btn'
+                            outline color="danger"
+                            onClick={this.handleDeleteToggle}>
                       Delete
-                  </Button>
-                </div>)
+                    </Button>
+                  </div>)
+              }
+          </div>
+          {/* Verify there are orgs */}
+          <div className='extra-padding'>
+            {(this.state.orgs.length === 0)
+              ? (<div className='list-item'>
+                  <h3> No organizations. </h3>
+                 </div>)
+              : (<List>
+                  {orgs}
+                 </List>)
             }
           </div>
-          <hr/>
-          {/* Verify there are orgs */}
-          {(this.state.orgs.length === 0)
-            ? (<div className='list-item'>
-                <h3> No organizations. </h3>
-               </div>)
-            : (<List>
-                {orgs}
-               </List>)
-          }
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 
