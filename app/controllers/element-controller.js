@@ -10,6 +10,7 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This implements the behavior and logic for elements.
  * It also provides function for interacting with elements.
@@ -1119,9 +1120,12 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
           // Set archivedBy if archived field is being changed
           if (key === 'archived') {
-            // Error Check: ensure user cannot archive the root model element
-            if (element._id === utils.createID(orgID, projID, 'model')) {
-              throw new M.CustomError('User cannot archive the root model element.', 403, 'warn');
+            const elemID = utils.parseID(element._id).pop();
+            // Error Check: ensure user cannot archive root elements
+            if (Element.getValidRootElements().includes(elemID)) {
+              throw new M.CustomError(
+                `User cannot archive the root element: ${elemID}.`, 403, 'warn'
+              );
             }
 
             // If the element is being archived
@@ -1344,10 +1348,14 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then(() => {
       foundElementIDs = foundElements.map(e => e._id);
 
-      // Error Check: ensure user cannot replace root model element
-      if (foundElementIDs.includes(utils.createID(orgID, projID, 'model'))) {
-        throw new M.CustomError('User cannot replace the root model element.', 403, 'warn');
-      }
+      // Error Check: ensure user cannot replace root element
+      foundElementIDs.forEach((id) => {
+        if (Element.getValidRootElements().includes(utils.parseID(id).pop())) {
+          throw new M.CustomError(
+            `User cannot replace root element: ${utils.parseID(id).pop()}.`, 403, 'warn'
+          );
+        }
+      });
 
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
@@ -1517,11 +1525,15 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     .then((_foundIDs) => {
       foundIDs = _foundIDs;
       const promises = [];
-
-      // Error Check: ensure user cannot delete root model element
-      if (foundIDs.includes(utils.createID(orgID, projID, 'model'))) {
-        throw new M.CustomError('User cannot delete the root model element.', 403, 'warn');
-      }
+      // Error Check: ensure user cannot delete root elements
+      foundIDs.forEach((id) => {
+        const elemID = utils.parseID(id).pop();
+        if (Element.getValidRootElements().includes(elemID)) {
+          throw new M.CustomError(
+            `User cannot delete root element: ${elemID}.`, 403, 'warn'
+          );
+        }
+      });
 
       // Split elements into batches of 50000 or less
       for (let i = 0; i < foundIDs.length / 50000; i++) {
@@ -1663,9 +1675,11 @@ function moveElementCheck(organizationID, projectID, branch, element) {
       throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
     }
 
-    // Error Check: ensure the root model element is not being moved
-    if (element.id === 'model') {
-      throw new M.CustomError('Cannot move the root model element.', 403, 'warn');
+    // Error Check: ensure the root elements is not being moved
+    if (Element.getValidRootElements().includes(element.id)) {
+      throw new M.CustomError(
+        `Cannot move the root element: ${element.id}.`, 403, 'warn'
+      );
     }
 
     // Define nested helper function
