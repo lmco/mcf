@@ -10,6 +10,7 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description
  * <p>Defines the element data model. Using
@@ -179,6 +180,19 @@ ElementSchema.methods.getValidPopulateFields = function() {
 ElementSchema.statics.getValidPopulateFields = function() {
   return ElementSchema.methods.getValidPopulateFields();
 };
+
+/**
+ * @description Returns a list of valid root elements
+ * @memberOf ElementSchema
+ */
+ElementSchema.methods.getValidRootElements = function() {
+  return ['model', '__mbee__', 'holding_bin', 'undefined'];
+};
+
+ElementSchema.statics.getValidRootElements = function() {
+  return ElementSchema.methods.getValidRootElements();
+};
+
 
 /**
  * @description Returns the element public data
