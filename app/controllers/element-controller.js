@@ -265,7 +265,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     }
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((project) => {
       // Check that the project was found
       if (!project) {
@@ -585,7 +585,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Find the project to verify existence and permissions
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -606,7 +606,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         // Split arrIDs into batches of 50000
         const tmpQuery = { _id: { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) } };
         // Attempt to find any elements with matching _id
-        promises.push(Element.find(tmpQuery, '_id')
+        promises.push(Element.find(tmpQuery, '_id').lean()
         .then((foundElements) => {
           if (foundElements.length > 0) {
             // Get array of the foundElements's ids
@@ -699,7 +699,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       const findExtraElementsQuery = { _id: { $in: elementsToFind } };
 
       // Find extra elements, and only return _id for faster lookup
-      return Element.find(findExtraElementsQuery, '_id');
+      return Element.find(findExtraElementsQuery, '_id').lean();
     })
     .then((extraElements) => {
       // Convert extraElements to JMI type 2 for easier lookup
@@ -931,7 +931,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -1029,7 +1029,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery)
+        promises.push(Element.find(searchQuery).lean()
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
         }));
@@ -1049,7 +1049,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         );
       }
 
-      return Element.find(sourceTargetQuery);
+      return Element.find(sourceTargetQuery).lean();
     })
     .then((foundSourceTarget) => {
       // Convert elementsToUpdate to JMI type 2
@@ -1280,7 +1280,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     const ts = Date.now();
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -1336,7 +1336,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery)
+        promises.push(Element.find(searchQuery).lean()
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
         }));
@@ -1382,7 +1382,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       });
     })
     // Delete elements from database
-    .then(() => Element.deleteMany({ _id: foundElementIDs }))
+    .then(() => Element.deleteMany({ _id: foundElementIDs }).lean())
     .then(() => {
       // Emit the event elements-deleted
       EventEmitter.emit('elements-deleted', foundElements);
@@ -1506,7 +1506,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Find the elements to delete
-    Element.find({ _id: { $in: elementsToFind } })
+    Element.find({ _id: { $in: elementsToFind } }).lean()
     .then((foundElements) => {
       const foundElementIDs = foundElements.map(e => e._id);
 
@@ -1539,7 +1539,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       for (let i = 0; i < foundIDs.length / 50000; i++) {
         const batchIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
         // Delete batch
-        promises.push(Element.deleteMany({ _id: { $in: batchIDs } }));
+        promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
       }
       // Return when all deletes have completed
       return Promise.all(promises);
@@ -1604,7 +1604,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
   function findElementTreeHelper(ids) {
     return new Promise((resolve, reject) => {
       // Find all elements whose parent is in the list of given ids
-      Element.find({ parent: { $in: ids } }, '_id')
+      Element.find({ parent: { $in: ids } }, '_id').lean()
       .then(elements => {
         // Get a list of element ids
         const foundIDs = elements.map(e => e._id);
@@ -1685,7 +1685,7 @@ function moveElementCheck(organizationID, projectID, branch, element) {
     // Define nested helper function
     function findElementParentRecursive(e) {
       return new Promise((res, rej) => {
-        Element.findOne({ _id: e.parent })
+        Element.findOne({ _id: e.parent }).lean()
         .then((foundElement) => {
           // If foundElement is null, reject with error
           if (!foundElement) {
@@ -1895,7 +1895,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     }
 
     // Ensure the project exists
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((project) => {
       // Ensure the project was found
       if (project === null) {

@@ -416,7 +416,7 @@ function create(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find any existing, conflicting orgs
-    Organization.find(searchQuery, '_id')
+    Organization.find(searchQuery, '_id').lean()
     .then((foundOrgs) => {
       // If there are any foundOrgs, there is a conflict
       if (foundOrgs.length > 0) {
@@ -429,11 +429,11 @@ function create(requestingUser, orgs, options) {
       }
 
       // Get all existing users for permissions
-      return User.find({});
+      return User.find({}).lean();
     })
     .then((foundUsers) => {
       // Create array of usernames
-      const foundUsernames = foundUsers.map(u => u.username);
+      const foundUsernames = foundUsers.map(u => u._id);
       // For each object of org data, create the org object
       orgObjects = orgsToCreate.map((o) => {
         const orgObj = new Organization(o);
@@ -670,7 +670,7 @@ function update(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the orgs to update
-    Organization.find(searchQuery).populate('projects')
+    Organization.find(searchQuery).populate('projects').lean()
     .then((_foundOrgs) => {
       // Set function-wide foundOrgs
       foundOrgs = _foundOrgs;
@@ -695,7 +695,7 @@ function update(requestingUser, orgs, options) {
 
       // Find users if updating permissions
       if (updatingPermissions) {
-        return User.find({});
+        return User.find({}).find();
       }
 
       // Return an empty array if not updating permissions
@@ -977,7 +977,7 @@ function createOrReplace(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the orgs to replace
-    Organization.find(searchQuery)
+    Organization.find(searchQuery).lean()
     .then((_foundOrgs) => {
       foundOrgs = _foundOrgs;
 
@@ -996,7 +996,7 @@ function createOrReplace(requestingUser, orgs, options) {
       });
     })
     // Delete orgs from database
-    .then(() => Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }))
+    .then(() => Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }).lean())
     .then(() => {
       // Emit the event orgs-deleted
       EventEmitter.emit('orgs-deleted', foundOrgs);
@@ -1093,7 +1093,7 @@ function remove(requestingUser, orgs, options) {
     }
 
     // Find the orgs to delete
-    Organization.find(searchQuery)
+    Organization.find(searchQuery).lean()
     .then((_foundOrgs) => {
       // Set function-wde foundOrgs and create ownedQuery
       foundOrgs = _foundOrgs;
@@ -1118,12 +1118,12 @@ function remove(requestingUser, orgs, options) {
       });
 
       // Delete any elements in the org
-      return Element.deleteMany(ownedQuery);
+      return Element.deleteMany(ownedQuery).lean();
     })
     // Delete any projects in the org
-    .then(() => Project.deleteMany({ org: { $in: saniOrgs } }))
+    .then(() => Project.deleteMany({ org: { $in: saniOrgs } }).lean())
     // Delete the orgs
-    .then(() => Organization.deleteMany(searchQuery))
+    .then(() => Organization.deleteMany(searchQuery).lean())
     .then((retQuery) => {
       // Emit the event orgs-deleted
       EventEmitter.emit('orgs-deleted', foundOrgs);

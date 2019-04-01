@@ -407,7 +407,7 @@ function create(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find any existing, conflicting users
-    User.find(searchQuery, '_id')
+    User.find(searchQuery, '_id').lean()
     .then((foundUsers) => {
       // If there are any foundUsers, there is a conflict
       if (foundUsers.length > 0) {
@@ -649,7 +649,7 @@ function update(requestingUser, users, options) {
     // Create searchQuery
     const searchQuery = { _id: { $in: arrUsernames } };
     // Find the users to update
-    User.find(searchQuery)
+    User.find(searchQuery).lean()
     .then((_foundUsers) => {
       // Verify the same number of users are found as desired
       if (_foundUsers.length !== arrUsernames.length) {
@@ -883,7 +883,7 @@ function createOrReplace(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find the users to update
-    User.find(searchQuery)
+    User.find(searchQuery).lean()
     .then((_foundUsers) => {
       // Set the function-wide foundUsers
       foundUsers = _foundUsers;
@@ -902,7 +902,7 @@ function createOrReplace(requestingUser, users, options) {
           });
       });
     })
-    .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }))
+    .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }).lean())
     .then(() => {
       // Emit the event users-deleted
       EventEmitter.emit('users-deleted', foundUsers);
@@ -1069,7 +1069,7 @@ function remove(requestingUser, users, options) {
       return Promise.all(promises);
     })
     // Remove the users
-    .then(() => User.deleteMany(searchQuery))
+    .then(() => User.deleteMany(searchQuery).lean())
     // Return the deleted users
     .then(() => {
       // Emit the event users-deleted

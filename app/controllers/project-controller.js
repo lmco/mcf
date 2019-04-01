@@ -438,7 +438,7 @@ function create(requestingUser, organizationID, projects, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the organization to verify existence and permissions
-    Organization.findOne({ _id: orgID })
+    Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrg) => {
       foundOrg = _foundOrg;
       // If the org was not found
@@ -454,7 +454,7 @@ function create(requestingUser, organizationID, projects, options) {
       }
 
       // Find any existing, conflicting projects
-      return Project.find(searchQuery, '_id');
+      return Project.find(searchQuery, '_id').lean();
     })
     .then((foundProjects) => {
       // If there are any foundProjects, there is a conflict
@@ -468,11 +468,11 @@ function create(requestingUser, organizationID, projects, options) {
       }
 
       // Get all existing users for permissions
-      return User.find({});
+      return User.find({}).lean();
     })
     .then((foundUsers) => {
       // Create array of usernames
-      const foundUsernames = foundUsers.map(u => u.username);
+      const foundUsernames = foundUsers.map(u => u._id);
       const promises = [];
       // For each object of project data, create the project object
       projObjects = projectsToCreate.map((p) => {
@@ -792,7 +792,7 @@ function update(requestingUser, organizationID, projects, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the organization containing the projects
-    Organization.findOne({ _id: orgID })
+    Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrganization) => {
       // Check if the organization was found
       if (_foundOrganization === null) {
@@ -803,7 +803,7 @@ function update(requestingUser, organizationID, projects, options) {
       foundOrg = _foundOrganization;
 
       // Find the projects to update
-      return Project.find(searchQuery);
+      return Project.find(searchQuery).lean();
     })
     .then((_foundProjects) => {
       // Set function-wide foundProjects
@@ -830,7 +830,7 @@ function update(requestingUser, organizationID, projects, options) {
 
       // Find users if updating permissions
       if (updatingPermissions) {
-        return User.find({});
+        return User.find({}).lean();
       }
 
       // Return an empty array if not updating permissions
@@ -1129,7 +1129,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the organization containing the projects
-    Organization.findOne({ _id: orgID })
+    Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrganization) => {
       // Check if the organization was found
       if (_foundOrganization === null) {
@@ -1137,7 +1137,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       }
 
       // Find the projects to update
-      return Project.find(searchQuery);
+      return Project.find(searchQuery).lean();
     })
     .then((_foundProjects) => {
       foundProjects = _foundProjects;
@@ -1169,10 +1169,10 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
         elemDelObj.push(utils.createID(p._id, 'holding_bin'));
         elemDelObj.push(utils.createID(p._id, 'undefined'));
       });
-      return Element.deleteMany({ _id: { $in: elemDelObj } });
+      return Element.deleteMany({ _id: { $in: elemDelObj } }).lean();
     })
     // Delete projects from database
-    .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
+    .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }).lean())
 
     .then(() => {
       // Emit the event projects-deleted
@@ -1297,7 +1297,7 @@ function remove(requestingUser, organizationID, projects, options) {
     }
 
     // Find the projects to delete
-    Project.find(searchQuery)
+    Project.find(searchQuery).lean()
     .then((_foundProjects) => {
       // Set the function-wide foundProjects and create ownedQuery
       foundProjects = _foundProjects;
@@ -1313,10 +1313,10 @@ function remove(requestingUser, organizationID, projects, options) {
       }
 
       // Delete any elements in the project
-      return Element.deleteMany(ownedQuery);
+      return Element.deleteMany(ownedQuery).lean();
     })
     // Delete the projects
-    .then(() => Project.deleteMany(searchQuery))
+    .then(() => Project.deleteMany(searchQuery).lean())
     .then((retQuery) => {
       // Emit the event projects-deleted
       EventEmitter.emit('projects-deleted', foundProjects);
