@@ -14,6 +14,26 @@
  * @description Provides permission lookup capabilities for MBEE actions.
  */
 
+module.exports = {
+  createElement,
+  createOrg,
+  createProject,
+  createUser,
+  deleteElement,
+  deleteOrg,
+  deleteProject,
+  deleteUser,
+  readElement,
+  readOrg,
+  readProject,
+  readUser,
+  updateElement,
+  updateOrg,
+  updateProject,
+  updateUser
+};
+
+
 /**
  * @description Returns true if the user has permission to create users,
  * false otherwise.
@@ -23,7 +43,7 @@
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.createUser = function(user) {
+function createUser(user) {
   return user.admin;
 };
 
@@ -36,7 +56,7 @@ module.exports.createUser = function(user) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.readUser = function(user) {
+function readUser(user) {
   return true;
 };
 
@@ -51,7 +71,7 @@ module.exports.readUser = function(user) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.updateUser = function(user, userToUpdate) {
+function updateUser(user, userToUpdate) {
   return user.admin || user.username === userToUpdate.username;
 };
 
@@ -65,7 +85,7 @@ module.exports.updateUser = function(user, userToUpdate) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.deleteUser = function(user) {
+function deleteUser(user) {
   return user.admin;
 };
 
@@ -78,7 +98,7 @@ module.exports.deleteUser = function(user) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.createOrg = function(user) {
+function createOrg(user) {
   return user.admin;
 };
 
@@ -92,7 +112,7 @@ module.exports.createOrg = function(user) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.readOrg = function(user, org) {
+function readOrg(user, org) {
   // Admin's can access any org
   if (user.admin) {
     return true;
@@ -112,7 +132,7 @@ module.exports.readOrg = function(user, org) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.updateOrg = function(user, org) {
+function updateOrg(user, org) {
   // Admin's can update orgs
   if (user.admin) {
     return true;
@@ -135,7 +155,7 @@ module.exports.updateOrg = function(user, org) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.deleteOrg = function(user) {
+function deleteOrg(user) {
   return user.admin;
 };
 
@@ -150,7 +170,7 @@ module.exports.deleteOrg = function(user) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.createProject = function(user, org) {
+function createProject(user, org) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -174,7 +194,7 @@ module.exports.createProject = function(user, org) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.readProject = function(user, org, project) {
+function readProject(user, org, project) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -210,7 +230,7 @@ module.exports.readProject = function(user, org, project) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.updateProject = function(user, org, project) {
+function updateProject(user, org, project) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -236,7 +256,7 @@ module.exports.updateProject = function(user, org, project) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.deleteProject = function(user, org, project) {
+function deleteProject(user, org, project) {
   return user.admin;
 };
 
@@ -253,7 +273,7 @@ module.exports.deleteProject = function(user, org, project) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.createElement = function(user, org, project, branch) {
+function createElement(user, org, project, branch) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -279,7 +299,7 @@ module.exports.createElement = function(user, org, project, branch) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.readElement = function(user, org, project, branch) {
+function readElement(user, org, project, branch) {
 // Admin's can create projects
   if (user.admin) {
     return true;
@@ -316,7 +336,7 @@ module.exports.readElement = function(user, org, project, branch) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.updateElement = function(user, org, project, branch) {
+function updateElement(user, org, project, branch) {
   // Admin's can create projects
   if (user.admin) {
     return true;
@@ -343,6 +363,7 @@ module.exports.updateElement = function(user, org, project, branch) {
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
-module.exports.deleteElement = function(user, org, project, branch) {
+function deleteElement(user, org, project, branch) {
   return user.admin;
 };
+
