@@ -144,7 +144,7 @@ function postElement(done) {
     // Verify element created properly
     chai.expect(createdElement.id).to.equal(elemData.id);
     chai.expect(createdElement.name).to.equal(elemData.name);
-    chai.expect(createdElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(createdElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(createdElement.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -218,7 +218,7 @@ function postElements(done) {
       // Verify elements created properly
       chai.expect(createdElement.id).to.equal(elemObj.id);
       chai.expect(createdElement.name).to.equal(elemObj.name);
-      chai.expect(createdElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(createdElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(createdElement.project).to.equal(projID);
 
       // If documentation was provided, verify it
@@ -284,7 +284,7 @@ function putElement(done) {
     // Verify element created/replaced properly
     chai.expect(replacedElem.id).to.equal(elemData.id);
     chai.expect(replacedElem.name).to.equal(elemData.name);
-    chai.expect(replacedElem.custom).to.deep.equal(elemData.custom);
+    chai.expect(replacedElem.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(replacedElem.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -359,7 +359,7 @@ function putElements(done) {
       // Verify elements created/replaced properly
       chai.expect(replacedElem.id).to.equal(elemObj.id);
       chai.expect(replacedElem.name).to.equal(elemObj.name);
-      chai.expect(replacedElem.custom).to.deep.equal(elemObj.custom);
+      chai.expect(replacedElem.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(replacedElem.project).to.equal(projID);
 
       // If documentation was provided, verify it
@@ -425,7 +425,7 @@ function getElement(done) {
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
     chai.expect(foundElement.name).to.equal(elemData.name);
-    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(foundElement.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -502,7 +502,7 @@ function getElements(done) {
       // Verify elements created properly
       chai.expect(foundElement.id).to.equal(elemObj.id);
       chai.expect(foundElement.name).to.equal(elemObj.name);
-      chai.expect(foundElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(foundElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(foundElement.project).to.equal(projID);
 
       // If documentation was provided, verify it
@@ -651,7 +651,7 @@ function searchElement(done) {
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
     chai.expect(foundElement.name).to.equal(elemData.name);
-    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(foundElement.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -720,7 +720,7 @@ function patchElement(done) {
     // Verify element updated properly
     chai.expect(updatedElement.id).to.equal(elemData.id);
     chai.expect(updatedElement.name).to.equal(updateObj.name);
-    chai.expect(updatedElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(updatedElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(updatedElement.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -803,7 +803,7 @@ function patchElements(done) {
       // Verify elements created properly
       chai.expect(updatedElement.id).to.equal(elemObj.id);
       chai.expect(updatedElement.name).to.equal(`${elemObj.name}_edit`);
-      chai.expect(updatedElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(updatedElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(updatedElement.project).to.equal(projID);
 
       // If documentation was provided, verify it
