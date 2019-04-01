@@ -12,6 +12,7 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Project model that
  * implements controller logic and behavior for Projects.
@@ -495,7 +496,7 @@ function create(requestingUser, organizationID, projects, options) {
       EventEmitter.emit('projects-created', projObjects);
 
       // Create a root model element for each project
-      const elemObjects = projObjects.map((p) => new Element({
+      const elemModelObj = projObjects.map((p) => new Element({
         _id: utils.createID(p._id, 'model'),
         name: 'Model',
         parent: null,
@@ -508,8 +509,54 @@ function create(requestingUser, organizationID, projects, options) {
         archivedBy: (p.archived) ? reqUser._id : null
       }));
 
-        // Create the elements
-      return Element.insertMany(elemObjects);
+      // Create a __MBEE__ element for each project
+      const elemMBEEObj = projObjects.map((p) => new Element({
+        _id: utils.createID(p._id, '__mbee__'),
+        name: '__mbee__',
+        parent: utils.createID(p._id, 'model'),
+        project: p._id,
+        lastModifiedBy: reqUser._id,
+        createdBy: reqUser._id,
+        createdOn: Date.now(),
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
+      }));
+
+      // Create a holding bin element for each project
+      const elemHoldingBinObj = projObjects.map((p) => new Element({
+        _id: utils.createID(p._id, 'holding_bin'),
+        name: 'holding bin',
+        parent: utils.createID(p._id, '__mbee__'),
+        project: p._id,
+        lastModifiedBy: reqUser._id,
+        createdBy: reqUser._id,
+        createdOn: Date.now(),
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
+      }));
+
+      // Create a undefined element for each project
+      const elemUndefinedBinObj = projObjects.map((p) => new Element({
+        _id: utils.createID(p._id, 'undefined'),
+        name: 'undefined element',
+        parent: utils.createID(p._id, '__mbee__'),
+        project: p._id,
+        lastModifiedBy: reqUser._id,
+        createdBy: reqUser._id,
+        createdOn: Date.now(),
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
+      }));
+
+      // Concatenate all element arrays
+      const conCatElemObj = elemModelObj.concat(elemMBEEObj) // eslint-disable-next-line indent
+        .concat(elemHoldingBinObj).concat(elemUndefinedBinObj);
+
+      // Create the elements
+      return Element.insertMany(conCatElemObj);
     })
     .then(() => resolve(Project.find({ _id: { $in: arrIDs } }, fieldsString)
     .populate(populateString)))
@@ -1030,7 +1077,6 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     })
     .then((_foundProjects) => {
       foundProjects = _foundProjects;
-
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
         fs.mkdirSync(path.join(M.root, 'data'));
@@ -1050,8 +1096,17 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
           });
       });
     })
-    // Delete root model elements from database
-    .then(() => Element.deleteMany({ _id: foundProjects.map(p => utils.createID(p._id, 'model')) }))
+    // Delete root elements from database
+    .then(() => {
+      const elemDelObj = [];
+      foundProjects.forEach(p => {
+        elemDelObj.push(utils.createID(p._id, 'model'));
+        elemDelObj.push(utils.createID(p._id, '__mbee__'));
+        elemDelObj.push(utils.createID(p._id, 'holding_bin'));
+        elemDelObj.push(utils.createID(p._id, 'undefined'));
+      });
+      return Element.deleteMany({ _id: { $in: elemDelObj } });
+    })
     // Delete projects from database
     .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
 
