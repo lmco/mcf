@@ -188,7 +188,7 @@ class HomeApp extends Component {
         </Modal>
         { /* Display the list of projects */ }
         <div id='workspace' ref={this.ref}>
-          <div id='workspace-header' className='workspace-header'>
+          <div id='workspace-header' className='workspace-header home-header'>
             <h2 className='workspace-title'>Organizations</h2>
             { /* Verify user is an admin */ }
             {(!this.state.admin)

@@ -165,10 +165,13 @@ class Delete extends Component {
 
     // Return the project delete form
     return (
-      <div className='extra-padding'>
-        <h2>Delete {title}</h2>
-        <hr />
-        <div>
+      <div id='workspace'>
+        <div id='workspace-header' className='workspace-header'>
+          <h2 className='workspace-title workspace-title-padding'>
+            Delete {title}
+          </h2>
+        </div>
+        <div className='extra-padding'>
           <Form>
             {
               (!this.props.orgs)
