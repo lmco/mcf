@@ -132,7 +132,7 @@ class ProjectElements extends Component {
           <h2 className='workspace-title'>{this.props.project.name} Model</h2>
           <div id='workspace-header-btn' className='workspace-header-button ws-button-group'>
             <Button className='btn btn-sm'
-                    outline color='secondary'
+                    outline color='primary'
                     onClick={this.createNewElement}>
               <i className='fas fa-plus'/>
               {' Add Element'}

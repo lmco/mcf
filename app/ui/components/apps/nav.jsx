@@ -115,7 +115,7 @@ class MbeeNav extends Component {
         <Navbar className={setNavbarSize} dark expand='md'>
           { /* Create the MBEE Logo on navbar */ }
           <NavbarBrand href="/">
-            <img src='/img/logo-alt.png' />
+            <img src='/img/logo.png' />
             { /* Change title based on width of window */ }
             {(this.state.width > 900) ? 'Model Based Engineering Environment' : 'MBEE'}
           </NavbarBrand>
