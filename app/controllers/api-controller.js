@@ -28,9 +28,9 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
-const Element = M.require('models.element');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
+const publicData = M.require('lib.get-public-data');
 
 // Expose `API Controller functions`
 module.exports = {
@@ -257,6 +257,9 @@ function getOrgs(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
   OrgController.find(req.user, ids, options)
@@ -268,7 +271,7 @@ function getOrgs(req, res) {
     }
 
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData());
+    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -326,12 +329,15 @@ function postOrgs(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create organizations in request body
   // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData());
+    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -389,12 +395,15 @@ function putOrgs(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace organizations in request body
   // NOTE: createOrReplace() sanitizes req.body
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData());
+    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -452,12 +461,15 @@ function patchOrgs(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Update the specified orgs
   // NOTE: update() sanitizes req.body
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData());
+    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -580,6 +592,9 @@ function getOrg(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Find the org from it's id
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid, options)
@@ -593,7 +608,7 @@ function getOrg(req, res) {
     }
 
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'))[0];
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -663,12 +678,15 @@ function postOrg(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create the organization with provided parameters
   // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'))[0];
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -738,12 +756,15 @@ function putOrg(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace the organization with provided parameters
   // NOTE: createOrReplace() sanitizes req.body
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'))[0];
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -813,12 +834,15 @@ function patchOrg(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Update the specified organization
   // NOTE: update() sanitizes req.body
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'))[0];
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -941,6 +965,9 @@ function getAllProjects(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Get all projects the requesting user has access to
   ProjectController.find(req.user, null, undefined, options)
   .then((projects) => {
@@ -950,7 +977,7 @@ function getAllProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -1042,6 +1069,9 @@ function getProjects(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Get all projects the requesting user has access to in a specified org
   // NOTE: find() sanitizes req.params.orgid and ids
   ProjectController.find(req.user, req.params.orgid, ids, options)
@@ -1052,7 +1082,7 @@ function getProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -1123,11 +1153,14 @@ function postProjects(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create the specified projects
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -1198,11 +1231,14 @@ function putProjects(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace the specified projects
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -1273,11 +1309,14 @@ function patchProjects(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Update the specified projects
   // NOTE: update() sanitizes req.params.orgid req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -1414,6 +1453,9 @@ function getProject(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Find the project
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
   ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
@@ -1426,7 +1468,7 @@ function getProject(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => p.getPublicData())[0];
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'))[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -1509,11 +1551,14 @@ function postProject(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create project with provided parameters
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData())[0];
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'))[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -1596,11 +1641,14 @@ function putProject(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace project with provided parameters
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData())[0];
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'))[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -1682,11 +1730,14 @@ function patchProject(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Update the specified project
   // NOTE: update() sanitizes req.params.orgid and req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData())[0];
+    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'))[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -1840,11 +1891,14 @@ function getUsers(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Get Users
   // NOTE: find() sanitizes req.usernames
   UserController.find(req.user, usernames, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData());
+    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -1903,11 +1957,14 @@ function postUsers(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create users
   // NOTE: create() sanitizes req.body
   UserController.create(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData());
+    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -1966,11 +2023,14 @@ function putUsers(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace users
   // NOTE: createOrReplace() sanitizes req.body
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData());
+    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2029,11 +2089,14 @@ function patchUsers(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Update the specified users
   // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData());
+    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2151,6 +2214,9 @@ function getUser(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Find the member from it's username
   // NOTE: find() sanitizes req.params.username
   UserController.find(req.user, req.params.username, options)
@@ -2163,7 +2229,7 @@ function getUser(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicUserData = users.map(u => u.getPublicData())[0];
+    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'))[0];
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2233,11 +2299,14 @@ function postUser(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create user with provided parameters
   // NOTE: create() sanitizes req.body
   UserController.create(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData())[0];
+    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'))[0];
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2307,11 +2376,14 @@ function putUser(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Creates or replaces a user with provided parameters
   // NOTE: createOrReplace() sanitizes req.body
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData())[0];
+    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'))[0];
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2381,11 +2453,14 @@ function patchUser(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Update the specified user
   // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData())[0];
+    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'))[0];
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2501,7 +2576,7 @@ function whoami(req, res) {
     delete options.minified;
   }
 
-  const publicUserData = req.user.getPublicData();
+  const publicUserData = publicData.getPublicData(req.user, 'user');
 
   // Format JSON if minify option is not true
   const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2582,7 +2657,7 @@ function patchPassword(req, res) {
   UserController.updatePassword(req.user, req.body.oldPassword,
     req.body.password, req.body.confirmPassword)
   .then((user) => {
-    const publicUserData = user.getPublicData();
+    const publicUserData = publicData.getPublicData(user, 'user');
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2624,8 +2699,26 @@ function getElements(req, res) {
     skip: 'number',
     ids: 'array',
     format: 'string',
-    minified: 'boolean'
+    minified: 'boolean',
+    parent: 'string',
+    source: 'string',
+    target: 'string',
+    type: 'string',
+    name: 'string',
+    createdBy: 'string',
+    lastModifiedBy: 'string',
+    archivedBy: 'string'
   };
+
+  // Loop through req.query
+  if (req.query) {
+    Object.keys(req.query).forEach((k) => {
+      // If the key starts with custom., add it to the validOptions object
+      if (k.startsWith('custom.')) {
+        validOptions[k] = 'string';
+      }
+    });
+  }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -2679,14 +2772,15 @@ function getElements(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Find elements
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, elemIDs, options)
   .then((elements) => {
-    const elementsPublicData = (elements.every(e => e instanceof Element))
-      ? elements.map(e => e.getPublicData())
-      : elements.map(e => Element.getPublicData(e));
+    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -2797,12 +2891,15 @@ function postElements(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create the specified elements
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -2877,12 +2974,15 @@ function putElements(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace the specified elements
   // NOTE: createOrReplace() sanitizes input params
   ElementController.createOrReplace(req.user, req.params.orgid,
     req.params.projectid, branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -2956,12 +3056,15 @@ function patchElements(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Update the specified elements
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -3075,8 +3178,26 @@ function searchElements(req, res) {
     limit: 'number',
     skip: 'number',
     q: 'string',
-    minified: 'boolean'
+    minified: 'boolean',
+    parent: 'string',
+    source: 'string',
+    target: 'string',
+    type: 'string',
+    name: 'string',
+    createdBy: 'string',
+    lastModifiedBy: 'string',
+    archivedBy: 'string'
   };
+
+  // Loop through req.query
+  if (req.query) {
+    Object.keys(req.query).forEach((k) => {
+      // If the key starts with custom., add it to the validOptions object
+      if (k.startsWith('custom.')) {
+        validOptions[k] = 'string';
+      }
+    });
+  }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -3109,6 +3230,9 @@ function searchElements(req, res) {
   // Default branch to master
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Find elements
   // NOTE: search() sanitizes input params
   ElementController.search(req.user, req.params.orgid, req.params.projectid,
@@ -3120,7 +3244,7 @@ function searchElements(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
 
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
@@ -3183,6 +3307,9 @@ function getElement(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Find the element
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
@@ -3196,7 +3323,7 @@ function getElement(req, res) {
       return res.status(error.status).send(error);
     }
 
-    let elementsPublicData = elements.map(e => e.getPublicData());
+    let elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
 
     // If the fields options was specified
     if (options.fields) {
@@ -3286,12 +3413,15 @@ function postElement(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create element with provided parameters
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
-  .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData())[0];
+  .then((elements) => {
+    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'))[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -3376,12 +3506,15 @@ function putElement(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace element with provided parameters
   // NOTE: createOrReplace() sanitizes input params
   ElementController.createOrReplace(req.user, req.params.orgid,
     req.params.projectid, branchid, req.body, options)
-  .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData())[0];
+  .then((elements) => {
+    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'))[0];
 
     // If the fields options was specified
     if (options.fields) {
@@ -3466,12 +3599,15 @@ function patchElement(req, res) {
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Updates the specified element
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
-  .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData())[0];
+  .then((elements) => {
+    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'))[0];
 
     // If the fields options was specified
     if (options.fields) {
