@@ -39,8 +39,9 @@ class Search extends Component {
     });
 
     this.state = {
-      query: getParams.query || null,
-      results: null
+      query: getParams.q || null,
+      results: null,
+      message: ''
     };
 
     // Bind component functions
@@ -59,19 +60,42 @@ class Search extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  doSearch() {
+  doSearch(e) {
+    // Disable form submit
+    if (e) {
+      e.preventDefault();
+    }
+
+    // Pre-search reset message
+    this.setState({
+      message: ''
+    });
+
+    // Append search to URL
+    this.props.history.push({
+      pathname: this.props.location.pathname,
+      search: `?q=${this.state.query}`
+    });
+
     // Build query URL
     const oid = this.props.project.org;
     const pid = this.props.project.id;
     const url = `/api/orgs/${oid}/projects/${pid}/branches/master/elements/search`;
 
     // Do ajax request
+    const start = new Date();
     $.ajax({
       method: 'GET',
       url: `${url}?q=${this.state.query}`
     })
     .done(data => {
-      this.setState({ results: data });
+      const end = new Date();
+      const elapsed = (end - start) / 1000;
+
+      this.setState({
+        results: data,
+        message: `Got ${data.length} results in ${elapsed} seconds.`
+      });
     })
     .fail(res => {
       if (res.status === 404) {
@@ -99,13 +123,19 @@ class Search extends Component {
                         <Col md={2} sm={4} xs={6} >
                             <Button className='btn'
                                     outline color="primary"
-                                    type='submit'>
+                                    type='submit'
+                                    onClick={this.doSearch}>
                                 Search
                             </Button>
                         </Col>
                     </Row>
                 </Form>
 
+                <div>
+                  <div style={{ marginLeft: '40px', fontSize: '12px' }}>
+                    {this.state.message}
+                  </div>
+                </div>
                 <div>
                     <SearchResults results={this.state.results}/>
                 </div>
