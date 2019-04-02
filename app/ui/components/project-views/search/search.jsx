@@ -40,7 +40,8 @@ class Search extends Component {
 
     this.state = {
       query: getParams.q || null,
-      results: null
+      results: null,
+      message: ''
     };
 
     // Bind component functions
@@ -77,12 +78,19 @@ class Search extends Component {
     const url = `/api/orgs/${oid}/projects/${pid}/branches/master/elements/search`;
 
     // Do ajax request
+    const start = new Date();
     $.ajax({
       method: 'GET',
       url: `${url}?q=${this.state.query}`
     })
     .done(data => {
-      this.setState({ results: data });
+      const end = new Date();
+      const elapsed = (end - start) / 1000;
+
+      this.setState({
+        results: data,
+        message: `Got ${data.length} results in ${elapsed} seconds.`
+      });
     })
     .fail(res => {
       if (res.status === 404) {
@@ -118,6 +126,11 @@ class Search extends Component {
                     </Row>
                 </Form>
 
+                <div>
+                  <div style={{ marginLeft: '40px', fontSize: '12px' }}>
+                    {this.state.message}
+                  </div>
+                </div>
                 <div>
                     <SearchResults results={this.state.results}/>
                 </div>
