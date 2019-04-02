@@ -27,13 +27,17 @@
     }
   }
 
+  .navbar-toggler-icon {
+    font-size: x-small;
+  }
+
   .nav-link {
     height: 100%;
     color: $mbee-navbar-text;
     font-size: 16px;
   }
+}
 
-  .navbar-toggler {
-    height: 100%;
-  }
+.show {
+  background-color: $mbee-navbar-color;
 }
