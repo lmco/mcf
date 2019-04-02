@@ -39,7 +39,7 @@ class Search extends Component {
     });
 
     this.state = {
-      query: getParams.query || null,
+      query: getParams.q || null,
       results: null
     };
 
@@ -59,7 +59,18 @@ class Search extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  doSearch() {
+  doSearch(e) {
+    // Disable form submit
+    if (e) {
+      e.preventDefault();
+    }
+
+    // Append search to URL
+    this.props.history.push({
+      pathname: this.props.location.pathname,
+      search: `?q=${this.state.query}`
+    });
+
     // Build query URL
     const oid = this.props.project.org;
     const pid = this.props.project.id;
@@ -99,7 +110,8 @@ class Search extends Component {
                         <Col md={2} sm={4} xs={6} >
                             <Button className='btn'
                                     outline color="primary"
-                                    type='submit'>
+                                    type='submit'
+                                    onClick={this.doSearch}>
                                 Search
                             </Button>
                         </Col>
