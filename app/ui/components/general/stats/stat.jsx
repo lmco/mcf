@@ -38,7 +38,6 @@ class Stat extends Component {
   }
 
   render() {
-    console.log('in the render');
     // Initialize variables
     let icon;
     let value;
