@@ -196,8 +196,8 @@ class Delete extends Component {
                 ? ''
                 : (
                   <FormGroup>
-                    (<Label for="id">Project ID</Label>)
-                    (<Input type="select"
+                    <Label for="id">Project ID</Label>
+                    <Input type="select"
                            name="id"
                            id="id"
                            value={this.state.id || ''}
