@@ -21,8 +21,6 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import UserListItem from '../list-items/user-list-item.jsx';
-import List from '../../general/list/list.jsx';
 import { Button, Modal, ModalBody } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
 
