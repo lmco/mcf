@@ -205,7 +205,7 @@ class ProjectList extends Component {
                 : (<Button className='btn'
                             outline color="secondary"
                             onClick={this.handleCreateToggle}>
-                  {(this.state.width > 800)
+                  {(this.state.width > 600)
                     ? 'Create'
                     : (<i className='fas fa-plus add-btn'/>)
                   }
@@ -218,7 +218,7 @@ class ProjectList extends Component {
                 : (<Button className='btn'
                             outline color="danger"
                             onClick={this.handleDeleteToggle}>
-                  {(this.state.width > 800)
+                  {(this.state.width > 600)
                     ? 'Delete'
                     : (<i className='fas fa-trash-alt delete-btn'/>)
                   }
