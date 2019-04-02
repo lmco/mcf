@@ -64,7 +64,12 @@ class MembersPage extends Component {
     }
 
     // Loop through project members
-    const listItems = users.map(user => <UserListItem key={`user-key-${user}`} user={user} permission={userperm[user]}/>);
+    const listItems = users.map(user =>
+      <tr>
+        <td>{user}</td>
+        <td>{userperm[user]}</td>
+      </tr>
+    );
 
     // Return project member list
     return (
@@ -86,14 +91,20 @@ class MembersPage extends Component {
           )
         }
         <div id='workspace'>
-          <div id='workspace-header' className='user-list-header'>
-            <h2 className='user-title'>Users</h2>
-            <h2 className='user-descriptor'>Permissions</h2>
+          <div id='workspace-header' className='workspace-header'>
+            <table className='workspace-title'>
+              <tbody>
+              <tr>
+                <td className='user-title'><h2>Users</h2></td>
+                <td><h2>Permissions</h2></td>
+              </tr>
+              </tbody>
+            </table>
             {/* Verify user is admin */}
             {(!this.props.admin)
               ? ''
               : ( // Button to edit user roles
-                <div className='user-button'>
+                <div className='workspace-header-button'>
                   <Button className='btn'
                           outline color="secondary"
                           onClick={this.handleToggle}>
@@ -104,9 +115,11 @@ class MembersPage extends Component {
             }
           </div>
           <div id='workspace-body' className='extra-padding'>
-            <List>
-              {listItems}
-            </List>
+            <table>
+              <tbody>
+                {listItems}
+              </tbody>
+            </table>
           </div>
         </div>
       </React.Fragment>

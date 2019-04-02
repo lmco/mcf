@@ -4,34 +4,8 @@
 /*                           Members Page Styling                             *
 /******************************************************************************/
 
-.user-list-header {
-  display: grid;
-  grid-template-columns: minmax(auto, 48%) minmax(auto, 48%) 1fr;
-  grid-template-areas: "header descriptor button";
-  justify-content: space-between;
-  align-items: center;
-
-  .user-title {
-    grid-area: header;
-    justify-content: flex-start;
-    margin: 0;
-  }
-
-  .user-descriptor {
-    grid-area: descriptor;
-    justify-content: flex-start;
-    margin: 0;
-  }
-
-  .user-button {
-    grid-area: button;
-    display: flex;
-
-    .btn {
-      float: right;
-      margin: 5px;
-    }
-  }
+.user-title {
+  padding-right: 150px;
 }
 
 .edit-role-title {
