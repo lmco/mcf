@@ -113,7 +113,7 @@ class OrgList extends Component {
                     <div className='org-icon' onClick={this.handleShowProjsToggle}>
                         <i className={icon}/>
                     </div>
-                    <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`}/>
+                    <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`} divider={true}/>
                     {((this.props.admin) || (this.props.write))
                       ? (<div className='controls-container'>
                           <i className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>

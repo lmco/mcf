@@ -67,7 +67,7 @@ class ProjList extends Component {
                     </ModalBody>
                 </Modal>
                 <div className='proj-list'>
-                    <ProjectListItem className='homeproj-list' project={project} href={`/${orgId}/${project.id}`}/>
+                    <ProjectListItem className='homeproj-list' divider={true} project={project} href={`/${orgId}/${project.id}`}/>
                     {(!this.props.admin)
                       ? ''
                       : (< div className='controls-container'>

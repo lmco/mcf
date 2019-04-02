@@ -234,6 +234,18 @@
       margin: 0;
     }
   }
+
+  .empty-item {
+    display: none;
+  }
+
+  .stats-divider {
+    border-right: 1px solid red;
+    height: 80%;
+    padding-left: 0px;
+    padding-right: 0px;
+    width: 1px;
+  }
 }
 
 .user-list-item {
