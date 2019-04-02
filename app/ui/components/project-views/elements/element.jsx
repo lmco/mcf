@@ -140,6 +140,20 @@ class Element extends Component {
                     <th>Type:</th>
                     <td>{element.type}</td>
                   </tr>
+                  {(!element.target || !element.source)
+                    ? ''
+                    : (<React.Fragment>
+                        <tr>
+                          <th>Target:</th>
+                          <td>{element.target}</td>
+                        </tr>
+                        <tr>
+                          <th>Source:</th>
+                          <td>{element.target}</td>
+                        </tr>
+                      </React.Fragment>
+                    )
+                  }
                   <tr>
                     <th>Documentation:</th>
                     <td>{element.documentation}</td>
