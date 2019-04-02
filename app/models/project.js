@@ -20,7 +20,6 @@ const mongoose = require('mongoose');
 // MBEE modules
 const Element = M.require('models.element');
 const validators = M.require('lib.validators');
-const utils = M.require('lib.utils');
 const extensions = M.require('models.plugin.extensions');
 
 
@@ -93,80 +92,6 @@ const ProjectSchema = new mongoose.Schema({
 ProjectSchema.plugin(extensions);
 
 /* ---------------------------( Project Methods )---------------------------- */
-
-/**
- * @description Returns a project's public data.
- * @memberOf ProjectSchema
- */
-ProjectSchema.methods.getPublicData = function() {
-  const permissions = (this.permissions) ? {} : undefined;
-  let createdBy;
-  let lastModifiedBy;
-  let archivedBy;
-
-  // Loop through each permission key/value pair
-  Object.keys(this.permissions || {}).forEach((u) => {
-    // Return highest permission
-    permissions[u] = this.permissions[u].pop();
-  });
-
-  // If this.createdBy is defined
-  if (this.createdBy) {
-    // If this.createdBy is populated
-    if (typeof this.createdBy === 'object') {
-      // Get the public data of createdBy
-      createdBy = this.createdBy.getPublicData();
-    }
-    else {
-      createdBy = this.createdBy;
-    }
-  }
-
-  // If this.lastModifiedBy is defined
-  if (this.lastModifiedBy) {
-    // If this.lastModifiedBy is populated
-    if (typeof this.lastModifiedBy === 'object') {
-      // Get the public data of lastModifiedBy
-      lastModifiedBy = this.lastModifiedBy.getPublicData();
-    }
-    else {
-      lastModifiedBy = this.lastModifiedBy;
-    }
-  }
-
-  // If this.archivedBy is defined
-  if (this.archivedBy) {
-    // If this.archivedBy is populated
-    if (typeof this.archivedBy === 'object') {
-      // Get the public data of archivedBy
-      archivedBy = this.archivedBy.getPublicData();
-    }
-    else {
-      archivedBy = this.archivedBy;
-    }
-  }
-
-  // Return the projects public fields
-  return {
-    id: utils.parseID(this._id).pop(),
-    org: (this.org && this.org.id)
-      ? this.org.getPublicData()
-      : utils.parseID(this._id)[0],
-    name: this.name,
-    elementCount: this.count || undefined,
-    permissions: permissions,
-    custom: this.custom,
-    visibility: this.visibility,
-    createdOn: this.createdOn,
-    createdBy: createdBy,
-    updatedOn: this.updatedOn,
-    lastModifiedBy: lastModifiedBy,
-    archived: (this.archived) ? true : undefined,
-    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
-    archivedBy: archivedBy
-  };
-};
-
 /**
  * @description Returns supported permission levels
  * @memberOf ProjectSchema

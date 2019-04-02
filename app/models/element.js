@@ -10,6 +10,7 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description
  * <p>Defines the element data model. Using
@@ -39,7 +40,6 @@
 const mongoose = require('mongoose');
 
 // MBEE modules
-const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 
@@ -181,235 +181,15 @@ ElementSchema.statics.getValidPopulateFields = function() {
 };
 
 /**
- * @description Returns the element public data
+ * @description Returns a list of valid root elements
  * @memberOf ElementSchema
  */
-ElementSchema.methods.getPublicData = function() {
-  // Parse the element ID
-  const idParts = utils.parseID(this._id);
-
-  let createdBy;
-  let lastModifiedBy;
-  let archivedBy;
-  let parent = null;
-  let source;
-  let target;
-
-  // If this.createdBy is defined
-  if (this.createdBy) {
-    // If this.createdBy is populated
-    if (typeof this.createdBy === 'object') {
-      // Get the public data of createdBy
-      createdBy = this.createdBy.getPublicData();
-    }
-    else {
-      createdBy = this.createdBy;
-    }
-  }
-
-  // If this.lastModifiedBy is defined
-  if (this.lastModifiedBy) {
-    // If this.lastModifiedBy is populated
-    if (typeof this.lastModifiedBy === 'object') {
-      // Get the public data of lastModifiedBy
-      lastModifiedBy = this.lastModifiedBy.getPublicData();
-    }
-    else {
-      lastModifiedBy = this.lastModifiedBy;
-    }
-  }
-
-  // If this.archivedBy is defined
-  if (this.archivedBy) {
-    // If this.archivedBy is populated
-    if (typeof this.archivedBy === 'object') {
-      // Get the public data of archivedBy
-      archivedBy = this.archivedBy.getPublicData();
-    }
-    else {
-      archivedBy = this.archivedBy;
-    }
-  }
-
-  // If this.parent is defined
-  if (this.parent) {
-    // If this.parent is populated
-    if (typeof this.parent === 'object') {
-      // Get the public data of parent
-      parent = this.parent.getPublicData();
-    }
-    else {
-      parent = utils.parseID(this.parent).pop();
-    }
-  }
-
-  // If this.source is defined
-  if (this.source) {
-    // If this.source is populated
-    if (typeof this.source === 'object') {
-      // Get the public data of source
-      source = this.source.getPublicData();
-    }
-    else {
-      source = utils.parseID(this.source).pop();
-    }
-  }
-
-  // If this.target is defined
-  if (this.target) {
-    // If this.target is populated
-    if (typeof this.target === 'object') {
-      // Get the public data of target
-      target = this.target.getPublicData();
-    }
-    else {
-      target = utils.parseID(this.target).pop();
-    }
-  }
-
-  const data = {
-    id: idParts.pop(),
-    name: this.name,
-    project: idParts[1],
-    org: idParts[0],
-    parent: parent,
-    source: source,
-    target: target,
-    type: this.type,
-    documentation: this.documentation,
-    custom: this.custom,
-    createdOn: this.createdOn,
-    createdBy: createdBy,
-    updatedOn: this.updatedOn,
-    lastModifiedBy: lastModifiedBy,
-    archived: (this.archived) ? true : undefined,
-    archivedOn: (this.archivedOn) ? this.archivedOn : undefined,
-    archivedBy: archivedBy
-  };
-
-
-  if (this.contains) {
-    // Handle the virtual contains field
-    data.contains = (this.contains.every(e => typeof e === 'object'))
-      ? this.contains.map(e => utils.parseID(e._id).pop())
-      : this.contains.map(e => utils.parseID(e).pop());
-  }
-
-  return data;
+ElementSchema.methods.getValidRootElements = function() {
+  return ['model', '__mbee__', 'holding_bin', 'undefined'];
 };
 
-ElementSchema.statics.getPublicData = function(element) {
-  // Parse the element ID
-  const idParts = utils.parseID(element._id);
-
-  let createdBy;
-  let lastModifiedBy;
-  let archivedBy;
-  let parent = null;
-  let source;
-  let target;
-
-  // If element.createdBy is defined
-  if (element.createdBy) {
-    // If element.createdBy is populated
-    if (typeof element.createdBy === 'object') {
-      // Get the public data of createdBy
-      createdBy = element.createdBy.getPublicData();
-    }
-    else {
-      createdBy = element.createdBy;
-    }
-  }
-
-  // If element.lastModifiedBy is defined
-  if (element.lastModifiedBy) {
-    // If element.lastModifiedBy is populated
-    if (typeof element.lastModifiedBy === 'object') {
-      // Get the public data of lastModifiedBy
-      lastModifiedBy = element.lastModifiedBy.getPublicData();
-    }
-    else {
-      lastModifiedBy = element.lastModifiedBy;
-    }
-  }
-
-  // If element.archivedBy is defined
-  if (element.archivedBy) {
-    // If element.archivedBy is populated
-    if (typeof element.archivedBy === 'object') {
-      // Get the public data of archivedBy
-      archivedBy = element.archivedBy.getPublicData();
-    }
-    else {
-      archivedBy = element.archivedBy;
-    }
-  }
-
-  // If element.parent is defined
-  if (element.parent) {
-    // If element.parent is populated
-    if (typeof element.parent === 'object') {
-      // Get the public data of parent
-      parent = element.parent.getPublicData();
-    }
-    else {
-      parent = utils.parseID(element.parent).pop();
-    }
-  }
-
-  // If element.source is defined
-  if (element.source) {
-    // If element.source is populated
-    if (typeof element.source === 'object') {
-      // Get the public data of source
-      source = element.source.getPublicData();
-    }
-    else {
-      source = utils.parseID(element.source).pop();
-    }
-  }
-
-  // If element.target is defined
-  if (element.target) {
-    // If element.target is populated
-    if (typeof element.target === 'object') {
-      // Get the public data of target
-      target = element.target.getPublicData();
-    }
-    else {
-      target = utils.parseID(element.target).pop();
-    }
-  }
-
-  const data = {
-    id: idParts.pop(),
-    name: element.name,
-    project: idParts[1],
-    org: idParts[0],
-    parent: parent,
-    source: source,
-    target: target,
-    type: element.type,
-    documentation: element.documentation,
-    custom: element.custom,
-    createdOn: element.createdOn,
-    createdBy: createdBy,
-    updatedOn: element.updatedOn,
-    lastModifiedBy: lastModifiedBy,
-    archived: (element.archived) ? element : undefined,
-    archivedOn: (element.archivedOn) ? element.archivedOn : undefined,
-    archivedBy: archivedBy
-  };
-
-
-  if (element.contains) {
-    // Handle the virtual contains field
-    data.contains = (element.contains.every(e => typeof e === 'object'))
-      ? element.contains.map(e => utils.parseID(e._id).pop())
-      : element.contains.map(e => utils.parseID(e).pop());
-  }
-
-  return data;
+ElementSchema.statics.getValidRootElements = function() {
+  return ElementSchema.methods.getValidRootElements();
 };
 
 /**
