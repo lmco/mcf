@@ -66,6 +66,11 @@ class Search extends Component {
       e.preventDefault();
     }
 
+    // Pre-search reset message
+    this.setState({
+      message: ''
+    });
+
     // Append search to URL
     this.props.history.push({
       pathname: this.props.location.pathname,
