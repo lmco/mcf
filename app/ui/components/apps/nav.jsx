@@ -103,7 +103,7 @@ class MbeeNav extends Component {
   render() {
     let setNavbarSize;
 
-    if (this.state.width > 676) {
+    if (this.state.width > 776) {
       setNavbarSize = 'mbee-navbar';
     }
     else {
