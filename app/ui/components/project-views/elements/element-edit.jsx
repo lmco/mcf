@@ -188,12 +188,16 @@ class ElementEdit extends Component {
     // Render organization edit page
     return (
       <div className='element-panel-display'>
-        <div className='side-icons'>
-          <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
-        </div>
         <div className='element-data'>
-          <h2>Element Edit</h2>
-          <hr />
+          <div className='element-header'>
+            <h2>
+              Element Edit
+            </h2>
+            <div className='side-icons'>
+              <i className='fas fa-share-square edit-btn' onClick={this.onSubmit}/>
+              <i className='fas fa-times exit-btn' onClick={() => { this.props.openElementInfo(this.props.id); }}/>
+            </div>
+          </div>
           {/* Create form to update element data */}
           <Form className='element-edit-form'>
             {/* Form section for Element name */}
@@ -308,14 +312,6 @@ class ElementEdit extends Component {
                 Invalid: Custom data must be valid JSON
               </FormFeedback>
             </FormGroup>
-            {/* Button to submit changes */}
-            <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}>
-              Submit
-            </Button>
-            {' '}
-            <Button outline onClick={() => { this.props.openElementInfo(this.props.id); }}>
-              Cancel
-            </Button>
           </Form>
         </div>
       </div>
