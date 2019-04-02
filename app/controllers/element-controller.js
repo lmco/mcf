@@ -622,8 +622,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     })
     .then(() => {
       // For each object of element data, create the element object
-      elementObjects = elementsToCreate.map((e) => {
-        const elemObj = new Element(e);
+      elementObjects = elementsToCreate.map((elemObj) => {
         // Set the project, lastModifiedBy and createdBy
         elemObj.project = utils.createID(orgID, projID);
         elemObj.lastModifiedBy = reqUser._id;
@@ -632,12 +631,12 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         elemObj.archivedBy = (elemObj.archived) ? reqUser._id : null;
 
         // Add hidden fields
-        elemObj.$parent = utils.createID(orgID, projID, e.parent);
-        elemObj.$source = (e.source)
-          ? utils.createID(orgID, projID, e.source)
+        elemObj.$parent = utils.createID(orgID, projID, elemObj.parent);
+        elemObj.$source = (elemObj.source)
+          ? utils.createID(orgID, projID, elemObj.source)
           : null;
-        elemObj.$target = (e.target)
-          ? utils.createID(orgID, projID, e.target)
+        elemObj.$target = (elemObj.target)
+          ? utils.createID(orgID, projID, elemObj.target)
           : null;
 
         return elemObj;
@@ -744,11 +743,11 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         }
       });
 
-      return Element.insertMany(elementObjects);
+      return Element.insertMany(elementObjects, { rawResult: true });
     })
     .then((createdElements) => {
       const promises = [];
-      const createdIDs = createdElements.map(e => e._id);
+      const createdIDs = createdElements.ops.map(e => e._id);
       // Find elements in batches
       for (let i = 0; i < createdIDs.length / 50000; i++) {
         // Split elementIDs list into batches of 50000
