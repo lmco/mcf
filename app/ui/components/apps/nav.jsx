@@ -101,9 +101,18 @@ class MbeeNav extends Component {
   }
 
   render() {
+    let setNavbarSize;
+
+    if (this.state.width > 676) {
+      setNavbarSize = 'mbee-navbar';
+    }
+    else {
+      setNavbarSize = 'small-screen-navbar';
+    }
+
     return (
       <div ref='navbar' style={{ width: '100%' }}>
-        <Navbar className='mbee-navbar' dark expand='md'>
+        <Navbar className={setNavbarSize} dark expand='md'>
           { /* Create the MBEE Logo on navbar */ }
           <NavbarBrand href="/">
             <img src='/img/logo-alt.png' />
@@ -146,7 +155,7 @@ class MbeeNav extends Component {
                         <DropdownItem href='/profile/projects'>Your Projects</DropdownItem>
                         <DropdownItem href='/about'>About</DropdownItem>
                         <DropdownItem divider />
-                        <DropdownItem><NavLink href='/logout'>Log Out</NavLink></DropdownItem>
+                        <DropdownItem href='/logout'>Log Out</DropdownItem>
                       </DropdownMenu>
                     </UncontrolledDropdown>
                   )

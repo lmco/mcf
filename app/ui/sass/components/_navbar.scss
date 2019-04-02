@@ -8,36 +8,37 @@
   height: 36px;
   background-color: $mbee-navbar-color;
   width: 100%;
-  border-bottom: 1px solid darkgray;
   padding-top: 5px;
   padding-bottom: 3px;
+}
 
-  .navbar-brand {
-    height: 100%;
-    color: $mbee-navbar-text;
-    display:flex;
-    font-size: 16px;
-    align-items: center;
-    img {
-      height: 28px;
-      //height: 2em;
-      padding-right: .5em;
-      position: relative;
-      top: -2px;
-    }
-  }
+.small-screen-navbar {
+  background-color: $mbee-navbar-color;
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 3px;
+}
 
-  .navbar-toggler-icon {
-    font-size: x-small;
-  }
-
-  .nav-link {
-    height: 100%;
-    color: $mbee-navbar-text;
-    font-size: 16px;
+.navbar-brand {
+  height: 100%;
+  color: $mbee-navbar-text;
+  display:flex;
+  font-size: 16px;
+  align-items: center;
+  img {
+    height: 28px;
+    padding-right: .5em;
+    position: relative;
+    top: -2px;
   }
 }
 
-.show {
-  background-color: $mbee-navbar-color;
+.navbar-toggler-icon {
+  font-size: x-small;
+}
+
+.nav-link {
+  height: 100%;
+  color: $mbee-navbar-text;
+  font-size: 16px;
 }
