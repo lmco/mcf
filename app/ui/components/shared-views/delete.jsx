@@ -54,9 +54,9 @@ class Delete extends Component {
       ajaxRequest('GET', `/api/orgs/${event.target.value}/projects?fields=id,name`)
       .then(projects => {
         // Loop through project-views and create proj options
-        const projectOptions = projects.map((project) => {
-          return (<option value={project.id}>{project.name}</option>);
-        });
+        const projectOptions = projects.map(
+          (project) => (<option value={project.id}>{project.name}</option>)
+        );
 
         // Set the new project options
         this.setState({ projectOpt: projectOptions });
@@ -142,10 +142,7 @@ class Delete extends Component {
     // Verify if orgs provided
     if (this.props.orgs) {
       // Loop through orgs
-      orgOptions = this.props.orgs.map((org) => {
-        // Create an org option
-        return (<option value={org.id}>{org.name}</option>);
-      });
+      orgOptions = this.props.orgs.map((org) => (<option value={org.id}>{org.name}</option>));
     }
 
     if (this.props.org) {
@@ -157,66 +154,66 @@ class Delete extends Component {
     else if (this.props.element) {
       name = (<span className='element-name'>
                 {this.props.element.name} {' '}
-                <span className={'element-id'}>({this.props.element.id} : {this.props.element.type})</span>
+          <span className={'element-id'}>({this.props.element.id} : {this.props.element.type})</span>
               </span>
       );
     }
 
     // Return the project delete form
     return (
-            <div className='project-forms'>
-                <h2>Delete {title}</h2>
-                <hr />
-                <div>
-                    <Form>
-                        {
-                          (!this.props.orgs)
-                            ? ''
-                            : (
-                              <FormGroup>
-                                <Label for="org">Organization ID</Label>
-                                <Input type="select"
-                                       name="org"
-                                       id="org"
-                                       value={this.state.org || ''}
-                                       onChange={this.handleOrgChange}>
-                                    <option>Choose one...</option>
-                                    {orgOptions}
-                                </Input>
-                              </FormGroup>
-                            )
-                        }
-                        {/* Verify if project-views provided */}
-                        { // Create a form to choose the project
-                          (!this.props.projects)
-                            ? ''
-                            : (
-                              <FormGroup>
-                                (<Label for="id">Project ID</Label>)
-                                (<Input type="select"
-                                       name="id"
-                                       id="id"
-                                       value={this.state.id || ''}
-                                       onChange={this.handleChange}>
-                                    <option>Choose one...</option>
-                                    {this.state.projectOpt}
-                                </Input>
-                            </FormGroup>)
-                        }
-                        {/* Verify if project provided */}
-                        {(this.props.org || this.props.project || this.props.element)
-                          ? (<FormGroup>
-                              <Label for="id">Do you want to delete {name}?</Label>
-                             </FormGroup>)
-                          // Display confirmation
-                          : ''
-                        }
-                        {/* Button to submit and delete project */}
-                        <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
-                        <Button onClick={this.props.toggle}> Cancel </Button>
-                    </Form>
-                </div>
-            </div>
+      <div className='project-forms'>
+        <h2>Delete {title}</h2>
+        <hr />
+        <div>
+          <Form>
+            {
+              (!this.props.orgs)
+                ? ''
+                : (
+                  <FormGroup>
+                    <Label for="org">Organization ID</Label>
+                    <Input type="select"
+                           name="org"
+                           id="org"
+                           value={this.state.org || ''}
+                           onChange={this.handleOrgChange}>
+                      <option>Choose one...</option>
+                      {orgOptions}
+                    </Input>
+                  </FormGroup>
+                )
+            }
+            {/* Verify if project-views provided */}
+            { // Create a form to choose the project
+              (!this.props.projects)
+                ? ''
+                : (
+                  <FormGroup>
+                    (<Label for="id">Project ID</Label>)
+                    (<Input type="select"
+                            name="id"
+                            id="id"
+                            value={this.state.id || ''}
+                            onChange={this.handleChange}>
+                    <option>Choose one...</option>
+                    {this.state.projectOpt}
+                  </Input>
+                  </FormGroup>)
+            }
+            {/* Verify if project provided */}
+            {(this.props.org || this.props.project || this.props.element)
+              ? (<FormGroup>
+                <Label for="id">Do you want to delete {name}?</Label>
+              </FormGroup>)
+              // Display confirmation
+              : ''
+            }
+            {/* Button to submit and delete project */}
+            <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
+            <Button onClick={this.props.toggle}> Cancel </Button>
+          </Form>
+        </div>
+      </div>
     );
   }
 
