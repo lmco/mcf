@@ -104,7 +104,7 @@ function find(requestingUser, users, options) {
 
     // Sanitize input parameters
     const saniUsers = (users !== undefined)
-      ? sani.sanitize(JSON.parse(JSON.stringify(users)))
+      ? sani.mongo(JSON.parse(JSON.stringify(users)))
       : undefined;
 
     // Set options if no users were provided, but options were
@@ -302,7 +302,7 @@ function create(requestingUser, users, options) {
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     let createdUsers = [];
 
     // Initialize valid options
@@ -545,7 +545,7 @@ function update(requestingUser, users, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUsers = [];
     let usersToUpdate = [];
@@ -835,7 +835,7 @@ function createOrReplace(requestingUser, users, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     const duplicateCheck = {};
     let foundUsers = [];
     let usersToLookup = [];
@@ -975,7 +975,7 @@ function remove(requestingUser, users, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUsers = [];
     let foundUsernames = [];

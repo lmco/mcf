@@ -135,16 +135,17 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
     // Sanitize input parameters
     const saniElements = (elements !== undefined)
-      ? sani.sanitize(JSON.parse(JSON.stringify(elements)))
+      ? sani.mongo(JSON.parse(JSON.stringify(elements)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
     let foundElements = [];
     const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Set options if no elements were provided, but options were
     if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
+      // Note: assumes input param elements is input option param
       options = elements; // eslint-disable-line no-param-reassign
     }
 
@@ -257,7 +258,6 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
             // Make value the concatenated ID
             options[o] = utils.createID(orgID, projID, options[o]);
           }
-
           // Add the search option to the searchQuery
           searchQuery[o] = sani.mongo(options[o]);
         }
@@ -335,6 +335,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       // Find elements in batches
       for (let i = 0; i < elementIDs.length / 50000; i++) {
         // Split elementIDs list into batches of 50000
+        // Need to sanitize _id
         searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
 
         // If the lean option is supplied
@@ -447,12 +448,11 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     catch (err) {
       throw new M.CustomError(err.message, 400, 'warn');
     }
-
     // Sanitize input parameters and create function-wide variables
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
     let elementObjects = [];
     const remainingElements = [];
     let populatedElements = [];
@@ -865,9 +865,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
+    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     let foundElements = [];
     let elementsToUpdate = [];
     let searchQuery = {};
@@ -1268,9 +1268,9 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     }
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
+    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     const duplicateCheck = {};
     let foundElements = [];
     let elementsToLookup = [];
@@ -1483,9 +1483,9 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
+    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     let elementsToFind = [];
     let foundIDs = [];
 
@@ -1797,8 +1797,8 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
     const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Initialize valid options
