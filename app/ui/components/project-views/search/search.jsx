@@ -106,6 +106,7 @@ class Search extends Component {
 
   render() {
     return (
+      <div id='view'>
             <div id={'search'}>
                 <Form id={'search-form'} className={'search-form'} inline>
                     <Row form>
@@ -140,6 +141,7 @@ class Search extends Component {
                     <SearchResults results={this.state.results}/>
                 </div>
             </div>
+      </div>
     );
   }
 

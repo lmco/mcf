@@ -68,22 +68,26 @@ class OrgListItem extends Component {
     const org = this.props.org;
 
     const stats = (
-            // Create the stat list for the organization
-            <StatsList>
-                <Stat title='Projects' icon='fas fa-boxes' value={org.projects.length} _key={`org-${org.id}-projects`} />
-                <Stat title='Users' icon='fas fa-users' value={Object.keys(org.permissions).length} _key={`org-${org.id}-users`} />
-            </StatsList>
+      // Create the stat list for the organization
+      <StatsList>
+        <Stat title='Projects' icon='fas fa-boxes' value={org.projects.length} _key={`org-${org.id}-projects`} />
+        <Stat title='Users' icon='fas fa-users' value={Object.keys(org.permissions).length} _key={`org-${org.id}-users`} />
+        {(!this.props.divider)
+          ? <Stat title='' icon='' value='' _key='empty'/>
+          : <Stat divider={this.props.divider} _key={`org-${org.id}-divider`}/>
+        }
+      </StatsList>
     );
 
     // Render the organization stat list items
     return (
-                <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
-                    <div className='list-header'>
-                        <a href={this.props.href}>{org.name}</a>
-                    </div>
-                    {/* Verify width of client, remove stats based on width */}
-                    {(this.state.width > 600) ? stats : ''}
-                </div>
+      <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
+        <div className='list-header'>
+          <a href={this.props.href}>{org.name}</a>
+        </div>
+        {/* Verify width of client, remove stats based on width */}
+        {(this.state.width > 600) ? stats : ''}
+      </div>
     );
   }
 

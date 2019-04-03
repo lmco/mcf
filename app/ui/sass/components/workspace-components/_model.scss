@@ -1,12 +1,16 @@
-
-@import 'variables';
-@import 'panel';
+@import '../../utils/variables';
+@import './sidepanel';
 
 #element-tree-container {
-  display: table-cell;
+  display: table;
   padding-top: 10px;
   padding-right: 10px;
   padding-left: 10px;
+
+  #tree-model {
+    overflow: scroll;
+    height: 108%;
+  }
 
   /* TODO (jk) - Figure this one out.
   I have no idea why, but the nowrap is causing the main workspace to
@@ -51,7 +55,7 @@
 
   .element-tree > .element-name:hover > span:not(.element-id) {
     cursor: default;
-    color: lighten($mbee-color, 20%);
+    color: lighten($mbee-navbar-color, 20%);
   }
 
   .element-tree.tree-selected > .element-name > span {

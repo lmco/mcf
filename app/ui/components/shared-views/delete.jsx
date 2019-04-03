@@ -111,6 +111,7 @@ class Delete extends Component {
     .then(() => {
       if (this.props.element) {
         this.props.closeSidePanel(null, true, true);
+        this.props.toggle();
       }
       else {
         // On success, return to the project-views page
@@ -161,10 +162,13 @@ class Delete extends Component {
 
     // Return the project delete form
     return (
-      <div className='project-forms'>
-        <h2>Delete {title}</h2>
-        <hr />
-        <div>
+      <div id='workspace'>
+        <div id='workspace-header' className='workspace-header'>
+          <h2 className='workspace-title workspace-title-padding'>
+            Delete {title}
+          </h2>
+        </div>
+        <div className='extra-padding'>
           <Form>
             {
               (!this.props.orgs)
@@ -189,22 +193,22 @@ class Delete extends Component {
                 ? ''
                 : (
                   <FormGroup>
-                    (<Label for="id">Project ID</Label>)
-                    (<Input type="select"
-                            name="id"
-                            id="id"
-                            value={this.state.id || ''}
-                            onChange={this.handleChange}>
-                    <option>Choose one...</option>
-                    {this.state.projectOpt}
-                  </Input>
-                  </FormGroup>)
+                    <Label for="id">Project ID</Label>
+                    <Input type="select"
+                           name="id"
+                           id="id"
+                           value={this.state.id || ''}
+                           onChange={this.handleChange}>
+                      <option>Choose one...</option>
+                      {this.state.projectOpt}
+                    </Input>
+                </FormGroup>)
             }
             {/* Verify if project provided */}
             {(this.props.org || this.props.project || this.props.element)
               ? (<FormGroup>
-                <Label for="id">Do you want to delete {name}?</Label>
-              </FormGroup>)
+                  <Label for="id">Do you want to delete {name}?</Label>
+                 </FormGroup>)
               // Display confirmation
               : ''
             }

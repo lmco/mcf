@@ -155,80 +155,80 @@ class Create extends Component {
 
     // Return the form to create a project
     return (
-            <div className='project-forms'>
-                {/* Verify if org provided */}
-                {title}
-                <hr />
-                <div>
-                  <Form>
-                    {/* Verify if org provided */}
-                    {(this.props.project && !this.props.org)
-                      ? (// Display options to choose the organization
-                        <FormGroup>
-                          <Label for="org">Organization ID</Label>
-                          <Input type="select"
-                                 name="org"
-                                 id="org"
-                                 value={this.state.org || ''}
-                                 onChange={this.handleChange}>
-                            <option>Choose one...</option>
-                            {this.state.orgOpt}
-                          </Input>
-                        </FormGroup>)
-                      : ''
-                    }
-                    {/* Create an input for project id */}
-                    <FormGroup>
-                      <Label for="id">{header} ID</Label>
-                      <Input type="id"
-                             name="id"
-                             id="id"
-                             placeholder="ID"
-                             value={this.state.id || ''}
-                             invalid={idInvalid}
-                             onChange={this.handleChange}/>
-                      {/* If invalid id, notify user */}
-                      <FormFeedback >
-                        Invalid: A id may only contain lower case letters, numbers, or dashes.
-                      </FormFeedback>
-                    </FormGroup>
-                    {/* Create an input for project name */}
-                    <FormGroup>
-                      <Label for="name">{header} Name</Label>
-                      <Input type="name"
-                             name="name"
-                             id="name"
-                             placeholder="Name"
-                             value={this.state.name || ''}
-                             invalid={nameInvalid}
-                             onChange={this.handleChange}/>
-                      {/* If invalid name, notify user */}
-                      <FormFeedback >
-                        Invalid: A name may only contain letters, numbers, space, or dashes.
-                      </FormFeedback>
-                    </FormGroup>
-                    {/* Create an input for custom data */}
-                    <FormGroup>
-                      <Label for="custom">Custom Data</Label>
-                      <Input type="custom"
-                             name="custom"
-                             id="custom"
-                             placeholder="Custom Data"
-                             value={this.state.custom || ''}
-                             invalid={customInvalid}
-                             onChange={this.handleChange}/>
-                      {/* If invalid custom data, notify user */}
-                      <FormFeedback>
-                        Invalid: Custom data must be valid JSON
-                      </FormFeedback>
-                    </FormGroup>
+      <div id='workspace'>
+        <div id='workspace-header' className='workspace-header'>
+          <h2 className='workspace-title workspace-title-padding'>{title}</h2>
+        </div>
+        <div className='extra-padding'>
+          <Form>
+            {/* Verify if org provided */}
+            {(this.props.project && !this.props.org)
+              ? (// Display options to choose the organization
+                <FormGroup>
+                  <Label for="org">Organization ID</Label>
+                  <Input type="select"
+                         name="org"
+                         id="org"
+                         value={this.state.org || ''}
+                         onChange={this.handleChange}>
+                    <option>Choose one...</option>
+                    {this.state.orgOpt}
+                  </Input>
+                </FormGroup>)
+              : ''
+            }
+            {/* Create an input for project id */}
+            <FormGroup>
+              <Label for="id">{header} ID</Label>
+              <Input type="id"
+                     name="id"
+                     id="id"
+                     placeholder="ID"
+                     value={this.state.id || ''}
+                     invalid={idInvalid}
+                     onChange={this.handleChange}/>
+              {/* If invalid id, notify user */}
+              <FormFeedback >
+                Invalid: A id may only contain lower case letters, numbers, or dashes.
+              </FormFeedback>
+            </FormGroup>
+            {/* Create an input for project name */}
+            <FormGroup>
+              <Label for="name">{header} Name</Label>
+              <Input type="name"
+                     name="name"
+                     id="name"
+                     placeholder="Name"
+                     value={this.state.name || ''}
+                     invalid={nameInvalid}
+                     onChange={this.handleChange}/>
+              {/* If invalid name, notify user */}
+              <FormFeedback >
+                Invalid: A name may only contain letters, numbers, space, or dashes.
+              </FormFeedback>
+            </FormGroup>
+            {/* Create an input for custom data */}
+            <FormGroup>
+              <Label for="custom">Custom Data</Label>
+              <Input type="custom"
+                     name="custom"
+                     id="custom"
+                     placeholder="Custom Data"
+                     value={this.state.custom || ''}
+                     invalid={customInvalid}
+                     onChange={this.handleChange}/>
+              {/* If invalid custom data, notify user */}
+              <FormFeedback>
+                Invalid: Custom data must be valid JSON
+              </FormFeedback>
+            </FormGroup>
 
-                    {/* Button to create project */}
-                        <Button disabled={disableSubmit} onClick={this.onSubmit}> Create </Button>{' '}
-                        <Button outline onClick={this.props.toggle}> Cancel </Button>
-                    </Form>
-                </div>
-            </div>
+            {/* Button to create project */}
+                <Button disabled={disableSubmit} onClick={this.onSubmit}> Create </Button>{' '}
+                <Button outline onClick={this.props.toggle}> Cancel </Button>
+            </Form>
+        </div>
+    </div>
     );
   }
 

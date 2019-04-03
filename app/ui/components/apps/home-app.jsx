@@ -39,6 +39,7 @@ class HomeApp extends Component {
 
     // Initialize state props
     this.state = {
+      width: null,
       modal: false,
       modalCreate: false,
       modalDelete: false,
@@ -164,16 +165,16 @@ class HomeApp extends Component {
       const username = this.state.user.username;
 
       if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
-        return (<OrgList org={org} write={this.state.write} admin={this.state.admin}/>);
+        return (<OrgList org={org} key={`org-key-${org.id}`} write={this.state.write} admin={this.state.admin}/>);
       }
       else {
-        return (<OrgList org={org} admin={this.state.admin}/>);
+        return (<OrgList key={`org-key-${org.id}`} org={org} admin={this.state.admin}/>);
       }
     });
 
     // Render the homepage
     return (
-      <div id='view'>
+      <React.Fragment>
         { /* Modal for creating an org */ }
         <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
           <ModalBody>
@@ -187,36 +188,44 @@ class HomeApp extends Component {
           </ModalBody>
         </Modal>
         { /* Display the list of projects */ }
-        <div id='view' className='org-list' ref={this.ref}>
-          <div className='org-list-header'>
-            <h2 className='org-header'>Organizations</h2>
+        <div id='workspace' ref={this.ref}>
+          <div id='workspace-header' className='workspace-header home-header'>
+            <h2 className='workspace-title'>Organizations</h2>
             { /* Verify user is an admin */ }
             {(!this.state.admin)
               ? ''
               // Display create and delete buttons
               : (
-                <div className='org-button'>
+                <div className='workspace-header-button'>
                   <Button className='btn'
-                          outline
-                          color="secondary" onClick={this.handleCreateToggle}>
-                      Create
+                          outline color="secondary"
+                          onClick={this.handleCreateToggle}>
+                    {(this.state.width > 600)
+                      ? 'Create'
+                      : (<i className='fas fa-plus add-btn'/>)
+                    }
                   </Button>
-                  <Button className='btn' outline color="danger"
+                  <Button className='btn'
+                          outline color="danger"
                           onClick={this.handleDeleteToggle}>
-                      Delete
+                    {(this.state.width > 600)
+                      ? 'Delete'
+                      : (<i className='fas fa-trash-alt delete-btn'/>)
+                    }
                   </Button>
                 </div>
               )
             }
           </div>
-          <hr/>
           { /* Verify there are projects */ }
+          <div className='extra-padding'>
           {(this.state.orgs.length === 0)
             ? (<div className='list-item'><h3> No organizations.</h3></div>)
             : (<List>{list}</List>)
           }
+          </div>
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module app.ui.sass.variables.scss
+ * @module app.ui.sass._variables.scss
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -23,6 +23,8 @@ $mbee-background: white;
 $mbee-color: #333333;
 $mbee-font: "Avenir Next";
 $mbee-color-primary: $mbee-color-purple;
+$mbee-navbar-color: #1a3652;
+$mbee-navbar-text: #dedede;
 
 /* Button colors */
 $color-primary: #007bff;
@@ -45,8 +47,9 @@ $color5: #E55643;  /* red */
 
 /* sizing */
 $banner-height: 20px;
-$sidebar-full-width: 250px;
+$sidebar-full-width: 220px;
 $sidebar-min-width: 50px;
+$sidebar-text: #656565;
 
 /* Swagger Colors */
 $swagger-border-color-get:      #9a9a9a;

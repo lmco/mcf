@@ -108,59 +108,62 @@ class ProfileEdit extends Component {
 
     // Render user edit page
     return (
-      <div className='user-edit'>
-        <h2>User Edit</h2>
-        <hr />
-        {/* Create form to update user data */}
-        <Form>
-          {/* Form section for user's first name */}
-          <FormGroup>
-            <Label for="fname">User's First Name</Label>
-            <Input type="fname"
-                   name="fname"
-                   id="fname"
-                   placeholder="User's first name"
-                   value={this.state.fname || ''}
-                   invalid={fnameInvalid}
-                   onChange={this.handleChange}/>
-            {/* Verify fields are valid, or display feedback */}
-            <FormFeedback >
-              Invalid: A user's first name may only contain letters.
-            </FormFeedback>
-          </FormGroup>
-          {/* Form section for user's last name */}
-          <FormGroup>
-            <Label for="lname">User's Last Name</Label>
-            <Input type="lname"
-                   name="lname"
-                   id="lname"
-                   placeholder="User's last name"
-                   value={this.state.lname || ''}
-                   invalid={lnameInvalid}
-                   onChange={this.handleChange}/>
-            {/* Verify fields are valid, or display feedback */}
-            <FormFeedback >
-              Invalid: A user's last name may only contain letters.
-            </FormFeedback>
-          </FormGroup>
-          {/* Form section for custom data */}
-          <FormGroup>
-            <Label for="custom">Custom Data</Label>
-            <Input type="custom"
-                   name="custom"
-                   id="custom"
-                   placeholder="Custom Data"
-                   value={this.state.custom || ''}
-                   invalid={customInvalid}
-                   onChange={this.handleChange}/>
-            {/* Verify fields are valid, or display feedback */}
-            <FormFeedback>
-              Invalid: Custom data must be valid JSON
-            </FormFeedback>
-          </FormGroup>
-          {/* Button to submit changes */}
-          <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
-        </Form>
+      <div id='workspace'>
+        <div id='workspace-header' className='workspace-header'>
+          <h2 className='workspace-title workspace-title-padding'>User Edit</h2>
+        </div>
+        <div id='workspace-body' className='extra-padding'>
+          {/* Create form to update user data */}
+          <Form>
+            {/* Form section for user's first name */}
+            <FormGroup>
+              <Label for="fname">User's First Name</Label>
+              <Input type="fname"
+                     name="fname"
+                     id="fname"
+                     placeholder="User's first name"
+                     value={this.state.fname || ''}
+                     invalid={fnameInvalid}
+                     onChange={this.handleChange}/>
+              {/* Verify fields are valid, or display feedback */}
+              <FormFeedback >
+                Invalid: A user's first name may only contain letters.
+              </FormFeedback>
+            </FormGroup>
+            {/* Form section for user's last name */}
+            <FormGroup>
+              <Label for="lname">User's Last Name</Label>
+              <Input type="lname"
+                     name="lname"
+                     id="lname"
+                     placeholder="User's last name"
+                     value={this.state.lname || ''}
+                     invalid={lnameInvalid}
+                     onChange={this.handleChange}/>
+              {/* Verify fields are valid, or display feedback */}
+              <FormFeedback >
+                Invalid: A user's last name may only contain letters.
+              </FormFeedback>
+            </FormGroup>
+            {/* Form section for custom data */}
+            <FormGroup>
+              <Label for="custom">Custom Data</Label>
+              <Input type="custom"
+                     name="custom"
+                     id="custom"
+                     placeholder="Custom Data"
+                     value={this.state.custom || ''}
+                     invalid={customInvalid}
+                     onChange={this.handleChange}/>
+              {/* Verify fields are valid, or display feedback */}
+              <FormFeedback>
+                Invalid: Custom data must be valid JSON
+              </FormFeedback>
+            </FormGroup>
+            {/* Button to submit changes */}
+            <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+          </Form>
+        </div>
       </div>
     );
   }

@@ -1,31 +1,17 @@
 
-@import 'variables';
+@import '../../utils/_variables';
 
-.table {
-  display: table;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-
-  td, th {
-    border: none;
-    padding-top: 5px;
-  }
-}
+/******************************************************************************
+/*                            Side Panel Styling                               *
+/******************************************************************************/
 
 .side-panel {
-  display: table-cell;
-  border-left:  1px solid darken($mbee-background, 10%);
-  border-right:  1px solid darken($mbee-background, 10%);
-  border-bottom:  1px solid darken($mbee-background, 10%);
-  width: 50%;
-  background: $mbee-background;
-
   .element-panel-display {
     padding: 15px;
     display: flex;
     justify-content: center;
     flex-direction: row-reverse;
+    width: 100%;
 
     hr {
       width: 95%;
@@ -38,39 +24,50 @@
       .exit-btn {
         height: 5%;
         color: $color-secondary;
+
+        &:hover {
+          cursor: pointer;
+          color: darken($color-secondary, 30);
+        }
       }
 
-      .exit-btn:hover {
-        cursor: pointer;
-        color: darken($color-secondary, 30);
-      }
       .edit-btn {
+        height: 5%;
         color: $color-primary;
         padding-right: 15px;
+
+        &:hover {
+          cursor: pointer;
+          color: $color-secondary
+        }
       }
 
-      .edit-btn:hover {
-        cursor: pointer;
-        color: $color-secondary
+      .delete-btn {
+        color: $color-danger;
+        padding-right: 15px;
+
+        &:hover {
+          cursor: pointer;
+          color: darken($color-danger, 30);
+        }
       }
-    }
-
-    .edit-btn {
-      color: $color-primary;
-    }
-
-    .edit-btn:hover {
-      cursor: pointer;
-      color: $color-secondary
     }
 
     .element-data {
       width: 100%;
+
       table {
         width: 100%;
       }
+
       hr {
         margin: 5px 0px 5px 0px;
+      }
+
+      .element-header {
+        display: flex;
+        border-bottom: 1px solid black;
+        justify-content: space-between;
       }
 
       .element-edit-form {
@@ -81,7 +78,7 @@
   }
 
   .element-create {
-
+    width: 100%;
     padding: 24px;
 
     h2 {
@@ -96,6 +93,5 @@
     p {
       padding: 8px 0;
     }
-
   }
 }

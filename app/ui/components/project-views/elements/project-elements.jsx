@@ -53,13 +53,15 @@ class ProjectElements extends Component {
     this.setState({
       sidePanel: 'addElement'
     });
+
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
   // Define the open and close of the element side panel function
   openElementInfo(id, refreshFunction) {
     // The currently selected element
     this.setState({ id: id, refreshFunction: refreshFunction });
-
 
     // Select the clicked element
     $('.element-tree').removeClass('tree-selected');
@@ -72,10 +74,16 @@ class ProjectElements extends Component {
       // Toggle the element side panel
       this.setState({ sidePanel: 'elementInfo' });
     }
+
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
   closeSidePanel(event, refresh, isDelete) {
-    this.setState({ sidePanel: false });
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.remove('side-panel-expanded');
+
+    this.setState({ sidePanel: null });
 
     if (refresh) {
       this.state.refreshFunction(isDelete);
@@ -86,6 +94,9 @@ class ProjectElements extends Component {
     this.setState({
       sidePanel: 'elementEdit'
     });
+
+    // Get the sidebar html element and toggle it
+    document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
   componentDidMount() {
@@ -116,20 +127,20 @@ class ProjectElements extends Component {
 
     // Return element list
     return (
-      <div id='workspace' className='project-elements'>
-        <div id='workspace-header'>
-          <h2>{this.props.project.name} Model</h2>
-          <div className='ws-button-group'>
+      <div id='workspace'>
+        <div id='workspace-header' className='workspace-header'>
+          <h2 className='workspace-title'>{this.props.project.name} Model</h2>
+          <div id='workspace-header-btn' className='workspace-header-button ws-button-group'>
             <Button className='btn btn-sm'
                     outline color='primary'
                     onClick={this.createNewElement}>
               <i className='fas fa-plus'/>
-              Add Element
+              {' Add Element'}
             </Button>
           </div>
         </div>
-        <div id='workspace-body' className='table'>
-          <div id='element-tree-container'>
+        <div id='workspace-body'>
+          <div id='element-tree-container' className='main-workspace'>
             <ElementTree id='model'
                          project={this.props.project}
                          parent={null}
@@ -137,10 +148,9 @@ class ProjectElements extends Component {
                          parentRefresh={this.componentDidMount}
                          clickHandler={this.openElementInfo}/>
           </div>
-          {(!this.state.sidePanel)
-            ? ''
-            : (<SidePanel> { sidePanelView } </SidePanel>)
-          }
+          <SidePanel>
+            { sidePanelView }
+          </SidePanel>
         </div>
       </div>
     );
