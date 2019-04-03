@@ -34,7 +34,7 @@
 /*                        Workspace Headers                         *
 /******************************************************************************/
 #workspace {
-  overflow: scroll;
+  overflow: hidden;
 
   #workspace-header {
     border-bottom: 1px solid $mbee-color;
@@ -65,14 +65,17 @@
       grid-column-end: 3;
       display: none;
       width: 0;
-      overflow: hidden;
       border-left:  1px solid darken($mbee-background, 10%);
       border-right:  1px solid darken($mbee-background, 10%);
       background: $mbee-background;
 
       &.side-panel-expanded {
+        position: sticky;
+        top: 0;
         display: flex;
         width: 500px;
+        overflow: hidden;
+        height: 90vh;
       }
     }
   }
