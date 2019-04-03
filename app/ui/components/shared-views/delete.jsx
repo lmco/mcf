@@ -54,9 +54,9 @@ class Delete extends Component {
       ajaxRequest('GET', `/api/orgs/${event.target.value}/projects?fields=id,name`)
       .then(projects => {
         // Loop through project-views and create proj options
-        const projectOptions = projects.map((project) => {
-          return (<option value={project.id}>{project.name}</option>);
-        });
+        const projectOptions = projects.map(
+          (project) => (<option value={project.id}>{project.name}</option>)
+        );
 
         // Set the new project options
         this.setState({ projectOpt: projectOptions });
@@ -143,10 +143,7 @@ class Delete extends Component {
     // Verify if orgs provided
     if (this.props.orgs) {
       // Loop through orgs
-      orgOptions = this.props.orgs.map((org) => {
-        // Create an org option
-        return (<option value={org.id}>{org.name}</option>);
-      });
+      orgOptions = this.props.orgs.map((org) => (<option value={org.id}>{org.name}</option>));
     }
 
     if (this.props.org) {
@@ -158,7 +155,7 @@ class Delete extends Component {
     else if (this.props.element) {
       name = (<span className='element-name'>
                 {this.props.element.name} {' '}
-                <span className={'element-id'}>({this.props.element.id} : {this.props.element.type})</span>
+          <span className={'element-id'}>({this.props.element.id} : {this.props.element.type})</span>
               </span>
       );
     }
