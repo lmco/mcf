@@ -10,6 +10,7 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Defines sanitization functions.
  */
@@ -37,12 +38,15 @@ module.exports.sanitize = function(userInput) {
  * @param {Object} userInput - User object data to be sanitized.
  */
 module.exports.mongo = function(userInput) {
-  if (userInput instanceof Object) {
-    // Check for '$' in each parameter of userInput
-    Object.keys(userInput).forEach((value) => {
-      // If '$' in value, remove value from userInput
-      if (/^\$/.test(value)) {
-        delete userInput[value];
+  if (Array.isArray(userInput)) {
+    return userInput.map((value) => this.mongo(value));
+  }
+  else if (userInput instanceof Object) {
+    // Check for '$' in each key parameter of userInput
+    Object.keys(userInput).forEach((key) => {
+      // If '$' in key, remove key from userInput
+      if (/^\$/.test(key)) {
+        delete userInput[key];
       }
     });
   }
@@ -66,8 +70,9 @@ module.exports.mongo = function(userInput) {
  * @param {*} userInput - User input data to be sanitized.
  */
 module.exports.html = function(userInput) {
-  // Replace known HTML characters with HTML escape sequences.
+  // Check if input is string type
   if (typeof userInput === 'string') {
+    // Replace known HTML characters with HTML escape sequences
     return String(userInput)
     .replace(/&(?!(amp;)|(lt;)|(gt;)|(quot;)|(#039;)|(nbsp))/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -75,15 +80,21 @@ module.exports.html = function(userInput) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
   }
-
-  // Check if object type
-  if (userInput instanceof Object) {
-    // Loop through each object
-    Object.keys(userInput).forEach((value) => {
-      // Sanitize value
-      userInput[value] = module.exports.html(userInput[value]);
-    });
+  // Check if input type is array
+  else if (Array.isArray(userInput)) {
+    return userInput.map((value) => this.html(value));
   }
+  // Check if input is object type
+  else if (userInput instanceof Object) {
+    const objResult = {};
+    // Loop through the object
+    Object.keys(userInput).forEach((index) => {
+      // Sanitize value
+      objResult[index] = this.html(userInput[index]);
+    });
+    return objResult;
+  }
+
   return userInput;
 };
 

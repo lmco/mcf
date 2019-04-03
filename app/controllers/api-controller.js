@@ -31,6 +31,7 @@ const UserController = M.require('controllers.user-controller');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 const publicData = M.require('lib.get-public-data');
+const sani = M.require('lib.sanitization');
 
 // Expose `API Controller functions`
 module.exports = {
@@ -271,7 +272,9 @@ function getOrgs(req, res) {
     }
 
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'));
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -337,7 +340,9 @@ function postOrgs(req, res) {
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'));
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -403,7 +408,9 @@ function putOrgs(req, res) {
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'));
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -469,7 +476,9 @@ function patchOrgs(req, res) {
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'));
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -608,7 +617,9 @@ function getOrg(req, res) {
     }
 
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'))[0];
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org'))[0]
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -686,7 +697,9 @@ function postOrg(req, res) {
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'))[0];
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org'))[0]
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -764,7 +777,9 @@ function putOrg(req, res) {
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'))[0];
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org'))[0]
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -842,7 +857,9 @@ function patchOrg(req, res) {
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => publicData.getPublicData(o, 'org'))[0];
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org'))[0]
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -977,7 +994,9 @@ function getAllProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1082,7 +1101,9 @@ function getProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1160,7 +1181,9 @@ function postProjects(req, res) {
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1238,7 +1261,9 @@ function putProjects(req, res) {
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1316,7 +1341,9 @@ function patchProjects(req, res) {
   // NOTE: update() sanitizes req.params.orgid req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'));
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1468,7 +1495,9 @@ function getProject(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'))[0];
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))[0]
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1558,7 +1587,9 @@ function postProject(req, res) {
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'))[0];
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))[0]
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1648,7 +1679,9 @@ function putProject(req, res) {
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'))[0];
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))[0]
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1737,7 +1770,9 @@ function patchProject(req, res) {
   // NOTE: update() sanitizes req.params.orgid and req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => publicData.getPublicData(p, 'project'))[0];
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project'))[0]
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -1898,7 +1933,9 @@ function getUsers(req, res) {
   // NOTE: find() sanitizes req.usernames
   UserController.find(req.user, usernames, options)
   .then((users) => {
-    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'));
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -1964,7 +2001,9 @@ function postUsers(req, res) {
   // NOTE: create() sanitizes req.body
   UserController.create(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'));
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2030,7 +2069,9 @@ function putUsers(req, res) {
   // NOTE: createOrReplace() sanitizes req.body
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'));
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2096,7 +2137,9 @@ function patchUsers(req, res) {
   // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'));
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2229,7 +2272,9 @@ function getUser(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'))[0];
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user'))[0]
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2306,7 +2351,9 @@ function postUser(req, res) {
   // NOTE: create() sanitizes req.body
   UserController.create(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'))[0];
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user'))[0]
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2383,7 +2430,9 @@ function putUser(req, res) {
   // NOTE: createOrReplace() sanitizes req.body
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'))[0];
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user'))[0]
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2460,7 +2509,9 @@ function patchUser(req, res) {
   // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => publicData.getPublicData(u, 'user'))[0];
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user'))[0]
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2576,7 +2627,9 @@ function whoami(req, res) {
     delete options.minified;
   }
 
-  const publicUserData = publicData.getPublicData(req.user, 'user');
+  const publicUserData = sani.html(
+    publicData.getPublicData(req.user, 'user')
+  );
 
   // Format JSON if minify option is not true
   const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2657,7 +2710,9 @@ function patchPassword(req, res) {
   UserController.updatePassword(req.user, req.body.oldPassword,
     req.body.password, req.body.confirmPassword)
   .then((user) => {
-    const publicUserData = publicData.getPublicData(user, 'user');
+    const publicUserData = sani.html(
+      publicData.getPublicData(user, 'user')
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2780,8 +2835,9 @@ function getElements(req, res) {
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
     branchid, elemIDs, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
-
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))
+    );
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
@@ -2899,7 +2955,9 @@ function postElements(req, res) {
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -2982,7 +3040,9 @@ function putElements(req, res) {
   ElementController.createOrReplace(req.user, req.params.orgid,
     req.params.projectid, branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -3064,7 +3124,9 @@ function patchElements(req, res) {
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -3244,7 +3306,9 @@ function searchElements(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
@@ -3323,7 +3387,9 @@ function getElement(req, res) {
       return res.status(error.status).send(error);
     }
 
-    let elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'));
+    let elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -3421,7 +3487,9 @@ function postElement(req, res) {
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'))[0];
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -3514,7 +3582,9 @@ function putElement(req, res) {
   ElementController.createOrReplace(req.user, req.params.orgid,
     req.params.projectid, branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'))[0];
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+    );
 
     // If the fields options was specified
     if (options.fields) {
@@ -3607,7 +3677,9 @@ function patchElement(req, res) {
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
     branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => publicData.getPublicData(e, 'element'))[0];
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+    );
 
     // If the fields options was specified
     if (options.fields) {

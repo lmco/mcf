@@ -11,6 +11,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Organization model
  * that provides functions implementing controller logic and behavior.
@@ -107,7 +108,7 @@ function find(requestingUser, orgs, options) {
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = (orgs !== undefined)
-      ? sani.sanitize(JSON.parse(JSON.stringify(orgs)))
+      ? sani.mongo(JSON.parse(JSON.stringify(orgs)))
       : undefined;
 
     // Set options if no orgs were provided, but options were
@@ -302,7 +303,7 @@ function create(requestingUser, orgs, options) {
 
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     let orgObjects = [];
 
     // Initialize valid options
@@ -561,7 +562,7 @@ function update(requestingUser, orgs, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const duplicateCheck = {};
     let foundOrgs = [];
@@ -928,7 +929,7 @@ function createOrReplace(requestingUser, orgs, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     const duplicateCheck = {};
     let foundOrgs = [];
     let orgsToLookup = [];
@@ -1068,7 +1069,7 @@ function remove(requestingUser, orgs, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     let foundOrgs = [];
     let searchedIDs = [];
 
