@@ -111,9 +111,9 @@ function find(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters
-    const orgID = sani.sanitize(organizationID);
+    const orgID = sani.mongo(organizationID);
     const saniProjects = (projects !== undefined)
-      ? sani.sanitize(JSON.parse(JSON.stringify(projects)))
+      ? sani.mongo(JSON.parse(JSON.stringify(projects)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
@@ -321,8 +321,8 @@ function create(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.mongo(organizationID);
+    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrg = {};
     let projObjects = [];
@@ -681,8 +681,8 @@ function update(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.mongo(organizationID);
+    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const duplicateCheck = {};
     let foundProjects = [];
@@ -1074,8 +1074,8 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.mongo(organizationID);
+    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const duplicateCheck = {};
     let foundProjects = [];
     let projectsToLookUp = [];
@@ -1256,8 +1256,8 @@ function remove(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.mongo(organizationID);
+    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
     let searchedIDs = [];

@@ -145,12 +145,12 @@ function getElementPublicData(element) {
     type: element.type,
     documentation: element.documentation,
     custom: element.custom || {},
-    createdOn: element.createdOn,
+    createdOn: element.createdOn.toString(),
     createdBy: createdBy,
-    updatedOn: element.updatedOn,
+    updatedOn: element.updatedOn.toString(),
     lastModifiedBy: lastModifiedBy,
     archived: (element.archived) ? element : undefined,
-    archivedOn: (element.archivedOn) ? element.archivedOn : undefined,
+    archivedOn: (element.archivedOn) ? element.archivedOn.toString() : undefined,
     archivedBy: archivedBy
   };
 
@@ -231,12 +231,12 @@ function getProjectPublicData(project) {
     permissions: permissions,
     custom: project.custom || {},
     visibility: project.visibility,
-    createdOn: project.createdOn,
+    createdOn: project.createdOn.toString(),
     createdBy: createdBy,
-    updatedOn: project.updatedOn,
+    updatedOn: project.updatedOn.toString(),
     lastModifiedBy: lastModifiedBy,
     archived: (project.archived) ? project : undefined,
-    archivedOn: (project.archivedOn) ? project.archivedOn : undefined,
+    archivedOn: (project.archivedOn) ? project.archivedOn.toString() : undefined,
     archivedBy: archivedBy
   };
 }
@@ -302,12 +302,12 @@ function getOrgPublicData(org) {
     name: org.name,
     permissions: permissions,
     custom: org.custom || {},
-    createdOn: org.createdOn,
+    createdOn: org.createdOn.toString(),
     createdBy: createdBy,
-    updatedOn: org.updatedOn,
+    updatedOn: org.updatedOn.toString(),
     lastModifiedBy: lastModifiedBy,
     archived: (org.archived) ? org : undefined,
-    archivedOn: (org.archivedOn) ? org.archivedOn : undefined,
+    archivedOn: (org.archivedOn) ? org.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
     projects: (org.projects) ? org.projects.map(p => getProjectPublicData(p)) : undefined
   };
@@ -369,12 +369,12 @@ function getUserPublicData(user) {
     lname: user.lname,
     email: user.email,
     custom: user.custom || {},
-    createdOn: user.createdOn,
+    createdOn: user.createdOn.toString(),
     createdBy: createdBy,
-    updatedOn: user.updatedOn,
+    updatedOn: user.updatedOn.toString(),
     lastModifiedBy: lastModifiedBy,
     archived: (user.archived) ? user : undefined,
-    archivedOn: (user.archivedOn) ? user.archivedOn : undefined,
+    archivedOn: (user.archivedOn) ? user.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
     admin: user.admin
   };
