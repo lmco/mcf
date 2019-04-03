@@ -144,7 +144,7 @@ class MemberEdit extends Component {
 
     // Render project edit page
     return (
-            <div className='project-forms'>
+            <div className='extra-padding'>
                 <h2>User Roles</h2>
                 <hr />
                 <div>
@@ -153,7 +153,7 @@ class MemberEdit extends Component {
                     <Form>
                         <FormGroup>
                             {/* Create a search bar for username input */}
-                            <Label className='username-label' for='username'>Username</Label>
+                            <Label for='username'>Username</Label>
                             <div className='username-search'>
                                 {/* Input field for username */}
                                 <Input autoFocus

@@ -36,7 +36,7 @@ class ElementEdit extends Component {
       id: this.props.id,
       name: '',
       type: '',
-      parent: '',
+      parent: null,
       target: null,
       source: null,
       documentation: '',
@@ -188,12 +188,16 @@ class ElementEdit extends Component {
     // Render organization edit page
     return (
       <div className='element-panel-display'>
-        <div className='side-icons'>
-          <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
-        </div>
         <div className='element-data'>
-          <h2>Element Edit</h2>
-          <hr />
+          <div className='element-header'>
+            <h2>
+              Element Edit
+            </h2>
+            <div className='side-icons'>
+              <i className='fas fa-share-square edit-btn' onClick={this.onSubmit}/>
+              <i className='fas fa-times exit-btn' onClick={() => { this.props.openElementInfo(this.props.id); }}/>
+            </div>
+          </div>
           {/* Create form to update element data */}
           <Form className='element-edit-form'>
             {/* Form section for Element name */}
@@ -208,6 +212,26 @@ class ElementEdit extends Component {
                        onChange={this.handleChange}/>
               </Col>
             </FormGroup>
+            {(!this.state.parent)
+              ? ''
+              // Form section for Element parent
+              : (<FormGroup row>
+                  <Label for='name' sm={2}>Parent</Label>
+                  <Col sm={10}>
+                    <Input type='text'
+                           name='parent'
+                           id='parent'
+                           invalid={parentInvalid}
+                           placeholder='Parent'
+                           value={this.state.parent || ''}
+                           onChange={this.handleChange}/>
+                  </Col>
+                  {/* Verify fields are valid, or display feedback */}
+                  <FormFeedback >
+                    Invalid: An Element parent may only contain letters, numbers, space, or dashes.
+                  </FormFeedback>
+                 </FormGroup>)
+            }
             {/* Form section for Element type */}
             <FormGroup row>
               <Label for='type' sm={2}>Type</Label>
@@ -220,59 +244,47 @@ class ElementEdit extends Component {
                        onChange={this.handleChange}/>
               </Col>
             </FormGroup>
-            {/* Form section for Element parent */}
-            <FormGroup row>
-              <Label for='name' sm={2}>Parent</Label>
-              <Col sm={10}>
-                <Input type='text'
-                       name='parent'
-                       id='parent'
-                       invalid={parentInvalid}
-                       placeholder='Parent'
-                       value={this.state.parent || ''}
-                       onChange={this.handleChange}/>
-              </Col>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback >
-                Invalid: An Element parent may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
-            </FormGroup>
-            <Row form>
-              <Col md={6}>
-                {/* Form section for Element target */}
-                <FormGroup>
-                  <Label for='name'>Target ID</Label>
-                  <Input type='text'
-                         name='target'
-                         id='target'
-                         placeholder='Target ID'
-                         invalid={targetInvalid}
-                         value={this.state.target || ''}
-                         onChange={this.handleChange}/>
-                  {/* Verify fields are valid, or display feedback */}
-                  <FormFeedback >
-                    Invalid: An Element target may only contain letters, numbers, space, or dashes.
-                  </FormFeedback>
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                {/* Form section for Element source */}
-                <FormGroup>
-                  <Label for='name'>Source ID</Label>
-                  <Input type='text'
-                         name='source'
-                         id='source'
-                         placeholder='Source ID'
-                         invalid={sourceInvalid}
-                         value={this.state.source || ''}
-                         onChange={this.handleChange}/>
-                  {/* Verify fields are valid, or display feedback */}
-                  <FormFeedback >
-                    Invalid: An Element source may only contain letters, numbers, space, or dashes.
-                  </FormFeedback>
-                </FormGroup>
-              </Col>
-            </Row>
+            {(!this.state.target || !this.state.source)
+              ? ''
+              : (<Row form>
+                  <Col md={6}>
+                    {/* Form section for Element target */}
+                    <FormGroup>
+                      <Label for='name'>Target ID</Label>
+                      <Input type='text'
+                             name='target'
+                             id='target'
+                             placeholder='Target ID'
+                             invalid={targetInvalid}
+                             value={this.state.target || ''}
+                             onChange={this.handleChange}/>
+                      {/* Verify fields are valid, or display feedback */}
+                      <FormFeedback>
+                        Invalid:
+                        An Element target may only contain letters, numbers, space, or dashes.
+                      </FormFeedback>
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    {/* Form section for Element source */}
+                    <FormGroup>
+                      <Label for='name'>Source ID</Label>
+                      <Input type='text'
+                             name='source'
+                             id='source'
+                             placeholder='Source ID'
+                             invalid={sourceInvalid}
+                             value={this.state.source || ''}
+                             onChange={this.handleChange}/>
+                      {/* Verify fields are valid, or display feedback */}
+                      <FormFeedback>
+                        Invalid:
+                        An Element source may only contain letters, numbers, space, or dashes.
+                      </FormFeedback>
+                    </FormGroup>
+                  </Col>
+                </Row>)
+            }
             {/* Form section for custom data */}
             <FormGroup>
               <Label for='documentation'>Documentation</Label>
@@ -300,14 +312,6 @@ class ElementEdit extends Component {
                 Invalid: Custom data must be valid JSON
               </FormFeedback>
             </FormGroup>
-            {/* Button to submit changes */}
-            <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}>
-              Submit
-            </Button>
-            {' '}
-            <Button outline onClick={() => { this.props.openElementInfo(this.props.id); }}>
-              Cancel
-            </Button>
           </Form>
         </div>
       </div>

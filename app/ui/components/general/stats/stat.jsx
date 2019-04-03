@@ -38,20 +38,42 @@ class Stat extends Component {
   }
 
   render() {
+    // Initialize variables
+    let icon;
+    let value;
+    let classNames;
+
+    // Verify if divider element
+    if (this.props.divider) {
+      // Set divider properties
+      classNames = 'stats-item stats-divider';
+      icon = '';
+      value = '';
+    }
+    else {
+      // Set stat properties
+      classNames = (this.props._key === 'empty') ? 'empty-item' : 'stats-item';
+      icon = <i className={this.props.icon}/>;
+      // Verify value is a number, display a '?' if not
+      value = Number.isNaN(this.props.value) ? '?' : (<p>{this.props.value}</p>);
+    }
+
     // Return stats
     return (
       // Create stat div with key or title
-      <div className='stats-item' ref={this.ref} id={this.props._key || this.props.title}>
-        <i className={this.props.icon}/>
-        {/* If prop value does not exist, display a '?' */}
-        <p>{Number.isNaN(this.props.value) ? '?' : this.props.value}</p>
-        {/* Create hover title for icon */}
-        <UncontrolledTooltip placement='top'
-                             target={this.props._key || this.props.title}
-                             delay={{ show: 0, hide: 0 }}
-                             boundariesElement='viewport'>
-          {this.props.title}
-        </UncontrolledTooltip>
+      <div className={classNames} ref={this.ref} id={this.props._key || this.props.title}>
+        {icon}
+        {value}
+        {/* Create hover title for icon if not divider element */}
+        {(this.props.divider)
+          ? ''
+          : (<UncontrolledTooltip placement='top'
+                                 target={this.props._key || this.props.title}
+                                 delay={{ show: 0, hide: 0 }}
+                                 boundariesElement='viewport'>
+              {this.props.title}
+             </UncontrolledTooltip>)
+        }
       </div>
     );
   }

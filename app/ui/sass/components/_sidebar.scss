@@ -1,8 +1,8 @@
+@import '../utils/_variables';
+
 /******************************************************************************
 /*                              Sidebar Styling                               *
 /******************************************************************************/
-
-@import 'variables';
 
 .sidebar {
   background: whitesmoke;
@@ -17,17 +17,23 @@
   }
 
   a {
+    font-size: 10px;
     display: block;
     text-decoration: none;
-    color: black;
+    color: $sidebar-text;
+    font-weight: 200;
     &.active {
       :hover {
-        color: grey;
+        color: $mbee-navbar-color;
+        font-weight: 600;
       }
-      color: grey;
+      color: $mbee-navbar-color;
+      background-color: darken(whitesmoke, 5);
+      font-weight: 600;
     }
     :hover {
-      color: #ffc700;
+      color: darken($sidebar-text, 20);
+      font-weight: 300;
     }
   }
 
@@ -47,17 +53,18 @@
     margin-bottom: 0px;
     display: flex;
     justify-content: center;
+    font-weight: 500;
   }
 
   .sidebar-links {
-    /*height: 100vh;*/
+    height: 100vh;
     overflow: hidden;
   }
 
   .sidebar-item {
     padding:20px;
     height: 50px;
-    font-size: 12px;
+    font-size: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -69,6 +76,7 @@
     }
 
     i.fas, i.fa {
+      font-size: 12px;
       width: 12px;
       text-align: center;
     }

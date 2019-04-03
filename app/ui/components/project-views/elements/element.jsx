@@ -113,15 +113,17 @@ class Element extends Component {
         {(!this.state.element)
           ? <div className="loading"> {this.state.error || 'Loading your element...'} </div>
           : (<React.Fragment>
-              <div className='side-icons'>
-                <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
-                <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
-              </div>
               <div className='element-data'>
-                <h2>
-                  Element Information
-                </h2>
-                <hr/>
+                <div className='element-header'>
+                  <h2>
+                    Element Information
+                  </h2>
+                  <div className='side-icons'>
+                    <i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
+                    <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                    <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
+                  </div>
+                </div>
                 <table>
                   <tbody>
                   <tr>
@@ -140,6 +142,20 @@ class Element extends Component {
                     <th>Type:</th>
                     <td>{element.type}</td>
                   </tr>
+                  {(!element.target || !element.source)
+                    ? ''
+                    : (<React.Fragment>
+                        <tr>
+                          <th>Target:</th>
+                          <td>{element.target}</td>
+                        </tr>
+                        <tr>
+                          <th>Source:</th>
+                          <td>{element.target}</td>
+                        </tr>
+                      </React.Fragment>
+                    )
+                  }
                   <tr>
                     <th>Documentation:</th>
                     <td>{element.documentation}</td>
@@ -166,11 +182,6 @@ class Element extends Component {
                   </tr>
                   </tbody>
                 </table>
-                <Button className='btn'
-                        outline color="danger"
-                        onClick={this.handleDeleteToggle}>
-                  Delete
-                </Button>
               </div>
             </React.Fragment>
           )

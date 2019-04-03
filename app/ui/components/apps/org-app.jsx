@@ -108,7 +108,7 @@ class OrgApp extends Component {
     // Return organization page
     return (
       <Router>
-        <React.Fragment>
+        <div id='container'>
           { /* Create the sidebar with sidebar links */ }
           <Sidebar title={title}>
             <SidebarLink id='Home'
@@ -137,7 +137,7 @@ class OrgApp extends Component {
           { /* Verify organization data exists */ }
           {(!this.state.org)
           // Display loading page or error page if org is loading or failed to load
-            ? <div className="loading"> {this.state.error || 'Loading your organization...'} </div>
+            ? <div id='view' className="loading"> {this.state.error || 'Loading your organization...'} </div>
           // Display page based on route on clients side
             : (
               <Switch>
@@ -168,7 +168,7 @@ class OrgApp extends Component {
               </Switch>
             )
           }
-        </React.Fragment>
+        </div>
       </Router>
     );
   }

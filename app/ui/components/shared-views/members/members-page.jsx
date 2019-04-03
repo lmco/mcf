@@ -21,8 +21,6 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import UserListItem from '../list-items/user-list-item.jsx';
-import List from '../../general/list/list.jsx';
 import { Button, Modal, ModalBody } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
 
@@ -64,51 +62,65 @@ class MembersPage extends Component {
     }
 
     // Loop through project members
-    const listItems = users.map(user => <UserListItem user={user} permission={userperm[user]}/>);
+    const listItems = users.map(user => {
+      return (<tr>
+                <td>{user}</td>
+                <td>{userperm[user]}</td>
+              </tr>);
+    });
 
     // Return project member list
     return (
-            <React.Fragment>
-                {/* Verify admin user */}
-                {(!this.props.admin)
-                  ? ''
-                  : (
-                        // Modal for editing user roles
-                        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
-                            <ModalBody>
-                                {(this.props.project && !this.props.org)
-                                  ? (<MemberEdit project={this.props.project}
-                                                 toggle={this.handleToggle}/>)
-                                  : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
-                                }
-                            </ModalBody>
-                        </Modal>
-                  )
+      <React.Fragment>
+        {/* Verify admin user */}
+        {(!this.props.admin)
+          ? ''
+          : (
+            // Modal for editing user roles
+            <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+              <ModalBody>
+                {(this.props.project && !this.props.org)
+                  ? (<MemberEdit project={this.props.project}
+                                 toggle={this.handleToggle}/>)
+                  : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
                 }
-                <div id='view' className='user-list'>
-                    <div className='user-list-header'>
-                        <h2 className='user-header'>Users</h2>
-                        <h2 className='user-descriptor'>Permissions</h2>
-                        {/* Verify user is admin */}
-                        {(!this.props.admin)
-                          ? ''
-                          : ( // Button to edit user roles
-                                <div className='user-button'>
-                                    <Button className='btn'
-                                            outline color="secondary"
-                                            onClick={this.handleToggle}>
-                                        Edit
-                                    </Button>
-                                </div>
-                          )
-                        }
-                    </div>
-                    <hr/>
-                    <List>
-                        {listItems}
-                    </List>
+              </ModalBody>
+            </Modal>
+          )
+        }
+        <div id='workspace'>
+          <div id='workspace-header' className='workspace-header'>
+            <table className='workspace-title'>
+              <tbody>
+              <tr>
+                <td className='user-title'><h2>Users</h2></td>
+                <td><h2>Permissions</h2></td>
+              </tr>
+              </tbody>
+            </table>
+            {/* Verify user is admin */}
+            {(!this.props.admin)
+              ? ''
+              : ( // Button to edit user roles
+                <div className='workspace-header-button'>
+                  <Button className='btn'
+                          outline color="secondary"
+                          onClick={this.handleToggle}>
+                    Edit
+                  </Button>
                 </div>
-            </React.Fragment>
+              )
+            }
+          </div>
+          <div id='workspace-body' className='extra-padding'>
+            <table>
+              <tbody>
+                {listItems}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </React.Fragment>
     );
   }
 

@@ -3,7 +3,7 @@
 /*                                  General                                   *
 /******************************************************************************/
 
-@import 'variables';
+@import '../utils/_variables';
 
 html,
 body {
@@ -40,11 +40,6 @@ h3 {
   font-size: 15px;
 }
 
-.container {
-  padding: 2em;
-  overflow: scroll;
-}
-
 label {
   font-size: 15px;
 }
@@ -53,6 +48,10 @@ textarea[name="custom"] {
   font-family: Consolas, "Courier New";
   resize: vertical;
   outline: none;
+}
+
+.extra-padding {
+  padding: 20px;
 }
 
 /******************************************************************************
