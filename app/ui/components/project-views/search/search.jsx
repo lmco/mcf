@@ -20,6 +20,7 @@
 // React Modules
 import React, { Component } from 'react';
 import { Input, Form, FormGroup, Button, Row, Col } from 'reactstrap';
+import { Spinner } from 'reactstrap';
 
 // MBEE Modules
 import SearchResults from './search-results.jsx';
@@ -61,15 +62,16 @@ class Search extends Component {
   }
 
   doSearch(e) {
+    // Pre-search state resets
+    this.setState({
+      message: '',
+      results: 'Searching ...'
+    }, () => { this.render(); });
+
     // Disable form submit
     if (e) {
       e.preventDefault();
     }
-
-    // Pre-search reset message
-    this.setState({
-      message: ''
-    });
 
     // Append search to URL
     this.props.history.push({
@@ -86,7 +88,7 @@ class Search extends Component {
     const start = new Date();
     $.ajax({
       method: 'GET',
-      url: `${url}?q=${this.state.query}`
+      url: `${url}?q=${this.state.query}&limit=100`
     })
     .done(data => {
       const end = new Date();
@@ -105,6 +107,22 @@ class Search extends Component {
   }
 
   render() {
+    // Set search results or loading icons ...
+    let searchResults = '';
+    if (this.state.results === 'Searching ...') {
+      searchResults = (
+        <div style={{ width: '100%', textAlign: 'center' }}>
+          <Spinner type="grow" color="primary" />
+          <span style={{ paddingLeft: '20px' }}>
+            Searching ...
+          </span>
+        </div>
+      );
+    }
+    else if (Array.isArray(this.state.results)) {
+      searchResults = (<SearchResults results={this.state.results}/>);
+    }
+
     return (
             <div id={'search'}>
                 <Form id={'search-form'} className={'search-form'} inline>
@@ -137,7 +155,7 @@ class Search extends Component {
                   </div>
                 </div>
                 <div>
-                    <SearchResults results={this.state.results}/>
+                  {searchResults}
                 </div>
             </div>
     );
