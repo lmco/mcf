@@ -366,4 +366,4 @@ module.exports.getSchemaVersion = function() {
     .then(() => resolve())
     .catch((error) => reject(error));
   });
-}
+};
