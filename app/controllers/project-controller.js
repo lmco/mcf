@@ -952,9 +952,6 @@ function update(requestingUser, organizationID, projects, options) {
                 updateProj.permissions = proj.permissions;
               });
             }
-            // Mark mixed fields as updated, required for mixed fields to update in mongoose
-            // http://mongoosejs.com/docs/schematypes.html#mixed
-            proj.markModified(key);
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
