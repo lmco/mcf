@@ -34,7 +34,7 @@
 /*                        Workspace Headers                         *
 /******************************************************************************/
 #workspace {
-  overflow: scroll;
+  overflow: hidden;
 
   #workspace-header {
     border-bottom: 1px solid $mbee-color;
