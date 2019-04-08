@@ -11,6 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This renders a project's element page.
  */
@@ -104,6 +105,8 @@ class ProjectElements extends Component {
   }
 
   render() {
+    let isButtonDisplayed = false;
+    let btnDisClassName = 'workspace-title workspace-title-padding';
     let sidePanelView = <Element id={this.state.id}
                                  project={this.props.project}
                                  url={this.props.url}
@@ -125,19 +128,26 @@ class ProjectElements extends Component {
                                    url={this.props.url}/>);
     }
 
+    // Check admin/write permissions
+    if (this.props.permissions === 'admin' || this.props.permissions === 'write') {
+      isButtonDisplayed = true;
+      btnDisClassName = 'workspace-title';
+    }
     // Return element list
     return (
       <div id='workspace'>
         <div id='workspace-header' className='workspace-header'>
-          <h2 className='workspace-title'>{this.props.project.name} Model</h2>
-          <div id='workspace-header-btn' className='workspace-header-button ws-button-group'>
-            <Button className='btn btn-sm'
-                    outline color='primary'
-                    onClick={this.createNewElement}>
-              <i className='fas fa-plus'/>
-              {' Add Element'}
-            </Button>
-          </div>
+          <h2 className={btnDisClassName}>{this.props.project.name} Model</h2>
+          {(!isButtonDisplayed)
+            ? ''
+            : (<div id='workspace-header-btn' className='workspace-header-button ws-button-group'>
+              <Button className='btn btn-sm'
+                      outline color='primary'
+                      onClick={this.createNewElement}>
+                <i className='fas fa-plus'/>
+                {' Add Element'}
+              </Button>
+            </div>)}
         </div>
         <div id='workspace-body'>
           <div id='element-tree-container' className='main-workspace'>
