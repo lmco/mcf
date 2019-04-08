@@ -27,8 +27,8 @@ packages = [
 for pkg in packages:
     url = url_template.format(server, pkg['id'])
     r = requests.post(url, auth=creds, json=pkg)
-    print r.status_code
-    print r.text
+    print(r.status_code)
+    print(r.text)
 ```
 
 The above code defines a list of packages to create, then loops over that list
@@ -80,8 +80,8 @@ packages = [
 for pkg in packages:
     url = url_template.format(server, pkg['id'])
     r = requests.post(url, auth=creds, json=pkg)
-    print r.status_code
-    print r.text
+    print(r.status_code)
+    print(r.text)
 ```
 
 Model elements can be deleted by making an HTTP DELETE request to the 
@@ -91,8 +91,8 @@ this in Python is as follows:
 ```python
 url = '{}/api/orgs/demo/projects/demo-project/branches/master/elements/pkg-a'.format(server);
 r = requests.delete(url, auth=creds)
-print r.status_code
-print r.text
+print(r.status_code)
+print(r.text)
 ```
 
 Note that model elements are soft-deleted by default. This means they are not

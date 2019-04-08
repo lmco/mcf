@@ -24,7 +24,7 @@ sure we can successfully communicate with the MBEE server.
 # Test connection to server
 url = '{}/api/test'.format(server) # the url we want to request
 r = requests.get(url)              # make a GET request to url
-print r.status_code                # print the HTTP response code        
+print(r.status_code)               # print the HTTP response code        
 ```
 
 If MBEE is up and running and the application is able to communicate with it,
@@ -45,8 +45,8 @@ url = '{}/api/login'.format(server)       # the url we want to request
 auth_header = ('admin', 'CHANGE_ME')      # the basic auth header
 r = requests.post(url, auth=auth_header)  # make a GET request to url
 res = r.json()                            # parse the JSON response
-print r.status_code                       # print the HTTP response code
-print res                                 # print the HTTP response body
+print(r.status_code)                      # print the HTTP response code
+print(res)                                # print the HTTP response body
 token = res['token']                      # store the auth token for later
 ```
 
@@ -75,8 +75,8 @@ url = '{}/api/version'.format(server)
 auth_header = {'Authorization': 'Bearer {}'.format(token)}
 r = requests.get(url, headers=auth_header)
 res = r.json()
-print r.status_code
-print res
+print(r.status_code)
+print(res)
 ```
 
 Similar to our previous requests, we make a request to the `/api/version` route.
@@ -108,7 +108,7 @@ url = '{}/api/version'.format(server)
 auth_header = {'Authorization': 'Bearer {}'.format(token)}
 r = requests.get(url, headers=auth_header)
 res = r.json()
-print res['version']
+print(res['version'])
 ```
 
 The above program removes most of the print statements that were used throughout
