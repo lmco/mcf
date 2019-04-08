@@ -119,8 +119,14 @@ class Element extends Component {
                     Element Information
                   </h2>
                   <div className='side-icons'>
-                    <i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
-                    <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                    {(this.props.permissions === 'admin')
+                      ? (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>)
+                      : ''
+                    }
+                    {((this.props.permissions === 'write') || this.props.permissions === 'admin')
+                      ? (<i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>)
+                      : ''
+                    }
                     <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
                   </div>
                 </div>

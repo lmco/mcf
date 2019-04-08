@@ -160,6 +160,9 @@ class HomeApp extends Component {
   }
 
   render() {
+    // Initialize variables
+    let titleClass = 'workspace-title workspace-title-padding';
+
     // Loop through all orgs
     const list = this.state.orgs.map(org => {
       const username = this.state.user.username;
@@ -171,6 +174,12 @@ class HomeApp extends Component {
         return (<OrgList key={`org-key-${org.id}`} org={org} admin={this.state.admin}/>);
       }
     });
+
+    // Verify user is admin
+    if (this.state.admin) {
+      // Change class on title
+      titleClass = 'workspace-title';
+    }
 
     // Render the homepage
     return (
@@ -190,7 +199,7 @@ class HomeApp extends Component {
         { /* Display the list of projects */ }
         <div id='workspace' ref={this.ref}>
           <div id='workspace-header' className='workspace-header home-header'>
-            <h2 className='workspace-title'>Organizations</h2>
+            <h2 className={titleClass}>Organizations</h2>
             { /* Verify user is an admin */ }
             {(!this.state.admin)
               ? ''

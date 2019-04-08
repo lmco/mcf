@@ -107,9 +107,17 @@ class ProjectElements extends Component {
   render() {
     let isButtonDisplayed = false;
     let btnDisClassName = 'workspace-title workspace-title-padding';
+
+    // Check admin/write permissions
+    if (this.props.permissions === 'admin' || this.props.permissions === 'write') {
+      isButtonDisplayed = true;
+      btnDisClassName = 'workspace-title';
+    }
+
     let sidePanelView = <Element id={this.state.id}
                                  project={this.props.project}
                                  url={this.props.url}
+                                 permissions={this.props.permissions}
                                  editElementInfo={this.editElementInfo}
                                  closeSidePanel={this.closeSidePanel}/>;
 
@@ -128,11 +136,6 @@ class ProjectElements extends Component {
                                    url={this.props.url}/>);
     }
 
-    // Check admin/write permissions
-    if (this.props.permissions === 'admin' || this.props.permissions === 'write') {
-      isButtonDisplayed = true;
-      btnDisClassName = 'workspace-title';
-    }
     // Return element list
     return (
       <div id='workspace'>
