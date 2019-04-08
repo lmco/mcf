@@ -1194,7 +1194,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 }
 
 /**
- * @description This functions creates or replaces one or many elements. If the
+ * @description This function creates or replaces one or many elements. If the
  * element already exists, it is replaced with the provided data. NOTE: This
  * function is reserved for system-wide admins ONLY.
  *
@@ -1288,6 +1288,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       }
 
       // Check the type of the elements parameter
+      // TODO: Repeated every(e => typeof e === 'object')
       if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
         // elements is an array, create/replace many elements
         elementsToLookup = saniElements;
@@ -1330,6 +1331,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       const searchQuery = { project: utils.createID(orgID, projID) };
 
       // Find elements in batches
+      // TODO: Consider changing of loop increment by 50k instead of 1
       for (let i = 0; i < arrIDs.length / 50000; i++) {
         // Split arrIDs list into batches of 50000
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
@@ -1356,6 +1358,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         }
       });
 
+      // Create temporary element data
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
         fs.mkdirSync(path.join(M.root, 'data'));
@@ -1722,7 +1725,7 @@ function moveElementCheck(organizationID, projectID, branch, element) {
 }
 
 /**
- * @description A function which searches elements within a certain projects
+ * @description A function which searches elements within a certain project
  * using mongo's built in text search. Returns any elements that match the text
  * search, in order of the best matches to the worst. Searches the _id, name,
  * documentation, parent, source and target fields.

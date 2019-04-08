@@ -10,6 +10,7 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This renders a project.
  */
@@ -46,7 +47,8 @@ class ProjectApp extends Component {
       orgid: null,
       url: null,
       error: null,
-      admin: false
+      admin: false,
+      permissions: null
     };
   }
 
@@ -76,7 +78,8 @@ class ProjectApp extends Component {
           // Set admin state
           this.setState({ admin: true });
         }
-
+        // Set permissions
+        this.setState({ permissions: perm });
         // Set states
         this.setState({ project: project });
       })
@@ -152,6 +155,7 @@ class ProjectApp extends Component {
                   { /* Route to element page */ }
                   <Route path={`${this.props.match.url}/elements`}
                          render={ (props) => <ProjectElements {...props}
+                                                              permissions={this.state.permissions}
                                                               url={this.state.url}
                                                               project={this.state.project}/> } />
                   <Route path={`${this.props.match.url}/search`}
