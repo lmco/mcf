@@ -126,16 +126,6 @@ class ProjectApp extends Component {
                          title='Members'
                          icon='fas fa-users'
                          routerLink={`${this.props.match.url}/users`}/>
-              <Divider/>
-              { /* Check if user is admin */ }
-              { // Add the edit router link for admin users ONLY
-                (this.state.admin)
-                  ? (<SidebarLink id='Edit'
-                               title='Edit'
-                               icon='fas fa-cog'
-                               routerLink={`${this.props.match.url}/edit`}/>)
-                  : ''
-              }
           </Sidebar>
           { /* Verify project and element data exists */ }
           { // Display loading page or error page if project is loading or failed to load
@@ -146,6 +136,7 @@ class ProjectApp extends Component {
                   { /* Route to project home page */ }
                   <Route exact path={`${this.props.match.url}/`}
                          render={ (props) => <InformationPage {...props}
+                                                              permissions={this.state.permissions}
                                                               project={this.state.project} /> } />
                   { /* Route to members page */ }
                   <Route path={`${this.props.match.url}/users`}
@@ -161,15 +152,6 @@ class ProjectApp extends Component {
                   <Route path={`${this.props.match.url}/search`}
                          render={ (props) => <Search {...props}
                                                      project={this.state.project} /> } />
-                  { /* Verify admin user */ }
-                  {(this.state.admin)
-                  // Route for admin users ONLY to edit page
-                    ? (<Route path={`${this.props.match.url}/edit`}
-                                render={(props) => <EditPage {...props}
-                                                             project={this.state.project}
-                                                             orgid={this.state.orgid}/>}/>)
-                    : ''
-                  }
                 </Switch>
               )
           }

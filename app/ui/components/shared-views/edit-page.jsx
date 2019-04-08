@@ -22,9 +22,6 @@
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
 
-// MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-
 class EditPage extends Component {
 
   constructor(props) {

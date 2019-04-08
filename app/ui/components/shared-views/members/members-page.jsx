@@ -15,7 +15,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -23,6 +23,7 @@ import React, { Component } from 'react';
 // MBEE Modules
 import { Button, Modal, ModalBody } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
+/* eslint-enable no-unused-vars */
 
 class MembersPage extends Component {
 
@@ -72,22 +73,16 @@ class MembersPage extends Component {
     // Return project member list
     return (
       <React.Fragment>
-        {/* Verify admin user */}
-        {(!this.props.admin)
-          ? ''
-          : (
-            // Modal for editing user roles
-            <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
-              <ModalBody>
-                {(this.props.project && !this.props.org)
-                  ? (<MemberEdit project={this.props.project}
-                                 toggle={this.handleToggle}/>)
-                  : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
-                }
-              </ModalBody>
-            </Modal>
-          )
-        }
+        {/* Modal for editing user roles */}
+        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+          <ModalBody>
+            {(this.props.project && !this.props.org)
+              ? (<MemberEdit project={this.props.project}
+                             toggle={this.handleToggle}/>)
+              : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
+            }
+          </ModalBody>
+        </Modal>
         <div id='workspace'>
           <div id='workspace-header' className='workspace-header'>
             <table className='workspace-title'>
