@@ -42,8 +42,8 @@ with open('data.json', 'r') as f:
 url = '{}/api/orgs/default/projects/demo-mass-rollup'.format(server)
 r = requests.post(url, auth=creds, json={'name': 'Demo - Mass Rollup'})
 if (r.status_code != 200):
-    print 'Project creation failed!'
-    print r.text
+    print('Project creation failed!')
+    print(r.text)
     exit(1)
  
 # Append to the previously defined projects URL
@@ -52,16 +52,16 @@ url = '{}/elements'.format(url)
 # POST our model elements
 r = requests.post(url, auth=creds, json=packages)
 if (r.status_code != 200):
-    print 'Element creation failed!'
-    print r.text
+    print('Element creation failed!')
+    print(r.text)
     exit(1)
 
 # Rename the model root
 url = '{}/{}'.format(url, 'model')
 r = requests.patch(url, auth=creds, json={"name": "Spacecraft Model"})
 if (r.status_code != 200):
-    print 'Element creation failed!'
-    print r.text
+    print('Element creation failed!')
+    print(r.text)
     exit(1)
 ```
 

@@ -31,8 +31,8 @@ Now we can make a POST request to the server to create an organization.
 # Create an org
 url = '{}/api/orgs/demo'.format(server)
 r = requests.post(url, auth=creds, json={'name': 'Demo Org'})
-print r.status_code
-print r.json()
+print(r.status_code)
+print(r.json())
 ```
 
 In the above code snippet, we make a request to the `/api/orgs/:orgid` route 
@@ -49,8 +49,8 @@ a GET request to the server to retrieve it.
 ```python
 url = '{}/api/orgs/demo'.format(server)
 r = requests.get(url, auth=creds)
-print r.status_code
-print r.json()
+print(r.status_code)
+print(r.json())
 ```
 
 Note that the above code snippet is nearly identical to the one used to create
@@ -65,13 +65,13 @@ organization with a similar approach.
 # Create a project
 url = '{}/api/orgs/demo/projects/demo-project'.format(server)
 r = requests.post(url, auth=creds, json={'name': 'Demo Project'})
-print r.status_code
+print(r.status_code)
 
 # Get the project
 url = '{}/api/orgs/demo/projects/demo-project'.format(server)
 r = requests.get(url, auth=creds)
-print r.status_code
-print r.json()
+print(r.status_code)
+print(r.json())
 ```
 
 The above code creates our project by calling the 
@@ -115,6 +115,6 @@ r = requests.post(url, auth=creds, json={'name': 'Demo Project'})
 # Get the project
 url = '{}/api/orgs/demo/projects/demo-project'.format(server)
 r = requests.get(url, auth=creds)
-print r.status_code
-print json.dumps(r.json(), indent=4)
+print(r.status_code)
+print(json.dumps(r.json(), indent=4))
 ```
