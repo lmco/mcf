@@ -16,7 +16,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -26,15 +26,15 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
-import Divider from '../general/sidebar/divider.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
-import EditPage from '../shared-views/edit-page.jsx';
 import OrgProjects from '../org-views/organization-projects.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class OrgApp extends Component {
+
+/* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props
@@ -46,7 +46,8 @@ class OrgApp extends Component {
       error: null,
       admin: false,
       write: false,
-      modal: false
+      modal: false,
+      permissions: null
     };
 
     // Bind component functions
@@ -73,6 +74,8 @@ class OrgApp extends Component {
 
         // Set the org state
         this.setState({ org: org });
+
+        this.setState({ permissions: perm });
 
         // Verify is user has write permissions
         if (admin || (perm === 'write')) {
@@ -123,16 +126,6 @@ class OrgApp extends Component {
                          title='Members'
                          icon='fas fa-users'
                          routerLink={`${this.props.match.url}/users`} />
-            <Divider/>
-            { /* Check if user is admin */ }
-            {(this.state.admin)
-            // Add the edit router link for admin users ONLY
-              ? (<SidebarLink id='Edit'
-                              title='Edit'
-                              icon='fas fa-cog'
-                              routerLink={`${this.props.match.url}/edit`} />)
-              : ''
-            }
           </Sidebar>
           { /* Verify organization data exists */ }
           {(!this.state.org)
@@ -144,6 +137,7 @@ class OrgApp extends Component {
                 { /* Route to org home page */ }
                 <Route exact path={`${this.props.match.url}`}
                        render={ (props) => <InformationPage {...props}
+                                                            permissions={this.state.permissions}
                                                             org={this.state.org} /> } />
                 { /* Route to projects page */ }
                 <Route path={`${this.props.match.url}/projects`}
@@ -157,14 +151,6 @@ class OrgApp extends Component {
                        render={ (props) => <MembersPage {...props}
                                                         org={this.state.org}
                                                         admin={this.state.admin}/> } />
-               { /* Verify if user is admin */ }
-                {(this.state.admin)
-                // Route for admin users ONLY to edit page
-                  ? (<Route path={`${this.props.match.url}/edit`}
-                             render={(props) => <EditPage {...props}
-                                                          org={this.state.org} />}/>)
-                  : ''
-                }
               </Switch>
             )
           }

@@ -15,7 +15,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -32,6 +32,8 @@ import { Form,
 // MBEE Modules
 import CustomMenu from '../../general/dropdown-search/custom-menu.jsx';
 import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
+
+/* eslint-enable no-unused-vars */
 
 // Define component
 class MemberEdit extends Component {
@@ -144,64 +146,64 @@ class MemberEdit extends Component {
 
     // Render project edit page
     return (
-            <div className='extra-padding'>
-                <h2>User Roles</h2>
-                <hr />
-                <div>
-                    <h3 className='edit-role-title'> {title} </h3>
-                    {/* Create form to update user roles */}
-                    <Form>
-                        <FormGroup>
-                            {/* Create a search bar for username input */}
-                            <Label for='username'>Username</Label>
-                            <div className='username-search'>
-                                {/* Input field for username */}
-                                <Input autoFocus
-                                       id="username"
-                                       name="username"
-                                       className="user-searchbar my-2 w-auto"
-                                       placeholder="Choose a user..."
-                                       onChange={this.handleChange}
-                                       value={this.state.username || ''} />
-                               {/* Drop down menu to choose a user */}
-                                <Dropdown className='search-button' isOpen={this.state.dropDownOpen} toggle={this.toggle}>
-                                    {/* Button to toggle drop down menu */}
-                                    <DropdownToggle
-                                        onClick={this.toggle}
-                                        aria-expanded={this.state.dropDownOpen}>
-                                            Search
-                                    </DropdownToggle>
-                                    <DropdownMenu >
-                                        {/* List all the usernames with a filter option */}
-                                        <CustomMenu username={this.state.username}
-                                                    onChange={this.updateUsername}>
-                                            {this.state.users}
-                                        </CustomMenu>
-                                    </DropdownMenu>
-                                </Dropdown>
-                            </div>
-                        </FormGroup>
-                        {/* Permissions user updates with */}
-                        <FormGroup>
-                            <Label for="permissions">Permissions</Label>
-                            <Input type="select"
-                                   name='permissions'
-                                   id="permissions"
-                                   value={this.state.permissions}
-                                   onChange={this.handleChange}>
-                                <option>Choose one...</option>
-                                <option>read</option>
-                                <option>write</option>
-                                <option>admin</option>
-                                <option>REMOVE_ALL</option>
-                            </Input>
-                        </FormGroup>
-                        {/* Button to submit changes */}
-                        <Button onClick={this.onSubmit}> Submit </Button>{' '}
-                        <Button outline color="secondary" onClick={this.props.toggle}>Cancel</Button>
-                    </Form>
-                </div>
-            </div>
+      <div className='extra-padding'>
+        <h2>User Roles</h2>
+        <hr />
+        <div>
+          <h3 className='edit-role-title'> {title} </h3>
+          {/* Create form to update user roles */}
+          <Form>
+            <FormGroup>
+              {/* Create a search bar for username input */}
+              <Label for='username'>Username</Label>
+              <div className='username-search'>
+                {/* Input field for username */}
+                <Input autoFocus
+                       id="username"
+                       name="username"
+                       className="user-searchbar my-2 w-auto"
+                       placeholder="Choose a user..."
+                       onChange={this.handleChange}
+                       value={this.state.username || ''} />
+               {/* Drop down menu to choose a user */}
+                <Dropdown className='search-button' isOpen={this.state.dropDownOpen} toggle={this.toggle}>
+                  {/* Button to toggle drop down menu */}
+                  <DropdownToggle
+                    onClick={this.toggle}
+                    aria-expanded={this.state.dropDownOpen}>
+                        Search
+                  </DropdownToggle>
+                  <DropdownMenu >
+                    {/* List all the usernames with a filter option */}
+                    <CustomMenu username={this.state.username}
+                                onChange={this.updateUsername}>
+                      {this.state.users}
+                    </CustomMenu>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+            </FormGroup>
+            {/* Permissions user updates with */}
+            <FormGroup>
+              <Label for="permissions">Permissions</Label>
+              <Input type="select"
+                     name='permissions'
+                     id="permissions"
+                     value={this.state.permissions}
+                     onChange={this.handleChange}>
+                <option>Choose one...</option>
+                <option>read</option>
+                <option>write</option>
+                <option>admin</option>
+                <option>REMOVE_ALL</option>
+              </Input>
+            </FormGroup>
+            {/* Button to submit changes */}
+            <Button onClick={this.onSubmit}> Submit </Button>{' '}
+            <Button outline color="secondary" onClick={this.props.toggle}>Cancel</Button>
+          </Form>
+        </div>
+      </div>
     );
   }
 

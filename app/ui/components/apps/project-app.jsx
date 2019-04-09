@@ -16,7 +16,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -26,9 +26,7 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
-import Divider from '../general/sidebar/divider.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
-import EditPage from '../shared-views/edit-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import ProjectElements from '../project-views/elements/project-elements.jsx';
 import Search from '../project-views/search/search.jsx';
@@ -36,6 +34,8 @@ import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProjectApp extends Component {
+
+/* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props
@@ -126,16 +126,6 @@ class ProjectApp extends Component {
                          title='Members'
                          icon='fas fa-users'
                          routerLink={`${this.props.match.url}/users`}/>
-              <Divider/>
-              { /* Check if user is admin */ }
-              { // Add the edit router link for admin users ONLY
-                (this.state.admin)
-                  ? (<SidebarLink id='Edit'
-                               title='Edit'
-                               icon='fas fa-cog'
-                               routerLink={`${this.props.match.url}/edit`}/>)
-                  : ''
-              }
           </Sidebar>
           { /* Verify project and element data exists */ }
           { // Display loading page or error page if project is loading or failed to load
@@ -146,6 +136,7 @@ class ProjectApp extends Component {
                   { /* Route to project home page */ }
                   <Route exact path={`${this.props.match.url}/`}
                          render={ (props) => <InformationPage {...props}
+                                                              permissions={this.state.permissions}
                                                               project={this.state.project} /> } />
                   { /* Route to members page */ }
                   <Route path={`${this.props.match.url}/users`}
@@ -161,15 +152,6 @@ class ProjectApp extends Component {
                   <Route path={`${this.props.match.url}/search`}
                          render={ (props) => <Search {...props}
                                                      project={this.state.project} /> } />
-                  { /* Verify admin user */ }
-                  {(this.state.admin)
-                  // Route for admin users ONLY to edit page
-                    ? (<Route path={`${this.props.match.url}/edit`}
-                                render={(props) => <EditPage {...props}
-                                                             project={this.state.project}
-                                                             orgid={this.state.orgid}/>}/>)
-                    : ''
-                  }
                 </Switch>
               )
           }

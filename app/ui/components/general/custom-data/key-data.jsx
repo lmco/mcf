@@ -43,6 +43,16 @@ class KeyData extends Component {
     this.setState({ keyDataDisplay: !this.state.keyDataDisplay });
   }
 
+  componentDidUpdate(prevProps) {
+    // Verify if props were updated
+    if (this.props.data !== prevProps.data) {
+      // Update state with new props
+      this.setState({ keyDataDisplay: false });
+      this.setState({ data: this.props.data });
+      this.setState({ keyName: this.props.keyName });
+    }
+  }
+
   render() {
     // Initialize variables
     const custom = this.state.data;
@@ -67,9 +77,7 @@ class KeyData extends Component {
         // Verify type of data
         if (typeof data === 'object') {
           // Loop through data for recursive call
-          nestedData = Object.keys(data).map((key) => {
-            return nests.push(<KeyData keyName={key} data={data[key]}/>);
-          });
+          nestedData = Object.keys(data).map((key) => nests.push(<KeyData key={`key-${key}`} keyName={key} data={data[key]}/>));
         }
         else {
           // Display the data
@@ -84,9 +92,7 @@ class KeyData extends Component {
     // Verify type is object
     else if (typeof custom === 'object') {
       // Loop through object for recursive call
-      nestedData = Object.keys(custom).map((key) => {
-        return (<KeyData keyName={key} data={custom[key]}/>);
-      });
+      nestedData = Object.keys(custom).map((key) => <KeyData key={`key-${key}`} keyName={key} data={custom[key]}/>);
     }
     else {
       // Display the data

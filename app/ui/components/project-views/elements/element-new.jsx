@@ -15,7 +15,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -24,11 +24,11 @@ import {
   FormGroup,
   Label,
   Input,
-  FormFeedback,
   Button,
-  Col,
-  UncontrolledTooltip
+  Col
 } from 'reactstrap';
+
+/* eslint-enable no-unused-vars */
 
 class ElementNew extends Component {
 

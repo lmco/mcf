@@ -15,7 +15,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -24,6 +24,8 @@ import { Spinner } from 'reactstrap';
 
 // MBEE Modules
 import SearchResults from './search-results.jsx';
+
+/* eslint-enable no-unused-vars */
 
 class Search extends Component {
 

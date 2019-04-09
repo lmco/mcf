@@ -15,10 +15,12 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 import React, { Component } from 'react';
 import SearchResult from './search-result.jsx';
+
+/* eslint-enable no-unused-vars */
 
 class SearchResults extends Component {
 
