@@ -24,6 +24,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 // MBEE Modules
 import EditPage from './edit-page.jsx';
 import CustomData from '../general/custom-data/custom-data.jsx';
+
 /* eslint-enable no-unused-vars */
 
 class InformationPage extends Component {

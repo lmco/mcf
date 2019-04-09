@@ -17,7 +17,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -29,6 +29,8 @@ import Element from './element.jsx';
 import ElementEdit from './element-edit.jsx';
 import ElementNew from './element-new.jsx';
 import SidePanel from '../../general/side-panel.jsx';
+
+/* eslint-enable no-unused-vars */
 
 // Define component
 class ProjectElements extends Component {

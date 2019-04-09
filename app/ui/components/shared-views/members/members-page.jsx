@@ -23,6 +23,7 @@ import React, { Component } from 'react';
 // MBEE Modules
 import { Button, Modal, ModalBody } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
+
 /* eslint-enable no-unused-vars */
 
 class MembersPage extends Component {

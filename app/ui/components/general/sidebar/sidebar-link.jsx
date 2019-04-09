@@ -15,12 +15,14 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { UncontrolledTooltip } from 'reactstrap';
+
+/* eslint-enable no-unused-vars */
 
 // Define function
 function SidebarLink(props) {

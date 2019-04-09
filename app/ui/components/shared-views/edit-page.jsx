@@ -21,6 +21,7 @@
 // React Modules
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
+
 /* eslint-enable no-unused-vars */
 
 class EditPage extends Component {

@@ -15,9 +15,11 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 import React, { Component } from 'react';
+
+/* eslint-enable no-unused-vars */
 
 class Divider extends Component {
 

@@ -20,6 +20,7 @@
 
 // React Modules
 import React, { Component } from 'react';
+
 /* eslint-enable no-unused-vars */
 
 // Define component

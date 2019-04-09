@@ -25,6 +25,7 @@ import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 import { Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 import Delete from '../../shared-views/delete.jsx';
 import CustomData from '../../general/custom-data/custom-data.jsx';
+
 /* eslint-enable no-unused-vars */
 
 // Define component

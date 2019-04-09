@@ -16,16 +16,17 @@
 */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
-import {Modal, ModalBody, UncontrolledTooltip} from 'reactstrap';
+import { Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 
 // MBEE Modules
 import ProjectListItem from '../shared-views/list-items/project-list-item.jsx';
 import Delete from '../shared-views/delete.jsx';
 
+/* eslint-enable no-unused-vars */
 
 class ProjList extends Component {
 

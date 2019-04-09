@@ -96,6 +96,7 @@ class ProfileHome extends Component {
       </React.Fragment>
     );
   }
+
 }
 
 // Export function
