@@ -107,23 +107,25 @@ class InformationPage extends Component {
               )
             }
           </div>
-          <div id='workspace-body' className='extra-padding'>
-            <table>
-              <tbody>
-              <tr>
-                <th>ID:</th>
-                <td>{id}</td>
-              </tr>
-              {(orgid === null)
-                ? <tr/>
-                : (<tr>
-                  <th>Org ID:</th>
-                  <td><a href={`/${orgid}`}>{orgid}</a></td>
-                </tr>)
-              }
-              </tbody>
-            </table>
-            <CustomData data={custom}/>
+          <div id='workspace-body'>
+            <div className='main-workspace extra-padding'>
+              <table>
+                <tbody>
+                <tr>
+                  <th>ID:</th>
+                  <td>{id}</td>
+                </tr>
+                {(orgid === null)
+                  ? <tr/>
+                  : (<tr>
+                    <th>Org ID:</th>
+                    <td><a href={`/${orgid}`}>{orgid}</a></td>
+                  </tr>)
+                }
+                </tbody>
+              </table>
+              <CustomData data={custom}/>
+            </div>
           </div>
         </div>
       </React.Fragment>

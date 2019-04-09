@@ -126,7 +126,7 @@ class Element extends Component {
                           <UncontrolledTooltip placement='left' target='deleteBtn'>
                             Delete
                           </UncontrolledTooltip>
-                          <i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
+                          <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
                          </React.Fragment>)
                       : ''
                     }
@@ -135,14 +135,14 @@ class Element extends Component {
                           <UncontrolledTooltip placement='left' target='editBtn'>
                             Edit
                           </UncontrolledTooltip>
-                          <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                          <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
                          </React.Fragment>)
                       : ''
                     }
                     <UncontrolledTooltip placement='left' target='exitBtn'>
                       Exit
                     </UncontrolledTooltip>
-                    <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
+                    <i id='exitBtn' className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
                   </div>
                 </div>
                 <table>
