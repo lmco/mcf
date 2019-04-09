@@ -12,8 +12,8 @@ the previous tutorial where we log in to the MBEE server.
 
 ```python
 import requests
-server = 'http://localhost:6233'
-creds = ('admin', 'CHANGE_ME')
+server = 'http://localhost:9080'
+creds = ('admin', 'Admin12345!')
 
 # Test to make sure we can connect to the server
 url = '{}/api/test'.format(server)
@@ -93,8 +93,8 @@ a python script to create an organization and a project.
 import requests
 import json
 
-server = 'http://localhost:6233'
-creds = ('admin', 'CHANGE_ME')
+server = 'http://localhost:9080'
+creds = ('admin', 'Admin12345!')
 
 # Test to make sure we can connect to the server
 url = '{}/api/test'.format(server)
