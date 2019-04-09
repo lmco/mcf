@@ -35,9 +35,7 @@ class InformationPage extends Component {
 
     // Initialize state props
     this.state = {
-      permissions: false,
-      modal: false,
-      error: null
+      modal: false
     };
 
     // Bind component functions
@@ -96,7 +94,7 @@ class InformationPage extends Component {
             { /* Verify user is an admin */}
             {(!isButtonDisplayed)
               ? ''
-              // Display create and delete buttons
+              // Display edit button
               : (
                 <div className='workspace-header-button'>
                   <Button className='btn'
