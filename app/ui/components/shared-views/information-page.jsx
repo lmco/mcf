@@ -23,6 +23,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import EditPage from './edit-page.jsx';
+import CustomData from '../general/custom-data/custom-data.jsx';
 /* eslint-enable no-unused-vars */
 
 class InformationPage extends Component {
@@ -91,7 +92,7 @@ class InformationPage extends Component {
         <div id='workspace'>
           <div id='workspace-header' className='workspace-header'>
             <h2 className={titleClass}>{name}</h2>
-            { /* Verify user is an admin */ }
+            { /* Verify user is an admin */}
             {(!isButtonDisplayed)
               ? ''
               // Display create and delete buttons
@@ -120,17 +121,15 @@ class InformationPage extends Component {
                   <td><a href={`/${orgid}`}>{orgid}</a></td>
                 </tr>)
               }
-              <tr>
-                <th>Custom:</th>
-                <td>{JSON.stringify(custom, null, 2)}</td>
-              </tr>
               </tbody>
             </table>
+            <CustomData data={custom}/>
           </div>
         </div>
       </React.Fragment>
     );
   }
+
 }
 
 export default InformationPage;

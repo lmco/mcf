@@ -4,94 +4,93 @@
 /******************************************************************************
 /*                            Side Panel Styling                               *
 /******************************************************************************/
+.element-panel-display {
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  flex-direction: row-reverse;
+  width: 100%;
+  height: 87vh;
+  overflow: scroll;
 
-.side-panel {
-  .element-panel-display {
-    padding: 15px;
+  hr {
+    width: 95%;
+  }
+
+  .side-icons {
     display: flex;
-    justify-content: center;
-    flex-direction: row-reverse;
-    width: 100%;
+    justify-content: flex-end;
 
-    hr {
-      width: 95%;
-    }
+    .exit-btn {
+      height: 5%;
+      color: $color-secondary;
 
-    .side-icons {
-      display: flex;
-      justify-content: flex-end;
-
-      .exit-btn {
-        height: 5%;
-        color: $color-secondary;
-
-        &:hover {
-          cursor: pointer;
-          color: darken($color-secondary, 30);
-        }
-      }
-
-      .edit-btn {
-        height: 5%;
-        color: $color-primary;
-        padding-right: 15px;
-
-        &:hover {
-          cursor: pointer;
-          color: $color-secondary
-        }
-      }
-
-      .delete-btn {
-        color: $color-danger;
-        padding-right: 15px;
-
-        &:hover {
-          cursor: pointer;
-          color: darken($color-danger, 30);
-        }
+      &:hover {
+        cursor: pointer;
+        color: darken($color-secondary, 30);
       }
     }
 
-    .element-data {
-      width: 100%;
+    .edit-btn {
+      height: 5%;
+      color: $color-primary;
+      padding-right: 15px;
 
-      table {
-        width: 100%;
+      &:hover {
+        cursor: pointer;
+        color: $color-secondary
       }
+    }
 
-      hr {
-        margin: 5px 0px 5px 0px;
-      }
+    .delete-btn {
+      color: $color-danger;
+      padding-right: 15px;
 
-      .element-header {
-        display: flex;
-        border-bottom: 1px solid black;
-        justify-content: space-between;
-      }
-
-      .element-edit-form {
-        padding-top: 15px;
-        padding-left: 5px;
+      &:hover {
+        cursor: pointer;
+        color: darken($color-danger, 30);
       }
     }
   }
 
-  .element-create {
+  .element-data {
     width: 100%;
-    padding: 24px;
 
-    h2 {
-      padding-bottom: 5px;
-      border-bottom: 1px solid $mbee-color;
+    table {
+      width: 100%;
     }
 
-    button {
-      margin-right: 10px;
+    hr {
+      margin: 5px 0px 5px 0px;
     }
 
-    p {
-      padding: 8px 0;
+    .element-header {
+      display: flex;
+      border-bottom: 1px solid black;
+      justify-content: space-between;
     }
+
+    .element-edit-form {
+      padding-top: 15px;
+      padding-left: 5px;
+    }
+  }
+}
+
+.element-create {
+  width: 100%;
+  padding: 24px;
+
+  h2 {
+    padding-bottom: 5px;
+    border-bottom: 1px solid $mbee-color;
+  }
+
+  button {
+    margin-right: 10px;
+  }
+
+  p {
+    padding: 8px 0;
   }
 }

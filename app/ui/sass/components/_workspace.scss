@@ -4,6 +4,8 @@
 @import './workspace-components/_project.scss';
 @import './workspace-components/_user.scss';
 @import './workspace-components/_sidepanel.scss';
+@import './workspace-components/_custom-data.scss';
+
 
 /******************************************************************************
 /*                        General Components Styling                          *
@@ -74,7 +76,7 @@
         top: 0;
         display: flex;
         width: 500px;
-        overflow: hidden;
+        overflow: scroll;
         height: 90vh;
       }
     }
