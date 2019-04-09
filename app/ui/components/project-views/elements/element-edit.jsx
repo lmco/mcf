@@ -16,15 +16,16 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, FormFeedback, Button, Row, Col } from 'reactstrap';
+import { Form, FormGroup, Label, Input, FormFeedback, Row, Col, UncontrolledTooltip } from 'reactstrap';
 
 // MBEE Modules
 import validators from '../../../../../build/json/validators.json';
 import { ajaxRequest } from '../../helper-functions/ajaxRequests';
+/* eslint-enable no-unused-vars */
 
 class ElementEdit extends Component {
 
@@ -40,15 +41,23 @@ class ElementEdit extends Component {
       target: null,
       source: null,
       documentation: '',
-      custom: null,
+      custom: {},
       org: null,
-      project: null
+      project: null,
+      tooltipOpen: false
     };
 
     // Bind component function
+    this.toggleTooltip = this.toggleTooltip.bind(this);
+    this.getElement = this.getElement.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-    this.getElement = this.getElement.bind(this);
+  }
+
+  toggleTooltip() {
+    this.setState({
+      tooltipOpen: !this.state.tooltipOpen
+    });
   }
 
   getElement() {
@@ -145,14 +154,14 @@ class ElementEdit extends Component {
     })
     // On fail
     .catch((err) => {
+      console.log(err);
       // Let user know update failed
-      alert(`Update Failed: ${err.responseJSON.description}`);
+      alert(`Update Failed: ${err}`);
     });
   }
 
   render() {
     // // Initialize variables
-    let disableSubmit;
     let customInvalid;
     let parentInvalid;
     let targetInvalid;
@@ -161,18 +170,15 @@ class ElementEdit extends Component {
     // Verify id
     if (!RegExp(validators.id).test(this.state.parent)) {
       parentInvalid = true;
-      disableSubmit = true;
     }
 
     // Verify id
     if (!RegExp(validators.id).test(this.state.target)) {
       targetInvalid = true;
-      disableSubmit = true;
     }
     // Verify id
     if (!RegExp(validators.id).test(this.state.source)) {
       sourceInvalid = true;
-      disableSubmit = true;
     }
 
     // Verify if custom data is correct JSON format
@@ -182,7 +188,6 @@ class ElementEdit extends Component {
     catch (err) {
       // Set invalid fields
       customInvalid = true;
-      disableSubmit = true;
     }
 
     // Render organization edit page
@@ -194,8 +199,14 @@ class ElementEdit extends Component {
               Element Edit
             </h2>
             <div className='side-icons'>
-              <i className='fas fa-share-square edit-btn' onClick={this.onSubmit}/>
-              <i className='fas fa-times exit-btn' onClick={() => { this.props.openElementInfo(this.props.id); }}/>
+              <UncontrolledTooltip placement='left' target='saveBtn'>
+                Save
+              </UncontrolledTooltip>
+              <i id='saveBtn' className='fas fa-save edit-btn' onClick={this.onSubmit}/>
+              <UncontrolledTooltip placement='left' target='cancelBtn'>
+                Cancel
+              </UncontrolledTooltip>
+              <i id='cancelBtn' className='fas fa-times exit-btn' onClick={() => { this.props.openElementInfo(this.props.id); }}/>
             </div>
           </div>
           {/* Create form to update element data */}

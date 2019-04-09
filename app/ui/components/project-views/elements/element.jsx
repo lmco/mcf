@@ -15,15 +15,17 @@
 */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
 
 // MBEE Modules
 import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
-import { Button, Modal, ModalBody } from 'reactstrap';
+import { Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 import Delete from '../../shared-views/delete.jsx';
+import CustomData from '../../general/custom-data/custom-data.jsx';
+/* eslint-enable no-unused-vars */
 
 // Define component
 class Element extends Component {
@@ -119,9 +121,18 @@ class Element extends Component {
                     Element Information
                   </h2>
                   <div className='side-icons'>
-                    <i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
-                    <i className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
-                    <i className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
+                    <UncontrolledTooltip placement='left' target='deleteBtn'>
+                      Delete
+                    </UncontrolledTooltip>
+                    <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
+                    <UncontrolledTooltip placement='left' target='editBtn'>
+                      Edit
+                    </UncontrolledTooltip>
+                    <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                    <UncontrolledTooltip placement='left' target='exitBtn'>
+                      Exit
+                    </UncontrolledTooltip>
+                    <i id='exitBtn' className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
                   </div>
                 </div>
                 <table>
@@ -176,12 +187,9 @@ class Element extends Component {
                     <th>Updated On:</th>
                     <td>{element.updatedOn}</td>
                   </tr>
-                  <tr>
-                  <th>Custom:</th>
-                  <td>{JSON.stringify(custom, null, 2)}</td>
-                  </tr>
                   </tbody>
                 </table>
+                <CustomData data={custom}/>
               </div>
             </React.Fragment>
           )
