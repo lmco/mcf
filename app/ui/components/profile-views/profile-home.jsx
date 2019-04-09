@@ -15,42 +15,87 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
-import React from 'react';
+import React, { Component } from 'react';
+import { Button, Modal, ModalBody } from 'reactstrap';
+
+// MBEE Modules
+import ProfileEdit from './profile-edit.jsx';
+/* eslint-enable no-unused-vars */
 
 // Define function
-function ProfileHome(props) {
-  // Initialize variables
-  const user = props.user;
+class ProfileHome extends Component {
 
-  // Render user data in table format
-  return (
-    <div id='workspace'>
-      <div id='workspace-header' className='workspace-header'>
-        <h2 className='workspace-title workspace-title-padding'>{user.name}</h2>
-      </div>
-      <div id='workspace-body' className='extra-padding'>
-        <table>
-          <tbody>
-            <tr>
-              <th>Username:</th>
-              <td>{user.username}</td>
-            </tr>
-            <tr>
-              <th>Email:</th>
-              <td>{user.email}</td>
-            </tr>
-            <tr>
-              <th>Custom:</th>
-              <td>{JSON.stringify(user.custom, null, 2)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+  constructor(props) {
+    // Initialize parent props
+    super(props);
+
+    // Initialize state props
+    this.state = {
+      permissions: false,
+      modal: false,
+      error: null
+    };
+
+    // Bind component functions
+    this.handleToggle = this.handleToggle.bind(this);
+  }
+
+  // Define toggle function
+  handleToggle() {
+    // Open or close modal
+    this.setState({ modal: !this.state.modal });
+  }
+
+  render() {
+    // Initialize variables
+    const user = this.props.user;
+
+    // Render user data in table format
+    return (
+      <React.Fragment>
+        {/* Modal for editing the information */}
+        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+          <ModalBody>
+            <ProfileEdit user={this.props.user}
+                         toggle={this.handleToggle}/>
+          </ModalBody>
+        </Modal>
+        <div id='workspace'>
+          <div id='workspace-header' className='workspace-header'>
+            <h2 className='workspace-title'>{user.name}</h2>
+            <div className='workspace-header-button'>
+              <Button className='btn'
+                      outline color="secondary"
+                      onClick={this.handleToggle}>
+                Edit
+              </Button>
+            </div>
+          </div>
+          <div id='workspace-body' className='extra-padding'>
+            <table>
+              <tbody>
+              <tr>
+                <th>Username:</th>
+                <td>{user.username}</td>
+              </tr>
+              <tr>
+                <th>Email:</th>
+                <td>{user.email}</td>
+              </tr>
+              <tr>
+                <th>Custom:</th>
+                <td>{JSON.stringify(user.custom, null, 2)}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </React.Fragment>
+    );
+  }
 }
 
 // Export function

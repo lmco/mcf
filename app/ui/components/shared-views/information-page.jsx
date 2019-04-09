@@ -45,7 +45,7 @@ class InformationPage extends Component {
 
   // Define toggle function
   handleToggle() {
-    // Set the create modal state
+    // Open or close modal
     this.setState({ modal: !this.state.modal });
   }
 

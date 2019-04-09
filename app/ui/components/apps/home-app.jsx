@@ -16,7 +16,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -32,6 +32,8 @@ import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define HomePage Component
 class HomeApp extends Component {
+
+/* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props

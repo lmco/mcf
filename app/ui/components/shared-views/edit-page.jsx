@@ -160,6 +160,8 @@ class EditPage extends Component {
             </FormGroup>
             {/* Button to submit changes */}
             <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+            {' '}
+            <Button outline onClick={this.props.toggle}> Cancel </Button>
           </Form>
         </div>
       </div>

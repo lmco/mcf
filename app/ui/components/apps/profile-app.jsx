@@ -15,7 +15,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -25,15 +25,15 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
-import Divider from '../general/sidebar/divider.jsx';
 import ProfileHome from '../profile-views/profile-home.jsx';
-import ProfileEdit from '../profile-views/profile-edit.jsx';
 import OrganizationList from '../profile-views/organization-list.jsx';
 import ProjectList from '../profile-views/project-list.jsx';
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProfileApp extends Component {
+
+/* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props
@@ -90,11 +90,6 @@ class ProfileApp extends Component {
                          title='Projects'
                          icon='fas fa-box'
                          routerLink='/profile/projects'/>
-            <Divider/>
-            <SidebarLink id='Edit'
-                         title='Edit'
-                         icon='fas fa-cog'
-                         routerLink={'/profile/edit'} />
           </Sidebar>
           { /* Verify user data exists */ }
           { // Display loading page or error page if user data is loading or failed to load
@@ -113,10 +108,6 @@ class ProfileApp extends Component {
                   { /* Route to project list page */ }
                   <Route exact path={'/profile/projects'}
                          render={ (props) => <ProjectList {...props}
-                                                          user={this.state.user} /> } />
-                  { /* Route to user edit page */ }
-                  <Route exact path={'/profile/edit'}
-                         render={ (props) => <ProfileEdit {...props}
                                                           user={this.state.user} /> } />
                 </Switch>
               )
