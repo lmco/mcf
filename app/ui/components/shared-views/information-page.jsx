@@ -15,10 +15,14 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React from 'react';
+
+// MBEE Modules
+import CustomData from '../general/custom-data/custom-data.jsx';
+/* eslint-enable no-unused-vars */
 
 function InformationPage(props) {
   // Initialize variables
@@ -44,26 +48,25 @@ function InformationPage(props) {
       <div id='workspace-header' className='workspace-header'>
         <h2 className='workspace-title workspace-title-padding'>{name}</h2>
       </div>
-      <div id='workspace-body' className='extra-padding'>
-        <table>
-          <tbody>
-            <tr>
-              <th>ID:</th>
-              <td>{id}</td>
-            </tr>
-            {(orgid === null)
-              ? <tr/>
-              : (<tr>
-                  <th>Org ID:</th>
-                  <td><a href={`/${orgid}`}>{orgid}</a></td>
-                 </tr>)
-            }
-            <tr>
-              <th>Custom:</th>
-              <td>{JSON.stringify(custom, null, 2)}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div id='workspace-body'>
+        <div className='main-workspace extra-padding'>
+          <table>
+            <tbody>
+              <tr>
+                <th>ID:</th>
+                <td>{id}</td>
+              </tr>
+              {(orgid === null)
+                ? <tr/>
+                : (<tr>
+                    <th>Org ID:</th>
+                    <td><a href={`/${orgid}`}>{orgid}</a></td>
+                   </tr>)
+              }
+            </tbody>
+          </table>
+          <CustomData data={custom}/>
+        </div>
       </div>
     </div>
   );
