@@ -20,7 +20,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Modal, ModalBody } from 'reactstrap';
+import {Modal, ModalBody, UncontrolledTooltip} from 'reactstrap';
 
 // MBEE Modules
 import List from '../general/list/list.jsx';
@@ -116,13 +116,20 @@ class OrgList extends Component {
                     <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`} divider={true}/>
                     {((this.props.admin) || (this.props.write))
                       ? (<div className='controls-container'>
-                          <i className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
+                          <UncontrolledTooltip placement='top' target={`newproj-${orgId}`}>
+                            New Project
+                          </UncontrolledTooltip>
+                          <i id={`newproj-${orgId}`} className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
                             {(!this.props.admin)
                               ? ''
-                              : (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>)
+                              : (<React.Fragment>
+                                  <UncontrolledTooltip placement='top' target={`delete-${orgId}`}>
+                                    Delete
+                                  </UncontrolledTooltip>
+                                  <i id={`delete-${orgId}`} className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>
+                                </React.Fragment>)
                             }
-                          </div>
-                      )
+                          </div>)
                       : ''
                     }
                 </div>

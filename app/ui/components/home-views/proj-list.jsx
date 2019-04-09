@@ -20,7 +20,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Modal, ModalBody } from 'reactstrap';
+import {Modal, ModalBody, UncontrolledTooltip} from 'reactstrap';
 
 // MBEE Modules
 import ProjectListItem from '../shared-views/list-items/project-list-item.jsx';
@@ -59,25 +59,27 @@ class ProjList extends Component {
     const orgId = this.props.orgid;
 
     return (
-            <React.Fragment>
-                {/* Modal for deleting a project */}
-                <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
-                    <ModalBody>
-                        <Delete project={project} toggle={this.handleDeleteProjToggle}/>
-                    </ModalBody>
-                </Modal>
-                <div className='proj-list'>
-                    <ProjectListItem className='homeproj-list' divider={true} project={project} href={`/${orgId}/${project.id}`}/>
-                    {(!this.props.admin)
-                      ? ''
-                      : (< div className='controls-container'>
-                                <i className='fas fa-plus fake-icon'/>
-                                <i onClick={this.handleDeleteProjToggle} className='fas fa-trash-alt delete-btn'/>
-                            </div>
-                      )
-                    }
-                </div>
-            </React.Fragment>
+      <React.Fragment>
+        {/* Modal for deleting a project */}
+        <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
+          <ModalBody>
+            <Delete project={project} toggle={this.handleDeleteProjToggle}/>
+          </ModalBody>
+        </Modal>
+        <div className='proj-list'>
+          <ProjectListItem className='homeproj-list' divider={true} project={project} href={`/${orgId}/${project.id}`}/>
+          {(!this.props.admin)
+            ? ''
+            : (<div className='controls-container'>
+                <UncontrolledTooltip placement='top' target={`delete-${project.id}`}>
+                  Delete
+                </UncontrolledTooltip>
+                <i className='fas fa-plus fake-icon'/>
+                <i id={`delete-${project.id}`} onClick={this.handleDeleteProjToggle} className='fas fa-trash-alt delete-btn'/>
+               </div>)
+          }
+        </div>
+      </React.Fragment>
     );
   }
 
