@@ -118,8 +118,9 @@ function getElementPublicData(element) {
       // Get the public data of source
       source = getElementPublicData(element.source);
     }
-    // Source references another element, return an object
+    // If source element's project is not the same as the elements parent
     else if (sourceIdParts[1] !== idParts[1]) {
+      // Set source to object with org, project and element id
       source = {
         org: sourceIdParts[0],
         project: sourceIdParts[1],
@@ -127,6 +128,7 @@ function getElementPublicData(element) {
       };
     }
     else {
+      // Set source to just the element id
       source = sourceIdParts.pop();
     }
   }
@@ -139,8 +141,9 @@ function getElementPublicData(element) {
       // Get the public data of target
       target = getElementPublicData(element.target);
     }
-    // Target references another element, return an object
+    // If target element's project is not the same as the elements parent
     else if (targetIdParts[1] !== idParts[1]) {
+      // Set target to object with org, project and element id
       target = {
         org: targetIdParts[0],
         project: targetIdParts[1],
@@ -148,6 +151,7 @@ function getElementPublicData(element) {
       };
     }
     else {
+      // Set target to just the element id
       target = targetIdParts.pop();
     }
   }
@@ -205,6 +209,7 @@ function getProjectPublicData(project) {
 
   // Loop through each project reference
   project.projectReferences.forEach((ref) => {
+    // Split concatenated id and return only project id
     projectReferences.push(utils.parseID(ref).pop());
   });
 

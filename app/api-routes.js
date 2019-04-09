@@ -2014,9 +2014,35 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *               source:
  *                 type: string
  *                 description: Required if target is provided.
+ *               sourceNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the source element. The source's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               target:
  *                 type: string
  *                 description: Required if source is provided.
+ *               targetNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the target element. The targets's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               documentation:
  *                 type: string
  *                 default: ''
@@ -2113,9 +2139,35 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *               source:
  *                 type: string
  *                 description: Required if target is provided.
+ *               sourceNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the source element. The source's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               target:
  *                 type: string
  *                 description: Required if source is provided.
+ *               targetNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the target element. The targets's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               documentation:
  *                 type: string
  *                 default: ''
@@ -2212,8 +2264,34 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: string
  *               source:
  *                 type: string
+ *               sourceNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the source element. The source's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               target:
  *                 type: string
+ *               targetNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the target element. The target's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               documentation:
  *                 type: string
  *               type:
@@ -2473,10 +2551,36 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: string
  *               description: An optional field that stores the ID of a source
  *                            element. If provided, target is required.
+ *             sourceNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the source element. The source's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             target:
  *               type: string
  *               description: An optional field that stores the ID of a target
  *                            element. If provided, source is required.
+ *             targetNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the target element. The target's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             documentation:
  *               type: string
  *               default: ''
@@ -2576,10 +2680,36 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: string
  *               description: An optional field that stores the ID of a source
  *                            element. If provided, target is required.
+ *             sourceNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the source element. The source's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             target:
  *               type: string
  *               description: An optional field that stores the ID of a target
  *                            element. If provided, source is required.
+ *             targetNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the target element. The target's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             documentation:
  *               type: string
  *               default: ''
@@ -2672,8 +2802,34 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: string
  *             source:
  *               type: string
+ *             sourceNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the source element. The source's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             target:
  *               type: string
+ *             targetNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the target element. The target's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             documentation:
  *               type: string
  *             type:

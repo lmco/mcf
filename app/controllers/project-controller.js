@@ -436,8 +436,11 @@ function create(requestingUser, organizationID, projects, options) {
         if (proj.hasOwnProperty('projectReferences')) {
           proj.projectReferences = proj.projectReferences.map((project) => {
             const projID = utils.createID(orgID, project);
-            // If the project isn't already being searched for...
+            // Check for duplicate project references. If multiple projects
+            // being created reference the same project, that project only gets
+            // found once.
             if (!projectReferences.includes(projID)) {
+              // Add project ID to array of projects to be searched for
               projectReferences.push(projID);
             }
             // Return the concatenated project ID
@@ -830,8 +833,11 @@ function update(requestingUser, organizationID, projects, options) {
         if (proj.hasOwnProperty('projectReferences')) {
           proj.projectReferences = proj.projectReferences.map((project) => {
             const projID = utils.createID(orgID, project);
-            // If the project isn't already being searched for...
+            // Check for duplicate project references. If multiple projects
+            // being created reference the same project, that project only gets
+            // found once.
             if (!projectReferences.includes(projID)) {
+              // Add project ID to array of projects to be searched for
               projectReferences.push(projID);
             }
             // Return the concatenated project ID
