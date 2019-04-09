@@ -33,18 +33,20 @@ function ProfileHome(props) {
       </div>
       <div id='workspace-body' className='extra-padding'>
         <table>
-          <tr>
-            <th>Username:</th>
-            <td>{user.username}</td>
-          </tr>
-          <tr>
-            <th>Email:</th>
-            <td>{user.email}</td>
-          </tr>
-          <tr>
-            <th>Custom:</th>
-            <td>{JSON.stringify(user.custom, null, 2)}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <th>Username:</th>
+              <td>{user.username}</td>
+            </tr>
+            <tr>
+              <th>Email:</th>
+              <td>{user.email}</td>
+            </tr>
+            <tr>
+              <th>Custom:</th>
+              <td>{JSON.stringify(user.custom, null, 2)}</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>

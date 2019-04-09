@@ -161,7 +161,7 @@ class ProjectList extends Component {
             <ListItem key={`org-key-${org.id}`} className='proj-org-header'>
                 <a href={`/${orgId}`}>{org.name}</a>
             </ListItem>
-            <List>
+            <List key={`org-list-key-${org.id}`}>
                 {projects}
             </List>
         </React.Fragment>
