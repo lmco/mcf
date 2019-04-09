@@ -54,12 +54,12 @@ class CustomData extends Component {
       // Loop through custom data
       Object.keys(customData).forEach((key) => {
         // Create the key data view
-        keys.push(<KeyData keyName={key} data={customData[key]}/>);
+        keys.push(<KeyData key={`key-${key}`} keyName={key} data={customData[key]}/>);
       });
     }
     else {
       // Create no custom data view
-      keys.push('No Custom Data');
+      keys.push(<span key={'key-no-data'}>No Custom Data</span>);
     }
 
     return (
