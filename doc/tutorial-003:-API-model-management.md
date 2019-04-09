@@ -96,7 +96,7 @@ print(r.text)
 ```
 
 Note that model elements are can only be deleted by MBEE admins. Standard users
-have the ability to archive elements with is virtually soft-deleting them. They
+have the ability to archive elements which is virtually soft-deleting them. They
 can do this by updating the element, and passing updating the field 
 `archived: true`.
 
