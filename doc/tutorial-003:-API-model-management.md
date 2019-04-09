@@ -97,8 +97,7 @@ print(r.text)
 
 Note that model elements are can only be deleted by MBEE admins. Standard users
 have the ability to archive elements which is virtually soft-deleting them. They
-can do this by updating the element, and passing updating the field 
-`archived: true`.
+can do this by updating the element, and updating the field `archived: true`.
 
 This tutorial introduced some of the basics of model model management showing 
 how to create, retrieve, and delete model elements. 
