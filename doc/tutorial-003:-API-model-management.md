@@ -10,8 +10,8 @@ previous tutorials:
 
 ```python
 import requests
-server = 'http://localhost:6233'
-creds = ('admin', 'CHANGE_ME')
+server = 'http://localhost:9080'
+creds = ('admin', 'Admin12345!')
 ```
 
 We can POST additional packages to our model using the following code:
@@ -20,9 +20,9 @@ We can POST additional packages to our model using the following code:
 # Create some top-level packages
 url_template = '{}/api/orgs/demo/projects/demo-project/branches/master/elements/{}'
 packages = [
-    {'id': 'pkg-a', 'name': 'parent': 'model'},
-    {'id': 'pkg-b', 'name': 'parent': 'model'},
-    {'id': 'pkg-c', 'name': 'parent': 'model'}
+    {'id': 'pkg-a', 'name': 'Element 01', 'parent': 'model'},
+    {'id': 'pkg-b', 'name': 'Element 02', 'parent': 'model'},
+    {'id': 'pkg-c', 'name': 'Element 03', 'parent': 'model'}
 ]
 for pkg in packages:
     url = url_template.format(server, pkg['id'])
@@ -95,10 +95,9 @@ print(r.status_code)
 print(r.text)
 ```
 
-Note that model elements are soft-deleted by default. This means they are not
-truly removed from the database and can be recovered if needed. MBEE admins, 
-however, have the option to pass the option `"hardDelete": true` in the request
-body to permanently delete elements.
+Note that model elements are can only be deleted by MBEE admins. Standard users
+have the ability to archive elements which is virtually soft-deleting them. They
+can do this by updating the element, and updating the field `archived: true`.
 
 This tutorial introduced some of the basics of model model management showing 
 how to create, retrieve, and delete model elements. 

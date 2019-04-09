@@ -9,7 +9,7 @@ code we need to get started:
 
 ```python
 import requests
-server = 'http://localhost:6233'
+server = 'http://localhost:9080'
 ``` 
 
 In the above code snippet, we import the *requests* module which we will use to
@@ -42,7 +42,7 @@ and passing our user credentials as a basic authentication header.
 ```python
 # Login to the server
 url = '{}/api/login'.format(server)       # the url we want to request
-auth_header = ('admin', 'CHANGE_ME')      # the basic auth header
+auth_header = ('admin', 'Admin12345!')      # the basic auth header
 r = requests.post(url, auth=auth_header)  # make a GET request to url
 res = r.json()                            # parse the JSON response
 print(r.status_code)                      # print the HTTP response code
@@ -91,7 +91,7 @@ should look something like this:
 ```python
 #!/usr/bin/env python
 import requests
-server = 'http://localhost:6233'
+server = 'http://localhost:9080'
 
 # Test to make sure we can connect to the server
 url = '{}/api/test'.format(server)
@@ -99,7 +99,7 @@ r = requests.get(url)
 
 # Login to the server
 url = '{}/api/login'.format(server)
-r = requests.post(url, auth=('admin', 'CHANGE_ME'))
+r = requests.post(url, auth=('admin', 'Admin12345!'))
 res = r.json()
 token = res['token']
 
