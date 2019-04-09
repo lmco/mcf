@@ -276,6 +276,9 @@ function find(requestingUser, organizationID, projects, options) {
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
+ * @param {string[]} [projects.projectReferences] - An array of referenced
+ * projects. These projects must be in the same organization and must have a
+ * visibility of 'internal' to be referenced.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -326,6 +329,7 @@ function create(requestingUser, organizationID, projects, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrg = {};
     let projObjects = [];
+    const projectReferences = [];
 
     // Initialize valid options
     let populateString = '';
@@ -398,7 +402,8 @@ function create(requestingUser, organizationID, projects, options) {
 
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
-    const validProjKeys = ['id', 'name', 'custom', 'visibility', 'permissions'];
+    const validProjKeys = ['id', 'name', 'custom', 'visibility', 'permissions',
+      'projectReferences'];
 
     // Check that each project has an id, and add to arrIDs
     try {
@@ -427,6 +432,19 @@ function create(requestingUser, organizationID, projects, options) {
         // Add requesting user as admin on project
         proj.permissions[reqUser._id] = 'admin';
 
+        // Check if updating the project references array
+        if (proj.hasOwnProperty('projectReferences')) {
+          proj.projectReferences = proj.projectReferences.map((project) => {
+            const projID = utils.createID(orgID, project);
+            // If the project isn't already being searched for...
+            if (!projectReferences.includes(projID)) {
+              projectReferences.push(projID);
+            }
+            // Return the concatenated project ID
+            return projID;
+          });
+        }
+
         index++;
       });
     }
@@ -452,6 +470,29 @@ function create(requestingUser, organizationID, projects, options) {
         throw new M.CustomError('User does not have permission to create'
           + ` projects on the org [${foundOrg._id}].`, 403, 'warn');
       }
+
+      // Find any project references
+      return Project.find({ _id: { $in: projectReferences } });
+    })
+    .then((_projReferences) => {
+      // Verify the same number of projects are found as desired
+      if (_projReferences.length !== projectReferences.length) {
+        const foundIDs = _projReferences.map(p => p._id);
+        const notFound = projectReferences.filter(p => !foundIDs.includes(p))
+        .map(p => utils.parseID(p).pop());
+        throw new M.CustomError(
+          `The following projects [${notFound.toString()}] were not found in `
+          + `the org [${orgID}].`, 404, 'warn'
+        );
+      }
+
+      // Verify that each referenced project has a visibility of 'internal'
+      _projReferences.forEach((project) => {
+        if (project.visibility !== 'internal') {
+          throw new M.CustomError(`The project [${utils.parseID(project._id).pop()}]`
+            + ' must have a visibility level of \'internal\' to be referenced.', 403, 'warn');
+        }
+      });
 
       // Find any existing, conflicting projects
       return Project.find(searchQuery, '_id').lean();
@@ -631,6 +672,9 @@ function create(requestingUser, organizationID, projects, options) {
  * the key is the username, and the value is the role which the user is to have
  * in the project. To remove a user from a project, the value must be
  * 'remove_all'.
+ * @param {string[]} [projects.projectReferences] - An array of referenced
+ * projects. These projects must be in the same organization and must have a
+ * visibility of 'internal' to be referenced.
  * @param {Object} [projects.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
@@ -690,6 +734,7 @@ function update(requestingUser, organizationID, projects, options) {
     let existingUsers = [];
     let updatingPermissions = false;
     let foundOrg = {};
+    const projectReferences = [];
 
     // Initialize valid options
     let populateString = '';
@@ -781,6 +826,19 @@ function update(requestingUser, organizationID, projects, options) {
           updatingPermissions = true;
         }
 
+        // Check if updating the project references array
+        if (proj.hasOwnProperty('projectReferences')) {
+          proj.projectReferences = proj.projectReferences.map((project) => {
+            const projID = utils.createID(orgID, project);
+            // If the project isn't already being searched for...
+            if (!projectReferences.includes(projID)) {
+              projectReferences.push(projID);
+            }
+            // Return the concatenated project ID
+            return projID;
+          });
+        }
+
         index++;
       });
     }
@@ -801,6 +859,29 @@ function update(requestingUser, organizationID, projects, options) {
 
       // Set function-wide foundOrg
       foundOrg = _foundOrganization;
+
+      // Find any project references
+      return Project.find({ _id: { $in: projectReferences } });
+    })
+    .then((_projReferences) => {
+      // Verify the same number of projects are found as desired
+      if (_projReferences.length !== projectReferences.length) {
+        const foundIDs = _projReferences.map(p => p._id);
+        const notFound = projectReferences.filter(p => !foundIDs.includes(p))
+        .map(p => utils.parseID(p).pop());
+        throw new M.CustomError(
+          `The following projects [${notFound.toString()}] were not found in `
+          + `the org [${orgID}].`, 404, 'warn'
+        );
+      }
+
+      // Verify that each referenced project has a visibility of 'internal'
+      _projReferences.forEach((project) => {
+        if (project.visibility !== 'internal') {
+          throw new M.CustomError(`The project [${utils.parseID(project._id).pop()}]`
+          + ' must have a visibility level of \'internal\' to be referenced.', 403, 'warn');
+        }
+      });
 
       // Find the projects to update
       return Project.find(searchQuery).lean();
@@ -878,80 +959,71 @@ function update(requestingUser, organizationID, projects, options) {
             }
           }
 
-          // If the type of field is mixed
-          if (Project.schema.obj[key]
-            && Project.schema.obj[key].type.schemaName === 'Mixed') {
-            // Only objects should be passed into mixed data
-            if (typeof updateProj !== 'object') {
-              throw new M.CustomError(`${key} must be an object`, 400, 'warn');
-            }
+          // If the user is updating permissions
+          if (key === 'permissions') {
+            // Get a list of valid project permissions
+            const validPermissions = Project.getPermissionLevels();
 
-            // If the user is updating permissions
-            if (key === 'permissions') {
-              // Get a list of valid project permissions
-              const validPermissions = Project.getPermissionLevels();
+            // Loop through each user provided
+            Object.keys(updateProj[key]).forEach((user) => {
+              let permValue = updateProj[key][user];
+              // Ensure user is not updating own permissions
+              if (user === reqUser.username) {
+                throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
+              }
 
-              // Loop through each user provided
-              Object.keys(updateProj[key]).forEach((user) => {
-                let permValue = updateProj[key][user];
-                // Ensure user is not updating own permissions
-                if (user === reqUser.username) {
-                  throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
-                }
+              // If user does not exist, throw an error
+              if (!existingUsers.includes(user)) {
+                throw new M.CustomError(`User [${user}] not found.`, 404, 'warn');
+              }
 
-                // If user does not exist, throw an error
-                if (!existingUsers.includes(user)) {
-                  throw new M.CustomError(`User [${user}] not found.`, 404, 'warn');
-                }
+              // Value must be an string containing highest permissions
+              if (typeof permValue !== 'string') {
+                throw new M.CustomError(`Permission for ${user} must be a string.`, 400, 'warn');
+              }
 
-                // Value must be an string containing highest permissions
-                if (typeof permValue !== 'string') {
-                  throw new M.CustomError(`Permission for ${user} must be a string.`, 400, 'warn');
-                }
+              // Lowercase the permission value
+              permValue = permValue.toLowerCase();
 
-                // Lowercase the permission value
-                permValue = permValue.toLowerCase();
+              // Value must be valid permission
+              if (!validPermissions.includes(permValue)) {
+                throw new M.CustomError(
+                  `${permValue} is not a valid permission`, 400, 'warn'
+                );
+              }
 
-                // Value must be valid permission
-                if (!validPermissions.includes(permValue)) {
+              // Set stored permissions value based on provided permValue
+              switch (permValue) {
+                case 'read':
+                  proj.permissions[user] = ['read'];
+                  break;
+                case 'write':
+                  proj.permissions[user] = ['read', 'write'];
+                  break;
+                case 'admin':
+                  proj.permissions[user] = ['read', 'write', 'admin'];
+                  break;
+                case 'remove_all':
+                  delete proj.permissions[user];
+                  break;
+                // Default case, unknown permission, throw an error
+                default:
                   throw new M.CustomError(
                     `${permValue} is not a valid permission`, 400, 'warn'
                   );
-                }
+              }
 
-                // Set stored permissions value based on provided permValue
-                switch (permValue) {
-                  case 'read':
-                    proj.permissions[user] = ['read'];
-                    break;
-                  case 'write':
-                    proj.permissions[user] = ['read', 'write'];
-                    break;
-                  case 'admin':
-                    proj.permissions[user] = ['read', 'write', 'admin'];
-                    break;
-                  case 'remove_all':
-                    delete proj.permissions[user];
-                    break;
-                  // Default case, unknown permission, throw an error
-                  default:
-                    throw new M.CustomError(
-                      `${permValue} is not a valid permission`, 400, 'warn'
-                    );
-                }
+              // If not removing a user, check if they have been added to the org
+              if (permValue !== 'remove_all' && !foundOrg.permissions.hasOwnProperty(user)) {
+                // Add user to org with read permissions
+                const updateQuery = {};
+                updateQuery[`permissions.${user}`] = ['read'];
+                promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
+              }
 
-                // If not removing a user, check if they have been added to the org
-                if (permValue !== 'remove_all' && !foundOrg.permissions.hasOwnProperty(user)) {
-                  // Add user to org with read permissions
-                  const updateQuery = {};
-                  updateQuery[`permissions.${user}`] = ['read'];
-                  promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
-                }
-
-                // Copy permissions from proj to update object
-                updateProj.permissions = proj.permissions;
-              });
-            }
+              // Copy permissions from proj to update object
+              updateProj.permissions = proj.permissions;
+            });
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
@@ -1027,6 +1099,9 @@ function update(requestingUser, organizationID, projects, options) {
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
+ * @param {string[]} [projects.projectReferences] - An array of referenced
+ * projects. These projects must be in the same organization and must have a
+ * visibility of 'internal' to be referenced.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -1312,6 +1387,9 @@ function remove(requestingUser, organizationID, projects, options) {
       // Delete any elements in the project
       return Element.deleteMany(ownedQuery).lean();
     })
+    // Delete the project references from any projectReferences arrays
+    .then(() => Project.updateMany({}, { $pull: { projectReferences:
+          { $in: foundProjects.map(p => p._id) } } }, { multi: true }))
     // Delete the projects
     .then(() => Project.deleteMany(searchQuery).lean())
     .then((retQuery) => {

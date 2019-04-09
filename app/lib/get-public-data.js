@@ -112,25 +112,43 @@ function getElementPublicData(element) {
 
   // If element.source is defined
   if (element.source) {
+    const sourceIdParts = utils.parseID(element.source);
     // If element.source is populated
     if (typeof element.source === 'object') {
       // Get the public data of source
       source = getElementPublicData(element.source);
     }
+    // Source references another element, return an object
+    else if (sourceIdParts[1] !== idParts[1]) {
+      source = {
+        org: sourceIdParts[0],
+        project: sourceIdParts[1],
+        element: sourceIdParts.pop()
+      };
+    }
     else {
-      source = utils.parseID(element.source).pop();
+      source = sourceIdParts.pop();
     }
   }
 
   // If element.target is defined
   if (element.target) {
+    const targetIdParts = utils.parseID(element.target);
     // If element.target is populated
     if (typeof element.target === 'object') {
       // Get the public data of target
       target = getElementPublicData(element.target);
     }
+    // Target references another element, return an object
+    else if (targetIdParts[1] !== idParts[1]) {
+      target = {
+        org: targetIdParts[0],
+        project: targetIdParts[1],
+        element: targetIdParts.pop()
+      };
+    }
     else {
-      target = utils.parseID(element.target).pop();
+      target = targetIdParts.pop();
     }
   }
 
@@ -177,11 +195,17 @@ function getProjectPublicData(project) {
   let createdBy;
   let lastModifiedBy;
   let archivedBy;
+  const projectReferences = [];
 
   // Loop through each permission key/value pair
   Object.keys(project.permissions || {}).forEach((u) => {
     // Return highest permission
     permissions[u] = project.permissions[u].pop();
+  });
+
+  // Loop through each project reference
+  project.projectReferences.forEach((ref) => {
+    projectReferences.push(utils.parseID(ref).pop());
   });
 
   // If project.createdBy is defined
@@ -229,6 +253,7 @@ function getProjectPublicData(project) {
     name: project.name,
     elementCount: project.count || undefined,
     permissions: permissions,
+    projectReferences: projectReferences,
     custom: project.custom || {},
     visibility: project.visibility,
     createdOn: (project.createdOn) ? project.createdOn.toString() : undefined,

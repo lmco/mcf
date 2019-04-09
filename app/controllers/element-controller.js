@@ -394,8 +394,16 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * element. The default value is 'model'
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
+ * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * source element, if the element is not part of the project. Must include a
+ * the key/value pairs org, project and branch. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
+ * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * target element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
@@ -456,6 +464,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     let elementObjects = [];
     const remainingElements = [];
     let populatedElements = [];
+    const projectRefs = [];
 
     // Initialize valid options
     let populateString = 'contains ';
@@ -529,7 +538,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
     const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
-      'documentation', 'type', 'custom'];
+      'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace'];
 
     // Check that each element has an id and set the parent if null
     try {
@@ -552,14 +561,15 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           elem.parent = 'model';
         }
         assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
-        assert.ok(utils.createID(orgID, projID, elem.parent) !== elem._id,
-          'Elements parent cannot be self.');
+        elem.parent = utils.createID(orgID, projID, elem.parent);
+        assert.ok(elem.parent !== elem._id, 'Elements parent cannot be self.');
 
         // If element has a source, ensure it has a target
         if (elem.hasOwnProperty('source')) {
           assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
           assert.ok(typeof elem.target === 'string',
             `Element #${index}'s target is not a string.`);
+          elem.source = utils.createID(orgID, projID, elem.source);
         }
 
         // If element has a target, ensure it has a source
@@ -567,6 +577,55 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
           assert.ok(typeof elem.source === 'string',
             `Element #${index}'s source is not a string.`);
+          elem.target = utils.createID(orgID, projID, elem.target);
+        }
+
+        // If the element a sourceNamespace section, ensure it contains the proper fields
+        if (elem.hasOwnProperty('sourceNamespace')) {
+          assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+
+          // Ensure the object contains an org, project and branch field
+          assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
+            + ` #${index}'s sourceNamespace is missing an org.`);
+          assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
+            + ` #${index}'s sourceNamespace is missing a project.`);
+          assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
+            + ` #${index}'s sourceNamespace is missing a branch.`);
+
+          // Ensure the sourceNamespace org is the same org
+          assert.ok(elem.sourceNamespace.org === orgID, `Element #${index}'s `
+            + 'source cannot reference elements outside its org.');
+
+          projectRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
+
+          // Reset the elem source with new project
+          const tmpSource = utils.parseID(elem.source).pop();
+          elem.source = utils.createID(elem.sourceNamespace.org,
+            elem.sourceNamespace.project, tmpSource);
+        }
+
+        // If the element a targetNamespace section, ensure it contains the proper fields
+        if (elem.hasOwnProperty('targetNamespace')) {
+          assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+
+          // Ensure the object contains an org, project and branch field
+          assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
+            + ` #${index}'s targetNamespace is missing an org.`);
+          assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
+            + ` #${index}'s targetNamespace is missing a project.`);
+          assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
+            + ` #${index}'s targetNamespace is missing a branch.`);
+
+          // Ensure the sourceNamespace org is the same org
+          assert.ok(elem.targetNamespace.org === orgID, `Element #${index}'s `
+            + 'target cannot reference elements outside its org.');
+
+          projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
+
+          // Reset the elem target with new project
+          const tmpTarget = utils.parseID(elem.target).pop();
+          elem.target = utils.createID(elem.targetNamespace.org,
+            elem.targetNamespace.project, tmpTarget);
         }
 
         index++;
@@ -601,6 +660,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
             + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
       }
 
+      // Verify that the found project's projectReferences contains the specified refs
+      projectRefs.forEach((ref) => {
+        if (!foundProject.projectReferences.includes(ref)) {
+          throw new M.CustomError(`The project [${utils.parseID(ref).pop()}] `
+            + 'is not in the found project\'s projectReference list.', 403, 'warn');
+        }
+      });
+
       const promises = [];
       for (let i = 0; i < arrIDs.length / 50000; i++) {
         // Split arrIDs into batches of 50000
@@ -631,13 +698,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         elemObj.archivedBy = (elemObj.archived) ? reqUser._id : null;
 
         // Add hidden fields
-        elemObj.$parent = utils.createID(orgID, projID, elemObj.parent);
-        elemObj.$source = (elemObj.source)
-          ? utils.createID(orgID, projID, elemObj.source)
-          : null;
-        elemObj.$target = (elemObj.target)
-          ? utils.createID(orgID, projID, elemObj.target)
-          : null;
+        elemObj.$parent = elemObj.parent;
+        elemObj.$source = (elemObj.source) ? elemObj.source : null;
+        elemObj.$target = (elemObj.target) ? elemObj.target : null;
 
         return elemObj;
       });
@@ -806,7 +869,15 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
  * update element parents in bulk.
  * @param {string} [elements.source] - The ID of the source element.
+ * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * source element, if the element is not part of the project. Must include a
+ * the key/value pairs org, project and branch. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element.
+ * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * target element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
  * @param {string} [elements.type] - An optional type string.
@@ -869,6 +940,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const projID = sani.mongo(projectID);
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     let foundElements = [];
+    let foundProject = {};
     let elementsToUpdate = [];
     let searchQuery = {};
     let sourceTargetQuery = {};
@@ -931,7 +1003,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
-    .then((foundProject) => {
+    .then((_foundProject) => {
+      foundProject = _foundProject;
       // Check that the project was found
       if (!foundProject) {
         throw new M.CustomError(`Project [${projID}] not found in the `
@@ -1005,10 +1078,78 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             sourceTargetIDs.push(elem.source);
           }
 
+          // If the element a sourceNamespace section, ensure it contains the proper fields
+          if (elem.hasOwnProperty('sourceNamespace')) {
+            assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+
+            // Ensure the object contains an org, project and branch field
+            assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
+              + ` #${index}'s sourceNamespace is missing an org.`);
+            assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
+              + ` #${index}'s sourceNamespace is missing a project.`);
+            assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
+              + ` #${index}'s sourceNamespace is missing a branch.`);
+
+            // Ensure the sourceNamespace org is the same org
+            assert.ok(elem.sourceNamespace.org === orgID, `Element #${index}'s `
+              + 'source cannot reference elements outside its org.');
+            // Ensure the project is in the projectReferences array
+            const tmpProj = utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project);
+            assert.ok(foundProject.projectReferences.includes(tmpProj),
+              `The project [${elem.sourceNamespace.project}] is not in the `
+              + 'projectReferences list.');
+
+            // Reset the elem source with new project
+            const tmpSource = utils.parseID(elem.source).pop();
+            elem.source = utils.createID(elem.sourceNamespace.org,
+              elem.sourceNamespace.project, tmpSource);
+
+            // Remove the last source which has the wrong project
+            sourceTargetIDs.pop();
+            sourceTargetIDs.push(elem.source);
+
+            // Delete sourceNamespace, it does not get stored in the database
+            delete elem.sourceNamespace;
+          }
+
           // If updating target, add ID to sourceTargetIDs
           if (elem.target) {
             elem.target = utils.createID(orgID, projID, elem.target);
             sourceTargetIDs.push(elem.target);
+          }
+
+          // If the element a targetNamespace section, ensure it contains the proper fields
+          if (elem.hasOwnProperty('targetNamespace')) {
+            assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+
+            // Ensure the object contains an org, project and branch field
+            assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
+              + ` #${index}'s targetNamespace is missing an org.`);
+            assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
+              + ` #${index}'s targetNamespace is missing a project.`);
+            assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
+              + ` #${index}'s targetNamespace is missing a branch.`);
+
+            // Ensure the sourceNamespace org is the same org
+            assert.ok(elem.targetNamespace.org === orgID, `Element #${index}'s `
+              + 'target cannot reference elements outside its org.');
+            // Ensure the project is in the projectReferences array
+            const tmpProj = utils.createID(elem.targetNamespace.org, elem.targetNamespace.project);
+            assert.ok(foundProject.projectReferences.includes(tmpProj),
+              `The project [${elem.targetNamespace.project}] is not in the `
+                + 'projectReferences list.');
+
+            // Reset the elem target with new project
+            const tmpTarget = utils.parseID(elem.target).pop();
+            elem.target = utils.createID(elem.targetNamespace.org,
+              elem.targetNamespace.project, tmpTarget);
+
+            // Remove the last target which has the wrong project
+            sourceTargetIDs.pop();
+            sourceTargetIDs.push(elem.target);
+
+            // Delete targetNamespace, it does not get stored in the database
+            delete elem.targetNamespace;
           }
 
           index++;
@@ -1068,8 +1209,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
         // Error Check: if element is currently archived, it must first be unarchived
         if (element.archived && updateElement.archived !== false) {
-          throw new M.CustomError(`Element [${element._id}] is archived. `
-              + 'Archived objects cannot be modified.', 403, 'warn');
+          throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
+              + ' is archived. Archived objects cannot be modified.', 403, 'warn');
         }
 
         // For each key in the updated object
@@ -1101,7 +1242,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             // If source/target does not exist, throw error
             if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
               throw new M.CustomError(`The ${key} element `
-                + `[${utils.parseID(updateElement[key]).pop()}] was not found.`, 404, 'warn');
+                + `[${utils.parseID(updateElement[key]).pop()}] was not found `
+                + `in the project [${utils.parseID(updateElement[key])[1]}].`, 404, 'warn');
             }
 
             // If no target exists and is not being updated, throw error
@@ -1210,8 +1352,16 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * element. The default value is 'model'
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
+ * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * source element, if the element is not part of the project. Must include a
+ * the key/value pairs org, project and branch. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
+ * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * target element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
