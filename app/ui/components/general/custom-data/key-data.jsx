@@ -77,9 +77,7 @@ class KeyData extends Component {
         // Verify type of data
         if (typeof data === 'object') {
           // Loop through data for recursive call
-          nestedData = Object.keys(data).map((key) => {
-            return nests.push(<KeyData key={`key-${key}`} keyName={key} data={data[key]}/>);
-          });
+          nestedData = Object.keys(data).map((key) => nests.push(<KeyData key={`key-${key}`} keyName={key} data={data[key]}/>));
         }
         else {
           // Display the data
@@ -94,9 +92,7 @@ class KeyData extends Component {
     // Verify type is object
     else if (typeof custom === 'object') {
       // Loop through object for recursive call
-      nestedData = Object.keys(custom).map((key) => {
-        return (<KeyData key={`key-${key}`} keyName={key} data={custom[key]}/>);
-      });
+      nestedData = Object.keys(custom).map((key) => <KeyData key={`key-${key}`} keyName={key} data={custom[key]}/>);
     }
     else {
       // Display the data
