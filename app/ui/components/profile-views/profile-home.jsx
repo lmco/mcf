@@ -34,9 +34,7 @@ class ProfileHome extends Component {
 
     // Initialize state props
     this.state = {
-      permissions: false,
-      modal: false,
-      error: null
+      modal: false
     };
 
     // Bind component functions
