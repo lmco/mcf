@@ -164,7 +164,7 @@ class Element extends Component {
                     <td>{element.type}</td>
                   </tr>
                   {(!element.target || !element.source)
-                    ? ''
+                    ? <tr/>
                     : (<React.Fragment>
                         <tr>
                           <th>Target:</th>
