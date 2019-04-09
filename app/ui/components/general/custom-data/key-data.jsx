@@ -43,6 +43,16 @@ class KeyData extends Component {
     this.setState({ keyDataDisplay: !this.state.keyDataDisplay });
   }
 
+  componentDidUpdate(prevProps) {
+    // Verify if props were updated
+    if (this.props.data !== prevProps.data) {
+      // Update state with new props
+      this.setState({ keyDataDisplay: false });
+      this.setState({ data: this.props.data });
+      this.setState({ keyName: this.props.keyName });
+    }
+  }
+
   render() {
     // Initialize variables
     const custom = this.state.data;
