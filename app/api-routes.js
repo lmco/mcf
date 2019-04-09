@@ -995,6 +995,13 @@ api.route('/projects')
  *                 type: object
  *                 description: Any preset permissions. Keys are the users
  *                              usernames, and values are the permission.
+ *               projectReferences:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Any projects to reference in the model. Projects
+ *                              must be in the same organization and must have a
+ *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1072,6 +1079,13 @@ api.route('/projects')
  *                 type: object
  *                 description: Any preset permissions. Keys are the users
  *                              usernames, and values are the permission.
+ *               projectReferences:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Any projects to reference in the model. Projects
+ *                              must be in the same organization and must have a
+ *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1153,6 +1167,13 @@ api.route('/projects')
  *                 description: An object where keys are usernames and values
  *                              are the new role the user has. To remove a user,
  *                              the role should be REMOVE_ALL.
+ *               projectReferences:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Any projects to reference in the model. Projects
+ *                              must be in the same organization and must have a
+ *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1234,7 +1255,7 @@ api.route('/projects')
  *                      permissions.
  *       500:
  *         description: Internal Server Error, Failed to DELETE org due to a
- *                      server side issue.
+ *                      server side issue
  */
 api.route('/orgs/:orgid/projects')
 .get(
@@ -1370,6 +1391,13 @@ api.route('/orgs/:orgid/projects')
  *               type: object
  *               description: Any preset permissions. Keys are the users
  *                            usernames, and values are the permission.
+ *             projectReferences:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               description: Any projects to reference in the model. Projects
+ *                            must be in the same organization and must have a
+ *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1453,6 +1481,13 @@ api.route('/orgs/:orgid/projects')
  *               type: object
  *               description: Any preset permissions. Keys are the users
  *                            usernames, and values are the permission.
+ *             projectReferences:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               description: Any projects to reference in the model. Projects
+ *                            must be in the same organization and must have a
+ *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -1532,6 +1567,13 @@ api.route('/orgs/:orgid/projects')
  *                 description: An object where keys are usernames and values
  *                              are the new role the user has. To remove a user,
  *                              the role should be REMOVE_ALL.
+ *             projectReferences:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               description: Any projects to reference in the model. Projects
+ *                            must be in the same organization and must have a
+ *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.

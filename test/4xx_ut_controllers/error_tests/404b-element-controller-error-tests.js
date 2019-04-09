@@ -209,7 +209,7 @@ function updateNonExistentSource(done) {
     else {
       // Ensure error message is correct
       chai.expect(error.description).to.equal('The source element '
-        + '[NonExistentElement] was not found.');
+        + '[NonExistentElement] was not found in the project [project00].');
       done();
     }
   });
@@ -242,7 +242,7 @@ function updateNonExistentTarget(done) {
     else {
       // Ensure error message is correct
       chai.expect(error.description).to.equal('The target element '
-        + '[NonExistentElement] was not found.');
+        + '[NonExistentElement] was not found in the project [project00].');
       done();
     }
   });
