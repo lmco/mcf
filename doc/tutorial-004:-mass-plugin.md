@@ -31,8 +31,8 @@ this document for more on writing API-based integrations.
 ```python
 import json
 import requests
-server = 'http://localhost:6233'
-creds = ('admin', 'CHANGE_ME')
+server = 'http://localhost:9080'
+creds = ('admin', 'Admin12345!')
 
 # Load our element data from our data.json file
 with open('data.json', 'r') as f:
@@ -47,7 +47,7 @@ if (r.status_code != 200):
     exit(1)
  
 # Append to the previously defined projects URL
-url = '{}/elements'.format(url)
+url = '{}/branches/master/elements'.format(url)
 
 # POST our model elements
 r = requests.post(url, auth=creds, json=packages)
