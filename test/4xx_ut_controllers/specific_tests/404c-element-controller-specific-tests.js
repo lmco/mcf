@@ -24,6 +24,7 @@ const ElementController = M.require('controllers.element-controller');
 const ProjectController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
 const db = M.require('lib.db');
+const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -131,6 +132,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should update an element target to be on a different project', updateExternalTarget);
   it('should populate allowed fields when finding an element', optionPopulateFind);
   it('should find an archived element when the option archived is provided', optionArchivedFind);
+  it('should find an element and it\'s subtree when the option subtree '
+    + 'is provided', optionSubtreeFind);
+  it('should return an element with only the specific fields specified', optionFieldsFind);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -373,6 +377,91 @@ function optionArchivedFind(done) {
     chai.expect(elem.archived).to.equal(true);
     chai.expect(elem.archivedOn).to.not.equal(null);
     chai.expect(elem.archivedBy).to.equal(adminUser.username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that an element and it's subtree are returned when
+ * using the option 'subtree' in find().
+ */
+function optionSubtreeFind(done) {
+  // Get the ID of the element to find
+  const elemID = utils.parseID(elements[2]._id).pop();
+  // Create the options object. Search for archived:true since one child element
+  // was archived in a previous test
+  const options = { subtree: true, archived: true };
+
+  // Find the element and it's subtree
+  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options)
+  .then((foundElements) => {
+    // Expect there to be 4 elements found, the searched element and 3 in subtree
+    chai.expect(foundElements.length).to.equal(4);
+    // Attempt to convert elements to JMI3, if successful then its a valid tree
+    const jmi3Elements = jmi.convertJMI(1, 3, foundElements);
+    // Verify that there is only one top level key in jmi3, which should be the
+    // searched element
+    chai.expect(Object.keys(jmi3Elements).length).to.equal(1);
+    chai.expect(Object.keys(jmi3Elements)[0]).to.equal(elements[2]._id);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that option 'fields' returns an element with only
+ * specific fields in find().
+ */
+function optionFieldsFind(done) {
+  // Get the ID of the element to find
+  const elemID = utils.parseID(elements[0]._id);
+  // Create the options object with the list of fields specifically find
+  const findOptions = { fields: ['name', 'createdBy'] };
+  // Create the options object with the list of fields to specifically NOT find
+  const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
+  // Create the list of fields which are always provided no matter what
+  const fieldsAlwaysProvided = ['_id', 'contains'];
+
+  // Find the element only with specific fields.
+  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, findOptions)
+  .then((foundElements) => {
+    // Expect there to be exactly 1 element found
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // Create the list of fields that should be returned
+    const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+
+    // Check that the only keys in the element are the expected ones
+    chai.expect(visibleFields).to.have.members(expectedFields);
+
+    // Find the element without the notFind fields
+    return ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, notFindOptions);
+  })
+  .then((foundElements) => {
+    // Expect there to be exactly 1 element found
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+
+    // Check that the keys in the notFindOptions are not in elem
+    chai.expect(Object.keys(visibleFields)).to.not.have.members(['createdOn', 'updatedOn']);
     done();
   })
   .catch((error) => {
