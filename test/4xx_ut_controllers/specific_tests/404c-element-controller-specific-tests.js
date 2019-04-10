@@ -145,6 +145,16 @@ describe(M.getModuleName(module.filename), () => {
     + ' create()', optionFieldsCreate);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from create()', optionLeanCreate);
+  it('should populate allowed fields when updating an element', optionPopulateUpdate);
+  it('should return an element with only the specific fields specified from'
+    + ' update()', optionFieldsUpdate);
+  it('should return a raw JSON version of an element instead of a mongoose '
+    + 'object from update()', optionLeanUpdate);
+  it('should populate allowed fields when replacing an element', optionPopulateReplace);
+  it('should return an element with only the specific fields specified from'
+    + ' createOrReplace()', optionFieldsReplace);
+  it('should return a raw JSON version of an element instead of a mongoose '
+    + 'object from createOrReplace()', optionLeanReplace);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -698,6 +708,280 @@ function optionLeanCreate(done) {
     // Expect there to be exactly 1 element created
     chai.expect(createdElements.length).to.equal(1);
     const elem = createdElements[0];
+
+    // Verify that the element is not a mongoose object ('Element')
+    chai.expect(elem instanceof Element).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that the fields specified in the element model function
+ * getValidPopulateFields() can all be populated in the update() function using
+ * the option 'populate'.
+ */
+function optionPopulateUpdate(done) {
+  // Get the valid populate fields
+  const pop = Element.getValidPopulateFields();
+  // Create the options object
+  const options = { populate: pop };
+  // Create the update object
+  const updateObj = {
+    id: 'populate-element',
+    name: 'Update Element'
+  };
+
+  // Update the element
+  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj, options)
+  .then((updatedElements) => {
+    // Verify the array length is exactly 1
+    chai.expect(updatedElements.length).to.equal(1);
+    const elem = updatedElements[0];
+
+    // For each field in pop
+    pop.forEach((field) => {
+      // If the field is defined in the returned element
+      if (elem.hasOwnProperty(field)) {
+        // Expect each populated field to be an object
+        chai.expect(typeof elem.field).to.equal('object');
+        // Expect each populated field to at least have an _id
+        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+      }
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that option 'fields' returns an element with only
+ * specific fields in update().
+ */
+function optionFieldsUpdate(done) {
+  // Create the update objects
+  const updateObjFind = {
+    id: 'fields-element',
+    name: 'Fields Element Updated'
+  };
+  const updateObjNotFind = {
+    id: 'not-fields-element',
+    name: 'Not Fields Element Updated'
+  };
+  // Create the options object with the list of fields specifically find
+  const findOptions = { fields: ['name', 'createdBy'] };
+  // Create the options object with the list of fields to specifically NOT find
+  const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
+  // Create the list of fields which are always provided no matter what
+  const fieldsAlwaysProvided = ['_id', 'contains'];
+
+  // Update the element only with specific fields returned
+  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObjFind, findOptions)
+  .then((updatedElements) => {
+    // Expect there to be exactly 1 element updated
+    chai.expect(updatedElements.length).to.equal(1);
+    const elem = updatedElements[0];
+
+    // Create the list of fields that should be returned
+    const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+
+    // Check that the only keys in the element are the expected ones
+    chai.expect(visibleFields).to.have.members(expectedFields);
+
+    // Update the element without the notFind fields
+    return ElementController.update(adminUser, org.id, projIDs[0], 'master',
+      updateObjNotFind, notFindOptions);
+  })
+  .then((updatedElements) => {
+    // Expect there to be exactly 1 element updated
+    chai.expect(updatedElements.length).to.equal(1);
+    const elem = updatedElements[0];
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+
+    // Check that the keys in the notFindOptions are not in elem
+    chai.expect(Object.keys(visibleFields)).to.not.have.members(['createdOn', 'updatedOn']);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that providing the option 'lean' returns raw JSON of an
+ * element rather than a mongoose object in the update() function.
+ */
+function optionLeanUpdate(done) {
+  // Create the update object
+  const updateObj = {
+    id: 'lean-element',
+    name: 'Lean Element Updated'
+  };
+  // Create the options object with lean: true
+  const options = { lean: true };
+
+  // Update the element
+  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj, options)
+  .then((updatedElements) => {
+    // Expect there to be exactly 1 element updated
+    chai.expect(updatedElements.length).to.equal(1);
+    const elem = updatedElements[0];
+
+    // Verify that the element is not a mongoose object ('Element')
+    chai.expect(elem instanceof Element).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that the fields specified in the element model function
+ * getValidPopulateFields() can all be populated in the createOrReplace()
+ * function using the option 'populate'.
+ */
+function optionPopulateReplace(done) {
+  // Get the valid populate fields
+  const pop = Element.getValidPopulateFields();
+  // Create the options object
+  const options = { populate: pop };
+  // Create the element object
+  const elemObj = {
+    id: 'populate-element',
+    source: utils.parseID(elements[0]._id).pop(),
+    target: utils.parseID(elements[1]._id).pop()
+  };
+
+  // Replace the element
+  ElementController.createOrReplace(adminUser, org.id, projIDs[0], 'master', elemObj, options)
+  .then((replacedElements) => {
+    // Verify the array length is exactly 1
+    chai.expect(replacedElements.length).to.equal(1);
+    const elem = replacedElements[0];
+
+    // For each field in pop
+    pop.forEach((field) => {
+      // If the field is defined in the returned element
+      if (elem.hasOwnProperty(field)) {
+        // Expect each populated field to be an object
+        chai.expect(typeof elem.field).to.equal('object');
+        // Expect each populated field to at least have an _id
+        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+      }
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that option 'fields' returns an element with only
+ * specific fields in createOrReplace().
+ */
+function optionFieldsReplace(done) {
+  // Create the element objects
+  const elemObjFind = {
+    id: 'fields-element',
+    name: 'Fields Element'
+  };
+  const elemObjNotFind = {
+    id: 'not-fields-element',
+    name: 'Not Fields Element'
+  };
+  // Create the options object with the list of fields specifically find
+  const findOptions = { fields: ['name', 'createdBy'] };
+  // Create the options object with the list of fields to specifically NOT find
+  const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
+  // Create the list of fields which are always provided no matter what
+  const fieldsAlwaysProvided = ['_id', 'contains'];
+
+  // Replace the element only with specific fields returned
+  ElementController.createOrReplace(adminUser, org.id, projIDs[0], 'master',
+    elemObjFind, findOptions)
+  .then((replacedElements) => {
+    // Expect there to be exactly 1 element replaced
+    chai.expect(replacedElements.length).to.equal(1);
+    const elem = replacedElements[0];
+
+    // Create the list of fields that should be returned
+    const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+
+    // Check that the only keys in the element are the expected ones
+    chai.expect(visibleFields).to.have.members(expectedFields);
+
+    // Replace the element without the notFind fields
+    return ElementController.createOrReplace(adminUser, org.id, projIDs[0],
+      'master', elemObjNotFind, notFindOptions);
+  })
+  .then((replacedElements) => {
+    // Expect there to be exactly 1 element replaced
+    chai.expect(replacedElements.length).to.equal(1);
+    const elem = replacedElements[0];
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+
+    // Check that the keys in the notFindOptions are not in elem
+    chai.expect(Object.keys(visibleFields)).to.not.have.members(['createdOn', 'updatedOn']);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that providing the option 'lean' returns raw JSON of an
+ * element rather than a mongoose object in the createOrReplace() function.
+ */
+function optionLeanReplace(done) {
+  // Create the element object
+  const elemObj = {
+    id: 'lean-element',
+    name: 'Lean Element'
+  };
+  // Create the options object with lean: true
+  const options = { lean: true };
+
+  // Replace the element
+  ElementController.createOrReplace(adminUser, org.id, projIDs[0], 'master', elemObj, options)
+  .then((replacedElements) => {
+    // Expect there to be exactly 1 element replaced
+    chai.expect(replacedElements.length).to.equal(1);
+    const elem = replacedElements[0];
 
     // Verify that the element is not a mongoose object ('Element')
     chai.expect(elem instanceof Element).to.equal(false);
