@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.404c-element-controller-detailed-tests
+ * @module test.404c-element-controller-specific-tests
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
@@ -22,6 +22,7 @@ const chai = require('chai');
 // MBEE modules
 const ElementController = M.require('controllers.element-controller');
 const ProjectController = M.require('controllers.project-controller');
+const Element = M.require('models.element');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
@@ -32,6 +33,7 @@ let adminUser = null;
 let org = null;
 const projects = [];
 const projIDs = [];
+let elements = [];
 
 /* --------------------( Main )-------------------- */
 /**
@@ -85,7 +87,15 @@ describe(M.getModuleName(module.filename), () => {
       return ProjectController.update(adminUser, org.id,
         { id: projIDs[0], projectReferences: [projIDs[1]] });
     })
-    .then(() => done())
+    .then(() => {
+      // Create test elements for the main project
+      const elems = testData.elements;
+      return ElementController.create(adminUser, org.id, projIDs[0], 'master', elems);
+    })
+    .then((createdElements) => {
+      elements = createdElements;
+      done();
+    })
     .catch((error) => {
       M.log.error(error);
       // Expect no error
@@ -114,13 +124,49 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  it('should archive an element', archiveElement);
   it('should create an element whose source is on a different project', createExternalSource);
   it('should create an element whose target is on a different project', createExternalTarget);
   it('should update an element source to be on a different project', updateExternalSource);
   it('should update an element target to be on a different project', updateExternalTarget);
+  it('should populate allowed fields when finding an element', optionPopulateFind);
+  it('should find an archived element when the option archived is provided', optionArchivedFind);
 });
 
 /* --------------------( Tests )-------------------- */
+/**
+ * @description Verifies that an element can be archived.
+ */
+function archiveElement(done) {
+  // Get the ID of the element to archive
+  const elemID = utils.parseID(elements[6]._id).pop();
+  // Create the update object
+  const updateObj = {
+    id: elemID,
+    archived: true
+  };
+
+  // Update the element with archived: true
+  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj)
+  .then((updatedElements) => {
+    // Verify the array length is exactly 1
+    chai.expect(updatedElements.length).to.equal(1);
+    const elem = updatedElements[0];
+
+    // Expect archived to be true, and archivedOn and archivedBy to not be null
+    chai.expect(elem.archived).to.equal(true);
+    chai.expect(elem.archivedBy).to.equal(adminUser.username);
+    chai.expect(elem.archivedOn).to.not.equal(null);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
 /**
  * @description Verifies that an element can be created with a source that is
  * in a referenced project.
@@ -249,6 +295,84 @@ function updateExternalTarget(done) {
     const referencedID = utils.createID(org.id, projIDs[1], 'undefined');
     // Verify the target is equal to the referencedID
     chai.expect(elem.target).to.equal(referencedID);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that the fields specified in the element model function
+ * getValidPopulateFields() can all be populated in the find() function using
+ * the option 'populate'.
+ */
+function optionPopulateFind(done) {
+  // Get the valid populate fields
+  const pop = Element.getValidPopulateFields();
+  // Create the options object
+  const options = { populate: pop };
+  // Get the element ID of a relationship element
+  const elemID = utils.parseID(elements[5]._id).pop();
+
+  // Find a relationship element so source and target can be populated
+  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options)
+  .then((foundElements) => {
+    // Verify the array length is exactly 1
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // For each field in pop
+    pop.forEach((field) => {
+      // If the field is defined in the returned element
+      if (elem.hasOwnProperty(field)) {
+        // Expect each populated field to be an object
+        chai.expect(typeof elem.field).to.equal('object');
+        // Expect each populated field to at least have an _id
+        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+      }
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that archived elements can be found in the find()
+ * function using the option 'archived'.
+ */
+function optionArchivedFind(done) {
+  // Create the options object
+  const options = { archived: true };
+  // Get the element ID of the archived element
+  const elemID = utils.parseID(elements[6]._id).pop();
+
+  // Attempt to find the element without providing options
+  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID)
+  .then((foundElements) => {
+    // Expect the array to be empty since the option archived: true was not provided
+    chai.expect(foundElements.length).to.equal(0);
+
+    // Attempt the find the element WITH providing the archived option
+    return ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options);
+  })
+  .then((foundElements) => {
+    // Expect the array to be of length 1
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // Verify all of the archived fields are properly set
+    chai.expect(elem.archived).to.equal(true);
+    chai.expect(elem.archivedOn).to.not.equal(null);
+    chai.expect(elem.archivedBy).to.equal(adminUser.username);
     done();
   })
   .catch((error) => {
