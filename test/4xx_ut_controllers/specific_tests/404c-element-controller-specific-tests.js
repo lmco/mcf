@@ -565,14 +565,25 @@ function optionLeanFind(done) {
   // Create the options object with lean: true
   const options = { lean: true };
 
-  // Find the element
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options)
+  // Find the element without the lean option
+  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID)
   .then((foundElements) => {
     // Expect there to be exactly 1 element found
     chai.expect(foundElements.length).to.equal(1);
     const elem = foundElements[0];
 
-    // Verify that the element is not a mongoose object ('Element')
+    // Verify that the element is a mongoose object ('Element')
+    chai.expect(elem instanceof Element).to.equal(true);
+
+    // Find the element WITH the lean option
+    return ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options);
+  })
+  .then((foundElements) => {
+    // Expect there to be exactly 1 element found
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // Verify that the element is NOT a mongoose object ('Element')
     chai.expect(elem instanceof Element).to.equal(false);
     done();
   })
@@ -838,14 +849,25 @@ function optionLeanUpdate(done) {
   // Create the options object with lean: true
   const options = { lean: true };
 
-  // Update the element
-  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj, options)
+  // Update the element without the lean option
+  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj)
   .then((updatedElements) => {
     // Expect there to be exactly 1 element updated
     chai.expect(updatedElements.length).to.equal(1);
     const elem = updatedElements[0];
 
-    // Verify that the element is not a mongoose object ('Element')
+    // Verify that the element is a mongoose object ('Element')
+    chai.expect(elem instanceof Element).to.equal(true);
+
+    // Update the element WITH the lean option
+    return ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj, options);
+  })
+  .then((updatedElements) => {
+    // Expect there to be exactly 1 element updated
+    chai.expect(updatedElements.length).to.equal(1);
+    const elem = updatedElements[0];
+
+    // Verify that the element is NOT a mongoose object ('Element')
     chai.expect(elem instanceof Element).to.equal(false);
     done();
   })
