@@ -499,6 +499,7 @@ function optionLimitFind(done) {
   // Create the options object with a limit of 2
   const options = { limit: 2 };
 
+  // TODO: Remove undefined after bug fix MBX-929
   // Find all elements on a given project
   ElementController.find(adminUser, org.id, projIDs[0], 'master', undefined, options)
   .then((foundElements) => {
