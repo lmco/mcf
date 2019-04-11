@@ -860,7 +860,7 @@ function update(requestingUser, organizationID, projects, options) {
     .then((_foundOrganization) => {
       // Check if the organization was found
       if (_foundOrganization === null) {
-        throw new M.CustomError(`The org [${_foundOrganization._id}] was not found.`, 404, 'warn');
+        throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
       }
 
       // Set function-wide foundOrg
