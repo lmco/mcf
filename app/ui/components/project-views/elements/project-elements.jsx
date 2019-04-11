@@ -42,7 +42,8 @@ class ProjectElements extends Component {
     this.state = {
       sidePanel: false,
       id: null,
-      refreshFunction: null
+      refreshFunction: null,
+      selected: null
     };
 
     this.openElementInfo = this.openElementInfo.bind(this);
@@ -72,6 +73,9 @@ class ProjectElements extends Component {
 
     if (this.state.sidePanel === 'addElement') {
       // do nothing
+    }
+    if (this.state.sidePanel === 'elementEdit') {
+      this.setState({ selected: id });
     }
     else {
       // Toggle the element side panel
@@ -126,8 +130,8 @@ class ProjectElements extends Component {
     if (this.state.sidePanel === 'elementEdit') {
       sidePanelView = <ElementEdit id={this.state.id}
                                    url={this.props.url}
-                                   openElementInfo={this.openElementInfo}
-                                   closeSidePanel={this.closeSidePanel}/>;
+                                   closeSidePanel={this.closeSidePanel}
+                                   selected={this.state.selected}/>;
     }
 
     else if (this.state.sidePanel === 'addElement') {
