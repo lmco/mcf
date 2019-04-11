@@ -32,7 +32,6 @@ const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
-const projects = [];
 const projIDs = [];
 let elements = [];
 
@@ -69,7 +68,6 @@ describe(M.getModuleName(module.filename), () => {
     })
     .then((retProj) => {
       // Add project to array of created projects
-      projects.push(retProj);
       projIDs.push(utils.parseID(retProj.id).pop());
 
       // Create an additional project with visibility of internal to be used
@@ -81,7 +79,6 @@ describe(M.getModuleName(module.filename), () => {
     })
     .then((retProj) => {
       // Add project to array of created projects
-      projects.push(retProj[0]);
       projIDs.push(utils.parseID(retProj[0].id).pop());
 
       // Update the project references array in the main project
