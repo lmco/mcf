@@ -63,7 +63,7 @@ class ElementEdit extends Component {
 
   getElement() {
     // Initialize variables
-    const elementId = this.props.id;
+    const elementId = this.state.id;
     const url = `${this.props.url}/branches/master/elements/${elementId}`;
     // Get project data
     ajaxRequest('GET', `${url}`)
@@ -103,9 +103,10 @@ class ElementEdit extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    // Typical usage (don't forget to compare props):
-    if (this.props.id !== prevProps.id) {
-      this.getElement();
+    // Check if new selected element
+    if (this.props.selected !== prevProps.selected) {
+      // Set parent as the selected element
+      this.setState({ parent: this.props.selected });
     }
   }
 
@@ -127,7 +128,7 @@ class ElementEdit extends Component {
   // Define the submit function
   onSubmit() {
     // Initialize variables
-    const elementId = this.props.id;
+    const elementId = this.state.id;
     const url = `${this.props.url}/branches/master/elements/${elementId}`;
     const data = {
       name: this.state.name,
@@ -164,14 +165,8 @@ class ElementEdit extends Component {
   render() {
     // // Initialize variables
     let customInvalid;
-    let parentInvalid;
     let targetInvalid;
     let sourceInvalid;
-
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.parent)) {
-      parentInvalid = true;
-    }
 
     // Verify id
     if (!RegExp(validators.id).test(this.state.target)) {
@@ -205,9 +200,9 @@ class ElementEdit extends Component {
               </UncontrolledTooltip>
               <i id='saveBtn' className='fas fa-save edit-btn' onClick={this.onSubmit}/>
               <UncontrolledTooltip placement='left' target='cancelBtn'>
-                Cancel
+                Exit
               </UncontrolledTooltip>
-              <i id='cancelBtn' className='fas fa-times exit-btn' onClick={() => { this.props.openElementInfo(this.props.id); }}/>
+              <i id='cancelBtn' className='fas fa-times exit-btn' onClick={() => { this.props.closeSidePanel(); }}/>
             </div>
           </div>
           {/* Create form to update element data */}
@@ -230,13 +225,9 @@ class ElementEdit extends Component {
               : (<FormGroup row>
                   <Label for='name' sm={2}>Parent</Label>
                   <Col sm={10}>
-                    <Input type='text'
-                           name='parent'
-                           id='parent'
-                           invalid={parentInvalid}
-                           placeholder='Parent'
-                           value={this.state.parent || ''}
-                           onChange={this.handleChange}/>
+                    <p id="parent">
+                      {this.state.parent || 'Select an element in the model tree.'}
+                    </p>
                   </Col>
                   {/* Verify fields are valid, or display feedback */}
                   <FormFeedback >
