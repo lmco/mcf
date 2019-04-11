@@ -441,6 +441,8 @@ function optionSubtreeFind(done) {
  * specific fields in find().
  */
 function optionFieldsFind(done) {
+  // TODO: In the future, add a corner-case test to test for the fields option being supplied
+  // TODO: but not value being supplied.
   // Get the ID of the element to find
   const elemID = utils.parseID(elements[0]._id);
   // Create the options object with the list of fields specifically find
