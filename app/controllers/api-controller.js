@@ -3488,7 +3488,7 @@ function postElement(req, res) {
     branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+      elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
     // If the fields options was specified
@@ -3505,7 +3505,7 @@ function postElement(req, res) {
     }
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
@@ -3583,7 +3583,7 @@ function putElement(req, res) {
     req.params.projectid, branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+      elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
     // If the fields options was specified
@@ -3600,7 +3600,7 @@ function putElement(req, res) {
     }
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the created/replaced element
     res.header('Content-Type', 'application/json');
@@ -3678,7 +3678,7 @@ function patchElement(req, res) {
     branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+      elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
     // If the fields options was specified
@@ -3695,7 +3695,7 @@ function patchElement(req, res) {
     }
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
