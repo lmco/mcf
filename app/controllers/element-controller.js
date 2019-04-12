@@ -1800,71 +1800,12 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Initialize valid options
-    let archived = false;
-    let populateString = 'contains ';
-    let limit = 0;
-    let skip = 0;
-    let lean = false;
+    let validOptions = {};
 
     // Ensure options are valid
     if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
-
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString += options.populate.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
+      validOptions = utils.validateOptions(options, ['populate', 'archived',
+        'limit', 'skip', 'lean'], Element);
 
       // Create array of valid search options
       const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
@@ -1909,22 +1850,24 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
       searchQuery.$text = { $search: query };
       // If the archived field is true, remove it from the query
-      if (archived) {
+      if (validOptions.archived) {
         delete searchQuery.archived;
       }
 
       // If the lean option is supplied
-      if (lean) {
+      if (validOptions.lean) {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: limit, skip: skip })
-        .sort({ score: { $meta: 'textScore' } }).populate(populateString).lean();
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .sort({ score: { $meta: 'textScore' } })
+        .populate(validOptions.populateString || 'contains').lean();
       }
       else {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: limit, skip: skip })
-        .sort({ score: { $meta: 'textScore' } }).populate(populateString);
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .sort({ score: { $meta: 'textScore' } })
+        .populate(validOptions.populateString || 'contains');
       }
     })
     .then((foundElements) => resolve(foundElements))
