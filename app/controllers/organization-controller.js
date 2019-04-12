@@ -116,11 +116,8 @@ function find(requestingUser, orgs, options) {
       options = orgs; // eslint-disable-line no-param-reassign
     }
 
-    // Initialize valid options
-    let validOptions = {};
-
-    // Ensure options are valid
-    validOptions = utils.validateOptions(options, ['populate', 'archived',
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'archived',
       'fields', 'limit', 'skip', 'lean'], Organization);
 
     // Define searchQuery
@@ -232,11 +229,8 @@ function create(requestingUser, orgs, options) {
     const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     let orgObjects = [];
 
-    // Initialize valid options
-    let validOptions = {};
-
-    // Ensure options are valid
-    validOptions = utils.validateOptions(options, ['populate', 'fields',
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Organization);
 
     // Define array to store org data
@@ -451,11 +445,8 @@ function update(requestingUser, orgs, options) {
     let existingUsers = [];
     let updatingPermissions = false;
 
-    // Initialize valid options
-    let validOptions = {};
-
-    // Ensure options are valid
-    validOptions = utils.validateOptions(options, ['populate', 'fields',
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Organization);
 
     // Check the type of the orgs parameter

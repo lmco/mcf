@@ -388,11 +388,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     let populatedElements = [];
     const projectRefs = [];
 
-    // Initialize valid options
-    let validOptions = {};
-
-    // Ensure options are valid
-    validOptions = utils.validateOptions(options, ['populate', 'fields',
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Element);
 
     // Define array to store element data
@@ -832,11 +829,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const arrIDs = [];
     const sourceTargetIDs = [];
 
-    // Initialize valid options
-    let validOptions = {};
-
-    // Ensure options are valid
-    validOptions = utils.validateOptions(options, ['populate', 'fields',
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Element);
 
     // Find the project
