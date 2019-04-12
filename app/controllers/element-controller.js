@@ -538,7 +538,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
     const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
-      'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace'];
+      'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace',
+      'archived'];
 
     // Check that each element has an id and set the parent if null
     try {
