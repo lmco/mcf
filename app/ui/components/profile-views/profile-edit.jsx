@@ -23,6 +23,7 @@ import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap'
 
 // MBEE Modules
 import validators from '../../../../build/json/validators.json';
+import Divider from '../general/sidebar/divider.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -38,7 +39,8 @@ class ProfileEdit extends Component {
       fname: this.props.user.fname,
       lname: this.props.user.lname,
       custom: JSON.stringify(this.props.user.custom || {}, null, 2),
-      password: ''
+      oldpassword: '',
+      newpassword: ''
     };
 
     // Bind component functions
@@ -147,19 +149,6 @@ class ProfileEdit extends Component {
                 Invalid: A user's last name may only contain letters.
               </FormFeedback>
             </FormGroup>
-            {/* Form section for user's first name */}
-            {(this.props.user.provider !== 'local')
-              ? ''
-              : (<FormGroup>
-                  <Label for="fname">Password</Label>
-                  <Input type="password"
-                         name="password"
-                         id="password"
-                         placeholder="Password"
-                         value={this.state.password || ''}
-                         onChange={this.handleChange}/>
-                 </FormGroup>)
-            }
             {/* Form section for custom data */}
             <FormGroup>
               <Label for="custom">Custom Data</Label>
@@ -175,6 +164,31 @@ class ProfileEdit extends Component {
                 Invalid: Custom data must be valid JSON
               </FormFeedback>
             </FormGroup>
+            {/* Form section for user's first name */}
+            {(this.props.user.provider !== 'local')
+              ? ''
+              : (<React.Fragment>
+                <Divider/>
+                  <FormGroup>
+                    <Label for="oldpassword">Old Password</Label>
+                    <Input type="password"
+                           name="oldpassword"
+                           id="oldpassword"
+                           placeholder="Old Password"
+                           value={this.state.password || ''}
+                           onChange={this.handleChange}/>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label for="newpassword">New Password</Label>
+                    <Input type="password"
+                           name="newpassword"
+                           id="newpassword"
+                           placeholder="New Password"
+                           value={this.state.password || ''}
+                           onChange={this.handleChange}/>
+                  </FormGroup>
+                </React.Fragment>)
+            }
             {/* Button to submit changes */}
             <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
             {' '}
