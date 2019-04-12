@@ -384,7 +384,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
   // For each option provided
   Object.keys(options).forEach((opt) => {
-    const val = options[opt];
+    let val = options[opt];
 
     // Special case, ignore these as the controller handles these
     if (model.modelName === 'Element'
@@ -457,6 +457,9 @@ module.exports.validateOptions = function(options, validOptions, model) {
           'Every value in the fields array must be a string.', 400, 'warn'
         );
       }
+
+      // If -_id in array remove it, that fields MUST be returned
+      val = val.filter(field => field !== '-_id');
 
       // Set the fieldsString option in the returnObject
       returnObject.fieldsString = val.join(' ');
