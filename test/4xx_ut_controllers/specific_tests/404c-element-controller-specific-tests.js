@@ -122,6 +122,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // it('should create and archived element', createArchivedElement);
   it('should archive an element', archiveElement);
   it('should create an element whose source is on a different project', createExternalSource);
   it('should create an element whose target is on a different project', createExternalTarget);
@@ -164,6 +165,39 @@ describe(M.getModuleName(module.filename), () => {
 });
 
 /* --------------------( Tests )-------------------- */
+/**
+ * @description Verifies that an element can be archived upon creation
+ */
+// TODO: Uncomment test upon completion of MBX-930
+// function createArchivedElement(done) {
+//   // Create the element object
+//   const elemObj = {
+//     id: 'archived-element',
+//     name: 'Archived Element',
+//     archived: true
+//   };
+//
+//   // Create the element
+//   ElementController.create(adminUser, org.id, projIDs[0], 'master', elemObj)
+//   .then((createdElements) => {
+//     // Verify that only one element was created
+//     chai.expect(createdElements.length).to.equal(1);
+//     const elem = createdElements[0];
+//
+//     // Expect archived to be true, and archivedOn and archivedBy to not be null
+//     chai.expect(elem.archived).to.equal(true);
+//     chai.expect(elem.archivedBy).to.equal(adminUser.username);
+//     chai.expect(elem.archivedOn).to.not.equal(null);
+//     done();
+//   })
+//   .catch((error) => {
+//     M.log.error(error);
+//     // Expect no error
+//     chai.expect(error.message).to.equal(null);
+//     done();
+//   });
+// }
+
 /**
  * @description Verifies that an element can be archived.
  */
