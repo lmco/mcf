@@ -2841,7 +2841,7 @@ function getElements(req, res) {
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -2962,7 +2962,7 @@ function postElements(req, res) {
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3047,7 +3047,7 @@ function putElements(req, res) {
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3131,7 +3131,7 @@ function patchElements(req, res) {
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3394,7 +3394,7 @@ function getElement(req, res) {
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3494,7 +3494,7 @@ function postElement(req, res) {
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3589,7 +3589,7 @@ function putElement(req, res) {
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3684,7 +3684,7 @@ function patchElement(req, res) {
     // If the fields options was specified
     if (options.fields) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
