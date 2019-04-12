@@ -357,6 +357,9 @@ module.exports.parseOptions = function(options, validOptions) {
  * @param {string[]} validOptions - An array of valid options for that function.
  * @param {Object} model - The model of the controller which called this
  * function.
+ *
+ * @return {Object} - An object with key/value pairs formatted for use by the
+ * controllers.
  */
 module.exports.validateOptions = function(options, validOptions, model) {
   // Define the object to be returned to the user. Initialize populateString
