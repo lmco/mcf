@@ -25,6 +25,7 @@ import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 import { Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 import Delete from '../../shared-views/delete.jsx';
 import CustomData from '../../general/custom-data/custom-data.jsx';
+
 /* eslint-enable no-unused-vars */
 
 // Define component
@@ -121,14 +122,24 @@ class Element extends Component {
                     Element Information
                   </h2>
                   <div className='side-icons'>
-                    <UncontrolledTooltip placement='left' target='deleteBtn'>
-                      Delete
-                    </UncontrolledTooltip>
-                    <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
-                    <UncontrolledTooltip placement='left' target='editBtn'>
-                      Edit
-                    </UncontrolledTooltip>
-                    <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                    {(this.props.permissions === 'admin')
+                      ? (<React.Fragment>
+                          <UncontrolledTooltip placement='left' target='deleteBtn'>
+                            Delete
+                          </UncontrolledTooltip>
+                          <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
+                         </React.Fragment>)
+                      : ''
+                    }
+                    {((this.props.permissions === 'write') || this.props.permissions === 'admin')
+                      ? (<React.Fragment>
+                          <UncontrolledTooltip placement='left' target='editBtn'>
+                            Edit
+                          </UncontrolledTooltip>
+                          <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                         </React.Fragment>)
+                      : ''
+                    }
                     <UncontrolledTooltip placement='left' target='exitBtn'>
                       Exit
                     </UncontrolledTooltip>
@@ -154,7 +165,7 @@ class Element extends Component {
                     <td>{element.type}</td>
                   </tr>
                   {(!element.target || !element.source)
-                    ? ''
+                    ? <tr/>
                     : (<React.Fragment>
                         <tr>
                           <th>Target:</th>

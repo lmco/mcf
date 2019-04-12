@@ -14,13 +14,12 @@
  * @description This creates the organization list.
  */
 
-
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
-import { Modal, ModalBody } from 'reactstrap';
+import { Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 
 // MBEE Modules
 import List from '../general/list/list.jsx';
@@ -29,6 +28,7 @@ import Delete from '../shared-views/delete.jsx';
 import Create from '../shared-views/create.jsx';
 import ProjList from './proj-list.jsx';
 
+/* eslint-enable no-unused-vars */
 
 class OrgList extends Component {
 
@@ -95,44 +95,51 @@ class OrgList extends Component {
 
     // Return the list of the orgs with project-views
     return (
-            <React.Fragment>
-                {/* Modal for creating an org */}
-                <Modal isOpen={this.state.modalProjCreate} toggle={this.handleCreateProjToggle}>
-                    <ModalBody>
-                        <Create project={true} org={this.props.org}
-                                toggle={this.handleCreateProjToggle}/>
-                    </ModalBody>
-                </Modal>
-                {/* Modal for deleting an org */}
-                <Modal isOpen={this.state.modalOrgDelete} toggle={this.handleDeleteOrgToggle}>
-                    <ModalBody>
-                        <Delete org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
-                    </ModalBody>
-                </Modal>
-                <div className='org-proj-list'>
-                    <div className='org-icon' onClick={this.handleShowProjsToggle}>
-                        <i className={icon}/>
-                    </div>
-                    <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`} divider={true}/>
-                    {((this.props.admin) || (this.props.write))
-                      ? (<div className='controls-container'>
-                          <i className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
-                            {(!this.props.admin)
-                              ? ''
-                              : (<i className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>)
-                            }
-                          </div>
-                      )
-                      : ''
-                    }
-                </div>
-                {(!this.state.showProjs)
-                  ? ''
-                  : (<List>
-                        {projects}
-                      </List>)
-                }
-            </React.Fragment>
+      <React.Fragment>
+        {/* Modal for creating an org */}
+        <Modal isOpen={this.state.modalProjCreate} toggle={this.handleCreateProjToggle}>
+          <ModalBody>
+            <Create project={true} org={this.props.org}
+                    toggle={this.handleCreateProjToggle}/>
+          </ModalBody>
+        </Modal>
+        {/* Modal for deleting an org */}
+        <Modal isOpen={this.state.modalOrgDelete} toggle={this.handleDeleteOrgToggle}>
+          <ModalBody>
+            <Delete org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
+          </ModalBody>
+        </Modal>
+        <div className='org-proj-list'>
+          <div className='org-icon' onClick={this.handleShowProjsToggle}>
+            <i className={icon}/>
+          </div>
+          <OrgListItem className='org-info' org={this.props.org} href={`/${orgId}`} divider={true}/>
+          {((this.props.admin) || (this.props.write))
+            ? (<div className='controls-container'>
+                <UncontrolledTooltip placement='top' target={`newproj-${orgId}`}>
+                  New Project
+                </UncontrolledTooltip>
+                <i id={`newproj-${orgId}`} className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
+                  {(!this.props.admin)
+                    ? ''
+                    : (<React.Fragment>
+                        <UncontrolledTooltip placement='top' target={`delete-${orgId}`}>
+                          Delete
+                        </UncontrolledTooltip>
+                        <i id={`delete-${orgId}`} className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteOrgToggle}/>
+                      </React.Fragment>)
+                  }
+                </div>)
+            : ''
+          }
+        </div>
+        {(!this.state.showProjs)
+          ? ''
+          : (<List>
+              {projects}
+             </List>)
+        }
+      </React.Fragment>
     );
   }
 

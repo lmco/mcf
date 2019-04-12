@@ -395,8 +395,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
  * @param {Object} [elements.sourceNamespace] - The optional namespace of the
- * source element, if the element is not part of the project. Must include a
- * the key/value pairs org, project and branch. The organization must be the
+ * source element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
@@ -597,9 +597,11 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.sourceNamespace.org === orgID, `Element #${index}'s `
             + 'source cannot reference elements outside its org.');
 
+          // Add project id to projectRefs array. Later we verify these projects
+          // are in the foundProject's projectReferences array
           projectRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
 
-          // Reset the elem source with new project
+          // Change element source to referenced project's id
           const tmpSource = utils.parseID(elem.source).pop();
           elem.source = utils.createID(elem.sourceNamespace.org,
             elem.sourceNamespace.project, tmpSource);
@@ -617,13 +619,15 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
             + ` #${index}'s targetNamespace is missing a branch.`);
 
-          // Ensure the sourceNamespace org is the same org
+          // Ensure the targetNamespace org is the same org
           assert.ok(elem.targetNamespace.org === orgID, `Element #${index}'s `
             + 'target cannot reference elements outside its org.');
 
+          // Add project id to projectRefs array. Later we verify these projects
+          // are in the foundProject's projectReferences array
           projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
 
-          // Reset the elem target with new project
+          // Change element target to referenced project's id
           const tmpTarget = utils.parseID(elem.target).pop();
           elem.target = utils.createID(elem.targetNamespace.org,
             elem.targetNamespace.project, tmpTarget);
@@ -871,8 +875,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * update element parents in bulk.
  * @param {string} [elements.source] - The ID of the source element.
  * @param {Object} [elements.sourceNamespace] - The optional namespace of the
- * source element, if the element is not part of the project. Must include a
- * the key/value pairs org, project and branch. The organization must be the
+ * source element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element.
  * @param {Object} [elements.targetNamespace] - The optional namespace of the
@@ -1131,7 +1135,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
               + ` #${index}'s targetNamespace is missing a branch.`);
 
-            // Ensure the sourceNamespace org is the same org
+            // Ensure the targetNamespace org is the same org
             assert.ok(elem.targetNamespace.org === orgID, `Element #${index}'s `
               + 'target cannot reference elements outside its org.');
             // Ensure the project is in the projectReferences array
@@ -1354,8 +1358,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
  * @param {Object} [elements.sourceNamespace] - The optional namespace of the
- * source element, if the element is not part of the project. Must include a
- * the key/value pairs org, project and branch. The organization must be the
+ * source element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.

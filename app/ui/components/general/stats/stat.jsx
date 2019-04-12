@@ -15,11 +15,13 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
 import { UncontrolledTooltip } from 'reactstrap';
+
+/* eslint-enable no-unused-vars */
 
 // Define component
 class Stat extends Component {

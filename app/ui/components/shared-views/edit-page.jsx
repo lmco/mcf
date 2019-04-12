@@ -21,6 +21,7 @@
 // React Modules
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
+
 /* eslint-enable no-unused-vars */
 
 class EditPage extends Component {
@@ -160,6 +161,8 @@ class EditPage extends Component {
             </FormGroup>
             {/* Button to submit changes */}
             <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+            {' '}
+            <Button outline onClick={this.props.toggle}> Cancel </Button>
           </Form>
         </div>
       </div>

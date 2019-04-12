@@ -16,7 +16,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -24,6 +24,7 @@ import React, { Component } from 'react';
 // MBEE Modules
 import StatsList from '../../general/stats/stats-list.jsx';
 import Stat from '../../general/stats/stat.jsx';
+/* eslint-enable no-unused-vars */
 
 // Define component
 class OrgListItem extends Component {

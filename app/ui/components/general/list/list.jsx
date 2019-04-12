@@ -16,10 +16,12 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React from 'react';
+
+/* eslint-enable no-unused-vars */
 
 // Define component
 function List(props) {

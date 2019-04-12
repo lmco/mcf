@@ -16,7 +16,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React from 'react';
@@ -26,6 +26,8 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 import ListItem from '../general/list/list-item.jsx';
 import List from '../general/list/list.jsx';
 import Create from '../shared-views/create.jsx';
+
+/* eslint-enable no-unused-vars */
 
 // Define function
 function OrganizationProjects(props) {

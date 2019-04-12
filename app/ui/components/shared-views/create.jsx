@@ -15,7 +15,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -24,6 +24,8 @@ import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap'
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
+
+/* eslint-enable no-unused-vars */
 
 class Create extends Component {
 

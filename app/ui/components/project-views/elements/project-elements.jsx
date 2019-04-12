@@ -17,7 +17,7 @@
  */
 
 /* Modified ESLint rules for React. */
-/* eslint no-unused-vars: "warn" */
+/* eslint-disable no-unused-vars */
 
 // React Modules
 import React, { Component } from 'react';
@@ -30,6 +30,8 @@ import ElementEdit from './element-edit.jsx';
 import ElementNew from './element-new.jsx';
 import SidePanel from '../../general/side-panel.jsx';
 
+/* eslint-enable no-unused-vars */
+
 // Define component
 class ProjectElements extends Component {
 
@@ -40,7 +42,8 @@ class ProjectElements extends Component {
     this.state = {
       sidePanel: false,
       id: null,
-      refreshFunction: null
+      refreshFunction: null,
+      selected: null
     };
 
     this.openElementInfo = this.openElementInfo.bind(this);
@@ -70,6 +73,9 @@ class ProjectElements extends Component {
 
     if (this.state.sidePanel === 'addElement') {
       // do nothing
+    }
+    if (this.state.sidePanel === 'elementEdit') {
+      this.setState({ selected: id });
     }
     else {
       // Toggle the element side panel
@@ -107,17 +113,25 @@ class ProjectElements extends Component {
   render() {
     let isButtonDisplayed = false;
     let btnDisClassName = 'workspace-title workspace-title-padding';
+
+    // Check admin/write permissions
+    if (this.props.permissions === 'admin' || this.props.permissions === 'write') {
+      isButtonDisplayed = true;
+      btnDisClassName = 'workspace-title';
+    }
+
     let sidePanelView = <Element id={this.state.id}
                                  project={this.props.project}
                                  url={this.props.url}
+                                 permissions={this.props.permissions}
                                  editElementInfo={this.editElementInfo}
                                  closeSidePanel={this.closeSidePanel}/>;
 
     if (this.state.sidePanel === 'elementEdit') {
       sidePanelView = <ElementEdit id={this.state.id}
                                    url={this.props.url}
-                                   openElementInfo={this.openElementInfo}
-                                   closeSidePanel={this.closeSidePanel}/>;
+                                   closeSidePanel={this.closeSidePanel}
+                                   selected={this.state.selected}/>;
     }
 
     else if (this.state.sidePanel === 'addElement') {
@@ -128,11 +142,6 @@ class ProjectElements extends Component {
                                    url={this.props.url}/>);
     }
 
-    // Check admin/write permissions
-    if (this.props.permissions === 'admin' || this.props.permissions === 'write') {
-      isButtonDisplayed = true;
-      btnDisClassName = 'workspace-title';
-    }
     // Return element list
     return (
       <div id='workspace'>
