@@ -346,3 +346,152 @@ module.exports.parseOptions = function(options, validOptions) {
   });
   return parsedOptions;
 };
+
+/**
+ * @description Validates a list of options and returns the desired response in
+ * an object.
+ *
+ * @param {Object} options - The options object passed into the controller.
+ * Should contain key/value pairs where the key is the option and the value is
+ * the user input
+ * @param {string[]} validOptions - An array of valid options for that function.
+ * @param {Object} model - The model of the controller which called this
+ * function.
+ */
+module.exports.validateOptions = function(options, validOptions, model) {
+  // Define the object tobe returned to the user
+  const returnObject = {};
+  // Define valid searchOptions for the element model
+  const searchOptions = ['parent', 'source', 'target', 'type', 'name',
+    'createdBy', 'lastModifiedBy', 'archivedBy'];
+
+  // Define the populateString for elements, since we populate contains by default
+  if (model.modelName === 'Element') {
+    returnObject.populateString = 'contains ';
+  }
+  // Not a valid mongoose model, throw an error
+  else if (!model.hasOwnProperty('modelName')) {
+    throw new M.CustomError('A valid model was not provided.', 500, 'error');
+  }
+
+  // For each option provided
+  Object.keys(options).forEach((opt) => {
+    const val = options[opt];
+
+    // Special case, ignore these as the controller handles these
+    if (model.modelName === 'Element'
+      && (searchOptions.includes(opt) || opt.startsWith('custom.'))) {
+      // Ignore iteration of loop
+      return;
+    }
+    // If the option is not valid for the calling function
+    else if (!validOptions.includes(opt)) {
+      throw new M.CustomError(`Invalid option [${opt}].`, 400, 'warn');
+    }
+
+    // Handle the populate option
+    if (opt === 'populate') {
+      // Ensure the value is an array
+      if (!Array.isArray(val)) {
+        throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+      }
+      // Ensure every item in val is a string
+      if (!val.every(o => typeof o === 'string')) {
+        throw new M.CustomError(
+          'Every value in the populate array must be a string.', 400, 'warn'
+        );
+      }
+
+      // Ensure each field is able to be populated
+      const validPopulateFields = model.getValidPopulateFields();
+      val.forEach((p) => {
+        // If the field cannot be populated, throw an error
+        if (!validPopulateFields.includes(p)) {
+          throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+        }
+      });
+
+      // Set the populateString option in the returnObject
+      returnObject.populateString += val.join(' ');
+    }
+
+    // Handle the archived option
+    if (opt === 'archived') {
+      // Ensure value is a boolean
+      if (typeof val !== 'boolean') {
+        throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
+      }
+
+      // Set the field archived in the returnObject
+      returnObject.archived = val;
+    }
+
+    // Handle the subtree option
+    if (opt === 'subtree') {
+      // Ensure value is a boolean
+      if (typeof options.subtree !== 'boolean') {
+        throw new M.CustomError('The option \'subtree\' is not a boolean.', 400, 'warn');
+      }
+
+      // Set the subtree option in the returnObject
+      returnObject.subtree = val;
+    }
+
+    // Handle the fields option
+    if (opt === 'fields') {
+      // Ensure the value is an array
+      if (!Array.isArray(val)) {
+        throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+      }
+      // Ensure every item in the array is a string
+      if (!val.every(o => typeof o === 'string')) {
+        throw new M.CustomError(
+          'Every value in the fields array must be a string.', 400, 'warn'
+        );
+      }
+
+      // Set the fieldsString option in the returnObject
+      returnObject.fieldsString = val.join(' ');
+    }
+
+    // Handle the limit option
+    if (opt === 'limit') {
+      // Ensure the value is a number
+      if (typeof options.limit !== 'number') {
+        throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+      }
+
+      // Set the limit option in the returnObject
+      returnObject.limit = val;
+    }
+
+    // Handle the option skip
+    if (opt === 'skip') {
+      // Ensure the value is a number
+      if (typeof options.skip !== 'number') {
+        throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+      }
+
+      // Ensure the value is not negative
+      if (options.skip < 0) {
+        throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+      }
+
+      // Set the skip option in the returnObject
+      returnObject.skip = val;
+    }
+
+    // Handle the lean option
+    if (opt === 'lean') {
+      // Ensure the value is a boolean
+      if (typeof options.lean !== 'boolean') {
+        throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+      }
+
+      // Set the lean option in the returnObject
+      returnObject.lean = val;
+    }
+  });
+
+  return returnObject;
+};
