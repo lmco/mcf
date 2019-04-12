@@ -278,7 +278,7 @@ function create(requestingUser, organizationID, projects, options) {
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
     const validProjKeys = ['id', 'name', 'custom', 'visibility', 'permissions',
-      'projectReferences'];
+      'projectReferences', 'archived'];
 
     // Check that each project has an id, and add to arrIDs
     try {

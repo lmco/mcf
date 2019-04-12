@@ -252,7 +252,7 @@ function create(requestingUser, orgs, options) {
 
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
-    const validOrgKeys = ['id', 'name', 'custom', 'permissions'];
+    const validOrgKeys = ['id', 'name', 'custom', 'permissions', 'archived'];
 
     // Check that each org has an id, and add to arrIDs
     try {
