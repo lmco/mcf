@@ -152,12 +152,12 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     // Initialize validOptions
     let validOptions = {};
 
+    // Validate and set the options
+    validOptions = utils.validateOptions(options, ['archived', 'populate',
+      'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
+
     // Ensure options are valid
     if (options) {
-      // Validate and set the options
-      validOptions = utils.validateOptions(options, ['archived', 'populate',
-        'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
-
       // Create array of valid search options
       const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
         'createdBy', 'lastModifiedBy', 'archivedBy'];
@@ -392,11 +392,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     let validOptions = {};
 
     // Ensure options are valid
-    if (options) {
-      // Validate options ard return properly formatted options
-      validOptions = utils.validateOptions(options, ['populate', 'fields',
-        'lean'], Element);
-    }
+    validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Element);
 
     // Define array to store element data
     let elementsToCreate = [];
@@ -839,10 +836,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     let validOptions = {};
 
     // Ensure options are valid
-    if (options) {
-      validOptions = utils.validateOptions(options, ['populate', 'fields',
-        'lean'], Element);
-    }
+    validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Element);
 
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
@@ -1802,11 +1797,12 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     // Initialize valid options
     let validOptions = {};
 
+    // Validate and set the options
+    validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'limit', 'skip', 'lean'], Element);
+
     // Ensure options are valid
     if (options) {
-      validOptions = utils.validateOptions(options, ['populate', 'archived',
-        'limit', 'skip', 'lean'], Element);
-
       // Create array of valid search options
       const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
         'createdBy', 'lastModifiedBy', 'archivedBy'];

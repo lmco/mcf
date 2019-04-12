@@ -359,8 +359,8 @@ module.exports.parseOptions = function(options, validOptions) {
  * function.
  */
 module.exports.validateOptions = function(options, validOptions, model) {
-  // Define the object tobe returned to the user
-  const returnObject = {};
+  // Define the object to be returned to the user. Initialize populateString
+  const returnObject = { populateString: '' };
   // Define valid searchOptions for the element model
   const searchOptions = ['parent', 'source', 'target', 'type', 'name',
     'createdBy', 'lastModifiedBy', 'archivedBy'];
@@ -372,6 +372,11 @@ module.exports.validateOptions = function(options, validOptions, model) {
   // Not a valid mongoose model, throw an error
   else if (!model.hasOwnProperty('modelName')) {
     throw new M.CustomError('A valid model was not provided.', 500, 'error');
+  }
+
+  // Check if no options provided
+  if (!options) {
+    return returnObject;
   }
 
   // For each option provided
