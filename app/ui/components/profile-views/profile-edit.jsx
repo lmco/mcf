@@ -37,7 +37,8 @@ class ProfileEdit extends Component {
     this.state = {
       fname: this.props.user.fname,
       lname: this.props.user.lname,
-      custom: JSON.stringify(this.props.user.custom || {}, null, 2)
+      custom: JSON.stringify(this.props.user.custom || {}, null, 2),
+      password: ''
     };
 
     // Bind component functions
@@ -146,6 +147,19 @@ class ProfileEdit extends Component {
                 Invalid: A user's last name may only contain letters.
               </FormFeedback>
             </FormGroup>
+            {/* Form section for user's first name */}
+            {(this.props.user.provider !== 'local')
+              ? ''
+              : (<FormGroup>
+                  <Label for="fname">Password</Label>
+                  <Input type="password"
+                         name="password"
+                         id="password"
+                         placeholder="Password"
+                         value={this.state.password || ''}
+                         onChange={this.handleChange}/>
+                 </FormGroup>)
+            }
             {/* Form section for custom data */}
             <FormGroup>
               <Label for="custom">Custom Data</Label>
