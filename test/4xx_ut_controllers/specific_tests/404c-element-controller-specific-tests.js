@@ -133,8 +133,9 @@ describe(M.getModuleName(module.filename), () => {
     + 'is provided', optionSubtreeFind);
   it('should return an element with only the specific fields specified from'
     + ' find()', optionFieldsFind);
-  it('should return a limited number of elements', optionLimitFind);
-  it('should return a second batch of elements with the limit and skip option', optionSkipFind);
+  it('should return a limited number of elements from find()', optionLimitFind);
+  it('should return a second batch of elements with the limit and skip option'
+    + ' from find()', optionSkipFind);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from find()', optionLeanFind);
   it('should populate allowed fields when creating an element', optionPopulateCreate);
@@ -152,6 +153,14 @@ describe(M.getModuleName(module.filename), () => {
     + ' createOrReplace()', optionFieldsReplace);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from createOrReplace()', optionLeanReplace);
+  it('should populate allowed fields when searching an element', optionPopulateSearch);
+  it('should search an archived element when the option archived is provided',
+    optionArchivedSearch);
+  it('should return a limited number of elements from search()', optionLimitSearch);
+  it('should return a second batch of elements with the limit and skip option '
+    + 'from search()', optionSkipSearch);
+  it('should return a raw JSON version of an element instead of a mongoose '
+    + 'object from search()', optionLeanSearch);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -706,21 +715,36 @@ function optionFieldsCreate(done) {
  */
 function optionLeanCreate(done) {
   // Create the element object
-  const elemObj = {
+  const leanElemObj = {
     id: 'lean-element',
     name: 'Lean Element'
+  };
+  const notLeanElemObj = {
+    id: 'not-lean-element',
+    name: 'Not Lean Element'
   };
   // Create the options object with lean: true
   const options = { lean: true };
 
-  // Create the element
-  ElementController.create(adminUser, org.id, projIDs[0], 'master', elemObj, options)
+  // Create the element without the lean option
+  ElementController.create(adminUser, org.id, projIDs[0], 'master', notLeanElemObj)
   .then((createdElements) => {
     // Expect there to be exactly 1 element created
     chai.expect(createdElements.length).to.equal(1);
     const elem = createdElements[0];
 
-    // Verify that the element is not a mongoose object ('Element')
+    // Verify that the element is a mongoose object ('Element')
+    chai.expect(elem instanceof Element).to.equal(true);
+
+    // Create the element WITH the lean option
+    return ElementController.create(adminUser, org.id, projIDs[0], 'master', leanElemObj, options);
+  })
+  .then((createdElements) => {
+    // Expect there to be exactly 1 element created
+    chai.expect(createdElements.length).to.equal(1);
+    const elem = createdElements[0];
+
+    // Verify that the element is NOT a mongoose object ('Element')
     chai.expect(elem instanceof Element).to.equal(false);
     done();
   })
@@ -842,15 +866,19 @@ function optionFieldsUpdate(done) {
  */
 function optionLeanUpdate(done) {
   // Create the update object
-  const updateObj = {
+  const leanUpdateObj = {
     id: 'lean-element',
     name: 'Lean Element Updated'
+  };
+  const notLeanUpdateObj = {
+    id: 'not-lean-element',
+    name: 'Not Lean Element Updated'
   };
   // Create the options object with lean: true
   const options = { lean: true };
 
   // Update the element without the lean option
-  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj)
+  ElementController.update(adminUser, org.id, projIDs[0], 'master', notLeanUpdateObj)
   .then((updatedElements) => {
     // Expect there to be exactly 1 element updated
     chai.expect(updatedElements.length).to.equal(1);
@@ -860,7 +888,8 @@ function optionLeanUpdate(done) {
     chai.expect(elem instanceof Element).to.equal(true);
 
     // Update the element WITH the lean option
-    return ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj, options);
+    return ElementController.update(adminUser, org.id, projIDs[0], 'master',
+      leanUpdateObj, options);
   })
   .then((updatedElements) => {
     // Expect there to be exactly 1 element updated
@@ -991,21 +1020,222 @@ function optionFieldsReplace(done) {
  */
 function optionLeanReplace(done) {
   // Create the element object
-  const elemObj = {
+  const leanElemObj = {
     id: 'lean-element',
     name: 'Lean Element'
+  };
+  const notLeanElemObj = {
+    id: 'not-lean-element',
+    name: 'Not Lean Element'
   };
   // Create the options object with lean: true
   const options = { lean: true };
 
-  // Replace the element
-  ElementController.createOrReplace(adminUser, org.id, projIDs[0], 'master', elemObj, options)
+  // Replace the element without the lean option
+  ElementController.createOrReplace(adminUser, org.id, projIDs[0], 'master', notLeanElemObj)
   .then((replacedElements) => {
     // Expect there to be exactly 1 element replaced
     chai.expect(replacedElements.length).to.equal(1);
     const elem = replacedElements[0];
 
-    // Verify that the element is not a mongoose object ('Element')
+    // Verify that the element is a mongoose object ('Element')
+    chai.expect(elem instanceof Element).to.equal(true);
+
+    // Replace the element WITH the lean option
+    return ElementController.createOrReplace(adminUser, org.id, projIDs[0],
+      'master', leanElemObj, options);
+  })
+  .then((replacedElements) => {
+    // Expect there to be exactly 1 element replaced
+    chai.expect(replacedElements.length).to.equal(1);
+    const elem = replacedElements[0];
+
+    // Verify that the element is NOT a mongoose object ('Element')
+    chai.expect(elem instanceof Element).to.equal(false);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that the fields specified in the element model function
+ * getValidPopulateFields() can all be populated in the search() function using
+ * the option 'populate'.
+ */
+function optionPopulateSearch(done) {
+  // Get the valid populate fields
+  const pop = Element.getValidPopulateFields();
+  // Create the options object
+  const options = { populate: pop };
+  // Create the text string to search for
+  const query = '"Element #1"';
+
+  // Search for elements
+  ElementController.search(adminUser, org.id, projIDs[0], 'master', query, options)
+  .then((foundElements) => {
+    // Verify the array length is exactly 1
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // For each field in pop
+    pop.forEach((field) => {
+      // If the field is defined in the returned element
+      if (elem.hasOwnProperty(field)) {
+        // Expect each populated field to be an object
+        chai.expect(typeof elem.field).to.equal('object');
+        // Expect each populated field to at least have an _id
+        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+      }
+    });
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that archived elements can be found in the search()
+ * function using the option 'archived'.
+ */
+function optionArchivedSearch(done) {
+  // Create the options object
+  const options = { archived: true };
+  // Create the text string to search for
+  const query = `"${elements[6].name}"`;
+
+  // Search for the element, expecting no results back
+  ElementController.search(adminUser, org.id, projIDs[0], 'master', query)
+  .then((foundElements) => {
+    // Expect the array to be empty since the option archived: true was not provided
+    chai.expect(foundElements.length).to.equal(0);
+
+    // Attempt the find the element WITH providing the archived option
+    return ElementController.search(adminUser, org.id, projIDs[0], 'master', query, options);
+  })
+  .then((foundElements) => {
+    // Expect the array to be of length 1
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // Verify all of the archived fields are properly set
+    chai.expect(elem.archived).to.equal(true);
+    chai.expect(elem.archivedOn).to.not.equal(null);
+    chai.expect(elem.archivedBy).to.equal(adminUser.username);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies a limited number of elements are returned when the
+ * option 'limit' is supplied to the search() function.
+ */
+function optionLimitSearch(done) {
+  // Create the options object with a limit of 2
+  const options = { limit: 2 };
+  // Create the text string to search for, should find more than 2 elements
+  const query = 'model';
+
+  // Search for elements
+  ElementController.search(adminUser, org.id, projIDs[0], 'master', query, options)
+  .then((foundElements) => {
+    // Verify that no more than 2 elements were found
+    chai.expect(foundElements).to.have.lengthOf.at.most(2);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that a second batch of elements are returned when using
+ * the 'skip' and 'limit' option together in the search() function
+ */
+function optionSkipSearch(done) {
+  // Create an array to store first batch of element ids
+  let firstBatchIDs = [];
+  // Create the first options object with just a limit
+  const firstOptions = { limit: 2 };
+  // Create the second options object with a limit and skip
+  const secondOptions = { limit: 2, skip: 2 };
+  // Create the query
+  const query = 'model';
+
+  // Search for elements
+  ElementController.search(adminUser, org.id, projIDs[0], 'master', query, firstOptions)
+  .then((foundElements) => {
+    // Verify that no more than 2 elements were found
+    chai.expect(foundElements).to.have.lengthOf.at.most(2);
+    // Add element ids to the firstBatchIDs array
+    firstBatchIDs = foundElements.map(e => e._id);
+
+    // Search for next batch of elements
+    return ElementController.search(adminUser, org.id, projIDs[0], 'master',
+      query, secondOptions);
+  })
+  .then((foundElements) => {
+    // Verify that no more than 2 elements were found
+    chai.expect(foundElements).to.have.lengthOf.at.most(2);
+    // Verify the second batch of elements are not the same as the first
+    const secondBatchIDs = foundElements.map(e => e._id);
+    chai.expect(secondBatchIDs).to.not.have.members(firstBatchIDs);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies that providing the option 'lean' returns raw JSON of an
+ * element rather than a mongoose object in the search() function.
+ */
+function optionLeanSearch(done) {
+  // Create the query to search with
+  const query = `"${elements[0].name}"`;
+  // Create the options object with lean: true
+  const options = { lean: true };
+
+  // Search for elements
+  ElementController.search(adminUser, org.id, projIDs[0], 'master', query)
+  .then((foundElements) => {
+    // Expect there to be exactly 1 element found
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // Verify that the element is a mongoose object ('Element')
+    chai.expect(elem instanceof Element).to.equal(true);
+
+    // Search for elements WITH the lean option
+    return ElementController.search(adminUser, org.id, projIDs[0], 'master', query, options);
+  })
+  .then((foundElements) => {
+    // Expect there to be exactly 1 element found
+    chai.expect(foundElements.length).to.equal(1);
+    const elem = foundElements[0];
+
+    // Verify that the element is NOT a mongoose object ('Element')
     chai.expect(elem instanceof Element).to.equal(false);
     done();
   })
