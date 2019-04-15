@@ -23,7 +23,6 @@ import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap'
 
 // MBEE Modules
 import validators from '../../../../build/json/validators.json';
-import Divider from '../general/sidebar/divider.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -38,9 +37,7 @@ class ProfileEdit extends Component {
     this.state = {
       fname: this.props.user.fname,
       lname: this.props.user.lname,
-      custom: JSON.stringify(this.props.user.custom || {}, null, 2),
-      oldpassword: '',
-      newpassword: ''
+      custom: JSON.stringify(this.props.user.custom || {}, null, 2)
     };
 
     // Bind component functions
@@ -167,27 +164,9 @@ class ProfileEdit extends Component {
             {/* Form section for user's first name */}
             {(this.props.user.provider !== 'local')
               ? ''
-              : (<React.Fragment>
-                <Divider/>
-                  <FormGroup>
-                    <Label for="oldpassword">Old Password</Label>
-                    <Input type="password"
-                           name="oldpassword"
-                           id="oldpassword"
-                           placeholder="Old Password"
-                           value={this.state.password || ''}
-                           onChange={this.handleChange}/>
-                  </FormGroup>
-                  <FormGroup>
-                    <Label for="newpassword">New Password</Label>
-                    <Input type="password"
-                           name="newpassword"
-                           id="newpassword"
-                           placeholder="New Password"
-                           value={this.state.password || ''}
-                           onChange={this.handleChange}/>
-                  </FormGroup>
-                </React.Fragment>)
+              : (<Button onClick={this.props.togglePasswordModal}>
+                  Edit Password
+                 </Button>)
             }
             {/* Button to submit changes */}
             <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
