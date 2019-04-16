@@ -116,88 +116,9 @@ function find(requestingUser, orgs, options) {
       options = orgs; // eslint-disable-line no-param-reassign
     }
 
-    // Initialize valid options
-    let archived = false;
-    let populateString = '';
-    let fieldsString = '';
-    let limit = 0;
-    let skip = 0;
-    let lean = false;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
-
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Organization.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'fields', 'limit', 'skip', 'lean'], Organization);
 
     // Define searchQuery
     const searchQuery = { archived: false };
@@ -206,7 +127,7 @@ function find(requestingUser, orgs, options) {
       searchQuery[`permissions.${reqUser._id}`] = 'read';
     }
     // If the archived field is true, remove it from the query
-    if (archived) {
+    if (validOptions.archived) {
       delete searchQuery.archived;
     }
 
@@ -225,16 +146,18 @@ function find(requestingUser, orgs, options) {
     }
 
     // If the lean option is supplied
-    if (lean) {
+    if (validOptions.lean) {
       // Find the orgs
-      Organization.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-      .populate(populateString).lean()
+      Organization.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString).lean()
       .then((foundOrgs) => resolve(foundOrgs))
       .catch((error) => reject(M.CustomError.parseCustomError(error)));
     }
     else {
-      Organization.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-      .populate(populateString)
+      Organization.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString)
       .then((foundOrgs) => resolve(foundOrgs))
       .catch((error) => reject(M.CustomError.parseCustomError(error)));
     }
@@ -306,57 +229,9 @@ function create(requestingUser, orgs, options) {
     const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     let orgObjects = [];
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-    let lean = false;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Organization.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Organization);
 
     // Define array to store org data
     let orgsToCreate = [];
@@ -477,13 +352,13 @@ function create(requestingUser, orgs, options) {
       EventEmitter.emit('orgs-created', orgObjects);
 
       // If the lean option is supplied
-      if (lean) {
-        return Organization.find({ _id: { $in: arrIDs } }, fieldsString)
-        .populate(populateString).lean();
+      if (validOptions.lean) {
+        return Organization.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
       }
       else {
-        return Organization.find({ _id: { $in: arrIDs } }, fieldsString)
-        .populate(populateString);
+        return Organization.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
+        .populate(validOptions.populateString);
       }
     })
     .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
@@ -570,57 +445,9 @@ function update(requestingUser, orgs, options) {
     let existingUsers = [];
     let updatingPermissions = false;
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-    let lean = false;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a array of strings
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Organization.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Organization);
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
@@ -847,11 +674,13 @@ function update(requestingUser, orgs, options) {
     })
     .then(() => {
       // If the lean option is supplied
-      if (lean) {
-        return Organization.find(searchQuery, fieldsString).populate(populateString).lean();
+      if (validOptions.lean) {
+        return Organization.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
       }
       else {
-        return Organization.find(searchQuery, fieldsString).populate(populateString);
+        return Organization.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString);
       }
     })
     .then((foundUpdatedOrgs) => {
