@@ -853,10 +853,10 @@ function update(requestingUser, organizationID, projects, options) {
                 updateQuery[`permissions.${user}`] = ['read'];
                 promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
               }
-
-              // Copy permissions from proj to update object
-              updateProj.permissions = proj.permissions;
             });
+
+            // Copy permissions from proj to update object
+            updateProj.permissions = proj.permissions;
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {

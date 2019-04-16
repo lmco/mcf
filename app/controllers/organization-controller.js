@@ -635,10 +635,10 @@ function update(requestingUser, orgs, options) {
                       `${permValue} is not a valid permission`, 400, 'warn'
                     );
                 }
-
-                // Copy permissions from org to update object
-                updateOrg.permissions = org.permissions;
               });
+
+              // Copy permissions from org to update object
+              updateOrg.permissions = org.permissions;
             }
           }
           // Set archivedBy if archived field is being changed
