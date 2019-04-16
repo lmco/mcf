@@ -18,7 +18,7 @@ approach, and should only be done if necessary.**
 ## Migration Failures
 
 In the rare chance a migration does fail, content from the database is at
-at risk of being lost. To counter this, prior to any content being deleted or
+risk of being lost. To counter this, prior to any content being deleted or
 altered, all data is stored in JSON files in the /data directory. The files are
 named based on the collection altered, for example: *projects.json*. Upon
 successful migration of that specific collection, the file is removed from the

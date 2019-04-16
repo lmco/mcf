@@ -1,6 +1,6 @@
 ## Tutorial: API Authentication and Pulling Data
 
-Let's being by demonstrating a simple API-based integration. One convenient 
+Let's begin by demonstrating a simple API-based integration. One convenient 
 thing about interacting with MBEE via the RESTful API is that the integration
 can be written in any language. In this tutorial, we'll use Python.
 
@@ -42,7 +42,7 @@ and passing our user credentials as a basic authentication header.
 ```python
 # Login to the server
 url = '{}/api/login'.format(server)       # the url we want to request
-auth_header = ('admin', 'Admin12345!')      # the basic auth header
+auth_header = ('admin', 'Admin12345!')    # the basic auth header
 r = requests.post(url, auth=auth_header)  # make a GET request to url
 res = r.json()                            # parse the JSON response
 print(r.status_code)                      # print the HTTP response code
