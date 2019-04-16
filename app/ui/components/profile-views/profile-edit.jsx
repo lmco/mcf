@@ -82,6 +82,14 @@ class ProfileEdit extends Component {
     let lnameInvalid;
     let customInvalid;
     let disableSubmit;
+    let titleClass = 'workspace-title workspace-title-padding';
+    let localUser = false;
+
+    // Check admin/write permissions
+    if (this.props.user.provider === 'local') {
+      localUser = true;
+      titleClass = 'workspace-title';
+    }
 
     // Verify if user's first name is valid
     if (!RegExp(validators.user.fname).test(this.state.fname)) {
@@ -110,8 +118,19 @@ class ProfileEdit extends Component {
     // Render user edit page
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header'>
-          <h2 className='workspace-title workspace-title-padding'>User Edit</h2>
+        <div id='workspace-header' className='profile-edit-title'>
+          <h2 className={titleClass}>User Edit</h2>
+          {(!localUser)
+            ? ''
+            : (<div className='workspace-header-button'>
+                <Button className='btn'
+                        size='sm'
+                        outline color='primary'
+                        onClick={this.props.togglePasswordModal}>
+                  Edit Password
+                </Button>
+               </div>)
+          }
         </div>
         <div id='workspace-body' className='extra-padding'>
           {/* Create form to update user data */}
@@ -162,7 +181,7 @@ class ProfileEdit extends Component {
               </FormFeedback>
             </FormGroup>
             {/* Button to submit changes */}
-            <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+            <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
             {' '}
             <Button outline onClick={this.props.toggle}> Cancel </Button>
           </Form>

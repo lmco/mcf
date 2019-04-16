@@ -419,6 +419,7 @@ function getUserPublicData(user) {
     archived: (user.archived) ? user : undefined,
     archivedOn: (user.archivedOn) ? user.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
-    admin: user.admin
+    admin: user.admin,
+    provider: user.provider
   };
 }

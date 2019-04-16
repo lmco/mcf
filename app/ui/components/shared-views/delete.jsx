@@ -216,7 +216,7 @@ class Delete extends Component {
             }
             {/* Button to submit and delete project */}
             <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
-            <Button onClick={this.props.toggle}> Cancel </Button>
+            <Button outline onClick={this.props.toggle}> Cancel </Button>
           </Form>
         </div>
       </div>

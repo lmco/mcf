@@ -23,6 +23,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE Modules
 import ProfileEdit from './profile-edit.jsx';
+import PasswordEdit from './password-edit.jsx';
 /* eslint-enable no-unused-vars */
 
 // Define function
@@ -34,18 +35,31 @@ class ProfileHome extends Component {
 
     // Initialize state props
     this.state = {
-      modal: false
+      modal: false,
+      editPasswordModal: false
     };
 
     // Bind component functions
     this.handleToggle = this.handleToggle.bind(this);
+    this.togglePasswordModal = this.togglePasswordModal.bind(this);
   }
 
   // Define toggle function
   handleToggle() {
     // Open or close modal
     this.setState({ modal: !this.state.modal });
+
+    if ((this.state.modal === false) && (this.state.editPasswordModal === true)) {
+      this.togglePasswordModal();
+    }
   }
+
+  // Define toggle function
+  togglePasswordModal() {
+    // Open or close modal
+    this.setState({ editPasswordModal: !this.state.editPasswordModal });
+  }
+
 
   render() {
     // Initialize variables
@@ -57,8 +71,13 @@ class ProfileHome extends Component {
         {/* Modal for editing the information */}
         <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
           <ModalBody>
-            <ProfileEdit user={this.props.user}
-                         toggle={this.handleToggle}/>
+            {(!this.state.editPasswordModal)
+              ? (<ProfileEdit user={this.props.user}
+                              togglePasswordModal={this.togglePasswordModal}
+                              toggle={this.handleToggle}/>)
+              : (<PasswordEdit user={this.props.user}
+                               toggle={this.handleToggle}/>)
+            }
           </ModalBody>
         </Modal>
         <div id='workspace'>
