@@ -48,6 +48,10 @@ class ProfileHome extends Component {
   handleToggle() {
     // Open or close modal
     this.setState({ modal: !this.state.modal });
+
+    if ((this.state.modal === false) && (this.state.editPasswordModal === true)) {
+      this.togglePasswordModal();
+    }
   }
 
   // Define toggle function

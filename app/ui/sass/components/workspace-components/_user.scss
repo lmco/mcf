@@ -4,6 +4,14 @@
 /*                           Members Page Styling                             *
 /******************************************************************************/
 
+.profile-edit-title {
+  display: grid;
+  grid-template-columns: minmax(auto, 70%) 1fr;
+  grid-template-areas: "header button";
+  justify-content: space-between;
+  align-items: center;
+}
+
 .user-title {
   padding-right: 150px;
 }

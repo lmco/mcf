@@ -62,8 +62,14 @@ class PasswordEdit extends Component {
         const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
         // At least 1 special character
         const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
-        // Set State
+        // Set state
         this.setState({ newPasswordInvalid: false });
+        // Return validation
+        return (lengthValidator
+          && digitsValidator
+          && lowercaseValidator
+          && uppercaseValidator
+          && specialCharValidator);
       }
       catch (error) {
         this.setState({ newPasswordInvalid: true });
@@ -159,7 +165,7 @@ class PasswordEdit extends Component {
               </FormFeedback>
             </FormGroup>
             {/* Button to submit changes */}
-            <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+            <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
             {' '}
             <Button outline onClick={this.props.toggle}> Cancel </Button>
           </Form>
