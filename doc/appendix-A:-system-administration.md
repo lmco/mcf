@@ -26,10 +26,6 @@ print out the containers logs, which can be useful if an error has occured. If
 the docker container needs to be rebuilt and the previous build needs to be
 removed, use `--clean` to remove the previous docker build.
 
-### Docker Documentation
-MBEE can be run in a docker container. The docker functionality includes
-getting logs, cleaning, building, and running the docker container.
-
 You can find more on using docker with MBEE at the `/doc/index.html`
 route on a running MBEE server.
 
@@ -57,7 +53,7 @@ your configuration.
 MBEE supports modular authentication strategies. These strategies are defined
 in the authentication modules in `/app/auth`. Which authentication strategy is
 used is defined in the config file. The `auth` section contains a field called
-`strategy`. This `auth.strategy` section should be set to the module you which
+`strategy`. This `auth.strategy` section should be set to the module you wish
 to use.
 
 These authentication modules have well defined interfaces that can be
