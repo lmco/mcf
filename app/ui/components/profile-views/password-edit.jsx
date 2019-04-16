@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.components.profile-views.profile-edit
+ * @module ui.components.profile-views.password-edit
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,7 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders the user's edit page.
+ * @description This renders the password edit page.
  */
 
 /* Modified ESLint rules for React. */
@@ -43,14 +43,16 @@ class PasswordEdit extends Component {
     this.onSubmit = this.onSubmit.bind(this);
   }
 
-  // Define handle change function
   handleChange(event) {
     // Change the state with new value
     this.setState({ [event.target.name]: event.target.value });
 
+    // Verify if state is new password
     if (event.target.name === 'newPassword') {
+      // Initialize variables
       const password = event.target.value;
 
+      // Test the validation of password
       try {
         // At least 8 characters
         const lengthValidator = (password.length >= 8);
@@ -62,7 +64,7 @@ class PasswordEdit extends Component {
         const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
         // At least 1 special character
         const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
-        // Set state
+        // Set password is valid
         this.setState({ newPasswordInvalid: false });
         // Return validation
         return (lengthValidator
@@ -72,13 +74,14 @@ class PasswordEdit extends Component {
           && specialCharValidator);
       }
       catch (error) {
+        // Set password is invalid
         this.setState({ newPasswordInvalid: true });
       }
     }
   }
 
-  // Define the submit function
   onSubmit() {
+    // Initialize variables
     const url = `/api/users/${this.props.user.username}/password`;
     const data = {
       oldPassword: this.state.oldPassword,
@@ -86,10 +89,7 @@ class PasswordEdit extends Component {
       confirmPassword: this.state.confirmNewPassword
     };
 
-    console.log(url);
-    console.log(data);
-
-    // Send a patch request to update user data
+    // Send a patch request to update user password
     $.ajax({
       method: 'PATCH',
       url: url,
@@ -100,33 +100,39 @@ class PasswordEdit extends Component {
         401: (_data) => { window.location.replace('/profile'); }
       },
       fail: (err) => {
-        alert(`Update Failed: ${err.responseJSON.description}`);
+        alert(`Update Failed: ${err.description}`);
       }
     });
   }
 
   render() {
+    // Initialize variables
     let disableSubmit;
     let confirmPasswordInvalid;
 
+    // Verify if new passwords match
     if (this.state.newPassword !== this.state.confirmNewPassword) {
+      // Set invalid fields
       disableSubmit = true;
       confirmPasswordInvalid = true;
     }
 
+    // Verify if new password valid
     if (this.state.newPasswordInvalid) {
+      // Disable submit button
       disableSubmit = true;
     }
 
-    // Render user edit page
+    // Render user password page
     return (
       <div id='workspace'>
         <div id='workspace-header' className='workspace-header'>
           <h2 className='workspace-title workspace-title-padding'>User Edit</h2>
         </div>
         <div id='workspace-body' className='extra-padding'>
-          {/* Create form to update user data */}
+          {/* Create form to update user password */}
           <Form>
+            {/* Input old password */}
             <FormGroup>
               <Label for="oldPassword">Old Password</Label>
               <Input type="password"
@@ -136,6 +142,7 @@ class PasswordEdit extends Component {
                      value={this.state.oldPassword || ''}
                      onChange={this.handleChange}/>
             </FormGroup>
+            {/* Input new password */}
             <FormGroup>
               <Label for="newPassword">New Password</Label>
               <Input type="password"
@@ -150,6 +157,7 @@ class PasswordEdit extends Component {
                 a lowercase, uppercase, digit, and special character.
               </FormFeedback>
             </FormGroup>
+            {/* Input new password again */}
             <FormGroup>
               <Label for="confirmNewPassword">Confirm New Password</Label>
               <Input type="password"
@@ -159,12 +167,11 @@ class PasswordEdit extends Component {
                      value={this.state.confirmNewPassword || ''}
                      invalid={confirmPasswordInvalid}
                      onChange={this.handleChange}/>
-              {/* Verify fields are valid, or display feedback */}
               <FormFeedback>
                 Invalid: Password are not the same.
               </FormFeedback>
             </FormGroup>
-            {/* Button to submit changes */}
+            {/* Button to submit or cancel */}
             <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
             {' '}
             <Button outline onClick={this.props.toggle}> Cancel </Button>
