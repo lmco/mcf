@@ -34,7 +34,8 @@ class PasswordEdit extends Component {
     this.state = {
       oldPassword: '',
       newPassword: '',
-      confirmNewPassword: ''
+      confirmNewPassword: '',
+      newPasswordInvalid: false
     };
 
     // Bind component functions
@@ -46,6 +47,28 @@ class PasswordEdit extends Component {
   handleChange(event) {
     // Change the state with new value
     this.setState({ [event.target.name]: event.target.value });
+
+    if (event.target.name === 'newPassword') {
+      const password = event.target.value;
+
+      try {
+        // At least 8 characters
+        const lengthValidator = (password.length >= 8);
+        // At least 1 digit
+        const digitsValidator = (password.match(/[0-9]/g).length >= 1);
+        // At least 1 lowercase letter
+        const lowercaseValidator = (password.match(/[a-z]/g).length >= 1);
+        // At least 1 uppercase letter
+        const uppercaseValidator = (password.match(/[A-Z]/g).length >= 1);
+        // At least 1 special character
+        const specialCharValidator = (password.match(/[-`~!@#$%^&*()_+={}[\]:;'",.<>?/|\\]/g).length >= 1);
+        // Set State
+        this.setState({ newPasswordInvalid: false });
+      }
+      catch (error) {
+        this.setState({ newPasswordInvalid: true });
+      }
+    }
   }
 
   // Define the submit function
@@ -78,11 +101,15 @@ class PasswordEdit extends Component {
 
   render() {
     let disableSubmit;
-    let confirmPassword;
+    let confirmPasswordInvalid;
 
     if (this.state.newPassword !== this.state.confirmNewPassword) {
       disableSubmit = true;
-      confirmPassword = true;
+      confirmPasswordInvalid = true;
+    }
+
+    if (this.state.newPasswordInvalid) {
+      disableSubmit = true;
     }
 
     // Render user edit page
@@ -110,7 +137,12 @@ class PasswordEdit extends Component {
                      id="newPassword"
                      placeholder="New Password"
                      value={this.state.newPassword || ''}
+                     invalid={this.state.newPasswordInvalid}
                      onChange={this.handleChange}/>
+              <FormFeedback>
+                Invalid: Password must have 8 characters,
+                a lowercase, uppercase, digit, and special character.
+              </FormFeedback>
             </FormGroup>
             <FormGroup>
               <Label for="confirmNewPassword">Confirm New Password</Label>
@@ -119,7 +151,7 @@ class PasswordEdit extends Component {
                      id="confirmNewPassword"
                      placeholder="Confirm New Password"
                      value={this.state.confirmNewPassword || ''}
-                     invalid={confirmPassword}
+                     invalid={confirmPasswordInvalid}
                      onChange={this.handleChange}/>
               {/* Verify fields are valid, or display feedback */}
               <FormFeedback>

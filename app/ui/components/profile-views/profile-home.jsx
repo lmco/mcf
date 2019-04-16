@@ -70,9 +70,9 @@ class ProfileHome extends Component {
             {(!this.state.editPasswordModal)
               ? (<ProfileEdit user={this.props.user}
                               togglePasswordModal={this.togglePasswordModal}
-                               toggle={this.handleToggle}/>)
-              : (<PasswordEdit user={this.props.user}
                               toggle={this.handleToggle}/>)
+              : (<PasswordEdit user={this.props.user}
+                               toggle={this.handleToggle}/>)
             }
           </ModalBody>
         </Modal>
