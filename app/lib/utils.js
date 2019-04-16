@@ -458,7 +458,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         );
       }
 
-      // If -_id in array remove it, that fields MUST be returned
+      // If -_id in array remove it, that field MUST be returned
       val = val.filter(field => field !== '-_id');
 
       // Set the fieldsString option in the returnObject
