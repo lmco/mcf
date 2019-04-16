@@ -27,7 +27,9 @@ import {
   Button,
   Col, FormFeedback
 } from 'reactstrap';
-import validators from "../../../../../build/json/validators";
+
+// MBEE Modules
+import validators from '../../../../../build/json/validators';
 
 /* eslint-enable no-unused-vars */
 
