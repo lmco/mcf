@@ -64,12 +64,10 @@ class MembersPage extends Component {
     }
 
     // Loop through project members
-    const listItems = users.map(user => {
-      return (<tr key={`key-${user}`}>
+    const listItems = users.map(user => (<tr key={`key-${user}`}>
                 <td>{user}</td>
                 <td>{userperm[user]}</td>
-              </tr>);
-    });
+              </tr>));
 
     // Return project member list
     return (
