@@ -1042,8 +1042,9 @@ function getAllProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1149,8 +1150,9 @@ function getProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1229,8 +1231,9 @@ function postProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1309,8 +1312,9 @@ function putProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1389,8 +1393,9 @@ function patchProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1543,8 +1548,9 @@ function getProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))[0]
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1635,8 +1641,9 @@ function postProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))[0]
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1727,8 +1734,9 @@ function putProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))[0]
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1818,8 +1826,9 @@ function patchProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))[0]
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -2882,8 +2891,9 @@ function getElements(req, res) {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
@@ -3003,8 +3013,9 @@ function postElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
@@ -3088,8 +3099,9 @@ function putElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
@@ -3172,8 +3184,9 @@ function patchElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
@@ -3435,8 +3448,9 @@ function getElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
@@ -3535,8 +3549,9 @@ function postElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
@@ -3630,8 +3645,9 @@ function putElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
@@ -3725,8 +3741,9 @@ function patchElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
