@@ -112,6 +112,9 @@ print out a message that build is complete before build has finished.
 Refreshing some UI pages causes issues with page rendering due to client-side
 applications mapping to server-side routes.
 
+#### Password Validation
+Since, the password validation is through the modular authentication strategies,
+there is no easy way to tell if a password valid.
 
 
 ## Security Related Configuration
