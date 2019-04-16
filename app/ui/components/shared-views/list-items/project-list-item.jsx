@@ -72,6 +72,7 @@ class ProjectListItem extends Component {
       // Create the stat list for the organization
       <StatsList>
         <Stat title='Users' icon='fas fa-users' value={Object.keys(project.permissions).length} _key={`project-${project.id.split(':').join('-')}-users`} />
+        <Stat title='Elements' icon='fas fa-boxes' value={project.elementCount} _key={`project-${project.id.split(':').join('-')}-elements`} />
         {(!this.props.divider)
           ? <Stat title='' icon='' value='' _key='empty'/>
           : <Stat divider={this.props.divider} _key={`project-${project.id}-divider`}/>
