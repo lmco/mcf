@@ -255,7 +255,7 @@ function getOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -350,7 +350,7 @@ function postOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -418,7 +418,7 @@ function putOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -486,7 +486,7 @@ function patchOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -559,7 +559,7 @@ function deleteOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -620,7 +620,7 @@ function getOrg(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -728,7 +728,7 @@ function postOrg(req, res) {
   req.body.id = req.params.orgid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -808,7 +808,7 @@ function putOrg(req, res) {
   req.body.id = req.params.orgid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -888,7 +888,7 @@ function patchOrg(req, res) {
   req.body.id = req.params.orgid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -955,7 +955,7 @@ function deleteOrg(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1021,7 +1021,7 @@ function getAllProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1128,7 +1128,7 @@ function getProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1215,7 +1215,7 @@ function postProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1296,7 +1296,7 @@ function putProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1377,7 +1377,7 @@ function patchProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1462,7 +1462,7 @@ function deleteProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1524,7 +1524,7 @@ function getProject(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1625,7 +1625,7 @@ function postProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1718,7 +1718,7 @@ function putProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1810,7 +1810,7 @@ function patchProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1890,7 +1890,7 @@ function deleteProject(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1974,7 +1974,7 @@ function getUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2042,7 +2042,7 @@ function postUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2110,7 +2110,7 @@ function putUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2178,7 +2178,7 @@ function patchUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2244,7 +2244,7 @@ function deleteUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2305,7 +2305,7 @@ function getUser(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2392,7 +2392,7 @@ function postUser(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2471,7 +2471,7 @@ function putUser(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2550,7 +2550,7 @@ function patchUser(req, res) {
   req.body.username = req.params.username;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2615,7 +2615,7 @@ function deleteUser(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2675,7 +2675,7 @@ function whoami(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2754,7 +2754,7 @@ function patchPassword(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2875,7 +2875,7 @@ function getElements(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2996,7 +2996,7 @@ function postElements(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3082,7 +3082,7 @@ function putElements(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3167,7 +3167,7 @@ function patchElements(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3249,7 +3249,7 @@ function deleteElements(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3340,7 +3340,7 @@ function searchElements(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3422,7 +3422,7 @@ function getElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3531,7 +3531,7 @@ function postElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3627,7 +3627,7 @@ function putElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3723,7 +3723,7 @@ function patchElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3806,7 +3806,7 @@ function deleteElement(req, res) {
   const branchid = 'master'; // TODO: fix future = req.params.branchid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
