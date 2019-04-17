@@ -184,7 +184,7 @@ function getElementPublicData(element) {
     createdBy: createdBy,
     updatedOn: (element.updatedOn) ? element.updatedOn.toString() : undefined,
     lastModifiedBy: lastModifiedBy,
-    archived: (element.archived) ? element : undefined,
+    archived: (element.archived) ? element.archived : undefined,
     archivedOn: (element.archivedOn) ? element.archivedOn.toString() : undefined,
     archivedBy: archivedBy
   };
@@ -278,7 +278,7 @@ function getProjectPublicData(project) {
     createdBy: createdBy,
     updatedOn: (project.updatedOn) ? project.updatedOn.toString() : undefined,
     lastModifiedBy: lastModifiedBy,
-    archived: (project.archived) ? project : undefined,
+    archived: (project.archived) ? project.archived : undefined,
     archivedOn: (project.archivedOn) ? project.archivedOn.toString() : undefined,
     archivedBy: archivedBy
   };
@@ -349,7 +349,7 @@ function getOrgPublicData(org) {
     createdBy: createdBy,
     updatedOn: (org.updatedOn) ? org.updatedOn.toString() : undefined,
     lastModifiedBy: lastModifiedBy,
-    archived: (org.archived) ? org : undefined,
+    archived: (org.archived) ? org.archived : undefined,
     archivedOn: (org.archivedOn) ? org.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
     projects: (org.projects) ? org.projects.map(p => getProjectPublicData(p)) : undefined
@@ -416,7 +416,7 @@ function getUserPublicData(user) {
     createdBy: createdBy,
     updatedOn: (user.updatedOn) ? user.updatedOn.toString() : undefined,
     lastModifiedBy: lastModifiedBy,
-    archived: (user.archived) ? user : undefined,
+    archived: (user.archived) ? user.archived : undefined,
     archivedOn: (user.archivedOn) ? user.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
     admin: user.admin,
