@@ -24,6 +24,7 @@ import { Button, Modal, ModalBody } from 'reactstrap';
 // MBEE Modules
 import ProfileEdit from './profile-edit.jsx';
 import PasswordEdit from './password-edit.jsx';
+import CustomData from '../general/custom-data/custom-data.jsx';
 /* eslint-enable no-unused-vars */
 
 // Define function
@@ -103,12 +104,9 @@ class ProfileHome extends Component {
                   <th>Email:</th>
                   <td>{user.email}</td>
                 </tr>
-                <tr>
-                  <th>Custom:</th>
-                  <td>{JSON.stringify(user.custom, null, 2)}</td>
-                </tr>
                 </tbody>
               </table>
+              <CustomData data={user.custom}/>
             </div>
           </div>
         </div>
