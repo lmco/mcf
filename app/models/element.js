@@ -99,7 +99,8 @@ const ElementSchema = new mongoose.Schema({
   parent: {
     type: String,
     ref: 'Element',
-    default: null
+    default: null,
+    index: true
   },
   source: {
     type: String,
