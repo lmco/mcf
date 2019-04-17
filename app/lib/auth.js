@@ -50,7 +50,7 @@ function authenticate(req, res, next) {
   const authorization = req.headers.authorization;
   let username = null;
   let password = null;
-  let err = {};
+  let error = {};
 
   // Check if Authorization header exist
   if (authorization) {
@@ -62,10 +62,10 @@ function authenticate(req, res, next) {
     if (parts.length < 2) {
       M.log.debug('Parts length < 2');
       // Create the error
-      err = new M.CustomError('Username or password not provided.', 400, 'warn');
+      error = new M.CustomError('Username or password not provided.', 400, 'warn');
       // Return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
-        ? res.status(err.status).send(err)
+        ? res.status(error.status).send(error)
         : res.redirect('/login');
     }
     // Get the auth scheme and check auth scheme is basic
@@ -93,10 +93,10 @@ function authenticate(req, res, next) {
         M.log.debug('Credentials length < 2');
 
         // Create the error
-        err = new M.CustomError('Username or password not provided.', 400, 'warn');
+        error = new M.CustomError('Username or password not provided.', 400, 'warn');
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(err.status).send(err)
+          ? res.status(error.status).send(error)
           : res.redirect('/login');
       }
 
@@ -107,9 +107,9 @@ function authenticate(req, res, next) {
       // Error check - username/password not empty
       if (!username || !password || username === '' || password === '') {
         // return proper error for API route or redirect for UI
-        err = new M.CustomError('Username or password not provided.', 401, 'warn');
+        error = new M.CustomError('Username or password not provided.', 401, 'warn');
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(err.status).send(err)
+          ? res.status(error.status).send(error)
           : res.redirect('back');
       }
       // Handle Basic Authentication
@@ -267,11 +267,11 @@ function authenticate(req, res, next) {
   // Verify if credentials are empty or null
   else {
     // Create the error
-    err = new M.CustomError('Username or password not provided.', 401, 'warn');
+    error = new M.CustomError('Username or password not provided.', 401, 'warn');
 
     // return proper error for API route or redirect for UI
     return (req.originalUrl.startsWith('/api'))
-      ? res.status(err.status).send(err)
+      ? res.status(error.status).send(error)
       : res.redirect(`/login?next=${req.originalUrl}`);
   }
 }
