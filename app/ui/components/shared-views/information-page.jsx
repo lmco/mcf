@@ -83,6 +83,7 @@ class InformationPage extends Component {
           <ModalBody>
             {(this.props.project && !this.props.org)
               ? (<EditPage project={this.props.project}
+                           orgid={this.props.project.org}
                            toggle={this.handleToggle}/>)
               : (<EditPage org={this.props.org} toggle={this.handleToggle}/>)
             }

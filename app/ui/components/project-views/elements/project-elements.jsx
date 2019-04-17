@@ -74,7 +74,7 @@ class ProjectElements extends Component {
     if (this.state.sidePanel === 'addElement') {
       // do nothing
     }
-    if (this.state.sidePanel === 'elementEdit') {
+    else if (this.state.sidePanel === 'elementEdit') {
       this.setState({ selected: id });
     }
     else {

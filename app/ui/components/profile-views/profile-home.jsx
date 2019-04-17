@@ -91,23 +91,25 @@ class ProfileHome extends Component {
               </Button>
             </div>
           </div>
-          <div id='workspace-body' className='extra-padding'>
-            <table>
-              <tbody>
-              <tr>
-                <th>Username:</th>
-                <td>{user.username}</td>
-              </tr>
-              <tr>
-                <th>Email:</th>
-                <td>{user.email}</td>
-              </tr>
-              <tr>
-                <th>Custom:</th>
-                <td>{JSON.stringify(user.custom, null, 2)}</td>
-              </tr>
-              </tbody>
-            </table>
+          <div id='workspace-body'>
+            <div className='main-workspace extra-padding'>
+              <table>
+                <tbody>
+                <tr>
+                  <th>Username:</th>
+                  <td>{user.username}</td>
+                </tr>
+                <tr>
+                  <th>Email:</th>
+                  <td>{user.email}</td>
+                </tr>
+                <tr>
+                  <th>Custom:</th>
+                  <td>{JSON.stringify(user.custom, null, 2)}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </React.Fragment>

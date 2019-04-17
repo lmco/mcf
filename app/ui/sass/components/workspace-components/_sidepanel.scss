@@ -6,12 +6,11 @@
 /******************************************************************************/
 .element-panel-display {
   padding: 15px;
-  display: flex;
-  justify-content: center;
-  flex-direction: row-reverse;
-  width: 100%;
-  height: 87vh;
+  position: sticky;
+  top: 0px;
+  height: 86vh;
   overflow: scroll;
+  width: 100%;
 
   hr {
     width: 95%;
@@ -80,6 +79,10 @@
 .element-create {
   width: 100%;
   padding: 24px;
+  position: sticky;
+  top: 0px;
+  height: 80vh;
+  overflow: scroll;
 
   h2 {
     padding-bottom: 5px;

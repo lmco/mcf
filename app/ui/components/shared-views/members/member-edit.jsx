@@ -117,9 +117,14 @@ class MemberEdit extends Component {
     ajaxRequest('GET', '/api/users')
     .then((users) => {
       // Loop through users
-      const userOpts = users.map(
-        (user) => (<DropdownItem value={user.username}>{user.name}</DropdownItem>)
-      );
+      const userOpts = users.map((user) => {
+        if (user.name.length > 0) {
+          return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
+        }
+        else {
+          return (<DropdownItem value={user.username}>{user.username}</DropdownItem>);
+        }
+      });
 
       // Set the user state
       this.setState({ users: userOpts });

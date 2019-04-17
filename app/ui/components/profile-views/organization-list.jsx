@@ -159,12 +159,12 @@ class OrganizationList extends Component {
               }
           </div>
           {/* Verify there are orgs */}
-          <div className='extra-padding'>
+          <div id='workspace-body' className='extra-padding'>
             {(this.state.orgs.length === 0)
-              ? (<div className='list-item'>
+              ? (<div className='main-workspace list-item'>
                   <h3> No organizations. </h3>
                  </div>)
-              : (<List>
+              : (<List className='main-workspace'>
                   {orgs}
                  </List>)
             }
