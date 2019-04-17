@@ -60,7 +60,7 @@ function initApp() {
   return new Promise((resolve, reject) => {
     // Compress responses
     app.use(compression());
-    
+
     // Configure the static/public directory
     const staticDir = path.join(__dirname, '..', 'build', 'public');
     app.use(express.static(staticDir));
