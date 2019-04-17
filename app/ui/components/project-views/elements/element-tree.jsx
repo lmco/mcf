@@ -33,7 +33,8 @@ class ElementTree extends Component {
     this.state = {
       id: props.id,
       isOpen: props.isOpen,
-      data: null,
+      data: props.data,
+      children: null,
       modalEdit: false,
       elementWindow: false,
       isSelected: true
@@ -53,16 +54,26 @@ class ElementTree extends Component {
     // Build URL to get element data
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
-    const elementId = this.props.id.replace('tree-', '');
+    const contains = this.state.data.contains;
+    const parent = this.state.data.id;
+    if (contains === null || contains.length === 0) {
+      return;
+    }
+
+    const elements = contains.join(',');
+
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    const url = `${base}/elements/${elementId}?fields=id,name,contains,type`;
+    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,type`;
+    if (url.length > 2047) {
+      url = `${base}/elements?parent=${parent}&fields=id,name,contains,type`;
+    }
 
     $.ajax({
       method: 'GET',
       url: url,
       statusCode: {
-        200: (data) => { this.setState({ data: data }); },
-        401: () => { this.setState({ data: null }); }
+        200: (data) => { this.setState({ children: data }); },
+        401: () => { this.setState({ children: null }); }
       },
       fail: () => {
         console.log('A failure occurred.');
@@ -118,16 +129,19 @@ class ElementTree extends Component {
 
 
       // Create Subtrees
-      for (let i = 0; i < this.state.data.contains.length; i++) {
-        subtree.push(
-          <ElementTree key={`tree-${this.state.data.contains[i]}`}
-                       id={`${this.state.data.contains[i]}`}
-                       project={this.props.project}
-                       parent={this.state}
-                       parentRefresh={this.refresh}
-                       clickHandler={this.props.clickHandler}
-                       isOpen={false}/>
-        );
+      if (this.state.children !== null) {
+        for (let i = 0; i < this.state.children.length; i++) {
+          subtree.push(
+            <ElementTree key={`tree-${this.state.children[i].id}`}
+                         id={`${this.state.children[i].id}`}
+                         data={this.state.children[i]}
+                         project={this.props.project}
+                         parent={this.state}
+                         parentRefresh={this.refresh}
+                         clickHandler={this.props.clickHandler}
+                         isOpen={false}/>
+          );
+        }
       }
     }
 
