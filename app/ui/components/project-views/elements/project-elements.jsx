@@ -43,7 +43,8 @@ class ProjectElements extends Component {
       sidePanel: false,
       id: null,
       refreshFunction: null,
-      selected: null
+      selected: null,
+      treeRoot: null
     };
 
     this.openElementInfo = this.openElementInfo.bind(this);
@@ -107,7 +108,22 @@ class ProjectElements extends Component {
   }
 
   componentDidMount() {
+    const orgId = this.props.project.org;
+    const projId = this.props.project.id;
+    const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
+    const url = `${base}/elements/model?fields=id,name,contains,type`;
 
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (data) => { this.setState({ treeRoot: data }); },
+        401: () => { this.setState({ treeRoot: null }); }
+      },
+      fail: () => {
+        console.log('A failure occurred.');
+      }
+    });
   }
 
   render() {
@@ -142,6 +158,17 @@ class ProjectElements extends Component {
                                    url={this.props.url}/>);
     }
 
+    let tree = null;
+    if (this.state.treeRoot !== null) {
+      tree = <ElementTree id='model'
+                          data={this.state.treeRoot}
+                          project={this.props.project}
+                          parent={null}
+                          isOpen={true}
+                          parentRefresh={this.componentDidMount}
+                          clickHandler={this.openElementInfo}/>;
+    }
+
     // Return element list
     return (
       <div id='workspace'>
@@ -160,12 +187,7 @@ class ProjectElements extends Component {
         </div>
         <div id='workspace-body'>
           <div id='element-tree-container' className='main-workspace'>
-            <ElementTree id='model'
-                         project={this.props.project}
-                         parent={null}
-                         isOpen={true}
-                         parentRefresh={this.componentDidMount}
-                         clickHandler={this.openElementInfo}/>
+            {tree}
           </div>
           <SidePanel>
             { sidePanelView }
