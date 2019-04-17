@@ -2407,8 +2407,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *   delete:
  *     tags:
  *       - elements
- *     description: Deletes multiple elements. NOTE this endpoint can be used by
- *                  system-admins ONLY.
+ *     description: Deletes multiple elements and their subtrees.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2965,8 +2964,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       -  elements
  *     description: Deletes the specified element and all elements in the
- *                  specified elements subtree. NOTE this endpoint is reserved
- *                  for system-wide admins ONLY.
+ *                  specified elements subtree.
  *     produces:
  *       - application/json
  *     parameters:

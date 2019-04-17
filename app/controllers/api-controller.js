@@ -3213,7 +3213,6 @@ function patchElements(req, res) {
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
  * @description Deletes multiple elements.
- * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -3770,7 +3769,6 @@ function patchElement(req, res) {
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
  * @description Deletes an element.
- * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
