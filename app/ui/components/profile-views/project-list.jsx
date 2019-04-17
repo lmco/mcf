@@ -228,13 +228,13 @@ class ProjectList extends Component {
               }
             </div>
           </div>
-          <div className='extra-padding'>
+          <div id='workspace-body' className='extra-padding'>
             {/* Verify there are project-views */}
             {(this.state.projects.length === 0)
-              ? (<div className='list-item'>
+              ? (<div className='main-workspace list-item'>
                   <h3> No projects. </h3>
                  </div>)
-              : (<List key='main-list'>
+              : (<List className='main-workspace' key='main-list'>
                   {list}
                  </List>)
             }

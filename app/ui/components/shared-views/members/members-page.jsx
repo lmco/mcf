@@ -107,11 +107,13 @@ class MembersPage extends Component {
             }
           </div>
           <div id='workspace-body' className='extra-padding'>
-            <table>
-              <tbody>
-                {listItems}
-              </tbody>
-            </table>
+            <div className='main-workspace'>
+              <table>
+                <tbody>
+                  {listItems}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </React.Fragment>

@@ -66,9 +66,9 @@ function OrganizationProjects(props) {
               </div>)
           }
         </div>
-        <div className='extra-padding'>
+        <div id='workspace-body' className='extra-padding'>
           {/* Display list of projects */}
-          <List>
+          <List className='main-workspace'>
             {listItems}
           </List>
         </div>
