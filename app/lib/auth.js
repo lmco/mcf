@@ -127,6 +127,7 @@ function authenticate(req, res, next) {
       .catch(err => {
         // Log the error
         M.log.error(err.stack);
+        error = new M.CustomError('Invalid username or password.', 401, 'warn');
         if (err.description === 'Invalid username or password.') {
           req.flash('loginError', err.message);
         }
@@ -136,7 +137,7 @@ function authenticate(req, res, next) {
 
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(401).send(err)
+          ? res.status(401).send(error)
           : res.redirect(`/login?next=${req.originalUrl}`);
       });
     }
