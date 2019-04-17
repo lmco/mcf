@@ -181,7 +181,7 @@ class Create extends Component {
             }
             {/* Create an input for project id */}
             <FormGroup>
-              <Label for="id">{header} ID</Label>
+              <Label for="id">{header} ID*</Label>
               <Input type="id"
                      name="id"
                      id="id"
@@ -196,7 +196,7 @@ class Create extends Component {
             </FormGroup>
             {/* Create an input for project name */}
             <FormGroup>
-              <Label for="name">{header} Name</Label>
+              <Label for="name">{header} Name*</Label>
               <Input type="name"
                      name="name"
                      id="name"
@@ -224,6 +224,7 @@ class Create extends Component {
                 Invalid: Custom data must be valid JSON
               </FormFeedback>
             </FormGroup>
+            <div className='required-fields'>* required fields.</div>
 
             {/* Button to create project */}
                 <Button outline color='primary'
