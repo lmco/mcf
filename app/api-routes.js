@@ -147,7 +147,8 @@ api.route('/version')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: archived
@@ -159,7 +160,9 @@ api.route('/version')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: limit
@@ -234,7 +237,9 @@ api.route('/version')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -292,14 +297,17 @@ api.route('/version')
  *         description: An array of objects containing organization data.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -364,14 +372,17 @@ api.route('/version')
  *                              the role should be REMOVE_ALL.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -482,7 +493,8 @@ api.route('/orgs')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *         required: false
@@ -495,7 +507,9 @@ api.route('/orgs')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -553,7 +567,8 @@ api.route('/orgs')
  *                            usernames, and values are the permission.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *         required: false
@@ -561,7 +576,9 @@ api.route('/orgs')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -623,7 +640,8 @@ api.route('/orgs')
  *                            usernames, and values are the permission.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *         required: false
@@ -631,7 +649,9 @@ api.route('/orgs')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -693,14 +713,17 @@ api.route('/orgs')
  *                              the role should be REMOVE_ALL.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -807,7 +830,8 @@ api.route('/orgs/:orgid')
  *     parameters:
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -820,7 +844,9 @@ api.route('/orgs/:orgid')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: limit
@@ -905,7 +931,8 @@ api.route('/projects')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *       - name: archived
@@ -917,7 +944,9 @@ api.route('/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: limit
@@ -1004,7 +1033,8 @@ api.route('/projects')
  *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1012,7 +1042,9 @@ api.route('/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1088,7 +1120,8 @@ api.route('/projects')
  *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1096,7 +1129,9 @@ api.route('/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1176,14 +1211,17 @@ api.route('/projects')
  *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1308,7 +1346,8 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1321,7 +1360,9 @@ api.route('/orgs/:orgid/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1400,7 +1441,8 @@ api.route('/orgs/:orgid/projects')
  *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1408,7 +1450,9 @@ api.route('/orgs/:orgid/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1490,7 +1534,8 @@ api.route('/orgs/:orgid/projects')
  *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1498,7 +1543,9 @@ api.route('/orgs/:orgid/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1576,14 +1623,17 @@ api.route('/orgs/:orgid/projects')
  *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1723,7 +1773,8 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -1864,7 +1915,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -1882,7 +1934,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
  *         in: query
  *         type: string
  *       - name: limit
@@ -2055,7 +2109,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2063,7 +2118,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2180,7 +2238,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2188,7 +2247,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2304,7 +2366,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2312,7 +2375,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2455,7 +2521,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2474,7 +2541,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2592,7 +2662,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2600,7 +2671,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2721,7 +2795,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2729,7 +2804,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2842,7 +2920,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2850,7 +2929,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2993,7 +3075,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3006,7 +3088,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: limit
@@ -3089,7 +3174,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3097,7 +3182,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3165,7 +3253,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3173,7 +3261,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3245,7 +3336,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                              this field.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3253,7 +3344,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3409,7 +3503,7 @@ api.route('/users/whoami')
  *         in: path
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3422,7 +3516,10 @@ api.route('/users/whoami')
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3493,7 +3590,7 @@ api.route('/users/whoami')
  *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3501,7 +3598,10 @@ api.route('/users/whoami')
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3572,7 +3672,7 @@ api.route('/users/whoami')
  *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3580,7 +3680,10 @@ api.route('/users/whoami')
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3646,14 +3749,17 @@ api.route('/users/whoami')
  *                            this field.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified

@@ -113,6 +113,10 @@ describe(M.getModuleName(module.filename), () => {
     + ' updating a source', updateSourceWithNoTarget);
   it('should reject an update saying a source is required when'
     + ' updating a target', updateTargetWithNoSource);
+  it('should reject creating an element whose source is in an external project'
+    + ' that is not included in the project\'s projectReferences', createNonRefExternalSource);
+  it('should reject creating an element whose target is in an external project'
+    + ' that is not included in the project\'s projectReferences', createNonRefExternalTarget);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -133,19 +137,13 @@ function updateSourceToSelf(done) {
   ElementController.update(adminUser, org.id, projID, 'master', update)
   .then(() => {
     // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element updated successfully.');
+    done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
-    // If element updated successfully, fail the test
-    if (error.message === 'Element updated successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.description).to.equal('Element\'s source cannot be self'
-        + ` [${elemDataObject.id}].`);
-      done();
-    }
+    // Ensure error message is correct
+    chai.expect(error.description).to.equal('Element\'s source cannot be self'
+      + ` [${elemDataObject.id}].`);
+    done();
   });
 }
 
@@ -166,19 +164,13 @@ function updateTargetToSelf(done) {
   ElementController.update(adminUser, org.id, projID, 'master', update)
   .then(() => {
     // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element updated successfully.');
+    done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
-    // If element updated successfully, fail the test
-    if (error.message === 'Element updated successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.description).to.equal('Element\'s target cannot be self'
-        + ` [${elemDataObject.id}].`);
-      done();
-    }
+    // Ensure error message is correct
+    chai.expect(error.description).to.equal('Element\'s target cannot be self'
+      + ` [${elemDataObject.id}].`);
+    done();
   });
 }
 
@@ -199,19 +191,13 @@ function updateNonExistentSource(done) {
   ElementController.update(adminUser, org.id, projID, 'master', update)
   .then(() => {
     // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element updated successfully.');
+    done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
-    // If element updated successfully, fail the test
-    if (error.message === 'Element updated successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.description).to.equal('The source element '
-        + '[NonExistentElement] was not found in the project [project00].');
-      done();
-    }
+    // Ensure error message is correct
+    chai.expect(error.description).to.equal('The source element '
+      + '[NonExistentElement] was not found in the project [project00].');
+    done();
   });
 }
 
@@ -232,19 +218,13 @@ function updateNonExistentTarget(done) {
   ElementController.update(adminUser, org.id, projID, 'master', update)
   .then(() => {
     // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element updated successfully.');
+    done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
-    // If element updated successfully, fail the test
-    if (error.message === 'Element updated successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.description).to.equal('The target element '
-        + '[NonExistentElement] was not found in the project [project00].');
-      done();
-    }
+    // Ensure error message is correct
+    chai.expect(error.description).to.equal('The target element '
+      + '[NonExistentElement] was not found in the project [project00].');
+    done();
   });
 }
 
@@ -265,19 +245,13 @@ function updateSourceWithNoTarget(done) {
   ElementController.update(adminUser, org.id, projID, 'master', update)
   .then(() => {
     // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element updated successfully.');
+    done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
-    // If element updated successfully, fail the test
-    if (error.message === 'Element updated successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.description).to.equal(`Element [${elemDataObject.id}]`
-        + ' target is required if source is provided.');
-      done();
-    }
+    // Ensure error message is correct
+    chai.expect(error.description).to.equal(`Element [${elemDataObject.id}]`
+      + ' target is required if source is provided.');
+    done();
   });
 }
 
@@ -298,18 +272,78 @@ function updateTargetWithNoSource(done) {
   ElementController.update(adminUser, org.id, projID, 'master', update)
   .then(() => {
     // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element updated successfully.');
+    done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
-    // If element updated successfully, fail the test
-    if (error.message === 'Element updated successfully.') {
-      done(error);
+    // Ensure error message is correct
+    chai.expect(error.description).to.equal(`Element [${elemDataObject.id}]`
+      + ' source is required if target is provided.');
+    done();
+  });
+}
+
+/**
+ * @description Verifies that an element cannot have a source in an external
+ * project that is not in the current project projectReferences array.
+ */
+function createNonRefExternalSource(done) {
+  // Create element data with sourceNamespace with project not in the current
+  // project's projectReferences list
+  const elemObj = {
+    id: 'external-source',
+    source: 'model',
+    sourceNamespace: {
+      org: org.id,
+      project: 'doesnotexist',
+      branch: 'master'
+    },
+    target: 'model'
+  };
+
+  // Attempt to create the element through the element controller
+  ElementController.create(adminUser, org.id, projID, 'master', elemObj)
+  .then(() => {
+    // Should not succeed, force to fail
+    done(new Error('Element created successfully.'));
+  })
+  .catch((error) => {
+    // Ensure error message is correct
+    chai.expect(error.description).to.equal('The project '
+      + `[${elemObj.sourceNamespace.project}] is not in the found project's `
+      + 'projectReference list.');
+    done();
+  });
+}
+
+/**
+ * @description Verifies that an element cannot have a target in an external
+ * project that is not in the current project projectReferences array.
+ */
+function createNonRefExternalTarget(done) {
+  // Create element data with targetNamespace with project not in the current
+  // project's projectReferences list
+  const elemObj = {
+    id: 'external-source',
+    source: 'model',
+    target: 'model',
+    targetNamespace: {
+      org: org.id,
+      project: 'doesnotexist',
+      branch: 'master'
     }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.description).to.equal(`Element [${elemDataObject.id}]`
-        + ' source is required if target is provided.');
-      done();
-    }
+  };
+
+  // Attempt to create the element through the element controller
+  ElementController.create(adminUser, org.id, projID, 'master', elemObj)
+  .then(() => {
+    // Should not succeed, force to fail
+    done(new Error('Element created successfully.'));
+  })
+  .catch((error) => {
+    // Ensure error message is correct
+    chai.expect(error.description).to.equal('The project '
+      + `[${elemObj.targetNamespace.project}] is not in the found project's `
+      + 'projectReference list.');
+    done();
   });
 }

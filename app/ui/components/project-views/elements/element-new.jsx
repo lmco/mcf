@@ -25,8 +25,11 @@ import {
   Label,
   Input,
   Button,
-  Col
+  Col, FormFeedback
 } from 'reactstrap';
+
+// MBEE Modules
+import validators from '../../../../../build/json/validators';
 
 /* eslint-enable no-unused-vars */
 
@@ -104,7 +107,15 @@ class ElementNew extends Component {
   }
 
   render() {
-    const disableSubmit = false;
+    let idInvalid;
+    let disableSubmit;
+
+    // Verify if user's first name is valid
+    if (!RegExp(validators.id).test(this.state.id)) {
+      // Set invalid fields
+      idInvalid = true;
+      disableSubmit = true;
+    }
 
     // Render organization edit page
     return (
@@ -119,7 +130,12 @@ class ElementNew extends Component {
                    id="name"
                    placeholder="Element name"
                    value={this.state.id}
+                   invalid={idInvalid}
                    onChange={this.handleChange}/>
+              {/* If invalid id, notify user */}
+              <FormFeedback >
+                Invalid: A id may only contain lower case letters, numbers, or dashes.
+              </FormFeedback>
             </Col>
           </FormGroup>
           <FormGroup row>

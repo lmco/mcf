@@ -61,6 +61,7 @@ function getElementPublicData(element) {
   let parent = null;
   let source;
   let target;
+  let project;
 
   // If element.createdBy is defined
   if (element.createdBy) {
@@ -156,10 +157,22 @@ function getElementPublicData(element) {
     }
   }
 
+  // If element.project is defined
+  if (element.project) {
+    // If element.project is populated
+    if (typeof element.project === 'object') {
+      // Get the public data of project
+      project = getProjectPublicData(element.project);
+    }
+    else {
+      project = utils.parseID(element.project)[1];
+    }
+  }
+
   const data = {
     id: idParts.pop(),
     name: element.name,
-    project: idParts[1],
+    project: project,
     org: idParts[0],
     parent: parent,
     source: source,
@@ -406,6 +419,7 @@ function getUserPublicData(user) {
     archived: (user.archived) ? user : undefined,
     archivedOn: (user.archivedOn) ? user.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
-    admin: user.admin
+    admin: user.admin,
+    provider: user.provider
   };
 }

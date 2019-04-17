@@ -41,6 +41,7 @@ const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const utils = M.require('lib.utils');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -112,93 +113,14 @@ function find(requestingUser, users, options) {
       options = users; // eslint-disable-line no-param-reassign
     }
 
-    // Initialize valid options
-    let archived = false;
-    let populateString = '';
-    let fieldsString = '';
-    let limit = 0;
-    let skip = 0;
-    let lean = false;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
-
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = User.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'fields', 'limit', 'skip', 'lean'], User);
 
     // Define searchQuery
     const searchQuery = { archived: false };
     // If the archived field is true, remove it from the query
-    if (archived) {
+    if (validOptions.archived) {
       delete searchQuery.archived;
     }
 
@@ -217,17 +139,19 @@ function find(requestingUser, users, options) {
     }
 
     // If the lean option is supplied
-    if (lean) {
+    if (validOptions.lean) {
       // Find the users
-      User.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-      .populate(populateString).lean()
+      User.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString).lean()
       .then((foundUser) => resolve(foundUser))
       .catch((error) => reject(M.CustomError.parseCustomError(error)));
     }
     else {
       // Find the users
-      User.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-      .populate(populateString)
+      User.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString)
       .then((foundUser) => resolve(foundUser))
       .catch((error) => reject(M.CustomError.parseCustomError(error)));
     }
@@ -305,57 +229,9 @@ function create(requestingUser, users, options) {
     const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     let createdUsers = [];
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-    let lean = false;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = User.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], User);
 
     // Define array to store user data
     let usersToCreate = [];
@@ -377,7 +253,7 @@ function create(requestingUser, users, options) {
     // Create array of id's for lookup and array of valid keys
     const arrUsernames = [];
     const validUserKeys = ['username', 'password', 'fname', 'lname',
-      'preferredName', 'email', 'admin', 'provider', 'custom'];
+      'preferredName', 'email', 'admin', 'provider', 'custom', 'archived'];
 
     // Check that each user has a username, and add to arrUsernames
     try {
@@ -459,13 +335,13 @@ function create(requestingUser, users, options) {
     })
     .then(() => {
       // If the lean option is supplied
-      if (lean) {
-        return User.find({ _id: { $in: arrUsernames } }, fieldsString)
-        .populate(populateString).lean();
+      if (validOptions.lean) {
+        return User.find({ _id: { $in: arrUsernames } }, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
       }
       else {
-        return User.find({ _id: { $in: arrUsernames } }, fieldsString)
-        .populate(populateString);
+        return User.find({ _id: { $in: arrUsernames } }, validOptions.fieldsString)
+        .populate(validOptions.populateString);
       }
     })
     .then((foundCreatedUsers) => resolve(foundCreatedUsers))
@@ -551,57 +427,9 @@ function update(requestingUser, users, options) {
     let usersToUpdate = [];
     const duplicateCheck = {};
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-    let lean = false;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = User.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], User);
 
     // Check the type of the users parameter
     if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
@@ -752,11 +580,13 @@ function update(requestingUser, users, options) {
     })
     .then(() => {
       // If the lean option is supplied
-      if (lean) {
-        return User.find(searchQuery, fieldsString).populate(populateString).lean();
+      if (validOptions.lean) {
+        return User.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
       }
       else {
-        return User.find(searchQuery, fieldsString).populate(populateString);
+        return User.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString);
       }
     })
     .then((foundUpdatedUsers) => {

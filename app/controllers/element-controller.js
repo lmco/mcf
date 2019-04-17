@@ -149,102 +149,20 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       options = elements; // eslint-disable-line no-param-reassign
     }
 
-    // Initialize valid options
-    let archived = false;
-    let populateString = 'contains ';
-    let subtree = false;
-    let fieldsString = '';
-    let limit = 0;
-    let skip = 0;
-    let lean = false;
+    // Initialize validOptions
+    let validOptions = {};
+
+    // Validate and set the options
+    validOptions = utils.validateOptions(options, ['archived', 'populate',
+      'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
 
     // Ensure options are valid
     if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
-
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString += options.populate.join(' ');
-      }
-
-      // If the option 'subtree' is supplied ensure it's a boolean
-      if (options.hasOwnProperty('subtree')) {
-        if (typeof options.subtree !== 'boolean') {
-          throw new M.CustomError('The option \'subtree\' is not a boolean.', 400, 'warn');
-        }
-        subtree = options.subtree;
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-
       // Create array of valid search options
       const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
         'createdBy', 'lastModifiedBy', 'archivedBy'];
 
-      // Loop through provided options
+      // Loop through provided options, look for validSearchOptions
       Object.keys(options).forEach((o) => {
         // If the provided option is a valid search option
         if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
@@ -302,7 +220,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       }
 
       // If wanting to find subtree, find subtree ids
-      if (subtree) {
+      if (validOptions.subtree) {
         return findElementTree(orgID, projID, 'master', elementsToFind);
       }
 
@@ -310,22 +228,24 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     })
     .then((elementIDs) => {
       // If the archived field is true, remove it from the query
-      if (archived) {
+      if (validOptions.archived) {
         delete searchQuery.archived;
       }
 
       // If no IDs provided, find all elements in a project
       if (elementIDs.length === 0) {
         // If the lean option is supplied
-        if (lean) {
+        if (validOptions.lean) {
           // Find all elements in a project
-          return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-          .populate(populateString)
+          return Element.find(searchQuery, validOptions.fieldsString,
+            { limit: validOptions.limit, skip: validOptions.skip })
+          .populate(validOptions.populateString || 'contains')
           .lean();
         }
         else {
-          return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-          .populate(populateString);
+          return Element.find(searchQuery, validOptions.fieldsString,
+            { limit: validOptions.limit, skip: validOptions.skip })
+          .populate(validOptions.populateString || 'contains');
         }
       }
       // Find elements by ID
@@ -339,10 +259,11 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
 
         // If the lean option is supplied
-        if (lean) {
+        if (validOptions.lean) {
           // Add find operation to promises array
-          promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-          .populate(populateString)
+          promises.push(Element.find(searchQuery, validOptions.fieldsString,
+            { limit: validOptions.limit, skip: validOptions.skip })
+          .populate(validOptions.populateString || 'contains')
           .lean()
           .then((_foundElements) => {
             foundElements = foundElements.concat(_foundElements);
@@ -350,8 +271,9 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         }
         else {
           // Add find operation to promises array
-          promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-          .populate(populateString)
+          promises.push(Element.find(searchQuery, validOptions.fieldsString,
+            { limit: validOptions.limit, skip: validOptions.skip })
+          .populate(validOptions.populateString || 'contains')
           .then((_foundElements) => {
             foundElements = foundElements.concat(_foundElements);
           }));
@@ -466,57 +388,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     let populatedElements = [];
     const projectRefs = [];
 
-    // Initialize valid options
-    let populateString = 'contains ';
-    let fieldsString = '';
-    let lean = false;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString += options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Element);
 
     // Define array to store element data
     let elementsToCreate = [];
@@ -538,7 +412,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
     const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
-      'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace'];
+      'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace',
+      'archived'];
 
     // Check that each element has an id and set the parent if null
     try {
@@ -821,16 +696,18 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
         // If the lean option is supplied
-        if (lean) {
+        if (validOptions.lean) {
           // Add find operation to promises array
-          promises.push(Element.find(tmpQuery, fieldsString).populate(populateString).lean()
+          promises.push(Element.find(tmpQuery, validOptions.fieldsString)
+          .populate(validOptions.populateString || 'contains').lean()
           .then((_foundElements) => {
             populatedElements = populatedElements.concat(_foundElements);
           }));
         }
         else {
           // Add find operation to promises array
-          promises.push(Element.find(tmpQuery, fieldsString).populate(populateString)
+          promises.push(Element.find(tmpQuery, validOptions.fieldsString)
+          .populate(validOptions.populateString || 'contains')
           .then((_foundElements) => {
             populatedElements = populatedElements.concat(_foundElements);
           }));
@@ -953,57 +830,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const arrIDs = [];
     const sourceTargetIDs = [];
 
-    // Initialize valid options
-    let populateString = 'contains ';
-    let fieldsString = '';
-    let lean = false;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString += options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Element);
 
     // Find the project
     Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
@@ -1310,16 +1139,18 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
         // If the lean option is supplied
-        if (lean) {
+        if (validOptions.lean) {
           // Add find operation to promises array
-          promises2.push(Element.find(searchQuery, fieldsString).populate(populateString).lean()
+          promises2.push(Element.find(searchQuery, validOptions.fieldsString)
+          .populate(validOptions.populateString || 'contains').lean()
           .then((_foundElements) => {
             foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
           }));
         }
         else {
           // Add find operation to promises array
-          promises2.push(Element.find(searchQuery, fieldsString).populate(populateString)
+          promises2.push(Element.find(searchQuery, validOptions.fieldsString)
+          .populate(validOptions.populateString || 'contains')
           .then((_foundElements) => {
             foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
           }));
@@ -1959,72 +1790,14 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Initialize valid options
-    let archived = false;
-    let populateString = 'contains ';
-    let limit = 0;
-    let skip = 0;
-    let lean = false;
+    let validOptions = {};
+
+    // Validate and set the options
+    validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'limit', 'skip', 'lean'], Element);
 
     // Ensure options are valid
     if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
-
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString += options.populate.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
-
-      // If the option 'lean' is supplied, ensure its a boolean
-      if (options.hasOwnProperty('lean')) {
-        if (typeof options.lean !== 'boolean') {
-          throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
-        }
-        lean = options.lean;
-      }
-
       // Create array of valid search options
       const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
         'createdBy', 'lastModifiedBy', 'archivedBy'];
@@ -2068,22 +1841,24 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
       searchQuery.$text = { $search: query };
       // If the archived field is true, remove it from the query
-      if (archived) {
+      if (validOptions.archived) {
         delete searchQuery.archived;
       }
 
       // If the lean option is supplied
-      if (lean) {
+      if (validOptions.lean) {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: limit, skip: skip })
-        .sort({ score: { $meta: 'textScore' } }).populate(populateString).lean();
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .sort({ score: { $meta: 'textScore' } })
+        .populate(validOptions.populateString || 'contains').lean();
       }
       else {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: limit, skip: skip })
-        .sort({ score: { $meta: 'textScore' } }).populate(populateString);
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .sort({ score: { $meta: 'textScore' } })
+        .populate(validOptions.populateString || 'contains');
       }
     })
     .then((foundElements) => resolve(foundElements))

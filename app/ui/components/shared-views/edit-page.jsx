@@ -160,7 +160,7 @@ class EditPage extends Component {
               </FormFeedback>
             </FormGroup>
             {/* Button to submit changes */}
-            <Button disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+            <Button color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
             {' '}
             <Button outline onClick={this.props.toggle}> Cancel </Button>
           </Form>

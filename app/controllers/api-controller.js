@@ -28,6 +28,7 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const Project = M.require('models.project');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 const publicData = M.require('lib.get-public-data');
@@ -210,6 +211,7 @@ function getOrgs(req, res) {
   let ids;
   let options;
   let minified = false;
+  let orgs = [];
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -264,7 +266,28 @@ function getOrgs(req, res) {
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
   OrgController.find(req.user, ids, options)
-  .then((orgs) => {
+  .then((_orgs) => {
+    orgs = _orgs;
+
+    // If the projects field is populated on each org
+    if (orgs.every(o => o.hasOwnProperty('projects') && Array.isArray(o.projects))) {
+      const promises = [];
+
+      // For every org
+      orgs.forEach((o) => {
+        // Get each project's elementCount
+        promises.push(Project.getElementCount(o.projects)
+        .then((updatedProjects) => {
+          // Set the org's projects to the updatedProjects
+          o.projects = updatedProjects;
+        }));
+      });
+
+      // Return when all promises have been completed
+      return Promise.all(promises);
+    }
+  })
+  .then(() => {
     // Verify orgs array is not empty
     if (orgs.length === 0) {
       const error = new M.CustomError('No orgs found.', 404, 'warn');
@@ -570,6 +593,7 @@ function getOrg(req, res) {
   // Note: Undefined if not set
   let options;
   let minified = false;
+  let orgs = [];
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -607,7 +631,8 @@ function getOrg(req, res) {
   // Find the org from it's id
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid, options)
-  .then((orgs) => {
+  .then((_orgs) => {
+    orgs = _orgs;
     // If no orgs found, return 404 error
     if (orgs.length === 0) {
       const error = new M.CustomError(
@@ -616,6 +641,25 @@ function getOrg(req, res) {
       return res.status(error.status).send(error);
     }
 
+    // If the projects field is populated on each org
+    if (orgs.every(o => o.hasOwnProperty('projects') && Array.isArray(o.projects))) {
+      const promises = [];
+
+      // For every org
+      orgs.forEach((o) => {
+        // Get each project's elementCount
+        promises.push(Project.getElementCount(o.projects)
+        .then((updatedProjects) => {
+          // Set the org's projects to the updatedProjects
+          o.projects = updatedProjects;
+        }));
+      });
+
+      // Return when all promises have been completed
+      return Promise.all(promises);
+    }
+  })
+  .then(() => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org'))[0]
@@ -998,8 +1042,9 @@ function getAllProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1105,8 +1150,9 @@ function getProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1185,8 +1231,9 @@ function postProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1265,8 +1312,9 @@ function putProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1345,8 +1393,9 @@ function patchProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1499,8 +1548,9 @@ function getProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))[0]
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1591,8 +1641,9 @@ function postProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))[0]
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1683,8 +1734,9 @@ function putProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))[0]
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -1774,8 +1826,9 @@ function patchProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project'))[0]
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
       const specialFields = ['org'];
       // For each special field
@@ -2838,10 +2891,11 @@ function getElements(req, res) {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -2959,10 +3013,11 @@ function postElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3044,10 +3099,11 @@ function putElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3128,10 +3184,11 @@ function patchElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3391,10 +3448,11 @@ function getElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3488,13 +3546,14 @@ function postElement(req, res) {
     branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+      elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3505,7 +3564,7 @@ function postElement(req, res) {
     }
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
@@ -3583,13 +3642,14 @@ function putElement(req, res) {
     req.params.projectid, branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+      elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3600,7 +3660,7 @@ function putElement(req, res) {
     }
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the created/replaced element
     res.header('Content-Type', 'application/json');
@@ -3678,13 +3738,14 @@ function patchElement(req, res) {
     branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))[0]
+      elements.map(e => publicData.getPublicData(e, 'element'))
     );
 
-    // If the fields options was specified
-    if (options.fields) {
+    // If the fields options was specified and its not blank and not including fields
+    if (options.fields && options.fields[0] !== ''
+      && options.fields.every(f => !f.startsWith('-'))) {
       // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
+      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
       // For each special field
       specialFields.forEach((f) => {
         // If the field is not specified in options, remove it from each element
@@ -3695,7 +3756,7 @@ function patchElement(req, res) {
     }
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
