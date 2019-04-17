@@ -57,14 +57,14 @@ db.connect()
  * @description Initializes the application and exports app.js
  */
 function initApp() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
+    // Compress responses
+    app.use(compression());
+
     // Configure the static/public directory
     const staticDir = path.join(__dirname, '..', 'build', 'public');
     app.use(express.static(staticDir));
     app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
-
-    // Compress responses
-    app.use(compression());
 
     // for parsing application/json
     app.use(bodyParser.json({ limit: M.config.server.requestSize || '50mb' }));
