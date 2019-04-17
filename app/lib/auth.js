@@ -182,10 +182,9 @@ function authenticate(req, res, next) {
     }
     // Other authorization header
     else {
-      M.log.verbose('Invalid authorization scheme.');
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send('Unauthorized')
+        ? res.status(401).send(new M.CustomError('Invalid authorization scheme.', 401, 'warn'))
         : res.redirect(`/login?next=${req.originalUrl}`);
     }
   } /* end if (authorization) */
@@ -225,7 +224,7 @@ function authenticate(req, res, next) {
       // return proper error for API route or redirect for UI
       // 'back' returns to the original login?next=originalUrl
       return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send('Unauthorized')
+        ? res.status(401).send(new M.CustomError('Invalid username or password.', 401, 'warn'))
         : res.redirect('back');
     });
   }
@@ -260,7 +259,7 @@ function authenticate(req, res, next) {
 
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send('Unauthorized')
+        ? res.status(401).send(new M.CustomError('Session Expired', 401, 'warn'))
         : res.redirect(`/login?next=${req.originalUrl}`);
     });
   }
