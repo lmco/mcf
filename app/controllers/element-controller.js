@@ -1415,9 +1415,8 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
 
 /**
  * @description This function removes one or many elements as well as the
- * subtree under those elements. This function can be used by system-wide admins
- * ONLY. Once the elements are deleted, the IDs of the deleted elements are
- * returned.
+ * subtree under those elements. Once the elements are deleted, the IDs of the
+ * deleted elements are returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -1447,8 +1446,6 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
       assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions to delete'
-        + ' elements.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
@@ -1471,6 +1468,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
@@ -1492,8 +1490,24 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError('Invalid input for removing elements.', 400, 'warn');
     }
 
-    // Find the elements to delete
-    Element.find({ _id: { $in: elementsToFind } }).lean()
+    // Find the project to verify permissions
+    Project.findOne({ _id: utils.createID(orgID, projID) })
+    .then((foundProject) => {
+      // Verify the project was found or exists
+      if (foundProject === null) {
+        throw new M.CustomError(`The project [${projID}] was not found.`, 404, 'warn');
+      }
+
+      // Verify the requesting user has at least project write permissions
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
+        throw new M.CustomError('User does not have permission to delete'
+          + ` elements on the project [${projID}].`, 403, 'warn');
+      }
+
+      // Find the elements to delete
+      return Element.find({ _id: { $in: elementsToFind } }).lean();
+    })
     .then((foundElements) => {
       const foundElementIDs = foundElements.map(e => e._id);
 
