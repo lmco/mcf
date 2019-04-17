@@ -855,7 +855,7 @@ function update(requestingUser, organizationID, projects, options) {
               }
             });
 
-            // Copy permissions from proj to update object
+            // Copy permissions from project to update object
             updateProj.permissions = proj.permissions;
           }
           // Set archivedBy if archived field is being changed
