@@ -57,7 +57,7 @@ db.connect()
  * @description Initializes the application and exports app.js
  */
 function initApp() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // Compress responses
     app.use(compression());
 
