@@ -66,13 +66,13 @@ class HomeApp extends Component {
   }
 
   componentDidMount() {
-    const url = '/api/users/whoami';
+    const url = '/api/users/whoami?minified=true';
 
     // TODO (jk->ld) - We should be using jQuery rather than our own custom AJAX function
     ajaxRequest('GET', `${url}`)
     .then(user => {
       // Get the organization and their projects
-      ajaxRequest('GET', '/api/orgs?populate=projects')
+      ajaxRequest('GET', '/api/orgs?populate=projects&minfied=true')
       .then(orgs => {
         // Set user state
         this.setState({ user: user });

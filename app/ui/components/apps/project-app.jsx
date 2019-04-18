@@ -56,7 +56,7 @@ class ProjectApp extends Component {
     // Initialize variables
     const orgId = this.props.match.params.orgid;
     const projId = this.props.match.params.projectid;
-    const url = `/api/orgs/${orgId}/projects/${projId}`;
+    const url = `/api/orgs/${orgId}/projects/${projId}?minified=true`;
 
     // Set states
     this.setState({ url: url });
@@ -66,7 +66,7 @@ class ProjectApp extends Component {
     ajaxRequest('GET', `${url}`)
     .then(project => {
       // Get user data
-      ajaxRequest('GET', '/api/users/whoami')
+      ajaxRequest('GET', '/api/users/whoami?minified=true')
       .then(user => {
         // Initialize variables
         const username = user.username;

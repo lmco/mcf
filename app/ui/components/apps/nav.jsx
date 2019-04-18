@@ -61,7 +61,7 @@ class MbeeNav extends Component {
     window.addEventListener('resize', this.setComponentSize);
 
     // Initialize url
-    const url = '/api/users/whoami';
+    const url = '/api/users/whoami?minified=true';
 
     // Do ajax request
     $.ajax({

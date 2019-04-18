@@ -63,9 +63,9 @@ class ElementTree extends Component {
     const elements = contains.join(',');
 
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,type`;
+    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,type&minified=true`;
     if (url.length > 2047) {
-      url = `${base}/elements?parent=${parent}&fields=id,name,contains,type`;
+      url = `${base}/elements?parent=${parent}&fields=id,name,contains,type&minified=true`;
     }
 
     $.ajax({
