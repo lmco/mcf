@@ -37,8 +37,8 @@ class Create extends Component {
     this.state = {
       orgOpt: null,
       org: null,
-      name: null,
-      id: null,
+      name: '',
+      id: '',
       custom: JSON.stringify({}, null, 2)
     };
 
@@ -132,16 +132,23 @@ class Create extends Component {
     }
 
     // Verify if project id is valid
-    if (!RegExp(validators.id).test(this.state.id)) {
-      // Set invalid fields
-      idInvalid = true;
-      disableSubmit = true;
+    if (this.state.id.length !== 0) {
+      if (!RegExp(validators.id).test(this.state.id)) {
+        // Set invalid fields
+        idInvalid = true;
+        disableSubmit = true;
+      }
     }
 
     // Verify if project name is valid
     if (!RegExp(validators.project.name).test(this.state.name)) {
       // Set invalid fields
       nameInvalid = true;
+      disableSubmit = true;
+    }
+
+    // Verify if the user input a name and length
+    if ((this.state.id.length === 0) || (this.state.name.length === 0)) {
       disableSubmit = true;
     }
 
