@@ -94,7 +94,7 @@ class ProfileHome extends Component {
           </div>
           <div id='workspace-body'>
             <div className='main-workspace extra-padding'>
-              <table>
+              <table className='table-width'>
                 <tbody>
                 <tr>
                   <th>Username:</th>

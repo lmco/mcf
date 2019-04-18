@@ -107,8 +107,8 @@ class MembersPage extends Component {
             }
           </div>
           <div id='workspace-body' className='extra-padding'>
-            <div className='main-workspace'>
-              <table>
+            <div className='main-workspace table-padding'>
+              <table className='table-width'>
                 <tbody>
                   {listItems}
                 </tbody>

@@ -70,17 +70,19 @@ class OrgApp extends Component {
         if ((admin) || (perm === 'admin')) {
           // Set the admin state
           this.setState({ admin: true });
+          this.setState({ permissions: 'admin' });
+        }
+        else {
+          this.setState({ permissions: perm });
+        }
+
+        // Verify is user has write permissions
+        if (admin || (perm === 'admin') || (perm === 'write')) {
+          this.setState({ write: true });
         }
 
         // Set the org state
         this.setState({ org: org });
-
-        this.setState({ permissions: perm });
-
-        // Verify is user has write permissions
-        if (admin || (perm === 'write')) {
-          this.setState({ write: true });
-        }
       })
       .catch(err => {
         // Throw error and set error state

@@ -77,9 +77,12 @@ class ProjectApp extends Component {
         if ((admin) || (perm === 'admin')) {
           // Set admin state
           this.setState({ admin: true });
+          this.setState({ permissions: 'admin' });
         }
-        // Set permissions
-        this.setState({ permissions: perm });
+        else {
+          // Set permissions
+          this.setState({ permissions: perm });
+        }
         // Set states
         this.setState({ project: project });
       })
