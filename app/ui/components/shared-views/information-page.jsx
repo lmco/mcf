@@ -58,7 +58,7 @@ class InformationPage extends Component {
     let titleClass = 'workspace-title workspace-title-padding';
 
     // Check admin/write permissions
-    if (this.props.permissions === 'admin' || this.props.permissions === 'write') {
+    if (this.props.permissions === 'admin') {
       isButtonDisplayed = true;
       titleClass = 'workspace-title';
     }
@@ -109,7 +109,7 @@ class InformationPage extends Component {
           </div>
           <div id='workspace-body'>
             <div className='main-workspace extra-padding'>
-              <table>
+              <table className='table-width'>
                 <tbody>
                 <tr>
                   <th>ID:</th>

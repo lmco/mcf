@@ -118,7 +118,7 @@ class MemberEdit extends Component {
     .then((users) => {
       // Loop through users
       const userOpts = users.map((user) => {
-        if (user.name.length > 0) {
+        if (user.name) {
           return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
         }
         else {
@@ -131,7 +131,7 @@ class MemberEdit extends Component {
     })
     .catch((msg) => {
       // Update user if failed
-      alert(`Grabbing users failed: ${msg.responseJSON.description}`);
+      alert(`Grabbing users failed: ${msg.description}`);
     });
   }
 

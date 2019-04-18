@@ -122,17 +122,12 @@ class Element extends Component {
                     Element Information
                   </h2>
                   <div className='side-icons'>
-                    {(this.props.permissions === 'admin')
+                    {((this.props.permissions === 'write') || this.props.permissions === 'admin')
                       ? (<React.Fragment>
                           <UncontrolledTooltip placement='left' target='deleteBtn'>
                             Delete
                           </UncontrolledTooltip>
                           <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
-                         </React.Fragment>)
-                      : ''
-                    }
-                    {((this.props.permissions === 'write') || this.props.permissions === 'admin')
-                      ? (<React.Fragment>
                           <UncontrolledTooltip placement='left' target='editBtn'>
                             Edit
                           </UncontrolledTooltip>
@@ -146,7 +141,7 @@ class Element extends Component {
                     <i id='exitBtn' className='fas fa-times exit-btn' onClick={this.props.closeSidePanel}/>
                   </div>
                 </div>
-                <table>
+                <table className='table-width'>
                   <tbody>
                   <tr>
                     <th>Name:</th>
