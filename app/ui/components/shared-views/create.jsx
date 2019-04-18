@@ -37,8 +37,8 @@ class Create extends Component {
     this.state = {
       orgOpt: null,
       org: null,
-      name: null,
-      id: null,
+      name: '',
+      id: '',
       custom: JSON.stringify({}, null, 2)
     };
 
@@ -132,16 +132,23 @@ class Create extends Component {
     }
 
     // Verify if project id is valid
-    if (!RegExp(validators.id).test(this.state.id)) {
-      // Set invalid fields
-      idInvalid = true;
-      disableSubmit = true;
+    if (this.state.id.length !== 0) {
+      if (!RegExp(validators.id).test(this.state.id)) {
+        // Set invalid fields
+        idInvalid = true;
+        disableSubmit = true;
+      }
     }
 
     // Verify if project name is valid
     if (!RegExp(validators.project.name).test(this.state.name)) {
       // Set invalid fields
       nameInvalid = true;
+      disableSubmit = true;
+    }
+
+    // Verify if the user input a name and length
+    if ((this.state.id.length === 0) || (this.state.name.length === 0)) {
       disableSubmit = true;
     }
 
@@ -181,7 +188,7 @@ class Create extends Component {
             }
             {/* Create an input for project id */}
             <FormGroup>
-              <Label for="id">{header} ID</Label>
+              <Label for="id">{header} ID*</Label>
               <Input type="id"
                      name="id"
                      id="id"
@@ -196,7 +203,7 @@ class Create extends Component {
             </FormGroup>
             {/* Create an input for project name */}
             <FormGroup>
-              <Label for="name">{header} Name</Label>
+              <Label for="name">{header} Name*</Label>
               <Input type="name"
                      name="name"
                      id="name"
@@ -224,6 +231,7 @@ class Create extends Component {
                 Invalid: Custom data must be valid JSON
               </FormFeedback>
             </FormGroup>
+            <div className='required-fields'>* required fields.</div>
 
             {/* Button to create project */}
                 <Button outline color='primary'
