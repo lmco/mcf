@@ -262,7 +262,7 @@ function create(requestingUser, organizationID, projects, options) {
     let projectsToCreate = [];
 
     // Check the type of the projects parameter
-    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
+    if (Array.isArray(saniProjects)) {
       // projects is an array, create many projects
       projectsToCreate = saniProjects;
     }
@@ -619,7 +619,7 @@ function update(requestingUser, organizationID, projects, options) {
       'lean'], Project);
 
     // Check the type of the projects parameter
-    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
+    if (Array.isArray(saniProjects)) {
       // projects is an array, update many projects
       projectsToUpdate = saniProjects;
     }
@@ -993,8 +993,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     const ts = Date.now();
 
     // Check the type of the projects parameter
-    // TODO: Remove the && check, already do this check in the first try/catch
-    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
+    if (Array.isArray(saniProjects)) {
       // projects is an array, replace/create many projects
       projectsToLookUp = saniProjects;
     }
@@ -1188,7 +1187,7 @@ function remove(requestingUser, organizationID, projects, options) {
     const ownedQuery = {};
 
     // Check the type of the projects parameter
-    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'string')) {
+    if (Array.isArray(saniProjects)) {
       // An array of project ids, remove all
       searchedIDs = saniProjects.map(p => utils.createID(orgID, p));
       searchQuery._id = { $in: searchedIDs };

@@ -238,7 +238,7 @@ function create(requestingUser, orgs, options) {
     let orgsToCreate = [];
 
     // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
+    if (Array.isArray(saniOrgs)) {
       // orgs is an array, create many orgs
       orgsToCreate = saniOrgs;
     }
@@ -451,7 +451,7 @@ function update(requestingUser, orgs, options) {
       'lean'], Organization);
 
     // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
+    if (Array.isArray(saniOrgs)) {
       // orgs is an array, update many orgs
       orgsToUpdate = saniOrgs;
     }
@@ -767,7 +767,7 @@ function createOrReplace(requestingUser, orgs, options) {
     const timestamp = Date.now();
 
     // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
+    if (Array.isArray(saniOrgs)) {
       // orgs is an array, update many orgs
       orgsToLookup = saniOrgs;
     }
@@ -908,7 +908,7 @@ function remove(requestingUser, orgs, options) {
     const ownedQuery = {};
 
     // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'string')) {
+    if (Array.isArray(saniOrgs)) {
       // An array of org ids, remove all
       searchedIDs = saniOrgs;
       searchQuery._id = { $in: saniOrgs };
