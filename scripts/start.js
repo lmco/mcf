@@ -49,13 +49,16 @@ function start(args) {
 
   startup(); // Print startup banner
 
+  // Check in dependenices are up to date
   const cmd = 'yarn check --verify-tree';
   try {
+    // Run the command
     execSync(cmd);
   }
   catch (error) {
-    M.log.warn('Dependencies out of date! Please run \'yarn install\' to update'
-      + ' the dependencies.');
+    // If failed, warn user and exit
+    M.log.warn('Dependencies out of date! Please run \'yarn install\' or \'npm'
+      + ' install\' to update the dependencies.');
     process.exit(1);
   }
 
