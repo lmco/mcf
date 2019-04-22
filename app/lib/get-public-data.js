@@ -26,19 +26,27 @@ const utils = M.require('lib.utils');
  * being returned.
  * @param {string} type - The type of item that the object is. Can be an org,
  * project, element or user.
+ * @param {Object} options - A list of options passed in by the user to the API
+ * Controller
  *
  * @return {object} - The modified object.
  */
-module.exports.getPublicData = function(object, type) {
+module.exports.getPublicData = function(object, type, options) {
+  // If options is undefined, set it equal to an empty object
+  if (options === undefined) {
+    options = {}; // eslint-disable-line
+  }
+
+  // Call correct getPublicData() function
   switch (type.toLowerCase()) {
     case 'element':
-      return getElementPublicData(object);
+      return getElementPublicData(object, options);
     case 'project':
-      return getProjectPublicData(object);
+      return getProjectPublicData(object, options);
     case 'org':
-      return getOrgPublicData(object);
+      return getOrgPublicData(object, options);
     case 'user':
-      return getUserPublicData(object);
+      return getUserPublicData(object, options);
     default:
       throw new M.CustomError(`Invalid model type [${type}]`, 400, 'warn');
   }
@@ -48,10 +56,12 @@ module.exports.getPublicData = function(object, type) {
  * @description Returns an elements public data
  *
  * @param {object} element - The raw JSON of the element.
+ * @param {Object} options - A list of options passed in by the user to the API
+ * Controller
  *
  * @return {object} - The public data of the element.
  */
-function getElementPublicData(element) {
+function getElementPublicData(element, options) {
   // Parse the element ID
   const idParts = utils.parseID(element._id);
 
@@ -68,7 +78,7 @@ function getElementPublicData(element) {
     // If element.createdBy is populated
     if (typeof element.createdBy === 'object') {
       // Get the public data of createdBy
-      createdBy = getUserPublicData(element.createdBy);
+      createdBy = getUserPublicData(element.createdBy, options);
     }
     else {
       createdBy = element.createdBy;
@@ -80,7 +90,7 @@ function getElementPublicData(element) {
     // If element.lastModifiedBy is populated
     if (typeof element.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
-      lastModifiedBy = getUserPublicData(element.lastModifiedBy);
+      lastModifiedBy = getUserPublicData(element.lastModifiedBy, options);
     }
     else {
       lastModifiedBy = element.lastModifiedBy;
@@ -92,7 +102,7 @@ function getElementPublicData(element) {
     // If element.archivedBy is populated
     if (typeof element.archivedBy === 'object') {
       // Get the public data of archivedBy
-      archivedBy = getUserPublicData(element.archivedBy);
+      archivedBy = getUserPublicData(element.archivedBy, options);
     }
     else {
       archivedBy = element.archivedBy;
@@ -104,7 +114,7 @@ function getElementPublicData(element) {
     // If element.parent is populated
     if (typeof element.parent === 'object') {
       // Get the public data of parent
-      parent = getElementPublicData(element.parent);
+      parent = getElementPublicData(element.parent, options);
     }
     else {
       parent = utils.parseID(element.parent).pop();
@@ -117,7 +127,7 @@ function getElementPublicData(element) {
     // If element.source is populated
     if (typeof element.source === 'object') {
       // Get the public data of source
-      source = getElementPublicData(element.source);
+      source = getElementPublicData(element.source, options);
     }
     // If source element's project is not the same as the elements parent
     else if (sourceIdParts[1] !== idParts[1]) {
@@ -140,7 +150,7 @@ function getElementPublicData(element) {
     // If element.target is populated
     if (typeof element.target === 'object') {
       // Get the public data of target
-      target = getElementPublicData(element.target);
+      target = getElementPublicData(element.target, options);
     }
     // If target element's project is not the same as the elements parent
     else if (targetIdParts[1] !== idParts[1]) {
@@ -162,7 +172,7 @@ function getElementPublicData(element) {
     // If element.project is populated
     if (typeof element.project === 'object') {
       // Get the public data of project
-      project = getProjectPublicData(element.project);
+      project = getProjectPublicData(element.project, options);
     }
     else {
       project = utils.parseID(element.project)[1];
@@ -189,12 +199,20 @@ function getElementPublicData(element) {
     archivedBy: archivedBy
   };
 
-
+  // Handle the virtual contains field
   if (element.contains) {
-    // Handle the virtual contains field
-    data.contains = (element.contains.every(e => typeof e === 'object'))
-      ? element.contains.map(e => utils.parseID(e._id).pop())
-      : element.contains.map(e => utils.parseID(e).pop());
+    // If all contents are objects (they should be)
+    if (element.contains.every(e => typeof e === 'object')) {
+      // If the archived option is supplied
+      if (options.hasOwnProperty('archived') && options.archived === true) {
+        data.contains = element.contains.map(e => utils.parseID(e._id).pop());
+      }
+      else {
+        // Remove all archived elements
+        const tmpContains = element.contains.filter(e => e.archived !== true);
+        data.contains = tmpContains.map(e => utils.parseID(e._id).pop());
+      }
+    }
   }
 
   return data;
@@ -204,10 +222,12 @@ function getElementPublicData(element) {
  * @description Returns a projects public data
  *
  * @param {object} project - The raw JSON of the project.
+ * @param {Object} options - A list of options passed in by the user to the API
+ * Controller
  *
  * @return {object} - The public data of the project.
  */
-function getProjectPublicData(project) {
+function getProjectPublicData(project, options) {
   const permissions = (project.permissions) ? {} : undefined;
   let createdBy;
   let lastModifiedBy;
@@ -231,7 +251,7 @@ function getProjectPublicData(project) {
     // If project.createdBy is populated
     if (typeof project.createdBy === 'object') {
       // Get the public data of createdBy
-      createdBy = getUserPublicData(project.createdBy);
+      createdBy = getUserPublicData(project.createdBy, options);
     }
     else {
       createdBy = project.createdBy;
@@ -243,7 +263,7 @@ function getProjectPublicData(project) {
     // If project.lastModifiedBy is populated
     if (typeof project.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
-      lastModifiedBy = getUserPublicData(project.lastModifiedBy);
+      lastModifiedBy = getUserPublicData(project.lastModifiedBy, options);
     }
     else {
       lastModifiedBy = project.lastModifiedBy;
@@ -255,7 +275,7 @@ function getProjectPublicData(project) {
     // If project.archivedBy is populated
     if (typeof project.archivedBy === 'object') {
       // Get the public data of archivedBy
-      archivedBy = getUserPublicData(project.archivedBy);
+      archivedBy = getUserPublicData(project.archivedBy, options);
     }
     else {
       archivedBy = project.archivedBy;
@@ -266,7 +286,7 @@ function getProjectPublicData(project) {
   return {
     id: utils.parseID(project._id).pop(),
     org: (project.org && project.org._id)
-      ? getOrgPublicData(project.org)
+      ? getOrgPublicData(project.org, options)
       : utils.parseID(project._id)[0],
     name: project.name,
     elementCount: project.count || undefined,
@@ -288,14 +308,17 @@ function getProjectPublicData(project) {
  * @description Returns an orgs public data
  *
  * @param {object} org - The raw JSON of the org.
+ * @param {Object} options - A list of options passed in by the user to the API
+ * Controller
  *
  * @return {object} - The public data of the org.
  */
-function getOrgPublicData(org) {
+function getOrgPublicData(org, options) {
   const permissions = (org.permissions) ? {} : undefined;
   let createdBy;
   let lastModifiedBy;
   let archivedBy;
+  let projects;
 
   // Loop through each permission key/value pair
   Object.keys(org.permissions || {}).forEach((u) => {
@@ -308,7 +331,7 @@ function getOrgPublicData(org) {
     // If org.createdBy is populated
     if (typeof org.createdBy === 'object') {
       // Get the public data of createdBy
-      createdBy = getUserPublicData(org.createdBy);
+      createdBy = getUserPublicData(org.createdBy, options);
     }
     else {
       createdBy = org.createdBy;
@@ -320,7 +343,7 @@ function getOrgPublicData(org) {
     // If org.lastModifiedBy is populated
     if (typeof org.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
-      lastModifiedBy = getUserPublicData(org.lastModifiedBy);
+      lastModifiedBy = getUserPublicData(org.lastModifiedBy, options);
     }
     else {
       lastModifiedBy = org.lastModifiedBy;
@@ -332,10 +355,26 @@ function getOrgPublicData(org) {
     // If org.archivedBy is populated
     if (typeof org.archivedBy === 'object') {
       // Get the public data of archivedBy
-      archivedBy = getUserPublicData(org.archivedBy);
+      archivedBy = getUserPublicData(org.archivedBy, options);
     }
     else {
       archivedBy = org.archivedBy;
+    }
+  }
+
+  // Handle the virtual projects field
+  if (org.projects) {
+    // If all contents are objects (they should be)
+    if (org.projects.every(p => typeof p === 'object')) {
+      // If the archived option is supplied
+      if (options.hasOwnProperty('archived') && options.archived === true) {
+        projects = org.projects.map(p => getProjectPublicData(p, options));
+      }
+      else {
+        // Remove all archived projects
+        const tmpContains = org.projects.filter(p => p.archived !== true);
+        projects = tmpContains.map(p => getProjectPublicData(p, options));
+      }
     }
   }
 
@@ -352,7 +391,7 @@ function getOrgPublicData(org) {
     archived: (org.archived) ? org.archived : undefined,
     archivedOn: (org.archivedOn) ? org.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
-    projects: (org.projects) ? org.projects.map(p => getProjectPublicData(p)) : undefined
+    projects: projects
   };
 }
 
@@ -360,10 +399,12 @@ function getOrgPublicData(org) {
  * @description Returns a users public data
  *
  * @param {object} user - The raw JSON of the user.
+ * @param {Object} options - A list of options passed in by the user to the API
+ * Controller
  *
  * @return {object} - The public data of the user.
  */
-function getUserPublicData(user) {
+function getUserPublicData(user, options) {
   let createdBy;
   let lastModifiedBy;
   let archivedBy;
@@ -373,7 +414,7 @@ function getUserPublicData(user) {
     // If user.createdBy is populated
     if (typeof user.createdBy === 'object') {
       // Get the public data of createdBy
-      createdBy = getUserPublicData(user.createdBy);
+      createdBy = getUserPublicData(user.createdBy, options);
     }
     else {
       createdBy = user.createdBy;
@@ -385,7 +426,7 @@ function getUserPublicData(user) {
     // If user.lastModifiedBy is populated
     if (typeof user.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
-      lastModifiedBy = getUserPublicData(user.lastModifiedBy);
+      lastModifiedBy = getUserPublicData(user.lastModifiedBy, options);
     }
     else {
       lastModifiedBy = user.lastModifiedBy;
@@ -397,7 +438,7 @@ function getUserPublicData(user) {
     // If user.archivedBy is populated
     if (typeof user.archivedBy === 'object') {
       // Get the public data of archivedBy
-      archivedBy = getUserPublicData(user.archivedBy);
+      archivedBy = getUserPublicData(user.archivedBy, options);
     }
     else {
       archivedBy = user.archivedBy;
