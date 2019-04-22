@@ -296,7 +296,7 @@ function getOrgs(req, res) {
 
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org'))
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -378,7 +378,7 @@ function postOrgs(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org'))
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -460,7 +460,7 @@ function putOrgs(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org'))
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -542,7 +542,7 @@ function patchOrgs(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org'))
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -718,7 +718,7 @@ function getOrg(req, res) {
   .then(() => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org'))
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -812,7 +812,7 @@ function postOrg(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org'))
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -906,7 +906,7 @@ function putOrg(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org'))
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1000,7 +1000,7 @@ function patchOrg(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org'))
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1151,7 +1151,7 @@ function getAllProjects(req, res) {
     }
 
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1259,7 +1259,7 @@ function getProjects(req, res) {
     }
 
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1340,7 +1340,7 @@ function postProjects(req, res) {
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1421,7 +1421,7 @@ function putProjects(req, res) {
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1502,7 +1502,7 @@ function patchProjects(req, res) {
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1657,7 +1657,7 @@ function getProject(req, res) {
     }
 
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1750,7 +1750,7 @@ function postProject(req, res) {
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1843,7 +1843,7 @@ function putProject(req, res) {
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -1935,7 +1935,7 @@ function patchProject(req, res) {
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project'))
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2099,7 +2099,7 @@ function getUsers(req, res) {
   UserController.find(req.user, usernames, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user'))
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2181,7 +2181,7 @@ function postUsers(req, res) {
   UserController.create(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user'))
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2263,7 +2263,7 @@ function putUsers(req, res) {
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user'))
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2345,7 +2345,7 @@ function patchUsers(req, res) {
   UserController.update(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user'))
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2494,7 +2494,7 @@ function getUser(req, res) {
     }
 
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user'))
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2587,7 +2587,7 @@ function postUser(req, res) {
   UserController.create(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user'))
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2680,7 +2680,7 @@ function putUser(req, res) {
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user'))
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2773,7 +2773,7 @@ function patchUser(req, res) {
   UserController.update(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user'))
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -2905,7 +2905,7 @@ function whoami(req, res) {
   }
 
   const publicUserData = sani.html(
-    publicData.getPublicData(req.user, 'user')
+    publicData.getPublicData(req.user, 'user', options)
   );
 
   // Format JSON if minify option is not true
@@ -2988,7 +2988,7 @@ function patchPassword(req, res) {
     req.body.password, req.body.confirmPassword)
   .then((user) => {
     const publicUserData = sani.html(
-      publicData.getPublicData(user, 'user')
+      publicData.getPublicData(user, 'user', options)
     );
 
     // Format JSON if minify option is not true
@@ -3113,7 +3113,7 @@ function getElements(req, res) {
     branchid, elemIDs, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
     // If the fields options was specified and its not blank and not including fields
     if (options.fields && options.fields[0] !== ''
@@ -3234,7 +3234,7 @@ function postElements(req, res) {
     branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -3320,7 +3320,7 @@ function putElements(req, res) {
     req.params.projectid, branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -3405,7 +3405,7 @@ function patchElements(req, res) {
     branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -3587,7 +3587,7 @@ function searchElements(req, res) {
     }
 
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
     // Format JSON if minify option is not true
@@ -3668,7 +3668,7 @@ function getElement(req, res) {
     }
 
     let elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -3769,7 +3769,7 @@ function postElement(req, res) {
     branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -3865,7 +3865,7 @@ function putElement(req, res) {
     req.params.projectid, branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
@@ -3961,7 +3961,7 @@ function patchElement(req, res) {
     branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element'))
+      elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
     // If the fields options was specified and its not blank and not including fields
