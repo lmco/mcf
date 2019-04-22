@@ -95,7 +95,10 @@ function jmi13(data, field) {
   // Loop through all top level keys in JMI 3 object
   Object.keys(jmi3Obj).forEach((k) => {
     // Get the ID of the elements parent
-    const parentID = jmi3Obj[k].parent;
+    const parentID = (typeof jmi3Obj[k].parent === 'object' && jmi3Obj[k].parent !== null)
+      ? jmi3Obj[k].parent[field]
+      : jmi3Obj[k].parent;
+
     // If the parent is on the top level, a circular reference exists.
     if (jmi3Obj[parentID]) {
       throw new M.CustomError('A circular reference exists in the given data.', 403, 'warn');
@@ -151,25 +154,30 @@ function jmi23(jmi2) {
  */
 function jmi23Helper(jmi2, ids) {
   // Create array for lowest level elements
-  const emptys = [];
+  const empties = [];
   // Loop through each id
   ids.forEach((i) => {
     const element = jmi2[i];
-    const parentID = element.parent;
+    const parentID = (typeof element.parent === 'object') ? element.parent.id : element.parent;
     const parent = jmi2[parentID];
     // Move element to its parent's contains field
     parent.contains[i] = element;
     delete jmi2[i];
 
+    // Get the ID of the parent's parent
+    const parentsParent = (typeof parent.parent === 'object' && parent.parent !== null)
+      ? jmi2[parent.parent.id]
+      : jmi2[parent.parent];
+
     // If all of the items in contains are objects, the parent is lowest level
     if (Object.keys(parent.contains).every(k => typeof parent.contains[k] === 'object')
-      && jmi2[parent.parent]) {
-      emptys.push(parentID);
+      && parentsParent) {
+      empties.push(parentID);
     }
   });
 
   // If there are still lowest level elements, recursively call function
-  if (emptys.length > 0) {
-    jmi23Helper(jmi2, emptys);
+  if (empties.length > 0) {
+    jmi23Helper(jmi2, empties);
   }
 }
