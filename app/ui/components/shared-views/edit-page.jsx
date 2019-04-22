@@ -20,7 +20,15 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
+import {
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  FormFeedback,
+  Button,
+  UncontrolledAlert
+} from 'reactstrap';
 
 /* eslint-enable no-unused-vars */
 
@@ -45,7 +53,8 @@ class EditPage extends Component {
 
     this.state = {
       name: name,
-      custom: JSON.stringify(custom || {}, null, 2)
+      custom: JSON.stringify(custom || {}, null, 2),
+      error: null
     };
 
     // Bind component function
@@ -92,11 +101,11 @@ class EditPage extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: (_data) => { window.location.replace(redirect); },
-        401: (_data) => { window.location.replace(redirect); }
-      },
-      fail: (err) => {
-        alert(`Update Failed: ${err.responseJSON.description}`);
+        200: () => { window.location.replace(redirect); },
+        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
       }
     });
   }
@@ -132,38 +141,46 @@ class EditPage extends Component {
           <h2 className='workspace-title workspace-title-padding'>Edit {title}</h2>
         </div>
         <div id='workspace-body' className='extra-padding'>
-          {/* Create form to update org data */}
-          <Form>
-            {/* Form section for org name */}
-            <FormGroup>
-              <Label for="name">Name</Label>
-              <Input type="name"
-                     name="name"
-                     id="name"
-                     placeholder="Name"
-                     value={this.state.name || ''}
-                     onChange={this.handleChange}/>
-            </FormGroup>
-            {/* Form section for custom data */}
-            <FormGroup>
-              <Label for="custom">Custom Data</Label>
-              <Input type="textarea"
-                     name="custom"
-                     id="custom"
-                     placeholder="Custom Data"
-                     value={this.state.custom || ''}
-                     invalid={customInvalid}
-                     onChange={this.handleChange}/>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback>
-                  Invalid: Custom data must be valid JSON
-              </FormFeedback>
-            </FormGroup>
-            {/* Button to submit changes */}
-            <Button color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
-            {' '}
-            <Button outline onClick={this.props.toggle}> Cancel </Button>
-          </Form>
+          <div className='main-workspace'>
+            {(!this.state.error)
+              ? ''
+              : (<UncontrolledAlert color="danger">
+                  {this.state.error}
+                </UncontrolledAlert>)
+            }
+            {/* Create form to update org data */}
+            <Form>
+              {/* Form section for org name */}
+              <FormGroup>
+                <Label for="name">Name</Label>
+                <Input type="name"
+                       name="name"
+                       id="name"
+                       placeholder="Name"
+                       value={this.state.name || ''}
+                       onChange={this.handleChange}/>
+              </FormGroup>
+              {/* Form section for custom data */}
+              <FormGroup>
+                <Label for="custom">Custom Data</Label>
+                <Input type="textarea"
+                       name="custom"
+                       id="custom"
+                       placeholder="Custom Data"
+                       value={this.state.custom || ''}
+                       invalid={customInvalid}
+                       onChange={this.handleChange}/>
+                {/* Verify fields are valid, or display feedback */}
+                <FormFeedback>
+                    Invalid: Custom data must be valid JSON
+                </FormFeedback>
+              </FormGroup>
+              {/* Button to submit changes */}
+              <Button color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+              {' '}
+              <Button outline onClick={this.props.toggle}> Cancel </Button>
+            </Form>
+          </div>
         </div>
       </div>
     );

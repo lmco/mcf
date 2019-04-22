@@ -27,7 +27,9 @@ import { Form,
   Dropdown,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem } from 'reactstrap';
+  DropdownItem,
+  UncontrolledAlert
+} from 'reactstrap';
 
 // MBEE Modules
 import CustomMenu from '../../general/dropdown-search/custom-menu.jsx';
@@ -48,7 +50,8 @@ class MemberEdit extends Component {
       username: '',
       permissions: '',
       searchParam: '',
-      dropDownOpen: false
+      dropDownOpen: false,
+      error: null
     };
 
     // Bind component functions
@@ -94,9 +97,9 @@ class MemberEdit extends Component {
       // Update the page to reload to user page
       window.location.replace(redirect);
     })
-    .catch((msg) => {
+    .catch((err) => {
       // Update user if failed
-      alert(`Update Failed: ${msg.responseJSON.description}`);
+      this.setState({ error: err.responseJSON.description });
     });
   }
 
@@ -129,9 +132,9 @@ class MemberEdit extends Component {
       // Set the user state
       this.setState({ users: userOpts });
     })
-    .catch((msg) => {
+    .catch((err) => {
       // Update user if failed
-      alert(`Grabbing users failed: ${msg.description}`);
+      this.setState({ error: err.responseJSON.description });
     });
   }
 
@@ -156,6 +159,12 @@ class MemberEdit extends Component {
         <hr />
         <div>
           <h3 className='edit-role-title'> {title} </h3>
+          {(!this.state.error)
+            ? ''
+            : (<UncontrolledAlert color="danger">
+                {this.state.error}
+              </UncontrolledAlert>)
+          }
           {/* Create form to update user roles */}
           <Form>
             <FormGroup>

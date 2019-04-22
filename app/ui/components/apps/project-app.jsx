@@ -87,12 +87,10 @@ class ProjectApp extends Component {
         this.setState({ project: project });
       })
       .catch((err) => {
-        console.log(err);
         this.setState({ error: `Failed to grab user: ${err.responseJSON.description}` });
       });
     })
     .catch(err => {
-      console.log(err);
       // Throw error and set state
       this.setState({ error: `Failed to load project: ${err.responseJSON.description}` });
     });

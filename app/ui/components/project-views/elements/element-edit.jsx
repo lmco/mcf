@@ -20,7 +20,17 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, FormFeedback, Row, Col, UncontrolledTooltip } from 'reactstrap';
+import {
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  FormFeedback,
+  Row,
+  Col,
+  UncontrolledTooltip,
+  UncontrolledAlert
+} from 'reactstrap';
 
 // MBEE Modules
 import validators from '../../../../../build/json/validators.json';
@@ -45,7 +55,8 @@ class ElementEdit extends Component {
       custom: {},
       org: null,
       project: null,
-      tooltipOpen: false
+      tooltipOpen: false,
+      error: null
     };
 
     // Bind component function
@@ -88,13 +99,13 @@ class ElementEdit extends Component {
         this.setState({ target: element.target });
       }
 
-      $('textarea[name="custom""]').autoResize();
+      $('textarea[name="custom"]').autoResize();
       // Resize custom data field
       $('textarea[name="documentation"]').autoResize();
     })
     .catch(err => {
       // Throw error and set state
-      this.setState({ error: `Failed to load element: ${err.responsetext}` });
+      this.setState({ error: `Failed to load element: ${err.responseJSON.description}` });
     });
   }
 
@@ -148,17 +159,23 @@ class ElementEdit extends Component {
     }
 
     // Send a patch request to update element data
-    ajaxRequest('PATCH', url, data)
-    // On success
-    .then(() => {
-      // Update the page
-      window.location.replace(`/${this.state.org}/${this.state.project}/elements`);
-    })
-    // On fail
-    .catch((err) => {
-      console.log(err);
-      // Let user know update failed
-      alert(`Update Failed: ${err}`);
+    $.ajax({
+      method: 'PATCH',
+      url: url,
+      data: data,
+      dataType: 'json',
+      statusCode: {
+        200: () => {
+          this.props.closeSidePanel(null, true);
+        },
+        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
+      }
     });
   }
 
@@ -205,6 +222,12 @@ class ElementEdit extends Component {
               <i id='cancelBtn' className='fas fa-times exit-btn' onClick={() => { this.props.closeSidePanel(); }}/>
             </div>
           </div>
+          {(!this.state.error)
+            ? ''
+            : (<UncontrolledAlert color="danger">
+                {this.state.error}
+              </UncontrolledAlert>)
+          }
           {/* Create form to update element data */}
           <Form className='element-edit-form'>
             {/* Form section for Element name */}

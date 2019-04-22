@@ -21,7 +21,6 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 import { Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 import Delete from '../../shared-views/delete.jsx';
 import CustomData from '../../general/custom-data/custom-data.jsx';
@@ -51,15 +50,26 @@ class Element extends Component {
     // Initialize variables
     const elementId = this.props.id;
     const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
-    // Get project data
-    ajaxRequest('GET', `${url}`)
-    .then(element => {
-      this.setState({ element: element });
-    })
-    .catch(err => {
-      // Throw error and set state
-      this.setState({ error: `Failed to load element: ${err.responsetext}` });
-    });
+
+    if (elementId) {
+      // Get project data
+      $.ajax({
+        method: 'GET',
+        url: url,
+        statusCode: {
+          200: (element) => {
+            this.setState({ element: element });
+          },
+          401: (err) => {
+            // Throw error and set state
+            this.setState({ error: err.responseJSON.description });
+          },
+          404: (err) => {
+            this.setState({ error: err.responseJSON.description });
+          }
+        }
+      });
+    }
   }
 
   // Define toggle function
