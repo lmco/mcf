@@ -232,11 +232,7 @@ ElementSchema.statics.validateObjectKeys = function(object) {
  */
 ElementSchema.index({
   name: 'text',
-  documentation: 'text',
-  _id: 'text',
-  source: 'text',
-  target: 'text',
-  parent: 'text'
+  documentation: 'text'
 });
 
 
