@@ -37,7 +37,8 @@ class ElementTree extends Component {
       children: null,
       modalEdit: false,
       elementWindow: false,
-      isSelected: true
+      isSelected: true,
+      error: null
     };
 
     this.toggleCollapse = this.toggleCollapse.bind(this);
@@ -72,11 +73,19 @@ class ElementTree extends Component {
       method: 'GET',
       url: url,
       statusCode: {
-        200: (data) => { this.setState({ children: data }); },
-        401: () => { this.setState({ children: null }); }
-      },
-      fail: () => {
-        console.log('A failure occurred.');
+        200: (data) => {
+          this.setState({ children: data });
+        },
+        401: (err) => {
+          this.setState({ children: null });
+          this.setState({ error: err.responseJSON.description });
+        },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
       }
     });
   }
@@ -127,7 +136,6 @@ class ElementTree extends Component {
       // Icon should be chevron to show subtree is collapsible
       expandIcon = (this.state.isOpen) ? 'fa-caret-down' : 'fa-caret-right';
 
-
       // Create Subtrees
       if (this.state.children !== null) {
         for (let i = 0; i < this.state.children.length; i++) {
@@ -144,7 +152,6 @@ class ElementTree extends Component {
         }
       }
     }
-
 
     // Build the rendered element item
     let element = '';

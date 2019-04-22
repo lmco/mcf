@@ -69,10 +69,10 @@ class MbeeNav extends Component {
       url: url,
       statusCode: {
         200: (data) => { this.setState({ user: data }); },
-        401: (data) => { this.setState({ user: null }); }
-      },
-      fail: () => {
-        console.log('A failure occurred.');
+        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
       }
     });
 

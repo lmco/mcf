@@ -19,10 +19,17 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
+import {
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  FormFeedback,
+  Button,
+  UncontrolledAlert
+} from 'reactstrap';
 
 // MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 import validators from '../../../../build/json/validators.json';
 
 /* eslint-enable no-unused-vars */
@@ -39,6 +46,7 @@ class Create extends Component {
       org: null,
       name: '',
       id: '',
+      error: null,
       custom: JSON.stringify({}, null, 2)
     };
 
@@ -84,15 +92,20 @@ class Create extends Component {
       custom: JSON.parse(this.state.custom)
     };
 
-    // Post the new project
-    ajaxRequest('POST', url, data)
-    .then(() => {
-      // On success, return to project-views page
-      window.location.replace(redirect);
-    })
-    .catch((msg) => {
-      // On failure, alert user
-      alert(`Create Failed: ${msg.responseJSON.description}`);
+    $.ajax({
+      method: 'POST',
+      url: url,
+      dataType: 'json',
+      data: data,
+      statusCode: {
+        200: () => {
+          // On success, return to project-views page
+          window.location.replace(redirect);
+        },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
+      }
     });
   }
 
@@ -169,6 +182,12 @@ class Create extends Component {
           <h2 className='workspace-title workspace-title-padding'>{title}</h2>
         </div>
         <div className='extra-padding'>
+          {(!this.state.error)
+            ? ''
+            : (<UncontrolledAlert color="danger">
+                {this.state.error}
+               </UncontrolledAlert>)
+          }
           <Form>
             {/* Verify if org provided */}
             {(this.props.project && !this.props.org)

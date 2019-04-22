@@ -44,15 +44,16 @@ class ProjectElements extends Component {
       id: null,
       refreshFunction: null,
       selected: null,
-      treeRoot: null
+      treeRoot: null,
+      error: null
     };
 
     this.openElementInfo = this.openElementInfo.bind(this);
     this.closeSidePanel = this.closeSidePanel.bind(this);
     this.editElementInfo = this.editElementInfo.bind(this);
     this.createNewElement = this.createNewElement.bind(this);
+    this.getElement = this.getElement.bind(this);
   }
-
 
   createNewElement() {
     this.setState({
@@ -107,7 +108,7 @@ class ProjectElements extends Component {
     document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
-  componentDidMount() {
+  getElement() {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
@@ -118,12 +119,19 @@ class ProjectElements extends Component {
       url: url,
       statusCode: {
         200: (data) => { this.setState({ treeRoot: data }); },
-        401: () => { this.setState({ treeRoot: null }); }
-      },
-      fail: () => {
-        console.log('A failure occurred.');
+        401: () => { this.setState({ treeRoot: null }); },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
       }
     });
+  }
+
+  componentDidMount() {
+    this.getElement();
   }
 
   render() {
@@ -165,7 +173,7 @@ class ProjectElements extends Component {
                           project={this.props.project}
                           parent={null}
                           isOpen={true}
-                          parentRefresh={this.componentDidMount}
+                          parentRefresh={this.getElement}
                           clickHandler={this.openElementInfo}/>;
     }
 

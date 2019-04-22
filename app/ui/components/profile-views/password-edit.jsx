@@ -19,7 +19,16 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
+import {
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  FormFeedback,
+  Button,
+  UncontrolledAlert
+} from 'reactstrap';
+
 
 /* eslint-enable no-unused-vars */
 
@@ -35,7 +44,8 @@ class PasswordEdit extends Component {
       oldPassword: '',
       newPassword: '',
       confirmNewPassword: '',
-      newPasswordInvalid: false
+      newPasswordInvalid: false,
+      error: null
     };
 
     // Bind component functions
@@ -96,11 +106,11 @@ class PasswordEdit extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: (_data) => { window.location.replace('/profile'); },
-        401: (_data) => { window.location.replace('/profile'); }
-      },
-      fail: (err) => {
-        alert(`Update Failed: ${err.description}`);
+        200: () => { window.location.replace('/profile'); },
+        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
       }
     });
   }
@@ -130,52 +140,60 @@ class PasswordEdit extends Component {
           <h2 className='workspace-title workspace-title-padding'>User Edit</h2>
         </div>
         <div id='workspace-body' className='extra-padding'>
-          {/* Create form to update user password */}
-          <Form>
-            {/* Input old password */}
-            <FormGroup>
-              <Label for="oldPassword">Old Password</Label>
-              <Input type="password"
-                     name="oldPassword"
-                     id="oldPassword"
-                     placeholder="Old Password"
-                     value={this.state.oldPassword || ''}
-                     onChange={this.handleChange}/>
-            </FormGroup>
-            {/* Input new password */}
-            <FormGroup>
-              <Label for="newPassword">New Password</Label>
-              <Input type="password"
-                     name="newPassword"
-                     id="newPassword"
-                     placeholder="New Password"
-                     value={this.state.newPassword || ''}
-                     invalid={this.state.newPasswordInvalid}
-                     onChange={this.handleChange}/>
-              <FormFeedback>
-                Invalid: Password must have 8 characters,
-                a lowercase, uppercase, digit, and special character.
-              </FormFeedback>
-            </FormGroup>
-            {/* Input new password again */}
-            <FormGroup>
-              <Label for="confirmNewPassword">Confirm New Password</Label>
-              <Input type="password"
-                     name="confirmNewPassword"
-                     id="confirmNewPassword"
-                     placeholder="Confirm New Password"
-                     value={this.state.confirmNewPassword || ''}
-                     invalid={confirmPasswordInvalid}
-                     onChange={this.handleChange}/>
-              <FormFeedback>
-                Invalid: Password are not the same.
-              </FormFeedback>
-            </FormGroup>
-            {/* Button to submit or cancel */}
-            <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
-            {' '}
-            <Button outline onClick={this.props.toggle}> Cancel </Button>
-          </Form>
+          <div className='main-workspace'>
+            {(!this.state.error)
+              ? ''
+              : (<UncontrolledAlert color="danger">
+                {this.state.error}
+              </UncontrolledAlert>)
+            }
+            {/* Create form to update user password */}
+            <Form>
+              {/* Input old password */}
+              <FormGroup>
+                <Label for="oldPassword">Old Password</Label>
+                <Input type="password"
+                       name="oldPassword"
+                       id="oldPassword"
+                       placeholder="Old Password"
+                       value={this.state.oldPassword || ''}
+                       onChange={this.handleChange}/>
+              </FormGroup>
+              {/* Input new password */}
+              <FormGroup>
+                <Label for="newPassword">New Password</Label>
+                <Input type="password"
+                       name="newPassword"
+                       id="newPassword"
+                       placeholder="New Password"
+                       value={this.state.newPassword || ''}
+                       invalid={this.state.newPasswordInvalid}
+                       onChange={this.handleChange}/>
+                <FormFeedback>
+                  Invalid: Password must have 8 characters,
+                  a lowercase, uppercase, digit, and special character.
+                </FormFeedback>
+              </FormGroup>
+              {/* Input new password again */}
+              <FormGroup>
+                <Label for="confirmNewPassword">Confirm New Password</Label>
+                <Input type="password"
+                       name="confirmNewPassword"
+                       id="confirmNewPassword"
+                       placeholder="Confirm New Password"
+                       value={this.state.confirmNewPassword || ''}
+                       invalid={confirmPasswordInvalid}
+                       onChange={this.handleChange}/>
+                <FormFeedback>
+                  Invalid: Password are not the same.
+                </FormFeedback>
+              </FormGroup>
+              {/* Button to submit or cancel */}
+              <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+              {' '}
+              <Button outline onClick={this.props.toggle}> Cancel </Button>
+            </Form>
+          </div>
         </div>
       </div>
     );

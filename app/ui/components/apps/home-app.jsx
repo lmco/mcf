@@ -128,7 +128,8 @@ class HomeApp extends Component {
       });
     })
     .catch(err => {
-      console.log(err);
+      // Throw error and set error state
+      this.setState({ error: `Failed to grab user: ${err}` });
     });
   }
 
