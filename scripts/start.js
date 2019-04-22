@@ -49,7 +49,7 @@ function start(args) {
 
   startup(); // Print startup banner
 
-  // Check in dependenices are up to date
+  // Check in dependencies are up to date
   const cmd = 'yarn check --verify-tree';
   try {
     // Run the command
