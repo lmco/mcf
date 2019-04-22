@@ -2811,10 +2811,7 @@ function getElements(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    console.log(error);
-    return res.status(error.status || 500).send(error)
-  });
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**

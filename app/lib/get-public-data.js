@@ -236,7 +236,7 @@ function getElementPublicData(element, options) {
       options.fields.forEach((f) => {
         returnObj[f] = (data[f]) ? data[f] : undefined;
       });
-      return returnObj
+      return returnObj;
     }
   }
 
@@ -312,7 +312,7 @@ function getProjectPublicData(project, options) {
   }
 
   // Return the projects public fields
-  const data =  {
+  const data = {
     id: utils.parseID(project._id).pop(),
     org: (project.org && project.org._id)
       ? getOrgPublicData(project.org, options)
@@ -353,7 +353,7 @@ function getProjectPublicData(project, options) {
       options.fields.forEach((f) => {
         returnObj[f] = (data[f]) ? data[f] : undefined;
       });
-      return returnObj
+      return returnObj;
     }
   }
 
@@ -471,7 +471,7 @@ function getOrgPublicData(org, options) {
       options.fields.forEach((f) => {
         returnObj[f] = (data[f]) ? data[f] : undefined;
       });
-      return returnObj
+      return returnObj;
     }
   }
 
@@ -568,7 +568,7 @@ function getUserPublicData(user, options) {
       options.fields.forEach((f) => {
         returnObj[f] = (data[f]) ? data[f] : undefined;
       });
-      return returnObj
+      return returnObj;
     }
   }
 
