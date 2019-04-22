@@ -53,7 +53,7 @@ class Delete extends Component {
 
     if (this.props.projects) {
       // Get all the project-views from that org
-      ajaxRequest('GET', `/api/orgs/${event.target.value}/projects?fields=id,name`)
+      ajaxRequest('GET', `/api/orgs/${event.target.value}/projects?fields=id,name&minified=true`)
       .then(projects => {
         // Loop through project-views and create proj options
         const projectOptions = projects.map(
@@ -110,7 +110,7 @@ class Delete extends Component {
     // Delete the project selected
     $.ajax({
       method: 'DELETE',
-      url: url,
+      url: `${url}?minified=true`,
       dataType: 'json',
       statusCode: {
         200: () => {

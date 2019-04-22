@@ -92,7 +92,7 @@ class MemberEdit extends Component {
     }
 
     // Send a patch request to update data
-    ajaxRequest('PATCH', url, data)
+    ajaxRequest('PATCH', `${url}?minified=true`, data)
     .then(() => {
       // Update the page to reload to user page
       window.location.replace(redirect);
@@ -117,7 +117,7 @@ class MemberEdit extends Component {
 
   componentDidMount() {
     // Get all the users
-    ajaxRequest('GET', '/api/users')
+    ajaxRequest('GET', '/api/users?minified=true')
     .then((users) => {
       // Loop through users
       const userOpts = users.map((user) => {

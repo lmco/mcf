@@ -72,7 +72,7 @@ class ProfileEdit extends Component {
     // Send a patch request to update user data
     $.ajax({
       method: 'PATCH',
-      url: url,
+      url: `${url}?minified=true`,
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {

@@ -161,7 +161,7 @@ class ElementEdit extends Component {
     // Send a patch request to update element data
     $.ajax({
       method: 'PATCH',
-      url: url,
+      url: `${url}?minified=true`,
       data: data,
       dataType: 'json',
       statusCode: {
