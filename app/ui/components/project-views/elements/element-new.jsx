@@ -25,7 +25,9 @@ import {
   Label,
   Input,
   Button,
-  Col, FormFeedback
+  Col,
+  FormFeedback,
+  UncontrolledAlert
 } from 'reactstrap';
 
 // MBEE Modules
@@ -55,7 +57,7 @@ class ElementNew extends Component {
       org: null,
       project: null,
       branch: 'master',
-      formFeedback: ''
+      error: null
     };
 
     // Bind component function
@@ -96,12 +98,12 @@ class ElementNew extends Component {
       dataType: 'json',
       data: data,
       statusCode: {
-        200: (retData) => {
+        200: () => {
           this.props.closeSidePanel(null, true);
+        },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
         }
-      },
-      fail: (err) => {
-        this.setState({ formFeedback: err });
       }
     });
   }
@@ -121,6 +123,12 @@ class ElementNew extends Component {
     return (
       <div className='element-create'>
         <h2>New Element</h2>
+        {(!this.state.error)
+          ? ''
+          : (<UncontrolledAlert color="danger">
+              {this.state.error}
+             </UncontrolledAlert>)
+        }
         <Form>
           <FormGroup row>
             <Label for="name" sm={2}>ID</Label>

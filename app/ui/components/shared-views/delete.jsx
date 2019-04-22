@@ -19,7 +19,7 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
+import { Form, FormGroup, Label, Input, Button, UncontrolledAlert } from 'reactstrap';
 
 // MBEE Modules
 import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
@@ -107,22 +107,27 @@ class Delete extends Component {
       url = `/api/orgs/${this.props.org.id}`;
     }
 
-
     // Delete the project selected
-    ajaxRequest('DELETE', url)
-    .then(() => {
-      if (this.props.element) {
-        this.props.closeSidePanel(null, true, true);
-        this.props.toggle();
+    $.ajax({
+      method: 'DELETE',
+      url: url,
+      dataType: 'json',
+      statusCode: {
+        200: () => {
+          if (this.props.element) {
+            this.props.closeSidePanel(null, true, true);
+            this.props.toggle();
+          }
+          else {
+            // On success, return to the project-views page
+            window.location.replace('/');
+          }
+        },
+        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
       }
-      else {
-        // On success, return to the project-views page
-        window.location.replace('/');
-      }
-    })
-    .catch((msg) => {
-      // On failure, notify user of failure
-      alert(`Delete Failed: ${msg.statusText}`);
     });
   }
 
@@ -171,6 +176,12 @@ class Delete extends Component {
           </h2>
         </div>
         <div className='extra-padding'>
+          {(!this.state.error)
+            ? ''
+            : (<UncontrolledAlert color="danger">
+              {this.state.error}
+            </UncontrolledAlert>)
+          }
           <Form>
             {
               (!this.props.orgs)

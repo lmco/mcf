@@ -19,7 +19,15 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Input, FormFeedback, Button } from 'reactstrap';
+import {
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  FormFeedback,
+  Button,
+  UncontrolledAlert
+} from 'reactstrap';
 
 // MBEE Modules
 import validators from '../../../../build/json/validators.json';
@@ -37,7 +45,8 @@ class ProfileEdit extends Component {
     this.state = {
       fname: this.props.user.fname,
       lname: this.props.user.lname,
-      custom: JSON.stringify(this.props.user.custom || {}, null, 2)
+      custom: JSON.stringify(this.props.user.custom || {}, null, 2),
+      error: null
     };
 
     // Bind component functions
@@ -67,11 +76,14 @@ class ProfileEdit extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: (_data) => { window.location.replace('/profile'); },
-        401: (_data) => { window.location.replace('/profile'); }
-      },
-      fail: (err) => {
-        alert(`Update Failed: ${err.responseJSON.description}`);
+        200: () => { window.location.replace('/profile'); },
+        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
       }
     });
   }
@@ -133,58 +145,66 @@ class ProfileEdit extends Component {
           }
         </div>
         <div id='workspace-body' className='extra-padding'>
-          {/* Create form to update user data */}
-          <Form>
-            {/* Form section for user's first name */}
-            <FormGroup>
-              <Label for="fname">User's First Name</Label>
-              <Input type="fname"
-                     name="fname"
-                     id="fname"
-                     placeholder="User's first name"
-                     value={this.state.fname || ''}
-                     invalid={fnameInvalid}
-                     onChange={this.handleChange}/>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback >
-                Invalid: A user's first name may only contain letters.
-              </FormFeedback>
-            </FormGroup>
-            {/* Form section for user's last name */}
-            <FormGroup>
-              <Label for="lname">User's Last Name</Label>
-              <Input type="lname"
-                     name="lname"
-                     id="lname"
-                     placeholder="User's last name"
-                     value={this.state.lname || ''}
-                     invalid={lnameInvalid}
-                     onChange={this.handleChange}/>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback >
-                Invalid: A user's last name may only contain letters.
-              </FormFeedback>
-            </FormGroup>
-            {/* Form section for custom data */}
-            <FormGroup>
-              <Label for="custom">Custom Data</Label>
-              <Input type="custom"
-                     name="custom"
-                     id="custom"
-                     placeholder="Custom Data"
-                     value={this.state.custom || ''}
-                     invalid={customInvalid}
-                     onChange={this.handleChange}/>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback>
-                Invalid: Custom data must be valid JSON
-              </FormFeedback>
-            </FormGroup>
-            {/* Button to submit changes */}
-            <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
-            {' '}
-            <Button outline onClick={this.props.toggle}> Cancel </Button>
-          </Form>
+          <div className='main-workspace'>
+            {(!this.state.error)
+              ? ''
+              : (<UncontrolledAlert color="danger">
+                  {this.state.error}
+                </UncontrolledAlert>)
+            }
+            {/* Create form to update user data */}
+            <Form>
+              {/* Form section for user's first name */}
+              <FormGroup>
+                <Label for="fname">User's First Name</Label>
+                <Input type="fname"
+                       name="fname"
+                       id="fname"
+                       placeholder="User's first name"
+                       value={this.state.fname || ''}
+                       invalid={fnameInvalid}
+                       onChange={this.handleChange}/>
+                {/* Verify fields are valid, or display feedback */}
+                <FormFeedback >
+                  Invalid: A user's first name may only contain letters.
+                </FormFeedback>
+              </FormGroup>
+              {/* Form section for user's last name */}
+              <FormGroup>
+                <Label for="lname">User's Last Name</Label>
+                <Input type="lname"
+                       name="lname"
+                       id="lname"
+                       placeholder="User's last name"
+                       value={this.state.lname || ''}
+                       invalid={lnameInvalid}
+                       onChange={this.handleChange}/>
+                {/* Verify fields are valid, or display feedback */}
+                <FormFeedback >
+                  Invalid: A user's last name may only contain letters.
+                </FormFeedback>
+              </FormGroup>
+              {/* Form section for custom data */}
+              <FormGroup>
+                <Label for="custom">Custom Data</Label>
+                <Input type="custom"
+                       name="custom"
+                       id="custom"
+                       placeholder="Custom Data"
+                       value={this.state.custom || ''}
+                       invalid={customInvalid}
+                       onChange={this.handleChange}/>
+                {/* Verify fields are valid, or display feedback */}
+                <FormFeedback>
+                  Invalid: Custom data must be valid JSON
+                </FormFeedback>
+              </FormGroup>
+              {/* Button to submit changes */}
+              <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+              {' '}
+              <Button outline onClick={this.props.toggle}> Cancel </Button>
+            </Form>
+          </div>
         </div>
       </div>
     );
