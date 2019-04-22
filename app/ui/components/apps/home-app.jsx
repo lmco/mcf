@@ -72,7 +72,7 @@ class HomeApp extends Component {
     ajaxRequest('GET', `${url}`)
     .then(user => {
       // Get the organization and their projects
-      ajaxRequest('GET', '/api/orgs?populate=projects&minfied=true')
+      ajaxRequest('GET', '/api/orgs?populate=projects&minified=true')
       .then(orgs => {
         // Set user state
         this.setState({ user: user });
