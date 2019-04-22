@@ -84,6 +84,12 @@ const jmi = M.require('lib.jmi-conversions');
  */
 function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
+    // Set options if no orgs were provided, but options were
+    if (typeof orgs === 'object' && orgs !== null && !Array.isArray(orgs)) {
+      options = orgs; // eslint-disable-line no-param-reassign
+      orgs = undefined; // eslint-disable-line no-param-reassign
+    }
+
     // Ensure input parameters are correct type
     try {
       assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
@@ -110,11 +116,6 @@ function find(requestingUser, orgs, options) {
     const saniOrgs = (orgs !== undefined)
       ? sani.mongo(JSON.parse(JSON.stringify(orgs)))
       : undefined;
-
-    // Set options if no orgs were provided, but options were
-    if (typeof orgs === 'object' && orgs !== null && !Array.isArray(orgs)) {
-      options = orgs; // eslint-disable-line no-param-reassign
-    }
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',

@@ -541,9 +541,8 @@ function optionLimitFind(done) {
   // Create the options object with a limit of 2
   const options = { limit: 2 };
 
-  // TODO: Remove undefined after bug fix MBX-929
   // Find all elements on a given project
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', undefined, options)
+  ElementController.find(adminUser, org.id, projIDs[0], 'master', options)
   .then((foundElements) => {
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -570,7 +569,7 @@ function optionSkipFind(done) {
   const secondOptions = { limit: 2, skip: 2 };
 
   // Find all elements on a given project
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', undefined, firstOptions)
+  ElementController.find(adminUser, org.id, projIDs[0], 'master', firstOptions)
   .then((foundElements) => {
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -579,7 +578,7 @@ function optionSkipFind(done) {
 
     // Find the next batch of elements
     return ElementController.find(adminUser, org.id, projIDs[0], 'master',
-      undefined, secondOptions);
+      secondOptions);
   })
   .then((foundElements) => {
     // Verify that no more than 2 elements were found
