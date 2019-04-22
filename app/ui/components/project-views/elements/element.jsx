@@ -49,7 +49,7 @@ class Element extends Component {
   getElement() {
     // Initialize variables
     const elementId = this.props.id;
-    const url = `${this.props.url}/branches/master/elements/${elementId}`;
+    const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
 
     if (elementId) {
       // Get project data

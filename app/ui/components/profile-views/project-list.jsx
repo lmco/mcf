@@ -62,10 +62,10 @@ class ProjectList extends Component {
 
   componentDidMount() {
     // Get user information
-    ajaxRequest('GET', '/api/users/whoami')
+    ajaxRequest('GET', '/api/users/whoami?minified=true')
     .then(user => {
       // Get the organization and their project-views
-      ajaxRequest('GET', '/api/orgs?populate=projects')
+      ajaxRequest('GET', '/api/orgs?populate=projects&minified=true')
       .then(orgs => {
         // Initialize variables
         const writePermOrgs = [];

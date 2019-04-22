@@ -48,7 +48,7 @@ class ProfileApp extends Component {
 
   componentDidMount() {
     // Get user data
-    ajaxRequest('GET', '/api/users/whoami')
+    ajaxRequest('GET', '/api/users/whoami?minified=true')
     .then(user => {
       // Set user state
       this.setState({ user: user });

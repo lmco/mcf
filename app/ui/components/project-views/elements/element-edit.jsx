@@ -75,7 +75,7 @@ class ElementEdit extends Component {
   getElement() {
     // Initialize variables
     const elementId = this.state.id;
-    const url = `${this.props.url}/branches/master/elements/${elementId}`;
+    const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
     // Get project data
     ajaxRequest('GET', `${url}`)
     .then(element => {
@@ -140,7 +140,7 @@ class ElementEdit extends Component {
   onSubmit() {
     // Initialize variables
     const elementId = this.state.id;
-    const url = `${this.props.url}/branches/master/elements/${elementId}`;
+    const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
     const data = {
       name: this.state.name,
       type: this.state.type,

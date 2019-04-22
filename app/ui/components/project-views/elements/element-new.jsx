@@ -94,7 +94,7 @@ class ElementNew extends Component {
 
     $.ajax({
       method: 'POST',
-      url: url,
+      url: `${url}?minified=true`,
       dataType: 'json',
       data: data,
       statusCode: {

@@ -63,10 +63,10 @@ class ProjectApp extends Component {
     this.setState({ orgid: orgId });
 
     // Get project data
-    ajaxRequest('GET', `${url}`)
+    ajaxRequest('GET', `${url}?minified=true`)
     .then(project => {
       // Get user data
-      ajaxRequest('GET', '/api/users/whoami')
+      ajaxRequest('GET', '/api/users/whoami?minified=true')
       .then(user => {
         // Initialize variables
         const username = user.username;

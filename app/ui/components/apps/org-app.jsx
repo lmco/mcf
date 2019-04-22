@@ -56,10 +56,10 @@ class OrgApp extends Component {
 
   componentDidMount() {
     // Get the organization and it's projects
-    ajaxRequest('GET', `/api/orgs/${this.props.match.params.orgid}?populate=projects`)
+    ajaxRequest('GET', `/api/orgs/${this.props.match.params.orgid}?populate=projects&minified=true`)
     .then(org => {
       // Get the users information
-      ajaxRequest('GET', '/api/users/whoami')
+      ajaxRequest('GET', '/api/users/whoami?minified=true')
       .then(user => {
         // Initialize variables
         const username = user.username;

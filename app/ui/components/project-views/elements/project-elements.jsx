@@ -112,7 +112,7 @@ class ProjectElements extends Component {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
-    const url = `${base}/elements/model?fields=id,name,contains,type`;
+    const url = `${base}/elements/model?fields=id,name,contains,type&minified=true`;
 
     $.ajax({
       method: 'GET',

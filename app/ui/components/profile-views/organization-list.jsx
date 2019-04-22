@@ -59,10 +59,10 @@ class OrganizationList extends Component {
 
   componentDidMount() {
     // Get all orgs with their projects
-    ajaxRequest('GET', '/api/orgs?populate=projects')
+    ajaxRequest('GET', '/api/orgs?populate=projects&minified=true')
     .then(orgs => {
       // Get the users information
-      ajaxRequest('GET', '/api/users/whoami')
+      ajaxRequest('GET', '/api/users/whoami?minified=true')
       .then(user => {
         // Verify if admin user
         if (user.admin) {
