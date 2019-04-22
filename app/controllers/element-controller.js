@@ -106,6 +106,13 @@ const jmi = M.require('lib.jmi-conversions');
  */
 function find(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    // Set options if no elements were provided, but options were
+    if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
+      // Note: assumes input param elements is input option param
+      options = elements; // eslint-disable-line no-param-reassign
+      elements = undefined; // eslint-disable-line no-param-reassign
+    }
+
     // Ensure input parameters are correct type
     try {
       assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
@@ -142,12 +149,6 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     const projID = sani.mongo(projectID);
     let foundElements = [];
     const searchQuery = { project: utils.createID(orgID, projID), archived: false };
-
-    // Set options if no elements were provided, but options were
-    if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
-      // Note: assumes input param elements is input option param
-      options = elements; // eslint-disable-line no-param-reassign
-    }
 
     // Initialize validOptions
     let validOptions = {};

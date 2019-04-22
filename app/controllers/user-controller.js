@@ -82,6 +82,12 @@ const utils = M.require('lib.utils');
  */
 function find(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
+    // Set options if no users were provided, but options were
+    if (typeof users === 'object' && users !== null && !Array.isArray(users)) {
+      options = users; // eslint-disable-line no-param-reassign
+      users = undefined; // eslint-disable-line no-param-reassign
+    }
+
     // Ensure input parameters are correct type
     try {
       assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
@@ -107,11 +113,6 @@ function find(requestingUser, users, options) {
     const saniUsers = (users !== undefined)
       ? sani.mongo(JSON.parse(JSON.stringify(users)))
       : undefined;
-
-    // Set options if no users were provided, but options were
-    if (typeof users === 'object' && users !== null && !Array.isArray(users)) {
-      options = users; // eslint-disable-line no-param-reassign
-    }
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',
