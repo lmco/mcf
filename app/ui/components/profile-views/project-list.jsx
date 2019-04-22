@@ -58,69 +58,92 @@ class ProjectList extends Component {
     this.handleResize = this.handleResize.bind(this);
     this.handleCreateToggle = this.handleCreateToggle.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
+    this.setMountedComponentStates = this.setMountedComponentStates.bind(this);
   }
 
   componentDidMount() {
-    // Get user information
-    ajaxRequest('GET', '/api/users/whoami?minified=true')
-    .then(user => {
-      // Get the organization and their project-views
-      ajaxRequest('GET', '/api/orgs?populate=projects&minified=true')
-      .then(orgs => {
-        // Initialize variables
-        const writePermOrgs = [];
-        const allProjects = [];
+    const url = '/api/users/whoami?minified=true';
 
-        // Add event listener for window resizing
-        window.addEventListener('resize', this.handleResize);
-        // Handle initial size of window
-        this.handleResize();
-
-        // Loop through orgs
-        orgs.forEach((org) => {
-          // Loop through project-views and push to array
-          org.projects.forEach(project => {
-            allProjects.push(project);
+    // Get project data
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (user) => {
+          // Get project data
+          $.ajax({
+            method: 'GET',
+            url: '/api/orgs?populate=projects&minified=true',
+            statusCode: {
+              200: (orgs) => {
+                this.setMountedComponentStates(user, orgs);
+              },
+              401: (err) => {
+                // Throw error and set state
+                this.setState({ error: err.responseJSON.description });
+              },
+              404: (err) => {
+                this.setState({ error: err.responseJSON.description });
+              }
+            }
           });
-
-          // Initialize variables
-          const perm = org.permissions[user.username];
-
-          // Verify if user has write or admin permissions
-          if ((perm === 'write') || (perm === 'admin')) {
-            // Push the org to the org permissions
-            writePermOrgs.push(org);
-          }
-        });
-
-        // Verify there are orgs
-        if (writePermOrgs.length > 0) {
-          // Set write states
-          this.setState({ write: true });
-          this.setState({ writePermOrgs: writePermOrgs });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
         }
-
-        // Verify user is admin
-        if (user.admin) {
-          // Set admin state
-          this.setState({ admin: user.admin });
-        }
-
-        // Set the org state
-        this.setState({ orgs: orgs });
-
-        // Set the org state
-        this.setState({ projects: allProjects });
-      })
-      .catch(err => {
-        // Throw error and set error state
-        this.setState({ error: `Failed to grab orgs: ${err}` });
-      });
-    })
-    // Throw error and set error state
-    .catch(err => {
-      this.setState({ error: `Failed to grab user information: ${err}` });
+      }
     });
+  }
+
+  setMountedComponentStates(user, orgs) {
+    // Initialize variables
+    const writePermOrgs = [];
+    const allProjects = [];
+
+    // Add event listener for window resizing
+    window.addEventListener('resize', this.handleResize);
+    // Handle initial size of window
+    this.handleResize();
+
+    // Loop through orgs
+    orgs.forEach((org) => {
+      // Loop through project-views and push to array
+      org.projects.forEach(project => {
+        allProjects.push(project);
+      });
+
+      // Initialize variables
+      const perm = org.permissions[user.username];
+
+      // Verify if user has write or admin permissions
+      if ((perm === 'write') || (perm === 'admin')) {
+        // Push the org to the org permissions
+        writePermOrgs.push(org);
+      }
+    });
+
+    // Verify there are orgs
+    if (writePermOrgs.length > 0) {
+      // Set write states
+      this.setState({ write: true });
+      this.setState({ writePermOrgs: writePermOrgs });
+    }
+
+    // Verify user is admin
+    if (user.admin) {
+      // Set admin state
+      this.setState({ admin: user.admin });
+    }
+
+    // Set the org state
+    this.setState({ orgs: orgs });
+
+    // Set the org state
+    this.setState({ projects: allProjects });
   }
 
   componentWillUnmount() {
