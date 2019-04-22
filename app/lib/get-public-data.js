@@ -215,6 +215,31 @@ function getElementPublicData(element, options) {
     }
   }
 
+  // If the fields options is defined
+  if (options.hasOwnProperty('fields')) {
+    // If fields should be excluded
+    if (options.fields.every(f => f.startsWith('-'))) {
+      // For each of those fields
+      options.fields.forEach((f) => {
+        // If -id, ignore it
+        if (f === '-id') {
+          return;
+        }
+        // Remove the field from data
+        data[f.slice(1)] = undefined;
+      });
+    }
+    // If only specific fields should be included
+    else if (options.fields.every(f => !f.startsWith('-'))) {
+      const returnObj = { id: data.id };
+      // Add specific field to returnObj
+      options.fields.forEach((f) => {
+        returnObj[f] = (data[f]) ? data[f] : undefined;
+      });
+      return returnObj
+    }
+  }
+
   return data;
 }
 
@@ -287,7 +312,7 @@ function getProjectPublicData(project, options) {
   }
 
   // Return the projects public fields
-  return {
+  const data =  {
     id: utils.parseID(project._id).pop(),
     org: (project.org && project.org._id)
       ? getOrgPublicData(project.org, options)
@@ -306,6 +331,33 @@ function getProjectPublicData(project, options) {
     archivedOn: (project.archivedOn) ? project.archivedOn.toString() : undefined,
     archivedBy: archivedBy
   };
+
+  // If the fields options is defined
+  if (options.hasOwnProperty('fields')) {
+    // If fields should be excluded
+    if (options.fields.every(f => f.startsWith('-'))) {
+      // For each of those fields
+      options.fields.forEach((f) => {
+        // If -id, ignore it
+        if (f === '-id') {
+          return;
+        }
+        // Remove the field from data
+        data[f.slice(1)] = undefined;
+      });
+    }
+    // If only specific fields should be included
+    else if (options.fields.every(f => !f.startsWith('-'))) {
+      const returnObj = { id: data.id };
+      // Add specific field to returnObj
+      options.fields.forEach((f) => {
+        returnObj[f] = (data[f]) ? data[f] : undefined;
+      });
+      return returnObj
+    }
+  }
+
+  return data;
 }
 
 /**
@@ -383,7 +435,7 @@ function getOrgPublicData(org, options) {
   }
 
   // Return the organization public fields
-  return {
+  const data = {
     id: org._id,
     name: org.name,
     permissions: permissions,
@@ -397,6 +449,33 @@ function getOrgPublicData(org, options) {
     archivedBy: archivedBy,
     projects: projects
   };
+
+  // If the fields options is defined
+  if (options.hasOwnProperty('fields')) {
+    // If fields should be excluded
+    if (options.fields.every(f => f.startsWith('-'))) {
+      // For each of those fields
+      options.fields.forEach((f) => {
+        // If -id, ignore it
+        if (f === '-id') {
+          return;
+        }
+        // Remove the field from data
+        data[f.slice(1)] = undefined;
+      });
+    }
+    // If only specific fields should be included
+    else if (options.fields.every(f => !f.startsWith('-'))) {
+      const returnObj = { id: data.id };
+      // Add specific field to returnObj
+      options.fields.forEach((f) => {
+        returnObj[f] = (data[f]) ? data[f] : undefined;
+      });
+      return returnObj
+    }
+  }
+
+  return data;
 }
 
 /**
@@ -449,7 +528,7 @@ function getUserPublicData(user, options) {
     }
   }
 
-  return {
+  const data = {
     username: user._id,
     name: (user.fname && user.lname) ? user.name : undefined,
     fname: user.fname,
@@ -467,4 +546,31 @@ function getUserPublicData(user, options) {
     admin: user.admin,
     provider: user.provider
   };
+
+  // If the fields options is defined
+  if (options.hasOwnProperty('fields')) {
+    // If fields should be excluded
+    if (options.fields.every(f => f.startsWith('-'))) {
+      // For each of those fields
+      options.fields.forEach((f) => {
+        // If -id, ignore it
+        if (f === '-username') {
+          return;
+        }
+        // Remove the field from data
+        data[f.slice(1)] = undefined;
+      });
+    }
+    // If only specific fields should be included
+    else if (options.fields.every(f => !f.startsWith('-'))) {
+      const returnObj = { username: data.username };
+      // Add specific field to returnObj
+      options.fields.forEach((f) => {
+        returnObj[f] = (data[f]) ? data[f] : undefined;
+      });
+      return returnObj
+    }
+  }
+
+  return data;
 }
