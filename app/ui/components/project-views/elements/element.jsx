@@ -49,9 +49,10 @@ class Element extends Component {
   getElement() {
     // Initialize variables
     const elementId = this.props.id;
-    const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
 
     if (elementId) {
+      // Initalize variables
+      const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
       // Get project data
       $.ajax({
         method: 'GET',
@@ -81,7 +82,6 @@ class Element extends Component {
   componentDidMount() {
     this.getElement();
   }
-
 
   componentDidUpdate(prevProps) {
     // Typical usage (don't forget to compare props):

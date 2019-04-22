@@ -99,7 +99,7 @@ class ElementNew extends Component {
       data: data,
       statusCode: {
         200: () => {
-          this.props.closeSidePanel(null, true);
+          this.props.closeSidePanel(null, true, false);
         },
         403: (err) => {
           this.setState({ error: err.responseJSON.description });
@@ -176,9 +176,6 @@ class ElementNew extends Component {
               </p>
             </Col>
           </FormGroup>
-          <div className={'text-danger'}>
-            {this.state.formFeedback}
-          </div>
           <Button className='btn btn'
                   outline color="primary"
                   disabled={disableSubmit} onClick={this.onSubmit}>

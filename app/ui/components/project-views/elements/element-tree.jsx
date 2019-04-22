@@ -74,7 +74,8 @@ class ElementTree extends Component {
       url: url,
       statusCode: {
         200: (data) => {
-          this.setState({ children: data });
+          const result = data.sort((a, b) => ((a.name > b.name) ? 1 : -1));
+          this.setState({ children: result });
         },
         401: (err) => {
           this.setState({ children: null });
@@ -94,6 +95,14 @@ class ElementTree extends Component {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
+
+  componentDidUpdate(prevProps, prevStates) {
+    // Verify if component needs to re-render
+    if (this.state.data !== prevStates.data) {
+      this.componentDidMount();
+    }
+  }
+
   /**
    * When an element is delete or created, the component
    * will update.
@@ -101,12 +110,33 @@ class ElementTree extends Component {
   refresh(isDelete) {
     // Element is being deleted
     if (isDelete) {
-      // Call the parent refresh
+      // Call parent refresh
       this.props.parentRefresh();
     }
     else {
-      // Update the component
-      this.componentDidMount();
+      // Build URL to get element data
+      const orgId = this.props.project.org;
+      const projId = this.props.project.id;
+      const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
+      const url = `${base}/elements/${this.state.id}?minified=true`;
+
+      // Get project data
+      $.ajax({
+        method: 'GET',
+        url: url,
+        statusCode: {
+          200: (data) => {
+            this.setState({ data: data });
+          },
+          401: (err) => {
+            // Throw error and set state
+            this.setState({ error: err.responseJSON.description });
+          },
+          404: (err) => {
+            this.setState({ error: err.responseJSON.description });
+          }
+        }
+      });
     }
   }
 

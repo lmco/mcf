@@ -55,21 +55,13 @@ class ElementEdit extends Component {
       custom: {},
       org: null,
       project: null,
-      tooltipOpen: false,
       error: null
     };
 
     // Bind component function
-    this.toggleTooltip = this.toggleTooltip.bind(this);
     this.getElement = this.getElement.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-  }
-
-  toggleTooltip() {
-    this.setState({
-      tooltipOpen: !this.state.tooltipOpen
-    });
   }
 
   getElement() {
