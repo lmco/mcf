@@ -37,8 +37,11 @@
     transition: all .15s ease-in-out;
   }
 
+  .element-tree > .element-name:hover {
+    cursor: pointer;
+  }
+
   .element-tree > .element-name:hover > span:not(.element-id) {
-    cursor: default;
     color: lighten($mbee-navbar-color, 20%);
   }
 
