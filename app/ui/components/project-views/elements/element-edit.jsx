@@ -140,7 +140,7 @@ class ElementEdit extends Component {
   onSubmit() {
     // Initialize variables
     const elementId = this.state.id;
-    const url = `${this.props.url}/branches/master/elements/${elementId}`;
+    const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
     const data = {
       name: this.state.name,
       type: this.state.type,
@@ -161,7 +161,7 @@ class ElementEdit extends Component {
     // Send a patch request to update element data
     $.ajax({
       method: 'PATCH',
-      url: `${url}?minified=true`,
+      url: url,
       data: data,
       dataType: 'json',
       statusCode: {

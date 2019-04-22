@@ -56,14 +56,14 @@ class ProjectApp extends Component {
     // Initialize variables
     const orgId = this.props.match.params.orgid;
     const projId = this.props.match.params.projectid;
-    const url = `/api/orgs/${orgId}/projects/${projId}?minified=true`;
+    const url = `/api/orgs/${orgId}/projects/${projId}`;
 
     // Set states
     this.setState({ url: url });
     this.setState({ orgid: orgId });
 
     // Get project data
-    ajaxRequest('GET', `${url}`)
+    ajaxRequest('GET', `${url}?minified=true`)
     .then(project => {
       // Get user data
       ajaxRequest('GET', '/api/users/whoami?minified=true')
