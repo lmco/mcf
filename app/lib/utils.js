@@ -59,112 +59,6 @@ module.exports.render = function(req, res, name, params) {
 };
 
 /**
- * @description Loops over a given array and asserts that each item is of a
- * specific type. If any item in the array is not of the specified type, an
- * error is thrown. It is assumed the array should always have items in it, if
- * the array is empty an error is thrown.
- *
- * @param {*} arrItems - An array of values to check.
- * @param {string} assertType - The type to check. Options: ['string', 'object',
- *                            'number', 'undefined', 'boolean', 'symbol'].
- */
-module.exports.assertType = function(arrItems, assertType) {
-  // An empty array is never expected
-  if (!Array.isArray(arrItems)) {
-    const desc = `Array was expected. Got ${typeof arrItems}`;
-    throw new M.CustomError(desc, 400);
-  }
-
-  // An empty array is never expected
-  if (arrItems.length === 0) {
-    const desc = 'Array is empty. Assertion check failed.';
-    throw new M.CustomError(desc, 400);
-  }
-
-  // Define valid type
-  const validType = ['string', 'object', 'number', 'undefined', 'boolean', 'symbol'];
-
-  // Check type NOT included in validTypes
-  if (!validType.includes(assertType)) {
-    // Invalid type, throw error
-    const desc = `${assertType} is not a valid javascript type.`;
-    throw new M.CustomError(desc, 400);
-  }
-  Object.keys(arrItems).forEach((item) => {
-    if (typeof arrItems[item] !== assertType) { // eslint-disable-line valid-typeof
-      throw new M.CustomError(`Value is not a ${assertType}.`, 400);
-    }
-  });
-};
-
-/**
- * @description Calls assertType to verify that `arrItems` is an array
- * containing items of type `checkType`. Returns true f all items in the array
- * of the specified type. Otherwise false is returned. Returns false is
- * assertType throws an error.
- *
- * @param {*} arrItems - An array of values to check.
- * @param {string} checkType - The type to check. Options: ['string', 'object',
- *                            'number', 'undefined', 'boolean', 'symbol'].
- *
- * @return {boolean} true - type is correct
- *                   false - error
- */
-module.exports.checkType = function(arrItems, checkType) {
-  try {
-    this.assertType(arrItems, checkType);
-    return true;
-  }
-  catch (error) {
-    return false;
-  }
-};
-
-/**
- * @description Given an array of string properties and an object, asserts that
- * the object has all of those properties.
- *
- * @example
- *  assertExists(['id', 'project.id'], { id: '123', project: {id: '456'} });
- *
- * @param {Object} properties - An array of strings denoting keys.
- * @param {Object} obj - The object being searched.
- */
-module.exports.assertExists = function(properties, obj) {
-  properties.forEach((prop) => {
-    let ref = obj;
-    // Split property on '.' characters.
-    // Loop over nested object properties, updating ref with each iteration.
-    prop.split('.').forEach(p => { ref = ref[p]; });
-    if (ref === undefined) {
-      throw new M.CustomError(`Object does not have property ${prop}.`, 400);
-    }
-  });
-};
-
-/**
- * @description Given an array of properties and an object, checks that the
- * object has each of the properties by calling assertExists. Returns true if
- * the object has all of those properties. If not, or if assertsExists throws
- * an error, false is returned.
- *
- * @param {Object} properties - A list of strings denoting keys.
- * @param {Object} obj - The object being searched.
- *
- * @return {boolean} true - property exists
- *                   false - error
- */
-module.exports.checkExists = function(properties, obj) {
-  try {
-    this.assertExists(properties, obj);
-    return true;
-  }
-  catch (error) {
-    return false;
-  }
-};
-
-/**
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *
@@ -173,7 +67,14 @@ module.exports.checkExists = function(properties, obj) {
  * @return {string} Concatenated args with uid delimiter
  */
 module.exports.createID = function(...args) {
-  this.assertType(args, 'string');
+  // For each argument
+  args.forEach((a) => {
+    // Verify the argument is a string
+    if (typeof a !== 'string') {
+      throw new M.CustomError('Argument is not a string.', 400);
+    }
+  });
+
   return args.join(this.ID_DELIMITER);
 };
 
