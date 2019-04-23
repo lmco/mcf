@@ -111,11 +111,18 @@ class ProjectList extends Component {
 
     // Loop through orgs
     orgs.forEach((org) => {
-      // Loop through project-views and push to array
-      org.projects.forEach(project => {
-        allProjects.push(project);
-      });
-
+      const projects = org.projects;
+      if (!this.props.admin) {
+        const username = this.props.user.username;
+        projects.forEach(project => {
+          if (project.permissions[username]) {
+            allProjects.push(project);
+          }
+        });
+      }
+      else {
+        projects.forEach(project => allProjects.push(project));
+      }
       // Initialize variables
       const perm = org.permissions[user.username];
 
@@ -173,12 +180,26 @@ class ProjectList extends Component {
     const list = this.state.orgs.map(org => {
       // Initialize variables
       const orgId = org.id;
+      const permProjects = [];
+      const projects = org.projects;
 
-      // Loop through project-views in each org
-      const projects = org.projects.map(project => (<ProjectListItem className='hover-darken project-hover'
-                                                                               key={`proj-key-${project.id}`}
-                                                                               project={project}
-                                                                               href={`/${orgId}/${project.id}`}/>));
+      if (!this.props.admin) {
+        const username = this.props.user.username;
+        projects.forEach(project => {
+          if (project.permissions[username]) {
+            permProjects.push(<ProjectListItem className='hover-darken project-hover'
+                                               key={`proj-key-${project.id}`}
+                                               project={project}
+                                               href={`/${orgId}/${project.id}`}/>);
+          }
+        });
+      }
+      else {
+        projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
+                                                                      key={`proj-key-${project.id}`}
+                                                                      project={project}
+                                                                      href={`/${orgId}/${project.id}`}/>));
+      }
 
       // Return the list of the orgs with project-views
       return (
