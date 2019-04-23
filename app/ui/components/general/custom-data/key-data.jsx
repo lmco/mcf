@@ -80,8 +80,6 @@ class KeyData extends Component {
           nestedData = Object.keys(data).map((key) => nests.push(<KeyData key={`key-${key}`} keyName={key} data={data[key]}/>));
         }
         else {
-          console.log('after array');
-          console.log(data);
           // Display the data
           nests.push(<span className='last-element'>{data}</span>);
         }
