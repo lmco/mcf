@@ -28,7 +28,6 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
-const Project = M.require('models.project');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 const publicData = M.require('lib.get-public-data');
@@ -211,7 +210,6 @@ function getOrgs(req, res) {
   let ids;
   let options;
   let minified = false;
-  let orgs = [];
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -266,28 +264,7 @@ function getOrgs(req, res) {
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
   OrgController.find(req.user, ids, options)
-  .then((_orgs) => {
-    orgs = _orgs;
-
-    // If the projects field is populated on each org
-    if (orgs.every(o => o.hasOwnProperty('projects') && Array.isArray(o.projects))) {
-      const promises = [];
-
-      // For every org
-      orgs.forEach((o) => {
-        // Get each project's elementCount
-        promises.push(Project.getElementCount(o.projects)
-        .then((updatedProjects) => {
-          // Set the org's projects to the updatedProjects
-          o.projects = updatedProjects;
-        }));
-      });
-
-      // Return when all promises have been completed
-      return Promise.all(promises);
-    }
-  })
-  .then(() => {
+  .then((orgs) => {
     // Verify orgs array is not empty
     if (orgs.length === 0) {
       const error = new M.CustomError('No orgs found.', 404, 'warn');
@@ -593,7 +570,6 @@ function getOrg(req, res) {
   // Note: Undefined if not set
   let options;
   let minified = false;
-  let orgs = [];
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -631,8 +607,7 @@ function getOrg(req, res) {
   // Find the org from it's id
   // NOTE: find() sanitizes req.params.orgid
   OrgController.find(req.user, req.params.orgid, options)
-  .then((_orgs) => {
-    orgs = _orgs;
+  .then((orgs) => {
     // If no orgs found, return 404 error
     if (orgs.length === 0) {
       const error = new M.CustomError(
@@ -641,25 +616,6 @@ function getOrg(req, res) {
       return res.status(error.status).send(error);
     }
 
-    // If the projects field is populated on each org
-    if (orgs.every(o => o.hasOwnProperty('projects') && Array.isArray(o.projects))) {
-      const promises = [];
-
-      // For every org
-      orgs.forEach((o) => {
-        // Get each project's elementCount
-        promises.push(Project.getElementCount(o.projects)
-        .then((updatedProjects) => {
-          // Set the org's projects to the updatedProjects
-          o.projects = updatedProjects;
-        }));
-      });
-
-      // Return when all promises have been completed
-      return Promise.all(promises);
-    }
-  })
-  .then(() => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))[0]

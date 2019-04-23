@@ -18,7 +18,6 @@
 const mongoose = require('mongoose');
 
 // MBEE modules
-const Element = M.require('models.element');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 
@@ -176,38 +175,6 @@ ProjectSchema.statics.validateObjectKeys = function(object) {
   // project model, return true
   return returnBool;
 };
-
-/**
- * @description Adds a field of total number of elements to projects. NOTE:
- * There is the ability to create a virtual which does the same thing.
- * Unfortunately, this virtual is SIGNIFICANTLY slower. See
- * https://mongoosejs.com/docs/populate.html#count if interested in virtual.
- *
- * @param {Project[]} projects - An array of project objects to retrieve element
- * count for.
- *
- * @returns {Promise} - Resolves all projects with added count field.
- */
-ProjectSchema.statics.getElementCount = function(projects) {
-  return new Promise((resolve, reject) => {
-    const promises = [];
-    // For each project
-    projects.forEach((proj) => {
-      // Count all elements in this project
-      promises.push(Element.countDocuments({ project: proj._id })
-      .then((count) => {
-        // Set the count field on the project
-        proj.count = count;
-      }));
-    });
-
-    // Return when all promises are complete
-    Promise.all(promises)
-    .then(() => resolve(projects))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
-  });
-};
-
 
 /* --------------------------( Project Properties )-------------------------- */
 
