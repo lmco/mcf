@@ -95,8 +95,8 @@ class Create extends Component {
     $.ajax({
       method: 'POST',
       url: `${url}?minified=true`,
-      dataType: 'json',
-      data: data,
+      contentType: 'application/json',
+      data: JSON.stringify(data),
       statusCode: {
         200: () => {
           // On success, return to project-views page
