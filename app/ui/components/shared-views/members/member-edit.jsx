@@ -33,7 +33,6 @@ import { Form,
 
 // MBEE Modules
 import CustomMenu from '../../general/dropdown-search/custom-menu.jsx';
-import { ajaxRequest } from '../../helper-functions/ajaxRequests.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -92,14 +91,24 @@ class MemberEdit extends Component {
     }
 
     // Send a patch request to update data
-    ajaxRequest('PATCH', `${url}?minified=true`, data)
-    .then(() => {
-      // Update the page to reload to user page
-      window.location.replace(redirect);
-    })
-    .catch((err) => {
-      // Update user if failed
-      this.setState({ error: err.responseJSON.description });
+    $.ajax({
+      method: 'PATCH',
+      url: `${url}?minified=true`,
+      data: data,
+      dataType: 'json',
+      statusCode: {
+        200: () => {
+          // Update the page to reload to user page
+          window.location.replace(redirect);
+        },
+        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        },
+        403: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
+      }
     });
   }
 
@@ -117,24 +126,32 @@ class MemberEdit extends Component {
 
   componentDidMount() {
     // Get all the users
-    ajaxRequest('GET', '/api/users?minified=true')
-    .then((users) => {
-      // Loop through users
-      const userOpts = users.map((user) => {
-        if (user.name) {
-          return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
-        }
-        else {
-          return (<DropdownItem value={user.username}>{user.username}</DropdownItem>);
-        }
-      });
+    $.ajax({
+      method: 'GET',
+      url: '/api/users?minified=true',
+      statusCode: {
+        200: (users) => {
+          // Loop through users
+          const userOpts = users.map((user) => {
+            if (user.name) {
+              return (<DropdownItem value={user.username}>{user.name}</DropdownItem>);
+            }
+            else {
+              return (<DropdownItem value={user.username}>{user.username}</DropdownItem>);
+            }
+          });
 
-      // Set the user state
-      this.setState({ users: userOpts });
-    })
-    .catch((err) => {
-      // Update user if failed
-      this.setState({ error: err.responseJSON.description });
+          // Set the user state
+          this.setState({ users: userOpts });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
+      }
     });
   }
 
