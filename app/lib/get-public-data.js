@@ -98,7 +98,7 @@ function getElementPublicData(element, options) {
   }
 
   // If element.archivedBy is defined
-  if (element.archivedBy) {
+  if (element.archivedBy && element.archived) {
     // If element.archivedBy is populated
     if (typeof element.archivedBy === 'object') {
       // Get the public data of archivedBy
@@ -194,7 +194,7 @@ function getElementPublicData(element, options) {
     createdBy: createdBy,
     updatedOn: (element.updatedOn) ? element.updatedOn.toString() : undefined,
     lastModifiedBy: lastModifiedBy,
-    archived: (element.archived) ? element.archived : undefined,
+    archived: element.archived,
     archivedOn: (element.archivedOn) ? element.archivedOn.toString() : undefined,
     archivedBy: archivedBy
   };
@@ -300,7 +300,7 @@ function getProjectPublicData(project, options) {
   }
 
   // If project.archivedBy is defined
-  if (project.archivedBy) {
+  if (project.archivedBy && project.archived) {
     // If project.archivedBy is populated
     if (typeof project.archivedBy === 'object') {
       // Get the public data of archivedBy
@@ -326,7 +326,7 @@ function getProjectPublicData(project, options) {
     createdBy: createdBy,
     updatedOn: (project.updatedOn) ? project.updatedOn.toString() : undefined,
     lastModifiedBy: lastModifiedBy,
-    archived: (project.archived) ? project.archived : undefined,
+    archived: project.archived,
     archivedOn: (project.archivedOn) ? project.archivedOn.toString() : undefined,
     archivedBy: archivedBy
   };
@@ -406,7 +406,7 @@ function getOrgPublicData(org, options) {
   }
 
   // If org.archivedBy is defined
-  if (org.archivedBy) {
+  if (org.archivedBy && org.archived) {
     // If org.archivedBy is populated
     if (typeof org.archivedBy === 'object') {
       // Get the public data of archivedBy
@@ -443,7 +443,7 @@ function getOrgPublicData(org, options) {
     createdBy: createdBy,
     updatedOn: (org.updatedOn) ? org.updatedOn.toString() : undefined,
     lastModifiedBy: lastModifiedBy,
-    archived: (org.archived) ? org.archived : undefined,
+    archived: org.archived,
     archivedOn: (org.archivedOn) ? org.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
     projects: projects
@@ -516,7 +516,7 @@ function getUserPublicData(user, options) {
   }
 
   // If user.archivedBy is defined
-  if (user.archivedBy) {
+  if (user.archivedBy && user.archived) {
     // If user.archivedBy is populated
     if (typeof user.archivedBy === 'object') {
       // Get the public data of archivedBy
@@ -539,7 +539,7 @@ function getUserPublicData(user, options) {
     createdBy: createdBy,
     updatedOn: (user.updatedOn) ? user.updatedOn.toString() : undefined,
     lastModifiedBy: lastModifiedBy,
-    archived: (user.archived) ? user.archived : undefined,
+    archived: user.archived,
     archivedOn: (user.archivedOn) ? user.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
     admin: user.admin,

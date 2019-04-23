@@ -171,10 +171,11 @@ function postElement(done) {
     chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdElement.createdOn).to.not.equal(null);
     chai.expect(createdElement.updatedOn).to.not.equal(null);
+    chai.expect(createdElement.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(createdElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -245,10 +246,11 @@ function postElements(done) {
       chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdElement.createdOn).to.not.equal(null);
       chai.expect(createdElement.updatedOn).to.not.equal(null);
+      chai.expect(createdElement.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(createdElement).to.not.have.any.keys('archivedOn',
+        'archivedBy', '__v', '_id');
     });
     done();
   };
@@ -312,10 +314,11 @@ function putElement(done) {
     chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(replacedElem.createdOn).to.not.equal(null);
     chai.expect(replacedElem.updatedOn).to.not.equal(null);
+    chai.expect(replacedElem.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(replacedElem).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -387,10 +390,11 @@ function putElements(done) {
       chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(replacedElem.createdOn).to.not.equal(null);
       chai.expect(replacedElem.updatedOn).to.not.equal(null);
+      chai.expect(replacedElem.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(replacedElem).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -454,10 +458,11 @@ function getElement(done) {
     chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
+    chai.expect(foundElement.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -531,10 +536,11 @@ function getElements(done) {
       chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
+      chai.expect(foundElement.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -609,10 +615,11 @@ function getAllElements(done) {
       chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
+      chai.expect(foundElement.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -681,10 +688,11 @@ function searchElement(done) {
     chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
+    chai.expect(foundElement.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -751,10 +759,11 @@ function patchElement(done) {
     chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(updatedElement.createdOn).to.not.equal(null);
     chai.expect(updatedElement.updatedOn).to.not.equal(null);
+    chai.expect(updatedElement.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(updatedElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -834,10 +843,11 @@ function patchElements(done) {
       chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(updatedElement.createdOn).to.not.equal(null);
       chai.expect(updatedElement.updatedOn).to.not.equal(null);
+      chai.expect(updatedElement.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(updatedElement).to.not.have.any.keys('archivedOn',
+        'archivedBy', '__v', '_id');
     });
     done();
   };

@@ -154,7 +154,8 @@ function postUser(done) {
     chai.expect(createdUser.updatedOn).to.not.equal(null);
     chai.expect(createdUser.createdBy).to.equal(adminUser.username);
     chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(createdUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+    chai.expect(createdUser.archived).to.equal(false);
+    chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
   };
 
@@ -207,7 +208,8 @@ function postUsers(done) {
       chai.expect(createdUser.updatedOn).to.not.equal(null);
       chai.expect(createdUser.createdBy).to.equal(adminUser.username);
       chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(createdUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+      chai.expect(createdUser.archived).to.equal(false);
+      chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
   };
@@ -250,7 +252,8 @@ function putUser(done) {
     chai.expect(replacedUser.updatedOn).to.not.equal(null);
     chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
     chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(replacedUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+    chai.expect(replacedUser.archived).to.equal(false);
+    chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
   };
 
@@ -304,7 +307,8 @@ function putUsers(done) {
       chai.expect(replacedUser.updatedOn).to.not.equal(null);
       chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
       chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(replacedUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+      chai.expect(replacedUser.archived).to.equal(false);
+      chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
   };
@@ -347,7 +351,8 @@ function getUser(done) {
     chai.expect(foundUser.updatedOn).to.not.equal(null);
     chai.expect(foundUser.createdBy).to.equal(adminUser.username);
     chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(foundUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+    chai.expect(foundUser.archived).to.equal(false);
+    chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
   };
 
@@ -401,7 +406,8 @@ function getUsers(done) {
       chai.expect(foundUser.updatedOn).to.not.equal(null);
       chai.expect(foundUser.createdBy).to.equal(adminUser.username);
       chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(foundUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+      chai.expect(foundUser.archived).to.equal(false);
+      chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
   };
@@ -461,7 +467,8 @@ function getAllUsers(done) {
         chai.expect(foundUser.updatedOn).to.not.equal(null);
         chai.expect(foundUser.createdBy).to.equal(adminUser.username);
         chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
-        chai.expect(foundUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+        chai.expect(foundUser.archived).to.equal(false);
+        chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
       }
       // Admin user special cases
       else {
@@ -514,7 +521,8 @@ function patchUser(done) {
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
     chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
     chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(updatedUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+    chai.expect(updatedUser.archived).to.equal(false);
+    chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
   };
 
@@ -572,7 +580,8 @@ function patchUsers(done) {
       chai.expect(updatedUser.updatedOn).to.not.equal(null);
       chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
       chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
-      chai.expect(updatedUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+      chai.expect(updatedUser.archived).to.equal(false);
+      chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
   };
@@ -621,7 +630,8 @@ function patchUserPassword(done) {
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
     chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
     chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(updatedUser).to.not.have.any.keys('archived', 'archivedOn', 'archivedBy');
+    chai.expect(updatedUser.archived).to.equal(false);
+    chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
   };
 
