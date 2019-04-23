@@ -55,6 +55,7 @@ class ElementEdit extends Component {
       custom: {},
       org: null,
       project: null,
+      customInvalid: false,
       error: null
     };
 
@@ -121,6 +122,16 @@ class ElementEdit extends Component {
     if (event.target.name === 'custom') {
       // Resize custom data field
       $('textarea[name="custom"]').autoResize();
+
+      // Verify if custom data is correct JSON format
+      try {
+        JSON.parse(this.state.custom);
+      }
+      catch (err) {
+        // Set invalid fields
+        this.setState({ customInvalid: true });
+        this.setState({ error: 'Custom data must be valid JSON.' });
+      }
     }
     else if (event.target.name === 'documentation') {
       // Resize custom data field
@@ -154,8 +165,8 @@ class ElementEdit extends Component {
     $.ajax({
       method: 'PATCH',
       url: url,
-      data: data,
-      dataType: 'json',
+      data: JSON.stringify(data),
+      contentType: 'application/json',
       statusCode: {
         200: () => {
           this.props.closeSidePanel(null, true);
@@ -184,15 +195,6 @@ class ElementEdit extends Component {
     // Verify id
     if (!RegExp(validators.id).test(this.state.source)) {
       sourceInvalid = true;
-    }
-
-    // Verify if custom data is correct JSON format
-    try {
-      JSON.parse(this.state.custom);
-    }
-    catch (err) {
-      // Set invalid fields
-      customInvalid = true;
     }
 
     // Render organization edit page
@@ -322,7 +324,7 @@ class ElementEdit extends Component {
                        id='custom'
                        placeholder='{}'
                        value={this.state.custom || ''}
-                       invalid={customInvalid}
+                       invalid={this.state.customInvalid}
                        onChange={this.handleChange}/>
               </pre>
               {/* Verify fields are valid, or display feedback */}

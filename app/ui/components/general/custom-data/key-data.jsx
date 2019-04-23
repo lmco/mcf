@@ -80,6 +80,8 @@ class KeyData extends Component {
           nestedData = Object.keys(data).map((key) => nests.push(<KeyData key={`key-${key}`} keyName={key} data={data[key]}/>));
         }
         else {
+          console.log('after array');
+          console.log(data);
           // Display the data
           nests.push(<span className='last-element'>{data}</span>);
         }
@@ -94,8 +96,13 @@ class KeyData extends Component {
       // Loop through object for recursive call
       nestedData = Object.keys(custom).map((key) => <KeyData key={`key-${key}`} keyName={key} data={custom[key]}/>);
     }
+    // Verify if type if boolean
+    else if (typeof custom === 'boolean') {
+      nestedData = (custom)
+        ? (<span className='last-element'>true</span>)
+        : (<span className='last-element'>false</span>);
+    }
     else {
-      // Display the data
       nestedData = (<span className='last-element'>{custom}</span>);
     }
 
