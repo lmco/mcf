@@ -208,7 +208,7 @@ class ProjectList extends Component {
                 <a href={`/${orgId}`}>{org.name}</a>
             </ListItem>
             <List key={`org-list-key-${org.id}`}>
-                {projects}
+                {permProjects}
             </List>
         </React.Fragment>
       );
