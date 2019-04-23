@@ -184,7 +184,6 @@ class ElementEdit extends Component {
 
   render() {
     // // Initialize variables
-    let customInvalid;
     let targetInvalid;
     let sourceInvalid;
 

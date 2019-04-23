@@ -831,9 +831,6 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const arrIDs = [];
     const sourceTargetIDs = [];
 
-    console.log(elements);
-    console.log(saniElements);
-
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Element);
