@@ -45,7 +45,6 @@ class HomeApp extends Component {
       modalCreate: false,
       modalDelete: false,
       user: null,
-      starredProjects: [],
       orgs: [],
       admin: false,
       write: false,
@@ -113,15 +112,9 @@ class HomeApp extends Component {
 
     // Initialize variables
     const writePermOrgs = [];
-    const allProjects = [];
 
     // Loop through orgs
     orgs.forEach((org) => {
-      // Loop through projects and push to array
-      org.projects.forEach(project => {
-        allProjects.push(project);
-      });
-
       // Initialize variables
       const perm = org.permissions[user.username];
 

@@ -159,12 +159,14 @@ class ProjectList extends Component {
   }
 
   render() {
+    let projectsAvaliable = false;
+
     // Loop through all orgs
     const list = this.state.orgs.map(org => {
       // Initialize variables
       const orgId = org.id;
-      const permProjects = [];
       const projects = org.projects;
+      const permProjects = [];
 
       if (!this.props.admin) {
         const username = this.props.user.username;
@@ -182,6 +184,12 @@ class ProjectList extends Component {
                                                                       key={`proj-key-${project.id}`}
                                                                       project={project}
                                                                       href={`/${orgId}/${project.id}`}/>));
+      }
+
+      // Verify if projects
+      if (permProjects.length > 0) {
+        // Set projects to true
+        projectsAvaliable = true;
       }
 
       // Return the list of the orgs with project-views
@@ -257,7 +265,7 @@ class ProjectList extends Component {
           </div>
           <div id='workspace-body' className='extra-padding'>
             {/* Verify there are project-views */}
-            {(this.state.projects.length === 0)
+            {(!projectsAvaliable)
               ? (<div className='main-workspace list-item'>
                   <h3> No projects. </h3>
                  </div>)
