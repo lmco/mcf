@@ -41,7 +41,6 @@ class ProjectList extends Component {
     // Initialize state props
     this.state = {
       width: null,
-      projects: [],
       orgs: [],
       admin: false,
       write: false,
@@ -102,7 +101,6 @@ class ProjectList extends Component {
   setMountedComponentStates(user, orgs) {
     // Initialize variables
     const writePermOrgs = [];
-    const allProjects = [];
 
     // Add event listener for window resizing
     window.addEventListener('resize', this.handleResize);
@@ -111,18 +109,6 @@ class ProjectList extends Component {
 
     // Loop through orgs
     orgs.forEach((org) => {
-      const projects = org.projects;
-      if (!this.props.admin) {
-        const username = this.props.user.username;
-        projects.forEach(project => {
-          if (project.permissions[username]) {
-            allProjects.push(project);
-          }
-        });
-      }
-      else {
-        projects.forEach(project => allProjects.push(project));
-      }
       // Initialize variables
       const perm = org.permissions[user.username];
 
@@ -148,9 +134,6 @@ class ProjectList extends Component {
 
     // Set the org state
     this.setState({ orgs: orgs });
-
-    // Set the org state
-    this.setState({ projects: allProjects });
   }
 
   componentWillUnmount() {
