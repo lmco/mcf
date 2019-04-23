@@ -618,11 +618,11 @@ function getOrg(req, res) {
 
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))[0]
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
 
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
@@ -698,11 +698,11 @@ function postOrg(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))[0]
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
 
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -778,11 +778,11 @@ function putOrg(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))[0]
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
 
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -858,11 +858,11 @@ function patchOrg(req, res) {
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))[0]
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
 
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
@@ -998,20 +998,6 @@ function getAllProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
 
@@ -1106,20 +1092,6 @@ function getProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
 
@@ -1186,20 +1158,6 @@ function postProjects(req, res) {
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
-
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
@@ -1268,20 +1226,6 @@ function putProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
 
@@ -1348,20 +1292,6 @@ function patchProjects(req, res) {
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
-
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
@@ -1501,25 +1431,11 @@ function getProject(req, res) {
     }
 
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))[0]
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
@@ -1594,25 +1510,11 @@ function postProject(req, res) {
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))[0]
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
 
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
@@ -1687,25 +1589,11 @@ function putProject(req, res) {
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))[0]
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
 
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
@@ -1779,25 +1667,11 @@ function patchProject(req, res) {
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))[0]
+      projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
 
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
@@ -2282,11 +2156,11 @@ function getUser(req, res) {
     }
 
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))[0]
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
 
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
@@ -2361,11 +2235,11 @@ function postUser(req, res) {
   UserController.create(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))[0]
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
 
     // Return 200: OK and created user
     res.header('Content-Type', 'application/json');
@@ -2440,11 +2314,11 @@ function putUser(req, res) {
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))[0]
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
 
     // Return 200: OK and created/replaced user
     res.header('Content-Type', 'application/json');
@@ -2519,11 +2393,11 @@ function patchUser(req, res) {
   UserController.update(req.user, req.body, options)
   .then((users) => {
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))[0]
+      users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
 
     // Return 200: OK and updated user
     res.header('Content-Type', 'application/json');
@@ -2847,19 +2721,6 @@ function getElements(req, res) {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
 
     // Verify elements public data array is not empty
     if (elementsPublicData.length === 0) {
@@ -2969,20 +2830,6 @@ function postElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
 
@@ -3055,20 +2902,6 @@ function putElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
 
@@ -3139,20 +2972,6 @@ function patchElements(req, res) {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
-
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
 
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
@@ -3403,20 +3222,6 @@ function getElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
-
     // If the subtree option was not provided, return only the first element
     if (!options.subtree) {
       elementsPublicData = elementsPublicData[0];
@@ -3504,20 +3309,6 @@ function postElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
@@ -3600,20 +3391,6 @@ function putElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
-
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
@@ -3695,20 +3472,6 @@ function patchElement(req, res) {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
-
-    // If the fields options was specified and its not blank and not including fields
-    if (options.fields && options.fields[0] !== ''
-      && options.fields.every(f => !f.startsWith('-'))) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains', 'custom'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
 
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
