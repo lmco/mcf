@@ -65,8 +65,8 @@ function getElementPublicData(element, options) {
   // Parse the element ID
   const idParts = utils.parseID(element._id);
 
-  let createdBy;
-  let lastModifiedBy;
+  let createdBy = null;
+  let lastModifiedBy = null;
   let archivedBy;
   let parent = null;
   let source;
@@ -254,8 +254,8 @@ function getElementPublicData(element, options) {
  */
 function getProjectPublicData(project, options) {
   const permissions = (project.permissions) ? {} : undefined;
-  let createdBy;
-  let lastModifiedBy;
+  let createdBy = null;
+  let lastModifiedBy = null;
   let archivedBy;
   let projectReferences;
 
@@ -370,8 +370,8 @@ function getProjectPublicData(project, options) {
  */
 function getOrgPublicData(org, options) {
   const permissions = (org.permissions) ? {} : undefined;
-  let createdBy;
-  let lastModifiedBy;
+  let createdBy = null;
+  let lastModifiedBy = null;
   let archivedBy;
   let projects;
 
@@ -487,8 +487,8 @@ function getOrgPublicData(org, options) {
  * @return {object} - The public data of the user.
  */
 function getUserPublicData(user, options) {
-  let createdBy;
-  let lastModifiedBy;
+  let createdBy = null;
+  let lastModifiedBy = null;
   let archivedBy;
 
   // If user.createdBy is defined
