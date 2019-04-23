@@ -233,7 +233,7 @@ class ElementEdit extends Component {
           <Form className='element-edit-form'>
             {/* Form section for Element name */}
             <FormGroup row>
-              <Label for='name' sm={2}>Name</Label>
+              <Label for='name' sm={2}><b>Name</b></Label>
               <Col sm={10}>
                 <Input type='text'
                        name='name'
@@ -247,7 +247,7 @@ class ElementEdit extends Component {
               ? ''
               // Form section for Element parent
               : (<FormGroup row>
-                  <Label for='name' sm={2}>Parent</Label>
+                <Label for='name' sm={2}><b>Parent</b></Label>
                   <Col sm={10}>
                     <p id="parent">
                       {this.state.parent || 'Select an element in the model tree.'}
@@ -261,7 +261,7 @@ class ElementEdit extends Component {
             }
             {/* Form section for Element type */}
             <FormGroup row>
-              <Label for='type' sm={2}>Type</Label>
+              <Label for='type' sm={2}><b>Type</b></Label>
               <Col sm={10}>
                 <Input type='text'
                        name='type'
@@ -271,50 +271,45 @@ class ElementEdit extends Component {
                        onChange={this.handleChange}/>
               </Col>
             </FormGroup>
-            {(!this.state.target || !this.state.source)
-              ? ''
-              : (<Row form>
-                  <Col md={6}>
-                    {/* Form section for Element target */}
-                    <FormGroup>
-                      <Label for='name'>Target ID</Label>
-                      <Input type='text'
-                             name='target'
-                             id='target'
-                             placeholder='Target ID'
-                             invalid={targetInvalid}
-                             value={this.state.target || ''}
-                             onChange={this.handleChange}/>
-                      {/* Verify fields are valid, or display feedback */}
-                      <FormFeedback>
-                        Invalid:
-                        An Element target may only contain letters, numbers, space, or dashes.
-                      </FormFeedback>
-                    </FormGroup>
-                  </Col>
-                  <Col md={6}>
-                    {/* Form section for Element source */}
-                    <FormGroup>
-                      <Label for='name'>Source ID</Label>
-                      <Input type='text'
-                             name='source'
-                             id='source'
-                             placeholder='Source ID'
-                             invalid={sourceInvalid}
-                             value={this.state.source || ''}
-                             onChange={this.handleChange}/>
-                      {/* Verify fields are valid, or display feedback */}
-                      <FormFeedback>
-                        Invalid:
-                        An Element source may only contain letters, numbers, space, or dashes.
-                      </FormFeedback>
-                    </FormGroup>
-                  </Col>
-                </Row>)
-            }
+            {/* Form section for Element source */}
+            <FormGroup row>
+              <Label for='name' sm={2}><b>Source</b></Label>
+              <Col sm={10}>
+                <Input type='text'
+                       name='source'
+                       id='source'
+                       placeholder='Source ID'
+                       invalid={sourceInvalid}
+                       value={this.state.source || ''}
+                       onChange={this.handleChange}/>
+              </Col>
+              {/* Verify fields are valid, or display feedback */}
+              <FormFeedback>
+                Invalid:
+                An Element source may only contain letters, numbers, space, or dashes.
+              </FormFeedback>
+            </FormGroup>
+            {/* Form section for Element target */}
+            <FormGroup row>
+              <Label for='name' sm={2}><b>Target</b></Label>
+              <Col sm={10}>
+                <Input type='text'
+                       name='target'
+                       id='target'
+                       placeholder='Target ID'
+                       invalid={targetInvalid}
+                       value={this.state.target || ''}
+                       onChange={this.handleChange}/>
+              </Col>
+              {/* Verify fields are valid, or display feedback */}
+              <FormFeedback>
+                Invalid:
+                An Element target may only contain letters, numbers, space, or dashes.
+              </FormFeedback>
+            </FormGroup>
             {/* Form section for custom data */}
             <FormGroup>
-              <Label for='documentation'>Documentation</Label>
+              <Label for='documentation'><b>Documentation</b></Label>
               <Input type='textarea'
                      name='documentation'
                      id='documentation'
@@ -324,7 +319,7 @@ class ElementEdit extends Component {
             </FormGroup>
             {/* Form section for custom data */}
             <FormGroup>
-              <Label for='custom'>Custom Data</Label>
+              <Label for='custom'><b>Custom Data</b></Label>
               <pre>
                 <Input type='textarea'
                        name='custom'
