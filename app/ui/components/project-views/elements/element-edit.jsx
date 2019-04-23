@@ -34,7 +34,6 @@ import {
 
 // MBEE Modules
 import validators from '../../../../../build/json/validators.json';
-import { ajaxRequest } from '../../helper-functions/ajaxRequests';
 
 /* eslint-enable no-unused-vars */
 
@@ -69,36 +68,45 @@ class ElementEdit extends Component {
     // Initialize variables
     const elementId = this.state.id;
     const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
-    // Get project data
-    ajaxRequest('GET', `${url}`)
-    .then(element => {
-      this.setState({
-        element: element,
-        name: element.name,
-        type: element.type,
-        documentation: element.documentation,
-        custom: JSON.stringify(element.custom, null, 2),
-        org: element.org,
-        project: element.project
-      });
 
-      if (element.parent) {
-        this.setState({ parent: element.parent });
-      }
-      if (element.source) {
-        this.setState({ source: element.source });
-      }
-      if (element.target) {
-        this.setState({ target: element.target });
-      }
+    // Get element data
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (element) => {
+          this.setState({
+            element: element,
+            name: element.name,
+            type: element.type,
+            documentation: element.documentation,
+            custom: JSON.stringify(element.custom, null, 2),
+            org: element.org,
+            project: element.project
+          });
 
-      $('textarea[name="custom"]').autoResize();
-      // Resize custom data field
-      $('textarea[name="documentation"]').autoResize();
-    })
-    .catch(err => {
-      // Throw error and set state
-      this.setState({ error: `Failed to load element: ${err.responseJSON.description}` });
+          if (element.parent) {
+            this.setState({ parent: element.parent });
+          }
+          if (element.source) {
+            this.setState({ source: element.source });
+          }
+          if (element.target) {
+            this.setState({ target: element.target });
+          }
+
+          $('textarea[name="custom"]').autoResize();
+          // Resize custom data field
+          $('textarea[name="documentation"]').autoResize();
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
+      }
     });
   }
 

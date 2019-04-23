@@ -33,15 +33,28 @@ import Create from '../shared-views/create.jsx';
 function OrganizationProjects(props) {
   // Initialize variables
   const org = props.org;
+  const listItems = [];
+  org.projects.forEach(project => {
+    if (!props.user.admin) {
+      const username = props.user.username;
+      if (project.permissions[username]) {
+        listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
+                        <a href={`/${org.id}/${project.id}`}>
+                          {project.name}
+                        </a>
+                       </ListItem>);
+      }
+    }
+    else {
+      listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
+                      <a href={`/${org.id}/${project.id}`}>
+                        {project.name}
+                      </a>
+                     </ListItem>);
+    }
+  });
 
-  // Loop through the org's projects
-  const listItems = org.projects.map(project => <ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
-      <a href={`/${org.id}/${project.id}`} >
-        {project.name}
-      </a>
-    </ListItem>);
-
-    // Return the org's project list
+  // Return the org's project list
   return (
     <React.Fragment>
       {/* Modal for creating a project */}

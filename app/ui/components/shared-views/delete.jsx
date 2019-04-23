@@ -21,9 +21,6 @@
 import React, { Component } from 'react';
 import { Form, FormGroup, Label, Input, Button, UncontrolledAlert } from 'reactstrap';
 
-// MBEE Modules
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
-
 /* eslint-enable no-unused-vars */
 
 class Delete extends Component {
@@ -53,19 +50,31 @@ class Delete extends Component {
 
     if (this.props.projects) {
       // Get all the project-views from that org
-      ajaxRequest('GET', `/api/orgs/${event.target.value}/projects?fields=id,name&minified=true`)
-      .then(projects => {
-        // Loop through project-views and create proj options
-        const projectOptions = projects.map(
-          (project) => (<option value={project.id}>{project.name}</option>)
-        );
+      $.ajax({
+        method: 'GET',
+        url: `/api/orgs/${event.target.value}/projects?fields=id,name&minified=true`,
+        statusCode: {
+          200: (projects) => {
+            // Loop through project-views and create proj options
+            const projectOptions = projects.map(
+              (project) => (<option value={project.id}>{project.name}</option>)
+            );
 
-        // Set the new project options
-        this.setState({ projectOpt: projectOptions });
-      })
-      .catch(err => {
-        // Set the project options to empty if none found
-        this.setState({ projectOpt: [] });
+            // Set the new project options
+            this.setState({ projectOpt: projectOptions });
+          },
+          401: (err) => {
+            // Set the project options to empty if none found
+            this.setState({ projectOpt: [] });
+            // Throw error and set state
+            this.setState({ error: err.responseJSON.description });
+          },
+          404: (err) => {
+            // Set the project options to empty if none found
+            this.setState({ projectOpt: [] });
+            this.setState({ error: err.responseJSON.description });
+          }
+        }
       });
     }
   }

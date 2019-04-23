@@ -202,7 +202,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       let elementsToFind = [];
 
       // Check the type of the elements parameter
-      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')) {
+      if (Array.isArray(saniElements)) {
         // An array of element ids, find all
         elementsToFind = saniElements.map(e => utils.createID(orgID, projID, e));
       }
@@ -397,7 +397,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     let elementsToCreate = [];
 
     // Check the type of the elements parameter
-    if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
+    if (Array.isArray(saniElements)) {
       // elements is an array, create many elements
       elementsToCreate = saniElements;
     }
@@ -853,7 +853,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Check the type of the elements parameter
-      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
+      if (Array.isArray(saniElements)) {
         // elements is an array, update many elements
         elementsToUpdate = saniElements;
 
@@ -1274,8 +1274,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       }
 
       // Check the type of the elements parameter
-      // TODO: Repeated every(e => typeof e === 'object')
-      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
+      if (Array.isArray(saniElements)) {
         // elements is an array, create/replace many elements
         elementsToLookup = saniElements;
       }
@@ -1477,8 +1476,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     let foundIDs = [];
 
     // Check the type of the elements parameter
-    if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')
-      && saniElements.length !== 0) {
+    if (Array.isArray(saniElements) && saniElements.length !== 0) {
       // An array of element ids, remove all
       elementsToFind = saniElements.map(e => utils.createID(orgID, projID, e));
     }

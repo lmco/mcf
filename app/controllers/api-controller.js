@@ -2701,9 +2701,6 @@ function getElements(req, res) {
     delete options.format;
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -2716,7 +2713,7 @@ function getElements(req, res) {
   // Find elements
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    branchid, elemIDs, options)
+    req.params.branchid, elemIDs, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -2809,9 +2806,6 @@ function postElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -2824,7 +2818,7 @@ function postElements(req, res) {
   // Create the specified elements
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
+    req.params.branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -2881,9 +2875,6 @@ function putElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -2896,7 +2887,7 @@ function putElements(req, res) {
   // Create or replace the specified elements
   // NOTE: createOrReplace() sanitizes input params
   ElementController.createOrReplace(req.user, req.params.orgid,
-    req.params.projectid, branchid, req.body, options)
+    req.params.projectid, req.params.branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -2952,9 +2943,6 @@ function patchElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -2967,7 +2955,7 @@ function patchElements(req, res) {
   // Update the specified elements
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
+    req.params.branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -3010,9 +2998,6 @@ function deleteElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -3032,7 +3017,7 @@ function deleteElements(req, res) {
   // Remove the specified elements
   // NOTE: remove() sanitizes input params
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
+    req.params.branchid, req.body, options)
   .then((elements) => {
     const parsedIDs = elements.map(e => utils.parseID(e).pop());
 
@@ -3120,16 +3105,13 @@ function searchElements(req, res) {
     delete options.minified;
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Set the lean option to true for better performance
   options.lean = true;
 
   // Find elements
   // NOTE: search() sanitizes input params
   ElementController.search(req.user, req.params.orgid, req.params.projectid,
-    branchid, query, options)
+    req.params.branchid, query, options)
   .then((elements) => {
     // Verify elements public data array is not empty
     if (elements.length === 0) {
@@ -3193,9 +3175,6 @@ function getElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -3208,7 +3187,7 @@ function getElement(req, res) {
   // Find the element
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.params.elementid, options)
+    req.params.branchid, req.params.elementid, options)
   .then((elements) => {
     // If no element found, return 404 error
     if (elements.length === 0) {
@@ -3288,9 +3267,6 @@ function postElement(req, res) {
   // Set the element ID in the body equal req.params.elementid
   req.body.id = req.params.elementid;
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -3303,7 +3279,7 @@ function postElement(req, res) {
   // Create element with provided parameters
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
+    req.params.branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -3370,9 +3346,6 @@ function putElement(req, res) {
   // Set the element ID in the body equal req.params.elementid
   req.body.id = req.params.elementid;
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -3385,7 +3358,7 @@ function putElement(req, res) {
   // Create or replace element with provided parameters
   // NOTE: createOrReplace() sanitizes input params
   ElementController.createOrReplace(req.user, req.params.orgid,
-    req.params.projectid, branchid, req.body, options)
+    req.params.projectid, req.params.branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -3452,9 +3425,6 @@ function patchElement(req, res) {
   // Set the element ID in the body equal req.params.elementid
   req.body.id = req.params.elementid;
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -3467,7 +3437,7 @@ function patchElement(req, res) {
   // Updates the specified element
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
+    req.params.branchid, req.body, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -3521,9 +3491,6 @@ function deleteElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -3533,7 +3500,7 @@ function deleteElement(req, res) {
   // Remove the specified element
   // NOTE: remove() sanitizes input params
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
-    branchid, [req.params.elementid], options)
+    req.params.branchid, [req.params.elementid], options)
   .then((element) => {
     const parsedID = utils.parseID(element[0]).pop();
 

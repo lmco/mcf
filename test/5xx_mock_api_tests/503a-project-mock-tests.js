@@ -136,10 +136,11 @@ function postProject(done) {
     chai.expect(createdProj.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdProj.createdOn).to.not.equal(null);
     chai.expect(createdProj.updatedOn).to.not.equal(null);
+    chai.expect(createdProj.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(createdProj).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(createdProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -194,10 +195,11 @@ function postProjects(done) {
       chai.expect(createdProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdProj.createdOn).to.not.equal(null);
       chai.expect(createdProj.updatedOn).to.not.equal(null);
+      chai.expect(createdProj.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(createdProj).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(createdProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -243,10 +245,11 @@ function putProject(done) {
     chai.expect(replacedProj.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(replacedProj.createdOn).to.not.equal(null);
     chai.expect(replacedProj.updatedOn).to.not.equal(null);
+    chai.expect(replacedProj.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(replacedProj).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(replacedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -302,10 +305,11 @@ function putProjects(done) {
       chai.expect(replacedProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(replacedProj.createdOn).to.not.equal(null);
       chai.expect(replacedProj.updatedOn).to.not.equal(null);
+      chai.expect(replacedProj.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(replacedProj).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(replacedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -351,10 +355,11 @@ function getProject(done) {
     chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundProj.createdOn).to.not.equal(null);
     chai.expect(foundProj.updatedOn).to.not.equal(null);
+    chai.expect(foundProj.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -411,10 +416,11 @@ function getProjects(done) {
       chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundProj.createdOn).to.not.equal(null);
       chai.expect(foundProj.updatedOn).to.not.equal(null);
+      chai.expect(foundProj.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -473,10 +479,11 @@ function getAllProjectsOnOrg(done) {
       chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundProj.createdOn).to.not.equal(null);
       chai.expect(foundProj.updatedOn).to.not.equal(null);
+      chai.expect(foundProj.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -533,10 +540,11 @@ function getAllProjects(done) {
       chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundProj.createdOn).to.not.equal(null);
       chai.expect(foundProj.updatedOn).to.not.equal(null);
+      chai.expect(foundProj.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundProj).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -586,10 +594,11 @@ function patchProject(done) {
     chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(updatedProj.createdOn).to.not.equal(null);
     chai.expect(updatedProj.updatedOn).to.not.equal(null);
+    chai.expect(updatedProj.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(updatedProj).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(updatedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -650,10 +659,11 @@ function patchProjects(done) {
       chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(updatedProj.createdOn).to.not.equal(null);
       chai.expect(updatedProj.updatedOn).to.not.equal(null);
+      chai.expect(updatedProj.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(updatedProj).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(updatedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };

@@ -126,7 +126,7 @@ function find(requestingUser, users, options) {
     }
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'string')) {
+    if (Array.isArray(saniUsers)) {
       // An array of usernames, find all
       searchQuery._id = { $in: saniUsers };
     }
@@ -238,7 +238,7 @@ function create(requestingUser, users, options) {
     let usersToCreate = [];
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
+    if (Array.isArray(saniUsers)) {
       // users is an array, create many users
       usersToCreate = saniUsers;
     }
@@ -433,7 +433,7 @@ function update(requestingUser, users, options) {
       'lean'], User);
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
+    if (Array.isArray(saniUsers)) {
       // users is an array, update many users
       usersToUpdate = saniUsers;
     }
@@ -674,7 +674,7 @@ function createOrReplace(requestingUser, users, options) {
     const ts = Date.now();
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
+    if (Array.isArray(saniUsers)) {
       // users is an array, update many users
       usersToLookup = saniUsers;
     }
@@ -817,7 +817,7 @@ function remove(requestingUser, users, options) {
     const memberQuery = {};
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'string')) {
+    if (Array.isArray(saniUsers)) {
       // An array of usernames, remove all
       searchedUsernames = saniUsers;
       searchQuery._id = { $in: saniUsers };

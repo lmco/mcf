@@ -42,7 +42,7 @@ class OrgList extends Component {
       width: null,
       modalProjCreate: false,
       modalOrgDelete: false,
-      projects: []
+      projects: null
     };
 
     // Create reference
@@ -72,25 +72,46 @@ class OrgList extends Component {
     this.setState({ modalProjCreate: !this.state.modalProjCreate });
   }
 
+  componentDidMount() {
+    const projects = this.props.org.projects;
+    const permissionedProjs = [];
+
+    if (!this.props.admin) {
+      const username = this.props.user.username;
+      projects.forEach(project => {
+        if (project.permissions[username]) {
+          permissionedProjs.push(project);
+        }
+      });
+    }
+    else {
+      projects.forEach(project => permissionedProjs.push(project));
+    }
+
+    this.setState({ projects: permissionedProjs });
+  }
+
   render() {
     // Initialize variables
     const orgId = this.props.org.id;
-
-    // Loop through project-views in each org
-    const projects = this.props.org.projects.map(
-      project => (<ProjList project={project}
-                                      admin={this.props.admin}
-                                      key={`proj-key-${project.id}`}
-                                      orgid={this.props.org.id}/>)
-    );
-
     let icon;
+    let projects;
 
     if (this.state.showProjs) {
       icon = 'fas fa-angle-down';
     }
     else {
       icon = 'fas fa-angle-right';
+    }
+
+    // Loop through project-views in each org
+    if (this.state.projects) {
+      projects = this.state.projects.map(
+        project => (<ProjList project={project}
+                              admin={this.props.admin}
+                              key={`proj-key-${project.id}`}
+                              orgid={this.props.org.id}/>)
+      );
     }
 
     // Return the list of the orgs with project-views

@@ -29,7 +29,6 @@ import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import OrgProjects from '../org-views/organization-projects.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class OrgApp extends Component {
@@ -44,6 +43,7 @@ class OrgApp extends Component {
     this.state = {
       org: null,
       error: null,
+      user: null,
       admin: false,
       write: false,
       modal: false,
@@ -52,47 +52,73 @@ class OrgApp extends Component {
 
     // Bind component functions
     this.handleToggle = this.handleToggle.bind(this);
+    this.setMountedComponentStates = this.setMountedComponentStates.bind(this);
   }
 
   componentDidMount() {
-    // Get the organization and it's projects
-    ajaxRequest('GET', `/api/orgs/${this.props.match.params.orgid}?populate=projects&minified=true`)
-    .then(org => {
-      // Get the users information
-      ajaxRequest('GET', '/api/users/whoami?minified=true')
-      .then(user => {
-        // Initialize variables
-        const username = user.username;
-        const perm = org.permissions[username];
-        const admin = user.admin;
+    const url = '/api/users/whoami?minified=true';
 
-        // Verify if user is admin
-        if ((admin) || (perm === 'admin')) {
-          // Set the admin state
-          this.setState({ admin: true });
-          this.setState({ permissions: 'admin' });
+    // Get project data
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (user) => {
+          // Get project data
+          $.ajax({
+            method: 'GET',
+            url: `/api/orgs/${this.props.match.params.orgid}?populate=projects&minified=true`,
+            statusCode: {
+              200: (org) => {
+                this.setMountedComponentStates(user, org);
+              },
+              401: (err) => {
+                // Throw error and set state
+                this.setState({ error: err.responseJSON.description });
+              },
+              404: (err) => {
+                this.setState({ error: err.responseJSON.description });
+              }
+            }
+          });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
         }
-        else {
-          this.setState({ permissions: perm });
-        }
-
-        // Verify is user has write permissions
-        if (admin || (perm === 'admin') || (perm === 'write')) {
-          this.setState({ write: true });
-        }
-
-        // Set the org state
-        this.setState({ org: org });
-      })
-      .catch(err => {
-        // Throw error and set error state
-        this.setState({ error: `Failed to grab user: ${err.responseJSON.description}` });
-      });
-    })
-    .catch(err => {
-      // Throw error and set error state
-      this.setState({ error: `Failed to load organization: ${err.responseJSON.description}` });
+      }
     });
+  }
+
+  setMountedComponentStates(user, org) {
+    // Initialize variables
+    const username = user.username;
+    const perm = org.permissions[username];
+    const admin = user.admin;
+
+    // Set user state
+    this.setState({ user: user });
+
+    // Verify if user is admin
+    if ((admin) || (perm === 'admin')) {
+      // Set the admin state
+      this.setState({ admin: true });
+      this.setState({ permissions: 'admin' });
+    }
+    else {
+      this.setState({ permissions: perm });
+    }
+
+    // Verify is user has write permissions
+    if (admin || (perm === 'admin') || (perm === 'write')) {
+      this.setState({ write: true });
+    }
+
+    // Set the org state
+    this.setState({ org: org });
   }
 
   // Define handle toggle
@@ -144,6 +170,7 @@ class OrgApp extends Component {
                 { /* Route to projects page */ }
                 <Route path={`${this.props.match.url}/projects`}
                     render={ (props) => <OrgProjects {...props}
+                                                     user={this.state.user}
                                                      org={this.state.org}
                                                      write={this.state.write}
                                                      modal={this.state.modal}

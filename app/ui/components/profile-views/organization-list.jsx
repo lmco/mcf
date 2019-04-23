@@ -27,7 +27,6 @@ import List from '../general/list/list.jsx';
 import OrgListItem from '../shared-views/list-items/org-list-item.jsx';
 import Create from '../shared-views/create.jsx';
 import Delete from '../shared-views/delete.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -58,33 +57,51 @@ class OrganizationList extends Component {
   }
 
   componentDidMount() {
-    // Get all orgs with their projects
-    ajaxRequest('GET', '/api/orgs?populate=projects&minified=true')
-    .then(orgs => {
-      // Get the users information
-      ajaxRequest('GET', '/api/users/whoami?minified=true')
-      .then(user => {
-        // Verify if admin user
-        if (user.admin) {
-          // Set admin state
-          this.setState({ admin: user.admin });
+    // Get project data
+    $.ajax({
+      method: 'GET',
+      url: '/api/users/whoami?minified=true',
+      statusCode: {
+        200: (user) => {
+          // Get project data
+          $.ajax({
+            method: 'GET',
+            url: '/api/orgs?populate=projects&minified=true',
+            statusCode: {
+              200: (orgs) => {
+                // Verify if admin user
+                if (user.admin) {
+                  // Set admin state
+                  this.setState({ admin: user.admin });
+                }
+
+                // Set org state
+                this.setState({ orgs: orgs });
+
+                // Create event listener for window resizing
+                window.addEventListener('resize', this.handleResize);
+                // Handle initial size of window
+                this.handleResize();
+              },
+              401: (err) => {
+                // Throw error and set state
+                this.setState({ error: err.responseJSON.description });
+              },
+              404: (err) => {
+                this.setState({ error: err.responseJSON.description });
+              }
+            }
+          });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
         }
-
-        // Set org state
-        this.setState({ orgs: orgs });
-
-        // Create event listener for window resizing
-        window.addEventListener('resize', this.handleResize);
-        // Handle initial size of window
-        this.handleResize();
-      })
-      .catch(err => {
-        // Throw error and set error state
-        this.setState({ error: `Failed to grab user information: ${err}` });
-      });
-    })
-    // Throw error and set error state
-    .catch(err => this.setState({ error: `Failed to load organizations: ${err}` }));
+      }
+    });
   }
 
   componentWillUnmount() {
