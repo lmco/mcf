@@ -28,7 +28,6 @@ import List from '../general/list/list.jsx';
 import OrgList from '../home-views/org-list.jsx';
 import Create from '../shared-views/create.jsx';
 import Delete from '../shared-views/delete.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define HomePage Component
 class HomeApp extends Component {
@@ -46,9 +45,7 @@ class HomeApp extends Component {
       modalCreate: false,
       modalDelete: false,
       user: null,
-      starredProjects: [],
       orgs: [],
-      projects: [],
       admin: false,
       write: false,
       writePermOrgs: null,
@@ -59,6 +56,7 @@ class HomeApp extends Component {
     this.ref = React.createRef();
 
     // Bind component functions
+    this.setMountedComponentStates = this.setMountedComponentStates.bind(this);
     this.handleModalToggle = this.handleModalToggle.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
@@ -68,69 +66,80 @@ class HomeApp extends Component {
   componentDidMount() {
     const url = '/api/users/whoami?minified=true';
 
-    // TODO (jk->ld) - We should be using jQuery rather than our own custom AJAX function
-    ajaxRequest('GET', `${url}`)
-    .then(user => {
-      // Get the organization and their projects
-      ajaxRequest('GET', '/api/orgs?populate=projects&minified=true')
-      .then(orgs => {
-        // Set user state
-        this.setState({ user: user });
-
-        // Add event listener for window resizing
-        window.addEventListener('resize', this.handleResize);
-        // Handle initial size of window
-        this.handleResize();
-
-        // Initialize variables
-        const writePermOrgs = [];
-        const allProjects = [];
-
-        // Loop through orgs
-        orgs.forEach((org) => {
-          // Loop through projects and push to array
-          org.projects.forEach(project => {
-            allProjects.push(project);
+    // Get project data
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (user) => {
+          // Get project data
+          $.ajax({
+            method: 'GET',
+            url: '/api/orgs?populate=projects&minified=true',
+            statusCode: {
+              200: (orgs) => {
+                this.setMountedComponentStates(user, orgs);
+              },
+              401: (err) => {
+                // Throw error and set state
+                this.setState({ error: err.responseJSON.description });
+              },
+              404: (err) => {
+                this.setState({ error: err.responseJSON.description });
+              }
+            }
           });
-
-          // Initialize variables
-          const perm = org.permissions[user.username];
-
-          // Verify if user has write or admin permissions
-          if ((perm === 'write') || (perm === 'admin')) {
-            // Push the org to the org permissions
-            writePermOrgs.push(org);
-          }
-        });
-
-        // Verify there are orgs
-        if (writePermOrgs.length > 0) {
-          // Set write states
-          this.setState({ write: true });
-          this.setState({ writePermOrgs: writePermOrgs });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
         }
-
-        // Verify user is admin
-        if (user.admin) {
-          // Set admin state
-          this.setState({ admin: user.admin });
-        }
-
-        // Set the org state
-        this.setState({ orgs: orgs });
-
-        // Set the org state
-        this.setState({ projects: allProjects });
-      })
-      .catch(err => {
-        // Throw error and set error state
-        this.setState({ error: `Failed to grab orgs: ${err}` });
-      });
-    })
-    .catch(err => {
-      // Throw error and set error state
-      this.setState({ error: `Failed to grab user: ${err}` });
+      }
     });
+  }
+
+  setMountedComponentStates(user, orgs) {
+    // Set user state
+    this.setState({ user: user });
+
+    // Add event listener for window resizing
+    window.addEventListener('resize', this.handleResize);
+    // Handle initial size of window
+    this.handleResize();
+
+    // Initialize variables
+    const writePermOrgs = [];
+
+    // Loop through orgs
+    orgs.forEach((org) => {
+      // Initialize variables
+      const perm = org.permissions[user.username];
+
+      // Verify if user has write or admin permissions
+      if ((perm === 'write') || (perm === 'admin')) {
+        // Push the org to the org permissions
+        writePermOrgs.push(org);
+      }
+    });
+
+    // Verify there are orgs
+    if (writePermOrgs.length > 0) {
+      // Set write states
+      this.setState({ write: true });
+      this.setState({ writePermOrgs: writePermOrgs });
+    }
+
+    // Verify user is admin
+    if (user.admin) {
+      // Set admin state
+      this.setState({ admin: user.admin });
+    }
+
+    // Set the org state
+    this.setState({ orgs: orgs });
   }
 
   componentWillUnmount() {
@@ -171,10 +180,10 @@ class HomeApp extends Component {
       const username = this.state.user.username;
 
       if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
-        return (<OrgList org={org} key={`org-key-${org.id}`} write={this.state.write} admin={this.state.admin}/>);
+        return (<OrgList org={org} key={`org-key-${org.id}`} user={this.state.user} write={this.state.write} admin={this.state.admin}/>);
       }
       else {
-        return (<OrgList key={`org-key-${org.id}`} org={org} admin={this.state.admin}/>);
+        return (<OrgList key={`org-key-${org.id}`} org={org} user={this.state.user} admin={this.state.admin}/>);
       }
     });
 

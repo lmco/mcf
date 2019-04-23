@@ -30,7 +30,6 @@ import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import ProjectElements from '../project-views/elements/project-elements.jsx';
 import Search from '../project-views/search/search.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProjectApp extends Component {
@@ -63,37 +62,82 @@ class ProjectApp extends Component {
     this.setState({ orgid: orgId });
 
     // Get project data
-    ajaxRequest('GET', `${url}?minified=true`)
-    .then(project => {
-      // Get user data
-      ajaxRequest('GET', '/api/users/whoami?minified=true')
-      .then(user => {
-        // Initialize variables
-        const username = user.username;
-        const perm = project.permissions[username];
-        const admin = user.admin;
+    $.ajax({
+      method: 'GET',
+      url: '/api/users/whoami?minified=true',
+      statusCode: {
+        200: (user) => {
+          // Get project data
+          $.ajax({
+            method: 'GET',
+            url: `${url}?minified=true`,
+            statusCode: {
+              200: (project) => {
+                // Initialize variables
+                const username = user.username;
+                const perm = project.permissions[username];
+                const admin = user.admin;
 
-        // Verify if user is admin
-        if ((admin) || (perm === 'admin')) {
-          // Set admin state
-          this.setState({ admin: true });
-          this.setState({ permissions: 'admin' });
+                // Verify if user is admin
+                if ((admin) || (perm === 'admin')) {
+                  // Set admin state
+                  this.setState({ admin: true });
+                  this.setState({ permissions: 'admin' });
+                }
+                else {
+                  // Set permissions
+                  this.setState({ permissions: perm });
+                }
+                // Set states
+                this.setState({ project: project });
+              },
+              401: (err) => {
+                // Throw error and set state
+                this.setState({ error: err.responseJSON.description });
+              },
+              404: (err) => {
+                this.setState({ error: err.responseJSON.description });
+              }
+            }
+          });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
         }
-        else {
-          // Set permissions
-          this.setState({ permissions: perm });
-        }
-        // Set states
-        this.setState({ project: project });
-      })
-      .catch((err) => {
-        this.setState({ error: `Failed to grab user: ${err.responseJSON.description}` });
-      });
-    })
-    .catch(err => {
-      // Throw error and set state
-      this.setState({ error: `Failed to load project: ${err.responseJSON.description}` });
+      }
     });
+  }
+
+  setMountedComponentStates(user, org) {
+    // Initialize variables
+    const username = user.username;
+    const perm = org.permissions[username];
+    const admin = user.admin;
+
+    // Set user state
+    this.setState({ user: user });
+
+    // Verify if user is admin
+    if ((admin) || (perm === 'admin')) {
+      // Set the admin state
+      this.setState({ admin: true });
+      this.setState({ permissions: 'admin' });
+    }
+    else {
+      this.setState({ permissions: perm });
+    }
+
+    // Verify is user has write permissions
+    if (admin || (perm === 'admin') || (perm === 'write')) {
+      this.setState({ write: true });
+    }
+
+    // Set the org state
+    this.setState({ org: org });
   }
 
   render() {

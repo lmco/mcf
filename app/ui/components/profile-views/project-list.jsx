@@ -27,7 +27,6 @@ import ListItem from '../general/list/list-item.jsx';
 import ProjectListItem from '../shared-views/list-items/project-list-item.jsx';
 import Create from '../shared-views/create.jsx';
 import Delete from '../shared-views/delete.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -41,7 +40,6 @@ class ProjectList extends Component {
     // Initialize state props
     this.state = {
       width: null,
-      projects: [],
       orgs: [],
       admin: false,
       write: false,
@@ -58,69 +56,83 @@ class ProjectList extends Component {
     this.handleResize = this.handleResize.bind(this);
     this.handleCreateToggle = this.handleCreateToggle.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
+    this.setMountedComponentStates = this.setMountedComponentStates.bind(this);
   }
 
   componentDidMount() {
-    // Get user information
-    ajaxRequest('GET', '/api/users/whoami?minified=true')
-    .then(user => {
-      // Get the organization and their project-views
-      ajaxRequest('GET', '/api/orgs?populate=projects&minified=true')
-      .then(orgs => {
-        // Initialize variables
-        const writePermOrgs = [];
-        const allProjects = [];
+    const url = '/api/users/whoami?minified=true';
 
-        // Add event listener for window resizing
-        window.addEventListener('resize', this.handleResize);
-        // Handle initial size of window
-        this.handleResize();
-
-        // Loop through orgs
-        orgs.forEach((org) => {
-          // Loop through project-views and push to array
-          org.projects.forEach(project => {
-            allProjects.push(project);
+    // Get project data
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (user) => {
+          // Get project data
+          $.ajax({
+            method: 'GET',
+            url: '/api/orgs?populate=projects&minified=true',
+            statusCode: {
+              200: (orgs) => {
+                this.setMountedComponentStates(user, orgs);
+              },
+              401: (err) => {
+                // Throw error and set state
+                this.setState({ error: err.responseJSON.description });
+              },
+              404: (err) => {
+                this.setState({ error: err.responseJSON.description });
+              }
+            }
           });
-
-          // Initialize variables
-          const perm = org.permissions[user.username];
-
-          // Verify if user has write or admin permissions
-          if ((perm === 'write') || (perm === 'admin')) {
-            // Push the org to the org permissions
-            writePermOrgs.push(org);
-          }
-        });
-
-        // Verify there are orgs
-        if (writePermOrgs.length > 0) {
-          // Set write states
-          this.setState({ write: true });
-          this.setState({ writePermOrgs: writePermOrgs });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
         }
-
-        // Verify user is admin
-        if (user.admin) {
-          // Set admin state
-          this.setState({ admin: user.admin });
-        }
-
-        // Set the org state
-        this.setState({ orgs: orgs });
-
-        // Set the org state
-        this.setState({ projects: allProjects });
-      })
-      .catch(err => {
-        // Throw error and set error state
-        this.setState({ error: `Failed to grab orgs: ${err}` });
-      });
-    })
-    // Throw error and set error state
-    .catch(err => {
-      this.setState({ error: `Failed to grab user information: ${err}` });
+      }
     });
+  }
+
+  setMountedComponentStates(user, orgs) {
+    // Initialize variables
+    const writePermOrgs = [];
+
+    // Add event listener for window resizing
+    window.addEventListener('resize', this.handleResize);
+    // Handle initial size of window
+    this.handleResize();
+
+    // Loop through orgs
+    orgs.forEach((org) => {
+      // Initialize variables
+      const perm = org.permissions[user.username];
+
+      // Verify if user has write or admin permissions
+      if ((perm === 'write') || (perm === 'admin')) {
+        // Push the org to the org permissions
+        writePermOrgs.push(org);
+      }
+    });
+
+    // Verify there are orgs
+    if (writePermOrgs.length > 0) {
+      // Set write states
+      this.setState({ write: true });
+      this.setState({ writePermOrgs: writePermOrgs });
+    }
+
+    // Verify user is admin
+    if (user.admin) {
+      // Set admin state
+      this.setState({ admin: user.admin });
+    }
+
+    // Set the org state
+    this.setState({ orgs: orgs });
   }
 
   componentWillUnmount() {
@@ -146,16 +158,38 @@ class ProjectList extends Component {
   }
 
   render() {
+    let projectsAvaliable = false;
+
     // Loop through all orgs
     const list = this.state.orgs.map(org => {
       // Initialize variables
       const orgId = org.id;
+      const projects = org.projects;
+      const permProjects = [];
 
-      // Loop through project-views in each org
-      const projects = org.projects.map(project => (<ProjectListItem className='hover-darken project-hover'
-                                                                               key={`proj-key-${project.id}`}
-                                                                               project={project}
-                                                                               href={`/${orgId}/${project.id}`}/>));
+      if (!this.props.admin) {
+        const username = this.props.user.username;
+        projects.forEach(project => {
+          if (project.permissions[username]) {
+            permProjects.push(<ProjectListItem className='hover-darken project-hover'
+                                               key={`proj-key-${project.id}`}
+                                               project={project}
+                                               href={`/${orgId}/${project.id}`}/>);
+          }
+        });
+      }
+      else {
+        projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
+                                                                      key={`proj-key-${project.id}`}
+                                                                      project={project}
+                                                                      href={`/${orgId}/${project.id}`}/>));
+      }
+
+      // Verify if projects
+      if (permProjects.length > 0) {
+        // Set projects to true
+        projectsAvaliable = true;
+      }
 
       // Return the list of the orgs with project-views
       return (
@@ -164,7 +198,7 @@ class ProjectList extends Component {
                 <a href={`/${orgId}`}>{org.name}</a>
             </ListItem>
             <List key={`org-list-key-${org.id}`}>
-                {projects}
+                {permProjects}
             </List>
         </React.Fragment>
       );
@@ -230,7 +264,7 @@ class ProjectList extends Component {
           </div>
           <div id='workspace-body' className='extra-padding'>
             {/* Verify there are project-views */}
-            {(this.state.projects.length === 0)
+            {(!projectsAvaliable)
               ? (<div className='main-workspace list-item'>
                   <h3> No projects. </h3>
                  </div>)

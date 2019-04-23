@@ -28,7 +28,6 @@ import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import ProfileHome from '../profile-views/profile-home.jsx';
 import OrganizationList from '../profile-views/organization-list.jsx';
 import ProjectList from '../profile-views/project-list.jsx';
-import { ajaxRequest } from '../helper-functions/ajaxRequests.js';
 
 // Define component
 class ProfileApp extends Component {
@@ -48,14 +47,22 @@ class ProfileApp extends Component {
 
   componentDidMount() {
     // Get user data
-    ajaxRequest('GET', '/api/users/whoami?minified=true')
-    .then(user => {
-      // Set user state
-      this.setState({ user: user });
-    })
-    .catch(err => {
-      // Throw error and set state
-      this.setState({ error: `Failed to load user information: ${err}` });
+    $.ajax({
+      method: 'GET',
+      url: '/api/users/whoami?minified=true',
+      statusCode: {
+        200: (user) => {
+          // Set user state
+          this.setState({ user: user });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseJSON.description });
+        },
+        404: (err) => {
+          this.setState({ error: err.responseJSON.description });
+        }
+      }
     });
   }
 
