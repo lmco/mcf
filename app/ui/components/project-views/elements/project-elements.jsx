@@ -43,7 +43,6 @@ class ProjectElements extends Component {
       sidePanel: false,
       id: null,
       refreshFunction: null,
-      selected: null,
       treeRoot: null,
       error: null
     };
@@ -75,9 +74,6 @@ class ProjectElements extends Component {
 
     if (this.state.sidePanel === 'addElement') {
       // do nothing
-    }
-    else if (this.state.sidePanel === 'elementEdit') {
-      this.setState({ selected: id });
     }
     else {
       // Toggle the element side panel

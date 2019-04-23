@@ -54,6 +54,7 @@ class ElementEdit extends Component {
       custom: {},
       org: null,
       project: null,
+      parentUpdate: null,
       customInvalid: false,
       error: null
     };
@@ -87,6 +88,7 @@ class ElementEdit extends Component {
 
           if (element.parent) {
             this.setState({ parent: element.parent });
+            this.setState({ parentUpdate: element.parent });
           }
           if (element.source) {
             this.setState({ source: element.source });
@@ -112,14 +114,6 @@ class ElementEdit extends Component {
 
   componentDidMount() {
     this.getElement();
-  }
-
-  componentDidUpdate(prevProps) {
-    // Check if new selected element
-    if (this.props.selected !== prevProps.selected) {
-      // Set parent as the selected element
-      this.setState({ parent: this.props.selected });
-    }
   }
 
   // Define handle change function
@@ -150,6 +144,7 @@ class ElementEdit extends Component {
   // Define the submit function
   onSubmit() {
     // Initialize variables
+    let parentUpdated;
     const elementId = this.state.id;
     const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
     const data = {
@@ -169,6 +164,10 @@ class ElementEdit extends Component {
       data.source = this.state.source;
     }
 
+    if (this.state.parentUpdate !== this.state.parent) {
+      parentUpdated = true;
+    }
+
     // Send a patch request to update element data
     $.ajax({
       method: 'PATCH',
@@ -177,7 +176,12 @@ class ElementEdit extends Component {
       contentType: 'application/json',
       statusCode: {
         200: () => {
-          this.props.closeSidePanel(null, true);
+          if (parentUpdated) {
+            this.props.closeSidePanel(null, true, true);
+          }
+          else {
+            this.props.closeSidePanel(null, true);
+          }
         },
         401: (err) => { this.setState({ error: err.responseJSON.description }); },
         404: (err) => {
@@ -192,9 +196,14 @@ class ElementEdit extends Component {
 
   render() {
     // // Initialize variables
+    let parentInvalid;
     let targetInvalid;
     let sourceInvalid;
 
+    // Verify id
+    if (!RegExp(validators.id).test(this.state.target)) {
+      parentInvalid = true;
+    }
     // Verify id
     if (!RegExp(validators.id).test(this.state.target)) {
       targetInvalid = true;
@@ -247,16 +256,20 @@ class ElementEdit extends Component {
               ? ''
               // Form section for Element parent
               : (<FormGroup row>
-                <Label for='name' sm={2}><b>Parent</b></Label>
+                <Label for='parent' sm={2}><b>Parent</b></Label>
                   <Col sm={10}>
-                    <p id="parent">
-                      {this.state.parent || 'Select an element in the model tree.'}
-                    </p>
+                    <Input type='text'
+                           name='parent'
+                           id='parent'
+                           placeholder='Parent ID'
+                           invalid={parentInvalid}
+                           value={this.state.parent || ''}
+                           onChange={this.handleChange}/>
                   </Col>
                   {/* Verify fields are valid, or display feedback */}
-                  <FormFeedback >
-                    Invalid: An Element parent may only contain letters, numbers, space, or dashes.
-                  </FormFeedback>
+                <FormFeedback>
+                  Invalid: An Element parent may only contain letters, numbers, space, or dashes.
+                </FormFeedback>
                  </FormGroup>)
             }
             {/* Form section for Element type */}
