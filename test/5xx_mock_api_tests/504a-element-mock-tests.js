@@ -32,6 +32,7 @@ let adminUser = null;
 let org = null;
 let proj = null;
 let projID = null;
+const branchID = 'master';
 
 /* --------------------( Main )-------------------- */
 /**
@@ -125,6 +126,7 @@ function postElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: elemData.id
   };
   const method = 'POST';
@@ -192,7 +194,7 @@ function postElements(done) {
     testData.elements[4],
     testData.elements[5]
   ];
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'POST';
   const req = testUtils.createRequest(adminUser, params, elemData, method);
 
@@ -265,6 +267,7 @@ function putElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: elemData.id
   };
   const method = 'PUT';
@@ -333,7 +336,7 @@ function putElements(done) {
     testData.elements[5],
     testData.elements[6]
   ];
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'PUT';
   const req = testUtils.createRequest(adminUser, params, elemData, method);
 
@@ -406,6 +409,7 @@ function getElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: elemData.id
   };
   const method = 'GET';
@@ -475,7 +479,7 @@ function getElements(done) {
   ];
 
   // Create request object
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, elemData, method);
 
@@ -553,7 +557,7 @@ function getAllElements(done) {
   ];
 
   // Create request object
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, {}, method);
 
@@ -627,6 +631,7 @@ function searchElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: elemData.id
   };
   const query = { q: `"${elemData.name}"` };
@@ -701,6 +706,7 @@ function patchElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: testData.elements[0].id
   };
   const method = 'PATCH';
@@ -776,7 +782,7 @@ function patchElements(done) {
     id: p.id
   }));
 
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, arrUpdateObjects, method);
 
@@ -849,6 +855,7 @@ function deleteElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: testData.elements[0].id
   };
   const method = 'DELETE';
@@ -886,7 +893,7 @@ function deleteElements(done) {
   ];
   const elemIDs = elemData.map(e => e.id);
 
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, elemIDs, method);
 

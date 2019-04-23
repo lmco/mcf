@@ -59,7 +59,7 @@ api.get('/test', Middleware.logRoute, APIController.test);
  */
 api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
 
-// TODO: Address deprecation warning on login
+
 /**
  * @swagger
  * /api/login:
