@@ -120,7 +120,7 @@ class Delete extends Component {
     $.ajax({
       method: 'DELETE',
       url: `${url}?minified=true`,
-      dataType: 'json',
+      contentType: 'application/json',
       statusCode: {
         200: () => {
           if (this.props.element) {

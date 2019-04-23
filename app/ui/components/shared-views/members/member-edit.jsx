@@ -94,8 +94,8 @@ class MemberEdit extends Component {
     $.ajax({
       method: 'PATCH',
       url: `${url}?minified=true`,
-      data: data,
-      dataType: 'json',
+      data: JSON.stringify(data),
+      contentType: 'application/json',
       statusCode: {
         200: () => {
           // Update the page to reload to user page

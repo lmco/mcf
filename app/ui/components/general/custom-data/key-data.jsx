@@ -94,8 +94,13 @@ class KeyData extends Component {
       // Loop through object for recursive call
       nestedData = Object.keys(custom).map((key) => <KeyData key={`key-${key}`} keyName={key} data={custom[key]}/>);
     }
+    // Verify if type if boolean
+    else if (typeof custom === 'boolean') {
+      nestedData = (custom)
+        ? (<span className='last-element'>true</span>)
+        : (<span className='last-element'>false</span>);
+    }
     else {
-      // Display the data
       nestedData = (<span className='last-element'>{custom}</span>);
     }
 
