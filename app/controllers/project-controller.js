@@ -161,7 +161,6 @@ function find(requestingUser, organizationID, projects, options) {
       Project.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
       .populate(validOptions.populateString).lean()
-      .then((foundProjects) => Project.getElementCount(foundProjects))
       .then((finishedProjects) => resolve(finishedProjects))
       .catch((error) => reject(M.CustomError.parseCustomError(error)));
     }
@@ -170,7 +169,6 @@ function find(requestingUser, organizationID, projects, options) {
       Project.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
       .populate(validOptions.populateString)
-      .then((foundProjects) => Project.getElementCount(foundProjects))
       .then((finishedProjects) => resolve(finishedProjects))
       .catch((error) => reject(M.CustomError.parseCustomError(error)));
     }

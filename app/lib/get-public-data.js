@@ -269,7 +269,6 @@ function getProjectPublicData(project) {
       ? getOrgPublicData(project.org)
       : utils.parseID(project._id)[0],
     name: project.name,
-    elementCount: project.count || undefined,
     permissions: permissions,
     projectReferences: projectReferences,
     custom: project.custom || {},
