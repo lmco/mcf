@@ -45,8 +45,6 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost
 
 # Prerequisites for MongoDB install
-RUN dpkg-divert --local --rename --add /etc/init.d/mongod
-RUN ln -s /bin/true /etc/init.d/mongod
 RUN apt-get install curl
 RUN curl --cacert "./certs/LockheedMartinCertificateAuthority.pem"  https://www.mongodb.org/static/pgp/server-4.0.asc | apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0 main" | tee /etc/apt/sources.list.d/mongodb-org-4.0.list
