@@ -108,14 +108,13 @@ It's important to ensure that all test users are deleted from the database.
 Some components in the build script are asynchronous and the build script will 
 print out a message that build is complete before build has finished.
 
-#### UI Refresh
-Refreshing some UI pages causes issues with page rendering due to client-side
-applications mapping to server-side routes.
+#### UI Model Tree Refresh
+When updating the parent in the model tree causes issues with the re-rendering 
+of model tree elements due to the refresh element functions.
 
 #### Password Validation
 Since, the password validation is through the modular authentication strategies,
 there is no easy way to tell if a password valid.
-
 
 ## Security Related Configuration
 
