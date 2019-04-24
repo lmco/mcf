@@ -19,6 +19,7 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     http_proxy="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost
+ENV NODE_ENV=production
 
 # Install dependencies
 RUN apt-get -y upgrade \
