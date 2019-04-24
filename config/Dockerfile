@@ -32,6 +32,11 @@ COPY ./build build
 COPY ./app  app
 COPY ./README.md README.md
 
+# Install certs - If you have certs in a certs directory, uncomment the following lines
+RUN mkdir -p certs
+COPY ./certs certs
+RUN chmod 400 certs/*
+
 # Set proxy environment variables
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80" \
@@ -40,10 +45,9 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost
 
 # Prerequisites for MongoDB install
-RUN dpkg-divert --local --rename --add /etc/init.d/mongod
-RUN ln -s /bin/true /etc/init.d/mongod
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
-RUN echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/4.0 multiverse" | tee -i /etc/apt/sources.list.d/mongodb-org-4.0.list
+RUN apt-get install curl
+RUN curl --cacert "./certs/LockheedMartinCertificateAuthority.pem"  https://www.mongodb.org/static/pgp/server-4.0.asc | apt-key add -
+RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0 main" | tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 
 # Install dependencies
 RUN apt-get -y upgrade \
@@ -51,11 +55,6 @@ RUN apt-get -y upgrade \
  && apt-get install -y git \
  && apt-get install -y openssh-client \
  && apt-get install -y --force-yes mongodb-org
-
-# Install certs - If you have certs in a certs directory, uncomment the following lines
-RUN mkdir -p certs
-COPY ./certs certs
-RUN chmod 400 certs/*
 
 # Configure Yarn
 RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
