@@ -42,7 +42,15 @@ const OrganizationSchema = new mongoose.Schema({
     required: true,
     match: RegExp(validators.org.id),
     maxlength: [36, 'Too many characters in ID'],
-    minlength: [2, 'Too few characters in ID']
+    minlength: [2, 'Too few characters in ID'],
+    validate: {
+      validator: function(v) {
+        // If the ID is a reserved keyword, reject
+        return !validators.reserved.includes(v);
+      },
+      message: 'Organization ID cannot include the following words: '
+        + `[${validators.reserved}].`
+    },
   },
   name: {
     type: String,

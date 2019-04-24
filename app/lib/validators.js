@@ -24,6 +24,12 @@ const customValidators = M.config.validators || {};
 // This ID is used as the common regex for other ID fields in this module
 const id = customValidators.id || '([_a-z0-9])([-_a-z0-9]){0,}';
 
+// A list of reserved keywords which cannot be used in ids
+module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
+  'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
+  'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
+  'whoami', 'profile', 'edit', 'proj', 'elements', 'branch'];
+
 /**
  * @description Regular Expressions to validate organization data
  *
@@ -51,7 +57,7 @@ const id = customValidators.id || '([_a-z0-9])([-_a-z0-9]){0,}';
  *     - " " [invalid - cannot start with a space]
  */
 module.exports.org = {
-  id: customValidators.org_id || `^(?!(css|js|img|login|logout|about|assets|static|public|api|organizations|projects|users))${id}$`
+  id: customValidators.org_id || `^${id}$`
 };
 
 /**

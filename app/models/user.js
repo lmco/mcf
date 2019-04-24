@@ -49,14 +49,17 @@ const UserSchema = new mongoose.Schema({
   _id: {
     type: String,
     required: [true, 'Username is required.'],
+    match: RegExp(validators.user.username),
     maxlength: [36, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
     validate: {
       validator: function(v) {
-        return RegExp(validators.user.username).test(v);
+        // If the ID is a reserved keyword, reject
+        return !validators.reserved.includes(v);
       },
-      message: 'Not a valid username.'
-    }
+      message: 'Username cannot include the following words: '
+      + `[${validators.reserved}].`
+    },
   },
   password: {
     type: String,

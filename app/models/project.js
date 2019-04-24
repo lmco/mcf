@@ -20,6 +20,7 @@ const mongoose = require('mongoose');
 // MBEE modules
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
+const utils = M.require('lib.utils');
 
 
 /* ----------------------------( Project Model )----------------------------- */
@@ -50,7 +51,16 @@ const ProjectSchema = new mongoose.Schema({
     required: true,
     match: RegExp(validators.project.id),
     maxlength: [73, 'Too many characters in ID'],
-    minlength: [5, 'Too few characters in ID']
+    minlength: [5, 'Too few characters in ID'],
+    validate: {
+      validator: function(v) {
+        const projID = utils.parseID(v).pop();
+        // If the ID is a reserved keyword, reject
+        return !validators.reserved.includes(projID);
+      },
+      message: 'Project ID cannot include the following words: '
+      + `[${validators.reserved}].`
+    },
   },
   org: {
     type: String,
