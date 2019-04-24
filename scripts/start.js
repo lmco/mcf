@@ -50,7 +50,11 @@ function start(args) {
   startup(); // Print startup banner
 
   // Create command to check if dependencies are up-to-date
-  const cmd = 'yarn check --verify-tree';
+  let cmd = 'yarn check --verify-tree';
+  if (process.env.NODE_ENV === 'production') {
+    cmd += ' --production';
+  }
+
   try {
     // Run the command
     execSync(cmd);
