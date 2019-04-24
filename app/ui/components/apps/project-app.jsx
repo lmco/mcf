@@ -143,12 +143,25 @@ class ProjectApp extends Component {
   render() {
     // Initialize variables
     let title;
+    let displayPlugins = false;
+    const plugins = [];
 
     // Verify if project exists
     if (this.state.project) {
       // Set the title for sidebar
       title = <h2> {this.state.project.name}</h2>;
+
+      if (this.state.project.custom.plugins) {
+        displayPlugins = true;
+        this.state.project.custom.plugins.forEach((plugin) => {
+          plugins.push(<SidebarLink id={`sidebar-${plugin.name}`}
+                                    title={plugin.title}
+                                    icon={`fas fa-${plugin.icon}`}
+                                    href={`${this.props.match.url}${plugin.url}`}/>);
+        });
+      }
     }
+
     // Return project page
     return (
       <Router>
@@ -171,6 +184,10 @@ class ProjectApp extends Component {
                          title='Members'
                          icon='fas fa-users'
                          routerLink={`${this.props.match.url}/users`}/>
+            {(!displayPlugins)
+              ? ''
+              : (plugins)
+            }
           </Sidebar>
           { /* Verify project and element data exists */ }
           { // Display loading page or error page if project is loading or failed to load
