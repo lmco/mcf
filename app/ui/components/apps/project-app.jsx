@@ -26,6 +26,7 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
+import Divider from '../general/sidebar/divider.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import ProjectElements from '../project-views/elements/project-elements.jsx';
@@ -188,6 +189,13 @@ class ProjectApp extends Component {
               ? ''
               : (plugins)
             }
+            {/*{(!displayPlugins)*/}
+              {/*? ''*/}
+              {/*: (<React.Fragment>*/}
+                  {/*<Divider/>*/}
+                  {/*{plugins}*/}
+                 {/*</React.Fragment>)*/}
+            {/*}*/}
           </Sidebar>
           { /* Verify project and element data exists */ }
           { // Display loading page or error page if project is loading or failed to load
