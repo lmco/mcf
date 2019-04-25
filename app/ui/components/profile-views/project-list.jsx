@@ -225,7 +225,7 @@ class ProjectList extends Component {
         <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
           <ModalBody>
             <Delete orgs={this.state.orgs}
-                    projects={this.state.projects}
+                    projects={true}
                     toggle={this.handleDeleteToggle}/>
           </ModalBody>
         </Modal>
