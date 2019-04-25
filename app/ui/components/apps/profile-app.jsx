@@ -58,6 +58,9 @@ class ProfileApp extends Component {
         401: (err) => {
           // Throw error and set state
           this.setState({ error: err.responseJSON.description });
+
+          // Refresh when session expires
+          window.location.reload();
         },
         404: (err) => {
           this.setState({ error: err.responseJSON.description });

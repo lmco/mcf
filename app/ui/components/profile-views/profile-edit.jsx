@@ -77,7 +77,12 @@ class ProfileEdit extends Component {
       data: JSON.stringify(data),
       statusCode: {
         200: () => { window.location.replace('/profile'); },
-        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        401: (err) => {
+          this.setState({ error: err.responseJSON.description });
+
+          // Refresh when session expires
+          window.location.reload();
+        },
         403: (err) => {
           this.setState({ error: err.responseJSON.description });
         },
