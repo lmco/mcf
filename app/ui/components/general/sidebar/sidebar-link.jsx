@@ -44,6 +44,7 @@ function SidebarLink(props) {
                 </UncontrolledTooltip>
               : ''}
             {/* if sidebar is expanded, set the name of link */}
+          {console.log(props.isExpanded)}
             {(props.isExpanded) ? <p> {props.title} </p> : ''}
         </div>
   );

@@ -185,17 +185,18 @@ class ProjectApp extends Component {
                          title='Members'
                          icon='fas fa-users'
                          routerLink={`${this.props.match.url}/users`}/>
-            {(!displayPlugins)
-              ? ''
-              : (plugins)
-            }
             {/*{(!displayPlugins)*/}
               {/*? ''*/}
-              {/*: (<React.Fragment>*/}
-                  {/*<Divider/>*/}
-                  {/*{plugins}*/}
-                 {/*</React.Fragment>)*/}
+              {/*: (plugins)*/}
             {/*}*/}
+            {(!displayPlugins)
+              ? ''
+              : (<React.Fragment>
+                  <Divider/>
+                {console.log(plugins)}
+                  {plugins}
+                 </React.Fragment>)
+            }
           </Sidebar>
           { /* Verify project and element data exists */ }
           { // Display loading page or error page if project is loading or failed to load
