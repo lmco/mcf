@@ -17,16 +17,12 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-import React, { Component } from 'react';
+import React from 'react';
 
 /* eslint-enable no-unused-vars */
 
-class Divider extends Component {
-
-  render() {
-    return (<hr className={'divider'}/>);
-  }
-
+function Divider() {
+  return (<hr className={'divider'}/>);
 }
 
 // Export component

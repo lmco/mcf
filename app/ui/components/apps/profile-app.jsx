@@ -25,6 +25,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
+import SidebarHeader from '../general/sidebar/sidebar-header.jsx';
 import ProfileHome from '../profile-views/profile-home.jsx';
 import OrganizationList from '../profile-views/organization-list.jsx';
 import ProjectList from '../profile-views/project-list.jsx';
@@ -86,8 +87,8 @@ class ProfileApp extends Component {
       <Router>
         <div id='container'>
           { /* Create the sidebar with sidebar links */ }
-          <Sidebar
-            title={title}>
+          <Sidebar title={title}>
+            <SidebarHeader title='Dashboard'/>
             <SidebarLink id='Info'
                          title='Info'
                          icon='fas fa-info'

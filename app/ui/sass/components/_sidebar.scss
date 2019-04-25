@@ -82,5 +82,9 @@
     }
   }
 
-
+  .nested-sidebar-header {
+    padding: 10px;
+    color: lighten($sidebar-text, 5);
+    font-size: 0.75rem;
+  }
 }
