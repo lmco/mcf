@@ -193,7 +193,10 @@ class ProjectApp extends Component {
         <div id='container'>
           { /* Create the sidebar with sidebar links */ }
           <Sidebar title={title}>
-            <SidebarHeader title='Dashboard'/>
+            {(displayPlugins)
+              ? (<SidebarHeader title='Dashboard'/>)
+              : ''
+            }
             <SidebarLink id='Home'
                          title='Home'
                          icon='fas fa-home'
