@@ -74,7 +74,28 @@ class ElementTree extends Component {
       url: url,
       statusCode: {
         200: (data) => {
-          const result = data.sort((a, b) => ((a.name > b.name) ? 1 : -1));
+          const result = data.sort((a, b) => {
+            if (!a.name) {
+              return 1;
+            }
+            else if (!b.name) {
+              return -1;
+            }
+            else {
+              const first = a.name.toLowerCase();
+              const second = b.name.toLowerCase();
+
+              if (first === '__mbee__') {
+                return -1;
+              }
+              else if ((second === '__mbee__') || (first > second)) {
+                return 1;
+              }
+              else {
+                return -1;
+              }
+            }
+          });
           this.setState({ children: result });
         },
         401: (err) => {

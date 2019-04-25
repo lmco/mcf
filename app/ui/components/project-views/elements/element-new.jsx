@@ -124,6 +124,11 @@ class ElementNew extends Component {
       idInvalid = true;
       disableSubmit = true;
     }
+    // Verify parent was selected
+    if (this.state.parent === null) {
+      // Disable submit
+      disableSubmit = true;
+    }
 
     // Render organization edit page
     return (
