@@ -26,6 +26,7 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
+import Divider from '../general/sidebar/divider.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import ProjectElements from '../project-views/elements/project-elements.jsx';
@@ -92,6 +93,8 @@ class ProjectApp extends Component {
                 this.setState({ project: project });
               },
               401: (err) => {
+                // reload the page
+                window.location.reload();
                 // Throw error and set state
                 this.setState({ error: err.responseJSON.description });
               },
@@ -102,6 +105,8 @@ class ProjectApp extends Component {
           });
         },
         401: (err) => {
+          // reload the page
+          window.location.reload();
           // Throw error and set state
           this.setState({ error: err.responseJSON.description });
         },
@@ -143,12 +148,40 @@ class ProjectApp extends Component {
   render() {
     // Initialize variables
     let title;
+    let displayPlugins = false;
+    const plugins = [];
 
     // Verify if project exists
     if (this.state.project) {
       // Set the title for sidebar
       title = <h2> {this.state.project.name}</h2>;
+
+      // Verify if plugins in project
+      if (this.state.project.custom.integrations) {
+        displayPlugins = true;
+        this.state.project.custom.integrations.forEach((plugin) => {
+          let icon = 'layer-group';
+          let newTab = false;
+
+          if (!plugin.hasOwnProperty('name') || !plugin.hasOwnProperty('url')) {
+            return;
+          }
+          if (plugin.hasOwnProperty('icon')) {
+            icon = plugin.icon;
+          }
+          if (plugin.hasOwnProperty('openNewTab')) {
+            newTab = true;
+          }
+
+          plugins.push(<SidebarLink id={`sidebar-${plugin.name}`}
+                                    title={plugin.title}
+                                    icon={`fas fa-${icon}`}
+                                    openNewTab={newTab}
+                                    href={`${plugin.url}`}/>);
+        });
+      }
     }
+
     // Return project page
     return (
       <Router>
@@ -171,6 +204,10 @@ class ProjectApp extends Component {
                          title='Members'
                          icon='fas fa-users'
                          routerLink={`${this.props.match.url}/users`}/>
+            {(!displayPlugins)
+              ? ''
+              : (plugins)
+            }
           </Sidebar>
           { /* Verify project and element data exists */ }
           { // Display loading page or error page if project is loading or failed to load
