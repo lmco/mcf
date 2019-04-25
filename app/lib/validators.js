@@ -34,8 +34,6 @@ module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
  * @description Regular Expressions to validate organization data
  *
  * id:
- *   - CANNOT include the follow reserved words: css, js, im, login, logout,
- *     about, assets, static, public
  *   - MUST start with a lowercase letter, number or '_'
  *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - MUST be of length 1 or more
@@ -43,18 +41,7 @@ module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
  *     - org1 [valid]
  *     - my-org [valid]
  *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
- *     - login-org [invalid - begins with reserved word]
  *     - myOrg [invalid - uses uppercase letter]
- * name:
- *   - MUST start with a letter or number
- *   - MUST ONLY include lowercase letters, uppercase letters, numbers,
- *     '-', or whitespace
- *   - MUST be of length 1 or more
- *   Examples:
- *     - "Org 1" [valid]
- *     - "An organization name - with dashes" [valid]
- *     - "No invalid chars (e.g. ', $, &, etc)" [invalid - no special characters]
- *     - " " [invalid - cannot start with a space]
  */
 module.exports.org = {
   id: customValidators.org_id || `^${id}$`
