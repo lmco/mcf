@@ -12,7 +12,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description This renders a project.
+ * @description This renders a project information.
  */
 
 /* Modified ESLint rules for React. */
