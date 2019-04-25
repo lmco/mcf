@@ -68,6 +68,9 @@ class Delete extends Component {
             this.setState({ projectOpt: [] });
             // Throw error and set state
             this.setState({ error: err.responseJSON.description });
+
+            // Refresh when session expires
+            window.location.reload();
           },
           404: (err) => {
             // Set the project options to empty if none found
@@ -132,7 +135,12 @@ class Delete extends Component {
             window.location.replace('/');
           }
         },
-        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        401: (err) => {
+          this.setState({ error: err.responseJSON.description });
+
+          // Refresh when session expires
+          window.location.reload();
+        },
         403: (err) => {
           this.setState({ error: err.responseJSON.description });
         }

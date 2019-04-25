@@ -101,7 +101,12 @@ class MemberEdit extends Component {
           // Update the page to reload to user page
           window.location.replace(redirect);
         },
-        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        401: (err) => {
+          this.setState({ error: err.responseJSON.description });
+
+          // Refresh when session expires
+          window.location.reload();
+        },
         404: (err) => {
           this.setState({ error: err.responseJSON.description });
         },
@@ -147,6 +152,9 @@ class MemberEdit extends Component {
         401: (err) => {
           // Throw error and set state
           this.setState({ error: err.responseJSON.description });
+
+          // Refresh when session expires
+          window.location.reload();
         },
         404: (err) => {
           this.setState({ error: err.responseJSON.description });

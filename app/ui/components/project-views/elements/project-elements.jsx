@@ -115,7 +115,12 @@ class ProjectElements extends Component {
       url: url,
       statusCode: {
         200: (data) => { this.setState({ treeRoot: data }); },
-        401: () => { this.setState({ treeRoot: null }); },
+        401: () => {
+          this.setState({ treeRoot: null });
+
+          // Refresh when session expires
+          window.location.reload();
+        },
         403: (err) => {
           this.setState({ error: err.responseJSON.description });
         },

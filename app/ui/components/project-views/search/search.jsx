@@ -90,7 +90,13 @@ class Search extends Component {
     const start = new Date();
     $.ajax({
       method: 'GET',
-      url: `${url}?q=${this.state.query}&limit=100&minified=true`
+      url: `${url}?q=${this.state.query}&limit=100&minified=true`,
+      statusCode: {
+        401: () => {
+          // Refresh when session expires
+          window.location.reload();
+        }
+      }
     })
     .done(data => {
       const end = new Date();

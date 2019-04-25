@@ -102,6 +102,10 @@ class Create extends Component {
           // On success, return to project-views page
           window.location.replace(redirect);
         },
+        401: (err) => {
+          // Refresh when session expires
+          window.location.reload();
+        },
         403: (err) => {
           this.setState({ error: err.responseJSON.description });
         }

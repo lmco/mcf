@@ -104,6 +104,9 @@ class ElementEdit extends Component {
         401: (err) => {
           // Throw error and set state
           this.setState({ error: err.responseJSON.description });
+
+          // Refresh when session expires
+          window.location.reload();
         },
         404: (err) => {
           this.setState({ error: err.responseJSON.description });
@@ -183,7 +186,12 @@ class ElementEdit extends Component {
             this.props.closeSidePanel(null, true);
           }
         },
-        401: (err) => { this.setState({ error: err.responseJSON.description }); },
+        401: (err) => {
+          this.setState({ error: err.responseJSON.description });
+
+          // Refresh when session expires
+          window.location.reload();
+        },
         404: (err) => {
           this.setState({ error: err.responseJSON.description });
         },
