@@ -106,7 +106,7 @@ class ElementNew extends Component {
 
           // Refresh when session expires
           window.location.reload();
-        }
+        },
         403: (err) => {
           this.setState({ error: err.responseJSON.description });
         }

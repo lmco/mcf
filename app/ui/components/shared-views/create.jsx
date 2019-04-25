@@ -105,7 +105,7 @@ class Create extends Component {
         401: (err) => {
           // Refresh when session expires
           window.location.reload();
-        }
+        },
         403: (err) => {
           this.setState({ error: err.responseJSON.description });
         }
