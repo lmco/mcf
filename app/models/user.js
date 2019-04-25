@@ -64,7 +64,8 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    match: RegExp(validators.user.email)
+    match: RegExp(validators.user.email),
+    default: ''
   },
   fname: {
     type: String,

@@ -78,7 +78,7 @@ function getElementPublicData(element, options) {
     // If element.createdBy is populated
     if (typeof element.createdBy === 'object') {
       // Get the public data of createdBy
-      createdBy = getUserPublicData(element.createdBy, options);
+      createdBy = getUserPublicData(element.createdBy, {});
     }
     else {
       createdBy = element.createdBy;
@@ -90,7 +90,7 @@ function getElementPublicData(element, options) {
     // If element.lastModifiedBy is populated
     if (typeof element.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
-      lastModifiedBy = getUserPublicData(element.lastModifiedBy, options);
+      lastModifiedBy = getUserPublicData(element.lastModifiedBy, {});
     }
     else {
       lastModifiedBy = element.lastModifiedBy;
@@ -102,7 +102,7 @@ function getElementPublicData(element, options) {
     // If element.archivedBy is populated
     if (typeof element.archivedBy === 'object') {
       // Get the public data of archivedBy
-      archivedBy = getUserPublicData(element.archivedBy, options);
+      archivedBy = getUserPublicData(element.archivedBy, {});
     }
     else {
       archivedBy = element.archivedBy;
@@ -114,7 +114,7 @@ function getElementPublicData(element, options) {
     // If element.parent is populated
     if (typeof element.parent === 'object') {
       // Get the public data of parent
-      parent = getElementPublicData(element.parent, options);
+      parent = getElementPublicData(element.parent, {});
     }
     else {
       parent = utils.parseID(element.parent).pop();
@@ -127,7 +127,7 @@ function getElementPublicData(element, options) {
     // If element.source is populated
     if (typeof element.source === 'object') {
       // Get the public data of source
-      source = getElementPublicData(element.source, options);
+      source = getElementPublicData(element.source, {});
     }
     // If source element's project is not the same as the elements parent
     else if (sourceIdParts[1] !== idParts[1]) {
@@ -150,7 +150,7 @@ function getElementPublicData(element, options) {
     // If element.target is populated
     if (typeof element.target === 'object') {
       // Get the public data of target
-      target = getElementPublicData(element.target, options);
+      target = getElementPublicData(element.target, {});
     }
     // If target element's project is not the same as the elements parent
     else if (targetIdParts[1] !== idParts[1]) {
@@ -172,7 +172,7 @@ function getElementPublicData(element, options) {
     // If element.project is populated
     if (typeof element.project === 'object') {
       // Get the public data of project
-      project = getProjectPublicData(element.project, options);
+      project = getProjectPublicData(element.project, {});
     }
     else {
       project = utils.parseID(element.project)[1];
@@ -234,12 +234,11 @@ function getElementPublicData(element, options) {
       const returnObj = { id: data.id };
       // Add specific field to returnObj
       options.fields.forEach((f) => {
-        returnObj[f] = (data[f]) ? data[f] : undefined;
+        returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
       });
       return returnObj;
     }
   }
-
   return data;
 }
 
@@ -280,7 +279,7 @@ function getProjectPublicData(project, options) {
     // If project.createdBy is populated
     if (typeof project.createdBy === 'object') {
       // Get the public data of createdBy
-      createdBy = getUserPublicData(project.createdBy, options);
+      createdBy = getUserPublicData(project.createdBy, {});
     }
     else {
       createdBy = project.createdBy;
@@ -292,7 +291,7 @@ function getProjectPublicData(project, options) {
     // If project.lastModifiedBy is populated
     if (typeof project.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
-      lastModifiedBy = getUserPublicData(project.lastModifiedBy, options);
+      lastModifiedBy = getUserPublicData(project.lastModifiedBy, {});
     }
     else {
       lastModifiedBy = project.lastModifiedBy;
@@ -304,7 +303,7 @@ function getProjectPublicData(project, options) {
     // If project.archivedBy is populated
     if (typeof project.archivedBy === 'object') {
       // Get the public data of archivedBy
-      archivedBy = getUserPublicData(project.archivedBy, options);
+      archivedBy = getUserPublicData(project.archivedBy, {});
     }
     else {
       archivedBy = project.archivedBy;
@@ -315,7 +314,7 @@ function getProjectPublicData(project, options) {
   const data = {
     id: utils.parseID(project._id).pop(),
     org: (project.org && project.org._id)
-      ? getOrgPublicData(project.org, options)
+      ? getOrgPublicData(project.org, {})
       : utils.parseID(project._id)[0],
     name: project.name,
     permissions: permissions,
@@ -350,7 +349,7 @@ function getProjectPublicData(project, options) {
       const returnObj = { id: data.id };
       // Add specific field to returnObj
       options.fields.forEach((f) => {
-        returnObj[f] = (data[f]) ? data[f] : undefined;
+        returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
       });
       return returnObj;
     }
@@ -386,7 +385,7 @@ function getOrgPublicData(org, options) {
     // If org.createdBy is populated
     if (typeof org.createdBy === 'object') {
       // Get the public data of createdBy
-      createdBy = getUserPublicData(org.createdBy, options);
+      createdBy = getUserPublicData(org.createdBy, {});
     }
     else {
       createdBy = org.createdBy;
@@ -398,7 +397,7 @@ function getOrgPublicData(org, options) {
     // If org.lastModifiedBy is populated
     if (typeof org.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
-      lastModifiedBy = getUserPublicData(org.lastModifiedBy, options);
+      lastModifiedBy = getUserPublicData(org.lastModifiedBy, {});
     }
     else {
       lastModifiedBy = org.lastModifiedBy;
@@ -410,7 +409,7 @@ function getOrgPublicData(org, options) {
     // If org.archivedBy is populated
     if (typeof org.archivedBy === 'object') {
       // Get the public data of archivedBy
-      archivedBy = getUserPublicData(org.archivedBy, options);
+      archivedBy = getUserPublicData(org.archivedBy, {});
     }
     else {
       archivedBy = org.archivedBy;
@@ -423,12 +422,12 @@ function getOrgPublicData(org, options) {
     if (org.projects.every(p => typeof p === 'object')) {
       // If the archived option is supplied
       if (options.hasOwnProperty('archived') && options.archived === true) {
-        projects = org.projects.map(p => getProjectPublicData(p, options));
+        projects = org.projects.map(p => getProjectPublicData(p, { archived: true }));
       }
       else {
         // Remove all archived projects
         const tmpContains = org.projects.filter(p => p.archived !== true);
-        projects = tmpContains.map(p => getProjectPublicData(p, options));
+        projects = tmpContains.map(p => getProjectPublicData(p, {}));
       }
     }
   }
@@ -468,7 +467,7 @@ function getOrgPublicData(org, options) {
       const returnObj = { id: data.id };
       // Add specific field to returnObj
       options.fields.forEach((f) => {
-        returnObj[f] = (data[f]) ? data[f] : undefined;
+        returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
       });
       return returnObj;
     }
@@ -496,7 +495,7 @@ function getUserPublicData(user, options) {
     // If user.createdBy is populated
     if (typeof user.createdBy === 'object') {
       // Get the public data of createdBy
-      createdBy = getUserPublicData(user.createdBy, options);
+      createdBy = getUserPublicData(user.createdBy, {});
     }
     else {
       createdBy = user.createdBy;
@@ -508,7 +507,7 @@ function getUserPublicData(user, options) {
     // If user.lastModifiedBy is populated
     if (typeof user.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
-      lastModifiedBy = getUserPublicData(user.lastModifiedBy, options);
+      lastModifiedBy = getUserPublicData(user.lastModifiedBy, {});
     }
     else {
       lastModifiedBy = user.lastModifiedBy;
@@ -520,7 +519,7 @@ function getUserPublicData(user, options) {
     // If user.archivedBy is populated
     if (typeof user.archivedBy === 'object') {
       // Get the public data of archivedBy
-      archivedBy = getUserPublicData(user.archivedBy, options);
+      archivedBy = getUserPublicData(user.archivedBy, {});
     }
     else {
       archivedBy = user.archivedBy;
@@ -565,7 +564,7 @@ function getUserPublicData(user, options) {
       const returnObj = { username: data.username };
       // Add specific field to returnObj
       options.fields.forEach((f) => {
-        returnObj[f] = (data[f]) ? data[f] : undefined;
+        returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
       });
       return returnObj;
     }
