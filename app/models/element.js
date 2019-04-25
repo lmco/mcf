@@ -85,7 +85,7 @@ const ElementSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    default: '',
+    default: ''
   },
   project: {
     type: String,
