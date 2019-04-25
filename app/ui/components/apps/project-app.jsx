@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
-import Divider from '../general/sidebar/divider.jsx';
+import SidebarHeader from '../general/sidebar/sidebar-header.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import ProjectElements from '../project-views/elements/project-elements.jsx';
@@ -163,6 +163,7 @@ class ProjectApp extends Component {
       // Verify if plugins in project
       if (this.state.project.custom.integrations) {
         displayPlugins = true;
+        plugins.push(<SidebarHeader title='Integrations'/>);
         this.state.project.custom.integrations.forEach((plugin) => {
           let icon = 'layer-group';
           let newTab = false;
@@ -192,18 +193,19 @@ class ProjectApp extends Component {
         <div id='container'>
           { /* Create the sidebar with sidebar links */ }
           <Sidebar title={title}>
-              <SidebarLink id='Home'
-                           title='Home'
-                           icon='fas fa-home'
-                           routerLink={`${this.props.match.url}`}/>
-              <SidebarLink id='Elements'
-                           title='Model'
-                           icon='fas fa-sitemap'
-                           routerLink={`${this.props.match.url}/elements`}/>
-              <SidebarLink id='Search'
-                           title='Search'
-                           icon='fas fa-search'
-                           routerLink={`${this.props.match.url}/search`}/>
+            <SidebarHeader title='Dashboard'/>
+            <SidebarLink id='Home'
+                         title='Home'
+                         icon='fas fa-home'
+                         routerLink={`${this.props.match.url}`}/>
+            <SidebarLink id='Elements'
+                         title='Model'
+                         icon='fas fa-sitemap'
+                         routerLink={`${this.props.match.url}/elements`}/>
+            <SidebarLink id='Search'
+                         title='Search'
+                         icon='fas fa-search'
+                         routerLink={`${this.props.match.url}/search`}/>
             <SidebarLink id='Members'
                          title='Members'
                          icon='fas fa-users'

@@ -26,6 +26,7 @@ import ReactDOM from 'react-dom';
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
+import SidebarHeader from '../general/sidebar/sidebar-header.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import OrgProjects from '../org-views/organization-projects.jsx';
@@ -148,6 +149,7 @@ class OrgApp extends Component {
         <div id='container'>
           { /* Create the sidebar with sidebar links */ }
           <Sidebar title={title}>
+            <SidebarHeader title='Dashboard'/>
             <SidebarLink id='Home'
                          title='Home'
                          icon='fas fa-home'

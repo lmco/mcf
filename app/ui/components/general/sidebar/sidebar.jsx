@@ -22,6 +22,7 @@ import React, { Component } from 'react';
 
 // MBEE Modules
 import SidebarLink from './sidebar-link.jsx';
+import SidebarHeader from './sidebar-header.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -97,7 +98,7 @@ class Sidebar extends Component {
     // Create the sidebar links
     const sidebarLink = React.Children.map(this.props.children, child => (
       ( // Clone the react element sidebar link and change expanded state
-        (child.type === SidebarLink)
+        ((child.type === SidebarLink) || (child.type === SidebarHeader))
           ? React.cloneElement(child, { isExpanded: this.state.isExpanded })
           : child
       )
