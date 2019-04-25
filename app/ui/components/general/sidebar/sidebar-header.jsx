@@ -22,11 +22,14 @@ import React from 'react';
 /* eslint-enable no-unused-vars */
 
 function SidebarHeader(props) {
+  // Verify if the sidebar is expanded
   if (props.isExpanded) {
     return (<div className='nested-sidebar-header'>
               {props.title}
             </div>);
   }
+  // Return an empty div if not expanded
+  // NOTE: this is necessary
   else {
     return (<div></div>);
   }
