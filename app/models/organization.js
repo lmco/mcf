@@ -50,7 +50,7 @@ const OrganizationSchema = new mongoose.Schema({
       },
       message: 'Organization ID cannot include the following words: '
         + `[${validators.reserved}].`
-    },
+    }
   },
   name: {
     type: String,

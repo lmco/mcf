@@ -60,7 +60,7 @@ const ProjectSchema = new mongoose.Schema({
       },
       message: 'Project ID cannot include the following words: '
       + `[${validators.reserved}].`
-    },
+    }
   },
   org: {
     type: String,

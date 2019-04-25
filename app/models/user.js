@@ -59,7 +59,7 @@ const UserSchema = new mongoose.Schema({
       },
       message: 'Username cannot include the following words: '
       + `[${validators.reserved}].`
-    },
+    }
   },
   password: {
     type: String,

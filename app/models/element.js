@@ -81,7 +81,7 @@ const ElementSchema = new mongoose.Schema({
       },
       message: 'Element ID cannot include the following words: '
       + `[${validators.reserved}].`
-    },
+    }
   },
   name: {
     type: String
