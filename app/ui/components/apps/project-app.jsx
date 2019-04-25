@@ -156,6 +156,7 @@ class ProjectApp extends Component {
       // Set the title for sidebar
       title = <h2> {this.state.project.name}</h2>;
 
+      // Verify if plugins in project
       if (this.state.project.custom.integrations) {
         displayPlugins = true;
         this.state.project.custom.integrations.forEach((plugin) => {
