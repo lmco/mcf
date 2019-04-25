@@ -929,7 +929,7 @@ function remove(requestingUser, orgs, options) {
       // Set function-wde foundOrgs and create ownedQuery
       foundOrgs = _foundOrgs;
       const foundOrgIDs = foundOrgs.map(o => o._id);
-      const regexIDs = _foundOrgs.map(o => `/^${o._id}/`);
+      const regexIDs = _foundOrgs.map(o => RegExp(`^${o._id}`));
       ownedQuery._id = { $in: regexIDs };
 
       // Check if all orgs were found
