@@ -88,7 +88,6 @@ class ProfileApp extends Component {
         <div id='container'>
           { /* Create the sidebar with sidebar links */ }
           <Sidebar title={title}>
-            <SidebarHeader title='Dashboard'/>
             <SidebarLink id='Info'
                          title='Info'
                          icon='fas fa-info'
