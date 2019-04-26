@@ -175,7 +175,7 @@ class ProjectApp extends Component {
             icon = plugin.icon;
           }
           if (plugin.hasOwnProperty('openNewTab')) {
-            newTab = true;
+            newTab = this.state.project.custom.integrations.openNewTab;
           }
 
           plugins.push(<SidebarLink id={`sidebar-${plugin.name}`}
