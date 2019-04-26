@@ -50,7 +50,6 @@ function verifyOrgID(done) {
 
   // Invalid IDs
   chai.expect(RegExp(validators.org.id).test('Org3')).to.equal(false);
-  chai.expect(RegExp(validators.org.id).test('login-org')).to.equal(false);
   chai.expect(RegExp(validators.org.id).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.org.id).test('')).to.equal(false);
   done();
