@@ -48,4 +48,8 @@ Included documentation:
   - Test Framework Documentation
   - Docker Set Up Documentation
 
-## Reporting vulnerabilities
+## Reporting Vulnerabilities and Bugs
+
+If an issue is identified in MBEE, please email
+[mbee-software.dl-ssc@exch.ems.lmco.com](mailto:mbee-software.dl-ssc@exch.ems.lmco.com).
+Refer to SECURITY.md for more information and the PGP encryption key.

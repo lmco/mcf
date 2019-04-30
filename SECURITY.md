@@ -1,8 +1,8 @@
 # MBEE Security
 
 **Contents**
-- [Disclosure Policy](#disclosure-policy)
-- [Security Update Policy](#security-update-policy)
+- [Reporting Vulnerabilities and Bugs](#reporting-vulnerabilities-and-bugs)
+- [Disclosure and Security Update Policy](#disclosure-and-security-update-policy)
 - [Known Gaps and Issues](#known-gaps-and-issues)
 - [Security Related Configuration](#security-related-configuration)
   - [Plugins and Integrations](#plugins-and-integrations)
@@ -15,7 +15,7 @@
 - [Security for Developers](#security-for-developers)
 
 
-## Reporting vulnerabilities
+## Reporting Vulnerabilities and Bugs
 
 **Lockheed Martin Internal**
 
@@ -60,7 +60,7 @@ can be helpful if they can be provided.
 can quickly reproduce the issue.
 - Organization(s) impacted/affected
 
-## Security Update Policy
+## Disclosure and Security Update Policy
 
 **Lockheed Martin Internal**
 
