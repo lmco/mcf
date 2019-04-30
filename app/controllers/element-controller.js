@@ -61,10 +61,10 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
- * @param {boolean} [options.subtree] - If true, all elements in the subtree of
- * the found elements will also be returned. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
+ * @param {boolean} [options.subtree = false] - If true, all elements in the subtree of
+ * the found elements will also be returned.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
@@ -314,7 +314,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {string} elements.id - The ID of the element being created.
  * @param {string} [elements.name] - The name of the element.
  * @param {string} [elements.parent = 'model'] - The ID of the parent of the
- * element. The default value is 'model'
+ * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
  * @param {Object} [elements.sourceNamespace] - The optional namespace of the
@@ -766,7 +766,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {Object} [elements.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
- * @param {boolean} [elements.archived] - The updated archived field. If true,
+ * @param {boolean} [elements.archived = false] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
@@ -780,7 +780,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @return {Promise} Array of updated element objects
  *
  * @example
- * update({User}, 'orgID', 'projID', branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
+ * update({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
  * .then(function(elements) {
  *   // Do something with the newly updated elements
  * })
@@ -1185,7 +1185,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} elements.id - The ID of the element being created/replaced.
  * @param {string} [elements.name] - The name of the element.
  * @param {string} [elements.parent = 'model'] - The ID of the parent of the
- * element. The default value is 'model'
+ * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
  * @param {Object} [elements.sourceNamespace] - The optional namespace of the
@@ -1574,8 +1574,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} branch - The ID of the branch to find elements from.
  * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
- * @return {Promise} resolve - Array of found element ids
- *                   reject - error
+ * @return {Promise} Array of found element ids
  *
  * @example
  * findElementTree('orgID', 'projID', 'branch', ['elem1', 'elem2',...])
@@ -1653,8 +1652,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
  * @param {Object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *
- * @return {Promise} resolve
- *                   reject - error
+ * @return {Promise} Resolved promise to verify element parent.
  *
  * @example
  * moveElementCheck('orgID', 'projID', 'branch', {Elem1})
@@ -1736,8 +1734,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.

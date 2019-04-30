@@ -54,7 +54,7 @@ const utils = M.require('lib.utils');
  *
  * @property {string} _id - The elements non-unique element ID.
  * or taken from another source if imported.
- * @property {string} name - THe elements non-unique name.
+ * @property {string} name - The elements non-unique name.
  * @property {string} project - A reference to an element's project.
  * @property {string} parent - The parent element which contains the element
  * @property {string} source - A reference to the source element if the base
@@ -208,7 +208,7 @@ ElementSchema.statics.getValidRootElements = function() {
  * @description Validates an object to ensure that it only contains keys
  * which exist in the element model.
  *
- * @param {Object} object to check keys of.
+ * @param {Object} object - Object for key verification.
  * @return {boolean} The boolean indicating if the object contained only
  * existing fields.
  */

@@ -29,11 +29,11 @@ module.exports.sanitize = function(userInput) {
 /**
  * @description Sanitizes database queries.
  *
- * +-------+-----------------+
- * | Input | Sanitized Output|
- * +-------+-----------------+
- * |   $   |                 |
- * +-------+-----------------+
+ * <p> +-------+-----------------+
+ * <br>| Input | Sanitized Output|
+ * <br>+-------+-----------------+
+ * <br>|   $   |                 |
+ * <br>+-------+-----------------+ </p>
  *
  * @param {Object} userInput - User object data to be sanitized.
  */
@@ -57,15 +57,15 @@ module.exports.mongo = function(userInput) {
 /**
  * @description Sanitizes HTML input.
  *
- * +-------+-----------------+
- * | Input | Sanitized Output|
- * +-------+-----------------+
- * |   &   | &amp            |
- * |   <   | &lt             |
- * |   >   | &gt             |
- * |   "   | &quot           |  |
- * |   '   | &#039           |
- * +-------+-----------------+
+ * <p> +-------+-----------------+
+ * <br>| Input | Sanitized Output|
+ * <br>+-------+-----------------+
+ * <br>|   &   | &amp            |
+ * <br>|   <   | &lt             |
+ * <br>|   >   | &gt             |
+ * <br>|   "   | &quot           |
+ * <br>|   '   | &#039           |
+ * <br>+-------+-----------------+ </p>
  *
  * @param {*} userInput - User input data to be sanitized.
  */
@@ -101,15 +101,15 @@ module.exports.html = function(userInput) {
 /**
  * @description Sanitizes LDAP special characters.
  *
- * +-------+-----------------+
- * | Input | Sanitized Output|
- * +-------+-----------------+
- * |   \   | \2A             |
- * |   *   | \28             |
- * |   (   | \29             |
- * |   )   | \5C             |
- * |   NUL | \00             |
- * +-------+-----------------+
+ * <p> +-------+-----------------+
+ * <br>| Input | Sanitized Output|
+ * <br>+-------+-----------------+
+ * <br>|   \   | \2A             |
+ * <br>|   *   | \28             |
+ * <br>|   (   | \29             |
+ * <br>|   )   | \5C             |
+ * <br>|   NUL | \00             |
+ * <br>+-------+-----------------+ </p>
  *
  * @param {*} userInput - User input data to be sanitized.
  */

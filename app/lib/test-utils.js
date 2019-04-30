@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.test-utils.js
+ * @module lib.test-utils.js
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -32,6 +32,7 @@ const User = M.require('models.user');
 const utils = M.require('lib.utils');
 const testData = require(path.join(M.root, 'test', 'test_data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
+
 /**
  * @description Helper function to create test non-admin user in
  * MBEE tests.

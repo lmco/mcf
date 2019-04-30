@@ -194,7 +194,6 @@ function version(req, res) {
  * GET /api/orgs
  *
  * @description Gets an array of all organizations that a user has access to.
- * Returns a 404 error in no organizations are found.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -359,6 +358,7 @@ function postOrgs(req, res) {
  * PUT /api/orgs
  *
  * @description Creates or replaces multiple orgs from an array of objects.
+ * NOTE: this route is reserved for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -715,8 +715,8 @@ function postOrg(req, res) {
 /**
  * PUT /api/orgs/:orgid
  *
- * @description Takes an organization in the request body and an
- * organization ID in the URI and creates or replaces the organization.
+ * @description Creates or replaces an organization.
+ * NOTE: this route is reserved for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -795,8 +795,7 @@ function putOrg(req, res) {
 /**
  * PATCH /api/orgs/:orgid
  *
- * @description Updates the specified org. Takes an id in the URI and update
- * object in the body, and update the org.
+ * @description Updates the specified org.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1174,6 +1173,7 @@ function postProjects(req, res) {
  * PUT /api/org/:orgid/projects
  *
  * @description This function creates/replaces multiple projects.
+ * NOTE: this route is reserved for system-wide admins ONLY.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
@@ -1307,7 +1307,8 @@ function patchProjects(req, res) {
 /**
  * DELETE /api/org/:orgid/projects
  *
- * @description This function deletes multiple projects.
+ * @description Deletes multiple projects from an array of project IDs or
+ * array of project objects.
  * NOTE: This function is for system-wide admins ONLY.
  *
  * @param {Object} req - request express object
@@ -1377,7 +1378,7 @@ function deleteProjects(req, res) {
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} Response object with found project
+ * @return {Object} Response object with project's public data
  */
 function getProject(req, res) {
   // Define options
@@ -1527,8 +1528,8 @@ function postProject(req, res) {
 /**
  * PUT /api/orgs/:orgid/projects/:projectid
  *
- * @description Takes an organization ID and project ID in the URI and project
- * data in the request body, and creates/replaces a project.
+ * @description  Creates or replaces a project.
+ * NOTE: this route is reserved for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -2038,7 +2039,8 @@ function patchUsers(req, res) {
 /**
  * DELETE /api/users
  *
- * @description Deletes multiple users.
+ * @description Deletes multiple users from an array of user IDs or array of user
+ * objects.
  * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
@@ -2617,7 +2619,7 @@ function patchPassword(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with elements
+ * @return {Object} Response object with elements' public data
  */
 function getElements(req, res) {
   // Define options and ids
@@ -2975,7 +2977,8 @@ function patchElements(req, res) {
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
- * @description Deletes multiple elements.
+ * @description Deletes multiple elements from an array of element IDs or array
+ * of element objects.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -3142,7 +3145,7 @@ function searchElements(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with element
+ * @return {Object} Response object with element's public data
  */
 function getElement(req, res) {
   // Define options
@@ -3299,7 +3302,8 @@ function postElement(req, res) {
 /**
  * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
- * @description Creates or replaces an element.
+ * @description Creates or replaces an element. NOTE: this route is reserved
+ * for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object

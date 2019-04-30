@@ -228,7 +228,7 @@ module.exports.parseOptions = function(options, validOptions) {
  * @param {Object} model - The model of the controller which called this
  * function.
  *
- * @return {Object} - An object with key/value pairs formatted for use by the
+ * @return {Object} An object with key/value pairs formatted for use by the
  * controllers.
  */
 module.exports.validateOptions = function(options, validOptions, model) {
