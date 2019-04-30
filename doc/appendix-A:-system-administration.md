@@ -22,7 +22,7 @@ how a docker container can be run:
 MBEE_ENV=test node mbee docker --run
 ```
 To get the logs of the docker container, you can use `--get-logs`. This will
-print out the containers logs, which can be useful if an error has occured. If
+print out the containers logs, which can be useful if an error has occurred. If
 the docker container needs to be rebuilt and the previous build needs to be
 removed, use `--clean` to remove the previous docker build.
 
@@ -75,6 +75,7 @@ An authentication module has the following requirements:
     - handleBasicAuth(req, res, username, password) - Returns a Promise
     - handleTokenAuth(req, res, token) - Returns a Promise
     - doLogin(req, res, next)
+    - validatePassword(password, provider) - Returns a boolean
 
 The `handleBasicAuth()` and `handleTokenAuth()` functions both defines how to
 authenticate users for their respective input types. Both objects are passed the
@@ -95,3 +96,12 @@ routes:
     -`/login`: This function should perform login actions such as setting the
     `req.session.token` value then call `next()` when done which will handle
     appropriate redirection of the user.
+
+The `validatePassword()` function is meant to validate the password of each user
+being created. This function should accept the password (and optionally the
+provider), verify the password meets some requirements, and return a boolean
+denoting whether that password is valid or not. By default, the requirements
+provided in the local-strategy expect each password to be at least 8 characters
+in length, and have at least one number, uppercase letter, lowercase letter and
+at least one special character. We do not recommend lessening these requirements
+for security reasons.
