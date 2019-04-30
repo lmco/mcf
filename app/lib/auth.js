@@ -286,7 +286,7 @@ function authenticate(req, res, next) {
  * @param {string} provider - the type of authentication strategy (ldap, local,
  * etc.)
  *
- * @returns {boolean} - If password is correctly validated
+ * @returns {boolean} If password is correctly validated
  */
 function validatePassword(password, provider) {
   // Check if custom validate password rules exist in auth strategy

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module lib.utils
+ * @module lib.jmi-conversions
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

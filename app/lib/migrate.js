@@ -272,7 +272,7 @@ function sortVersions(versions, order) {
  * @param {string[]} migrations - The list of migrations to run.
  * @param {number} move - Either 1 (migrate up) or -1 (migrate down)
  *
- * @return {Promise}
+ * @return {Promise} Resolved promise.
  */
 function runMigrations(from, migrations, move) {
   return new Promise((resolve, reject) => {

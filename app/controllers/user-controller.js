@@ -55,8 +55,8 @@ const utils = M.require('lib.utils');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
@@ -69,7 +69,7 @@ const utils = M.require('lib.utils');
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of found user objects.
+ * @return {Promise} Array of found users' public data objects.
  *
  * @example
  * find({User}, ['user1', 'user2'], { populate: 'createdBy' })
@@ -163,7 +163,7 @@ function find(requestingUser, users, options) {
  * @description This functions creates one or many users from the provided data.
  * This function is restricted to system-wide admin ONLY. The database is
  * searched for existing users with duplicate usernames and the users are added
- * to the default org prior to being created and returned from this function.
+ * to the default org prior to being returned from this function.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing user
@@ -190,7 +190,7 @@ function find(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created user objects
+ * @return {Promise} Array of created users' users' public data objects.
  *
  * @example
  * create({User}, [{User1}, {User2}, ...], { populate: 'createdBy' })
@@ -373,7 +373,7 @@ function create(requestingUser, users, options) {
  * @param {Object} [users.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
- * @param {boolean} [users.archived] - The updated archived field. If true, the
+ * @param {boolean} [users.archived = false] - The updated archived field. If true, the
  * user will not be able to be found until unarchived.
  * @param {boolean} [users.admin] - The updated admin field. If true, the
  * user is a system-wide admin. NOTE: Only system-wide admins can update this
@@ -387,7 +387,7 @@ function create(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated user objects
+ * @return {Promise} Array of updated users' public data objects.
  *
  * @example
  * update({User}, [{Updated User 1}, {Updated User 2}...], { populate: 'createdBy' })
@@ -618,7 +618,7 @@ function update(requestingUser, users, options) {
  * @param {Object} [users.custom] - The additions or changes to existing custom
  * data. If the key/value pair already exists, the value will be changed. If the
  * key/value pair does not exist, it will be added.
- * @param {boolean} [users.archived] - The updated archived field. If true, the
+ * @param {boolean} [users.archived = false] - The updated archived field. If true, the
  * user will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
@@ -629,7 +629,7 @@ function update(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of user objects
+ * @return {Promise} Array of users' public data objects.
  *
  * @example
  * createOrReplace({User}, [{User 1}, {User 2}...], { populate: 'createdBy' })
@@ -771,7 +771,7 @@ function createOrReplace(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted users usernames
+ * @return {Promise} Array of deleted users' usernames.
  *
  * @example
  * remove({User}, ['user1', 'user2'])
@@ -923,7 +923,7 @@ function remove(requestingUser, users, options) {
  * @param {string} confirmPassword - The new password entered a second time
  * to confirm they match.
  *
- * @return {Promise} The updated user object.
+ * @return {Promise} The updated user public data object.
  *
  * @example
  * updatePassword({User}, 'oldPass', 'newPass', 'newPass')
