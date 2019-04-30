@@ -15,7 +15,7 @@
 - [Security for Developers](#security-for-developers)
 
 
-## Disclosure Policy
+## Reporting vulnerabilities
 
 **Lockheed Martin Internal**
 
@@ -75,15 +75,14 @@ Once admins are notified and are able to update their instances, the
 list will be notified in the interest of transparency and program communication.
 
 If your program has special needs that may require an alteration to this policy,
-please contact our software team using the above *dl-SSC, MBEE-Software*
+please contact our software team with the [dl-SSC, MBEE-Software](mailto:mbee-software.dl-ssc@exch.ems.lmco.com)
 distribution list so that we may work together to identify an approach to meet
 your program's needs.
 
 Security updates should include a reasonable level of detail about the issue,
 the severity and likelihood of impact, and the MBEE team's assessment of the
 risk introduced by the issue. Security updates will also notify which versions
-are impacted and how to either update MBEE to a fixed version or how to
-mitigate the issue.
+are impacted and how to mitigate the issue.
 
 For a list of MBEE security related updates, a web page will be created at
 [mbee.us.lmco.com](https://mbee.us.lmco.com) provide that information.
@@ -102,11 +101,6 @@ The MBEE tests should not be run in production because the tests will create
 an arbitrary admin user in the database.
 
 It's important to ensure that all test users are deleted from the database.
-
-#### Asynchronous Build Script
-
-Some components in the build script are asynchronous and the build script will
-print out a message that build is complete before build has finished.
 
 #### UI Model Tree Refresh
 When updating the parent in the model tree causes issues with the re-rendering

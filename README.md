@@ -47,3 +47,5 @@ Included documentation:
   - Developer Documentation
   - Test Framework Documentation
   - Docker Set Up Documentation
+
+## Reporting vulnerabilities
