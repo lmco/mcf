@@ -60,7 +60,7 @@ can be helpful if they can be provided.
 can quickly reproduce the issue.
 - Organization(s) impacted/affected
 
-**Encryption key for REPLACEME@lmco.com**
+#### Encryption key for `REPLACEME@lmco.com`
 If your disclosure is sensitive, you may choose to encrypt your report using the key below.
 
 ```
@@ -100,8 +100,9 @@ For a list of MBEE security related updates, a web page will be created at
 
 > This only applies to non-LM users and the open source version of MBEE.
 
-Upon public release of MBEE a security update policy will be defined for the
-open source version of MBEE. This might be as simple as a security mailing list.
+If and when security-related updates are made to MBEE, refer to `CHANGELOG.md`
+for instructions on how to mitigate the issue.
+
 
 ## Known Gaps and Issues
 
