@@ -52,4 +52,4 @@ Included documentation:
 
 If an issue is identified in MBEE, please email
 [mbee-software.dl-ssc@exch.ems.lmco.com](mailto:mbee-software.dl-ssc@exch.ems.lmco.com).
-Refer to SECURITY.md for more information and the PGP encryption key.
+Refer to **SECURITY.md** for more information as well as the PGP encryption key.

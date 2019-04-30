@@ -60,6 +60,15 @@ can be helpful if they can be provided.
 can quickly reproduce the issue.
 - Organization(s) impacted/affected
 
+**Encryption key for REPLACEME@lmco.com**
+If your disclosure is sensitive, you may choose to encrypt your report using the key below.
+
+```
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+-----END PGP PUBLIC KEY BLOCK-----
+```
+
 ## Disclosure and Security Update Policy
 
 **Lockheed Martin Internal**
