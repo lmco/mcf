@@ -35,7 +35,7 @@ const Middleware = M.require('lib.middleware');
  *   get:
  *     tags:
  *       - general
- *     description: Returns a 200 status. Used to test if the API is up or a
+ *     description: Returns a 200 status. Used to test if the API is up and a
  *        connection can be established.
  *     responses:
  *       200:
@@ -124,8 +124,7 @@ api.route('/version')
  *     tags:
  *       - organizations
  *     description: Returns an array of organizations the requesting user has
- *                  read access to. By default, returns all organizations the
- *                  user has read access to. Optionally, an array of IDs can be
+ *                  read access to. Optionally, an array of IDs can be
  *                  provided in the request body or a comma separated list in
  *                  the request parameters to find multiple, specific orgs.
  *     produces:
@@ -136,13 +135,13 @@ api.route('/version')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to are found.
+ *         description: An array of org IDs to search for. If both query
+ *                      parameter and body are not provided, all orgs the
+ *                      user has read access to are found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both the
- *                      query parameter and body are not provided, all objects
- *                      the user has access to are found.
+ *                      query parameter and body are not provided, all orgs
+ *                      the user has read access to are found.
  *         in: query
  *         type: string
  *       - name: populate
@@ -230,7 +229,8 @@ api.route('/version')
  *         description: An array of objects containing organization data.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
@@ -269,7 +269,7 @@ api.route('/version')
  *       - organizations
  *     description: Creates or replaces multiple organizations from the data
  *                  provided in the request body. If the organization already
- *                  exists, it is updated with the provided data. NOTE This
+ *                  exists, it is replaced with the provided data. NOTE This
  *                  function is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
@@ -282,12 +282,12 @@ api.route('/version')
  *             type: object
  *             required:
  *               - id
+ *               - name
  *             properties:
  *               id:
  *                 type: string
  *               name:
  *                 type: string
- *                 description: Required if creating an organization.
  *               custom:
  *                 type: object
  *               permissions:
@@ -433,7 +433,7 @@ api.route('/version')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE orgs, returns deleted orgs' ids.
+ *         description: OK, Succeeded to DELETE orgs, returns deleted org's ids.
  *       400:
  *         description: Bad Request, Failed to DELETE orgs due to invalid data
  *                      in the request body.
@@ -444,7 +444,7 @@ api.route('/version')
  *         description: Forbidden, Failed to DELETE orgs due to not having
  *                      correct permissions.
  *       500:
- *         description: Internal Server Error, Failed to PATCH org due to a
+ *         description: Internal Server Error, Failed to DELETE org due to a
  *                      server side issue.
  */
 api.route('/orgs')
