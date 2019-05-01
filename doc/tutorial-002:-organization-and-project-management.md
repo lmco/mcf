@@ -38,7 +38,8 @@ print(r.json())
 In the above code snippet, we make a request to the `/api/orgs/:orgid` route 
 where we supply an organization ID of `demo`. An ID can only contain lowercase
 letters, numbers, dashes (`-`), and underscores (`_`) and must begin with a 
-lowercase letter or a number.
+lowercase letter or a number. Please note that this is configurable in your
+running config.
 
 We also supply a JSON body with the POST request. In this case, we specify a 
 name for our organization and call it `Demo Org`.
@@ -83,7 +84,8 @@ project we just created to verify it got created.
 
 > NOTE: Project IDs follow the same rules as organization IDs;
 > An ID can only contain lowercase letters, numbers, dashes (`-`), and 
-> underscores (`_`) and must begin with a lowercase letter or a number.
+> underscores (`_`) and must begin with a lowercase letter or a number. Once
+> again, this is configurable.
 
 Cleaning up all the code snippets above and putting it all together, we get 
 a python script to create an organization and a project.
@@ -104,9 +106,10 @@ r = requests.get(url)
 url = '{}/api/orgs/demo'.format(server)
 r = requests.post(url, auth=creds, json={'name': 'Demo Org'})
 
-# Get an org
+# Get the org
 url = '{}/api/orgs/demo'.format(server)
 r = requests.get(url, auth=creds)
+print(json.dumps(r.json(), indent=4))
 
 # Create a project
 url = '{}/api/orgs/demo/projects/demo-project'.format(server)
@@ -118,3 +121,6 @@ r = requests.get(url, auth=creds)
 print(r.status_code)
 print(json.dumps(r.json(), indent=4))
 ```
+
+Pretty simple, no? Take a look at the next tutorial, "Tutorial 003: Model 
+Management", to start working with elements, the core piece of MBEE.
