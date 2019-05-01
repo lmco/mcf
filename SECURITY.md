@@ -44,7 +44,7 @@ can quickly reproduce the issue
 > procedures above.
 
 If an issue is identified in the open source version MBEE, please email
-[mbee-software.dl-ssc@exch.ems.lmco.com](mailto:mbee-software.dl-ssc@exch.ems.lmco.com).
+[mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com).
 This will notify the Lockheed Martin MBEE Software Engineering team of the
 issue. Your email will be acknowledged within 1 business day and a more detailed
 follow-up will be provided with 5 business days.
@@ -60,7 +60,7 @@ can be helpful if they can be provided.
 can quickly reproduce the issue.
 - Organization(s) impacted/affected
 
-#### Encryption key for `REPLACEME@lmco.com`
+#### Encryption key for `mbee-software.fc-space@lmco.com`
 If your disclosure is sensitive, you may choose to encrypt your report using the key below.
 
 ```
@@ -93,8 +93,8 @@ the severity and likelihood of impact, and the MBEE team's assessment of the
 risk introduced by the issue. Security updates will also notify which versions
 are impacted and how to mitigate the issue.
 
-For a list of MBEE security related updates, a web page will be created at
-[mbee.us.lmco.com](https://mbee.us.lmco.com) provide that information.
+For a list of MBEE security related updates as well as bug fixes and features,
+refer to `CHANGELOG.md`.
 
 **External OpenMBEE**
 

@@ -3,28 +3,34 @@ All notable changes to this project will be documented in this file.
 
 ## [0.8.0] - 2019-04-09
 ### Major Features and Improvements
-* Changes example
-### Behavioral changes
-* Changes example
 ### Bug Fixes and Other Changes
-* Added CREDITS file
+* Added UI page for organization, project, user, and elements
+* Added UI page for user password change for admins
+* Added element tree display
+* Added edit function for organization, project, user, and elements
+* Added Side panels and nav bar
+
+### Bug Fixes and Other Changes
+* Added CHANGEME.md
+* Updated all documentation
 
 ## [0.7.3] - 2019-03-15
 ### Major Features and Improvements
-* Changes example
-### Behavioral changes
-* Changes example
-### Bug Fixes and Other Changes
-* Changes example
+* Added the minified option to all API endpoints
+* Added the skip option to all find() functions and GET endpoints
+* Renamed the jmiOpt option to format
+* Added the events.js library and emitting events on create/update/delete of orgs/projects/elements/users
 
 ## [0.7.2] - 2019-03-13
 ### Major Features and Improvements
-* Changes example
-### Behavioral changes
-* Changes example
-### Bug Fixes and Other Changes
-* Changes example
+* Added createOrReplace controller functions and PUT endpoints for all object types
+* Added the fields options to all controller functions (excluding remove())
+* Added the limit option to all find() functions
+* Added the element search controller function and API endpoint
+* Created an additional test suite to test for expected errors
 
+### Bug Fixes and Other Changes
+* Added CREDITS file
 
 ## [0.7.1] - 2019-02-20
 ### Major Features and Improvements
