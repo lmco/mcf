@@ -9,8 +9,15 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes and Other Changes
 * Added CREDITS file
 
+## [0.7.3] - 2019-03-15
+### Major Features and Improvements
+* Changes example
+### Behavioral changes
+* Changes example
+### Bug Fixes and Other Changes
+* Changes example
 
-## [0.7.2] - 2019-04-09
+## [0.7.2] - 2019-03-13
 ### Major Features and Improvements
 * Changes example
 ### Behavioral changes
@@ -19,7 +26,7 @@ All notable changes to this project will be documented in this file.
 * Changes example
 
 
-## [0.7.1] - 2019-02-25
+## [0.7.1] - 2019-02-20
 ### Major Features and Improvements
 * Refactored logical controller layer to focus on backwards compatibility of APIs (JavaScript and HTTP)
 * Adds new API endpoint for updating user passwords
