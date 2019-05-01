@@ -2508,6 +2508,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       - elements
  *     description: Returns an elements public data on a specified branch.
+ *                  Requesting user must have read access on the project to find
+ *                  elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2589,6 +2591,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       - elements
  *     description: Creates a new element from given data in the request body.
+ *                  Requesting user must have at least write access on the
+ *                  project to create an element.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2854,7 +2858,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     description: Updates an existing element. The following fields can be
  *                  updated [name, custom, archived, parent, documentation,
  *                  type]. Elements that are currently archived must first be
- *                  unarchived before making any other updates.
+ *                  unarchived before making any other updates. Requesting user
+ *                  must have at least write access on the porject to update an
+ *                  element.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2978,7 +2984,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       -  elements
  *     description: Deletes the specified element and all elements in the
- *                  specified elements subtree.
+ *                  specified element's subtree.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3057,6 +3063,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   Middleware.logRoute,
   APIController.deleteElement
 );
+
 
 /**
  * @swagger
