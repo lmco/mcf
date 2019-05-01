@@ -3071,10 +3071,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *   get:
  *     tags:
  *       - users
- *     description: Returns an array of users. By default, returns all users.
- *                  Optionally, an array of usernames can be provided in the
- *                  request body or a comma separated list in the request
- *                  parameters to find multiple, specific users.
+ *     description: Returns an array of users. Optionally, an array of usernames
+ *                  can be provided in the request body or a comma separated
+ *                  list in the request parameters to find multiple, specific
+ *                  users.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3172,7 +3172,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: string
  *               password:
  *                 type: string
- *                 description: Required unless running LDAP auth.
+ *                 description: Required unless running LDAP auth or some custom
+ *                              authentication strategy which does not store
+ *                              passwords.
  *               fname:
  *                 type: string
  *                 description: User's first name.
@@ -3251,7 +3253,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: string
  *               password:
  *                 type: string
- *                 description: Required unless running LDAP auth.
+ *                 description: Required unless running LDAP auth or some custom
+ *                              authentication strategy which does not store
+ *                              passwords.
  *               fname:
  *                 type: string
  *                 description: User's first name.
@@ -3464,6 +3468,7 @@ api.route('/users')
   APIController.deleteUsers
 );
 
+
 /**
  * @swagger
  * /api/users/whoami:
@@ -3504,6 +3509,7 @@ api.route('/users/whoami')
   Middleware.logRoute,
   APIController.whoami
 );
+
 
 /**
  * @swagger
@@ -3568,7 +3574,7 @@ api.route('/users/whoami')
  *     tags:
  *       - users
  *     description: Create a new user from the given data in the request body.
- *                  This endpoint is reserved for system-wide admins ONLY.
+ *                  NOTE this endpoint is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3673,7 +3679,9 @@ api.route('/users/whoami')
  *             password:
  *               type: string
  *               description: The password of the user. This field is required
- *                            unless LDAP authentication is used.
+ *                            unless LDAP authentication is used or some custom
+ *                            authentication strategy that does not store
+ *                            passwords.
  *             fname:
  *               type: string
  *             lname:
@@ -3721,7 +3729,7 @@ api.route('/users/whoami')
  *         description: Unauthorized, Failed to PUT user due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST PUT due to an invalid request
+ *         description: Forbidden, Failed to PUT user due to an invalid request
  *                      body.
  *       500:
  *         description: Internal Server Error, Failed to PUT user due to server
@@ -3732,7 +3740,9 @@ api.route('/users/whoami')
  *     description: Updates an existing user. The following fields can be
  *                  updated [fname, lname, preferredName, email, custom,
  *                  archived, admin]. Users that are currently archived must
- *                  first be unarchived before making any other updates.
+ *                  first be unarchived before making any other updates. NOTE
+ *                  this endpoint is reserved for system-wide admins only,
+ *                  unless a user is updating themselves.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3803,7 +3813,7 @@ api.route('/users/whoami')
  *         description: Not Found, Failed ot PATCH user due to user not
  *                      existing.
  *       500:
- *         description: Internal Server Error, Failed ot PATCH user due to
+ *         description: Internal Server Error, Failed to PATCH user due to
  *                      server side issue.
  *   delete:
  *     tags:
@@ -3877,6 +3887,7 @@ api.route('/users/:username')
   APIController.deleteUser
 );
 
+
 /**
  * @swagger
  * /api/users/{username}/password:
@@ -3933,7 +3944,7 @@ api.route('/users/:username')
  *         description: Forbidden, Failed to PATCH user due updating an
  *                      immutable field.
  *       500:
- *         description: Internal Server Error, Failed to DELETE user due to
+ *         description: Internal Server Error, Failed to PATCH user due to
  *                      server side issues.
  */
 api.route('/users/:username/password')
@@ -3943,6 +3954,7 @@ api.route('/users/:username/password')
   Middleware.disableUserAPI,
   APIController.patchPassword
 );
+
 
 // Catches any invalid api route not defined above.
 api.use('*', APIController.invalidRoute);
