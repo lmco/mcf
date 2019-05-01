@@ -481,7 +481,7 @@ api.route('/orgs')
  *   get:
  *     tags:
  *       - organizations
- *     description: Finds and returns an organizations public data if the user
+ *     description: Finds and returns an organization's public data if the user
  *                  has read permissions on that org.
  *     produces:
  *       - application/json
@@ -663,19 +663,19 @@ api.route('/orgs')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST org, returns org public data.
+ *         description: OK, Succeeded to PUT org, returns org public data.
  *       400:
- *         description: Bad Request, Failed to POST org due to invalid field in
+ *         description: Bad Request, Failed to PUT org due to invalid field in
  *                      request data.
  *       401:
- *         description: Unauthorized, Failed to POST org due to not being
- *                      logged in.
+ *         description: Unauthorized, Failed to PUT org due to not being logged
+ *                      in.
  *       403:
- *         description: Forbidden, Failed to POST org due to an existing org
- *                      with same id.
+ *         description: Forbidden, Failed to PUT org due to an existing org with
+ *                      same id.
  *       500:
- *         description: Internal Server Error, Failed to POST org due to a
- *                      server side issue.
+ *         description: Internal Server Error, Failed to PUT org due to a server
+ *                      side issue.
  *   patch:
  *     tags:
  *       - organizations
