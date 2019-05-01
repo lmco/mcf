@@ -1334,7 +1334,7 @@ api.route('/orgs/:orgid/projects')
  *   get:
  *     tags:
  *       - projects
- *     description: Finds and returns a projects public data if the user has
+ *     description: Finds and returns a project's public data if the user has
  *                  read permissions on that project.
  *     produces:
  *       - application/json
@@ -1399,7 +1399,8 @@ api.route('/orgs/:orgid/projects')
  *     tags:
  *       - projects
  *     description: Creates a new project from the given data in the request
- *                  body.
+ *                  body. Requesting user must have at least write access on the
+ *                  organization to create a project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1585,7 +1586,8 @@ api.route('/orgs/:orgid/projects')
  *     description: Updates an existing project. The following fields can be
  *                  updated [name, custom, archived, permissions]. Projects that
  *                  are currently archived must first be unarchived before
- *                  making any other updates.
+ *                  making any other updates. Requesting user must be a project
+ *                  admin to update the project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1740,6 +1742,7 @@ api.route('/orgs/:orgid/projects/:projectid')
   Middleware.logRoute,
   APIController.deleteProject
 );
+
 
 /**
  * @swagger
