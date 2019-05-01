@@ -1751,11 +1751,10 @@ api.route('/orgs/:orgid/projects/:projectid')
  *     tags:
  *       - elements
  *     description: Finds multiple elements using text based search on the
- *                  documentation, name, id, parent, source and target fields.
- *                  Allows for exact searches by quoting the desired field
- *                  "exact search", or the ability to not include a word in a
- *                  search by using a dash -not. Returns the elements public
- *                  data.
+ *                  documentation and name fields. Allows for exact searches by
+ *                  quoting the desired string "exact search", or the ability to
+ *                  not include a word in a search by using a dash -not. Returns
+ *                  the elements public data.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1881,11 +1880,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *   get:
  *     tags:
  *       - elements
- *     description: Returns an array of elements on a specified branch. By
- *                  default, returns all elements on the specified branch.
- *                  Optionally, an array of IDs can be provided in the request
- *                  body or a comma separated list in the request parameters to
- *                  find multiple, specific elements.
+ *     description: Returns an array of elements on a specified branch if the
+ *                  requesting user has read access on the project. Optionally,
+ *                  an array of IDs can be provided in the request body or a
+ *                  comma separated list in the request parameters to find
+ *                  multiple, specific elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1910,13 +1909,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
+ *         description: An array of element IDs to search for. If both query
+ *                      parameter and body are not provided, all elements the
  *                      user has access to (under the specified branch) are
  *                      found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
+ *                      parameter and body are not provided, all elements the
  *                      user has access to (under the specified branch) are
  *                      found.
  *         in: query
@@ -1935,7 +1934,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         type: boolean
  *       - name: subtree
  *         description: If true, returns all searched elements as well as the
- *                      elements in the searched element's subtree.
+ *                      elements in the found element's subtrees.
  *         in: query
  *         type: boolean
  *       - name: fields
@@ -2037,6 +2036,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - elements
  *     description: Creates multiple elements from the supplied data in the
  *                  request body. Returns the created element' public data.
+ *                  Requesting user must have write permissions on the project
+ *                  to create elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2153,7 +2154,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Forbidden, Failed to POST elements due to permissions
  *                      or already existing elements with matching ids.
  *       404:
- *         description: Not Found, Failed to GET branch, project or org.
+ *         description: Not Found, Failed to POST elements due to org, project,
+ *                      or branch not existing.
  *       500:
  *         description: Internal Server Error, Failed to POST elements due to a
  *                      server side issue.
@@ -2295,7 +2297,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                  first be unarchived before making any other updates. The
  *                  following fields can be updated [name, custom, archived,
  *                  parent, type, documentation]. NOTE, the id is required in
- *                  the request body, but CANNOT be updated.
+ *                  the request body, but CANNOT be updated. Requesting user
+ *                  must have write permissions on the project to update
+ *                  elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2415,7 +2419,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *   delete:
  *     tags:
  *       - elements
- *     description: Deletes multiple elements and their subtrees.
+ *     description: Deletes multiple elements and all elements in their
+ *                  subtrees.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2494,6 +2499,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   Middleware.logRoute,
   APIController.deleteElements
 );
+
 
 /**
  * @swagger
