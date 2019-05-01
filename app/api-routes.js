@@ -823,8 +823,8 @@ api.route('/orgs/:orgid')
  *   get:
  *     tags:
  *       - projects
- *     description: Returns a list of all projects and their public data that
- *                  the requesting user has access to.
+ *     description: Returns a list of all project's public data that the
+ *                  requesting user has read access to.
  *     produces:
  *       - application/json
  *     parameters:
@@ -870,7 +870,7 @@ api.route('/orgs/:orgid')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET projects, returns project public
+ *         description: OK, Succeeded to GET projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to GET projects due to invalid data.
@@ -894,6 +894,7 @@ api.route('/projects')
   APIController.getAllProjects
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects:
@@ -901,11 +902,10 @@ api.route('/projects')
  *     tags:
  *       - projects
  *     description: Returns an array of projects the requesting user has read
- *                  access to on a specified org. By default, returns all
- *                  projects on the specified org that the user has read access
- *                  to. Optionally, an array of IDs can be provided in the
- *                  request body or a comma separated list in the request
- *                  parameters to find multiple, specific projects.
+ *                  access to on a specified org. Optionally, an array of IDs
+ *                  can be provided in the request body or a comma separated
+ *                  list in the request parameters to find multiple, specific
+ *                  projects.
  *     produces:
  *       - application/json
  *     parameters:
@@ -920,13 +920,15 @@ api.route('/projects')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to (under the specified org) are found.
+ *         description: An array of project IDs to search for. If both query
+ *                      parameter and body are not provided, all projects the
+ *                      user has read access to (under the specified org) are
+ *                      found.
  *       - name: ids
- *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to (under the specified org) are found.
+ *         description: Comma separated list of project IDs to search for. If
+ *                      both query parameter and body are not provided, all
+ *                      projects the user has read access to (under the
+ *                      specified org) are found.
  *         in: query
  *         type: string
  *       - name: populate
@@ -970,7 +972,7 @@ api.route('/projects')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET projects, returns project public
+ *         description: OK, Succeeded to GET projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to GET projects due to invalid data.
@@ -991,6 +993,8 @@ api.route('/projects')
  *       - projects
  *     description: Creates multiple projects from the supplied data in the
  *                  request body. Returns the created projects' public data.
+ *                  Requesting user must have at least write access on the
+ *                  organization to create projects.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1075,20 +1079,21 @@ api.route('/projects')
  *       - projects
  *     description: Creates or replaces multiple projects from the supplied data
  *                  in the request body. If the project already exists, it will
- *                  be replaced along with the root model element. Returns the
+ *                  be replaced along with the pre-set elements. Returns the
  *                  created projects' public data. NOTE this endpoint is
  *                  reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose projects to create.
+ *         description: The ID of the organization whose projects to create or
+ *                      replace.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projects
  *         in: body
- *         description: An array of objects containing new project data.
+ *         description: An array of objects containing project data.
  *         schema:
  *           type: array
  *           items:
@@ -1143,7 +1148,7 @@ api.route('/projects')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PUT projects, returns project public
+ *         description: OK, Succeeded to PUT projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to PUT projects due to invalid
