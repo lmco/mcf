@@ -59,8 +59,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
@@ -554,7 +554,7 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {Object} [projects.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
- * @param {boolean} [projects.archived] - The updated archived field. If true,
+ * @param {boolean} [projects.archived = false] - The updated archived field. If true,
  * the project will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of

@@ -35,8 +35,7 @@ module.exports = {
 
 
 /**
- * @description Returns true if the user has permission to create users,
- * false otherwise.
+ * @description Verifies if user has permission to create users.
  *
  * @params {User} user - The user object to check permission for.
  *
@@ -48,8 +47,8 @@ function createUser(user) {
 }
 
 /**
- * @description Returns true if the user has permission to read other user
- * objects, false otherwise.
+ * @description Verifies if user has permission to read other user
+ * objects.
  *
  * @params {User} user - The user object to check permission for.
  *
@@ -62,8 +61,7 @@ function readUser(user) {
 
 
 /**
- * @description Returns true if the user has permission to update users,
- * false otherwise.
+ * @description Verifies if user has permission to update users.
  *
  * @params {User} user - The user object to check permission for.
  * @params {User} userToUpdate - The user object to updated.
@@ -77,8 +75,7 @@ function updateUser(user, userToUpdate) {
 
 
 /**
- * @description Returns true if the user has permission to delete users, false
- * otherwise.
+ * @description Verifies if user has permission to delete users.
  *
  * @params {User} user - The user object to check permission for.
  *
@@ -90,8 +87,7 @@ function deleteUser(user) {
 }
 
 /**
- * @description Returns true if the user has permission to create an organization,
- * false otherwise.
+ * @description Verifies if user has permission to create an organization.
  *
  * @params {User} user - The user object to check permission for.
  *
@@ -103,8 +99,8 @@ function createOrg(user) {
 }
 
 /**
- * @description Returns true if the user has permission to read the
- * organization, false otherwise.
+ * @description Verifies if user has permission to read the
+ * organization.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object to read.
@@ -123,8 +119,8 @@ function readOrg(user, org) {
 
 
 /**
- * @description Returns true if the user has permission to update organization
- * object, false otherwise.
+ * @description Verifies if user has permission to update organization
+ * object.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object to update.
@@ -147,8 +143,8 @@ function updateOrg(user, org) {
 
 
 /**
- * @description Returns true if the user has permission to delete the
- * organization object, false otherwise.
+ * @description Verifies if user has permission to delete the
+ * organization object.
  *
  * @params {User} user - The user object to check permission for.
  *
@@ -161,8 +157,8 @@ function deleteOrg(user) {
 
 
 /**
- * @description Returns true if the user has permission to create a project
- * within the org, false otherwise.
+ * @description Verifies if user has permission to create a project
+ * within the org.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
@@ -185,8 +181,7 @@ function createProject(user, org) {
 
 
 /**
- * @description Returns true if the user has permission to read the project,
- * false otherwise.
+ * @description Verifies if user has permission to read the project.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
@@ -221,8 +216,8 @@ function readProject(user, org, project) {
 
 
 /**
- * @description Returns true if the user has permission to update project
- * object, false otherwise.
+ * @description Verifies if user has permission to update project
+ * object.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
@@ -247,8 +242,8 @@ function updateProject(user, org, project) {
 
 
 /**
- * @description Returns true if the user has permission to delete the project
- * object, false otherwise.
+ * @description Verifies if user has permission to delete the project
+ * object.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
@@ -263,8 +258,8 @@ function deleteProject(user, org, project) {
 
 
 /**
- * @description Returns true if the user has permission to create elements in
- * the project, false otherwise.
+ * @description Verify if user has permission to create elements in
+ * the project.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
@@ -290,8 +285,8 @@ function createElement(user, org, project, branch) {
 
 
 /**
- * @description Returns true if the user has permission to read elements in the
- * project, false otherwise.
+ * @description Verify if user has permission to read elements in the
+ * project.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
@@ -327,8 +322,8 @@ function readElement(user, org, project, branch) {
 
 
 /**
- * @description Returns true if the user has permission to update project
- * element objects, false otherwise.
+ * @description Verify if user has permission to update project
+ * element objects.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
@@ -354,8 +349,8 @@ function updateElement(user, org, project, branch) {
 
 
 /**
- * @description Returns true if the user has permission to delete the project
- * elements, false otherwise.
+ * @description Verify if user has permission to delete the project
+ * elements.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.

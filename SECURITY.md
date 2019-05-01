@@ -103,18 +103,14 @@ an arbitrary admin user in the database.
 
 It's important to ensure that all test users are deleted from the database.
 
-#### Asynchronous Build Script 
+#### Asynchronous Build Script
 
-Some components in the build script are asynchronous and the build script will 
+Some components in the build script are asynchronous and the build script will
 print out a message that build is complete before build has finished.
 
 #### UI Model Tree Refresh
-When updating the parent in the model tree causes issues with the re-rendering 
+When updating the parent in the model tree causes issues with the re-rendering
 of model tree elements due to the refresh element functions.
-
-#### Password Validation
-Since, the password validation is through the modular authentication strategies,
-there is no easy way to tell if a password valid.
 
 ## Security Related Configuration
 
@@ -178,6 +174,26 @@ configuration should not be checked into version control.
 > API route be disabled in order to resolve conflicts between local or LDAP
 > authentication. This users API route can be disable on a per method basis in
 > the configuration file under server/api/userAPI.
+
+### Password Validation
+
+Password validation was designed to be configurable through each authentication
+module. When a user is created, the configured auth module is checked for an
+exported validator function called `validatePassword()`. This function should
+accept up to two parameters, the password (required) and the provider
+(optional), and should return a boolean of whether the password is valid or not.
+
+When creating a user, this function is ran and if the value *false* is returned,
+the creation of that user is rejected. The default password requirements
+provided in the local-strategy expect each password to contain at least 8
+characters and at least one number, uppercase letter, lowercase letter and at
+least one special character. If desired, one implementing this function can
+allow for stricter requirements, but we do not suggest lessening the
+requirements for security reasons.
+
+If using an auth module that does not need to store passwords in the database
+(such as LDAP), the `validatePassword()` function still needs to be provided and
+exported, but only needs to return *true* for any case.
 
 ### HTTPS
 

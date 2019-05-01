@@ -33,16 +33,16 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @description Defines the User Schema
  *
- * @property {string} _id - The Users unique name.
- * @property {string} password - The Users password.
- * @property {string} email - The Users email.
- * @property {string} fname - The Users first name.
- * @property {string} preferredName - The Users preferred first name.
- * @property {string} lname - The Users last name.
- * @property {boolean} admin - Indicates if the User is a global admin.
+ * @property {string} _id - The users unique name.
+ * @property {string} password - The users password.
+ * @property {string} email - The users email.
+ * @property {string} fname - The users first name.
+ * @property {string} preferredName - The users preferred first name.
+ * @property {string} lname - The users last name.
+ * @property {boolean} admin - Indicates if the user is a global admin.
  * @property {string} provider - Defines the authentication provider for the
- * User.
- * @property {Object} custom - JSON used to store additional date.
+ * user.
+ * @property {Object} custom - JSON used to store additional data.
  *
  */
 const UserSchema = new mongoose.Schema({

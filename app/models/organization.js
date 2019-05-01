@@ -117,7 +117,7 @@ OrganizationSchema.statics.getValidPopulateFields = function() {
  * @description Validates an object to ensure that it only contains keys
  * which exist in the organization model.
  *
- * @param {Object} object - The object to check keys of.
+ * @param {Object} object - Object for key verification.
  *
  * @return {boolean} The boolean indicating if the object contained only
  * existing fields.
