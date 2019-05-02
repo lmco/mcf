@@ -33,7 +33,6 @@ npm install -g yarn
 ```
 
 ### Quickstart
-
 If you're building MBEE for the first time, the easiest way to get started is 
 to run
 
@@ -45,7 +44,6 @@ By default this will install all dependencies and run a post-install script to
 build MBEE. 
 
 ### Build Process Breakdown
-
 The installation process (e.g. `yarn install`) installs the necessary 
 dependencies to build and run MBEE. The installation includes a 
 *pre-install* and *post-install* script. The pre-install scripts cleans and 
@@ -85,7 +83,6 @@ Additionally, a **`--all`** option tells the build script to run all sections of
 the build. This is the default behavior when no options are provided.
 
 ### Database Schema Migrations
-
 *Appendix B* of the Flight Manual covers database migration in more detail, but
 it will be discussed briefly here.
 
@@ -116,12 +113,10 @@ node mbee migrate -y
 
 
 ## Running MBEE
-
 Before running MBEE, it must be built. See the *Building MBEE* section above
 to build MBEE.
 
-### Development
-
+### Running in Development
 To run MBEE, run the following command:
 
 ```
@@ -177,8 +172,6 @@ container.
 
 
 ## Advanced Configuration
-
-### Configuration File
 MBEE stores all it's configuration information in the `config` directory. By
 default, it uses the `default.cfg` file, but that can be changed by setting the
 `MBEE_ENV` environment variable. On startup, MBEE will load the configuration
@@ -263,7 +256,6 @@ validation behaviors. Any validator defines in the `app/lib/validators.js` file
 can be overwritten here.
 
 ## Modular Authentication
-
 MBEE supports modular authentication strategies. These strategies are defined
 in the authentication modules in `/app/auth`. Which authentication strategy is
 used is defined in the config file. The `auth` section contains a field called
