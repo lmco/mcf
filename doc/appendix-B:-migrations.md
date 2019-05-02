@@ -29,7 +29,8 @@ to recreate the lost items, and help prevent any data loss.
 
 Below is a list of previous migrations which had implications that required
 additional effort by system administrators. Each section below contains
-instructions for system admins to get the database back to a correct state.
+instructions for system administrators to get the database back to a correct
+state.
 
 #### 0.6.0 -> 0.7.0
 
