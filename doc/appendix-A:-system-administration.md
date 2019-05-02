@@ -245,7 +245,7 @@ Some of the noteworthy options are
     useful if the MBEE API is desired without the front-end GUI.
     - **server.ui.mode**: This is used during build to define the build mode for
     React. Valid options are "development" and "production".
-    - **server.ui.banner**: This section can be used to deine a banner at the
+    - **server.ui.banner**: This section can be used to define a banner at the
     top and bottom of the UI for providing sensitivity labels.
   - **server.secret**: This is the secret key used by the server for encrypting
    authentication tokens. If the word "RANDOM" is provided, a key will be 
