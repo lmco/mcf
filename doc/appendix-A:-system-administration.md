@@ -1,7 +1,6 @@
 # Appendix A: System Administration
 
 ## Overview
-
 MBEE is designed to be deployed in a number of different architectural 
 configurations. At its simplest it can be deployed as a single instance of
 an application or it can be run in more complex configurations such as
@@ -10,7 +9,6 @@ will primarily focus on the first case: a single running instance of the MBEE
 Core Framework.
 
 ### System Requirements
-
 MBEE is designed to be cross-platform, but is primarily tested on Linux and 
 other Posix systems. Windows support is intended but not yet fully supported.
 
@@ -18,8 +16,10 @@ other Posix systems. Windows support is intended but not yet fully supported.
 > fully supported. It is intended that full Windows support will be available by
 > version 0.10.0 of the MBEE Core Framework.
 
-## Building MBEE
+The server should have at least 1 CPU and 0.5 GB RAM. Disk space required is 
+dependent on the total model storage needed.
 
+## Building MBEE
 Before running MBEE, the software must be built. The build process compiles 
 Sass into CSS, transpiles React JSX into vanilla Javascript, prepares other 
 static files, builds documentation, and more.
