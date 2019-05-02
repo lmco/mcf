@@ -84,7 +84,7 @@ In this case, we parse the JSON response and print the response status code and
 the response body to the console. You should see the `200` status indicating 
 that everything is okay and a body that includes MBEE version information.
 
-Now, let's clean up our code to create a simple program that inerfaces with 
+Now, let's clean up our code to create a simple program that interfaces with 
 MBEE to simply retrieve and print the MBEE version information. Your code
 should look something like this:
 
@@ -112,8 +112,8 @@ print(res['version'])
 ```
 
 The above program removes most of the print statements that were used throughout
-this walkthrough and includes a single print statement on the last line to print
-the MBEE version.
+this walk-through and includes a single print statement on the last line to
+print the MBEE version.
 
 That's it, you've written your first integration with MBEE! The following 
 tutorial will walk through creating and organization and project.
