@@ -3,14 +3,21 @@ All notable changes to this project will be documented in this file.
 
 ## [0.8.0] - 2019-04-09
 ### Major Features and Improvements
-### Bug Fixes and Other Changes
-* Added UI page for organization, project, user, and elements
-* Added UI page for user password change for admins
-* Added element tree display
+* Updated UI pages for organization, project, user, and elements
+* Added ability for user to change their own password if they are a local user
+* Updated element tree display
 * Added edit function for organization, project, user, and elements
-* Added Side panels and nav bar
+* Added side panels for element information view
+* Added element add and delete capabilities
+* Updated some of the styles through out the UI (i.e. the home page, sidebar, navbar, any of the org/project/profile pages)
+* Added the sidebar plugin capabilities for projects
+* Updated the profile page with the list of orgs or projects to be one the profile pages
+* Updated the physical structure of the UI components and sass files
 
 ### Bug Fixes and Other Changes
+* Added lean option to controllers to significantly improve performance
+* Added basic filtering when finding elements (i.e. the ability to search for elements with specific parents, created by specific users, etc.)
+* Added the ability to reference elements outside the current project (must be in the same org)
 * Added CHANGEME.md
 * Updated all documentation
 
