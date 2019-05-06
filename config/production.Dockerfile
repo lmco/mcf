@@ -9,7 +9,7 @@
 #
 # @description This Dockerfile defines the Docker build for MBEE.
 ##
-FROM node:6.17.1-stretch
+FROM node:10-stretch
 MAINTAINER Lockheed Martin
 WORKDIR /lm/mbee
 

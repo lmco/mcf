@@ -35,7 +35,7 @@ const Middleware = M.require('lib.middleware');
  *   get:
  *     tags:
  *       - general
- *     description: Returns a 200 status. Used to test if the API is up or a
+ *     description: Returns a 200 status. Used to test if the API is up and a
  *        connection can be established.
  *     responses:
  *       200:
@@ -124,8 +124,7 @@ api.route('/version')
  *     tags:
  *       - organizations
  *     description: Returns an array of organizations the requesting user has
- *                  read access to. By default, returns all organizations the
- *                  user has read access to. Optionally, an array of IDs can be
+ *                  read access to. Optionally, an array of IDs can be
  *                  provided in the request body or a comma separated list in
  *                  the request parameters to find multiple, specific orgs.
  *     produces:
@@ -136,13 +135,13 @@ api.route('/version')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to are found.
+ *         description: An array of org IDs to search for. If both query
+ *                      parameter and body are not provided, all orgs the
+ *                      user has read access to are found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both the
- *                      query parameter and body are not provided, all objects
- *                      the user has access to are found.
+ *                      query parameter and body are not provided, all orgs
+ *                      the user has read access to are found.
  *         in: query
  *         type: string
  *       - name: populate
@@ -230,7 +229,8 @@ api.route('/version')
  *         description: An array of objects containing organization data.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
@@ -269,7 +269,7 @@ api.route('/version')
  *       - organizations
  *     description: Creates or replaces multiple organizations from the data
  *                  provided in the request body. If the organization already
- *                  exists, it is updated with the provided data. NOTE This
+ *                  exists, it is replaced with the provided data. NOTE This
  *                  function is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
@@ -282,12 +282,12 @@ api.route('/version')
  *             type: object
  *             required:
  *               - id
+ *               - name
  *             properties:
  *               id:
  *                 type: string
  *               name:
  *                 type: string
- *                 description: Required if creating an organization.
  *               custom:
  *                 type: object
  *               permissions:
@@ -433,7 +433,7 @@ api.route('/version')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE orgs, returns deleted orgs' ids.
+ *         description: OK, Succeeded to DELETE orgs, returns deleted org's ids.
  *       400:
  *         description: Bad Request, Failed to DELETE orgs due to invalid data
  *                      in the request body.
@@ -444,7 +444,7 @@ api.route('/version')
  *         description: Forbidden, Failed to DELETE orgs due to not having
  *                      correct permissions.
  *       500:
- *         description: Internal Server Error, Failed to PATCH org due to a
+ *         description: Internal Server Error, Failed to DELETE org due to a
  *                      server side issue.
  */
 api.route('/orgs')
@@ -481,7 +481,7 @@ api.route('/orgs')
  *   get:
  *     tags:
  *       - organizations
- *     description: Finds and returns an organizations public data if the user
+ *     description: Finds and returns an organization's public data if the user
  *                  has read permissions on that org.
  *     produces:
  *       - application/json
@@ -663,19 +663,19 @@ api.route('/orgs')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST org, returns org public data.
+ *         description: OK, Succeeded to PUT org, returns org public data.
  *       400:
- *         description: Bad Request, Failed to POST org due to invalid field in
+ *         description: Bad Request, Failed to PUT org due to invalid field in
  *                      request data.
  *       401:
- *         description: Unauthorized, Failed to POST org due to not being
- *                      logged in.
+ *         description: Unauthorized, Failed to PUT org due to not being logged
+ *                      in.
  *       403:
- *         description: Forbidden, Failed to POST org due to an existing org
- *                      with same id.
+ *         description: Forbidden, Failed to PUT org due to an existing org with
+ *                      same id.
  *       500:
- *         description: Internal Server Error, Failed to POST org due to a
- *                      server side issue.
+ *         description: Internal Server Error, Failed to PUT org due to a server
+ *                      side issue.
  *   patch:
  *     tags:
  *       - organizations
@@ -823,8 +823,8 @@ api.route('/orgs/:orgid')
  *   get:
  *     tags:
  *       - projects
- *     description: Returns a list of all projects and their public data that
- *                  the requesting user has access to.
+ *     description: Returns a list of all project's public data that the
+ *                  requesting user has read access to.
  *     produces:
  *       - application/json
  *     parameters:
@@ -870,7 +870,7 @@ api.route('/orgs/:orgid')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET projects, returns project public
+ *         description: OK, Succeeded to GET projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to GET projects due to invalid data.
@@ -894,6 +894,7 @@ api.route('/projects')
   APIController.getAllProjects
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects:
@@ -901,11 +902,10 @@ api.route('/projects')
  *     tags:
  *       - projects
  *     description: Returns an array of projects the requesting user has read
- *                  access to on a specified org. By default, returns all
- *                  projects on the specified org that the user has read access
- *                  to. Optionally, an array of IDs can be provided in the
- *                  request body or a comma separated list in the request
- *                  parameters to find multiple, specific projects.
+ *                  access to on a specified org. Optionally, an array of IDs
+ *                  can be provided in the request body or a comma separated
+ *                  list in the request parameters to find multiple, specific
+ *                  projects.
  *     produces:
  *       - application/json
  *     parameters:
@@ -920,13 +920,15 @@ api.route('/projects')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to (under the specified org) are found.
+ *         description: An array of project IDs to search for. If both query
+ *                      parameter and body are not provided, all projects the
+ *                      user has read access to (under the specified org) are
+ *                      found.
  *       - name: ids
- *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to (under the specified org) are found.
+ *         description: Comma separated list of project IDs to search for. If
+ *                      both query parameter and body are not provided, all
+ *                      projects the user has read access to (under the
+ *                      specified org) are found.
  *         in: query
  *         type: string
  *       - name: populate
@@ -970,7 +972,7 @@ api.route('/projects')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET projects, returns project public
+ *         description: OK, Succeeded to GET projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to GET projects due to invalid data.
@@ -991,6 +993,8 @@ api.route('/projects')
  *       - projects
  *     description: Creates multiple projects from the supplied data in the
  *                  request body. Returns the created projects' public data.
+ *                  Requesting user must have at least write access on the
+ *                  organization to create projects.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1075,20 +1079,21 @@ api.route('/projects')
  *       - projects
  *     description: Creates or replaces multiple projects from the supplied data
  *                  in the request body. If the project already exists, it will
- *                  be replaced along with the root model element. Returns the
+ *                  be replaced along with the pre-set elements. Returns the
  *                  created projects' public data. NOTE this endpoint is
  *                  reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose projects to create.
+ *         description: The ID of the organization whose projects to create or
+ *                      replace.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projects
  *         in: body
- *         description: An array of objects containing new project data.
+ *         description: An array of objects containing project data.
  *         schema:
  *           type: array
  *           items:
@@ -1143,7 +1148,7 @@ api.route('/projects')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PUT projects, returns project public
+ *         description: OK, Succeeded to PUT projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to PUT projects due to invalid
@@ -1329,7 +1334,7 @@ api.route('/orgs/:orgid/projects')
  *   get:
  *     tags:
  *       - projects
- *     description: Finds and returns a projects public data if the user has
+ *     description: Finds and returns a project's public data if the user has
  *                  read permissions on that project.
  *     produces:
  *       - application/json
@@ -1394,7 +1399,8 @@ api.route('/orgs/:orgid/projects')
  *     tags:
  *       - projects
  *     description: Creates a new project from the given data in the request
- *                  body.
+ *                  body. Requesting user must have at least write access on the
+ *                  organization to create a project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1580,7 +1586,8 @@ api.route('/orgs/:orgid/projects')
  *     description: Updates an existing project. The following fields can be
  *                  updated [name, custom, archived, permissions]. Projects that
  *                  are currently archived must first be unarchived before
- *                  making any other updates.
+ *                  making any other updates. Requesting user must be a project
+ *                  admin to update the project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1736,6 +1743,7 @@ api.route('/orgs/:orgid/projects/:projectid')
   APIController.deleteProject
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/search:
@@ -1743,11 +1751,10 @@ api.route('/orgs/:orgid/projects/:projectid')
  *     tags:
  *       - elements
  *     description: Finds multiple elements using text based search on the
- *                  documentation, name, id, parent, source and target fields.
- *                  Allows for exact searches by quoting the desired field
- *                  "exact search", or the ability to not include a word in a
- *                  search by using a dash -not. Returns the elements public
- *                  data.
+ *                  documentation and name fields. Allows for exact searches by
+ *                  quoting the desired string "exact search", or the ability to
+ *                  not include a word in a search by using a dash -not. Returns
+ *                  the elements public data.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1873,11 +1880,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *   get:
  *     tags:
  *       - elements
- *     description: Returns an array of elements on a specified branch. By
- *                  default, returns all elements on the specified branch.
- *                  Optionally, an array of IDs can be provided in the request
- *                  body or a comma separated list in the request parameters to
- *                  find multiple, specific elements.
+ *     description: Returns an array of elements on a specified branch if the
+ *                  requesting user has read access on the project. Optionally,
+ *                  an array of IDs can be provided in the request body or a
+ *                  comma separated list in the request parameters to find
+ *                  multiple, specific elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1902,13 +1909,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
+ *         description: An array of element IDs to search for. If both query
+ *                      parameter and body are not provided, all elements the
  *                      user has access to (under the specified branch) are
  *                      found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
+ *                      parameter and body are not provided, all elements the
  *                      user has access to (under the specified branch) are
  *                      found.
  *         in: query
@@ -1927,7 +1934,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         type: boolean
  *       - name: subtree
  *         description: If true, returns all searched elements as well as the
- *                      elements in the searched element's subtree.
+ *                      elements in the found element's subtrees.
  *         in: query
  *         type: boolean
  *       - name: fields
@@ -2029,6 +2036,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - elements
  *     description: Creates multiple elements from the supplied data in the
  *                  request body. Returns the created element' public data.
+ *                  Requesting user must have write permissions on the project
+ *                  to create elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2145,7 +2154,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Forbidden, Failed to POST elements due to permissions
  *                      or already existing elements with matching ids.
  *       404:
- *         description: Not Found, Failed to GET branch, project or org.
+ *         description: Not Found, Failed to POST elements due to org, project,
+ *                      or branch not existing.
  *       500:
  *         description: Internal Server Error, Failed to POST elements due to a
  *                      server side issue.
@@ -2287,7 +2297,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                  first be unarchived before making any other updates. The
  *                  following fields can be updated [name, custom, archived,
  *                  parent, type, documentation]. NOTE, the id is required in
- *                  the request body, but CANNOT be updated.
+ *                  the request body, but CANNOT be updated. Requesting user
+ *                  must have write permissions on the project to update
+ *                  elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2407,7 +2419,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *   delete:
  *     tags:
  *       - elements
- *     description: Deletes multiple elements and their subtrees.
+ *     description: Deletes multiple elements and all elements in their
+ *                  subtrees.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2487,6 +2500,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   APIController.deleteElements
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/{elementid}:
@@ -2494,6 +2508,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       - elements
  *     description: Returns an elements public data on a specified branch.
+ *                  Requesting user must have read access on the project to find
+ *                  elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2575,6 +2591,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       - elements
  *     description: Creates a new element from given data in the request body.
+ *                  Requesting user must have at least write access on the
+ *                  project to create an element.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2840,7 +2858,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     description: Updates an existing element. The following fields can be
  *                  updated [name, custom, archived, parent, documentation,
  *                  type]. Elements that are currently archived must first be
- *                  unarchived before making any other updates.
+ *                  unarchived before making any other updates. Requesting user
+ *                  must have at least write access on the porject to update an
+ *                  element.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2964,7 +2984,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       -  elements
  *     description: Deletes the specified element and all elements in the
- *                  specified elements subtree.
+ *                  specified element's subtree.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3044,16 +3064,17 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   APIController.deleteElement
 );
 
+
 /**
  * @swagger
  * /api/users:
  *   get:
  *     tags:
  *       - users
- *     description: Returns an array of users. By default, returns all users.
- *                  Optionally, an array of usernames can be provided in the
- *                  request body or a comma separated list in the request
- *                  parameters to find multiple, specific users.
+ *     description: Returns an array of users. Optionally, an array of usernames
+ *                  can be provided in the request body or a comma separated
+ *                  list in the request parameters to find multiple, specific
+ *                  users.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3151,7 +3172,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: string
  *               password:
  *                 type: string
- *                 description: Required unless running LDAP auth.
+ *                 description: Required unless running LDAP auth or some custom
+ *                              authentication strategy which does not store
+ *                              passwords.
  *               fname:
  *                 type: string
  *                 description: User's first name.
@@ -3230,7 +3253,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: string
  *               password:
  *                 type: string
- *                 description: Required unless running LDAP auth.
+ *                 description: Required unless running LDAP auth or some custom
+ *                              authentication strategy which does not store
+ *                              passwords.
  *               fname:
  *                 type: string
  *                 description: User's first name.
@@ -3443,6 +3468,7 @@ api.route('/users')
   APIController.deleteUsers
 );
 
+
 /**
  * @swagger
  * /api/users/whoami:
@@ -3483,6 +3509,7 @@ api.route('/users/whoami')
   Middleware.logRoute,
   APIController.whoami
 );
+
 
 /**
  * @swagger
@@ -3547,7 +3574,7 @@ api.route('/users/whoami')
  *     tags:
  *       - users
  *     description: Create a new user from the given data in the request body.
- *                  This endpoint is reserved for system-wide admins ONLY.
+ *                  NOTE this endpoint is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3652,7 +3679,9 @@ api.route('/users/whoami')
  *             password:
  *               type: string
  *               description: The password of the user. This field is required
- *                            unless LDAP authentication is used.
+ *                            unless LDAP authentication is used or some custom
+ *                            authentication strategy that does not store
+ *                            passwords.
  *             fname:
  *               type: string
  *             lname:
@@ -3700,7 +3729,7 @@ api.route('/users/whoami')
  *         description: Unauthorized, Failed to PUT user due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST PUT due to an invalid request
+ *         description: Forbidden, Failed to PUT user due to an invalid request
  *                      body.
  *       500:
  *         description: Internal Server Error, Failed to PUT user due to server
@@ -3711,7 +3740,9 @@ api.route('/users/whoami')
  *     description: Updates an existing user. The following fields can be
  *                  updated [fname, lname, preferredName, email, custom,
  *                  archived, admin]. Users that are currently archived must
- *                  first be unarchived before making any other updates.
+ *                  first be unarchived before making any other updates. NOTE
+ *                  this endpoint is reserved for system-wide admins only,
+ *                  unless a user is updating themselves.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3782,7 +3813,7 @@ api.route('/users/whoami')
  *         description: Not Found, Failed ot PATCH user due to user not
  *                      existing.
  *       500:
- *         description: Internal Server Error, Failed ot PATCH user due to
+ *         description: Internal Server Error, Failed to PATCH user due to
  *                      server side issue.
  *   delete:
  *     tags:
@@ -3856,6 +3887,7 @@ api.route('/users/:username')
   APIController.deleteUser
 );
 
+
 /**
  * @swagger
  * /api/users/{username}/password:
@@ -3912,7 +3944,7 @@ api.route('/users/:username')
  *         description: Forbidden, Failed to PATCH user due updating an
  *                      immutable field.
  *       500:
- *         description: Internal Server Error, Failed to DELETE user due to
+ *         description: Internal Server Error, Failed to PATCH user due to
  *                      server side issues.
  */
 api.route('/users/:username/password')
@@ -3922,6 +3954,7 @@ api.route('/users/:username/password')
   Middleware.disableUserAPI,
   APIController.patchPassword
 );
+
 
 // Catches any invalid api route not defined above.
 api.use('*', APIController.invalidRoute);
