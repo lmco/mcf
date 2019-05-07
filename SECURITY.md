@@ -393,4 +393,4 @@ TODO - Discuss security-related developer considerations
 * how to use auth
 * using https
 * security configs
-* secutiy on plugins
+* secutiy on plugins.
