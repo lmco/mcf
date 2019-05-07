@@ -1,8 +1,8 @@
 # MBEE Security
 
 **Contents**
-- [Disclosure Policy](#disclosure-policy)
-- [Security Update Policy](#security-update-policy)
+- [Reporting Vulnerabilities and Bugs](#reporting-vulnerabilities-and-bugs)
+- [Disclosure and Security Update Policy](#disclosure-and-security-update-policy)
 - [Known Gaps and Issues](#known-gaps-and-issues)
 - [Security Related Configuration](#security-related-configuration)
   - [Plugins and Integrations](#plugins-and-integrations)
@@ -15,7 +15,7 @@
 - [Security for Developers](#security-for-developers)
 
 
-## Disclosure Policy
+## Reporting Vulnerabilities and Bugs
 
 **Lockheed Martin Internal**
 
@@ -44,7 +44,7 @@ can quickly reproduce the issue
 > procedures above.
 
 If an issue is identified in the open source version MBEE, please email
-[mbee-software.dl-ssc@exch.ems.lmco.com](mailto:mbee-software.dl-ssc@exch.ems.lmco.com).
+[mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com).
 This will notify the Lockheed Martin MBEE Software Engineering team of the
 issue. Your email will be acknowledged within 1 business day and a more detailed
 follow-up will be provided with 5 business days.
@@ -60,7 +60,16 @@ can be helpful if they can be provided.
 can quickly reproduce the issue.
 - Organization(s) impacted/affected
 
-## Security Update Policy
+#### Encryption key for `mbee-software.fc-space@lmco.com`
+If your disclosure is sensitive, you may choose to encrypt your report using the key below.
+
+```
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+-----END PGP PUBLIC KEY BLOCK-----
+```
+
+## Disclosure and Security Update Policy
 
 **Lockheed Martin Internal**
 
@@ -75,25 +84,25 @@ Once admins are notified and are able to update their instances, the
 list will be notified in the interest of transparency and program communication.
 
 If your program has special needs that may require an alteration to this policy,
-please contact our software team using the above *dl-SSC, MBEE-Software*
+please contact our software team with the [dl-SSC, MBEE-Software](mailto:mbee-software.dl-ssc@exch.ems.lmco.com)
 distribution list so that we may work together to identify an approach to meet
 your program's needs.
 
 Security updates should include a reasonable level of detail about the issue,
 the severity and likelihood of impact, and the MBEE team's assessment of the
 risk introduced by the issue. Security updates will also notify which versions
-are impacted and how to either update MBEE to a fixed version or how to
-mitigate the issue.
+are impacted and how to mitigate the issue.
 
-For a list of MBEE security related updates, a web page will be created at
-[mbee.us.lmco.com](https://mbee.us.lmco.com) provide that information.
+For a list of MBEE security related updates as well as bug fixes and features,
+refer to `CHANGELOG.md`.
 
 **External OpenMBEE**
 
 > This only applies to non-LM users and the open source version of MBEE.
 
-Upon public release of MBEE a security update policy will be defined for the
-open source version of MBEE. This might be as simple as a security mailing list.
+If and when security-related updates are made to MBEE, refer to `CHANGELOG.md`
+for instructions on how to mitigate the issue.
+
 
 ## Known Gaps and Issues
 
@@ -102,11 +111,6 @@ The MBEE tests should not be run in production because the tests will create
 an arbitrary admin user in the database.
 
 It's important to ensure that all test users are deleted from the database.
-
-#### Asynchronous Build Script
-
-Some components in the build script are asynchronous and the build script will
-print out a message that build is complete before build has finished.
 
 #### UI Model Tree Refresh
 When updating the parent in the model tree causes issues with the re-rendering
@@ -385,3 +389,8 @@ authentication to expire.
 ## Security for Developers
 
 TODO - Discuss security-related developer considerations
+* Secure connect with mongo
+* how to use auth
+* using https
+* security configs
+* secutiy on plugins.

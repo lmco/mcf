@@ -47,3 +47,9 @@ Included documentation:
   - Developer Documentation
   - Test Framework Documentation
   - Docker Set Up Documentation
+
+## Reporting Vulnerabilities and Bugs
+
+If an issue is identified in MBEE, please email
+[mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com).
+Refer to **SECURITY.md** for more information as well as the PGP encryption key.
