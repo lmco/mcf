@@ -61,12 +61,54 @@ can quickly reproduce the issue.
 - Organization(s) impacted/affected
 
 #### Encryption key for `mbee-software.fc-space@lmco.com`
-If your disclosure is sensitive, you may choose to encrypt your report using the key below.
+If your disclosure is particularly sensitive, you may choose to encrypt your 
+report using the following GPG public key:
 
 ```
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 
+mQENBFzS4/QBCACtj/64Ok3X+XWmlzo/5bCz+fj2jLgQt8YgX4wxQTXbDmlXY7in
+FQoD0foTC2BkB4royg01leZlnd5HfYh5Nz0WxUzw9zPZoaitsrUxzWcQHT0323G1
+c2Oclb28RK/JVIF7w9EF6wlL4+ZfJ+ZJ7WtUEcseAPMvFlYOx9eOPa5guyvUk9eV
+tWxt/67ki0/kfIFN6LtS35X6K44qDAFURAramIFOrODmkNcWQNFkm39Eg3ygHnUS
+eqlTlPwvzG7bVI2hmFf6+IDoqQuMleN3r5fbWmHkZVg1q9gvBJ0+X6OVquEnHz8F
+ZE39fa9Vl+UREH/55yO4xApTQDhRuVozkzXZABEBAAG0L21iZWUtc29mdHdhcmUg
+PG1iZWUtc29mdHdhcmUuZmMtc3BhY2VAbG1jby5jb20+iQFUBBMBCAA+FiEEoVqm
+0EvHGIs7jWRzgW7AYu0iZGAFAlzS4/QCGwMFCQPCZwAFCwkIBwIGFQgJCgsCBBYC
+AwECHgECF4AACgkQgW7AYu0iZGD1mgf9FdZFoEgDUeyQPkbXAjV0AGbTXp9VUdPU
+zVacT9zIxyeFvQpA8uP8V3C+5+uay72UliI/AK1VK9EBMYklTTKuRLmOmZGx/DNQ
+jwPZBXaBuCaykjX6EfoqT6+ZZc/sqQRcPRchR2siUWD6et3ZD5I74++L3mXXFVqd
+Rog5LIDF6KbIRkVCNn9nSuKU5KX0vuLT9nu5B7LuH/YXHRJgM7HYzfpRVuvFUZp9
+P9FEQgD0cufFTC61kQcK0UAId0EK7ub9SElkwWIn+fU62/jHKPCHJdDjhFF5cn9v
+x3iJ0DmEpy098goksLQi991x73gep07hg8Jr/OeAPw5ci4MgFUfRLrkBDQRc0uP0
+AQgA4RaTUjGhdg2ZqtfLPHq7fokaRYmmpIYXVNGo62AJHutZnwx1FZF0WMefKcpj
+hQkAkJ86Mi0sKGR1J0B6xjZsYpO5Jlyx0b2cHfr68m8Hxv9tH+zcnJqVj+gsdIQ+
+yLVadxjTd9xxayhDrwE0jVz9nzMgoqyYSjmLyaWl7TzJfO3PuGkXgLkxTlXPR1qT
+fwNMIToePxH5FRPykXygj8NVnrZN3ATtyjFCR7qd9LmAunEFBtOpCxeLNqAsKuZq
+Cx90oJEIVZc5mCfo497fOdCEx3f0uIal7BeYcvLL1A89rw9nPZPX/5A/r7rxxfTZ
+Zcl9z6OK9Wo8D/f6NgjIBdXu1QARAQABiQE8BBgBCAAmFiEEoVqm0EvHGIs7jWRz
+gW7AYu0iZGAFAlzS4/QCGwwFCQPCZwAACgkQgW7AYu0iZGBsrAf/XWHrNgaLijAF
+7tODGpdd4fQSIsMjc7Ad61UrpG7SeNZY8QnPtWP5U/LrPMYjvzHj5r38eCQFOqy4
+aX8mgs1ttdmNfavkgOihyMlOuAxTvjlO7V47GP45J0ZRS1tR/+R4kI+qPGAILECI
+gYOiLM2cRu1qAafi7urfLh710Z37Pw35A78MVZfPmr6PmogjpF8v2zihRC1tvU7G
+qMJqy0jExIvfZVEoRB4+AuRh0eeYpgLPL4nCmV+R4gXq/oT7KESze+8DGMy6aGl1
+OuzehpapwPugAPonYf5UTloSflxRsQYqjAt71c4KK+joeYHK2cqM6wPw+GX5zQBj
+0tpmsfEDeA==
+=Zzxx
 -----END PGP PUBLIC KEY BLOCK-----
+```
+
+To encrypt a message, save this file as `mbee-software.key.pub` and import the 
+key into GPG by running:
+
+```
+gpg --import mbee-software.key.pub
+```
+
+Then encrypt your message by running:
+
+```
+gpg -e -r mbee-software file_to_encrypt.txt
 ```
 
 ## Disclosure and Security Update Policy
