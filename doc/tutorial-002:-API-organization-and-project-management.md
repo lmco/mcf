@@ -1,4 +1,4 @@
-## Tutorial: Organization and Project Management
+## Tutorial: API Organization and Project Management
 
 In this tutorial we will show how to manage organizations and projects. By 
 default every user is a member of the *default* organization and has permission
