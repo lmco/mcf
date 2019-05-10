@@ -227,6 +227,7 @@ class HomeApp extends Component {
                   <Button className='btn'
                           outline color='secondary'
                           onClick={this.handleCreateToggle}>
+                    {/* Verify width of window */}
                     {(this.state.width > 600)
                       ? 'Create'
                       : (<i className='fas fa-plus add-btn'/>)

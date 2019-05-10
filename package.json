@@ -62,8 +62,5 @@
     "preinstall": "test $NOPREINSTALL || node ./scripts/clean.js --all",
     "start": "node mbee start",
     "test": "node mbee test"
-  },
-  "engines": {
-    "node": ">=10.15.0"
   }
 }
