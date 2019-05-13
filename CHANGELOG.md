@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file.
 * Added the sidebar plugin capabilities for projects
 * Updated the profile page with the list of orgs or projects to be one the profile pages
 * Updated the physical structure of the UI components and sass files
-* Changed node version requirements to be 10.15.0 or higher.
+* Changed node version requirements to be 10.15.0 or higher
 
 ### Bug Fixes and Other Changes
 * Added lean option to controllers to significantly improve performance
