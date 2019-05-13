@@ -4,9 +4,9 @@ Now that we have an organization and a project, we can begin creating a model.
 To begin, let's briefly introduce some of MBEE's data model. 
 
 By default, a project has a single root element with an ID of `model`. Under the
-root `model` element is a package called `__mbee__`. This package contains to
+root `model` element is a package called `__mbee__`. `__mbee__` contains two
 elements, the `holding_bin` and `undefined` element. These elements were
-designed to be used to store elements with no parents yet and to be used to
+designed to be used to store elements with parents not yet defined and to be used to
 serve as temporary sources/targets for relationships. None of these elements are
 allowed to be deleted.
 
@@ -114,11 +114,11 @@ print(r.status_code)
 print(r.text)
 ```
 
-NOTE: The response from the DELETE endpoints are slightly different that the
+NOTE: The response from the DELETE endpoints are slightly different than the
 others. They return an array of ids (strings) which have been deleted, while the
 other endpoints return arrays of elements (objects).
 
-This tutorial introduced some of the basics of model model management showing 
+This tutorial introduced some of the basics of model management, showing
 how to create, retrieve, and delete model elements. The next tutorial will show
 how to create a plugin, and allow you to use the MBEE API and UI to perform
 mass rollup with some sample elements.

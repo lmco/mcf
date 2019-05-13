@@ -1,14 +1,14 @@
-## Tutorial: Organization and Project Management
+## Tutorial: API Organization and Project Management
 
-In this tutorial we will show how to manage organizations and projects. By 
+In this tutorial, we will show how to manage organizations and projects. By 
 default every user is a member of the *default* organization and has permission
 to add projects to that organization. In this tutorial we will show how to 
 create a new organization. To do so, you must be an admin user on MBEE. 
 Otherwise, you can follow the project section of this tutorial by adding a
 project to the *default* organization.
 
-Before creating an organization, we must start with similar boilerplate code to
-the previous tutorial where we log in to the MBEE server.
+Before creating an organization, we must start with similar boilerplate code from
+the previous tutorial, where we log in to the MBEE server.
 
 ```python
 import requests
@@ -22,8 +22,7 @@ r = requests.get(url)
 
 In the above code snippet, we set up our *server* variable and a *creds* 
 variable to store our basic auth credentials. We'll use basic auth only in this
-tutorial for simplicity. Then we test our connection to the server to make
-sure we have a connection.
+tutorial for simplicity. Then we confirm we are connected to the server.
 
 Now we can make a POST request to the server to create an organization.
 
@@ -80,7 +79,7 @@ The above code creates our project by calling the
 same org ID as the one we created previously and we provide a project ID of
 `demo-project`. We also provide a JSON body giving our project a name of 
 `Demo Project`. Finally, we make a GET request to the server requesting the 
-project we just created to verify it got created.
+project we just created.
 
 > NOTE: Project IDs follow the same rules as organization IDs;
 > An ID can only contain lowercase letters, numbers, dashes (`-`), and 
@@ -107,7 +106,6 @@ url = '{}/api/orgs/demo'.format(server)
 r = requests.post(url, auth=creds, json={'name': 'Demo Org'})
 
 # Get the org
-url = '{}/api/orgs/demo'.format(server)
 r = requests.get(url, auth=creds)
 print(json.dumps(r.json(), indent=4))
 
@@ -116,11 +114,10 @@ url = '{}/api/orgs/demo/projects/demo-project'.format(server)
 r = requests.post(url, auth=creds, json={'name': 'Demo Project'})
 
 # Get the project
-url = '{}/api/orgs/demo/projects/demo-project'.format(server)
 r = requests.get(url, auth=creds)
 print(r.status_code)
 print(json.dumps(r.json(), indent=4))
 ```
 
-Pretty simple, no? Take a look at the next tutorial, "Tutorial 003: Model 
+Pretty simple, right? Take a look at the next tutorial, "Tutorial 003: Model 
 Management", to start working with elements, the core piece of MBEE.

@@ -2,27 +2,42 @@
 
 ## Overview
 MBEE is designed to be deployed in a number of different architectural 
-configurations. At its simplest it can be deployed as a single instance of
-an application or it can be run in more complex configurations such as
-clustered behind a load balancer or separated into its components. This document
-will primarily focus on the first case: a single running instance of the MBEE
-Core Framework.
+configurations. At its simplest, it can be deployed as a single instance of
+an application or it can be run in more complex configurations, such as
+clustered behind a load balancer. This document will primarily focus on the 
+first case: a single running instance of the MBEE Core Framework.
 
 ### System Requirements
 MBEE is designed to be cross-platform, but is primarily tested on Linux and 
-other Posix systems. Windows support is intended but not yet fully supported.
+other Posix systems. Windows support is intended, but not yet fully supported.
 
 > Windows Users: MBEE should be able to run on Windows, but plugins may not be 
 > fully supported. It is intended that full Windows support will be available by
 > version 0.10.0 of the MBEE Core Framework.
 
-The server should have at least 1 CPU and 0.5 GB RAM. Disk space required is 
-dependent on the total model storage needed.
+The server should have at least 1 CPU and 0.5 GB RAM. The amount of disk space
+required is dependent on the total model storage needed.
+
+## Obtaining the MBEE Source Code
+<!-- START LMPI -->
+The MBEE source code can be obtained from [GitLab](https://gitlab.us.lmco.com/mbx/mbee/mcf)
+or [eShare](https://eshare.engineering.lmco.com/redmine/projects/mbe).
+
+Clone the source code using Git by running:
+
+```json
+git clone <MBEE_REPO_URL>
+```
+
+Where `<MBEE_REPO_URL>` should be replaced with the repository URL you are 
+cloning from. Then enter the newly created directory containing the source code.
+
+<!-- END LMPI -->
 
 ## Building MBEE
 Before running MBEE, the software must be built. The build process compiles 
-Sass into CSS, transpiles React JSX into vanilla Javascript, prepares other 
-static files, builds documentation, and more.
+Sass into CSS, transpiles React JSX into vanilla Javascript, builds 
+documentation, prepares other static files, and more.
 
 The build process will output these runtime files to the `build` directory.
 
@@ -46,7 +61,7 @@ build MBEE.
 ### Build Process Breakdown
 The installation process (e.g. `yarn install`) installs the necessary 
 dependencies to build and run MBEE. The installation includes a 
-*pre-install* and *post-install* script. The pre-install scripts cleans and 
+*pre-install* and *post-install* script. The pre-install script cleans and 
 removes an existing build. The post-install script runs the MBEE build.
 
 Either of these scripts can be turned off by setting the `NOPREINSTALL` or 
@@ -58,10 +73,8 @@ export NOPOSTINSTALL=1    # Turns off the post-install script
 yarn install
 ```
 
-The build process prepares MBEE for runtime by processing Sass into CSS, 
-transpiling React JSX into vanilla Javascript and more. The build can be run 
-separately from the dependency installation, but the dependencies must be 
-installed first.
+The build can be run separately from the dependency installation, but the 
+dependencies must be installed first.
 
 To build MBEE run the following command:
 
@@ -84,7 +97,7 @@ the build. This is the default behavior when no options are provided.
 
 ### Database Schema Migrations
 *Appendix B* of the Flight Manual covers database migration in more detail, but
-it will be discussed briefly here.
+it will be discussed here briefly.
 
 Database migration refers to altering the database contents and schema with new 
 versions of MBEE. To facilitate this, MBEE contains a collection of migration
@@ -107,10 +120,9 @@ The migrations command will typically prompt the user to confirm the action.
 To automatically answer *yes* to this prompt (i.e. for scripting the migration
 command), the `-y` option can be used. 
 
-```
+```shell
 node mbee migrate -y
 ```
-
 
 ## Running MBEE
 Before running MBEE, it must be built. See the *Building MBEE* section above
@@ -119,7 +131,7 @@ to build MBEE.
 ### Running in Development
 To run MBEE, run the following command:
 
-```
+```shell
 node mbee start
 ```
 
@@ -130,6 +142,8 @@ memory limit use the `--max-old-space-size` option. For example:
 ```shell
 node --max-old-space-size=8192 mbee start
 ```
+
+> NOTE: The value above is in megabytes (MB).
 
 ### Using PM2
 Run `npm install -g pm2` or `yarn global add pm2` to install the `pm2` 
@@ -154,8 +168,8 @@ Docker image using the Dockerfile specified in the MBEE configuration file.
 The Dockerfile, image name, container name, and other options can be configured
 in the MBEE config file.
 
-After the image is built the docker container can be run using the `--run` 
-subcommand. The container will be detached, but have an interactive processes. 
+After the image is built, the docker container can be run using the `--run` 
+subcommand. The container will be detached, but have interactive processes. 
 The default runtime configuration will restart the Docker container if the
 server crashes. Below is an example of how a docker container can be run:
 
@@ -163,7 +177,7 @@ server crashes. Below is an example of how a docker container can be run:
 node mbee docker --run
 ```
 
-To get the logs of the docker container, you can use `--get-logs`. This will
+To get the logs from the docker container, you can use `--get-logs`. This will
 print out the container logs, which can be useful if an error has occurred. 
 
 If the docker container needs to be rebuilt and the previous build needs to be
@@ -184,7 +198,7 @@ defining the server ports, Docker configuration information, enabling and
 disabling application components, swapping out authentication schemes, and more. 
 
 For a detailed explanation of the fields supported by the config file, see the
-detailed comments provided [example.cfg](config/example.cfg).
+detailed comments provided in the [example.cfg](config/example.cfg).
 
 Some of the noteworthy options are
 
@@ -208,7 +222,7 @@ Some of the noteworthy options are
 - **db**: Used to configure the database connection.
 - **docker**: Defines the Docker configuration. This is used when running the 
 `node mbee docker` command.
-- **log**: Defines log level and locations.
+- **log**: Defines the log level and log file names.
 - **server**: This is the bulk of the application configuration.
   - **server.defaultAdminUsername**: The default admin user created on first
   server startup.
@@ -217,29 +231,30 @@ Some of the noteworthy options are
   will be members of.
   - **defaultOrganizationName**: The friendly name of the default organization.
   - **server.http**
-    - **server.http.enabled**: Enable or disable HTTP.
+    - **server.http.enabled**: Used to enable/disable HTTP.
     - **server.http.port**: Defines the HTTP port.
     - **server.http.redirectToHTTPS**: If `true`, redirects all HTTP traffic to
     HTTPS. HTTPS must be enabled.
   - **server.https**: 
-    - **enabled**: Used to enable/disable HTTPS.
-    - **port**: Defines the HTTPS port.
-    - **sslCert**: The path to the server SSL certificate 
+    - **server.https.enabled**: Used to enable/disable HTTPS.
+    - **server.https.port**: Defines the HTTPS port.
+    - **server.https.sslCert**: The path to the server SSL certificate 
     (e.g. "path/to/your/ssl/cert.crt").
-    - **sslKey**: The path to the server SSL key 
+    - **server.https.sslKey**: The path to the server SSL key 
     (e.g. "path/to/your/ssl/key.key").
   - **server.requestTimeout**: The time at which server requests will time out
   in seconds.
   - **server.requestSize**: The maximum size request. 
   - **server.api**: {
-    - **server.api.enabled**: true,
+    - **server.api.enabled**:Can be used to enable/disable the API.
     - **server.api.userAPI**: Can be used to disable certain user API endpoints
     such as create and update. This may be useful when using a separate 
     authentication provider such as LDAP.
   - **server.plugins**: {
     - **server.plugins.enabled**: Can be used to enable/disable plugins.
-    - **server.plugins.plugins**: This is when plugins are defined. This section
-    tells MBEE which plugins should be installed and where to obtain them.[
+    - **server.plugins.plugins**: This is where plugins are defined. This
+    section tells MBEE which plugins should be installed and where to obtain 
+    them.
   - **server.ui**
     - **server.ui.enabled**: Can be used to enable/disable the UI. This may be
     useful if the MBEE API is desired without the front-end GUI.
@@ -252,12 +267,12 @@ Some of the noteworthy options are
    randomly generated on server startup.
 - **test**: Defines test configuration. Used when running `node mbee test`.
 - **validators**: Validators can be used to overwrite certain default data model
-validation behaviors. Any validator defines in the `app/lib/validators.js` file 
+validation behaviors. Any validator defined in the `app/lib/validators.js` file 
 can be overwritten here.
 
 ## Modular Authentication
 MBEE supports modular authentication strategies. These strategies are defined
-in the authentication modules in `/app/auth`. Which authentication strategy is
+in the authentication module in `/app/auth`. Which authentication strategy is
 used is defined in the config file. The `auth` section contains a field called
 `strategy`. This `auth.strategy` section should be set to the module you wish
 to use.
@@ -288,9 +303,9 @@ authenticate users for their respective input types. Both objects are passed the
 request object, `req`, and response object, `res`. `handleBasicAuth()` is
 passed the username and password which is obtained from either the authorization
 header or form input depending on which is provided (with the former taking
-precedence). `handleTokenAuth()` is passed a token which is retrieved either from
-the authorization header or the `req.session.token` field (with the former
-taking precedence). Both of these functions must return promise that resolves
+precedence). `handleTokenAuth()` is passed a token which is retrieved either
+from the authorization header or the `req.session.token` field (with the former
+taking precedence). Both of these functions must return a promise that resolves
 the user object on success or rejects with an error if authentication fails.
 
 The `doLogin()` function defines what actions should be done to actually log the
@@ -300,8 +315,8 @@ routes:
     `next()` when done. Control will then be passed to the API controller which
     will return the token in the form `{ "token": "yourReqSessionToken" }`
     -`/login`: This function should perform login actions such as setting the
-    `req.session.token` value then call `next()` when done which will handle
-    appropriate redirection of the user.
+    `req.session.token` value and then call `next()` when done, which will
+    handle appropriate redirection of the user.
 
 The `validatePassword()` function is meant to validate the password of each user
 being created. This function should accept the password (and optionally the
@@ -309,5 +324,5 @@ provider), verify the password meets some requirements, and return a boolean
 denoting whether that password is valid or not. By default, the requirements
 provided in the local-strategy expect each password to be at least 8 characters
 in length, and have at least one number, uppercase letter, lowercase letter and
-at least one special character. We do not recommend lessening these requirements
-for security reasons.
+at least one special character. For security reasons, it is recommended that
+you do not lessen these requirements.

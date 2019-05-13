@@ -32,7 +32,7 @@ the program should print out `200`, indicating that a request was made to the
 API endpoint `/api/test` and the server responded with an HTTP 200 status 
 (e.g. OK).
 
-If the program does not print a 200 and instead throws an error, this is likely
+If the program does not print a 200 status code and instead throws an error, this is likely
 because your new integration cannot talk to the server. Confirm that the server
 is up and running and you are able to talk to it from your machine.
 
@@ -51,13 +51,13 @@ token = res['token']                      # store the auth token for later
 ```
 
 If all goes well (i.e. your credentials are valid), another 200 response should
-be printed to the console along with the response body which includes and 
+be printed to the console along with the response body, which includes an
 authentication token. This token can be used in subsequent requests rather than
 passing specific user credentials to each request.
 
 > NOTE: Both basic authentication and token authentication are valid for future 
-> requests, but using tokens has a few benefits. First, tokens expire and are 
-> therefore safer to pass around because a compromised token can be revoked and
+> requests, but using tokens has a few benefits. First, tokens expire and are, 
+> therefore, safer to pass around because a compromised token can be revoked and
 > will only be valid for a limited amount of time. The other reason to use
 > tokens is that they can perform better than basic auth in some configurations.
 > For example, if an external authentication service is used such as Active 
@@ -65,7 +65,7 @@ passing specific user credentials to each request.
 > to be made to validate user credentials. Tokens can be validated without 
 > taking the time for that additional request.
 
-Now we that we've authenticated with MBEE, we can make a request to the server
+Now that we've authenticated with MBEE, we can make a request to the server
 to retrieve the MBEE version information. In this case, we will use our token
 to authenticate this request.
 
@@ -112,9 +112,9 @@ print(res['version'])
 ```
 
 The above program removes most of the print statements that were used throughout
-this walk-through and includes a single print statement on the last line to
+this walk-through, and includes a single print statement on the last line to
 print the MBEE version.
 
 That's it, you've written your first integration with MBEE! The following 
-tutorial will walk through creating and organization and project.
+tutorial will walk through creating an organization and project.
 
