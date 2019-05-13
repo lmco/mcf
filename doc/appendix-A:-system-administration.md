@@ -18,6 +18,22 @@ other Posix systems. Windows support is intended, but not yet fully supported.
 The server should have at least 1 CPU and 0.5 GB RAM. The amount of disk space
 required is dependent on the total model storage needed.
 
+## Obtaining the MBEE Source Code
+<!-- START LMPI -->
+The MBEE source code can be obtained from [GitLab](https://gitlab.us.lmco.com/mbx/mbee/mcf)
+or [eShare](https://eshare.engineering.lmco.com/redmine/projects/mbe).
+
+Clone the source code using Git by running:
+
+```json
+git clone <MBEE_REPO_URL>
+```
+
+Where `<MBEE_REPO_URL>` should be replaced with the repository URL you are 
+cloning from. Then enter the newly created directory containing the source code.
+
+<!-- END LMPI -->
+
 ## Building MBEE
 Before running MBEE, the software must be built. The build process compiles 
 Sass into CSS, transpiles React JSX into vanilla Javascript, builds 

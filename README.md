@@ -17,7 +17,8 @@ distributed services.
 
 **Node.js**
 MBEE's only dependency to get started is Node.js and NPM. NPM comes with
-Node.js; just install packages with NPM to get started.
+Node.js; just install packages with NPM to get started. To start up MBEE,
+node version 10.15.0 or greater is required.
 See [nodejs.org](https://nodejs.org/en/) for information on Node.js.
 
 **MongoDB**
