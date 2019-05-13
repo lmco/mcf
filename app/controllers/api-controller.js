@@ -28,9 +28,10 @@ const ElementController = M.require('controllers.element-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
-const Element = M.require('models.element');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
+const publicData = M.require('lib.get-public-data');
+const sani = M.require('lib.sanitization');
 
 // Expose `API Controller functions`
 module.exports = {
@@ -193,7 +194,6 @@ function version(req, res) {
  * GET /api/orgs
  *
  * @description Gets an array of all organizations that a user has access to.
- * Returns a 404 error in no organizations are found.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -252,10 +252,13 @@ function getOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Get all organizations the requesting user has access to
   // NOTE: find() sanitizes arrOrgID.
@@ -268,7 +271,9 @@ function getOrgs(req, res) {
     }
 
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData());
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -321,17 +326,22 @@ function postOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create organizations in request body
   // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData());
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -348,6 +358,7 @@ function postOrgs(req, res) {
  * PUT /api/orgs
  *
  * @description Creates or replaces multiple orgs from an array of objects.
+ * NOTE: this route is reserved for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -384,17 +395,22 @@ function putOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create or replace organizations in request body
   // NOTE: createOrReplace() sanitizes req.body
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData());
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -447,17 +463,22 @@ function patchOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Update the specified orgs
   // NOTE: update() sanitizes req.body
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData());
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
@@ -515,7 +536,7 @@ function deleteOrgs(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -575,10 +596,13 @@ function getOrg(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Find the org from it's id
   // NOTE: find() sanitizes req.params.orgid
@@ -593,10 +617,12 @@ function getOrg(req, res) {
     }
 
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
 
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
@@ -658,20 +684,25 @@ function postOrg(req, res) {
   req.body.id = req.params.orgid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create the organization with provided parameters
   // NOTE: create() sanitizes req.body
   OrgController.create(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
 
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -684,8 +715,8 @@ function postOrg(req, res) {
 /**
  * PUT /api/orgs/:orgid
  *
- * @description Takes an organization in the request body and an
- * organization ID in the URI and creates or replaces the organization.
+ * @description Creates or replaces an organization.
+ * NOTE: this route is reserved for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -733,20 +764,25 @@ function putOrg(req, res) {
   req.body.id = req.params.orgid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create or replace the organization with provided parameters
   // NOTE: createOrReplace() sanitizes req.body
   OrgController.createOrReplace(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
 
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -759,8 +795,7 @@ function putOrg(req, res) {
 /**
  * PATCH /api/orgs/:orgid
  *
- * @description Updates the specified org. Takes an id in the URI and update
- * object in the body, and update the org.
+ * @description Updates the specified org.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -808,20 +843,25 @@ function patchOrg(req, res) {
   req.body.id = req.params.orgid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Update the specified organization
   // NOTE: update() sanitizes req.body
   OrgController.update(req.user, req.body, options)
   .then((orgs) => {
     // Get the public data of each org
-    const orgsPublicData = orgs.map(o => o.getPublicData())[0];
+    const orgsPublicData = sani.html(
+      orgs.map(o => publicData.getPublicData(o, 'org', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
 
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
@@ -870,7 +910,7 @@ function deleteOrg(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -936,10 +976,13 @@ function getAllProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Get all projects the requesting user has access to
   ProjectController.find(req.user, null, undefined, options)
@@ -950,20 +993,9 @@ function getAllProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => p.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
@@ -1037,10 +1069,13 @@ function getProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Get all projects the requesting user has access to in a specified org
   // NOTE: find() sanitizes req.params.orgid and ids
@@ -1052,20 +1087,9 @@ function getProjects(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => p.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
@@ -1118,29 +1142,21 @@ function postProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create the specified projects
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
@@ -1157,6 +1173,7 @@ function postProjects(req, res) {
  * PUT /api/org/:orgid/projects
  *
  * @description This function creates/replaces multiple projects.
+ * NOTE: this route is reserved for system-wide admins ONLY.
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
@@ -1193,29 +1210,21 @@ function putProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create or replace the specified projects
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
@@ -1268,29 +1277,21 @@ function patchProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Update the specified projects
   // NOTE: update() sanitizes req.params.orgid req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
@@ -1306,7 +1307,8 @@ function patchProjects(req, res) {
 /**
  * DELETE /api/org/:orgid/projects
  *
- * @description This function deletes multiple projects.
+ * @description Deletes multiple projects from an array of project IDs or
+ * array of project objects.
  * NOTE: This function is for system-wide admins ONLY.
  *
  * @param {Object} req - request express object
@@ -1347,7 +1349,7 @@ function deleteProjects(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1376,7 +1378,7 @@ function deleteProjects(req, res) {
  * @param {Object} req - request express object
  * @param {Object} res - response express object
  *
- * @return {Object} Response object with found project
+ * @return {Object} Response object with project's public data
  */
 function getProject(req, res) {
   // Define options
@@ -1409,10 +1411,13 @@ function getProject(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Find the project
   // NOTE: find() sanitizes req.params.projectid and req.params.orgid
@@ -1426,23 +1431,12 @@ function getProject(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicProjectData = projects.map(p => p.getPublicData())[0];
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
@@ -1504,32 +1498,24 @@ function postProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create project with provided parameters
   // NOTE: create() sanitizes req.params.orgid and req.body
   ProjectController.create(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData())[0];
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
 
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
@@ -1542,8 +1528,8 @@ function postProject(req, res) {
 /**
  * PUT /api/orgs/:orgid/projects/:projectid
  *
- * @description Takes an organization ID and project ID in the URI and project
- * data in the request body, and creates/replaces a project.
+ * @description  Creates or replaces a project.
+ * NOTE: this route is reserved for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -1591,32 +1577,24 @@ function putProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create or replace project with provided parameters
   // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
   ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData())[0];
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
 
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
@@ -1677,32 +1655,24 @@ function patchProject(req, res) {
   req.body.id = req.params.projectid;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Update the specified project
   // NOTE: update() sanitizes req.params.orgid and req.body
   ProjectController.update(req.user, req.params.orgid, req.body, options)
   .then((projects) => {
-    const publicProjectData = projects.map(p => p.getPublicData())[0];
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each project
-        if (!options.fields.includes(f)) {
-          publicProjectData.forEach((p => delete p[f]));
-        }
-      });
-    }
+    const publicProjectData = sani.html(
+      projects.map(p => publicData.getPublicData(p, 'project', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
 
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
@@ -1751,7 +1721,7 @@ function deleteProject(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -1835,16 +1805,21 @@ function getUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Get Users
   // NOTE: find() sanitizes req.usernames
   UserController.find(req.user, usernames, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData());
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -1898,16 +1873,21 @@ function postUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create users
   // NOTE: create() sanitizes req.body
   UserController.create(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData());
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -1961,16 +1941,21 @@ function putUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create or replace users
   // NOTE: createOrReplace() sanitizes req.body
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData());
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2024,16 +2009,21 @@ function patchUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Update the specified users
   // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData());
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2049,7 +2039,8 @@ function patchUsers(req, res) {
 /**
  * DELETE /api/users
  *
- * @description Deletes multiple users.
+ * @description Deletes multiple users from an array of user IDs or array of user
+ * objects.
  * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
@@ -2085,7 +2076,7 @@ function deleteUsers(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2146,10 +2137,13 @@ function getUser(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Find the member from it's username
   // NOTE: find() sanitizes req.params.username
@@ -2163,10 +2157,12 @@ function getUser(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const publicUserData = users.map(u => u.getPublicData())[0];
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
 
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
@@ -2228,19 +2224,24 @@ function postUser(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Create user with provided parameters
   // NOTE: create() sanitizes req.body
   UserController.create(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData())[0];
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
 
     // Return 200: OK and created user
     res.header('Content-Type', 'application/json');
@@ -2302,19 +2303,24 @@ function putUser(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Creates or replaces a user with provided parameters
   // NOTE: createOrReplace() sanitizes req.body
   UserController.createOrReplace(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData())[0];
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
 
     // Return 200: OK and created/replaced user
     res.header('Content-Type', 'application/json');
@@ -2376,19 +2382,24 @@ function patchUser(req, res) {
   req.body.username = req.params.username;
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Update the specified user
   // NOTE: update() sanitizes req.body
   UserController.update(req.user, req.body, options)
   .then((users) => {
-    const publicUserData = users.map(u => u.getPublicData())[0];
+    const publicUserData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
 
     // Return 200: OK and updated user
     res.header('Content-Type', 'application/json');
@@ -2436,7 +2447,7 @@ function deleteUser(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2496,12 +2507,14 @@ function whoami(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
-  const publicUserData = req.user.getPublicData();
+  const publicUserData = sani.html(
+    publicData.getPublicData(req.user, 'user', options)
+  );
 
   // Format JSON if minify option is not true
   const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2573,7 +2586,7 @@ function patchPassword(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -2582,7 +2595,9 @@ function patchPassword(req, res) {
   UserController.updatePassword(req.user, req.body.oldPassword,
     req.body.password, req.body.confirmPassword)
   .then((user) => {
-    const publicUserData = user.getPublicData();
+    const publicUserData = sani.html(
+      publicData.getPublicData(user, 'user', options)
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? publicUserData : formatJSON(publicUserData);
@@ -2604,7 +2619,7 @@ function patchPassword(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with elements
+ * @return {Object} Response object with elements' public data
  */
 function getElements(req, res) {
   // Define options and ids
@@ -2624,8 +2639,26 @@ function getElements(req, res) {
     skip: 'number',
     ids: 'array',
     format: 'string',
-    minified: 'boolean'
+    minified: 'boolean',
+    parent: 'string',
+    source: 'string',
+    target: 'string',
+    type: 'string',
+    name: 'string',
+    createdBy: 'string',
+    lastModifiedBy: 'string',
+    archivedBy: 'string'
   };
+
+  // Loop through req.query
+  if (req.query) {
+    Object.keys(req.query).forEach((k) => {
+      // If the key starts with custom., add it to the validOptions object
+      if (k.startsWith('custom.')) {
+        validOptions[k] = 'string';
+      }
+    });
+  }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -2670,36 +2703,23 @@ function getElements(req, res) {
     delete options.format;
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Find elements
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    branchid, elemIDs, options)
+    req.params.branchid, elemIDs, options)
   .then((elements) => {
-    const elementsPublicData = (elements.every(e => e instanceof Element))
-      ? elements.map(e => e.getPublicData())
-      : elements.map(e => Element.getPublicData(e));
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // Verify elements public data array is not empty
     if (elementsPublicData.length === 0) {
@@ -2788,34 +2808,23 @@ function postElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create the specified elements
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
+    req.params.branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => e.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
@@ -2868,34 +2877,23 @@ function putElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace the specified elements
   // NOTE: createOrReplace() sanitizes input params
   ElementController.createOrReplace(req.user, req.params.orgid,
-    req.params.projectid, branchid, req.body, options)
+    req.params.projectid, req.params.branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => e.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
@@ -2947,34 +2945,23 @@ function patchElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Update the specified elements
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
+    req.params.branchid, req.body, options)
   .then((elements) => {
-    const elementsPublicData = elements.map(e => e.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
@@ -2990,8 +2977,8 @@ function patchElements(req, res) {
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
- * @description Deletes multiple elements.
- * NOTE: This function is system-admin ONLY.
+ * @description Deletes multiple elements from an array of element IDs or array
+ * of element objects.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -3014,9 +3001,6 @@ function deleteElements(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -3028,7 +3012,7 @@ function deleteElements(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3036,7 +3020,7 @@ function deleteElements(req, res) {
   // Remove the specified elements
   // NOTE: remove() sanitizes input params
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
+    req.params.branchid, req.body, options)
   .then((elements) => {
     const parsedIDs = elements.map(e => utils.parseID(e).pop());
 
@@ -3075,8 +3059,26 @@ function searchElements(req, res) {
     limit: 'number',
     skip: 'number',
     q: 'string',
-    minified: 'boolean'
+    minified: 'boolean',
+    parent: 'string',
+    source: 'string',
+    target: 'string',
+    type: 'string',
+    name: 'string',
+    createdBy: 'string',
+    lastModifiedBy: 'string',
+    archivedBy: 'string'
   };
+
+  // Loop through req.query
+  if (req.query) {
+    Object.keys(req.query).forEach((k) => {
+      // If the key starts with custom., add it to the validOptions object
+      if (k.startsWith('custom.')) {
+        validOptions[k] = 'string';
+      }
+    });
+  }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
@@ -3101,18 +3103,18 @@ function searchElements(req, res) {
   }
 
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
+  // Set the lean option to true for better performance
+  options.lean = true;
 
   // Find elements
   // NOTE: search() sanitizes input params
   ElementController.search(req.user, req.params.orgid, req.params.projectid,
-    branchid, query, options)
+    req.params.branchid, query, options)
   .then((elements) => {
     // Verify elements public data array is not empty
     if (elements.length === 0) {
@@ -3120,7 +3122,9 @@ function searchElements(req, res) {
       return res.status(error.status).send(error);
     }
 
-    const elementsPublicData = elements.map(e => e.getPublicData());
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // Format JSON if minify option is not true
     const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
@@ -3141,7 +3145,7 @@ function searchElements(req, res) {
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with element
+ * @return {Object} Response object with element's public data
  */
 function getElement(req, res) {
   // Define options
@@ -3174,19 +3178,19 @@ function getElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Find the element
   // NOTE: find() sanitizes input params
   ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.params.elementid, options)
+    req.params.branchid, req.params.elementid, options)
   .then((elements) => {
     // If no element found, return 404 error
     if (elements.length === 0) {
@@ -3196,20 +3200,9 @@ function getElement(req, res) {
       return res.status(error.status).send(error);
     }
 
-    let elementsPublicData = elements.map(e => e.getPublicData());
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
+    let elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // If the subtree option was not provided, return only the first element
     if (!options.subtree) {
@@ -3277,37 +3270,26 @@ function postElement(req, res) {
   // Set the element ID in the body equal req.params.elementid
   req.body.id = req.params.elementid;
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create element with provided parameters
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
-  .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData())[0];
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
+    req.params.branchid, req.body, options)
+  .then((elements) => {
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
@@ -3320,7 +3302,8 @@ function postElement(req, res) {
 /**
  * PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
- * @description Creates or replaces an element.
+ * @description Creates or replaces an element. NOTE: this route is reserved
+ * for system-wide admins ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -3367,37 +3350,26 @@ function putElement(req, res) {
   // Set the element ID in the body equal req.params.elementid
   req.body.id = req.params.elementid;
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Create or replace element with provided parameters
   // NOTE: createOrReplace() sanitizes input params
   ElementController.createOrReplace(req.user, req.params.orgid,
-    req.params.projectid, branchid, req.body, options)
-  .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData())[0];
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
+    req.params.projectid, req.params.branchid, req.body, options)
+  .then((elements) => {
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the created/replaced element
     res.header('Content-Type', 'application/json');
@@ -3457,37 +3429,26 @@ function patchElement(req, res) {
   // Set the element ID in the body equal req.params.elementid
   req.body.id = req.params.elementid;
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   // Updates the specified element
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
-    branchid, req.body, options)
-  .then((element) => {
-    const elementsPublicData = element.map(e => e.getPublicData())[0];
-
-    // If the fields options was specified
-    if (options.fields) {
-      // Array of fields created in getPublicData()
-      const specialFields = ['org', 'project', 'parent', 'contains'];
-      // For each special field
-      specialFields.forEach((f) => {
-        // If the field is not specified in options, remove it from each element
-        if (!options.fields.includes(f)) {
-          elementsPublicData.forEach((e => delete e[f]));
-        }
-      });
-    }
+    req.params.branchid, req.body, options)
+  .then((elements) => {
+    const elementsPublicData = sani.html(
+      elements.map(e => publicData.getPublicData(e, 'element', options))
+    );
 
     // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
 
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
@@ -3501,7 +3462,6 @@ function patchElement(req, res) {
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  *
  * @description Deletes an element.
- * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -3535,11 +3495,8 @@ function deleteElement(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Default branch to master
-  const branchid = 'master'; // TODO: fix future = req.params.branchid;
-
   // Check options for minified
-  if (options.minified) {
+  if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
@@ -3547,7 +3504,7 @@ function deleteElement(req, res) {
   // Remove the specified element
   // NOTE: remove() sanitizes input params
   ElementController.remove(req.user, req.params.orgid, req.params.projectid,
-    branchid, [req.params.elementid], options)
+    req.params.branchid, [req.params.elementid], options)
   .then((element) => {
     const parsedID = utils.parseID(element[0]).pop();
 

@@ -32,6 +32,7 @@ let adminUser = null;
 let org = null;
 let proj = null;
 let projID = null;
+const branchID = 'master';
 
 /* --------------------( Main )-------------------- */
 /**
@@ -125,6 +126,7 @@ function postElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: elemData.id
   };
   const method = 'POST';
@@ -144,7 +146,7 @@ function postElement(done) {
     // Verify element created properly
     chai.expect(createdElement.id).to.equal(elemData.id);
     chai.expect(createdElement.name).to.equal(elemData.name);
-    chai.expect(createdElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(createdElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(createdElement.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -169,10 +171,11 @@ function postElement(done) {
     chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdElement.createdOn).to.not.equal(null);
     chai.expect(createdElement.updatedOn).to.not.equal(null);
+    chai.expect(createdElement.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(createdElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -192,7 +195,7 @@ function postElements(done) {
     testData.elements[4],
     testData.elements[5]
   ];
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'POST';
   const req = testUtils.createRequest(adminUser, params, elemData, method);
 
@@ -218,7 +221,7 @@ function postElements(done) {
       // Verify elements created properly
       chai.expect(createdElement.id).to.equal(elemObj.id);
       chai.expect(createdElement.name).to.equal(elemObj.name);
-      chai.expect(createdElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(createdElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(createdElement.project).to.equal(projID);
 
       // If documentation was provided, verify it
@@ -243,10 +246,11 @@ function postElements(done) {
       chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(createdElement.createdOn).to.not.equal(null);
       chai.expect(createdElement.updatedOn).to.not.equal(null);
+      chai.expect(createdElement.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(createdElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(createdElement).to.not.have.any.keys('archivedOn',
+        'archivedBy', '__v', '_id');
     });
     done();
   };
@@ -265,6 +269,7 @@ function putElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: elemData.id
   };
   const method = 'PUT';
@@ -284,7 +289,7 @@ function putElement(done) {
     // Verify element created/replaced properly
     chai.expect(replacedElem.id).to.equal(elemData.id);
     chai.expect(replacedElem.name).to.equal(elemData.name);
-    chai.expect(replacedElem.custom).to.deep.equal(elemData.custom);
+    chai.expect(replacedElem.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(replacedElem.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -309,10 +314,11 @@ function putElement(done) {
     chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(replacedElem.createdOn).to.not.equal(null);
     chai.expect(replacedElem.updatedOn).to.not.equal(null);
+    chai.expect(replacedElem.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(replacedElem).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -333,7 +339,7 @@ function putElements(done) {
     testData.elements[5],
     testData.elements[6]
   ];
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'PUT';
   const req = testUtils.createRequest(adminUser, params, elemData, method);
 
@@ -359,7 +365,7 @@ function putElements(done) {
       // Verify elements created/replaced properly
       chai.expect(replacedElem.id).to.equal(elemObj.id);
       chai.expect(replacedElem.name).to.equal(elemObj.name);
-      chai.expect(replacedElem.custom).to.deep.equal(elemObj.custom);
+      chai.expect(replacedElem.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(replacedElem.project).to.equal(projID);
 
       // If documentation was provided, verify it
@@ -384,10 +390,11 @@ function putElements(done) {
       chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(replacedElem.createdOn).to.not.equal(null);
       chai.expect(replacedElem.updatedOn).to.not.equal(null);
+      chai.expect(replacedElem.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(replacedElem).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -406,6 +413,7 @@ function getElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: elemData.id
   };
   const method = 'GET';
@@ -425,7 +433,7 @@ function getElement(done) {
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
     chai.expect(foundElement.name).to.equal(elemData.name);
-    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(foundElement.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -450,10 +458,11 @@ function getElement(done) {
     chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
+    chai.expect(foundElement.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -475,7 +484,7 @@ function getElements(done) {
   ];
 
   // Create request object
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, elemData, method);
 
@@ -502,7 +511,7 @@ function getElements(done) {
       // Verify elements created properly
       chai.expect(foundElement.id).to.equal(elemObj.id);
       chai.expect(foundElement.name).to.equal(elemObj.name);
-      chai.expect(foundElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(foundElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(foundElement.project).to.equal(projID);
 
       // If documentation was provided, verify it
@@ -527,10 +536,11 @@ function getElements(done) {
       chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
+      chai.expect(foundElement.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -553,7 +563,7 @@ function getAllElements(done) {
   ];
 
   // Create request object
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, {}, method);
 
@@ -605,10 +615,11 @@ function getAllElements(done) {
       chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
+      chai.expect(foundElement.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -627,6 +638,7 @@ function searchElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: elemData.id
   };
   const query = { q: `"${elemData.name}"` };
@@ -651,7 +663,7 @@ function searchElement(done) {
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
     chai.expect(foundElement.name).to.equal(elemData.name);
-    chai.expect(foundElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(foundElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(foundElement.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -676,10 +688,11 @@ function searchElement(done) {
     chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
+    chai.expect(foundElement.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(foundElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -701,6 +714,7 @@ function patchElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: testData.elements[0].id
   };
   const method = 'PATCH';
@@ -720,7 +734,7 @@ function patchElement(done) {
     // Verify element updated properly
     chai.expect(updatedElement.id).to.equal(elemData.id);
     chai.expect(updatedElement.name).to.equal(updateObj.name);
-    chai.expect(updatedElement.custom).to.deep.equal(elemData.custom);
+    chai.expect(updatedElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(updatedElement.project).to.equal(projID);
 
     // If documentation was provided, verify it
@@ -745,10 +759,11 @@ function patchElement(done) {
     chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(updatedElement.createdOn).to.not.equal(null);
     chai.expect(updatedElement.updatedOn).to.not.equal(null);
+    chai.expect(updatedElement.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(updatedElement).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -776,7 +791,7 @@ function patchElements(done) {
     id: p.id
   }));
 
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, arrUpdateObjects, method);
 
@@ -803,7 +818,7 @@ function patchElements(done) {
       // Verify elements created properly
       chai.expect(updatedElement.id).to.equal(elemObj.id);
       chai.expect(updatedElement.name).to.equal(`${elemObj.name}_edit`);
-      chai.expect(updatedElement.custom).to.deep.equal(elemObj.custom);
+      chai.expect(updatedElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(updatedElement.project).to.equal(projID);
 
       // If documentation was provided, verify it
@@ -828,10 +843,11 @@ function patchElements(done) {
       chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(updatedElement.createdOn).to.not.equal(null);
       chai.expect(updatedElement.updatedOn).to.not.equal(null);
+      chai.expect(updatedElement.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(updatedElement).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(updatedElement).to.not.have.any.keys('archivedOn',
+        'archivedBy', '__v', '_id');
     });
     done();
   };
@@ -849,6 +865,7 @@ function deleteElement(done) {
   const params = {
     orgid: org.id,
     projectid: projID,
+    branchid: branchID,
     elementid: testData.elements[0].id
   };
   const method = 'DELETE';
@@ -886,7 +903,7 @@ function deleteElements(done) {
   ];
   const elemIDs = elemData.map(e => e.id);
 
-  const params = { orgid: org.id, projectid: projID };
+  const params = { orgid: org.id, projectid: projID, branchid: branchID };
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, elemIDs, method);
 

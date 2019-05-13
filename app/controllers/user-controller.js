@@ -39,9 +39,9 @@ const Project = M.require('models.project');
 const User = M.require('models.user');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
-const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const utils = M.require('lib.utils');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -55,8 +55,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
@@ -66,8 +66,10 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of found user objects.
+ * @return {Promise} Array of found users' public data objects.
  *
  * @example
  * find({User}, ['user1', 'user2'], { populate: 'createdBy' })
@@ -80,6 +82,12 @@ const jmi = M.require('lib.jmi-conversions');
  */
 function find(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
+    // Set options if no users were provided, but options were
+    if (typeof users === 'object' && users !== null && !Array.isArray(users)) {
+      options = users; // eslint-disable-line no-param-reassign
+      users = undefined; // eslint-disable-line no-param-reassign
+    }
+
     // Ensure input parameters are correct type
     try {
       assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
@@ -103,97 +111,22 @@ function find(requestingUser, users, options) {
 
     // Sanitize input parameters
     const saniUsers = (users !== undefined)
-      ? sani.sanitize(JSON.parse(JSON.stringify(users)))
+      ? sani.mongo(JSON.parse(JSON.stringify(users)))
       : undefined;
 
-    // Set options if no users were provided, but options were
-    if (typeof users === 'object' && users !== null && !Array.isArray(users)) {
-      options = users; // eslint-disable-line no-param-reassign
-    }
-
-    // Initialize valid options
-    let archived = false;
-    let populateString = '';
-    let fieldsString = '';
-    let limit = 0;
-    let skip = 0;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
-
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = User.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'fields', 'limit', 'skip', 'lean'], User);
 
     // Define searchQuery
     const searchQuery = { archived: false };
     // If the archived field is true, remove it from the query
-    if (archived) {
+    if (validOptions.archived) {
       delete searchQuery.archived;
     }
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'string')) {
+    if (Array.isArray(saniUsers)) {
       // An array of usernames, find all
       searchQuery._id = { $in: saniUsers };
     }
@@ -206,11 +139,23 @@ function find(requestingUser, users, options) {
       throw new M.CustomError('Invalid input for finding users.', 400, 'warn');
     }
 
-    // Find the users
-    User.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-    .populate(populateString)
-    .then((foundUser) => resolve(foundUser))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    // If the lean option is supplied
+    if (validOptions.lean) {
+      // Find the users
+      User.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString).lean()
+      .then((foundUser) => resolve(foundUser))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
+    else {
+      // Find the users
+      User.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString)
+      .then((foundUser) => resolve(foundUser))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
   });
 }
 
@@ -218,7 +163,7 @@ function find(requestingUser, users, options) {
  * @description This functions creates one or many users from the provided data.
  * This function is restricted to system-wide admin ONLY. The database is
  * searched for existing users with duplicate usernames and the users are added
- * to the default org prior to being created and returned from this function.
+ * to the default org prior to being returned from this function.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing user
@@ -242,8 +187,10 @@ function find(requestingUser, users, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created user objects
+ * @return {Promise} Array of created users' users' public data objects.
  *
  * @example
  * create({User}, [{User1}, {User2}, ...], { populate: 'createdBy' })
@@ -280,57 +227,18 @@ function create(requestingUser, users, options) {
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     let createdUsers = [];
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = User.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], User);
 
     // Define array to store user data
     let usersToCreate = [];
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
+    if (Array.isArray(saniUsers)) {
       // users is an array, create many users
       usersToCreate = saniUsers;
     }
@@ -346,7 +254,7 @@ function create(requestingUser, users, options) {
     // Create array of id's for lookup and array of valid keys
     const arrUsernames = [];
     const validUserKeys = ['username', 'password', 'fname', 'lname',
-      'preferredName', 'email', 'admin', 'provider', 'custom'];
+      'preferredName', 'email', 'admin', 'provider', 'custom', 'archived'];
 
     // Check that each user has a username, and add to arrUsernames
     try {
@@ -376,7 +284,7 @@ function create(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find any existing, conflicting users
-    User.find(searchQuery, '_id')
+    User.find(searchQuery, '_id').lean()
     .then((foundUsers) => {
       // If there are any foundUsers, there is a conflict
       if (foundUsers.length > 0) {
@@ -426,8 +334,18 @@ function create(requestingUser, users, options) {
       // Save the updated default org
       return defaultOrg.save();
     })
-    .then(() => resolve(User.find({ _id: { $in: arrUsernames } }, fieldsString)
-    .populate(populateString)))
+    .then(() => {
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        return User.find({ _id: { $in: arrUsernames } }, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
+      }
+      else {
+        return User.find({ _id: { $in: arrUsernames } }, validOptions.fieldsString)
+        .populate(validOptions.populateString);
+      }
+    })
+    .then((foundCreatedUsers) => resolve(foundCreatedUsers))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -452,19 +370,24 @@ function create(requestingUser, users, options) {
  * @param {string} [users.preferredName] - The updated preferred first name of
  * the user.
  * @param {string} [users.email] - The updated email of the user.
- * @param {Object} [users.custom] - The additions or changes to existing custom
- * data. If the key/value pair already exists, the value will be changed. If the
- * key/value pair does not exist, it will be added.
- * @param {boolean} [users.archived] - The updated archived field. If true, the
+ * @param {Object} [users.custom] - The new custom data object. Please note,
+ * updating the custom data object completely replaces the old custom data
+ * object.
+ * @param {boolean} [users.archived = false] - The updated archived field. If true, the
  * user will not be able to be found until unarchived.
+ * @param {boolean} [users.admin] - The updated admin field. If true, the
+ * user is a system-wide admin. NOTE: Only system-wide admins can update this
+ * property.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated user objects
+ * @return {Promise} Array of updated users' public data objects.
  *
  * @example
  * update({User}, [{Updated User 1}, {Updated User 2}...], { populate: 'createdBy' })
@@ -475,7 +398,6 @@ function create(requestingUser, users, options) {
  *   M.log.error(error);
  * });
  */
-// TODO: Allow admins to update the admin field.
 function update(requestingUser, users, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
@@ -500,57 +422,18 @@ function update(requestingUser, users, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUsers = [];
     let usersToUpdate = [];
     const duplicateCheck = {};
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = User.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], User);
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
+    if (Array.isArray(saniUsers)) {
       // users is an array, update many users
       usersToUpdate = saniUsers;
     }
@@ -595,7 +478,7 @@ function update(requestingUser, users, options) {
     // Create searchQuery
     const searchQuery = { _id: { $in: arrUsernames } };
     // Find the users to update
-    User.find(searchQuery)
+    User.find(searchQuery).lean()
     .then((_foundUsers) => {
       // Verify the same number of users are found as desired
       if (_foundUsers.length !== arrUsernames.length) {
@@ -646,6 +529,12 @@ function update(requestingUser, users, options) {
             }
           }
 
+          // If updating the admin key, ensure the requesting user is an admin
+          if (key === 'admin' && !reqUser.admin) {
+            throw new M.CustomError(`${reqUser.username} does not have`
+              + ' permissions to update the admin field.', 403, 'warn');
+          }
+
           // If the type of field is mixed
           if (User.schema.obj[key]
             && User.schema.obj[key].type.schemaName === 'Mixed') {
@@ -653,16 +542,6 @@ function update(requestingUser, users, options) {
             if (typeof updateUser !== 'object') {
               throw new M.CustomError(`${key} must be an object`, 400, 'warn');
             }
-
-            // Add and replace parameters of the type 'Mixed'
-            utils.updateAndCombineObjects(user[key], updateUser[key]);
-
-            // Mark mixed fields as updated, required for mixed fields to update in mongoose
-            // http://mongoosejs.com/docs/schematypes.html#mixed
-            user.markModified(key);
-
-            // Set the updateUser mixed field to the modified version
-            updateUser[key] = user[key];
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
@@ -700,7 +579,17 @@ function update(requestingUser, users, options) {
       // Update all users through a bulk write to the database
       return User.bulkWrite(bulkArray);
     })
-    .then(() => User.find(searchQuery, fieldsString).populate(populateString))
+    .then(() => {
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        return User.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
+      }
+      else {
+        return User.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString);
+      }
+    })
     .then((foundUpdatedUsers) => {
       // Emit the event users-updated
       EventEmitter.emit('users-updated', foundUpdatedUsers);
@@ -729,7 +618,7 @@ function update(requestingUser, users, options) {
  * @param {Object} [users.custom] - The additions or changes to existing custom
  * data. If the key/value pair already exists, the value will be changed. If the
  * key/value pair does not exist, it will be added.
- * @param {boolean} [users.archived] - The updated archived field. If true, the
+ * @param {boolean} [users.archived = false] - The updated archived field. If true, the
  * user will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
@@ -737,8 +626,10 @@ function update(requestingUser, users, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of user objects
+ * @return {Promise} Array of users' public data objects.
  *
  * @example
  * createOrReplace({User}, [{User 1}, {User 2}...], { populate: 'createdBy' })
@@ -775,7 +666,7 @@ function createOrReplace(requestingUser, users, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     const duplicateCheck = {};
     let foundUsers = [];
     let usersToLookup = [];
@@ -783,7 +674,7 @@ function createOrReplace(requestingUser, users, options) {
     const ts = Date.now();
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'object')) {
+    if (Array.isArray(saniUsers)) {
       // users is an array, update many users
       usersToLookup = saniUsers;
     }
@@ -823,7 +714,7 @@ function createOrReplace(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find the users to update
-    User.find(searchQuery)
+    User.find(searchQuery).lean()
     .then((_foundUsers) => {
       // Set the function-wide foundUsers
       foundUsers = _foundUsers;
@@ -842,7 +733,7 @@ function createOrReplace(requestingUser, users, options) {
           });
       });
     })
-    .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }))
+    .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }).lean())
     .then(() => {
       // Emit the event users-deleted
       EventEmitter.emit('users-deleted', foundUsers);
@@ -880,7 +771,7 @@ function createOrReplace(requestingUser, users, options) {
  * @param {Object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted users usernames
+ * @return {Promise} Array of deleted users' usernames.
  *
  * @example
  * remove({User}, ['user1', 'user2'])
@@ -915,7 +806,7 @@ function remove(requestingUser, users, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.sanitize(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUsers = [];
     let foundUsernames = [];
@@ -926,7 +817,7 @@ function remove(requestingUser, users, options) {
     const memberQuery = {};
 
     // Check the type of the users parameter
-    if (Array.isArray(saniUsers) && saniUsers.every(u => typeof u === 'string')) {
+    if (Array.isArray(saniUsers)) {
       // An array of usernames, remove all
       searchedUsernames = saniUsers;
       searchQuery._id = { $in: saniUsers };
@@ -1009,7 +900,7 @@ function remove(requestingUser, users, options) {
       return Promise.all(promises);
     })
     // Remove the users
-    .then(() => User.deleteMany(searchQuery))
+    .then(() => User.deleteMany(searchQuery).lean())
     // Return the deleted users
     .then(() => {
       // Emit the event users-deleted
@@ -1032,7 +923,7 @@ function remove(requestingUser, users, options) {
  * @param {string} confirmPassword - The new password entered a second time
  * to confirm they match.
  *
- * @return {Promise} The updated user object.
+ * @return {Promise} The updated user public data object.
  *
  * @example
  * updatePassword({User}, 'oldPass', 'newPass', 'newPass')

@@ -12,6 +12,7 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Project model that
  * implements controller logic and behavior for Projects.
@@ -58,8 +59,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
@@ -69,6 +70,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of found project objects
  *
@@ -83,6 +86,12 @@ const jmi = M.require('lib.jmi-conversions');
  */
 function find(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
+    // Set options if no projects were provided, but options were
+    if (typeof projects === 'object' && projects !== null && !Array.isArray(projects)) {
+      options = projects; // eslint-disable-line no-param-reassign
+      projects = undefined; // eslint-disable-line no-param-reassign
+    }
+
     // Ensure input parameters are correct type
     try {
       assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
@@ -108,91 +117,15 @@ function find(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters
-    const orgID = sani.sanitize(organizationID);
+    const orgID = sani.mongo(organizationID);
     const saniProjects = (projects !== undefined)
-      ? sani.sanitize(JSON.parse(JSON.stringify(projects)))
+      ? sani.mongo(JSON.parse(JSON.stringify(projects)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
-    // Set options if no projects were provided, but options were
-    if (((typeof projects === 'object' && projects !== null && !Array.isArray(projects))
-      || (orgID === null)) && options === undefined) {
-      options = projects; // eslint-disable-line no-param-reassign
-    }
-
-    // Initialize valid options
-    let archived = false;
-    let populateString = '';
-    let fieldsString = '';
-    let limit = 0;
-    let skip = 0;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
-
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Project.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'fields', 'limit', 'skip', 'lean'], Project);
 
     // Define searchQuery
     const searchQuery = { archived: false };
@@ -201,7 +134,7 @@ function find(requestingUser, organizationID, projects, options) {
       searchQuery[`permissions.${reqUser._id}`] = 'read';
     }
     // If the archived field is true, remove it from the query
-    if (archived) {
+    if (validOptions.archived) {
       delete searchQuery.archived;
     }
     if (orgID !== null) {
@@ -222,11 +155,23 @@ function find(requestingUser, organizationID, projects, options) {
       throw new M.CustomError('Invalid input for finding projects.', 400, 'warn');
     }
 
-    // Find the projects
-    Project.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-    .populate(populateString)
-    .then((foundProjects) => resolve(foundProjects))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    // If the lean option is supplied
+    if (validOptions.lean) {
+      // Find the projects
+      Project.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString).lean()
+      .then((finishedProjects) => resolve(finishedProjects))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
+    else {
+      // Find the projects
+      Project.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString)
+      .then((finishedProjects) => resolve(finishedProjects))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
   });
 }
 
@@ -252,12 +197,17 @@ function find(requestingUser, organizationID, projects, options) {
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
+ * @param {string[]} [projects.projectReferences] - An array of referenced
+ * projects. These projects must be in the same organization and must have a
+ * visibility of 'internal' to be referenced.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created project objects
  *
@@ -295,60 +245,22 @@ function create(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.mongo(organizationID);
+    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrg = {};
     let projObjects = [];
+    const projectReferences = [];
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Project.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Project);
 
     // Define array to store project data
     let projectsToCreate = [];
 
     // Check the type of the projects parameter
-    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
+    if (Array.isArray(saniProjects)) {
       // projects is an array, create many projects
       projectsToCreate = saniProjects;
     }
@@ -363,7 +275,8 @@ function create(requestingUser, organizationID, projects, options) {
 
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
-    const validProjKeys = ['id', 'name', 'custom', 'visibility', 'permissions'];
+    const validProjKeys = ['id', 'name', 'custom', 'visibility', 'permissions',
+      'projectReferences', 'archived'];
 
     // Check that each project has an id, and add to arrIDs
     try {
@@ -392,6 +305,22 @@ function create(requestingUser, organizationID, projects, options) {
         // Add requesting user as admin on project
         proj.permissions[reqUser._id] = 'admin';
 
+        // Check if updating the project references array
+        if (proj.hasOwnProperty('projectReferences')) {
+          proj.projectReferences = proj.projectReferences.map((project) => {
+            const projID = utils.createID(orgID, project);
+            // Check for duplicate project references. If multiple projects
+            // being created reference the same project, that project only gets
+            // found once.
+            if (!projectReferences.includes(projID)) {
+              // Add project ID to array of projects to be searched for
+              projectReferences.push(projID);
+            }
+            // Return the concatenated project ID
+            return projID;
+          });
+        }
+
         index++;
       });
     }
@@ -403,7 +332,7 @@ function create(requestingUser, organizationID, projects, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the organization to verify existence and permissions
-    Organization.findOne({ _id: orgID })
+    Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrg) => {
       foundOrg = _foundOrg;
       // If the org was not found
@@ -418,8 +347,31 @@ function create(requestingUser, organizationID, projects, options) {
           + ` projects on the org [${foundOrg._id}].`, 403, 'warn');
       }
 
+      // Find any project references
+      return Project.find({ _id: { $in: projectReferences } });
+    })
+    .then((_projReferences) => {
+      // Verify the same number of projects are found as desired
+      if (_projReferences.length !== projectReferences.length) {
+        const foundIDs = _projReferences.map(p => p._id);
+        const notFound = projectReferences.filter(p => !foundIDs.includes(p))
+        .map(p => utils.parseID(p).pop());
+        throw new M.CustomError(
+          `The following projects [${notFound.toString()}] were not found in `
+          + `the org [${orgID}].`, 404, 'warn'
+        );
+      }
+
+      // Verify that each referenced project has a visibility of 'internal'
+      _projReferences.forEach((project) => {
+        if (project.visibility !== 'internal') {
+          throw new M.CustomError(`The project [${utils.parseID(project._id).pop()}]`
+            + ' must have a visibility level of \'internal\' to be referenced.', 403, 'warn');
+        }
+      });
+
       // Find any existing, conflicting projects
-      return Project.find(searchQuery, '_id');
+      return Project.find(searchQuery, '_id').lean();
     })
     .then((foundProjects) => {
       // If there are any foundProjects, there is a conflict
@@ -433,11 +385,11 @@ function create(requestingUser, organizationID, projects, options) {
       }
 
       // Get all existing users for permissions
-      return User.find({});
+      return User.find({}).lean();
     })
     .then((foundUsers) => {
       // Create array of usernames
-      const foundUsernames = foundUsers.map(u => u.username);
+      const foundUsernames = foundUsers.map(u => u._id);
       const promises = [];
       // For each object of project data, create the project object
       projObjects = projectsToCreate.map((p) => {
@@ -494,7 +446,7 @@ function create(requestingUser, organizationID, projects, options) {
       EventEmitter.emit('projects-created', projObjects);
 
       // Create a root model element for each project
-      const elemObjects = projObjects.map((p) => new Element({
+      const elemModelObj = projObjects.map((p) => new Element({
         _id: utils.createID(p._id, 'model'),
         name: 'Model',
         parent: null,
@@ -507,11 +459,67 @@ function create(requestingUser, organizationID, projects, options) {
         archivedBy: (p.archived) ? reqUser._id : null
       }));
 
-        // Create the elements
-      return Element.insertMany(elemObjects);
+      // Create a __MBEE__ element for each project
+      const elemMBEEObj = projObjects.map((p) => new Element({
+        _id: utils.createID(p._id, '__mbee__'),
+        name: '__mbee__',
+        parent: utils.createID(p._id, 'model'),
+        project: p._id,
+        lastModifiedBy: reqUser._id,
+        createdBy: reqUser._id,
+        createdOn: Date.now(),
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
+      }));
+
+      // Create a holding bin element for each project
+      const elemHoldingBinObj = projObjects.map((p) => new Element({
+        _id: utils.createID(p._id, 'holding_bin'),
+        name: 'holding bin',
+        parent: utils.createID(p._id, '__mbee__'),
+        project: p._id,
+        lastModifiedBy: reqUser._id,
+        createdBy: reqUser._id,
+        createdOn: Date.now(),
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
+      }));
+
+      // Create a undefined element for each project
+      const elemUndefinedBinObj = projObjects.map((p) => new Element({
+        _id: utils.createID(p._id, 'undefined'),
+        name: 'undefined element',
+        parent: utils.createID(p._id, '__mbee__'),
+        project: p._id,
+        lastModifiedBy: reqUser._id,
+        createdBy: reqUser._id,
+        createdOn: Date.now(),
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
+      }));
+
+      // Concatenate all element arrays
+      const conCatElemObj = elemModelObj.concat(elemMBEEObj) // eslint-disable-next-line indent
+        .concat(elemHoldingBinObj).concat(elemUndefinedBinObj);
+
+      // Create the elements
+      return Element.insertMany(conCatElemObj);
     })
-    .then(() => resolve(Project.find({ _id: { $in: arrIDs } }, fieldsString)
-    .populate(populateString)))
+    .then(() => {
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        return Project.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
+      }
+      else {
+        return Project.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
+        .populate(validOptions.populateString);
+      }
+    })
+    .then((foundCreatedProjects) => resolve(foundCreatedProjects))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -540,10 +548,13 @@ function create(requestingUser, organizationID, projects, options) {
  * the key is the username, and the value is the role which the user is to have
  * in the project. To remove a user from a project, the value must be
  * 'remove_all'.
- * @param {Object} [projects.custom] - The additions or changes to existing
- * custom data. If the key/value pair already exists, the value will be changed.
- * If the key/value pair does not exist, it will be added.
- * @param {boolean} [projects.archived] - The updated archived field. If true,
+ * @param {string[]} [projects.projectReferences] - An array of referenced
+ * projects. These projects must be in the same organization and must have a
+ * visibility of 'internal' to be referenced.
+ * @param {Object} [projects.custom] - The new custom data object. Please note,
+ * updating the custom data object completely replaces the old custom data
+ * object.
+ * @param {boolean} [projects.archived = false] - The updated archived field. If true,
  * the project will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
@@ -551,6 +562,8 @@ function create(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of updated project objects
  *
@@ -588,8 +601,8 @@ function update(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.mongo(organizationID);
+    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const duplicateCheck = {};
     let foundProjects = [];
@@ -597,52 +610,14 @@ function update(requestingUser, organizationID, projects, options) {
     let existingUsers = [];
     let updatingPermissions = false;
     let foundOrg = {};
+    const projectReferences = [];
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Project.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Project);
 
     // Check the type of the projects parameter
-    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
+    if (Array.isArray(saniProjects)) {
       // projects is an array, update many projects
       projectsToUpdate = saniProjects;
     }
@@ -679,6 +654,22 @@ function update(requestingUser, organizationID, projects, options) {
           updatingPermissions = true;
         }
 
+        // Check if updating the project references array
+        if (proj.hasOwnProperty('projectReferences')) {
+          proj.projectReferences = proj.projectReferences.map((project) => {
+            const projID = utils.createID(orgID, project);
+            // Check for duplicate project references. If multiple projects
+            // being created reference the same project, that project only gets
+            // found once.
+            if (!projectReferences.includes(projID)) {
+              // Add project ID to array of projects to be searched for
+              projectReferences.push(projID);
+            }
+            // Return the concatenated project ID
+            return projID;
+          });
+        }
+
         index++;
       });
     }
@@ -690,18 +681,41 @@ function update(requestingUser, organizationID, projects, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the organization containing the projects
-    Organization.findOne({ _id: orgID })
+    Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrganization) => {
       // Check if the organization was found
       if (_foundOrganization === null) {
-        throw new M.CustomError(`The org [${_foundOrganization._id}] was not found.`, 404, 'warn');
+        throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
       }
 
       // Set function-wide foundOrg
       foundOrg = _foundOrganization;
 
+      // Find any project references
+      return Project.find({ _id: { $in: projectReferences } });
+    })
+    .then((_projReferences) => {
+      // Verify the same number of projects are found as desired
+      if (_projReferences.length !== projectReferences.length) {
+        const foundIDs = _projReferences.map(p => p._id);
+        const notFound = projectReferences.filter(p => !foundIDs.includes(p))
+        .map(p => utils.parseID(p).pop());
+        throw new M.CustomError(
+          `The following projects [${notFound.toString()}] were not found in `
+          + `the org [${orgID}].`, 404, 'warn'
+        );
+      }
+
+      // Verify that each referenced project has a visibility of 'internal'
+      _projReferences.forEach((project) => {
+        if (project.visibility !== 'internal') {
+          throw new M.CustomError(`The project [${utils.parseID(project._id).pop()}]`
+          + ' must have a visibility level of \'internal\' to be referenced.', 403, 'warn');
+        }
+      });
+
       // Find the projects to update
-      return Project.find(searchQuery);
+      return Project.find(searchQuery).lean();
     })
     .then((_foundProjects) => {
       // Set function-wide foundProjects
@@ -728,7 +742,7 @@ function update(requestingUser, organizationID, projects, options) {
 
       // Find users if updating permissions
       if (updatingPermissions) {
-        return User.find({});
+        return User.find({}).lean();
       }
 
       // Return an empty array if not updating permissions
@@ -776,90 +790,71 @@ function update(requestingUser, organizationID, projects, options) {
             }
           }
 
-          // If the type of field is mixed
-          if (Project.schema.obj[key]
-            && Project.schema.obj[key].type.schemaName === 'Mixed') {
-            // Only objects should be passed into mixed data
-            if (typeof updateProj !== 'object') {
-              throw new M.CustomError(`${key} must be an object`, 400, 'warn');
-            }
+          // If the user is updating permissions
+          if (key === 'permissions') {
+            // Get a list of valid project permissions
+            const validPermissions = Project.getPermissionLevels();
 
-            // If the user is updating permissions
-            if (key === 'permissions') {
-              // Get a list of valid project permissions
-              const validPermissions = Project.getPermissionLevels();
+            // Loop through each user provided
+            Object.keys(updateProj[key]).forEach((user) => {
+              let permValue = updateProj[key][user];
+              // Ensure user is not updating own permissions
+              if (user === reqUser.username) {
+                throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
+              }
 
-              // Loop through each user provided
-              Object.keys(updateProj[key]).forEach((user) => {
-                let permValue = updateProj[key][user];
-                // Ensure user is not updating own permissions
-                if (user === reqUser.username) {
-                  throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
-                }
+              // If user does not exist, throw an error
+              if (!existingUsers.includes(user)) {
+                throw new M.CustomError(`User [${user}] not found.`, 404, 'warn');
+              }
 
-                // If user does not exist, throw an error
-                if (!existingUsers.includes(user)) {
-                  throw new M.CustomError(`User [${user}] not found.`, 404, 'warn');
-                }
+              // Value must be an string containing highest permissions
+              if (typeof permValue !== 'string') {
+                throw new M.CustomError(`Permission for ${user} must be a string.`, 400, 'warn');
+              }
 
-                // Value must be an string containing highest permissions
-                if (typeof permValue !== 'string') {
-                  throw new M.CustomError(`Permission for ${user} must be a string.`, 400, 'warn');
-                }
+              // Lowercase the permission value
+              permValue = permValue.toLowerCase();
 
-                // Lowercase the permission value
-                permValue = permValue.toLowerCase();
+              // Value must be valid permission
+              if (!validPermissions.includes(permValue)) {
+                throw new M.CustomError(
+                  `${permValue} is not a valid permission`, 400, 'warn'
+                );
+              }
 
-                // Value must be valid permission
-                if (!validPermissions.includes(permValue)) {
+              // Set stored permissions value based on provided permValue
+              switch (permValue) {
+                case 'read':
+                  proj.permissions[user] = ['read'];
+                  break;
+                case 'write':
+                  proj.permissions[user] = ['read', 'write'];
+                  break;
+                case 'admin':
+                  proj.permissions[user] = ['read', 'write', 'admin'];
+                  break;
+                case 'remove_all':
+                  delete proj.permissions[user];
+                  break;
+                // Default case, unknown permission, throw an error
+                default:
                   throw new M.CustomError(
                     `${permValue} is not a valid permission`, 400, 'warn'
                   );
-                }
+              }
 
-                // Set stored permissions value based on provided permValue
-                switch (permValue) {
-                  case 'read':
-                    proj.permissions[user] = ['read'];
-                    break;
-                  case 'write':
-                    proj.permissions[user] = ['read', 'write'];
-                    break;
-                  case 'admin':
-                    proj.permissions[user] = ['read', 'write', 'admin'];
-                    break;
-                  case 'remove_all':
-                    delete proj.permissions[user];
-                    break;
-                  // Default case, unknown permission, throw an error
-                  default:
-                    throw new M.CustomError(
-                      `${permValue} is not a valid permission`, 400, 'warn'
-                    );
-                }
+              // If not removing a user, check if they have been added to the org
+              if (permValue !== 'remove_all' && !foundOrg.permissions.hasOwnProperty(user)) {
+                // Add user to org with read permissions
+                const updateQuery = {};
+                updateQuery[`permissions.${user}`] = ['read'];
+                promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
+              }
+            });
 
-                // If not removing a user, check if they have been added to the org
-                if (permValue !== 'remove_all' && !foundOrg.permissions.hasOwnProperty(user)) {
-                  // Add user to org with read permissions
-                  const updateQuery = {};
-                  updateQuery[`permissions.${user}`] = ['read'];
-                  promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
-                }
-
-                // Copy permissions from proj to update object
-                updateProj.permissions = proj.permissions;
-              });
-            }
-            else {
-              // Add and replace parameters of the type 'Mixed'
-              utils.updateAndCombineObjects(proj[key], updateProj[key]);
-
-              // Set mixed field in updateProj
-              updateProj[key] = proj[key];
-            }
-            // Mark mixed fields as updated, required for mixed fields to update in mongoose
-            // http://mongoosejs.com/docs/schematypes.html#mixed
-            proj.markModified(key);
+            // Copy permissions from project to update object
+            updateProj.permissions = proj.permissions;
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
@@ -895,7 +890,17 @@ function update(requestingUser, organizationID, projects, options) {
       // Return when all promises have been complete
       return Promise.all(promises);
     })
-    .then(() => Project.find(searchQuery, fieldsString).populate(populateString))
+    .then(() => {
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        return Project.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
+      }
+      else {
+        return Project.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString);
+      }
+    })
     .then((foundUpdatedProjects) => {
       // Emit the event projects-updated
       EventEmitter.emit('projects-updated', foundUpdatedProjects);
@@ -927,12 +932,17 @@ function update(requestingUser, organizationID, projects, options) {
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
+ * @param {string[]} [projects.projectReferences] - An array of referenced
+ * projects. These projects must be in the same organization and must have a
+ * visibility of 'internal' to be referenced.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created project objects
  *
@@ -972,8 +982,8 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.mongo(organizationID);
+    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const duplicateCheck = {};
     let foundProjects = [];
     let projectsToLookUp = [];
@@ -981,8 +991,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     const ts = Date.now();
 
     // Check the type of the projects parameter
-    // TODO: Remove the && check, already do this check in the first try/catch
-    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'object')) {
+    if (Array.isArray(saniProjects)) {
       // projects is an array, replace/create many projects
       projectsToLookUp = saniProjects;
     }
@@ -1024,7 +1033,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the organization containing the projects
-    Organization.findOne({ _id: orgID })
+    Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrganization) => {
       // Check if the organization was found
       if (_foundOrganization === null) {
@@ -1032,11 +1041,10 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       }
 
       // Find the projects to update
-      return Project.find(searchQuery);
+      return Project.find(searchQuery).lean();
     })
     .then((_foundProjects) => {
       foundProjects = _foundProjects;
-
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
         fs.mkdirSync(path.join(M.root, 'data'));
@@ -1056,10 +1064,19 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
           });
       });
     })
-    // Delete root model elements from database
-    .then(() => Element.deleteMany({ _id: foundProjects.map(p => utils.createID(p._id, 'model')) }))
+    // Delete root elements from database
+    .then(() => {
+      const elemDelObj = [];
+      foundProjects.forEach(p => {
+        elemDelObj.push(utils.createID(p._id, 'model'));
+        elemDelObj.push(utils.createID(p._id, '__mbee__'));
+        elemDelObj.push(utils.createID(p._id, 'holding_bin'));
+        elemDelObj.push(utils.createID(p._id, 'undefined'));
+      });
+      return Element.deleteMany({ _id: { $in: elemDelObj } }).lean();
+    })
     // Delete projects from database
-    .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }))
+    .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }).lean())
 
     .then(() => {
       // Emit the event projects-deleted
@@ -1146,8 +1163,8 @@ function remove(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const saniProjects = sani.sanitize(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.mongo(organizationID);
+    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundProjects = [];
     let searchedIDs = [];
@@ -1168,7 +1185,7 @@ function remove(requestingUser, organizationID, projects, options) {
     const ownedQuery = {};
 
     // Check the type of the projects parameter
-    if (Array.isArray(saniProjects) && saniProjects.every(p => typeof p === 'string')) {
+    if (Array.isArray(saniProjects)) {
       // An array of project ids, remove all
       searchedIDs = saniProjects.map(p => utils.createID(orgID, p));
       searchQuery._id = { $in: searchedIDs };
@@ -1184,7 +1201,7 @@ function remove(requestingUser, organizationID, projects, options) {
     }
 
     // Find the projects to delete
-    Project.find(searchQuery)
+    Project.find(searchQuery).lean()
     .then((_foundProjects) => {
       // Set the function-wide foundProjects and create ownedQuery
       foundProjects = _foundProjects;
@@ -1200,10 +1217,13 @@ function remove(requestingUser, organizationID, projects, options) {
       }
 
       // Delete any elements in the project
-      return Element.deleteMany(ownedQuery);
+      return Element.deleteMany(ownedQuery).lean();
     })
+    // Delete the project references from any projectReferences arrays
+    .then(() => Project.updateMany({}, { $pull: { projectReferences:
+          { $in: foundProjects.map(p => p._id) } } }, { multi: true }))
     // Delete the projects
-    .then(() => Project.deleteMany(searchQuery))
+    .then(() => Project.deleteMany(searchQuery).lean())
     .then((retQuery) => {
       // Emit the event projects-deleted
       EventEmitter.emit('projects-deleted', foundProjects);

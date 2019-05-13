@@ -15,11 +15,12 @@
  * @description This defines the Sass variables.
  */
 
-@import 'variables';
+@import './utils/_variables';
 
 #fm {
 
     color: $mbee-color;
+    padding-bottom: 10px;
 
     h1.title {
         color: $mbee-color;
@@ -37,6 +38,7 @@
 
     .nav-link {
         border-radius: 0px;
+        color:  $mbee-color;
     }
 
     .nav-pills .nav-link.active {

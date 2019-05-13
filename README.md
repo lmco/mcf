@@ -1,5 +1,5 @@
 # Model-Based Engineering Environment
-
+ 
 The Model-Based Engineering Environment (MBEE) is a modeling collaboration software
 that integrates system models with multidisciplinary engineering data and tools.
 This enables system models to be a single-source of truth. MBEE allows for model
@@ -17,7 +17,8 @@ distributed services.
 
 **Node.js**
 MBEE's only dependency to get started is Node.js and NPM. NPM comes with
-Node.js, just install packages with NPM to get started.
+Node.js; just install packages with NPM to get started. To start up MBEE,
+node version 10.15.0 or greater is required.
 See [nodejs.org](https://nodejs.org/en/) for information on Node.js.
 
 **MongoDB**
@@ -27,7 +28,7 @@ and the [MongoDB Getting Started Guide](https://docs.mongodb.com/manual/tutorial
 for up-to-date documentation on MongoDB.
 
 **Source Code**
-1. Clone the MBEE code by running: `git clone https://gitlab.lmms.lmco.com/mbee/mbee.git`. 
+1. Clone the MBEE code by running: `git clone https://gitlab.us.lmco.com/mbx/mbee/mcf.git`. 
 2. Enter the directory with `cd mbee`.
 
 ## Getting Started
@@ -47,3 +48,17 @@ Included documentation:
   - Developer Documentation
   - Test Framework Documentation
   - Docker Set Up Documentation
+
+## Reporting Vulnerabilities and Bugs
+
+<!-- START LMPI -->
+// TODO - Verify we can get on email and send an email
+
+If an issue is identified in MBEE, please email
+[mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com). If
+you are internal Lockheed Martin, please email the distribution list 
+[mbee-developers-dl-ssc@exch.ems.lmco.com](mailto:mbee-developers-dl-ssc@exch.ems.lmco.com).
+Refer to **SECURITY.md** for more information as well as the PGP encryption key.
+
+
+<!-- END LMPI -->

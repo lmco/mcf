@@ -1,11 +1,11 @@
 {
   "name": "mbee",
-  "version": "0.7.3",
-  "schemaVersion": "0.7.3",
+  "version": "0.8.0",
+  "schemaVersion": "0.8.0",
   "build": "NO_BUILD_NUMBER",
   "description": "Model-Based Engineering Environment",
   "main": "mbee.js",
-  "repository": "https://gitlab.lmms.lmco.com/mbee/mbee.git",
+  "repository": "https://gitlab.us.lmco.com/mbx/mbee/mcf.git",
   "author": "Lockheed Martin",
   "license": "LMPI",
   "private": true,
@@ -48,7 +48,7 @@
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
     "react-router-dom": "^4.3.1",
-    "reactstrap": "^6.5.0",
+    "reactstrap": "^7.1.0",
     "swagger-ui-express": "^2.0.15",
     "webpack": "^4.29.5"
   },
@@ -58,9 +58,12 @@
     "docker": "node mbee docker",
     "lint": "node mbee lint",
     "migrate": "node mbee migrate",
-    "postinstall": "test $NOPOSTINSTALL -eq 1 || node mbee build",
-    "preinstall": "test $NOPREINSTALL -eq 1 || node ./scripts/clean.js --all",
+    "postinstall": "test $NOPOSTINSTALL || node mbee build",
+    "preinstall": "test $NOPREINSTALL || node ./scripts/clean.js --all",
     "start": "node mbee start",
     "test": "node mbee test"
+  },
+  "engines": {
+    "node": ">=10.15.0"
   }
 }

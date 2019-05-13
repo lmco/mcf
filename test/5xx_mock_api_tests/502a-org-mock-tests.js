@@ -119,10 +119,11 @@ function postOrg(done) {
     chai.expect(postedOrg.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(postedOrg.createdOn).to.not.equal(null);
     chai.expect(postedOrg.updatedOn).to.not.equal(null);
+    chai.expect(postedOrg.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(postedOrg).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(postedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -172,10 +173,11 @@ function postOrgs(done) {
       chai.expect(postedOrg.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(postedOrg.createdOn).to.not.equal(null);
       chai.expect(postedOrg.updatedOn).to.not.equal(null);
+      chai.expect(postedOrg.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(postedOrg).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(postedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -215,10 +217,11 @@ function putOrg(done) {
     chai.expect(replacedOrg.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(replacedOrg.createdOn).to.not.equal(null);
     chai.expect(replacedOrg.updatedOn).to.not.equal(null);
+    chai.expect(replacedOrg.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(replacedOrg).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(replacedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -270,10 +273,11 @@ function putOrgs(done) {
       chai.expect(replacedOrg.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(replacedOrg.createdOn).to.not.equal(null);
       chai.expect(replacedOrg.updatedOn).to.not.equal(null);
+      chai.expect(replacedOrg.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(replacedOrg).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(replacedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -312,10 +316,11 @@ function getOrg(done) {
     chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundOrg.createdOn).to.not.equal(null);
     chai.expect(foundOrg.updatedOn).to.not.equal(null);
+    chai.expect(foundOrg.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(foundOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -367,10 +372,11 @@ function getOrgs(done) {
       chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundOrg.createdOn).to.not.equal(null);
       chai.expect(foundOrg.updatedOn).to.not.equal(null);
+      chai.expect(foundOrg.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -425,10 +431,11 @@ function getAllOrgs(done) {
       chai.expect(foundOrg.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(foundOrg.createdOn).to.not.equal(null);
       chai.expect(foundOrg.updatedOn).to.not.equal(null);
+      chai.expect(foundOrg.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(foundOrg).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(foundOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };
@@ -466,10 +473,11 @@ function patchOrg(done) {
     chai.expect(patchedOrg.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(patchedOrg.createdOn).to.not.equal(null);
     chai.expect(patchedOrg.updatedOn).to.not.equal(null);
+    chai.expect(patchedOrg.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(patchedOrg).to.not.have.keys(['archived', 'archivedOn',
-      'archivedBy', '__v', '_id']);
+    chai.expect(patchedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
     done();
   };
 
@@ -524,10 +532,11 @@ function patchOrgs(done) {
       chai.expect(patchedOrg.lastModifiedBy).to.equal(adminUser.username);
       chai.expect(patchedOrg.createdOn).to.not.equal(null);
       chai.expect(patchedOrg.updatedOn).to.not.equal(null);
+      chai.expect(patchedOrg.archived).to.equal(false);
 
       // Verify specific fields not returned
-      chai.expect(patchedOrg).to.not.have.keys(['archived', 'archivedOn',
-        'archivedBy', '__v', '_id']);
+      chai.expect(patchedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
     });
     done();
   };

@@ -1,8 +1,8 @@
 # MBEE Security
 
 **Contents**
-- [Disclosure Policy](#disclosure-policy)
-- [Security Update Policy](#security-update-policy)
+- [Reporting Vulnerabilities and Bugs](#reporting-vulnerabilities-and-bugs)
+- [Disclosure and Security Update Policy](#disclosure-and-security-update-policy)
 - [Known Gaps and Issues](#known-gaps-and-issues)
 - [Security Related Configuration](#security-related-configuration)
   - [Plugins and Integrations](#plugins-and-integrations)
@@ -12,10 +12,9 @@
   - [Server Secret Key](#server-secret-key)
   - [MongoDB](#mongodb)
   - [Authentication](#authentication)
-- [Security for Developers](#security-for-developers)
 
 
-## Disclosure Policy
+## Reporting Vulnerabilities and Bugs
 
 **Lockheed Martin Internal**
 
@@ -27,12 +26,12 @@ be notified of such an issue. **DO NOT** disclose vulnerabilities on our JIRA
 service desk.
 
 Your email will be acknowledged within 1 business day and a more detailed
-follow-up will be provided with 5 business days.
+follow-up will be provided within 5 business days.
 
 When disclosing a vulnerability, please provide the following information:
 
 - The server on which the issue was identified (name and IP address)
-- The MBEE version (can be retrieved from the MBEE /about page)
+- The MBEE version (can be retrieved from the MBEE `/about` page)
 - A detailed description of the issue (the more detail, the better) so our team
 can quickly reproduce the issue
 - Programs/projects affected
@@ -44,23 +43,74 @@ can quickly reproduce the issue
 > procedures above.
 
 If an issue is identified in the open source version MBEE, please email
-[mbee-software.dl-ssc@exch.ems.lmco.com](mailto:mbee-software.dl-ssc@exch.ems.lmco.com).
+[mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com).
 This will notify the Lockheed Martin MBEE Software Engineering team of the
 issue. Your email will be acknowledged within 1 business day and a more detailed
-follow-up will be provided with 5 business days.
+follow-up will be provided within 5 business days.
 
 When disclosing a vulnerability, please provide the following information:
 
-- Server information: any environment details about the instance of MBEE on
-which the issue was identified that can reasonably be provided.
-- The MBEE version (can be retrieved from the MBEE /about page) and whether or
-not the original source code has been modified. Details about any modifications
-can be helpful if they can be provided.
+- Server information: any environment details that can be provided about the 
+instance of MBEE on which the vulnerability was identified on.
+- The MBEE version (can be retrieved from the MBEE `/about` page)
+- Whether or not the original source code has been modified. Details about any modifications
+can be helpful, if that information can be provided.
 - A detailed description of the issue (the more detail, the better) so our team
 can quickly reproduce the issue.
-- Organization(s) impacted/affected
+- Organization(s) impacted/affected.
 
-## Security Update Policy
+If your disclosure is of a sensitive nature, you may choose to encrypt your 
+report using the following GPG public key:
+
+```
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+mQENBFzS4/QBCACtj/64Ok3X+XWmlzo/5bCz+fj2jLgQt8YgX4wxQTXbDmlXY7in
+FQoD0foTC2BkB4royg01leZlnd5HfYh5Nz0WxUzw9zPZoaitsrUxzWcQHT0323G1
+c2Oclb28RK/JVIF7w9EF6wlL4+ZfJ+ZJ7WtUEcseAPMvFlYOx9eOPa5guyvUk9eV
+tWxt/67ki0/kfIFN6LtS35X6K44qDAFURAramIFOrODmkNcWQNFkm39Eg3ygHnUS
+eqlTlPwvzG7bVI2hmFf6+IDoqQuMleN3r5fbWmHkZVg1q9gvBJ0+X6OVquEnHz8F
+ZE39fa9Vl+UREH/55yO4xApTQDhRuVozkzXZABEBAAG0L21iZWUtc29mdHdhcmUg
+PG1iZWUtc29mdHdhcmUuZmMtc3BhY2VAbG1jby5jb20+iQFUBBMBCAA+FiEEoVqm
+0EvHGIs7jWRzgW7AYu0iZGAFAlzS4/QCGwMFCQPCZwAFCwkIBwIGFQgJCgsCBBYC
+AwECHgECF4AACgkQgW7AYu0iZGD1mgf9FdZFoEgDUeyQPkbXAjV0AGbTXp9VUdPU
+zVacT9zIxyeFvQpA8uP8V3C+5+uay72UliI/AK1VK9EBMYklTTKuRLmOmZGx/DNQ
+jwPZBXaBuCaykjX6EfoqT6+ZZc/sqQRcPRchR2siUWD6et3ZD5I74++L3mXXFVqd
+Rog5LIDF6KbIRkVCNn9nSuKU5KX0vuLT9nu5B7LuH/YXHRJgM7HYzfpRVuvFUZp9
+P9FEQgD0cufFTC61kQcK0UAId0EK7ub9SElkwWIn+fU62/jHKPCHJdDjhFF5cn9v
+x3iJ0DmEpy098goksLQi991x73gep07hg8Jr/OeAPw5ci4MgFUfRLrkBDQRc0uP0
+AQgA4RaTUjGhdg2ZqtfLPHq7fokaRYmmpIYXVNGo62AJHutZnwx1FZF0WMefKcpj
+hQkAkJ86Mi0sKGR1J0B6xjZsYpO5Jlyx0b2cHfr68m8Hxv9tH+zcnJqVj+gsdIQ+
+yLVadxjTd9xxayhDrwE0jVz9nzMgoqyYSjmLyaWl7TzJfO3PuGkXgLkxTlXPR1qT
+fwNMIToePxH5FRPykXygj8NVnrZN3ATtyjFCR7qd9LmAunEFBtOpCxeLNqAsKuZq
+Cx90oJEIVZc5mCfo497fOdCEx3f0uIal7BeYcvLL1A89rw9nPZPX/5A/r7rxxfTZ
+Zcl9z6OK9Wo8D/f6NgjIBdXu1QARAQABiQE8BBgBCAAmFiEEoVqm0EvHGIs7jWRz
+gW7AYu0iZGAFAlzS4/QCGwwFCQPCZwAACgkQgW7AYu0iZGBsrAf/XWHrNgaLijAF
+7tODGpdd4fQSIsMjc7Ad61UrpG7SeNZY8QnPtWP5U/LrPMYjvzHj5r38eCQFOqy4
+aX8mgs1ttdmNfavkgOihyMlOuAxTvjlO7V47GP45J0ZRS1tR/+R4kI+qPGAILECI
+gYOiLM2cRu1qAafi7urfLh710Z37Pw35A78MVZfPmr6PmogjpF8v2zihRC1tvU7G
+qMJqy0jExIvfZVEoRB4+AuRh0eeYpgLPL4nCmV+R4gXq/oT7KESze+8DGMy6aGl1
+OuzehpapwPugAPonYf5UTloSflxRsQYqjAt71c4KK+joeYHK2cqM6wPw+GX5zQBj
+0tpmsfEDeA==
+=Zzxx
+-----END PGP PUBLIC KEY BLOCK-----
+```
+
+To encrypt a message, save this file as `mbee-software.key.pub` and import the 
+key into GPG by running:
+
+```
+gpg --import mbee-software.key.pub
+```
+
+Then encrypt your message by running:
+
+```
+gpg -e -r mbee-software file_to_encrypt.txt
+```
+
+
+## Disclosure and Security Update Policy
 
 **Lockheed Martin Internal**
 
@@ -75,25 +125,25 @@ Once admins are notified and are able to update their instances, the
 list will be notified in the interest of transparency and program communication.
 
 If your program has special needs that may require an alteration to this policy,
-please contact our software team using the above *dl-SSC, MBEE-Software*
+please contact our software team at the [dl-SSC, MBEE-Software](mailto:mbee-software.dl-ssc@exch.ems.lmco.com)
 distribution list so that we may work together to identify an approach to meet
 your program's needs.
 
-Security updates should include a reasonable level of detail about the issue,
-the severity and likelihood of impact, and the MBEE team's assessment of the
-risk introduced by the issue. Security updates will also notify which versions
-are impacted and how to either update MBEE to a fixed version or how to
-mitigate the issue.
+Security updates will include a reasonable level of detail about the issue,
+the severity and likelihood of impact, and the MBEE teams' assessment of the
+risk introduced by the issue. Security updates will also specify which versions
+are impacted and how to mitigate the issue.
 
-For a list of MBEE security related updates, a web page will be created at
-[mbee.us.lmco.com](https://mbee.us.lmco.com) provide that information.
+For a list of MBEE security related updates as well as bug fixes and features,
+refer to `CHANGELOG.md`.
 
 **External OpenMBEE**
 
 > This only applies to non-LM users and the open source version of MBEE.
 
-Upon public release of MBEE a security update policy will be defined for the
-open source version of MBEE. This might be as simple as a security mailing list.
+If and when security-related updates are made to MBEE, refer to `CHANGELOG.md`
+for instructions on how to mitigate the issue.
+
 
 ## Known Gaps and Issues
 
@@ -103,16 +153,10 @@ an arbitrary admin user in the database.
 
 It's important to ensure that all test users are deleted from the database.
 
-#### Asynchronous Build Script 
-
-Some components in the build script are asynchronous and the build script will 
-print out a message that build is complete before build has finished.
-
-#### UI Refresh
-Refreshing some UI pages causes issues with page rendering due to client-side
-applications mapping to server-side routes.
-
-
+#### UI Model Tree Refresh
+If updating the parent in the model tree, an issue occurs with the re-rendering
+of model tree elements due to the refresh element functions. Refreshing the page 
+will display the updated, correct tree.
 
 ## Security Related Configuration
 
@@ -127,8 +171,8 @@ fact, it is part of the same running process. It is a module or collection of
 modules written in JavaScript as an Express application that is included by MBEE
 and used under namespaced routes. These plugins offer the ability to extend the
 functionality of MBEE. On one hand they allow for high-performance integrations
-with direct access to the underlying MBEE modules and database connections, on
-the other hand they extend MBEE functionality in along a monolithic architecture
+with direct access to the underlying MBEE modules and database connections. On
+the other hand, they extend MBEE functionality in a monolithic approach
 rather than a distributed microservice architecture that is created by API-based
 integrations.
 
@@ -143,11 +187,16 @@ any plugins being installed on an MBEE instance.
 
 ### Ports
 
-| Port   | Purpose                                                            |
-|:-------|:-------------------------------------------------------------------|
-| 9080   | MBEE HTTP port, this is adjustable in the configuration file.      |
-| 9443   | MBEE HTTPS port, this is adjustable in the configuration file.     |
-| 27017  | MongoDB. See [MongoDB section below](#mongodb) for more detail.    |
+Below are the default ports necessary for running an MBEE instance and what those
+ports are used for. The HTTP and HTTPS ports are adjustable in the configuration
+file. The MongoDB port can be adjusted on deployment, see 
+[MongoDB section below](#mongodb) for more detail. 
+
+| Port   | Purpose           |
+|:-------|:----------------- |
+| 9080   | MBEE HTTP port    |
+| 9443   | MBEE HTTPS port   |
+| 27017  | MongoDB           |
 
 
 ### Configuration JSON File
@@ -155,7 +204,7 @@ any plugins being installed on an MBEE instance.
 MBEE retrieves its configuration information from the JSON files in
 `config/*.json`. Which JSON file is used depends on the value of the `NODE_ENV`
 environment variable. MBEE looks for a file called `config/<NODE_ENV>.json`,
-where `<NODE_ENV>` is the value stored in the `NODE_ENV` environment variabled.
+where `<NODE_ENV>` is the value stored in the `NODE_ENV` environment variable.
 For example, if `NODE_ENV` is set to `production` MBEE will use the file
 `config/production.json` for its configuration.
 
@@ -163,24 +212,30 @@ This configuration file contains security-related information such as database
 credentials, authentication information, SSL certificate info, and more. This
 configuration should not be checked into version control.
 
-> It should be noted that this configuration is version controlled for the MBEE
-> development configurations. This is based on the assumptions that the security
-> of the development instance of MBEE is considered low risk and that the
-> gitlab.lmms.lmco.com server is considered reasonably secure.
->
-> This MUST be changed to a more secure approach and all credentials defined in
-> those configurations invalided before running MBEE's first internal production
-> instance.
+### Password Validation
 
-> Also note that certain authentication strategies may require that the users
-> API route be disabled in order to resolve conflicts between local or LDAP
-> authentication. This users API route can be disable on a per method basis in
-> the configuration file under server/api/userAPI.
+Password validation was designed to be configurable through each authentication
+module. When a user is created, the configured auth module is checked for an
+exported validator function called `validatePassword()`. This function should
+accept up to two parameters, the password (required) and the provider
+(optional), and should return a boolean of whether the password is valid or not.
+
+When creating a user, this function is ran and if the value *false* is returned,
+the creation of that user is rejected. The default password requirements
+provided in the local-strategy expect each password to contain at least 8
+characters and at least one number, uppercase letter, lowercase letter and at
+least one special character. If desired, one implementing this function can
+allow for stricter requirements, but we do not suggest lessening the
+requirements for security reasons.
+
+If using an auth module that does not need to store passwords in the database
+(such as LDAP), the `validatePassword()` function still needs to be provided and
+exported, but only needs to return *true* for any case.
 
 ### HTTPS
 
 To run MBEE with SSL enabled, you need a valid SSL certificate for the server.
-Once you have this you can simply define name of that certificate (which MBEE
+Once you have this you can simply define the name of that certificate (which MBEE
 expects to find in the `certs` directory of the project) in the `server.https`
 section of the configuration JSON file. For example, consider the following
 section of the configuration file:
@@ -312,14 +367,14 @@ mongod --sslMode requireSSL \
 
 MBEE operates on a concept of *modular authentication*. This means that one or
 more authentication modules are defined in the MBEE code. These authentication
-modules are located in the `app/auth` directory. MBEE was built to be an open
-source product and was therefore designed with varying organizations in mind.
+modules are located in the `app/auth` directory.
 
-To accommodate this, we implemented these authentication modules which allow
-each organization to write a few small functions to define their own
-authentication strategies that meet their organization's needs. As such, the
-module to be used is defined in the configuration JSON file. Consider the JSON
-configuration example below:
+MBEE was built to be an open source product and was therefore designed with 
+varying organizations in mind. To accommodate this, we implemented these 
+authentication modules which allow each organization to write a few small 
+functions to define their own authentication strategies that meet their 
+organization's needs. As such, the module to be used is defined in the 
+configuration JSON file. Consider the JSON configuration example below:
 
 ```json
 {
@@ -341,16 +396,16 @@ configuration example below:
 ```
 
 The `auth.strategy` section tells MBEE which authentication module or *strategy*
-to used. The `auth.ldap` section is required for the LDAP strategy and is used
+to use. The `auth.ldap` section is required for the LDAP strategy and is used
 to pass LDAP-specific information into MBEE.
 
-Also important to note is the `auth.token` and `auth.session` configuration.
-Both allow the definition of an expiration time, but there are differences
-between the two that should be explained.
+Also important to note are the `auth.token` and `auth.session` configuration 
+options. Both allow the definition of an expiration time, but there are 
+differences between the two that should be explained.
 
 A token is generated within MBEE. It stores basic information about the user
-(such as username and token expiration time) encrypted using the server's secret
-key (see the section on [Server Secret Key](#server-secret-key) above). This
+(such as username and token expiration time), which is encrypted using the server's 
+secret key (see the section on [Server Secret Key](#server-secret-key) above). This
 token is used to authenticate the user during session token authentication as
 well as API token authentication. The `auth.token` section defines when this
 token expires.
@@ -362,8 +417,3 @@ For API interactions with MBEE, only the `auth.token` expiration matters since
 sessions aren't used. However, for UI interaction with MBEE, both the token
 and session definitions matter. Whichever expires first will cause the user's
 authentication to expire.
-
-
-## Security for Developers
-
-TODO - Discuss security-related developer considerations

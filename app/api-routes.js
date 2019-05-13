@@ -35,7 +35,7 @@ const Middleware = M.require('lib.middleware');
  *   get:
  *     tags:
  *       - general
- *     description: Returns a 200 status. Used to test if the API is up or a
+ *     description: Returns a 200 status. Used to test if the API is up and a
  *        connection can be established.
  *     responses:
  *       200:
@@ -59,7 +59,7 @@ api.get('/test', Middleware.logRoute, APIController.test);
  */
 api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
 
-// TODO: Address deprecation warning on login
+
 /**
  * @swagger
  * /api/login:
@@ -124,8 +124,7 @@ api.route('/version')
  *     tags:
  *       - organizations
  *     description: Returns an array of organizations the requesting user has
- *                  read access to. By default, returns all organizations the
- *                  user has read access to. Optionally, an array of IDs can be
+ *                  read access to. Optionally, an array of IDs can be
  *                  provided in the request body or a comma separated list in
  *                  the request parameters to find multiple, specific orgs.
  *     produces:
@@ -136,18 +135,19 @@ api.route('/version')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to are found.
+ *         description: An array of org IDs to search for. If both query
+ *                      parameter and body are not provided, all orgs the
+ *                      user has read access to are found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both the
- *                      query parameter and body are not provided, all objects
- *                      the user has access to are found.
+ *                      query parameter and body are not provided, all orgs
+ *                      the user has read access to are found.
  *         in: query
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: archived
@@ -159,7 +159,9 @@ api.route('/version')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: limit
@@ -227,14 +229,17 @@ api.route('/version')
  *         description: An array of objects containing organization data.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -264,7 +269,7 @@ api.route('/version')
  *       - organizations
  *     description: Creates or replaces multiple organizations from the data
  *                  provided in the request body. If the organization already
- *                  exists, it is updated with the provided data. NOTE This
+ *                  exists, it is replaced with the provided data. NOTE This
  *                  function is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
@@ -277,12 +282,12 @@ api.route('/version')
  *             type: object
  *             required:
  *               - id
+ *               - name
  *             properties:
  *               id:
  *                 type: string
  *               name:
  *                 type: string
- *                 description: Required if creating an organization.
  *               custom:
  *                 type: object
  *               permissions:
@@ -292,14 +297,17 @@ api.route('/version')
  *         description: An array of objects containing organization data.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -353,6 +361,8 @@ api.route('/version')
  *                 type: string
  *               custom:
  *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
  *               archived:
  *                 type: boolean
  *               permissions:
@@ -362,14 +372,17 @@ api.route('/version')
  *                              the role should be REMOVE_ALL.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -420,7 +433,7 @@ api.route('/version')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to DELETE orgs, returns deleted orgs' ids.
+ *         description: OK, Succeeded to DELETE orgs, returns deleted org's ids.
  *       400:
  *         description: Bad Request, Failed to DELETE orgs due to invalid data
  *                      in the request body.
@@ -431,7 +444,7 @@ api.route('/version')
  *         description: Forbidden, Failed to DELETE orgs due to not having
  *                      correct permissions.
  *       500:
- *         description: Internal Server Error, Failed to PATCH org due to a
+ *         description: Internal Server Error, Failed to DELETE org due to a
  *                      server side issue.
  */
 api.route('/orgs')
@@ -468,7 +481,7 @@ api.route('/orgs')
  *   get:
  *     tags:
  *       - organizations
- *     description: Finds and returns an organizations public data if the user
+ *     description: Finds and returns an organization's public data if the user
  *                  has read permissions on that org.
  *     produces:
  *       - application/json
@@ -480,7 +493,8 @@ api.route('/orgs')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *         required: false
@@ -493,7 +507,9 @@ api.route('/orgs')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -551,7 +567,8 @@ api.route('/orgs')
  *                            usernames, and values are the permission.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *         required: false
@@ -559,7 +576,9 @@ api.route('/orgs')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -621,7 +640,8 @@ api.route('/orgs')
  *                            usernames, and values are the permission.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *         required: false
@@ -629,7 +649,9 @@ api.route('/orgs')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -641,19 +663,19 @@ api.route('/orgs')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST org, returns org public data.
+ *         description: OK, Succeeded to PUT org, returns org public data.
  *       400:
- *         description: Bad Request, Failed to POST org due to invalid field in
+ *         description: Bad Request, Failed to PUT org due to invalid field in
  *                      request data.
  *       401:
- *         description: Unauthorized, Failed to POST org due to not being
- *                      logged in.
+ *         description: Unauthorized, Failed to PUT org due to not being logged
+ *                      in.
  *       403:
- *         description: Forbidden, Failed to POST org due to an existing org
- *                      with same id.
+ *         description: Forbidden, Failed to PUT org due to an existing org with
+ *                      same id.
  *       500:
- *         description: Internal Server Error, Failed to POST org due to a
- *                      server side issue.
+ *         description: Internal Server Error, Failed to PUT org due to a server
+ *                      side issue.
  *   patch:
  *     tags:
  *       - organizations
@@ -680,6 +702,8 @@ api.route('/orgs')
  *               type: string
  *             custom:
  *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
  *             archived:
  *               type: boolean
  *             permissions:
@@ -689,14 +713,17 @@ api.route('/orgs')
  *                              the role should be REMOVE_ALL.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      projects]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, permissions,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -796,14 +823,15 @@ api.route('/orgs/:orgid')
  *   get:
  *     tags:
  *       - projects
- *     description: Returns a list of all projects and their public data that
- *                  the requesting user has access to.
+ *     description: Returns a list of all project's public data that the
+ *                  requesting user has read access to.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -816,7 +844,9 @@ api.route('/orgs/:orgid')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: limit
@@ -840,7 +870,7 @@ api.route('/orgs/:orgid')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET projects, returns project public
+ *         description: OK, Succeeded to GET projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to GET projects due to invalid data.
@@ -864,6 +894,7 @@ api.route('/projects')
   APIController.getAllProjects
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects:
@@ -871,11 +902,10 @@ api.route('/projects')
  *     tags:
  *       - projects
  *     description: Returns an array of projects the requesting user has read
- *                  access to on a specified org. By default, returns all
- *                  projects on the specified org that the user has read access
- *                  to. Optionally, an array of IDs can be provided in the
- *                  request body or a comma separated list in the request
- *                  parameters to find multiple, specific projects.
+ *                  access to on a specified org. Optionally, an array of IDs
+ *                  can be provided in the request body or a comma separated
+ *                  list in the request parameters to find multiple, specific
+ *                  projects.
  *     produces:
  *       - application/json
  *     parameters:
@@ -890,18 +920,21 @@ api.route('/projects')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to (under the specified org) are found.
+ *         description: An array of project IDs to search for. If both query
+ *                      parameter and body are not provided, all projects the
+ *                      user has read access to (under the specified org) are
+ *                      found.
  *       - name: ids
- *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
- *                      user has access to (under the specified org) are found.
+ *         description: Comma separated list of project IDs to search for. If
+ *                      both query parameter and body are not provided, all
+ *                      projects the user has read access to (under the
+ *                      specified org) are found.
  *         in: query
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *       - name: archived
@@ -913,7 +946,9 @@ api.route('/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: limit
@@ -937,7 +972,7 @@ api.route('/projects')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET projects, returns project public
+ *         description: OK, Succeeded to GET projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to GET projects due to invalid data.
@@ -958,6 +993,8 @@ api.route('/projects')
  *       - projects
  *     description: Creates multiple projects from the supplied data in the
  *                  request body. Returns the created projects' public data.
+ *                  Requesting user must have at least write access on the
+ *                  organization to create projects.
  *     produces:
  *       - application/json
  *     parameters:
@@ -991,9 +1028,17 @@ api.route('/projects')
  *                 type: object
  *                 description: Any preset permissions. Keys are the users
  *                              usernames, and values are the permission.
+ *               projectReferences:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Any projects to reference in the model. Projects
+ *                              must be in the same organization and must have a
+ *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1001,7 +1046,9 @@ api.route('/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1032,20 +1079,21 @@ api.route('/projects')
  *       - projects
  *     description: Creates or replaces multiple projects from the supplied data
  *                  in the request body. If the project already exists, it will
- *                  be replaced along with the root model element. Returns the
+ *                  be replaced along with the pre-set elements. Returns the
  *                  created projects' public data. NOTE this endpoint is
  *                  reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
  *       - name: orgid
- *         description: The ID of the organization whose projects to create.
+ *         description: The ID of the organization whose projects to create or
+ *                      replace.
  *         in: path
  *         required: true
  *         type: string
  *       - name: projects
  *         in: body
- *         description: An array of objects containing new project data.
+ *         description: An array of objects containing project data.
  *         schema:
  *           type: array
  *           items:
@@ -1068,9 +1116,17 @@ api.route('/projects')
  *                 type: object
  *                 description: Any preset permissions. Keys are the users
  *                              usernames, and values are the permission.
+ *               projectReferences:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Any projects to reference in the model. Projects
+ *                              must be in the same organization and must have a
+ *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1078,7 +1134,9 @@ api.route('/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1090,7 +1148,7 @@ api.route('/projects')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to PUT projects, returns project public
+ *         description: OK, Succeeded to PUT projects, returns project's public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to PUT projects due to invalid
@@ -1140,6 +1198,8 @@ api.route('/projects')
  *                 type: string
  *               custom:
  *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
  *               archived:
  *                 type: boolean
  *               permissions:
@@ -1147,16 +1207,26 @@ api.route('/projects')
  *                 description: An object where keys are usernames and values
  *                              are the new role the user has. To remove a user,
  *                              the role should be REMOVE_ALL.
+ *               projectReferences:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Any projects to reference in the model. Projects
+ *                              must be in the same organization and must have a
+ *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1228,7 +1298,7 @@ api.route('/projects')
  *                      permissions.
  *       500:
  *         description: Internal Server Error, Failed to DELETE org due to a
- *                      server side issue.
+ *                      server side issue
  */
 api.route('/orgs/:orgid/projects')
 .get(
@@ -1264,7 +1334,7 @@ api.route('/orgs/:orgid/projects')
  *   get:
  *     tags:
  *       - projects
- *     description: Finds and returns a projects public data if the user has
+ *     description: Finds and returns a project's public data if the user has
  *                  read permissions on that project.
  *     produces:
  *       - application/json
@@ -1281,7 +1351,8 @@ api.route('/orgs/:orgid/projects')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1294,7 +1365,9 @@ api.route('/orgs/:orgid/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1326,7 +1399,8 @@ api.route('/orgs/:orgid/projects')
  *     tags:
  *       - projects
  *     description: Creates a new project from the given data in the request
- *                  body.
+ *                  body. Requesting user must have at least write access on the
+ *                  organization to create a project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1364,9 +1438,17 @@ api.route('/orgs/:orgid/projects')
  *               type: object
  *               description: Any preset permissions. Keys are the users
  *                            usernames, and values are the permission.
+ *             projectReferences:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               description: Any projects to reference in the model. Projects
+ *                            must be in the same organization and must have a
+ *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1374,7 +1456,9 @@ api.route('/orgs/:orgid/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1447,9 +1531,17 @@ api.route('/orgs/:orgid/projects')
  *               type: object
  *               description: Any preset permissions. Keys are the users
  *                            usernames, and values are the permission.
+ *             projectReferences:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               description: Any projects to reference in the model. Projects
+ *                            must be in the same organization and must have a
+ *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *         required: false
@@ -1457,7 +1549,9 @@ api.route('/orgs/:orgid/projects')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1492,7 +1586,8 @@ api.route('/orgs/:orgid/projects')
  *     description: Updates an existing project. The following fields can be
  *                  updated [name, custom, archived, permissions]. Projects that
  *                  are currently archived must first be unarchived before
- *                  making any other updates.
+ *                  making any other updates. Requesting user must be a project
+ *                  admin to update the project.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1517,6 +1612,8 @@ api.route('/orgs/:orgid/projects')
  *               type: string
  *             custom:
  *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
  *             archived:
  *               type: boolean
  *             permissions:
@@ -1524,16 +1621,26 @@ api.route('/orgs/:orgid/projects')
  *                 description: An object where keys are usernames and values
  *                              are the new role the user has. To remove a user,
  *                              the role should be REMOVE_ALL.
+ *             projectReferences:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               description: Any projects to reference in the model. Projects
+ *                            must be in the same organization and must have a
+ *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      org]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org,
+ *                      permissions, projectReferences, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1636,6 +1743,7 @@ api.route('/orgs/:orgid/projects/:projectid')
   APIController.deleteProject
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/search:
@@ -1643,11 +1751,10 @@ api.route('/orgs/:orgid/projects/:projectid')
  *     tags:
  *       - elements
  *     description: Finds multiple elements using text based search on the
- *                  documentation, name, id, parent, source and target fields.
- *                  Allows for exact searches by quoting the desired field
- *                  "exact search", or the ability to not include a word in a
- *                  search by using a dash -not. Returns the elements public
- *                  data.
+ *                  documentation and name fields. Allows for exact searches by
+ *                  quoting the desired string "exact search", or the ability to
+ *                  not include a word in a search by using a dash -not. Returns
+ *                  the elements public data.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1673,7 +1780,8 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -1701,6 +1809,44 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: parent
+ *         description: Search for elements with a specific parent.
+ *         in: query
+ *         type: string
+ *       - name: source
+ *         description: Search for elements with a specific source.
+ *         in: query
+ *         type: string
+ *       - name: target
+ *         description: Search for elements with a specific target.
+ *         in: query
+ *         type: string
+ *       - name: type
+ *         description: Search for elements with a specific type.
+ *         in: query
+ *         type: string
+ *       - name: name
+ *         description: Search for elements with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for elements created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for elements last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for elements archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello.
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1734,11 +1880,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *   get:
  *     tags:
  *       - elements
- *     description: Returns an array of elements on a specified branch. By
- *                  default, returns all elements on the specified branch.
- *                  Optionally, an array of IDs can be provided in the request
- *                  body or a comma separated list in the request parameters to
- *                  find multiple, specific elements.
+ *     description: Returns an array of elements on a specified branch if the
+ *                  requesting user has read access on the project. Optionally,
+ *                  an array of IDs can be provided in the request body or a
+ *                  comma separated list in the request parameters to find
+ *                  multiple, specific elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1763,20 +1909,21 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *           type: array
  *           items:
  *             type: string
- *         description: An array of object IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
+ *         description: An array of element IDs to search for. If both query
+ *                      parameter and body are not provided, all elements the
  *                      user has access to (under the specified branch) are
  *                      found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all objects the
+ *                      parameter and body are not provided, all elements the
  *                      user has access to (under the specified branch) are
  *                      found.
  *         in: query
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -1787,14 +1934,16 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         type: boolean
  *       - name: subtree
  *         description: If true, returns all searched elements as well as the
- *                      elements in the searched element's subtree.
+ *                      elements in the found element's subtrees.
  *         in: query
  *         type: boolean
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
  *         in: query
  *         type: string
  *       - name: limit
@@ -1826,6 +1975,44 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: parent
+ *         description: Search for elements with a specific parent.
+ *         in: query
+ *         type: string
+ *       - name: source
+ *         description: Search for elements with a specific source.
+ *         in: query
+ *         type: string
+ *       - name: target
+ *         description: Search for elements with a specific target.
+ *         in: query
+ *         type: string
+ *       - name: type
+ *         description: Search for elements with a specific type.
+ *         in: query
+ *         type: string
+ *       - name: name
+ *         description: Search for elements with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for elements created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for elements last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for elements archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -1849,6 +2036,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - elements
  *     description: Creates multiple elements from the supplied data in the
  *                  request body. Returns the created element' public data.
+ *                  Requesting user must have write permissions on the project
+ *                  to create elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1888,9 +2077,35 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *               source:
  *                 type: string
  *                 description: Required if target is provided.
+ *               sourceNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the source element. The source's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               target:
  *                 type: string
  *                 description: Required if source is provided.
+ *               targetNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the target element. The targets's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               documentation:
  *                 type: string
  *                 default: ''
@@ -1903,7 +2118,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -1911,7 +2127,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -1935,7 +2154,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Forbidden, Failed to POST elements due to permissions
  *                      or already existing elements with matching ids.
  *       404:
- *         description: Not Found, Failed to GET branch, project or org.
+ *         description: Not Found, Failed to POST elements due to org, project,
+ *                      or branch not existing.
  *       500:
  *         description: Internal Server Error, Failed to POST elements due to a
  *                      server side issue.
@@ -1987,9 +2207,35 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *               source:
  *                 type: string
  *                 description: Required if target is provided.
+ *               sourceNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the source element. The source's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               target:
  *                 type: string
  *                 description: Required if source is provided.
+ *               targetNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the target element. The targets's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               documentation:
  *                 type: string
  *                 default: ''
@@ -2002,7 +2248,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2010,7 +2257,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2047,7 +2297,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                  first be unarchived before making any other updates. The
  *                  following fields can be updated [name, custom, archived,
  *                  parent, type, documentation]. NOTE, the id is required in
- *                  the request body, but CANNOT be updated.
+ *                  the request body, but CANNOT be updated. Requesting user
+ *                  must have write permissions on the project to update
+ *                  elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2086,19 +2338,48 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: string
  *               source:
  *                 type: string
+ *               sourceNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the source element. The source's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               target:
  *                 type: string
+ *               targetNamespace:
+ *                 type: object
+ *                 description: An optional field to specify the namespace of
+ *                              the target element. The target's project must
+ *                              be in the given project's projectReferences
+ *                              array.
+ *                 properties:
+ *                   org:
+ *                     type: string
+ *                   project:
+ *                     type: string
+ *                   branch:
+ *                     type: string
  *               documentation:
  *                 type: string
  *               type:
  *                 type: string
  *               custom:
  *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
  *               archived:
  *                 type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2106,7 +2387,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2135,8 +2419,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *   delete:
  *     tags:
  *       - elements
- *     description: Deletes multiple elements. NOTE this endpoint can be used by
- *                  system-admins ONLY.
+ *     description: Deletes multiple elements and all elements in their
+ *                  subtrees.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2216,6 +2500,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   APIController.deleteElements
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/elements/{elementid}:
@@ -2223,6 +2508,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       - elements
  *     description: Returns an elements public data on a specified branch.
+ *                  Requesting user must have read access on the project to find
+ *                  elements.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2249,7 +2536,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2268,7 +2556,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2300,6 +2591,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       - elements
  *     description: Creates a new element from given data in the request body.
+ *                  Requesting user must have at least write access on the
+ *                  project to create an element.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2345,10 +2638,36 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: string
  *               description: An optional field that stores the ID of a source
  *                            element. If provided, target is required.
+ *             sourceNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the source element. The source's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             target:
  *               type: string
  *               description: An optional field that stores the ID of a target
  *                            element. If provided, source is required.
+ *             targetNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the target element. The target's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             documentation:
  *               type: string
  *               default: ''
@@ -2360,7 +2679,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2368,7 +2688,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2448,10 +2771,36 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: string
  *               description: An optional field that stores the ID of a source
  *                            element. If provided, target is required.
+ *             sourceNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the source element. The source's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             target:
  *               type: string
  *               description: An optional field that stores the ID of a target
  *                            element. If provided, source is required.
+ *             targetNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the target element. The target's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             documentation:
  *               type: string
  *               default: ''
@@ -2463,7 +2812,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2471,7 +2821,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2505,7 +2858,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     description: Updates an existing element. The following fields can be
  *                  updated [name, custom, archived, parent, documentation,
  *                  type]. Elements that are currently archived must first be
- *                  unarchived before making any other updates.
+ *                  unarchived before making any other updates. Requesting user
+ *                  must have at least write access on the porject to update an
+ *                  element.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2544,19 +2899,48 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: string
  *             source:
  *               type: string
+ *             sourceNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the source element. The source's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             target:
  *               type: string
+ *             targetNamespace:
+ *               type: object
+ *               description: An optional field to specify the namespace of
+ *                            the target element. The target's project must
+ *                            be in the given project's projectReferences
+ *                            array.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                 project:
+ *                   type: string
+ *                 branch:
+ *                   type: string
  *             documentation:
  *               type: string
  *             type:
  *               type: string
  *             custom:
  *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
  *             archived:
  *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      parent, source, target, project]
  *         in: query
  *         type: string
  *         required: false
@@ -2564,7 +2948,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn]
+
  *         in: query
  *         type: string
  *       - name: minified
@@ -2597,8 +2984,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *     tags:
  *       -  elements
  *     description: Deletes the specified element and all elements in the
- *                  specified elements subtree. NOTE this endpoint is reserved
- *                  for system-wide admins ONLY.
+ *                  specified element's subtree.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2678,16 +3064,17 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   APIController.deleteElement
 );
 
+
 /**
  * @swagger
  * /api/users:
  *   get:
  *     tags:
  *       - users
- *     description: Returns an array of users. By default, returns all users.
- *                  Optionally, an array of usernames can be provided in the
- *                  request body or a comma separated list in the request
- *                  parameters to find multiple, specific users.
+ *     description: Returns an array of users. Optionally, an array of usernames
+ *                  can be provided in the request body or a comma separated
+ *                  list in the request parameters to find multiple, specific
+ *                  users.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2707,7 +3094,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -2720,7 +3107,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: limit
@@ -2782,7 +3172,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: string
  *               password:
  *                 type: string
- *                 description: Required unless running LDAP auth.
+ *                 description: Required unless running LDAP auth or some custom
+ *                              authentication strategy which does not store
+ *                              passwords.
  *               fname:
  *                 type: string
  *                 description: User's first name.
@@ -2803,7 +3195,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -2811,7 +3203,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2858,7 +3253,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: string
  *               password:
  *                 type: string
- *                 description: Required unless running LDAP auth.
+ *                 description: Required unless running LDAP auth or some custom
+ *                              authentication strategy which does not store
+ *                              passwords.
  *               fname:
  *                 type: string
  *                 description: User's first name.
@@ -2879,7 +3276,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -2887,7 +3284,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2918,8 +3318,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                  body. Users that are currently archived must first be
  *                  unarchived before making any other updates. The following
  *                  fields can be updated [custom, archived, fname, lname,
- *                  preferredName, email]. NOTE, the username is required in the
- *                  request body, but CANNOT be updated. This endpoint is
+ *                  preferredName, email, admin]. NOTE, the username is required
+ *                  in the request body, but CANNOT be updated. This endpoint is
  *                  reserved for admins only, unless user is updating self.
  *     produces:
  *       - application/json
@@ -2949,11 +3349,17 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: string
  *               custom:
  *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
  *               archived:
  *                 type: boolean
+ *               admin:
+ *                 type: boolean
+ *                 description: NOTE only current system-wide admins can update
+ *                              this field.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -2961,7 +3367,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3059,6 +3468,7 @@ api.route('/users')
   APIController.deleteUsers
 );
 
+
 /**
  * @swagger
  * /api/users/whoami:
@@ -3100,6 +3510,7 @@ api.route('/users/whoami')
   APIController.whoami
 );
 
+
 /**
  * @swagger
  * /api/users/{username}:
@@ -3117,7 +3528,7 @@ api.route('/users/whoami')
  *         in: path
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3130,7 +3541,10 @@ api.route('/users/whoami')
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3160,7 +3574,7 @@ api.route('/users/whoami')
  *     tags:
  *       - users
  *     description: Create a new user from the given data in the request body.
- *                  This endpoint is reserved for system-wide admins ONLY.
+ *                  NOTE this endpoint is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3201,7 +3615,7 @@ api.route('/users/whoami')
  *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3209,7 +3623,10 @@ api.route('/users/whoami')
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3262,7 +3679,9 @@ api.route('/users/whoami')
  *             password:
  *               type: string
  *               description: The password of the user. This field is required
- *                            unless LDAP authentication is used.
+ *                            unless LDAP authentication is used or some custom
+ *                            authentication strategy that does not store
+ *                            passwords.
  *             fname:
  *               type: string
  *             lname:
@@ -3280,7 +3699,7 @@ api.route('/users/whoami')
  *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3288,7 +3707,10 @@ api.route('/users/whoami')
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3307,7 +3729,7 @@ api.route('/users/whoami')
  *         description: Unauthorized, Failed to PUT user due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST PUT due to an invalid request
+ *         description: Forbidden, Failed to PUT user due to an invalid request
  *                      body.
  *       500:
  *         description: Internal Server Error, Failed to PUT user due to server
@@ -3317,8 +3739,10 @@ api.route('/users/whoami')
  *       - users
  *     description: Updates an existing user. The following fields can be
  *                  updated [fname, lname, preferredName, email, custom,
- *                  archived]. Users that are currently archived must first be
- *                  unarchived before making any other updates.
+ *                  archived, admin]. Users that are currently archived must
+ *                  first be unarchived before making any other updates. NOTE
+ *                  this endpoint is reserved for system-wide admins only,
+ *                  unless a user is updating themselves.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3344,18 +3768,27 @@ api.route('/users/whoami')
  *               type: string
  *             custom:
  *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
  *             archived:
  *               type: boolean
+ *             admin:
+ *               type: boolean
+ *               description: NOTE only current system-wide admins can update
+ *                            this field.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *       - name: fields
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3380,7 +3813,7 @@ api.route('/users/whoami')
  *         description: Not Found, Failed ot PATCH user due to user not
  *                      existing.
  *       500:
- *         description: Internal Server Error, Failed ot PATCH user due to
+ *         description: Internal Server Error, Failed to PATCH user due to
  *                      server side issue.
  *   delete:
  *     tags:
@@ -3454,6 +3887,7 @@ api.route('/users/:username')
   APIController.deleteUser
 );
 
+
 /**
  * @swagger
  * /api/users/{username}/password:
@@ -3510,7 +3944,7 @@ api.route('/users/:username')
  *         description: Forbidden, Failed to PATCH user due updating an
  *                      immutable field.
  *       500:
- *         description: Internal Server Error, Failed to DELETE user due to
+ *         description: Internal Server Error, Failed to PATCH user due to
  *                      server side issues.
  */
 api.route('/users/:username/password')
@@ -3520,6 +3954,7 @@ api.route('/users/:username/password')
   Middleware.disableUserAPI,
   APIController.patchPassword
 );
+
 
 // Catches any invalid api route not defined above.
 api.use('*', APIController.invalidRoute);

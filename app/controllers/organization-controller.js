@@ -11,6 +11,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Organization model
  * that provides functions implementing controller logic and behavior.
@@ -56,8 +57,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
@@ -67,6 +68,8 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of found organization objects
  *
@@ -81,6 +84,12 @@ const jmi = M.require('lib.jmi-conversions');
  */
 function find(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
+    // Set options if no orgs were provided, but options were
+    if (typeof orgs === 'object' && orgs !== null && !Array.isArray(orgs)) {
+      options = orgs; // eslint-disable-line no-param-reassign
+      orgs = undefined; // eslint-disable-line no-param-reassign
+    }
+
     // Ensure input parameters are correct type
     try {
       assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
@@ -105,87 +114,12 @@ function find(requestingUser, orgs, options) {
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = (orgs !== undefined)
-      ? sani.sanitize(JSON.parse(JSON.stringify(orgs)))
+      ? sani.mongo(JSON.parse(JSON.stringify(orgs)))
       : undefined;
 
-    // Set options if no orgs were provided, but options were
-    if (typeof orgs === 'object' && orgs !== null && !Array.isArray(orgs)) {
-      options = orgs; // eslint-disable-line no-param-reassign
-    }
-
-    // Initialize valid options
-    let archived = false;
-    let populateString = '';
-    let fieldsString = '';
-    let limit = 0;
-    let skip = 0;
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
-
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Organization.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'fields', 'limit', 'skip', 'lean'], Organization);
 
     // Define searchQuery
     const searchQuery = { archived: false };
@@ -194,7 +128,7 @@ function find(requestingUser, orgs, options) {
       searchQuery[`permissions.${reqUser._id}`] = 'read';
     }
     // If the archived field is true, remove it from the query
-    if (archived) {
+    if (validOptions.archived) {
       delete searchQuery.archived;
     }
 
@@ -212,11 +146,22 @@ function find(requestingUser, orgs, options) {
       throw new M.CustomError('Invalid input for finding organizations.', 400, 'warn');
     }
 
-    // Find the orgs
-    Organization.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-    .populate(populateString)
-    .then((foundOrgs) => resolve(foundOrgs))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    // If the lean option is supplied
+    if (validOptions.lean) {
+      // Find the orgs
+      Organization.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString).lean()
+      .then((foundOrgs) => resolve(foundOrgs))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
+    else {
+      Organization.find(searchQuery, validOptions.fieldsString,
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .populate(validOptions.populateString)
+      .then((foundOrgs) => resolve(foundOrgs))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
   });
 }
 
@@ -242,6 +187,8 @@ function find(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created organization objects
  *
@@ -280,57 +227,18 @@ function create(requestingUser, orgs, options) {
 
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     let orgObjects = [];
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Organization.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Organization);
 
     // Define array to store org data
     let orgsToCreate = [];
 
     // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
+    if (Array.isArray(saniOrgs)) {
       // orgs is an array, create many orgs
       orgsToCreate = saniOrgs;
     }
@@ -345,7 +253,7 @@ function create(requestingUser, orgs, options) {
 
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
-    const validOrgKeys = ['id', 'name', 'custom', 'permissions'];
+    const validOrgKeys = ['id', 'name', 'custom', 'permissions', 'archived'];
 
     // Check that each org has an id, and add to arrIDs
     try {
@@ -385,7 +293,7 @@ function create(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find any existing, conflicting orgs
-    Organization.find(searchQuery, '_id')
+    Organization.find(searchQuery, '_id').lean()
     .then((foundOrgs) => {
       // If there are any foundOrgs, there is a conflict
       if (foundOrgs.length > 0) {
@@ -398,11 +306,11 @@ function create(requestingUser, orgs, options) {
       }
 
       // Get all existing users for permissions
-      return User.find({});
+      return User.find({}).lean();
     })
     .then((foundUsers) => {
       // Create array of usernames
-      const foundUsernames = foundUsers.map(u => u.username);
+      const foundUsernames = foundUsers.map(u => u._id);
       // For each object of org data, create the org object
       orgObjects = orgsToCreate.map((o) => {
         const orgObj = new Organization(o);
@@ -444,9 +352,17 @@ function create(requestingUser, orgs, options) {
       // Emit the event orgs-created
       EventEmitter.emit('orgs-created', orgObjects);
 
-      return resolve(Organization.find({ _id: { $in: arrIDs } }, fieldsString)
-      .populate(populateString));
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        return Organization.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
+      }
+      else {
+        return Organization.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
+        .populate(validOptions.populateString);
+      }
     })
+    .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
@@ -473,10 +389,10 @@ function create(requestingUser, orgs, options) {
  * @param {Object} [orgs.permissions] - An object of key value pairs, where the
  * key is the username, and the value is the role which the user is to have in
  * the org. To remove a user from an org, the value must be 'remove_all'.
- * @param {Object} [orgs.custom] - The additions or changes to existing custom
- * data. If the key/value pair already exists, the value will be changed. If the
- * key/value pair does not exist, it will be added.
- * @param {boolean} [orgs.archived] - The updated archived field. If true, the
+ * @param {Object} [orgs.custom] - The new custom data object. Please note,
+ * updating the custom data object completely replaces the old custom data
+ * object.
+ * @param {boolean} [orgs.archived = false] - The updated archived field. If true, the
  * org will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
@@ -484,6 +400,8 @@ function create(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of updated organization objects
  *
@@ -520,7 +438,7 @@ function update(requestingUser, orgs, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const duplicateCheck = {};
     let foundOrgs = [];
@@ -528,51 +446,12 @@ function update(requestingUser, orgs, options) {
     let existingUsers = [];
     let updatingPermissions = false;
 
-    // Initialize valid options
-    let populateString = '';
-    let fieldsString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a array of strings
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Organization.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString = options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Organization);
 
     // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
+    if (Array.isArray(saniOrgs)) {
       // orgs is an array, update many orgs
       orgsToUpdate = saniOrgs;
     }
@@ -620,7 +499,7 @@ function update(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the orgs to update
-    Organization.find(searchQuery).populate('projects')
+    Organization.find(searchQuery).populate('projects').lean()
     .then((_foundOrgs) => {
       // Set function-wide foundOrgs
       foundOrgs = _foundOrgs;
@@ -645,7 +524,7 @@ function update(requestingUser, orgs, options) {
 
       // Find users if updating permissions
       if (updatingPermissions) {
-        return User.find({});
+        return User.find({}).find();
       }
 
       // Return an empty array if not updating permissions
@@ -757,21 +636,11 @@ function update(requestingUser, orgs, options) {
                       `${permValue} is not a valid permission`, 400, 'warn'
                     );
                 }
-
-                // Copy permissions from org to update object
-                updateOrg.permissions = org.permissions;
               });
-            }
-            else {
-              // Add and replace parameters of the type 'Mixed'
-              utils.updateAndCombineObjects(org[key], updateOrg[key]);
 
-              // Set mixed field in updateOrg
-              updateOrg[key] = org[key];
+              // Copy permissions from org to update object
+              updateOrg.permissions = org.permissions;
             }
-            // Mark mixed fields as updated, required for mixed fields to update in mongoose
-            // http://mongoosejs.com/docs/schematypes.html#mixed
-            org.markModified(key);
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
@@ -804,8 +673,17 @@ function update(requestingUser, orgs, options) {
       // Update all orgs through a bulk write to the database
       return Organization.bulkWrite(bulkArray);
     })
-    .then(() => Organization.find(searchQuery, fieldsString)
-    .populate(populateString))
+    .then(() => {
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        return Organization.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString).lean();
+      }
+      else {
+        return Organization.find(searchQuery, validOptions.fieldsString)
+        .populate(validOptions.populateString);
+      }
+    })
     .then((foundUpdatedOrgs) => {
       // Emit the event orgs-updated
       EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
@@ -833,7 +711,7 @@ function update(requestingUser, orgs, options) {
  * @param {Object} [orgs.custom] - The additions or changes to existing custom
  * data. If the key/value pair already exists, the value will be changed. If the
  * key/value pair does not exist, it will be added.
- * @param {boolean} [orgs.archived] - The archived field. If true, the org will
+ * @param {boolean} [orgs.archived = false] - The archived field. If true, the org will
  * not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
@@ -841,6 +719,8 @@ function update(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of replaced/created organization objects
  *
@@ -879,7 +759,7 @@ function createOrReplace(requestingUser, orgs, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     const duplicateCheck = {};
     let foundOrgs = [];
     let orgsToLookup = [];
@@ -887,7 +767,7 @@ function createOrReplace(requestingUser, orgs, options) {
     const timestamp = Date.now();
 
     // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'object')) {
+    if (Array.isArray(saniOrgs)) {
       // orgs is an array, update many orgs
       orgsToLookup = saniOrgs;
     }
@@ -928,7 +808,7 @@ function createOrReplace(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the orgs to replace
-    Organization.find(searchQuery)
+    Organization.find(searchQuery).lean()
     .then((_foundOrgs) => {
       foundOrgs = _foundOrgs;
 
@@ -947,7 +827,7 @@ function createOrReplace(requestingUser, orgs, options) {
       });
     })
     // Delete orgs from database
-    .then(() => Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }))
+    .then(() => Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }).lean())
     .then(() => {
       // Emit the event orgs-deleted
       EventEmitter.emit('orgs-deleted', foundOrgs);
@@ -1019,7 +899,7 @@ function remove(requestingUser, orgs, options) {
     }
 
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.sanitize(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     let foundOrgs = [];
     let searchedIDs = [];
 
@@ -1028,7 +908,7 @@ function remove(requestingUser, orgs, options) {
     const ownedQuery = {};
 
     // Check the type of the orgs parameter
-    if (Array.isArray(saniOrgs) && saniOrgs.every(o => typeof o === 'string')) {
+    if (Array.isArray(saniOrgs)) {
       // An array of org ids, remove all
       searchedIDs = saniOrgs;
       searchQuery._id = { $in: saniOrgs };
@@ -1044,12 +924,12 @@ function remove(requestingUser, orgs, options) {
     }
 
     // Find the orgs to delete
-    Organization.find(searchQuery)
+    Organization.find(searchQuery).lean()
     .then((_foundOrgs) => {
       // Set function-wde foundOrgs and create ownedQuery
       foundOrgs = _foundOrgs;
       const foundOrgIDs = foundOrgs.map(o => o._id);
-      const regexIDs = _foundOrgs.map(o => `/^${o._id}/`);
+      const regexIDs = _foundOrgs.map(o => RegExp(`^${o._id}`));
       ownedQuery._id = { $in: regexIDs };
 
       // Check if all orgs were found
@@ -1069,12 +949,12 @@ function remove(requestingUser, orgs, options) {
       });
 
       // Delete any elements in the org
-      return Element.deleteMany(ownedQuery);
+      return Element.deleteMany(ownedQuery).lean();
     })
     // Delete any projects in the org
-    .then(() => Project.deleteMany({ org: { $in: saniOrgs } }))
+    .then(() => Project.deleteMany({ org: { $in: saniOrgs } }).lean())
     // Delete the orgs
-    .then(() => Organization.deleteMany(searchQuery))
+    .then(() => Organization.deleteMany(searchQuery).lean())
     .then((retQuery) => {
       // Emit the event orgs-deleted
       EventEmitter.emit('orgs-deleted', foundOrgs);

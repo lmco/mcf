@@ -9,9 +9,27 @@
 #
 # @description This Dockerfile defines the Docker build for MBEE.
 ##
-FROM node:6.14.1
+FROM node:10-stretch
 MAINTAINER Lockheed Martin
 WORKDIR /lm/mbee
+
+# Create project directory structure
+RUN mkdir logs \
+    && mkdir -p config \
+    && mkdir -p scripts \
+    && mkdir -p plugins \
+    && mkdir -p build \
+    && mkdir -p public \
+    && mkdir -p app
+
+# Copy Project
+COPY ./config config
+COPY ./scripts scripts
+COPY ./mbee.js mbee.js
+COPY ./plugins plugins
+COPY ./build build
+COPY ./app  app
+COPY ./README.md README.md
 
 # Set proxy environment variables
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
@@ -19,6 +37,7 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     http_proxy="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost
+ENV NODE_ENV=production
 
 # Install dependencies
 RUN apt-get -y upgrade \
@@ -40,24 +59,6 @@ RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
 # Install modules using yarn from the package.json
 COPY ./package.json package.json
 RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install --production
-
-# Create project directory structure
-RUN mkdir logs \
-    && mkdir -p config \
-    && mkdir -p scripts \
-    && mkdir -p plugins \
-    && mkdir -p build \
-    && mkdir -p public \
-    && mkdir -p app
-
-# Copy Project
-COPY ./config config
-COPY ./scripts scripts
-COPY ./mbee.js mbee.js
-COPY ./plugins plugins
-COPY ./build build
-COPY ./app  app
-COPY ./README.md README.md
 
 # Run server
 CMD ["node", "mbee.js", "start"]

@@ -10,6 +10,7 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This implements the behavior and logic for elements.
  * It also provides function for interacting with elements.
@@ -60,10 +61,10 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
- * @param {boolean} [options.subtree] - If true, all elements in the subtree of
- * the found elements will also be returned. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
+ * @param {boolean} [options.subtree = false] - If true, all elements in the subtree of
+ * the found elements will also be returned.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
@@ -73,6 +74,24 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.parent] - Search for elements with a specific
+ * parent.
+ * @param {string} [options.source] - Search for elements with a specific
+ * source.
+ * @param {string} [options.target] - Search for elements with a specific
+ * target.
+ * @param {string} [options.type] - Search for elements with a specific type.
+ * @param {string} [options.name] - Search for elements with a specific name.
+ * @param {string} [options.createdBy] - Search for elements with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for elements with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for elements with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found element objects
  *
@@ -87,6 +106,13 @@ const jmi = M.require('lib.jmi-conversions');
  */
 function find(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    // Set options if no elements were provided, but options were
+    if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
+      // Note: assumes input param elements is input option param
+      options = elements; // eslint-disable-line no-param-reassign
+      elements = undefined; // eslint-disable-line no-param-reassign
+    }
+
     // Ensure input parameters are correct type
     try {
       assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
@@ -116,103 +142,49 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
     // Sanitize input parameters
     const saniElements = (elements !== undefined)
-      ? sani.sanitize(JSON.parse(JSON.stringify(elements)))
+      ? sani.mongo(JSON.parse(JSON.stringify(elements)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
     let foundElements = [];
+    const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
-    // Set options if no elements were provided, but options were
-    if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
-      options = elements; // eslint-disable-line no-param-reassign
-    }
+    // Initialize validOptions
+    let validOptions = {};
 
-    // Initialize valid options
-    let archived = false;
-    let populateString = 'contains ';
-    let subtree = false;
-    let fieldsString = '';
-    let limit = 0;
-    let skip = 0;
+    // Validate and set the options
+    validOptions = utils.validateOptions(options, ['archived', 'populate',
+      'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
 
     // Ensure options are valid
     if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
+      // Create array of valid search options
+      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+        'createdBy', 'lastModifiedBy', 'archivedBy'];
 
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+      // Loop through provided options, look for validSearchOptions
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
           }
-        });
 
-        populateString += options.populate.join(' ');
-      }
-
-      // If the option 'subtree' is supplied ensure it's a boolean
-      if (options.hasOwnProperty('subtree')) {
-        if (typeof options.subtree !== 'boolean') {
-          throw new M.CustomError('The option \'subtree\' is not a boolean.', 400, 'warn');
+          // If the search option is an element reference
+          if (['parent', 'source', 'target'].includes(o)) {
+            // Make value the concatenated ID
+            options[o] = utils.createID(orgID, projID, options[o]);
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
         }
-        subtree = options.subtree;
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
-        }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
+      });
     }
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((project) => {
       // Check that the project was found
       if (!project) {
@@ -230,7 +202,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       let elementsToFind = [];
 
       // Check the type of the elements parameter
-      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')) {
+      if (Array.isArray(saniElements)) {
         // An array of element ids, find all
         elementsToFind = saniElements.map(e => utils.createID(orgID, projID, e));
       }
@@ -249,26 +221,33 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       }
 
       // If wanting to find subtree, find subtree ids
-      if (subtree) {
+      if (validOptions.subtree) {
         return findElementTree(orgID, projID, 'master', elementsToFind);
       }
 
       return elementsToFind;
     })
     .then((elementIDs) => {
-      // Define searchQuery
-      const searchQuery = { project: utils.createID(orgID, projID), archived: false };
       // If the archived field is true, remove it from the query
-      if (archived) {
+      if (validOptions.archived) {
         delete searchQuery.archived;
       }
 
       // If no IDs provided, find all elements in a project
       if (elementIDs.length === 0) {
-        // Find all elements in a project
-        return Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-        .populate(populateString)
-        .lean();
+        // If the lean option is supplied
+        if (validOptions.lean) {
+          // Find all elements in a project
+          return Element.find(searchQuery, validOptions.fieldsString,
+            { limit: validOptions.limit, skip: validOptions.skip })
+          .populate(validOptions.populateString || 'contains')
+          .lean();
+        }
+        else {
+          return Element.find(searchQuery, validOptions.fieldsString,
+            { limit: validOptions.limit, skip: validOptions.skip })
+          .populate(validOptions.populateString || 'contains');
+        }
       }
       // Find elements by ID
 
@@ -277,14 +256,29 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       // Find elements in batches
       for (let i = 0; i < elementIDs.length / 50000; i++) {
         // Split elementIDs list into batches of 50000
+        // Need to sanitize _id
         searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
 
-        // Add find operation to promises array
-        promises.push(Element.find(searchQuery, fieldsString, { limit: limit, skip: skip })
-        .populate(populateString)
-        .then((_foundElements) => {
-          foundElements = foundElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (validOptions.lean) {
+          // Add find operation to promises array
+          promises.push(Element.find(searchQuery, validOptions.fieldsString,
+            { limit: validOptions.limit, skip: validOptions.skip })
+          .populate(validOptions.populateString || 'contains')
+          .lean()
+          .then((_foundElements) => {
+            foundElements = foundElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises.push(Element.find(searchQuery, validOptions.fieldsString,
+            { limit: validOptions.limit, skip: validOptions.skip })
+          .populate(validOptions.populateString || 'contains')
+          .then((_foundElements) => {
+            foundElements = foundElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -320,11 +314,19 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {string} elements.id - The ID of the element being created.
  * @param {string} [elements.name] - The name of the element.
  * @param {string} [elements.parent = 'model'] - The ID of the parent of the
- * element. The default value is 'model'
+ * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
+ * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * source element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
+ * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * target element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
@@ -336,6 +338,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created element objects
  *
@@ -375,64 +379,25 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     catch (err) {
       throw new M.CustomError(err.message, 400, 'warn');
     }
-
     // Sanitize input parameters and create function-wide variables
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
     let elementObjects = [];
     const remainingElements = [];
     let populatedElements = [];
+    const projectRefs = [];
 
-    // Initialize valid options
-    let populateString = 'contains ';
-    let fieldsString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString += options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Element);
 
     // Define array to store element data
     let elementsToCreate = [];
 
     // Check the type of the elements parameter
-    if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
+    if (Array.isArray(saniElements)) {
       // elements is an array, create many elements
       elementsToCreate = saniElements;
     }
@@ -448,7 +413,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
     const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
-      'documentation', 'type', 'custom'];
+      'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace',
+      'archived'];
 
     // Check that each element has an id and set the parent if null
     try {
@@ -471,14 +437,15 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           elem.parent = 'model';
         }
         assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
-        assert.ok(utils.createID(orgID, projID, elem.parent) !== elem._id,
-          'Elements parent cannot be self.');
+        elem.parent = utils.createID(orgID, projID, elem.parent);
+        assert.ok(elem.parent !== elem._id, 'Elements parent cannot be self.');
 
         // If element has a source, ensure it has a target
         if (elem.hasOwnProperty('source')) {
           assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
           assert.ok(typeof elem.target === 'string',
             `Element #${index}'s target is not a string.`);
+          elem.source = utils.createID(orgID, projID, elem.source);
         }
 
         // If element has a target, ensure it has a source
@@ -486,6 +453,59 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
           assert.ok(typeof elem.source === 'string',
             `Element #${index}'s source is not a string.`);
+          elem.target = utils.createID(orgID, projID, elem.target);
+        }
+
+        // If the element a sourceNamespace section, ensure it contains the proper fields
+        if (elem.hasOwnProperty('sourceNamespace')) {
+          assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+
+          // Ensure the object contains an org, project and branch field
+          assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
+            + ` #${index}'s sourceNamespace is missing an org.`);
+          assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
+            + ` #${index}'s sourceNamespace is missing a project.`);
+          assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
+            + ` #${index}'s sourceNamespace is missing a branch.`);
+
+          // Ensure the sourceNamespace org is the same org
+          assert.ok(elem.sourceNamespace.org === orgID, `Element #${index}'s `
+            + 'source cannot reference elements outside its org.');
+
+          // Add project id to projectRefs array. Later we verify these projects
+          // are in the foundProject's projectReferences array
+          projectRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
+
+          // Change element source to referenced project's id
+          const tmpSource = utils.parseID(elem.source).pop();
+          elem.source = utils.createID(elem.sourceNamespace.org,
+            elem.sourceNamespace.project, tmpSource);
+        }
+
+        // If the element a targetNamespace section, ensure it contains the proper fields
+        if (elem.hasOwnProperty('targetNamespace')) {
+          assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+
+          // Ensure the object contains an org, project and branch field
+          assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
+            + ` #${index}'s targetNamespace is missing an org.`);
+          assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
+            + ` #${index}'s targetNamespace is missing a project.`);
+          assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
+            + ` #${index}'s targetNamespace is missing a branch.`);
+
+          // Ensure the targetNamespace org is the same org
+          assert.ok(elem.targetNamespace.org === orgID, `Element #${index}'s `
+            + 'target cannot reference elements outside its org.');
+
+          // Add project id to projectRefs array. Later we verify these projects
+          // are in the foundProject's projectReferences array
+          projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
+
+          // Change element target to referenced project's id
+          const tmpTarget = utils.parseID(elem.target).pop();
+          elem.target = utils.createID(elem.targetNamespace.org,
+            elem.targetNamespace.project, tmpTarget);
         }
 
         index++;
@@ -504,7 +524,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Find the project to verify existence and permissions
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -520,12 +540,20 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
             + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
       }
 
+      // Verify that the found project's projectReferences contains the specified refs
+      projectRefs.forEach((ref) => {
+        if (!foundProject.projectReferences.includes(ref)) {
+          throw new M.CustomError(`The project [${utils.parseID(ref).pop()}] `
+            + 'is not in the found project\'s projectReference list.', 403, 'warn');
+        }
+      });
+
       const promises = [];
       for (let i = 0; i < arrIDs.length / 50000; i++) {
         // Split arrIDs into batches of 50000
         const tmpQuery = { _id: { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) } };
         // Attempt to find any elements with matching _id
-        promises.push(Element.find(tmpQuery, '_id')
+        promises.push(Element.find(tmpQuery, '_id').lean()
         .then((foundElements) => {
           if (foundElements.length > 0) {
             // Get array of the foundElements's ids
@@ -541,8 +569,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     })
     .then(() => {
       // For each object of element data, create the element object
-      elementObjects = elementsToCreate.map((e) => {
-        const elemObj = new Element(e);
+      elementObjects = elementsToCreate.map((elemObj) => {
         // Set the project, lastModifiedBy and createdBy
         elemObj.project = utils.createID(orgID, projID);
         elemObj.lastModifiedBy = reqUser._id;
@@ -551,13 +578,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         elemObj.archivedBy = (elemObj.archived) ? reqUser._id : null;
 
         // Add hidden fields
-        elemObj.$parent = utils.createID(orgID, projID, e.parent);
-        elemObj.$source = (e.source)
-          ? utils.createID(orgID, projID, e.source)
-          : null;
-        elemObj.$target = (e.target)
-          ? utils.createID(orgID, projID, e.target)
-          : null;
+        elemObj.$parent = elemObj.parent;
+        elemObj.$source = (elemObj.source) ? elemObj.source : null;
+        elemObj.$target = (elemObj.target) ? elemObj.target : null;
 
         return elemObj;
       });
@@ -618,7 +641,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       const findExtraElementsQuery = { _id: { $in: elementsToFind } };
 
       // Find extra elements, and only return _id for faster lookup
-      return Element.find(findExtraElementsQuery, '_id');
+      return Element.find(findExtraElementsQuery, '_id').lean();
     })
     .then((extraElements) => {
       // Convert extraElements to JMI type 2 for easier lookup
@@ -663,21 +686,33 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         }
       });
 
-      return Element.insertMany(elementObjects);
+      return Element.insertMany(elementObjects, { rawResult: true });
     })
     .then((createdElements) => {
       const promises = [];
-      const createdIDs = createdElements.map(e => e._id);
+      const createdIDs = createdElements.ops.map(e => e._id);
       // Find elements in batches
       for (let i = 0; i < createdIDs.length / 50000; i++) {
         // Split elementIDs list into batches of 50000
         const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
-        // Add find operation to promises array
-        promises.push(Element.find(tmpQuery, fieldsString).populate(populateString)
-        .then((_foundElements) => {
-          populatedElements = populatedElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (validOptions.lean) {
+          // Add find operation to promises array
+          promises.push(Element.find(tmpQuery, validOptions.fieldsString)
+          .populate(validOptions.populateString || 'contains').lean()
+          .then((_foundElements) => {
+            populatedElements = populatedElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises.push(Element.find(tmpQuery, validOptions.fieldsString)
+          .populate(validOptions.populateString || 'contains')
+          .then((_foundElements) => {
+            populatedElements = populatedElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -716,14 +751,22 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
  * update element parents in bulk.
  * @param {string} [elements.source] - The ID of the source element.
+ * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * source element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element.
+ * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * target element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - The additions or changes to existing
- * custom data. If the key/value pair already exists, the value will be changed.
- * If the key/value pair does not exist, it will be added.
- * @param {boolean} [elements.archived] - The updated archived field. If true,
+ * @param {Object} [elements.custom] - The new custom data object. Please note,
+ * updating the custom data object completely replaces the old custom data
+ * object.
+ * @param {boolean} [elements.archived = false] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
@@ -731,11 +774,13 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of updated element objects
  *
  * @example
- * update({User}, 'orgID', 'projID', branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
+ * update({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
  * .then(function(elements) {
  *   // Do something with the newly updated elements
  * })
@@ -773,10 +818,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
+    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     let foundElements = [];
+    let foundProject = {};
     let elementsToUpdate = [];
     let searchQuery = {};
     let sourceTargetQuery = {};
@@ -785,52 +831,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const arrIDs = [];
     const sourceTargetIDs = [];
 
-    // Initialize valid options
-    let populateString = 'contains ';
-    let fieldsString = '';
-
-    // Ensure options are valid
-    if (options) {
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
-          }
-        });
-
-        populateString += options.populate.join(' ');
-      }
-
-      // If the option 'fields' is supplied, ensure it's an array of strings
-      if (options.hasOwnProperty('fields')) {
-        if (!Array.isArray(options.fields)) {
-          throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
-        }
-        if (!options.fields.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the fields array must be a string.', 400, 'warn'
-          );
-        }
-
-        fieldsString += options.fields.join(' ');
-      }
-    }
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Element);
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
-    .then((foundProject) => {
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
+    .then((_foundProject) => {
+      foundProject = _foundProject;
       // Check that the project was found
       if (!foundProject) {
         throw new M.CustomError(`Project [${projID}] not found in the `
@@ -845,7 +853,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Check the type of the elements parameter
-      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
+      if (Array.isArray(saniElements)) {
         // elements is an array, update many elements
         elementsToUpdate = saniElements;
 
@@ -904,10 +912,78 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             sourceTargetIDs.push(elem.source);
           }
 
+          // If the element a sourceNamespace section, ensure it contains the proper fields
+          if (elem.hasOwnProperty('sourceNamespace')) {
+            assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+
+            // Ensure the object contains an org, project and branch field
+            assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
+              + ` #${index}'s sourceNamespace is missing an org.`);
+            assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
+              + ` #${index}'s sourceNamespace is missing a project.`);
+            assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
+              + ` #${index}'s sourceNamespace is missing a branch.`);
+
+            // Ensure the sourceNamespace org is the same org
+            assert.ok(elem.sourceNamespace.org === orgID, `Element #${index}'s `
+              + 'source cannot reference elements outside its org.');
+            // Ensure the project is in the projectReferences array
+            const tmpProj = utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project);
+            assert.ok(foundProject.projectReferences.includes(tmpProj),
+              `The project [${elem.sourceNamespace.project}] is not in the `
+              + 'projectReferences list.');
+
+            // Reset the elem source with new project
+            const tmpSource = utils.parseID(elem.source).pop();
+            elem.source = utils.createID(elem.sourceNamespace.org,
+              elem.sourceNamespace.project, tmpSource);
+
+            // Remove the last source which has the wrong project
+            sourceTargetIDs.pop();
+            sourceTargetIDs.push(elem.source);
+
+            // Delete sourceNamespace, it does not get stored in the database
+            delete elem.sourceNamespace;
+          }
+
           // If updating target, add ID to sourceTargetIDs
           if (elem.target) {
             elem.target = utils.createID(orgID, projID, elem.target);
             sourceTargetIDs.push(elem.target);
+          }
+
+          // If the element a targetNamespace section, ensure it contains the proper fields
+          if (elem.hasOwnProperty('targetNamespace')) {
+            assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+
+            // Ensure the object contains an org, project and branch field
+            assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
+              + ` #${index}'s targetNamespace is missing an org.`);
+            assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
+              + ` #${index}'s targetNamespace is missing a project.`);
+            assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
+              + ` #${index}'s targetNamespace is missing a branch.`);
+
+            // Ensure the targetNamespace org is the same org
+            assert.ok(elem.targetNamespace.org === orgID, `Element #${index}'s `
+              + 'target cannot reference elements outside its org.');
+            // Ensure the project is in the projectReferences array
+            const tmpProj = utils.createID(elem.targetNamespace.org, elem.targetNamespace.project);
+            assert.ok(foundProject.projectReferences.includes(tmpProj),
+              `The project [${elem.targetNamespace.project}] is not in the `
+                + 'projectReferences list.');
+
+            // Reset the elem target with new project
+            const tmpTarget = utils.parseID(elem.target).pop();
+            elem.target = utils.createID(elem.targetNamespace.org,
+              elem.targetNamespace.project, tmpTarget);
+
+            // Remove the last target which has the wrong project
+            sourceTargetIDs.pop();
+            sourceTargetIDs.push(elem.target);
+
+            // Delete targetNamespace, it does not get stored in the database
+            delete elem.targetNamespace;
           }
 
           index++;
@@ -927,7 +1003,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery)
+        promises.push(Element.find(searchQuery).lean()
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
         }));
@@ -947,7 +1023,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         );
       }
 
-      return Element.find(sourceTargetQuery);
+      return Element.find(sourceTargetQuery).lean();
     })
     .then((foundSourceTarget) => {
       // Convert elementsToUpdate to JMI type 2
@@ -967,8 +1043,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
         // Error Check: if element is currently archived, it must first be unarchived
         if (element.archived && updateElement.archived !== false) {
-          throw new M.CustomError(`Element [${element._id}] is archived. `
-              + 'Archived objects cannot be modified.', 403, 'warn');
+          throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
+              + ' is archived. Archived objects cannot be modified.', 403, 'warn');
         }
 
         // For each key in the updated object
@@ -1000,7 +1076,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             // If source/target does not exist, throw error
             if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
               throw new M.CustomError(`The ${key} element `
-                + `[${utils.parseID(updateElement[key]).pop()}] was not found.`, 404, 'warn');
+                + `[${utils.parseID(updateElement[key]).pop()}] was not found `
+                + `in the project [${utils.parseID(updateElement[key])[1]}].`, 404, 'warn');
             }
 
             // If no target exists and is not being updated, throw error
@@ -1016,29 +1093,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             }
           }
 
-          // If the type of field is mixed
-          if (Element.schema.obj[key]
-            && Element.schema.obj[key].type.schemaName === 'Mixed') {
-            // Only objects should be passed into mixed data
-            if (typeof updateElement !== 'object') {
-              throw new M.CustomError(`${key} must be an object`, 400, 'warn');
-            }
-
-            // Add and replace parameters of the type 'Mixed'
-            utils.updateAndCombineObjects(element[key], updateElement[key]);
-
-            // Set updateElement mixed field
-            updateElement[key] = element[key];
-
-            // Mark mixed fields as updated, required for mixed fields to update in mongoose
-            // http://mongoosejs.com/docs/schematypes.html#mixed
-            element.markModified(key);
-          }
           // Set archivedBy if archived field is being changed
-          else if (key === 'archived') {
-            // Error Check: ensure user cannot archive the root model element
-            if (element._id === utils.createID(orgID, projID, 'model')) {
-              throw new M.CustomError('User cannot archive the root model element.', 403, 'warn');
+          if (key === 'archived') {
+            const elemID = utils.parseID(element._id).pop();
+            // Error Check: ensure user cannot archive root elements
+            if (Element.getValidRootElements().includes(elemID)) {
+              throw new M.CustomError(
+                `User cannot archive the root element: ${elemID}.`, 403, 'warn'
+              );
             }
 
             // If the element is being archived
@@ -1077,11 +1139,23 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         // Split arrIDs list into batches of 50000
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
-        // Add find operation to promises array
-        promises2.push(Element.find(searchQuery, fieldsString).populate(populateString)
-        .then((_foundElements) => {
-          foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
-        }));
+        // If the lean option is supplied
+        if (validOptions.lean) {
+          // Add find operation to promises array
+          promises2.push(Element.find(searchQuery, validOptions.fieldsString)
+          .populate(validOptions.populateString || 'contains').lean()
+          .then((_foundElements) => {
+            foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+          }));
+        }
+        else {
+          // Add find operation to promises array
+          promises2.push(Element.find(searchQuery, validOptions.fieldsString)
+          .populate(validOptions.populateString || 'contains')
+          .then((_foundElements) => {
+            foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+          }));
+        }
       }
 
       // Return when all elements have been found
@@ -1098,7 +1172,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 }
 
 /**
- * @description This functions creates or replaces one or many elements. If the
+ * @description This function creates or replaces one or many elements. If the
  * element already exists, it is replaced with the provided data. NOTE: This
  * function is reserved for system-wide admins ONLY.
  *
@@ -1111,11 +1185,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} elements.id - The ID of the element being created/replaced.
  * @param {string} [elements.name] - The name of the element.
  * @param {string} [elements.parent = 'model'] - The ID of the parent of the
- * element. The default value is 'model'
+ * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
+ * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * source element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
+ * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * target element, if the element is not part of the project. Must include the
+ * key/value pairs 'org', 'project' and 'branch'. The organization must be the
+ * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
@@ -1127,6 +1209,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
  *
  * @return {Promise} Array of created/replaced element objects
  *
@@ -1170,9 +1254,9 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     }
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
+    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     const duplicateCheck = {};
     let foundElements = [];
     let elementsToLookup = [];
@@ -1181,7 +1265,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     const ts = Date.now();
 
     // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -1190,7 +1274,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       }
 
       // Check the type of the elements parameter
-      if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'object')) {
+      if (Array.isArray(saniElements)) {
         // elements is an array, create/replace many elements
         elementsToLookup = saniElements;
       }
@@ -1232,12 +1316,13 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       const searchQuery = { project: utils.createID(orgID, projID) };
 
       // Find elements in batches
+      // TODO: Consider changing of loop increment by 50k instead of 1
       for (let i = 0; i < arrIDs.length / 50000; i++) {
         // Split arrIDs list into batches of 50000
         searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to promises array
-        promises.push(Element.find(searchQuery)
+        promises.push(Element.find(searchQuery).lean()
         .then((_foundElements) => {
           foundElements = foundElements.concat(_foundElements);
         }));
@@ -1249,11 +1334,16 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then(() => {
       foundElementIDs = foundElements.map(e => e._id);
 
-      // Error Check: ensure user cannot replace root model element
-      if (foundElementIDs.includes(utils.createID(orgID, projID, 'model'))) {
-        throw new M.CustomError('User cannot replace the root model element.', 403, 'warn');
-      }
+      // Error Check: ensure user cannot replace root element
+      foundElementIDs.forEach((id) => {
+        if (Element.getValidRootElements().includes(utils.parseID(id).pop())) {
+          throw new M.CustomError(
+            `User cannot replace root element: ${utils.parseID(id).pop()}.`, 403, 'warn'
+          );
+        }
+      });
 
+      // Create temporary element data
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
         fs.mkdirSync(path.join(M.root, 'data'));
@@ -1279,7 +1369,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       });
     })
     // Delete elements from database
-    .then(() => Element.deleteMany({ _id: foundElementIDs }))
+    .then(() => Element.deleteMany({ _id: foundElementIDs }).lean())
     .then(() => {
       // Emit the event elements-deleted
       EventEmitter.emit('elements-deleted', foundElements);
@@ -1325,9 +1415,8 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
 
 /**
  * @description This function removes one or many elements as well as the
- * subtree under those elements. This function can be used by system-wide admins
- * ONLY. Once the elements are deleted, the IDs of the deleted elements are
- * returned.
+ * subtree under those elements. Once the elements are deleted, the IDs of the
+ * deleted elements are returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -1357,8 +1446,6 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
       assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions to delete'
-        + ' elements.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
@@ -1381,15 +1468,15 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
-    const saniElements = sani.sanitize(JSON.parse(JSON.stringify(elements)));
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
+    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     let elementsToFind = [];
     let foundIDs = [];
 
     // Check the type of the elements parameter
-    if (Array.isArray(saniElements) && saniElements.every(e => typeof e === 'string')
-      && saniElements.length !== 0) {
+    if (Array.isArray(saniElements) && saniElements.length !== 0) {
       // An array of element ids, remove all
       elementsToFind = saniElements.map(e => utils.createID(orgID, projID, e));
     }
@@ -1402,8 +1489,24 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError('Invalid input for removing elements.', 400, 'warn');
     }
 
-    // Find the elements to delete
-    Element.find({ _id: { $in: elementsToFind } })
+    // Find the project to verify permissions
+    Project.findOne({ _id: utils.createID(orgID, projID) })
+    .then((foundProject) => {
+      // Verify the project was found or exists
+      if (foundProject === null) {
+        throw new M.CustomError(`The project [${projID}] was not found.`, 404, 'warn');
+      }
+
+      // Verify the requesting user has at least project write permissions
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
+        throw new M.CustomError('User does not have permission to delete'
+          + ` elements on the project [${projID}].`, 403, 'warn');
+      }
+
+      // Find the elements to delete
+      return Element.find({ _id: { $in: elementsToFind } }).lean();
+    })
     .then((foundElements) => {
       const foundElementIDs = foundElements.map(e => e._id);
 
@@ -1422,17 +1525,21 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     .then((_foundIDs) => {
       foundIDs = _foundIDs;
       const promises = [];
-
-      // Error Check: ensure user cannot delete root model element
-      if (foundIDs.includes(utils.createID(orgID, projID, 'model'))) {
-        throw new M.CustomError('User cannot delete the root model element.', 403, 'warn');
-      }
+      // Error Check: ensure user cannot delete root elements
+      foundIDs.forEach((id) => {
+        const elemID = utils.parseID(id).pop();
+        if (Element.getValidRootElements().includes(elemID)) {
+          throw new M.CustomError(
+            `User cannot delete root element: ${elemID}.`, 403, 'warn'
+          );
+        }
+      });
 
       // Split elements into batches of 50000 or less
       for (let i = 0; i < foundIDs.length / 50000; i++) {
         const batchIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
         // Delete batch
-        promises.push(Element.deleteMany({ _id: { $in: batchIDs } }));
+        promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
       }
       // Return when all deletes have completed
       return Promise.all(promises);
@@ -1467,8 +1574,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
  * @param {string} branch - The ID of the branch to find elements from.
  * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
- * @return {Promise} resolve - Array of found element ids
- *                   reject - error
+ * @return {Promise} Array of found element ids
  *
  * @example
  * findElementTree('orgID', 'projID', 'branch', ['elem1', 'elem2',...])
@@ -1497,7 +1603,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
   function findElementTreeHelper(ids) {
     return new Promise((resolve, reject) => {
       // Find all elements whose parent is in the list of given ids
-      Element.find({ parent: { $in: ids } }, '_id')
+      Element.find({ parent: { $in: ids } }, '_id').lean()
       .then(elements => {
         // Get a list of element ids
         const foundIDs = elements.map(e => e._id);
@@ -1546,8 +1652,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
  * @param {Object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *
- * @return {Promise} resolve
- *                   reject - error
+ * @return {Promise} Resolved promise to verify element parent.
  *
  * @example
  * moveElementCheck('orgID', 'projID', 'branch', {Elem1})
@@ -1568,18 +1673,27 @@ function moveElementCheck(organizationID, projectID, branch, element) {
       throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
     }
 
+    // Error Check: ensure the root elements is not being moved
+    if (Element.getValidRootElements().includes(element.id)) {
+      throw new M.CustomError(
+        `Cannot move the root element: ${element.id}.`, 403, 'warn'
+      );
+    }
+
     // Define nested helper function
     function findElementParentRecursive(e) {
       return new Promise((res, rej) => {
-        Element.findOne({ _id: e.parent })
+        Element.findOne({ _id: e.parent }).lean()
         .then((foundElement) => {
           // If foundElement is null, reject with error
           if (!foundElement) {
-            throw new M.CustomError(`Parent element ${e.parent} not found.`, 404, 'warn');
+            throw new M.CustomError('Parent element '
+              + `[${utils.parseID(e.parent).pop()}] not found.`, 404, 'warn');
           }
 
           // If element.parent is root, resolve... there is no conflict
-          if (utils.parseID(foundElement.parent).pop() === 'model') {
+          if (foundElement.parent === null
+            || utils.parseID(foundElement.parent).pop() === 'model') {
             return '';
           }
 
@@ -1607,7 +1721,7 @@ function moveElementCheck(organizationID, projectID, branch, element) {
 }
 
 /**
- * @description A function which searches elements within a certain projects
+ * @description A function which searches elements within a certain project
  * using mongo's built in text search. Returns any elements that match the text
  * search, in order of the best matches to the worst. Searches the _id, name,
  * documentation, parent, source and target fields.
@@ -1620,14 +1734,32 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived] - If true, find results will include
- * archived objects. The default value is false.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.parent] - Search for elements with a specific
+ * parent.
+ * @param {string} [options.source] - Search for elements with a specific
+ * source.
+ * @param {string} [options.target] - Search for elements with a specific
+ * target.
+ * @param {string} [options.type] - Search for elements with a specific type.
+ * @param {string} [options.name] - Search for elements with a specific name.
+ * @param {string} [options.createdBy] - Search for elements with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for elements with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for elements with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} An array of found elements.
  *
@@ -1664,70 +1796,46 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.sanitize(organizationID);
-    const projID = sani.sanitize(projectID);
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
+    const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
     // Initialize valid options
-    let archived = false;
-    let populateString = 'contains ';
-    let limit = 0;
-    let skip = 0;
+    let validOptions = {};
+
+    // Validate and set the options
+    validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'limit', 'skip', 'lean'], Element);
 
     // Ensure options are valid
     if (options) {
-      // If the option 'archived' is supplied, ensure it's a boolean
-      if (options.hasOwnProperty('archived')) {
-        if (typeof options.archived !== 'boolean') {
-          throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
-        }
-        archived = options.archived;
-      }
+      // Create array of valid search options
+      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+        'createdBy', 'lastModifiedBy', 'archivedBy'];
 
-      // If the option 'populate' is supplied, ensure it's a string
-      if (options.hasOwnProperty('populate')) {
-        if (!Array.isArray(options.populate)) {
-          throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
-        }
-        if (!options.populate.every(o => typeof o === 'string')) {
-          throw new M.CustomError(
-            'Every value in the populate array must be a string.', 400, 'warn'
-          );
-        }
-
-        // Ensure each field is able to be populated
-        const validPopulateFields = Element.getValidPopulateFields();
-        options.populate.forEach((p) => {
-          if (!validPopulateFields.includes(p)) {
-            throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+      // Loop through provided options
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
           }
-        });
 
-        populateString += options.populate.join(' ');
-      }
+          // If the search option is an element reference
+          if (['parent', 'source', 'target'].includes(o)) {
+            // Make value the concatenated ID
+            options[o] = utils.createID(orgID, projID, options[o]);
+          }
 
-      // If the option 'limit' is supplied ensure it's a number
-      if (options.hasOwnProperty('limit')) {
-        if (typeof options.limit !== 'number') {
-          throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
         }
-        limit = options.limit;
-      }
-
-      // If the option 'skip' is supplied ensure it's a number
-      if (options.hasOwnProperty('skip')) {
-        if (typeof options.skip !== 'number') {
-          throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
-        }
-        // Ensure skip is not negative
-        if (options.skip < 0) {
-          throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
-        }
-        skip = options.skip;
-      }
+      });
     }
 
     // Ensure the project exists
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
     .then((project) => {
       // Ensure the project was found
       if (project === null) {
@@ -1742,17 +1850,27 @@ function search(requestingUser, organizationID, projectID, branch, query, option
           + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
       }
 
-      const searchQuery = { project: project._id, $text: { $search: query }, archived: false };
+      searchQuery.$text = { $search: query };
       // If the archived field is true, remove it from the query
-      if (archived) {
+      if (validOptions.archived) {
         delete searchQuery.archived;
       }
 
-      // Search for the elements
-      return Element.find(searchQuery, { score: { $meta: 'textScore' } },
-        { limit: limit, skip: skip })
-      .sort({ score: { $meta: 'textScore' } })
-      .populate(populateString);
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        // Search for the elements
+        return Element.find(searchQuery, { score: { $meta: 'textScore' } },
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .sort({ score: { $meta: 'textScore' } })
+        .populate(validOptions.populateString || 'contains').lean();
+      }
+      else {
+        // Search for the elements
+        return Element.find(searchQuery, { score: { $meta: 'textScore' } },
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .sort({ score: { $meta: 'textScore' } })
+        .populate(validOptions.populateString || 'contains');
+      }
     })
     .then((foundElements) => resolve(foundElements))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
