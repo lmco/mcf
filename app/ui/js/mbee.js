@@ -1,6 +1,6 @@
 // ESLint disbled for client-side JS for now.
 // TODO (jk) - determine long-term approach
-/* eslint-disable */
+/* eslint-disabled */
 
 $.fn.extend({
   autoResize: function() {
@@ -8,5 +8,3 @@ $.fn.extend({
     $(this).attr('rows', nlines + 1);
   }
 });
-
-
