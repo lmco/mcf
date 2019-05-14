@@ -35,7 +35,7 @@ module.exports = {
 };
 
 // Node modules
-const fs = require('fs'); // Used by flight manual. This may change. ~jk
+const fs = require('fs');
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 
