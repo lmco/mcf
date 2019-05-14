@@ -251,7 +251,7 @@ function ldapSearch(ldapClient, username) {
     // Execute the search
     ldapClient.search(ldapConfig.base, opts, (err, result) => {
       if (err) {
-        return reject(new M.CustomError('LDAP Serach Failure.', 500, 'warn'));
+        return reject(new M.CustomError('LDAP Search Failure.', 500, 'warn'));
       }
 
       // If search fails, reject error

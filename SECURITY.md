@@ -414,6 +414,6 @@ When interacting with MBEE via the UI, a user's token is stored in their session
 object. The `auth.session` section defines when a session expires.
 
 For API interactions with MBEE, only the `auth.token` expiration matters since
-sessions aren't used. However, for UI interaction with MBEE, both the token
+sessions are not used. However, for UI interaction with MBEE, both the token
 and session definitions matter. Whichever expires first will cause the user's
 authentication to expire.
