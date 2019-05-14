@@ -37,6 +37,7 @@ module.exports.sanitize = function(userInput) {
  *
  * @param {Object} userInput - User object data to be sanitized.
  */
+// TODO: verify object sanitization
 module.exports.mongo = function(userInput) {
   if (Array.isArray(userInput)) {
     return userInput.map((value) => this.mongo(value));
