@@ -357,6 +357,7 @@ function ldapSync(ldapUserObj) {
       userObject = savedUser;
 
       // If user created, emit users-created
+      // TODO: Fix the logic of this event emitter funky
       if (!found) {
         EventEmitter.emit('users-created', [savedUser]);
       }
