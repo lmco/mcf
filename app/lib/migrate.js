@@ -148,7 +148,7 @@ module.exports.migrate = function(args) {
  */
 function prompt(args) {
   return new Promise((resolve) => {
-    // If arg -y provided, resolve9)
+    // If arg -y provided, resolve
     if (args.includes('-y')) {
       return resolve();
     }
