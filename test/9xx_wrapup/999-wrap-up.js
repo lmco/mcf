@@ -18,10 +18,8 @@
  * test to ensure the database is empty and improve CI testing.
  */
 
-// Node modules
-const chai = require('chai');
-
 // NPM modules
+const chai = require('chai');
 const mongoose = require('mongoose');
 
 // MBEE modules

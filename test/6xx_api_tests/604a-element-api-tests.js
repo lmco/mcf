@@ -15,7 +15,7 @@
  * GET, POST, PATCH, and DELETE of an element.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const request = require('request');
 

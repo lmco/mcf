@@ -41,7 +41,6 @@ const utils = M.require('lib.utils');
 describe(`MANUAL-${M.getModuleName(module.filename)}`, () => {
   it('should use a default validator by default', verifyDefaultValidator);
   it('should use a custom validator when set', verifyCustomValidator);
-  it('should ignore falsy validators', verifyIgnoreFalsyValidators);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -66,17 +65,5 @@ function verifyCustomValidator(done) {
   const B = M.config.validators.id;
   const C = `^${B}${utils.ID_DELIMITER}${B}${utils.ID_DELIMITER}${B}$`;
   chai.expect(A).to.equal(C);
-  done();
-}
-
-/**
- * @description This checks that falsy values (undefined, null, '') provided
- * as custom validators are in fact ignored and the default value is used
- * instead.
- */
-function verifyIgnoreFalsyValidators(done) {
-  const A = validators.artifact.id;
-  const B = M.config.validators.artifact_id;
-  chai.expect(A).to.not.equal(B);
   done();
 }

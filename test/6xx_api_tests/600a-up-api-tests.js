@@ -15,12 +15,9 @@
  * documentation is up. Testing these endpoints also confirms that server has
  * started.
  */
-
-// Node Modules
-const request = require('request');
-
-// NPM modules
+// NPM Modules
 const chai = require('chai');
+const request = require('request');
 
 // MBEE modules
 const test = M.config.test;
