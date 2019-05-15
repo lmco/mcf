@@ -49,6 +49,11 @@ module.exports.mongo = function(userInput) {
       if (/^\$/.test(key)) {
         delete userInput[key];
       }
+      // If the value is an object
+      else if (typeof userInput[key] === 'object' && userInput[key] !== null) {
+        // Recursively call function on value
+        this.mongo(userInput[key]);
+      }
     });
   }
   // Return modified userInput
