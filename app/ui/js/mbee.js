@@ -20,7 +20,8 @@ $.fn.extend({
  * TODO - Is there a default option for the ajax statusCode for handling an
  * unexpected return status?
  */
-function mbeeWhoami(callback) {
+// eslint-disable-next-line no-unused-vars
+function mbeeWhoAmI(callback) {
   // If user is already stored, use that.
   if (window.sessionStorage.hasOwnProperty('mbee-user')
     && window.sessionStorage['mbee-user'] !== null) {
@@ -32,6 +33,16 @@ function mbeeWhoami(callback) {
   $.ajax({
     method: 'GET',
     url: url,
+    statusCode: {
+      401: () => {
+        const path = window.location.pathname;
+        if (!path.startsWith('/doc') && !path.startsWith('/login')
+          && !path.startsWith('/about')) {
+          // Refresh when session expires
+          window.location.reload();
+        }
+      }
+    },
     success: (data) => {
       if (data.hasOwnProperty('username')) {
         window.sessionStorage.setItem('mbee-user', JSON.stringify(data));

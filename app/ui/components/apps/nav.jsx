@@ -59,8 +59,8 @@ class MbeeNav extends Component {
   componentDidMount() {
     // Add event listener for window sizing
     window.addEventListener('resize', this.setComponentSize);
-
-    mbeeWhoami((err, data) => {
+    // eslint-disable-next-line no-undef
+    mbeeWhoAmI((err, data) => {
       if (err) {
         this.setState({ error: err.responseJSON.description });
       }

@@ -57,45 +57,33 @@ class OrgApp extends Component {
   }
 
   componentDidMount() {
-    const url = '/api/users/whoami?minified=true';
+    // eslint-disable-next-line no-undef
+    mbeeWhoAmI((err, data) => {
+      if (err) {
+        this.setState({ error: err.responseJSON.description });
+      }
+      else {
+        this.setState({ user: data });
+        // Get project data
+        $.ajax({
+          method: 'GET',
+          url: `/api/orgs/${this.props.match.params.orgid}?populate=projects&minified=true`,
+          statusCode: {
+            200: (org) => {
+              this.setMountedComponentStates(data, org);
+            },
+            401: (error) => {
+              // Throw error and set state
+              this.setState({ error: error.responseJSON.description });
 
-    // Get project data
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (user) => {
-          // Get project data
-          $.ajax({
-            method: 'GET',
-            url: `/api/orgs/${this.props.match.params.orgid}?populate=projects&minified=true`,
-            statusCode: {
-              200: (org) => {
-                this.setMountedComponentStates(user, org);
-              },
-              401: (err) => {
-                // Throw error and set state
-                this.setState({ error: err.responseJSON.description });
-
-                // Refresh when session expires
-                window.location.reload();
-              },
-              404: (err) => {
-                this.setState({ error: err.responseJSON.description });
-              }
+              // Refresh when session expires
+              window.location.reload();
+            },
+            404: (error) => {
+              this.setState({ error: error.responseJSON.description });
             }
-          });
-        },
-        401: (err) => {
-          // Throw error and set state
-          this.setState({ error: err.responseJSON.description });
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (err) => {
-          this.setState({ error: err.responseJSON.description });
-        }
+          }
+        });
       }
     });
   }

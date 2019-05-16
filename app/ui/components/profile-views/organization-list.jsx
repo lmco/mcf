@@ -57,55 +57,46 @@ class OrganizationList extends Component {
   }
 
   componentDidMount() {
-    // Get project data
-    $.ajax({
-      method: 'GET',
-      url: '/api/users/whoami?minified=true',
-      statusCode: {
-        200: (user) => {
-          // Get project data
-          $.ajax({
-            method: 'GET',
-            url: '/api/orgs?populate=projects&minified=true',
-            statusCode: {
-              200: (orgs) => {
-                // Verify if admin user
-                if (user.admin) {
-                  // Set admin state
-                  this.setState({ admin: user.admin });
-                }
+    // eslint-disable-next-line no-undef
+    mbeeWhoAmI((err, data) => {
+      if (err) {
+        this.setState({ error: err.responseJSON.description });
+      }
+      else {
+        this.setState({ user: data });
 
-                // Set org state
-                this.setState({ orgs: orgs });
-
-                // Create event listener for window resizing
-                window.addEventListener('resize', this.handleResize);
-                // Handle initial size of window
-                this.handleResize();
-              },
-              401: (err) => {
-                // Throw error and set state
-                this.setState({ error: err.responseJSON.description });
-
-                // Refresh when session expires
-                window.location.reload();
-              },
-              404: (err) => {
-                this.setState({ error: err.responseJSON.description });
+        // Get project data
+        $.ajax({
+          method: 'GET',
+          url: '/api/orgs?populate=projects&minified=true',
+          statusCode: {
+            200: (orgs) => {
+              // Verify if admin user
+              if (data.admin) {
+                // Set admin state
+                this.setState({ admin: data.admin });
               }
-            }
-          });
-        },
-        401: (err) => {
-          // Throw error and set state
-          this.setState({ error: err.responseJSON.description });
 
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (err) => {
-          this.setState({ error: err.responseJSON.description });
-        }
+              // Set org state
+              this.setState({ orgs: orgs });
+
+              // Create event listener for window resizing
+              window.addEventListener('resize', this.handleResize);
+              // Handle initial size of window
+              this.handleResize();
+            },
+            401: (error) => {
+              // Throw error and set state
+              this.setState({ error: error.responseJSON.description });
+
+              // Refresh when session expires
+              window.location.reload();
+            },
+            404: (error) => {
+              this.setState({ error: error.responseJSON.description });
+            }
+          }
+        });
       }
     });
   }
