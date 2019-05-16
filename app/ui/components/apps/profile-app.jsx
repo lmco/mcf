@@ -47,25 +47,13 @@ class ProfileApp extends Component {
   }
 
   componentDidMount() {
-    // Get user data
-    $.ajax({
-      method: 'GET',
-      url: '/api/users/whoami?minified=true',
-      statusCode: {
-        200: (user) => {
-          // Set user state
-          this.setState({ user: user });
-        },
-        401: (err) => {
-          // Throw error and set state
-          this.setState({ error: err.responseJSON.description });
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (err) => {
-          this.setState({ error: err.responseJSON.description });
-        }
+    // eslint-disable-next-line no-undef
+    mbeeWhoAmI((err, data) => {
+      if (err) {
+        this.setState({ error: err.responseJSON.description });
+      }
+      else {
+        this.setState({ user: data });
       }
     });
   }

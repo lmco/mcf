@@ -62,61 +62,49 @@ class ProjectApp extends Component {
     this.setState({ url: url });
     this.setState({ orgid: orgId });
 
-    // Get project data
-    $.ajax({
-      method: 'GET',
-      url: '/api/users/whoami?minified=true',
-      statusCode: {
-        200: (user) => {
-          // Get project data
-          $.ajax({
-            method: 'GET',
-            url: `${url}?minified=true`,
-            statusCode: {
-              200: (project) => {
-                // Initialize variables
-                const username = user.username;
-                const perm = project.permissions[username];
-                const admin = user.admin;
+    // eslint-disable-next-line no-undef
+    mbeeWhoAmI((err, data) => {
+      if (err) {
+        this.setState({ error: err.responseJSON.description });
+      }
+      else {
+        this.setState({ user: data });
+        // Get project data
+        $.ajax({
+          method: 'GET',
+          url: `${url}?minified=true`,
+          statusCode: {
+            200: (project) => {
+              // Initialize variables
+              const username = data.username;
+              const perm = project.permissions[username];
+              const admin = data.admin;
 
-                // Verify if user is admin
-                if ((admin) || (perm === 'admin')) {
-                  // Set admin state
-                  this.setState({ admin: true });
-                  this.setState({ permissions: 'admin' });
-                }
-                else {
-                  // Set permissions
-                  this.setState({ permissions: perm });
-                }
-                // Set states
-                this.setState({ project: project });
-              },
-              401: (err) => {
-                // Throw error and set state
-                this.setState({ error: err.responseJSON.description });
-
-                // Refresh when session expires
-                window.location.reload();
-              },
-              404: (err) => {
-                this.setState({ error: err.responseJSON.description });
+              // Verify if user is admin
+              if ((admin) || (perm === 'admin')) {
+                // Set admin state
+                this.setState({ admin: true });
+                this.setState({ permissions: 'admin' });
               }
-            }
-          });
-        },
-        401: (err) => {
-          // reload the page
-          window.location.reload();
-          // Throw error and set state
-          this.setState({ error: err.responseJSON.description });
+              else {
+                // Set permissions
+                this.setState({ permissions: perm });
+              }
+              // Set states
+              this.setState({ project: project });
+            },
+            401: (error) => {
+              // Throw error and set state
+              this.setState({ error: error.responseJSON.description });
 
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (err) => {
-          this.setState({ error: err.responseJSON.description });
-        }
+              // Refresh when session expires
+              window.location.reload();
+            },
+            404: (error) => {
+              this.setState({ error: error.responseJSON.description });
+            }
+          }
+        });
       }
     });
   }

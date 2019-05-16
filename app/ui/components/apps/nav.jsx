@@ -59,20 +59,13 @@ class MbeeNav extends Component {
   componentDidMount() {
     // Add event listener for window sizing
     window.addEventListener('resize', this.setComponentSize);
-
-    // Initialize url
-    const url = '/api/users/whoami?minified=true';
-
-    // Do ajax request
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (data) => { this.setState({ user: data }); },
-        401: (err) => { this.setState({ error: err.responseJSON.description }); },
-        403: (err) => {
-          this.setState({ error: err.responseJSON.description });
-        }
+    // eslint-disable-next-line no-undef
+    mbeeWhoAmI((err, data) => {
+      if (err) {
+        this.setState({ error: err.responseJSON.description });
+      }
+      else {
+        this.setState({ user: data });
       }
     });
 
