@@ -43,8 +43,17 @@ function mbeeWhoAmI(callback) {
         }
       }
     },
-    success: (data) => {
-      if (data.hasOwnProperty('username')) {
+    success: (_data) => {
+      const data = {
+        username: _data.username,
+        fname: _data.fname,
+        lname: _data.lname,
+        preferredName: _data.preferredName,
+        email: _data.email,
+        custom: _data.custom,
+        admin: _data.admin
+      };
+      if (data.username) {
         window.sessionStorage.setItem('mbee-user', JSON.stringify(data));
       }
       callback(null, data);
