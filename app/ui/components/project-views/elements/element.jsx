@@ -181,7 +181,7 @@ class Element extends Component {
                         </tr>
                         <tr>
                           <th>Source:</th>
-                          <td>{element.target}</td>
+                          <td>{element.source}</td>
                         </tr>
                       </React.Fragment>
                     )
