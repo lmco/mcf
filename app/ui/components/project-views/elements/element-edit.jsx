@@ -211,15 +211,10 @@ class ElementEdit extends Component {
 
   render() {
     // // Initialize variables
-    let parentInvalid;
     let targetInvalid;
     let sourceInvalid;
     let customInvalid;
 
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.target)) {
-      parentInvalid = true;
-    }
     // Verify id
     if (!RegExp(validators.id).test(this.state.target)) {
       targetInvalid = true;
@@ -282,13 +277,6 @@ class ElementEdit extends Component {
               : (<FormGroup row>
                 <Label for='parent' sm={2}><b>Parent</b></Label>
                   <Col sm={10} className={'parent'}>
-                    {/*<Input type='text'
-                           name='parent'
-                           id='parent'
-                           placeholder='Parent ID'
-                           invalid={parentInvalid}
-                           value={this.state.parent || ''}
-                           onChange={this.handleChange}/>*/}
                     {this.state.parent || ''}
                     <ElementSelector
                       project={this.props.project}
