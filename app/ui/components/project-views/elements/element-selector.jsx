@@ -117,7 +117,7 @@ class ElementSelector extends React.Component {
                           project={this.props.project}
                           parent={null}
                           isOpen={true}
-                          parentRefresh={null}
+                          parentRefresh={this.getRootElement}
                           clickHandler={this.selectElementHandler}/>;
     }
 
