@@ -34,6 +34,7 @@ import {
 
 // MBEE Modules
 import validators from '../../../../../build/json/validators.json';
+import ElementSelector from './element-selector.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -62,6 +63,7 @@ class ElementEdit extends Component {
     this.getElement = this.getElement.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.parentSelectHandler = this.parentSelectHandler.bind(this);
   }
 
   getElement() {
@@ -199,17 +201,20 @@ class ElementEdit extends Component {
     });
   }
 
+  /**
+   * This function is called when the ElementSelector for the parent field
+   * changes.
+   */
+  parentSelectHandler(_id) {
+    this.setState({ parent: _id });
+  }
+
   render() {
     // // Initialize variables
-    let parentInvalid;
     let targetInvalid;
     let sourceInvalid;
     let customInvalid;
 
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.target)) {
-      parentInvalid = true;
-    }
     // Verify id
     if (!RegExp(validators.id).test(this.state.target)) {
       targetInvalid = true;
@@ -271,14 +276,11 @@ class ElementEdit extends Component {
               // Form section for Element parent
               : (<FormGroup row>
                 <Label for='parent' sm={2}><b>Parent</b></Label>
-                  <Col sm={10}>
-                    <Input type='text'
-                           name='parent'
-                           id='parent'
-                           placeholder='Parent ID'
-                           invalid={parentInvalid}
-                           value={this.state.parent || ''}
-                           onChange={this.handleChange}/>
+                  <Col sm={10} className={'parent'}>
+                    {this.state.parent || ''}
+                    <ElementSelector
+                      project={this.props.project}
+                      selectedHandler={this.parentSelectHandler} />
                   </Col>
                   {/* Verify fields are valid, or display feedback */}
                 <FormFeedback>

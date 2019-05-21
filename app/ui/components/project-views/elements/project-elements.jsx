@@ -155,6 +155,7 @@ class ProjectElements extends Component {
     if (this.state.sidePanel === 'elementEdit') {
       sidePanelView = <ElementEdit id={this.state.id}
                                    url={this.props.url}
+                                   project={this.props.project}
                                    closeSidePanel={this.closeSidePanel}
                                    selected={this.state.selected}/>;
     }

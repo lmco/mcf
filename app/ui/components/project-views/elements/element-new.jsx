@@ -32,6 +32,7 @@ import {
 
 // MBEE Modules
 import validators from '../../../../../build/json/validators';
+import ElementSelector from './element-selector.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -63,6 +64,7 @@ class ElementNew extends Component {
     // Bind component function
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.parentSelectHandler = this.parentSelectHandler.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -112,6 +114,14 @@ class ElementNew extends Component {
         }
       }
     });
+  }
+
+  /**
+   * This function is called when the ElementSelector for the parent field
+   * changes.
+   */
+  parentSelectHandler(_id) {
+    this.setState({ parent: _id });
   }
 
   render() {
@@ -182,9 +192,12 @@ class ElementNew extends Component {
           <FormGroup row>
             <Label for="parent" sm={2}>Parent</Label>
             <Col sm={10}>
-              <p id="parent">
-                {this.state.parent || 'Select an element in the model tree.'}
-              </p>
+              <div id="parent">
+                {this.state.parent || 'Select an element.'}
+                <ElementSelector
+                  project={this.props.project}
+                  selectedHandler={this.parentSelectHandler} />
+              </div>
             </Col>
           </FormGroup>
           <Button className='btn btn'

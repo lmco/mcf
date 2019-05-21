@@ -86,3 +86,29 @@ textarea[name="custom"] {
 .about-top {
   padding-top: 30px;
 }
+
+
+/**
+ * TODO (jk) - not sure where we want to put this, so it's going here for now
+ */
+
+.element-selector {
+  display: inline;
+  margin-left: 10px;
+
+  i.fas:hover {
+    color: lighten(#333333, 25%);
+  }
+}
+
+.element-selector-modal {
+  .modal-footer {
+    p {
+      width: 100%;
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+  }
+}
