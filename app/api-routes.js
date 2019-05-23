@@ -42,6 +42,12 @@ const Middleware = M.require('lib.middleware');
  *         description: OK, the API is up.
  */
 api.get('/test', Middleware.logRoute, APIController.test);
+api.get(
+  '/coffee',
+  AuthController.authenticate,
+  Middleware.logRoute,
+  (req, res) => res.status(418).send('I\'m a teapot.')
+);
 
 
 /**
