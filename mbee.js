@@ -186,12 +186,16 @@ function main() {
 
 // Define process.exit() listener
 process.on('exit', (code) => {
-  // Log the termination of process along with exit code
-  M.log.info(`Exitting with code: ${code}`);
+  // If process run was "start", log termination
+  if (process.argv[2] === 'start') {
+    // Log the termination of process along with exit code
+    M.log.info(`Exiting with code: ${code}`);
+  }
 });
 
 // Define SIGINT listener, fired when using ctrl + c
 process.on('SIGINT', () => {
+  M.log.verbose('Exiting from SIGINT');
   // Exit with code 0, as this was user specified exit and nothing is wrong
   // and catching this signal stops termination
   process.exit(0);
@@ -199,6 +203,7 @@ process.on('SIGINT', () => {
 
 // Define SIGHUP listener, fired when the terminal window is closed
 process.on('SIGHUP', () => {
+  M.log.verbose('Exiting from SIGHUP');
   // Log exit, as this signal still causes program to terminate
-  M.log.info('Exitting with code: 0');
+  M.log.info('Exiting with code: 0');
 });
