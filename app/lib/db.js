@@ -58,6 +58,12 @@ module.exports.connect = function() {
     mongoose.set('useNewUrlParser', true);
     mongoose.set('useCreateIndex', true);
 
+    // Database debug logs
+    // Additional arguments may provide too much information
+    mongoose.set('debug', function(collectionName, methodName, arg1, arg2, arg3) {
+      M.log.debug(`DB OPERATION: ${collectionName}, ${methodName}`);
+    });
+
     // Connect to database
     mongoose.connect(connectURL, options, (err) => {
       if (err) {
