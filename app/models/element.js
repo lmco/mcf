@@ -247,7 +247,7 @@ ElementSchema.index({
 });
 
 
-/* -----------------------( Organization Properties )------------------------ */
+/* --------------------------( Element Properties )-------------------------- */
 
 // Required for virtual getters
 ElementSchema.set('toJSON', { virtuals: true });
