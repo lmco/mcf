@@ -183,3 +183,20 @@ function main() {
     console.log('Unknown command'); // eslint-disable-line no-console
   }
 }
+
+// Define process.exit() listener
+process.on('exit', (code) => {
+  // If process run was "start", log termination
+  if (process.argv[2] === 'start') {
+    // Log the termination of process along with exit code
+    M.log.info(`Exiting with code: ${code}`);
+  }
+});
+
+// Define SIGINT listener, fired when using ctrl + c
+process.on('SIGINT', () => {
+  M.log.verbose('Exiting from SIGINT');
+  // Exit with code 0, as this was user specified exit and nothing is wrong
+  // and catching this signal stops termination
+  process.exit(0);
+});

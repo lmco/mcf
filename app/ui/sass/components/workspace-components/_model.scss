@@ -1,7 +1,22 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.sass.components.workspace-components._model
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description Defines the element tree sass variables.
+ */
 @import '../../utils/variables';
 @import './sidepanel';
 
-#element-tree-container {
+#element-tree-container, .element-tree-container {
   padding-top: 10px;
   white-space: nowrap;
   padding-bottom: 10px;

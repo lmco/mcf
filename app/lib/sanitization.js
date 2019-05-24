@@ -37,6 +37,7 @@ module.exports.sanitize = function(userInput) {
  *
  * @param {Object} userInput - User object data to be sanitized.
  */
+// TODO: verify object sanitization
 module.exports.mongo = function(userInput) {
   if (Array.isArray(userInput)) {
     return userInput.map((value) => this.mongo(value));
@@ -47,6 +48,11 @@ module.exports.mongo = function(userInput) {
       // If '$' in key, remove key from userInput
       if (/^\$/.test(key)) {
         delete userInput[key];
+      }
+      // If the value is an object
+      else if (typeof userInput[key] === 'object' && userInput[key] !== null) {
+        // Recursively call function on value
+        this.mongo(userInput[key]);
       }
     });
   }

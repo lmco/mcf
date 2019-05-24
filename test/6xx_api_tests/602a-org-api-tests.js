@@ -16,7 +16,7 @@
  *
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const request = require('request');
 

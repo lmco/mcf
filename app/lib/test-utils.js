@@ -217,7 +217,7 @@ module.exports.createTestOrg = function(adminUser) {
 module.exports.removeTestOrg = function() {
   return new Promise((resolve, reject) => {
     // Create query for deleting items in the orgs
-    const ownedQuery = { _id: { $regex: `^${testData.orgs[0].id}:` } };
+    const ownedQuery = { _id: { $regex: `^${testData.orgs[0].id}${utils.ID_DELIMITER}` } };
 
     // Delete elements
     Element.deleteMany(ownedQuery)

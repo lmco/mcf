@@ -43,7 +43,7 @@ function test(_args) {
     _args.splice(removeInd, 1);
   }
 
-  // LM: Default timeout changed to 5000
+  // Default timeout changed to 5000
   // Add default timeout if not provided
   if (!_args.includes('--timeout')) {
     _args.push('--timeout');

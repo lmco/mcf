@@ -1,4 +1,18 @@
-
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.sass.components._general
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description Defines general html sass component styles
+ */
 /******************************************************************************
 /*                                  General                                   *
 /******************************************************************************/
@@ -71,4 +85,30 @@ textarea[name="custom"] {
 
 .about-top {
   padding-top: 30px;
+}
+
+
+/**
+ * TODO (jk) - not sure where we want to put this, so it's going here for now
+ */
+
+.element-selector {
+  display: inline;
+  margin-left: 10px;
+
+  i.fas:hover {
+    color: lighten(#333333, 25%);
+  }
+}
+
+.element-selector-modal {
+  .modal-footer {
+    p {
+      width: 100%;
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+  }
 }

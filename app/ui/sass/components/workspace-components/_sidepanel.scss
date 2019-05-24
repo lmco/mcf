@@ -1,4 +1,18 @@
-
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.sass.components.workspace-components._sidepanel
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description Defines the side panel sass variables
+ */
 @import '../../utils/_variables';
 
 /******************************************************************************
@@ -97,4 +111,17 @@
   p {
     padding: 8px 0;
   }
+
+  #parent {
+    font-size: 14px;
+    font-weight: normal;
+    padding: 10px 0;
+  }
+}
+
+.parent {
+  font-size: 14px;
+  font-weight: normal;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }

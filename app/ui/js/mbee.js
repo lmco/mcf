@@ -1,6 +1,6 @@
 // ESLint disbled for client-side JS for now.
 // TODO (jk) - determine long-term approach
-/* eslint-disable */
+/* eslint-disabled */
 
 $.fn.extend({
   autoResize: function() {
@@ -10,3 +10,56 @@ $.fn.extend({
 });
 
 
+/**
+ * Determines the identity of the current user. If the user is stored in session
+ * storage, that is used. Otherwise, an API call is made to /api/users/whoami
+ * to get the user information and store it in session storage.
+ *
+ * Takes a callback as input that will passed an error, and the user data.
+ *
+ * TODO - Is there a default option for the ajax statusCode for handling an
+ * unexpected return status?
+ */
+// eslint-disable-next-line no-unused-vars
+function mbeeWhoAmI(callback) {
+  // If user is already stored, use that.
+  if (window.sessionStorage.hasOwnProperty('mbee-user')
+    && window.sessionStorage['mbee-user'] !== null) {
+    return callback(null, JSON.parse(window.sessionStorage['mbee-user']));
+  }
+
+  // If not found, do ajax call
+  const url = '/api/users/whoami?minified=true';
+  $.ajax({
+    method: 'GET',
+    url: url,
+    statusCode: {
+      401: () => {
+        const path = window.location.pathname;
+        if (!path.startsWith('/doc') && !path.startsWith('/login')
+          && !path.startsWith('/about')) {
+          // Refresh when session expires
+          window.location.reload();
+        }
+      }
+    },
+    success: (_data) => {
+      const data = {
+        username: _data.username,
+        fname: _data.fname,
+        lname: _data.lname,
+        preferredName: _data.preferredName,
+        email: _data.email,
+        custom: _data.custom,
+        admin: _data.admin
+      };
+      if (data.username) {
+        window.sessionStorage.setItem('mbee-user', JSON.stringify(data));
+      }
+      callback(null, data);
+    },
+    error: (err) => {
+      callback(err, null);
+    }
+  });
+}

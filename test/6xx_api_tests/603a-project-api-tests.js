@@ -16,7 +16,7 @@
  * GET, POST, PATCH, and DELETE of a project.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const request = require('request');
 
