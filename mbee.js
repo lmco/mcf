@@ -200,10 +200,3 @@ process.on('SIGINT', () => {
   // and catching this signal stops termination
   process.exit(0);
 });
-
-// Define SIGHUP listener, fired when the terminal window is closed
-process.on('SIGHUP', () => {
-  M.log.verbose('Exiting from SIGHUP');
-  // Log exit, as this signal still causes program to terminate
-  M.log.info('Exiting with code: 0');
-});
