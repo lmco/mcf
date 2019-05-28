@@ -77,6 +77,11 @@ class EditPage extends Component {
   // Define handle change function
   handleChange(event) {
     if (event.target.name === 'archived') {
+      console.log('in archived if');
+      console.log(typeof event.target.value);
+      const newvalue = !event.target.value;
+      console.log(typeof newvalue);
+      console.log(!newvalue);
       // Change the state to opposite value
       this.setState({ [event.target.name]: !event.target.value });
     }
@@ -108,6 +113,8 @@ class EditPage extends Component {
       redirect = `/${this.props.orgid}/${this.props.project.id}`;
     }
 
+    console.log(this.state.archived);
+
     if (this.state.archived) {
       data.archived = true;
     }
@@ -133,6 +140,7 @@ class EditPage extends Component {
   }
 
   render() {
+    console.log(typeof this.state.archived);
     // Initialize variables
     let customInvalid;
     let disableSubmit;
@@ -220,7 +228,7 @@ class EditPage extends Component {
                                id="archived"
                                name="archived"
                                label="Archived"
-                               value={this.state.archived || false}
+                               value={false}
                                onChange={this.handleChange}/>
                 </div>
               </FormGroup>
