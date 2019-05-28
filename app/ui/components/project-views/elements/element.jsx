@@ -34,6 +34,7 @@ class Element extends Component {
     // Initialize parent props
     super(props);
 
+    // Set mounted variable
     this.mounted = false;
 
     // Initialize state props
@@ -91,10 +92,11 @@ class Element extends Component {
     this.getElement();
   }
 
+  // Toggles the tooltip
   handleTooltipToggle() {
     const isTooltipOpen = this.state.isTooltipOpen;
 
-    // console.log(this.mounted);
+    // Verify component is not unmounted
     if (!this.mounted) {
       return;
     }
@@ -110,6 +112,7 @@ class Element extends Component {
   }
 
   componentWillUnmount() {
+    // Set mounted variable
     this.mounted = false;
   }
 
@@ -161,17 +164,14 @@ class Element extends Component {
                             Delete
                           </UncontrolledTooltip>
                           <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
-                          <div id='edit-icon-container'>
-                            <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
-                            <Tooltip
-                              placement='left'
-                              container='edit-icon-container'
-                              isOpen={this.state.isTooltipOpen}
-                              target='editBtn'
-                              toggle={this.handleTooltipToggle}>
-                              Edit
-                            </Tooltip>
-                          </div>
+                          <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                          <Tooltip
+                            placement='left'
+                            isOpen={this.state.isTooltipOpen}
+                            target='editBtn'
+                            toggle={this.handleTooltipToggle}>
+                            Edit
+                          </Tooltip>
                          </React.Fragment>)
                       : ''
                     }
