@@ -62,11 +62,17 @@ module.exports.render = function(req, res, name, params) {
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *
- * @param {string} args - An arbitrary number of strings to be appended.
+ * @param {(...string|string[])} args - An arbitrary number of strings to be
+ * appended or an array of strings.
  *
  * @return {string} Concatenated args with uid delimiter
  */
 module.exports.createID = function(...args) {
+  // If passed in an array of strings, set equal to args
+  if (Array.isArray(args[0]) && args[0].every(e => typeof e === 'string')) {
+    args = args[0]; // eslint-disable-line
+  }
+
   // For each argument
   args.forEach((a) => {
     // Verify the argument is a string
@@ -235,8 +241,10 @@ module.exports.validateOptions = function(options, validOptions, model) {
   // Define the object to be returned to the user. Initialize populateString
   const returnObject = { populateString: '' };
   // Define valid searchOptions for the element model
-  const searchOptions = ['parent', 'source', 'target', 'type', 'name',
+  const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
     'createdBy', 'lastModifiedBy', 'archivedBy'];
+  // Define valid searchOptions for the branch model
+  const branchSearchOptions = ['tag', 'source'];
 
   // Define the populateString for elements, since we populate contains by default
   if (model.modelName === 'Element') {
@@ -258,7 +266,13 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
     // Special case, ignore these as the controller handles these
     if (model.modelName === 'Element'
-      && (searchOptions.includes(opt) || opt.startsWith('custom.'))) {
+      && (elemSearchOptions.includes(opt) || opt.startsWith('custom.'))) {
+      // Ignore iteration of loop
+      return;
+    }
+    // Special case, ignore these as the controller handles these
+    if (model.modelName === 'Branch'
+      && (branchSearchOptions.includes(opt) || opt.startsWith('custom.'))) {
       // Ignore iteration of loop
       return;
     }

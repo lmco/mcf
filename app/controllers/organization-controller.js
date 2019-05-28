@@ -35,6 +35,7 @@ const path = require('path');
 
 // MBEE Modules
 const Element = M.require('models.element');
+const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
@@ -855,7 +856,7 @@ function createOrReplace(requestingUser, orgs, options) {
 
 /**
  * @description This function removes one or many organizations as well as the
- * projects and elements that belong to them. This function can be used by
+ * projects, branches, and elements that belong to them. This function can be used by
  * system-wide admins ONLY. NOTE: Cannot delete the default org.
  *
  * @param {User} requestingUser - The object containing the requesting user.
@@ -951,6 +952,8 @@ function remove(requestingUser, orgs, options) {
       // Delete any elements in the org
       return Element.deleteMany(ownedQuery).lean();
     })
+    // Delete any branches in the org
+    .then(() => Branch.deleteMany(ownedQuery).lean())
     // Delete any projects in the org
     .then(() => Project.deleteMany({ org: { $in: saniOrgs } }).lean())
     // Delete the orgs

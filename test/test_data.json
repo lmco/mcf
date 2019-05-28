@@ -204,6 +204,64 @@
       "parent": "4",
       "contains": []
     }
+  ],
+  "branches": [
+    {
+      "id": "master",
+      "name": "Master Branch",
+      "custom": {},
+      "tag": false,
+      "source": null
+    },
+    {
+      "id": "branch01",
+      "name": "Branch01",
+      "custom": {},
+      "tag": false,
+      "source": "master"
+    },
+    {
+      "id": "branch02",
+      "name": "Branch02",
+      "custom": {},
+      "tag": false,
+      "source": "master"
+    },
+    {
+      "id": "branch03",
+      "name": "Branch03",
+      "custom": {},
+      "tag": false,
+      "source": "master"
+    },
+    {
+      "id": "branch04",
+      "name": "Branch04",
+      "custom": {},
+      "tag": false,
+      "source": "master"
+    },
+    {
+      "id": "branch05",
+      "name": "Branch05",
+      "custom": {},
+      "tag": false,
+      "source": "master"
+    },
+    {
+      "id": "branch06",
+      "name": "Branch06",
+      "custom": {},
+      "tag": false,
+      "source": "master"
+    },
+    {
+      "id": "branch07",
+      "name": "Branch07",
+      "custom": {},
+      "tag": true,
+      "source": "master"
+    }
   ]
 }
 
