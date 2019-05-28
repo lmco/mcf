@@ -193,7 +193,9 @@ function swaggerDoc(req, res) {
 function showAboutPage(req, res) {
   return utils.render(req, res, 'about', {
     info: {
-      version: M.version
+      version: M.version,
+      build: M.build,
+      commit: M.commit
     },
     title: 'About | Model-Based Engineering Environment'
   });
