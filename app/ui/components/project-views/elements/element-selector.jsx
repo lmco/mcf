@@ -100,13 +100,19 @@ class ElementSelector extends React.Component {
   selectElementHandler(id, refreshFunction) {
     // Cannot select self
     if (id === this.props.self) {
-      this.setState({ error: 'Element cannot select self.' });
-      this.setState({ selectedElementPreview: null });
+      this.setState({
+        selectedElementPreview: null,
+        selectDisabled: true,
+        error: 'Element cannot select self.'
+      });
       return;
     }
     // Otherwise, reset error to null and set selected state
-    this.setState({ error: null });
-    this.setState({ selectedElementPreview: id });
+    this.setState({
+      selectedElementPreview: id,
+      error: null,
+      selectDisabled: false
+    });
   }
 
   /**
@@ -156,7 +162,9 @@ class ElementSelector extends React.Component {
               Selected: {this.state.selectedElementPreview}
               {error}
             </p>
-            <Button color="primary" onClick={this.select}>Select</Button>{' '}
+            <Button color="primary"
+                    disabled={this.state.selectDisabled}
+                    onClick={this.select}>Select</Button>
             <Button color="secondary" onClick={this.toggle}>Cancel</Button>
           </ModalFooter>
         </Modal>
