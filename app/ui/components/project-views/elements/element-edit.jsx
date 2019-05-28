@@ -27,10 +27,9 @@ import {
   Label,
   Input,
   FormFeedback,
-  Row,
   Col,
-  UncontrolledTooltip,
-  UncontrolledAlert
+  UncontrolledAlert,
+  Tooltip
 } from 'reactstrap';
 
 // MBEE Modules
@@ -44,6 +43,10 @@ class ElementEdit extends Component {
   constructor(props) {
     // Initialize parent props
     super(props);
+
+    // Set mounted variable
+    this.mounted = false;
+
     // Initialize state props
     this.state = {
       id: this.props.id,
@@ -57,6 +60,8 @@ class ElementEdit extends Component {
       org: null,
       project: null,
       parentUpdate: null,
+      isSaveTooltipOpen: false,
+      isExitTooltipOpen: false,
       error: null
     };
 
@@ -65,6 +70,8 @@ class ElementEdit extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.parentSelectHandler = this.parentSelectHandler.bind(this);
+    this.handleSaveTooltipToggle = this.handleSaveTooltipToggle.bind(this);
+    this.handleExitTooltipToggle = this.handleExitTooltipToggle.bind(this);
     this.sourceSelectHandler = this.sourceSelectHandler.bind(this);
     this.targetSelectHandler = this.targetSelectHandler.bind(this);
   }
@@ -120,6 +127,10 @@ class ElementEdit extends Component {
   }
 
   componentDidMount() {
+    // Set the mounted variable
+    this.mounted = true;
+
+    // Get element information
     this.getElement();
   }
 
@@ -212,6 +223,35 @@ class ElementEdit extends Component {
     this.setState({ parent: _id });
   }
 
+  // Toggles the tooltip
+  handleSaveTooltipToggle() {
+    const isTooltipOpen = this.state.isSaveTooltipOpen;
+
+    // Verify component is not unmounted
+    if (!this.mounted) {
+      return;
+    }
+
+    return this.setState({ isSaveTooltipOpen: !isTooltipOpen });
+  }
+
+  // Toggles the tooltip
+  handleExitTooltipToggle() {
+    const isTooltipOpen = this.state.isExitTooltipOpen;
+
+    // Verify component is not unmounted
+    if (!this.mounted) {
+      return;
+    }
+
+    return this.setState({ isExitTooltipOpen: !isTooltipOpen });
+  }
+
+  componentWillUnmount() {
+    // Set mounted variable
+    this.mounted = false;
+  }
+
   /**
    * This function is called when the ElementSelector for the source field
    * changes.
@@ -252,13 +292,21 @@ class ElementEdit extends Component {
               Element Edit
             </h2>
             <div className='side-icons'>
-              <UncontrolledTooltip placement='left' target='saveBtn'>
+              <Tooltip
+                placement='left'
+                isOpen={this.state.isSaveTooltipOpen}
+                target='saveBtn'
+                toggle={this.handleSaveTooltipToggle}>
                 Save
-              </UncontrolledTooltip>
+              </Tooltip>
               <i id='saveBtn' className='fas fa-save edit-btn' onClick={this.onSubmit}/>
-              <UncontrolledTooltip placement='left' target='cancelBtn'>
+              <Tooltip
+                placement='left'
+                isOpen={this.state.isExitTooltipOpen}
+                target='cancelBtn'
+                toggle={this.handleExitTooltipToggle}>
                 Exit
-              </UncontrolledTooltip>
+              </Tooltip>
               <i id='cancelBtn' className='fas fa-times exit-btn' onClick={() => { this.props.closeSidePanel(); }}/>
             </div>
           </div>
@@ -294,10 +342,6 @@ class ElementEdit extends Component {
                       project={this.props.project}
                       selectedHandler={this.parentSelectHandler} />
                   </Col>
-                  {/* Verify fields are valid, or display feedback */}
-                <FormFeedback>
-                  Invalid: An Element parent may only contain letters, numbers, space, or dashes.
-                </FormFeedback>
                  </FormGroup>)
             }
             {/* Form section for Element type */}
@@ -322,11 +366,6 @@ class ElementEdit extends Component {
                   project={this.props.project}
                   selectedHandler={this.sourceSelectHandler} />
               </Col>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback>
-                Invalid:
-                An Element source may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
             </FormGroup>
             {/* Form section for Element target */}
             <FormGroup row>
@@ -338,11 +377,6 @@ class ElementEdit extends Component {
                   project={this.props.project}
                   selectedHandler={this.targetSelectHandler} />
               </Col>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback>
-                Invalid:
-                An Element target may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
             </FormGroup>
             {/* Form section for custom data */}
             <FormGroup>
