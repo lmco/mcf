@@ -41,6 +41,7 @@ class EditPage extends Component {
     // Initialize state props
     let name;
     let custom;
+    let visibility;
 
     if (this.props.org) {
       name = this.props.org.name;
@@ -49,10 +50,12 @@ class EditPage extends Component {
     else {
       name = this.props.project.name;
       custom = this.props.project.custom;
+      visibility = this.props.visibility;
     }
 
     this.state = {
       name: name,
+      visibility: visibility,
       custom: JSON.stringify(custom || {}, null, 2),
       error: null
     };
@@ -80,20 +83,21 @@ class EditPage extends Component {
     // Initialize variables
     let url;
     let redirect;
+    const data = {
+      name: this.state.name,
+      custom: JSON.parse(this.state.custom)
+    };
+
 
     if (this.props.org) {
       url = `/api/orgs/${this.props.org.id}`;
       redirect = `/${this.props.org.id}`;
     }
     else {
+      data.visibility = this.state.visibility;
       url = `/api/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
       redirect = `/${this.props.orgid}/${this.props.project.id}`;
     }
-
-    const data = {
-      name: this.state.name,
-      custom: JSON.parse(this.state.custom)
-    };
 
     $.ajax({
       method: 'PATCH',
@@ -165,6 +169,23 @@ class EditPage extends Component {
                        value={this.state.name || ''}
                        onChange={this.handleChange}/>
               </FormGroup>
+              {(!this.props.project)
+                ? ''
+                : (<React.Fragment>
+                  <FormGroup>
+                    <Label for="visibility">Visibility</Label>
+                    <Input type="select"
+                           name="visibility"
+                           id="visibility"
+                           value={this.state.visibility || ''}
+                           onChange={this.handleChange}>
+                      <option>Choose one...</option>
+                      <option value='internal'>Internal</option>
+                      <option value='private'>Private</option>
+                    </Input>
+                   </FormGroup>
+                </React.Fragment>)
+              }
               {/* Form section for custom data */}
               <FormGroup>
                 <Label for="custom">Custom Data</Label>
