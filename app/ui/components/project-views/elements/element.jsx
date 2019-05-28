@@ -88,7 +88,10 @@ class Element extends Component {
   }
 
   componentDidMount() {
+    // Set the mounted variable
     this.mounted = true;
+
+    // Get element information
     this.getElement();
   }
 

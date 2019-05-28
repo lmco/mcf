@@ -27,7 +27,6 @@ import {
   Input,
   FormFeedback,
   Col,
-  UncontrolledTooltip,
   UncontrolledAlert,
   Tooltip
 } from 'reactstrap';
@@ -125,7 +124,10 @@ class ElementEdit extends Component {
   }
 
   componentDidMount() {
+    // Set the mounted variable
     this.mounted = true;
+
+    // Get element information
     this.getElement();
   }
 
@@ -248,7 +250,7 @@ class ElementEdit extends Component {
   }
 
   render() {
-    // // Initialize variables
+    // Initialize variables
     let targetInvalid;
     let sourceInvalid;
     let customInvalid;
