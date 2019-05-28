@@ -415,9 +415,9 @@ api.route('/version')
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes multiple organizations and any projects and elements
- *                  name-spaced under the specified orgs. NOTE this endpoint can
- *                  be used by system-admins ONLY.
+ *     description: Deletes multiple organizations and any projects, branches
+ *                  or elements name-spaced under the specified orgs. NOTE
+ *                  this endpoint can be used by system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -760,8 +760,8 @@ api.route('/orgs')
  *   delete:
  *     tags:
  *       - organizations
- *     description: Deletes the specified organization and any projects and
- *                  elements name-spaced under the org. NOTE this endpoint is
+ *     description: Deletes the specified organization and any projects, branches,
+ *                  and elements name-spaced under the org. NOTE this endpoint is
  *                  reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
@@ -1261,9 +1261,9 @@ api.route('/projects')
  *   delete:
  *     tags:
  *       - projects
- *     description: Deletes multiple projects and any elements name-spaced under
- *                  the specified project. NOTE this endpoint can be used by
- *                  system-admins ONLY.
+ *     description: Deletes multiple projects, along with any branches or elements
+ *                  name-spaced under the specified project. NOTE this endpoint
+ *                  can be used be system-admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1678,9 +1678,9 @@ api.route('/orgs/:orgid/projects')
  *   delete:
  *     tags:
  *       - projects
- *     description: Deletes the specified project and any elements name-spaced
- *                  under the project. NOTE this endpoint is reserved for
- *                  system-wide admins ONLY.
+ *     description: Deletes the specified project, alone with any branches or
+ *                  elements name-spaced under the project. NOTE this endpoint
+ *                  is reserved for system-wide admins ONLY.
  *     produces:
  *       - application/json
  *     parameters:
@@ -1749,6 +1749,680 @@ api.route('/orgs/:orgid/projects/:projectid')
   APIController.deleteProject
 );
 
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches:
+ *   get:
+ *     tags:
+ *       - branches
+ *     description: Returns an array of branches, if the requesting user has read
+ *                  access on the specified project. Optionally, an array of IDs
+ *                  can be provided in the request body or a comma separated
+ *                  list in the request parameters to find multiple, specific
+ *                  branches.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project which contains the searched
+ *                      branches.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - in: body
+ *         schema:
+ *           type: array
+ *           items:
+ *            type: string
+ *         description: An array of branch IDs to search for. If both query
+ *                      parameter and body are not provided, all branches the
+ *                      user has read access to (under the specified project) are
+ *                      found.
+ *       - name: ids
+ *         description: Comma separated list of branch IDs to search for. If
+ *                      both query parameter and body are not provided, all
+ *                      branches the user has read access to (under the
+ *                      specified project) are found.
+ *         in: query
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, source]
+ *         in: query
+ *         type: string
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, updatedOn, name, org,
+ *                      project, source, tag]
+ *         in: query
+ *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET branches, returns branches' public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET branches due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET branches due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET branches due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET branches due to branches not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET branches due to a
+ *                      server side issue.
+ *   post:
+ *     tags:
+ *       - branches
+ *     description: Creates multiple branches from the supplied data in the
+ *                  request body. Returns the created branches' public data.
+ *                  Requesting user must have at least write access on the
+ *                  project to create branches.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the projects containing the branches to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branches
+ *         in: body
+ *         description: An array of objects containing new branch data.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *               - source
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 required: true
+ *               name:
+ *                 type: string
+ *               source:
+ *                 type: string
+ *                 required: true
+ *                 default: null
+ *                 description: NOTE The source field needs to be the same
+ *                              branch with every branch being created.
+ *               tag:
+ *                 type: boolean
+ *                 default: false
+ *                 description: This field defines if a branch is actually a tag.
+ *                              A tag can not be updated, nor can the branch
+ *                              add, update, or delete elements.
+ *               custom:
+ *                 type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, source]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, updatedOn, name, org,
+ *                      project, source, tag]
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST branches, returns branch public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to POST branches due to invalid
+ *                      branch data.
+ *       401:
+ *         description: Unauthorized, Failed to POST branches due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST branches due to branch ids
+ *                      already existing.
+ *       500:
+ *         description: Internal Server Error, Failed to POST branches due to a
+ *                      server side issue.
+ *   patch:
+ *     tags:
+ *       - branches
+ *     description: Updates multiple branches from the data provided in the
+ *                  request body. Branches that are currently archived must
+ *                  first be unarchived before making any other updates. The
+ *                  following fields can be updated [name, custom, archived].
+ *                  NOTE, the id is required in the request body,
+ *                  but CANNOT be updated.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the branches to update.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - in: body
+ *         name: branches
+ *         description: An array of objects containing updates to multiple
+ *                      branches.
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: The current ID of the branch, cannot be
+ *                              updated.
+ *               name:
+ *                 type: string
+ *               archived:
+ *                 type: boolean
+ *               custom:
+ *                 type: object
+ *                 description: NOTE when updating the custom data, the object
+ *                              is completely replaced.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, source]
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, updatedOn, name,
+ *                      org, project, tag, source]
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH branches, returns branches' public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH branches due to invalid
+ *                      request data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH branches due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH branches due to updating an
+ *                      immutable field.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH branches due to
+ *                      server side issue.
+ *   delete:
+ *     tags:
+ *       - branches
+ *     description: Deletes multiple branches and any elements name-spaced under
+ *                  the specified branch.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the branches to be
+ *                      deleted.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchIDs
+ *         description: An array of branch IDs to delete. Can optionally be an
+ *                      array of objects containing id key/value pairs.
+ *         in: body
+ *         required: false
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE branches, return deleted
+ *                      branches' ids.
+ *       400:
+ *         description: Bad Request, Failed to DELETE branches due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE branches due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE branches due to not having
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE branches due to a
+ *                      server side issue
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getBranches
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.postBranches
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchBranches
+)
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteBranches
+);
+
+
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}:
+ *   get:
+ *     tags:
+ *       - branches
+ *     description: Finds and returns a branch's public data if the user has
+ *                  read permissions on specified project.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch to find.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, source]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, updatedOn, name,
+ *                      org, source, project]
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET branch, returns branch public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET branch due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET branch due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET branch due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET branch due to branch with
+ *                      specified id not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET branch due to a
+ *                      server side issue.
+ *   post:
+ *     tags:
+ *       - branches
+ *     description: Creates a new branch from the given data in the request
+ *                  body. Requesting user must have at least write access on the
+ *                  project to create a branch.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the new branch to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branch
+ *         description: The object containing the new branch data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - source
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: Must match the id in the request parameters.
+ *             name:
+ *               type: string
+ *             tag:
+ *               type: boolean
+ *               default: false
+ *               description: This will define if the branch is actually a tag
+ *                            A tag can not be updated, nor can it create, update,
+ *                            or delete elements on the tag.
+ *             source:
+ *               type: string
+ *               required: true
+ *               default: null
+ *               description: This is a require field so the branch can clone
+ *                            the elements from the correct branch.
+ *             custom:
+ *               type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, source]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, updatedOn, name,
+ *                       org, project, tag, source
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST branch, return branch public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to POST branch due to invalid
+ *                      branch data.
+ *       401:
+ *         description: Unauthorized, Failed to POST branch due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST branch due to posting with an
+ *                      already existing id.
+ *       404:
+ *         description: Not Found, Failed to POST branch due to project not being
+ *                      found.
+ *       500:
+ *         description: Internal Server Error, Failed to POST branch due to a
+ *                      server side issue.
+ *   patch:
+ *     tags:
+ *       - branches
+ *     description: Updates an existing branch. The following fields can be
+ *                  updated [name, custom, archived]. Branches that
+ *                  are currently archived must first be unarchived before
+ *                  making any other updates. Requesting user must have project
+ *                  write permissions to update the branch.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the branch to be updated.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch to update.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branch
+ *         description: The object containing the updated branch data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             archived:
+ *               type: boolean
+ *             custom:
+ *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, source]
+ *         in: query
+ *         type: string
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, updatedOn, name,
+ *                      org, source, project, tag]
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH branch, return updated branch
+ *                      public data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH branch due to invalid
+ *                      update request data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH branch due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH branch due to updating an
+ *                      immutable field.
+ *       404:
+ *         description: Not Found, Failed to PATCH branch due to not finding
+ *                      branch.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH branch due to a
+ *                      server side issue.
+ *   delete:
+ *     tags:
+ *       - branches
+ *     description: Deletes the specified branch and any elements name-spaced
+ *                  under the branch.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the branch to
+ *                      be deleted.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch to delete.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE branch, return deleted branch
+ *                      ID.
+ *       400:
+ *         description: Bad Request, Failed to DELETE branch due to invalid
+ *                      branch data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE branch due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE branch due to not having
+ *                      permissions on project.
+ *       404:
+ *         description: Not Found, Failed to DELETE branch due to not finding
+ *                      branch.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE branch due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getBranch
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.postBranch
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchBranch
+)
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteBranch
+);
 
 /**
  * @swagger
@@ -1929,7 +2603,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, branch]
  *         in: query
  *         type: string
  *         required: false
@@ -1949,7 +2623,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
- *                      org, parent, project, source, target, type, updatedOn]
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
  *         in: query
  *         type: string
  *       - name: limit
@@ -2125,7 +2800,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, branch]
  *         in: query
  *         type: string
  *         required: false
@@ -2135,8 +2810,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
- *                      org, parent, project, source, target, type, updatedOn]
-
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2255,7 +2930,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, branch]
  *         in: query
  *         type: string
  *         required: false
@@ -2265,8 +2940,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
- *                      org, parent, project, source, target, type, updatedOn]
-
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2385,7 +3060,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, branch]
  *         in: query
  *         type: string
  *         required: false
@@ -2395,8 +3070,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
- *                      org, parent, project, source, target, type, updatedOn]
-
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2543,7 +3218,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, branch]
  *         in: query
  *         type: string
  *         required: false
@@ -2564,8 +3239,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
- *                      org, parent, project, source, target, type, updatedOn]
-
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2686,7 +3361,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, branch]
  *         in: query
  *         type: string
  *         required: false
@@ -2696,8 +3371,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
- *                      org, parent, project, source, target, type, updatedOn]
-
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2819,7 +3494,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, branch]
  *         in: query
  *         type: string
  *         required: false
@@ -2829,7 +3504,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
- *                      org, parent, project, source, target, type, updatedOn]
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
 
  *         in: query
  *         type: string
@@ -2946,7 +3622,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, branch]
  *         in: query
  *         type: string
  *         required: false
@@ -2956,7 +3632,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
- *                      org, parent, project, source, target, type, updatedOn]
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
 
  *         in: query
  *         type: string

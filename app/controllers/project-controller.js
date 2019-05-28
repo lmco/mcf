@@ -13,6 +13,7 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Project model that
  * implements controller logic and behavior for Projects.
@@ -36,6 +37,7 @@ const path = require('path');
 
 // MBEE Modules
 const Element = M.require('models.element');
+const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
@@ -445,12 +447,31 @@ function create(requestingUser, organizationID, projects, options) {
       // Emit the event projects-created
       EventEmitter.emit('projects-created', projObjects);
 
+      // Create a branch for each project
+      const branchObjects = projObjects.map((p) => new Branch({
+        _id: utils.createID(p._id, 'master'),
+        name: 'Master',
+        project: p._id,
+        tag: false,
+        lastModifiedBy: reqUser._id,
+        createdBy: reqUser._id,
+        createdOn: Date.now(),
+        updatedOn: Date.now(),
+        archived: p.archived,
+        archivedBy: (p.archived) ? reqUser._id : null
+      }));
+
+      // Create the branch
+      return Branch.insertMany(branchObjects);
+    })
+    .then(() => {
       // Create a root model element for each project
       const elemModelObj = projObjects.map((p) => new Element({
-        _id: utils.createID(p._id, 'model'),
+        _id: utils.createID(p._id, 'master', 'model'),
         name: 'Model',
         parent: null,
         project: p._id,
+        branch: utils.createID(p._id, 'master'),
         lastModifiedBy: reqUser._id,
         createdBy: reqUser._id,
         createdOn: Date.now(),
@@ -461,10 +482,11 @@ function create(requestingUser, organizationID, projects, options) {
 
       // Create a __MBEE__ element for each project
       const elemMBEEObj = projObjects.map((p) => new Element({
-        _id: utils.createID(p._id, '__mbee__'),
+        _id: utils.createID(p._id, 'master', '__mbee__'),
         name: '__mbee__',
-        parent: utils.createID(p._id, 'model'),
+        parent: utils.createID(p._id, 'master', 'model'),
         project: p._id,
+        branch: utils.createID(p._id, 'master'),
         lastModifiedBy: reqUser._id,
         createdBy: reqUser._id,
         createdOn: Date.now(),
@@ -475,10 +497,11 @@ function create(requestingUser, organizationID, projects, options) {
 
       // Create a holding bin element for each project
       const elemHoldingBinObj = projObjects.map((p) => new Element({
-        _id: utils.createID(p._id, 'holding_bin'),
+        _id: utils.createID(p._id, 'master', 'holding_bin'),
         name: 'holding bin',
-        parent: utils.createID(p._id, '__mbee__'),
+        parent: utils.createID(p._id, 'master', '__mbee__'),
         project: p._id,
+        branch: utils.createID(p._id, 'master'),
         lastModifiedBy: reqUser._id,
         createdBy: reqUser._id,
         createdOn: Date.now(),
@@ -489,10 +512,11 @@ function create(requestingUser, organizationID, projects, options) {
 
       // Create a undefined element for each project
       const elemUndefinedBinObj = projObjects.map((p) => new Element({
-        _id: utils.createID(p._id, 'undefined'),
+        _id: utils.createID(p._id, 'master', 'undefined'),
         name: 'undefined element',
-        parent: utils.createID(p._id, '__mbee__'),
+        parent: utils.createID(p._id, 'master', '__mbee__'),
         project: p._id,
+        branch: utils.createID(p._id, 'master'),
         lastModifiedBy: reqUser._id,
         createdBy: reqUser._id,
         createdOn: Date.now(),
@@ -1068,12 +1092,20 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     .then(() => {
       const elemDelObj = [];
       foundProjects.forEach(p => {
-        elemDelObj.push(utils.createID(p._id, 'model'));
-        elemDelObj.push(utils.createID(p._id, '__mbee__'));
-        elemDelObj.push(utils.createID(p._id, 'holding_bin'));
-        elemDelObj.push(utils.createID(p._id, 'undefined'));
+        elemDelObj.push(utils.createID(p._id, 'master', 'model'));
+        elemDelObj.push(utils.createID(p._id, 'master', '__mbee__'));
+        elemDelObj.push(utils.createID(p._id, 'master', 'holding_bin'));
+        elemDelObj.push(utils.createID(p._id, 'master', 'undefined'));
       });
       return Element.deleteMany({ _id: { $in: elemDelObj } }).lean();
+    })
+    // Delete branches from database
+    .then(() => {
+      const branchDelObj = [];
+      foundProjects.forEach(p => {
+        branchDelObj.push(utils.createID(p._id, 'master'));
+      });
+      return Branch.deleteMany({ _id: { $in: branchDelObj } }).lean();
     })
     // Delete projects from database
     .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }).lean())
@@ -1219,6 +1251,8 @@ function remove(requestingUser, organizationID, projects, options) {
       // Delete any elements in the project
       return Element.deleteMany(ownedQuery).lean();
     })
+    // Delete any branches in the project
+    .then(() => Branch.deleteMany(ownedQuery).lean())
     // Delete the project references from any projectReferences arrays
     .then(() => Project.updateMany({}, { $pull: { projectReferences:
           { $in: foundProjects.map(p => p._id) } } }, { multi: true }))

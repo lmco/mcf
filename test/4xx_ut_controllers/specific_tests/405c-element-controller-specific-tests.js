@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.404c-element-controller-specific-tests
+ * @module test.405c-element-controller-specific-tests
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
@@ -33,6 +33,7 @@ const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
 const projIDs = [];
+let branchID = null;
 let elements = [];
 
 /* --------------------( Main )-------------------- */
@@ -67,6 +68,8 @@ describe(M.getModuleName(module.filename), () => {
       return testUtils.createTestProject(adminUser, org.id);
     })
     .then((retProj) => {
+      branchID = testData.branches[0].id;
+
       // Add project to array of created projects
       projIDs.push(utils.parseID(retProj.id).pop());
 
@@ -88,7 +91,7 @@ describe(M.getModuleName(module.filename), () => {
     .then(() => {
       // Create test elements for the main project
       const elems = testData.elements;
-      return ElementController.create(adminUser, org.id, projIDs[0], 'master', elems);
+      return ElementController.create(adminUser, org.id, projIDs[0], branchID, elems);
     })
     .then((createdElements) => {
       elements = createdElements;
@@ -177,7 +180,7 @@ function createArchivedElement(done) {
   };
 
   // Create the element
-  ElementController.create(adminUser, org.id, projIDs[0], 'master', elemObj)
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, elemObj)
   .then((createdElements) => {
     // Verify that only one element was created
     chai.expect(createdElements.length).to.equal(1);
@@ -210,7 +213,7 @@ function archiveElement(done) {
   };
 
   // Update the element with archived: true
-  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj)
+  ElementController.update(adminUser, org.id, projIDs[0], branchID, updateObj)
   .then((updatedElements) => {
     // Verify the array length is exactly 1
     chai.expect(updatedElements.length).to.equal(1);
@@ -242,17 +245,17 @@ function createExternalSource(done) {
     sourceNamespace: {
       org: org.id,
       project: projIDs[1],
-      branch: 'master'
+      branch: branchID
     },
     target: 'model'
   };
 
   // Create the element using the element controller
-  ElementController.create(adminUser, org.id, projIDs[0], 'master', newElement)
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, newElement)
   .then((createdElements) => {
     const elem = createdElements[0];
     // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], 'model');
+    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'model');
     // Verify the source is equal to the referencedID
     chai.expect(elem.source).to.equal(referencedID);
     done();
@@ -278,16 +281,16 @@ function createExternalTarget(done) {
     targetNamespace: {
       org: org.id,
       project: projIDs[1],
-      branch: 'master'
+      branch: branchID
     }
   };
 
   // Create the element using the element controller
-  ElementController.create(adminUser, org.id, projIDs[0], 'master', newElement)
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, newElement)
   .then((createdElements) => {
     const elem = createdElements[0];
     // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], 'model');
+    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'model');
     // Verify the target is equal to the referencedID
     chai.expect(elem.target).to.equal(referencedID);
     done();
@@ -312,16 +315,16 @@ function updateExternalSource(done) {
     sourceNamespace: {
       org: org.id,
       project: projIDs[1],
-      branch: 'master'
+      branch: branchID
     }
   };
 
   // Update the element using the element controller
-  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj)
+  ElementController.update(adminUser, org.id, projIDs[0], branchID, updateObj)
   .then((updatedElements) => {
     const elem = updatedElements[0];
     // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], 'undefined');
+    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'undefined');
     // Verify the source is equal to the referencedID
     chai.expect(elem.source).to.equal(referencedID);
     done();
@@ -346,16 +349,16 @@ function updateExternalTarget(done) {
     targetNamespace: {
       org: org.id,
       project: projIDs[1],
-      branch: 'master'
+      branch: branchID
     }
   };
 
   // Update the element using the element controller
-  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj)
+  ElementController.update(adminUser, org.id, projIDs[0], branchID, updateObj)
   .then((updatedElements) => {
     const elem = updatedElements[0];
     // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], 'undefined');
+    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'undefined');
     // Verify the target is equal to the referencedID
     chai.expect(elem.target).to.equal(referencedID);
     done();
@@ -382,7 +385,7 @@ function optionPopulateFind(done) {
   const elemID = utils.parseID(elements[5]._id).pop();
 
   // Find a relationship element so source and target can be populated
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options)
+  ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options)
   .then((foundElements) => {
     // Verify the array length is exactly 1
     chai.expect(foundElements.length).to.equal(1);
@@ -419,13 +422,13 @@ function optionArchivedFind(done) {
   const elemID = utils.parseID(elements[6]._id).pop();
 
   // Attempt to find the element without providing options
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID)
+  ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID)
   .then((foundElements) => {
     // Expect the array to be empty since the option archived: true was not provided
     chai.expect(foundElements.length).to.equal(0);
 
     // Attempt the find the element WITH providing the archived option
-    return ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options);
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options);
   })
   .then((foundElements) => {
     // Expect the array to be of length 1
@@ -458,7 +461,7 @@ function optionSubtreeFind(done) {
   const options = { subtree: true, archived: true };
 
   // Find the element and it's subtree
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options)
+  ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options)
   .then((foundElements) => {
     // Expect there to be 4 elements found, the searched element and 3 in subtree
     chai.expect(foundElements.length).to.equal(4);
@@ -495,7 +498,7 @@ function optionFieldsFind(done) {
   const fieldsAlwaysProvided = ['_id', 'contains'];
 
   // Find the element only with specific fields.
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, findOptions)
+  ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, findOptions)
   .then((foundElements) => {
     // Expect there to be exactly 1 element found
     chai.expect(foundElements.length).to.equal(1);
@@ -511,7 +514,7 @@ function optionFieldsFind(done) {
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Find the element without the notFind fields
-    return ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, notFindOptions);
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, notFindOptions);
   })
   .then((foundElements) => {
     // Expect there to be exactly 1 element found
@@ -542,7 +545,7 @@ function optionLimitFind(done) {
   const options = { limit: 2 };
 
   // Find all elements on a given project
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', options)
+  ElementController.find(adminUser, org.id, projIDs[0], branchID, options)
   .then((foundElements) => {
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -569,7 +572,7 @@ function optionSkipFind(done) {
   const secondOptions = { limit: 2, skip: 2 };
 
   // Find all elements on a given project
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', firstOptions)
+  ElementController.find(adminUser, org.id, projIDs[0], branchID, firstOptions)
   .then((foundElements) => {
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -577,7 +580,7 @@ function optionSkipFind(done) {
     firstBatchIDs = foundElements.map(e => e._id);
 
     // Find the next batch of elements
-    return ElementController.find(adminUser, org.id, projIDs[0], 'master',
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID,
       secondOptions);
   })
   .then((foundElements) => {
@@ -607,7 +610,7 @@ function optionLeanFind(done) {
   const options = { lean: true };
 
   // Find the element without the lean option
-  ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID)
+  ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID)
   .then((foundElements) => {
     // Expect there to be exactly 1 element found
     chai.expect(foundElements.length).to.equal(1);
@@ -617,7 +620,7 @@ function optionLeanFind(done) {
     chai.expect(elem instanceof Element).to.equal(true);
 
     // Find the element WITH the lean option
-    return ElementController.find(adminUser, org.id, projIDs[0], 'master', elemID, options);
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options);
   })
   .then((foundElements) => {
     // Expect there to be exactly 1 element found
@@ -654,7 +657,7 @@ function optionPopulateCreate(done) {
   };
 
   // Create the element
-  ElementController.create(adminUser, org.id, projIDs[0], 'master', elemObj, options)
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, elemObj, options)
   .then((createdElements) => {
     // Verify the array length is exactly 1
     chai.expect(createdElements.length).to.equal(1);
@@ -702,7 +705,7 @@ function optionFieldsCreate(done) {
   const fieldsAlwaysProvided = ['_id', 'contains'];
 
   // Create the element only with specific fields returned
-  ElementController.create(adminUser, org.id, projIDs[0], 'master', elemObjFind, findOptions)
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, elemObjFind, findOptions)
   .then((createdElements) => {
     // Expect there to be exactly 1 element created
     chai.expect(createdElements.length).to.equal(1);
@@ -718,7 +721,7 @@ function optionFieldsCreate(done) {
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Create the element without the notFind fields
-    return ElementController.create(adminUser, org.id, projIDs[0], 'master',
+    return ElementController.create(adminUser, org.id, projIDs[0], branchID,
       elemObjNotFind, notFindOptions);
   })
   .then((createdElements) => {
@@ -759,7 +762,7 @@ function optionLeanCreate(done) {
   const options = { lean: true };
 
   // Create the element without the lean option
-  ElementController.create(adminUser, org.id, projIDs[0], 'master', notLeanElemObj)
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, notLeanElemObj)
   .then((createdElements) => {
     // Expect there to be exactly 1 element created
     chai.expect(createdElements.length).to.equal(1);
@@ -769,7 +772,7 @@ function optionLeanCreate(done) {
     chai.expect(elem instanceof Element).to.equal(true);
 
     // Create the element WITH the lean option
-    return ElementController.create(adminUser, org.id, projIDs[0], 'master', leanElemObj, options);
+    return ElementController.create(adminUser, org.id, projIDs[0], branchID, leanElemObj, options);
   })
   .then((createdElements) => {
     // Expect there to be exactly 1 element created
@@ -805,7 +808,7 @@ function optionPopulateUpdate(done) {
   };
 
   // Update the element
-  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObj, options)
+  ElementController.update(adminUser, org.id, projIDs[0], branchID, updateObj, options)
   .then((updatedElements) => {
     // Verify the array length is exactly 1
     chai.expect(updatedElements.length).to.equal(1);
@@ -853,7 +856,7 @@ function optionFieldsUpdate(done) {
   const fieldsAlwaysProvided = ['_id', 'contains'];
 
   // Update the element only with specific fields returned
-  ElementController.update(adminUser, org.id, projIDs[0], 'master', updateObjFind, findOptions)
+  ElementController.update(adminUser, org.id, projIDs[0], branchID, updateObjFind, findOptions)
   .then((updatedElements) => {
     // Expect there to be exactly 1 element updated
     chai.expect(updatedElements.length).to.equal(1);
@@ -869,7 +872,7 @@ function optionFieldsUpdate(done) {
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Update the element without the notFind fields
-    return ElementController.update(adminUser, org.id, projIDs[0], 'master',
+    return ElementController.update(adminUser, org.id, projIDs[0], branchID,
       updateObjNotFind, notFindOptions);
   })
   .then((updatedElements) => {
@@ -910,7 +913,7 @@ function optionLeanUpdate(done) {
   const options = { lean: true };
 
   // Update the element without the lean option
-  ElementController.update(adminUser, org.id, projIDs[0], 'master', notLeanUpdateObj)
+  ElementController.update(adminUser, org.id, projIDs[0], branchID, notLeanUpdateObj)
   .then((updatedElements) => {
     // Expect there to be exactly 1 element updated
     chai.expect(updatedElements.length).to.equal(1);
@@ -920,7 +923,7 @@ function optionLeanUpdate(done) {
     chai.expect(elem instanceof Element).to.equal(true);
 
     // Update the element WITH the lean option
-    return ElementController.update(adminUser, org.id, projIDs[0], 'master',
+    return ElementController.update(adminUser, org.id, projIDs[0], branchID,
       leanUpdateObj, options);
   })
   .then((updatedElements) => {
@@ -958,7 +961,7 @@ function optionPopulateReplace(done) {
   };
 
   // Replace the element
-  ElementController.createOrReplace(adminUser, org.id, projIDs[0], 'master', elemObj, options)
+  ElementController.createOrReplace(adminUser, org.id, projIDs[0], branchID, elemObj, options)
   .then((replacedElements) => {
     // Verify the array length is exactly 1
     chai.expect(replacedElements.length).to.equal(1);
@@ -1006,7 +1009,7 @@ function optionFieldsReplace(done) {
   const fieldsAlwaysProvided = ['_id', 'contains'];
 
   // Replace the element only with specific fields returned
-  ElementController.createOrReplace(adminUser, org.id, projIDs[0], 'master',
+  ElementController.createOrReplace(adminUser, org.id, projIDs[0], branchID,
     elemObjFind, findOptions)
   .then((replacedElements) => {
     // Expect there to be exactly 1 element replaced
@@ -1024,7 +1027,7 @@ function optionFieldsReplace(done) {
 
     // Replace the element without the notFind fields
     return ElementController.createOrReplace(adminUser, org.id, projIDs[0],
-      'master', elemObjNotFind, notFindOptions);
+      branchID, elemObjNotFind, notFindOptions);
   })
   .then((replacedElements) => {
     // Expect there to be exactly 1 element replaced
@@ -1064,7 +1067,7 @@ function optionLeanReplace(done) {
   const options = { lean: true };
 
   // Replace the element without the lean option
-  ElementController.createOrReplace(adminUser, org.id, projIDs[0], 'master', notLeanElemObj)
+  ElementController.createOrReplace(adminUser, org.id, projIDs[0], branchID, notLeanElemObj)
   .then((replacedElements) => {
     // Expect there to be exactly 1 element replaced
     chai.expect(replacedElements.length).to.equal(1);
@@ -1075,7 +1078,7 @@ function optionLeanReplace(done) {
 
     // Replace the element WITH the lean option
     return ElementController.createOrReplace(adminUser, org.id, projIDs[0],
-      'master', leanElemObj, options);
+      branchID, leanElemObj, options);
   })
   .then((replacedElements) => {
     // Expect there to be exactly 1 element replaced
@@ -1108,7 +1111,7 @@ function optionPopulateSearch(done) {
   const query = '"Element #1"';
 
   // Search for elements
-  ElementController.search(adminUser, org.id, projIDs[0], 'master', query, options)
+  ElementController.search(adminUser, org.id, projIDs[0], branchID, query, options)
   .then((foundElements) => {
     // Verify the array length is exactly 1
     chai.expect(foundElements.length).to.equal(1);
@@ -1145,13 +1148,13 @@ function optionArchivedSearch(done) {
   const query = `"${elements[6].name}"`;
 
   // Search for the element, expecting no results back
-  ElementController.search(adminUser, org.id, projIDs[0], 'master', query)
+  ElementController.search(adminUser, org.id, projIDs[0], branchID, query)
   .then((foundElements) => {
     // Expect the array to be empty since the option archived: true was not provided
     chai.expect(foundElements.length).to.equal(0);
 
     // Attempt the find the element WITH providing the archived option
-    return ElementController.search(adminUser, org.id, projIDs[0], 'master', query, options);
+    return ElementController.search(adminUser, org.id, projIDs[0], branchID, query, options);
   })
   .then((foundElements) => {
     // Expect the array to be of length 1
@@ -1183,7 +1186,7 @@ function optionLimitSearch(done) {
   const query = 'model';
 
   // Search for elements
-  ElementController.search(adminUser, org.id, projIDs[0], 'master', query, options)
+  ElementController.search(adminUser, org.id, projIDs[0], branchID, query, options)
   .then((foundElements) => {
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -1212,7 +1215,7 @@ function optionSkipSearch(done) {
   const query = 'model';
 
   // Search for elements
-  ElementController.search(adminUser, org.id, projIDs[0], 'master', query, firstOptions)
+  ElementController.search(adminUser, org.id, projIDs[0], branchID, query, firstOptions)
   .then((foundElements) => {
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -1220,7 +1223,7 @@ function optionSkipSearch(done) {
     firstBatchIDs = foundElements.map(e => e._id);
 
     // Search for next batch of elements
-    return ElementController.search(adminUser, org.id, projIDs[0], 'master',
+    return ElementController.search(adminUser, org.id, projIDs[0], branchID,
       query, secondOptions);
   })
   .then((foundElements) => {
@@ -1250,7 +1253,7 @@ function optionLeanSearch(done) {
   const options = { lean: true };
 
   // Search for elements
-  ElementController.search(adminUser, org.id, projIDs[0], 'master', query)
+  ElementController.search(adminUser, org.id, projIDs[0], branchID, query)
   .then((foundElements) => {
     // Expect there to be exactly 1 element found
     chai.expect(foundElements.length).to.equal(1);
@@ -1260,7 +1263,7 @@ function optionLeanSearch(done) {
     chai.expect(elem instanceof Element).to.equal(true);
 
     // Search for elements WITH the lean option
-    return ElementController.search(adminUser, org.id, projIDs[0], 'master', query, options);
+    return ElementController.search(adminUser, org.id, projIDs[0], branchID, query, options);
   })
   .then((foundElements) => {
     // Expect there to be exactly 1 element found
