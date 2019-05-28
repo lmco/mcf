@@ -90,7 +90,7 @@ function start(args) {
       }
       else {
         // Warn the user that says HTTPS redirect is enabled but HTTPS is disabled.
-        M.log.warn('Warning: HTTPS redirect is enabled but HTTPS is disabled.'
+        M.log.warn('HTTPS redirect is enabled but HTTPS is disabled.'
           + '  Continuing with HTTP instead.');
         httpServer = http.createServer(app);
       }
