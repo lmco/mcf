@@ -11,6 +11,7 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
+*  @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This implements the behavior and logic for elements.
  * It also provides function for interacting with elements.
@@ -38,7 +39,9 @@ const path = require('path');
 
 // MBEE Modules
 const Element = M.require('models.element');
+const Branch = M.require('models.branch');
 const Project = M.require('models.project');
+const Org = M.require('models.organization');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -122,8 +125,6 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
-      // Ensure user is on the master branch
-      assert.ok(branch === 'master', 'User must be on the master branch.');
 
       const elementsTypes = ['undefined', 'object', 'string'];
       const optionsTypes = ['undefined', 'object'];
@@ -147,14 +148,12 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
+    const branchID = sani.mongo(branch);
     let foundElements = [];
-    const searchQuery = { project: utils.createID(orgID, projID), archived: false };
+    const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
     // Initialize validOptions
-    let validOptions = {};
-
-    // Validate and set the options
-    validOptions = utils.validateOptions(options, ['archived', 'populate',
+    const validOptions = utils.validateOptions(options, ['archived', 'populate',
       'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
 
     // Ensure options are valid
@@ -175,7 +174,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           // If the search option is an element reference
           if (['parent', 'source', 'target'].includes(o)) {
             // Make value the concatenated ID
-            options[o] = utils.createID(orgID, projID, options[o]);
+            options[o] = utils.createID(orgID, projID, branchID, options[o]);
           }
           // Add the search option to the searchQuery
           searchQuery[o] = sani.mongo(options[o]);
@@ -183,8 +182,17 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       });
     }
 
-    // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
+    // Find the organization
+    Org.findOne({ _id: orgID }).lean()
+    .then((organization) => {
+      // Check that the org was found
+      if (!organization) {
+        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+      }
+
+      // Find the project
+      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
+    })
     .then((project) => {
       // Check that the project was found
       if (!project) {
@@ -199,19 +207,29 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
             + ` elements on the project [${utils.parseID(project._id).pop()}].`, 403, 'warn');
       }
 
+      // Find the branch
+      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
+    })
+    .then((foundBranch) => {
+      // Check that the project was found
+      if (!foundBranch) {
+        throw new M.CustomError(`Branch [${branchID}] not found in the `
+          + `project [${projID}].`, 404, 'warn');
+      }
+
       let elementsToFind = [];
 
       // Check the type of the elements parameter
       if (Array.isArray(saniElements)) {
         // An array of element ids, find all
-        elementsToFind = saniElements.map(e => utils.createID(orgID, projID, e));
+        elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branchID, e));
       }
       else if (typeof saniElements === 'string') {
         // A single element id
-        elementsToFind = [utils.createID(orgID, projID, saniElements)];
+        elementsToFind = [utils.createID(orgID, projID, branchID, saniElements)];
       }
       else if (((typeof saniElements === 'object' && saniElements !== null)
-          || saniElements === undefined)) {
+        || saniElements === undefined)) {
         // Find all elements in the project
         elementsToFind = [];
       }
@@ -222,7 +240,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
 
       // If wanting to find subtree, find subtree ids
       if (validOptions.subtree) {
-        return findElementTree(orgID, projID, 'master', elementsToFind);
+        return findElementTree(orgID, projID, branchID, elementsToFind);
       }
 
       return elementsToFind;
@@ -363,8 +381,6 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
-      // Ensure user is on the master branch
-      assert.ok(branch === 'master', 'User must be on the master branch.');
       assert.ok(typeof elements === 'object', 'Elements parameter is not an object.');
       assert.ok(elements !== null, 'Elements parameter cannot be null.');
       // If elements is an array, ensure each item inside is an object
@@ -384,6 +400,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
+    const branchID = sani.mongo(branch);
     let elementObjects = [];
     const remainingElements = [];
     let populatedElements = [];
@@ -428,7 +445,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         // Ensure each element has an id and that it's a string
         assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
         assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
-        elem.id = utils.createID(orgID, projID, elem.id);
+        elem.id = utils.createID(orgID, projID, branchID, elem.id);
         arrIDs.push(elem.id);
         elem._id = elem.id;
 
@@ -437,7 +454,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           elem.parent = 'model';
         }
         assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
-        elem.parent = utils.createID(orgID, projID, elem.parent);
+        elem.parent = utils.createID(orgID, projID, branchID, elem.parent);
         assert.ok(elem.parent !== elem._id, 'Elements parent cannot be self.');
 
         // If element has a source, ensure it has a target
@@ -445,7 +462,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
           assert.ok(typeof elem.target === 'string',
             `Element #${index}'s target is not a string.`);
-          elem.source = utils.createID(orgID, projID, elem.source);
+          elem.source = utils.createID(orgID, projID, branchID, elem.source);
         }
 
         // If element has a target, ensure it has a source
@@ -453,7 +470,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
           assert.ok(typeof elem.source === 'string',
             `Element #${index}'s source is not a string.`);
-          elem.target = utils.createID(orgID, projID, elem.target);
+          elem.target = utils.createID(orgID, projID, branchID, elem.target);
         }
 
         // If the element a sourceNamespace section, ensure it contains the proper fields
@@ -479,7 +496,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           // Change element source to referenced project's id
           const tmpSource = utils.parseID(elem.source).pop();
           elem.source = utils.createID(elem.sourceNamespace.org,
-            elem.sourceNamespace.project, tmpSource);
+            elem.sourceNamespace.project, elem.sourceNamespace.branch, tmpSource);
         }
 
         // If the element a targetNamespace section, ensure it contains the proper fields
@@ -505,7 +522,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           // Change element target to referenced project's id
           const tmpTarget = utils.parseID(elem.target).pop();
           elem.target = utils.createID(elem.targetNamespace.org,
-            elem.targetNamespace.project, tmpTarget);
+            elem.targetNamespace.project, elem.targetNamespace.branch, tmpTarget);
         }
 
         index++;
@@ -523,8 +540,17 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError('Cannot create multiple elements with the same ID.', 403, 'warn');
     }
 
-    // Find the project to verify existence and permissions
-    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
+    // Find the organization
+    Org.findOne({ _id: orgID }).lean()
+    .then((organization) => {
+      // Check that the org was found
+      if (!organization) {
+        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+      }
+
+      // Find the project
+      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
+    })
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
@@ -548,6 +574,22 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         }
       });
 
+      // Find the branch
+      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
+    })
+    .then((foundBranch) => {
+      // Check that the branch was found
+      if (!foundBranch) {
+        throw new M.CustomError(`Branch [${branchID}] not found in the `
+          + `project [${projID}].`, 404, 'warn');
+      }
+
+      // Check the branch is not a tagged branch
+      if (foundBranch.tag) {
+        throw new M.CustomError(`[${branchID}] is a tag and does`
+        + ' not allow elements to be created.', 403, 'warn');
+      }
+
       const promises = [];
       for (let i = 0; i < arrIDs.length / 50000; i++) {
         // Split arrIDs into batches of 50000
@@ -561,7 +603,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
             // There are one or more elements with conflicting IDs
             throw new M.CustomError('Elements with the following IDs already exist'
-                  + ` [${foundElementIDs.toString()}].`, 403, 'warn');
+              + ` [${foundElementIDs.toString()}].`, 403, 'warn');
           }
         }));
       }
@@ -572,6 +614,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       elementObjects = elementsToCreate.map((elemObj) => {
         // Set the project, lastModifiedBy and createdBy
         elemObj.project = utils.createID(orgID, projID);
+        elemObj.branch = utils.createID(orgID, projID, branchID);
         elemObj.lastModifiedBy = reqUser._id;
         elemObj.createdBy = reqUser._id;
         elemObj.updatedOn = Date.now();
@@ -799,8 +842,6 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
-      // Ensure user is on the master branch
-      assert.ok(branch === 'master', 'User must be on the master branch.');
       assert.ok(typeof elements === 'object', 'Elements parameter is not an object.');
       assert.ok(elements !== null, 'Elements parameter cannot be null.');
       // If elements is an array, ensure each item inside is an object
@@ -820,6 +861,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
+    const branchID = sani.mongo(branch);
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     let foundElements = [];
     let foundProject = {};
@@ -835,8 +877,17 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     const validOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Element);
 
-    // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
+    // Find the organization
+    Org.findOne({ _id: orgID }).lean()
+    .then((organization) => {
+      // Check that the org was found
+      if (!organization) {
+        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+      }
+
+      // Find the project
+      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
+    })
     .then((_foundProject) => {
       foundProject = _foundProject;
       // Check that the project was found
@@ -850,6 +901,21 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to update'
           + ` elements on the project [${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
+      }
+      // Find the branch
+      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
+    })
+    .then((foundBranch) => {
+      // Check that the branch was found
+      if (!foundBranch) {
+        throw new M.CustomError(`Branch [${branchID}] not found in the `
+          + `project [${projID}].`, 404, 'warn');
+      }
+
+      // Check the branch is not a tagged branch
+      if (foundBranch.tag) {
+        throw new M.CustomError(`[${branchID}] is a tag and `
+          + 'does not allow updates to elements.', 403, 'warn');
       }
 
       // Check the type of the elements parameter
@@ -877,9 +943,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         // If updating parent, ensure it won't cause a circular reference
         if (saniElements.hasOwnProperty('parent')) {
           // Turn parent ID into a name-spaced ID
-          saniElements.parent = utils.createID(orgID, projID, saniElements.parent);
+          saniElements.parent = utils.createID(orgID, projID, branchID, saniElements.parent);
           // Find if a circular reference exists
-          return moveElementCheck(orgID, projID, branch, saniElements);
+          return moveElementCheck(orgID, projID, branchID, saniElements);
         }
       }
       else {
@@ -894,7 +960,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           // Ensure each element has an id and that its a string
           assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
           assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
-          elem.id = utils.createID(orgID, projID, elem.id);
+          elem.id = utils.createID(orgID, projID, branchID, elem.id);
           // If a duplicate ID, throw an error
           if (duplicateCheck[elem.id]) {
             throw new M.CustomError(`Multiple objects with the same ID [${elem.id}] exist in the`
@@ -908,7 +974,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
           // If updating source, add ID to sourceTargetIDs
           if (elem.source) {
-            elem.source = utils.createID(orgID, projID, elem.source);
+            elem.source = utils.createID(orgID, projID, branchID, elem.source);
             sourceTargetIDs.push(elem.source);
           }
 
@@ -936,7 +1002,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             // Reset the elem source with new project
             const tmpSource = utils.parseID(elem.source).pop();
             elem.source = utils.createID(elem.sourceNamespace.org,
-              elem.sourceNamespace.project, tmpSource);
+              elem.sourceNamespace.project, branchID, tmpSource);
 
             // Remove the last source which has the wrong project
             sourceTargetIDs.pop();
@@ -948,7 +1014,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
           // If updating target, add ID to sourceTargetIDs
           if (elem.target) {
-            elem.target = utils.createID(orgID, projID, elem.target);
+            elem.target = utils.createID(orgID, projID, branchID, elem.target);
             sourceTargetIDs.push(elem.target);
           }
 
@@ -976,7 +1042,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             // Reset the elem target with new project
             const tmpTarget = utils.parseID(elem.target).pop();
             elem.target = utils.createID(elem.targetNamespace.org,
-              elem.targetNamespace.project, tmpTarget);
+              elem.targetNamespace.project, branchID, tmpTarget);
 
             // Remove the last target which has the wrong project
             sourceTargetIDs.pop();
@@ -994,7 +1060,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       const promises = [];
-      searchQuery = { project: utils.createID(orgID, projID) };
+      searchQuery = { branch: utils.createID(orgID, projID, branchID) };
       sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
 
       // Find elements in batches
@@ -1236,8 +1302,6 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
-      // Ensure user is on the master branch
-      assert.ok(branch === 'master', 'User must be on the master branch.');
       assert.ok(typeof elements === 'object', 'Elements parameter is not an object.');
       assert.ok(elements !== null, 'Elements parameter cannot be null.');
       // If elements is an array, ensure each item inside is an object
@@ -1256,6 +1320,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     // Sanitize input parameters and create function-wide variables
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
+    const branchID = sani.mongo(branch);
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     const duplicateCheck = {};
     let foundElements = [];
@@ -1264,13 +1329,37 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     let foundElementIDs = [];
     const ts = Date.now();
 
-    // Find the project
-    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
+    // Find the organization
+    Org.findOne({ _id: orgID }).lean()
+    .then((organization) => {
+      // Check that the org was found
+      if (!organization) {
+        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+      }
+
+      // Find the project
+      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
+    })
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
         throw new M.CustomError(`Project [${projID}] not found in the `
           + `organization [${orgID}].`, 404, 'warn');
+      }
+      // Find the branch
+      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
+    })
+    .then((foundBranch) => {
+      // Check that the branch was found
+      if (!foundBranch) {
+        throw new M.CustomError(`Branch [${branchID}] not found in the `
+          + `project [${projID}].`, 404, 'warn');
+      }
+
+      // Check the branch is not a tagged branch
+      if (foundBranch.tag) {
+        throw new M.CustomError(`[${branchID}] is a tag and `
+          + 'does not allow updates to elements.', 403, 'warn');
       }
 
       // Check the type of the elements parameter
@@ -1295,7 +1384,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
           // Ensure each element has an id and that its a string
           assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
           assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
-          const tmpID = utils.createID(orgID, projID, elem.id);
+          const tmpID = utils.createID(orgID, projID, branchID, elem.id);
           // If a duplicate ID, throw an error
           if (duplicateCheck[tmpID]) {
             throw new M.CustomError(`Multiple objects with the same ID [${elem.id}] exist in the`
@@ -1313,7 +1402,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       }
 
       const promises = [];
-      const searchQuery = { project: utils.createID(orgID, projID) };
+      const searchQuery = { branch: utils.createID(orgID, projID, branchID) };
 
       // Find elements in batches
       // TODO: Consider changing of loop increment by 50k instead of 1
@@ -1359,9 +1448,14 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         fs.mkdirSync(path.join(M.root, 'data', orgID, projID));
       }
 
+      // If branch directory doesn't exist, create it
+      if (!fs.existsSync(path.join(M.root, 'data', orgID, projID, branchID))) {
+        fs.mkdirSync(path.join(M.root, 'data', orgID, projID, branchID));
+      }
+
       // Write contents to temporary file
       return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', orgID, projID, `PUT-backup-elements-${ts}.json`),
+        fs.writeFile(path.join(M.root, 'data', orgID, projID, branchID, `PUT-backup-elements-${ts}.json`),
           JSON.stringify(foundElements), function(err) {
             if (err) rej(err);
             else res();
@@ -1375,11 +1469,11 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       EventEmitter.emit('elements-deleted', foundElements);
 
       // Create new elements
-      return create(requestingUser, orgID, projID, branch, elementsToLookup, options);
+      return create(requestingUser, orgID, projID, branchID, elementsToLookup, options);
     })
     .then((_createdElements) => {
       createdElements = _createdElements;
-      const filePath = path.join(M.root, 'data', orgID, projID, `PUT-backup-elements-${ts}.json`);
+      const filePath = path.join(M.root, 'data', orgID, projID, branchID, `PUT-backup-elements-${ts}.json`);
       // Delete the temporary file.
       if (fs.existsSync(filePath)) {
         return new Promise(function(res, rej) {
@@ -1391,6 +1485,14 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       }
     })
     .then(() => {
+      // Read all of the files in the branch directory
+      const existingBranchFiles = fs.readdirSync(path.join(M.root, 'data', orgID, projID, branchID));
+
+      // If no files exist in the directory, delete it
+      if (existingBranchFiles.length === 0) {
+        fs.rmdirSync(path.join(M.root, 'data', orgID, projID, branchID));
+      }
+
       // Read all of the files in the project directory
       const existingProjFiles = fs.readdirSync(path.join(M.root, 'data', orgID, projID));
 
@@ -1449,8 +1551,6 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
-      // Ensure user is on the master branch
-      assert.ok(branch === 'master', 'User must be on the master branch.');
 
       const elementsTypes = ['object', 'string'];
       const optionsTypes = ['undefined', 'object'];
@@ -1471,6 +1571,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
+    const branchID = sani.mongo(branch);
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     let elementsToFind = [];
     let foundIDs = [];
@@ -1478,19 +1579,27 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     // Check the type of the elements parameter
     if (Array.isArray(saniElements) && saniElements.length !== 0) {
       // An array of element ids, remove all
-      elementsToFind = saniElements.map(e => utils.createID(orgID, projID, e));
+      elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branchID, e));
     }
     else if (typeof saniElements === 'string') {
       // A single element id, remove one
-      elementsToFind = [utils.createID(orgID, projID, saniElements)];
+      elementsToFind = [utils.createID(orgID, projID, branchID, saniElements)];
     }
     else {
       // Invalid parameter, throw an error
       throw new M.CustomError('Invalid input for removing elements.', 400, 'warn');
     }
+    // Find the organization
+    Org.findOne({ _id: orgID }).lean()
+    .then((organization) => {
+      // Check that the org was found
+      if (!organization) {
+        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+      }
 
-    // Find the project to verify permissions
-    Project.findOne({ _id: utils.createID(orgID, projID) })
+      // Find the project
+      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
+    })
     .then((foundProject) => {
       // Verify the project was found or exists
       if (foundProject === null) {
@@ -1502,6 +1611,21 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
         || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to delete'
           + ` elements on the project [${projID}].`, 403, 'warn');
+      }
+
+      // Find the elements to delete
+      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
+    })
+    .then((foundBranch) => {
+      // Verify the project was found or exists
+      if (foundBranch === null) {
+        throw new M.CustomError(`The branch [${branchID}] was not found.`, 404, 'warn');
+      }
+
+      // Check the branch is not a tagged branch
+      if (foundBranch.tag) {
+        throw new M.CustomError(`[${branchID}] is a tag and`
+          + ' does not allow elements to be deleted.', 403, 'warn');
       }
 
       // Find the elements to delete
@@ -1520,7 +1644,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       }
 
       // Find all element IDs and their subtree IDs
-      return findElementTree(orgID, projID, 'master', elementsToFind);
+      return findElementTree(orgID, projID, branchID, elementsToFind);
     })
     .then((_foundIDs) => {
       foundIDs = _foundIDs;
@@ -1596,7 +1720,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
 
   // If no elements provided, find all elements in project
   if (foundElements.length === 0) {
-    foundElements = [utils.createID(organizationID, projectID, 'model')];
+    foundElements = [utils.createID(organizationID, projectID, branch, 'model')];
   }
 
   // Define nested helper function
@@ -1666,7 +1790,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
 function moveElementCheck(organizationID, projectID, branch, element) {
   return new Promise((resolve, reject) => {
     // Create the name-spaced ID
-    const elementID = utils.createID(organizationID, projectID, element.id);
+    const elementID = utils.createID(organizationID, projectID, branch, element.id);
 
     // Error Check: ensure elements parent is not self
     if (element.parent === elementID) {
@@ -1784,8 +1908,6 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
       assert.ok(typeof query === 'string', 'Query is not a string.');
-      // Ensure user is on the master branch
-      assert.ok(branch === 'master', 'User must be on the master branch.');
 
       const optionsTypes = ['undefined', 'object'];
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
@@ -1798,7 +1920,8 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
-    const searchQuery = { project: utils.createID(orgID, projID), archived: false };
+    const branchID = sani.mongo(branch);
+    const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
     // Initialize valid options
     let validOptions = {};
@@ -1826,7 +1949,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
           // If the search option is an element reference
           if (['parent', 'source', 'target'].includes(o)) {
             // Make value the concatenated ID
-            options[o] = utils.createID(orgID, projID, options[o]);
+            options[o] = utils.createID(orgID, projID, branchID, options[o]);
           }
 
           // Add the search option to the searchQuery
@@ -1835,8 +1958,17 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       });
     }
 
-    // Ensure the project exists
-    Project.findOne({ _id: utils.createID(orgID, projID) }).lean()
+    // Find the organization
+    Org.findOne({ _id: orgID }).lean()
+    .then((organization) => {
+      // Check that the org was found
+      if (!organization) {
+        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+      }
+
+      // Find the project
+      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
+    })
     .then((project) => {
       // Ensure the project was found
       if (project === null) {
@@ -1849,6 +1981,16 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.CustomError('User does not have permission to get'
           + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
+      }
+
+      // Find the elements to delete
+      return Branch.find({ _id: utils.createID(orgID, projID, branchID) }).lean();
+    })
+    .then((foundBranch) => {
+      // Ensure the project was found
+      if (foundBranch === null) {
+        throw new M.CustomError(`The branch [${branchID}] on the project ${projID} `
+          + 'was not found.', 404, 'warn');
       }
 
       searchQuery.$text = { $search: query };
