@@ -1797,10 +1797,10 @@ function moveElementCheck(organizationID, projectID, branch, element) {
       throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
     }
 
-    // Error Check: ensure the root elements is not being moved
+    // Error Check: ensure the root elements is not being edited
     if (Element.getValidRootElements().includes(element.id)) {
       throw new M.CustomError(
-        `Cannot move the root element: ${element.id}.`, 403, 'warn'
+        `Cannot edit the root element: ${element.id}.`, 403, 'warn'
       );
     }
 
