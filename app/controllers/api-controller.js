@@ -25,6 +25,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
+const BranchController = M.require('controllers.branch-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
@@ -83,6 +84,14 @@ module.exports = {
   putElement,
   patchElement,
   deleteElement,
+  getBranches,
+  postBranches,
+  patchBranches,
+  deleteBranches,
+  getBranch,
+  patchBranch,
+  postBranch,
+  deleteBranch,
   invalidRoute
 };
 
@@ -1494,7 +1503,7 @@ function postProject(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Set the orgid in req.body in case it wasn't provided
+  // Set the projectid in req.body in case it wasn't provided
   req.body.id = req.params.projectid;
 
   // Check options for minified
@@ -3515,6 +3524,603 @@ function deleteElement(req, res) {
     // Return 200: OK and deleted element
     return res.status(200).send(json);
   })
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/* -----------------------( Branches API Endpoints )------------------------- */
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/branches
+ *
+ * @description Gets all branches or get specified branches.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with branches' public data
+ */
+function getBranches(req, res) {
+  // Define options and ids
+  // Note: Undefined if not set
+  let branchIDs;
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    fields: 'array',
+    limit: 'number',
+    skip: 'number',
+    ids: 'array',
+    minified: 'boolean',
+    source: 'string',
+    tag: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check query for branch IDs
+  if (options.ids) {
+    branchIDs = options.ids;
+    delete options.ids;
+  }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+    // No IDs include in options, check body
+    branchIDs = req.body;
+  }
+  // Check branch object in body
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    branchIDs = req.body.map(p => p.id);
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Find branches
+  // NOTE: find() sanitizes input params
+  BranchController.find(req.user, req.params.orgid, req.params.projectid,
+    branchIDs, options)
+  .then((branches) => {
+    const branchesPublicData = sani.html(
+      branches.map(b => publicData.getPublicData(b, 'branch', options))
+    );
+
+    // Verify branches public data array is not empty
+    if (branchesPublicData.length === 0) {
+      const error = new M.CustomError('No branches found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    const retData = branchesPublicData;
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? retData : formatJSON(retData);
+
+    // Return a 200: OK and public branch data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * POST /api/org/:orgid/projects/:projectid/branches
+ *
+ * @description This function creates multiple branches.
+ *
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} Response object with created branches.
+ */
+function postBranches(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Create the specified branches
+  // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and req.body
+  BranchController.create(req.user, req.params.orgid, req.params.projectid,
+    req.body, options)
+  .then((branches) => {
+    const publicBranchData = sani.html(
+      branches.map(b => publicData.getPublicData(b, 'branch', options))
+    );
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicBranchData : formatJSON(publicBranchData);
+
+    // Return 200: OK and created branch data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/branches
+ *
+ * @description Updates specified branches.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with updated branches
+ */
+function patchBranches(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Update the specified branches
+  // NOTE: update() sanitizes input params
+  BranchController.update(req.user, req.params.orgid, req.params.projectid,
+    req.body, options)
+  .then((branches) => {
+    const branchesPublicData = sani.html(
+      branches.map(b => publicData.getPublicData(b, 'branch', options))
+    );
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? branchesPublicData : formatJSON(branchesPublicData);
+
+    // Return 200: OK and the updated branches
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * DELETE /api/org/:orgid/projects/:projectid/branches
+ *
+ * @description Deletes multiple branches from an array of branch IDs or
+ * array of branch objects.
+ *
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} Response object with deleted branch IDs.
+ */
+function deleteBranches(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // If req.body contains objects, grab the branch IDs from the objects
+  if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    req.body = req.body.map(b => b.id);
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Remove the specified branches
+  BranchController.remove(req.user, req.params.orgid, req.params.projectid,
+    req.body, options)
+  .then((branchIDs) => {
+    const parsedIDs = branchIDs.map(p => utils.parseID(p).pop());
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+
+    // Return 200: OK and the deleted branch IDs
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * GET /api/org/:orgid/projects/:projectid/branches/:branchid
+ *
+ * @description Gets a branch by its branch ID.
+ *
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} Response object with branch's public data
+ */
+function getBranch(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Find the branch
+  // NOTE: find() sanitizes req.params.branchid, req.params.projectid and req.params.orgid
+  BranchController.find(req.user, req.params.orgid, req.params.projectid,
+    req.params.branchid, options)
+  .then((branch) => {
+    // If no branch found, return 404 error
+    if (branch.length === 0) {
+      const error = new M.CustomError(
+        `Project [${req.params.branchid}] not found.`, 404, 'warn'
+      );
+      return res.status(error.status).send(error);
+    }
+
+    const publicBranchData = sani.html(
+      branch.map(b => publicData.getPublicData(b, 'branch', options))
+    );
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? publicBranchData[0] : formatJSON(publicBranchData[0]);
+
+    // Return 200: OK and public branch data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid
+ *
+ * @description Creates a branch.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with created branch
+ */
+function postBranch(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.branchid)) {
+    const error = new M.CustomError(
+      'Branch ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the branch ID in the body equal req.params.branchid
+  req.body.id = req.params.branchid;
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Create branch with provided parameters
+  // NOTE: create() sanitizes input params
+  BranchController.create(req.user, req.params.orgid, req.params.projectid,
+    req.body, options)
+  .then((branch) => {
+    const branchesPublicData = sani.html(
+      branch.map(b => publicData.getPublicData(b, 'branch', options))
+    );
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? branchesPublicData[0] : formatJSON(branchesPublicData[0]);
+
+    // Return 200: OK and the created branch
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid
+ *
+ * @description Updates the specified branch.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with updated branch
+ */
+function patchBranch(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.branchid)) {
+    const error = new M.CustomError(
+      'Branch ID in the body does not match ID in the params.', 400, 'warn'
+    );
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Set the branch ID in the body equal req.params.branchid
+  req.body.id = req.params.branchid;
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Updates the specified branch
+  // NOTE: update() sanitizes input params
+  BranchController.update(req.user, req.params.orgid, req.params.projectid,
+    req.body, options)
+  .then((branch) => {
+    const branchPublicData = sani.html(
+      branch.map(b => publicData.getPublicData(b, 'branch', options))
+    );
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? branchPublicData[0] : formatJSON(branchPublicData[0]);
+
+    // Return 200: OK and the updated branch
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid
+ *
+ * @description Takes an orgid, projectid, and branchid in the URI and
+ * deletes a branch.
+ *
+ * @param {Object} req - request express object
+ * @param {Object} res - response express object
+ *
+ * @return {Object} Response object with deleted branch ID.
+ */
+function deleteBranch(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Remove the specified branch
+  // NOTE: remove() sanitizes params
+  BranchController.remove(req.user, req.params.orgid, req.params.projectid,
+    req.params.branchid, options)
+  .then((branchID) => {
+    const parsedIDs = utils.parseID(branchID[0]).pop();
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+
+    // Return 200: OK and the deleted branch ID
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
 }
 

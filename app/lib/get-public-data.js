@@ -41,6 +41,8 @@ module.exports.getPublicData = function(object, type, options) {
   switch (type.toLowerCase()) {
     case 'element':
       return getElementPublicData(object, options);
+    case 'branch':
+      return getBranchPublicData(object, options);
     case 'project':
       return getProjectPublicData(object, options);
     case 'org':
@@ -72,6 +74,7 @@ function getElementPublicData(element, options) {
   let source;
   let target;
   let project;
+  let branch;
 
   // If element.createdBy is defined
   if (element.createdBy) {
@@ -167,6 +170,18 @@ function getElementPublicData(element, options) {
     }
   }
 
+  // If element.branch is defined
+  if (element.branch) {
+    // If element.branch is populated
+    if (typeof element.branch === 'object') {
+      // Get the public data of branch
+      branch = getBranchPublicData(element.branch, {});
+    }
+    else {
+      branch = utils.parseID(element.branch).pop();
+    }
+  }
+
   // If element.project is defined
   if (element.project) {
     // If element.project is populated
@@ -182,6 +197,7 @@ function getElementPublicData(element, options) {
   const data = {
     id: idParts.pop(),
     name: element.name,
+    branch: branch,
     project: project,
     org: idParts[0],
     parent: parent,
@@ -239,6 +255,130 @@ function getElementPublicData(element, options) {
       return returnObj;
     }
   }
+  return data;
+}
+
+/**
+ * @description Returns a branch public data
+ *
+ * @param {object} branch - The raw JSON of the branch.
+ * @param {Object} options - A list of options passed in by the user to the API
+ * Controller
+ *
+ * @return {object} The public data of the branch.
+ */
+function getBranchPublicData(branch, options) {
+  // Parse the branch ID
+  const idParts = utils.parseID(branch._id);
+  let createdBy = null;
+  let lastModifiedBy = null;
+  let archivedBy;
+  let project;
+  let source;
+
+  // If branch.createdBy is defined
+  if (branch.createdBy) {
+    // If branch.createdBy is populated
+    if (typeof branch.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = getUserPublicData(branch.createdBy, {});
+    }
+    else {
+      createdBy = branch.createdBy;
+    }
+  }
+
+  // If branch.lastModifiedBy is defined
+  if (branch.lastModifiedBy) {
+    // If branch.lastModifiedBy is populated
+    if (typeof branch.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = getUserPublicData(branch.lastModifiedBy, {});
+    }
+    else {
+      lastModifiedBy = branch.lastModifiedBy;
+    }
+  }
+
+  // If branch.archivedBy is defined
+  if (branch.archivedBy && branch.archived) {
+    // If branch.archivedBy is populated
+    if (typeof branch.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = getUserPublicData(branch.archivedBy, {});
+    }
+    else {
+      archivedBy = branch.archivedBy;
+    }
+  }
+
+  // If branch.project is defined
+  if (branch.project) {
+    // If branch.project is populated
+    if (typeof branch.project === 'object') {
+      // Get the public data of project
+      project = getProjectPublicData(branch.project, {});
+    }
+    else {
+      project = utils.parseID(branch.project)[1];
+    }
+  }
+
+  // If branch.source is defined
+  if (branch.source) {
+    // If branch.source is populated
+    if (typeof branch.source === 'object') {
+      // Get the public data of branch
+      source = getBranchPublicData(branch.source, {});
+    }
+    else {
+      source = utils.parseID(branch.source).pop();
+    }
+  }
+
+  // Return the branches public fields
+  const data = {
+    id: idParts.pop(),
+    name: branch.name,
+    org: idParts[0],
+    project: project,
+    source: source,
+    tag: branch.tag,
+    custom: branch.custom || {},
+    createdOn: (branch.createdOn) ? branch.createdOn.toString() : undefined,
+    createdBy: createdBy,
+    updatedOn: (branch.updatedOn) ? branch.updatedOn.toString() : undefined,
+    lastModifiedBy: lastModifiedBy,
+    archived: branch.archived,
+    archivedOn: (branch.archivedOn) ? branch.archivedOn.toString() : undefined,
+    archivedBy: archivedBy
+  };
+
+  // If the fields options is defined
+  if (options.hasOwnProperty('fields')) {
+    // If fields should be excluded
+    if (options.fields.every(f => f.startsWith('-'))) {
+      // For each of those fields
+      options.fields.forEach((f) => {
+        // If -id, ignore it
+        if (f === '-id') {
+          return;
+        }
+        // Remove the field from data
+        data[f.slice(1)] = undefined;
+      });
+    }
+    // If only specific fields should be included
+    else if (options.fields.every(f => !f.startsWith('-'))) {
+      const returnObj = { id: data.id };
+      // Add specific field to returnObj
+      options.fields.forEach((f) => {
+        returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
+      });
+      return returnObj;
+    }
+  }
+
   return data;
 }
 

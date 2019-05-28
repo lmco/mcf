@@ -192,7 +192,7 @@ class ElementNew extends Component {
           <FormGroup row>
             <Label for="parent" sm={2}>Parent</Label>
             <Col sm={10}>
-              <div id="parent">
+              <div id="parent" className={'selector-value'}>
                 {this.state.parent || 'Select an element.'}
                 <ElementSelector
                   project={this.props.project}

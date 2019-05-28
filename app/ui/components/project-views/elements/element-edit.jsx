@@ -7,10 +7,11 @@
  *
  * @license LMPI - Lockheed Martin Proprietary Information
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This renders the element component
  */
@@ -52,8 +53,8 @@ class ElementEdit extends Component {
       name: '',
       type: '',
       parent: null,
-      target: null,
       source: null,
+      target: null,
       documentation: '',
       custom: {},
       org: null,
@@ -71,6 +72,8 @@ class ElementEdit extends Component {
     this.parentSelectHandler = this.parentSelectHandler.bind(this);
     this.handleSaveTooltipToggle = this.handleSaveTooltipToggle.bind(this);
     this.handleExitTooltipToggle = this.handleExitTooltipToggle.bind(this);
+    this.sourceSelectHandler = this.sourceSelectHandler.bind(this);
+    this.targetSelectHandler = this.targetSelectHandler.bind(this);
   }
 
   getElement() {
@@ -249,20 +252,28 @@ class ElementEdit extends Component {
     this.mounted = false;
   }
 
-  render() {
-    // Initialize variables
-    let targetInvalid;
-    let sourceInvalid;
-    let customInvalid;
+  /**
+   * This function is called when the ElementSelector for the source field
+   * changes.
+   */
+  sourceSelectHandler(_id) {
+    this.setState({ source: _id });
+  }
 
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.target)) {
-      targetInvalid = true;
-    }
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.source)) {
-      sourceInvalid = true;
-    }
+  /**
+   * This function is called when the ElementSelector for the target field
+   * changes.
+   */
+  targetSelectHandler(_id) {
+    this.setState({ target: _id });
+  }
+
+  /**
+   * Renders the component
+   */
+  render() {
+    // // Initialize variables
+    let customInvalid;
 
     // Verify if custom data is correct JSON format
     try {
@@ -324,16 +335,13 @@ class ElementEdit extends Component {
               // Form section for Element parent
               : (<FormGroup row>
                 <Label for='parent' sm={2}><b>Parent</b></Label>
-                  <Col sm={10} className={'parent'}>
+                  <Col sm={10} className={'selector-value'}>
                     {this.state.parent || ''}
                     <ElementSelector
+                      self={this.state.id}
                       project={this.props.project}
                       selectedHandler={this.parentSelectHandler} />
                   </Col>
-                  {/* Verify fields are valid, or display feedback */}
-                <FormFeedback>
-                  Invalid: An Element parent may only contain letters, numbers, space, or dashes.
-                </FormFeedback>
                  </FormGroup>)
             }
             {/* Form section for Element type */}
@@ -351,38 +359,24 @@ class ElementEdit extends Component {
             {/* Form section for Element source */}
             <FormGroup row>
               <Label for='name' sm={2}><b>Source</b></Label>
-              <Col sm={10}>
-                <Input type='text'
-                       name='source'
-                       id='source'
-                       placeholder='Source ID'
-                       invalid={sourceInvalid}
-                       value={this.state.source || ''}
-                       onChange={this.handleChange}/>
+              <Col sm={10} className={'selector-value'}>
+                {this.state.source || 'null'}
+                <ElementSelector
+                  self={this.state.id}
+                  project={this.props.project}
+                  selectedHandler={this.sourceSelectHandler} />
               </Col>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback>
-                Invalid:
-                An Element source may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
             </FormGroup>
             {/* Form section for Element target */}
             <FormGroup row>
               <Label for='name' sm={2}><b>Target</b></Label>
-              <Col sm={10}>
-                <Input type='text'
-                       name='target'
-                       id='target'
-                       placeholder='Target ID'
-                       invalid={targetInvalid}
-                       value={this.state.target || ''}
-                       onChange={this.handleChange}/>
+              <Col sm={10} className={'selector-value'}>
+                {this.state.target || 'null'}
+                <ElementSelector
+                  self={this.state.id}
+                  project={this.props.project}
+                  selectedHandler={this.targetSelectHandler} />
               </Col>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback>
-                Invalid:
-                An Element target may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
             </FormGroup>
             {/* Form section for custom data */}
             <FormGroup>

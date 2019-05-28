@@ -46,7 +46,6 @@ const utils = M.require('lib.utils');
 
 
 /* ---------------------------( Element Schemas )---------------------------- */
-
 /**
  * @namespace
  *
@@ -71,8 +70,8 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.element.id),
-    maxlength: [255, 'Too many characters in ID'],
-    minlength: [8, 'Too few characters in ID'],
+    maxlength: [147, 'Too many characters in ID'],
+    minlength: [11, 'Too few characters in ID'],
     validate: {
       validator: function(v) {
         const elemID = utils.parseID(v).pop();
@@ -80,7 +79,7 @@ const ElementSchema = new mongoose.Schema({
         return !validators.reserved.includes(elemID);
       },
       message: 'Element ID cannot include the following words: '
-      + `[${validators.reserved}].`
+        + `[${validators.reserved}].`
     }
   },
   name: {
@@ -90,22 +89,13 @@ const ElementSchema = new mongoose.Schema({
   project: {
     type: String,
     required: true,
-    ref: 'Project',
-    set: function(_proj) {
-      // Check value undefined
-      if (typeof this.project === 'undefined') {
-        // Return value to set it
-        return _proj;
-      }
-      // Check value NOT equal to db value
-      if (_proj !== this.project) {
-        // TODO: We need to do more than warn and return old value, causes unexpected behavior
-        // Immutable field, return error
-        M.log.warn('Assigned project cannot be changed.');
-      }
-      // No change, return the value
-      return this.project;
-    }
+    ref: 'Project'
+  },
+  branch: {
+    type: String,
+    required: true,
+    ref: 'Branch',
+    index: true
   },
   parent: {
     type: String,
@@ -185,7 +175,7 @@ ElementSchema.statics.getValidBulkUpdateFields = function() {
  */
 ElementSchema.methods.getValidPopulateFields = function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source',
-    'target', 'project'];
+    'target', 'project', 'branch'];
 };
 
 ElementSchema.statics.getValidPopulateFields = function() {
