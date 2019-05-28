@@ -28,6 +28,11 @@ import ElementTree from './element-tree.jsx';
 
 class ElementSelector extends React.Component {
 
+  /**
+   *
+   * @param props
+   * @param props.self (optional)
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -93,6 +98,14 @@ class ElementSelector extends React.Component {
    * This is the click handler used to select an element.
    */
   selectElementHandler(id, refreshFunction) {
+    // Cannot select self
+    if (id === this.props.self) {
+      this.setState({ error: 'Element cannot select self.' });
+      this.setState({ selectedElementPreview: null });
+      return;
+    }
+    // Otherwise, reset error to null and set selected state
+    this.setState({ error: null });
     this.setState({ selectedElementPreview: id });
   }
 
@@ -121,6 +134,12 @@ class ElementSelector extends React.Component {
                           clickHandler={this.selectElementHandler}/>;
     }
 
+
+    let error = '';
+    if (this.state.error) {
+      error = <span className={'text-danger'}>{this.state.error}</span>;
+    }
+
     return (
       <div className={'element-selector'}>
         <i className={'fas fa-caret-square-down'} onClick={this.toggle}></i>
@@ -133,7 +152,10 @@ class ElementSelector extends React.Component {
             { tree }
           </ModalBody>
           <ModalFooter>
-            <p>Selected: {this.state.selectedElementPreview}</p>
+            <p>
+              Selected: {this.state.selectedElementPreview}
+              {error}
+            </p>
             <Button color="primary" onClick={this.select}>Select</Button>{' '}
             <Button color="secondary" onClick={this.toggle}>Cancel</Button>
           </ModalFooter>

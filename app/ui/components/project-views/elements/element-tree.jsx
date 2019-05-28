@@ -251,6 +251,30 @@ class ElementTree extends Component {
         icon: 'sitemap',
         color: 'lightgreen'
       },
+      'association': {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      'Association': {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      'relationship': {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      'Relationship': {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      'Edge': {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      'edge': {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
       'uml:Diagram': {
         icon: 'sitemap',
         color: 'lightgreen'
