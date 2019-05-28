@@ -216,7 +216,7 @@ class ElementTree extends Component {
       // Element should be rendered as the ID initially
       element = (
         <span className={'element-id'}>
-           {this.state.data.id} : {this.state.data.type}
+           {this.state.data.id}
         </span>
       );
       // If the name is not blank, render the name
@@ -224,12 +224,13 @@ class ElementTree extends Component {
         element = (
           <span>
             {this.state.data.name}
-            <span className={'element-id'}>({this.state.data.id} : {this.state.data.type})</span>
+            <span className={'element-id'}>({this.state.data.id})</span>
           </span>
         );
       }
     }
 
+    // TODO (jk) We should abstract this into a "data types" library or similar.
     const iconMappings = {
       Package: {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
@@ -250,6 +251,30 @@ class ElementTree extends Component {
       diagram: {
         icon: 'sitemap',
         color: 'lightgreen'
+      },
+      association: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      Association: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      relationship: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      Relationship: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      Edge: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      edge: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
       },
       'uml:Diagram': {
         icon: 'sitemap',

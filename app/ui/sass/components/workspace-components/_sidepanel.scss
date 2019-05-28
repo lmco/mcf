@@ -25,6 +25,7 @@
   height: 86vh;
   overflow: scroll;
   width: 100%;
+  font-size: 14px;
 
   hr {
     width: 95%;
@@ -119,9 +120,9 @@
   }
 }
 
-.parent {
+.selector-value {
   font-size: 14px;
   font-weight: normal;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
