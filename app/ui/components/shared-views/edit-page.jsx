@@ -76,17 +76,15 @@ class EditPage extends Component {
 
   // Define handle change function
   handleChange(event) {
+    // Verify target being changed
     if (event.target.name === 'archived') {
-      console.log('in archived if');
-      console.log(typeof event.target.value);
-      const newvalue = !event.target.value;
-      console.log(typeof newvalue);
-      console.log(!newvalue);
-      // Change the state to opposite value
-      this.setState({ [event.target.name]: !event.target.value });
+      // Change the archive state to opposite value
+      this.setState(prevState => ({ archived: !prevState.archived }));
     }
-    // Change the state with new value
-    this.setState({ [event.target.name]: event.target.value });
+    else {
+      // Change the state with new value
+      this.setState({ [event.target.name]: event.target.value });
+    }
 
     // Resize custom data field
     $('textarea[name="custom"]').autoResize();
@@ -113,8 +111,6 @@ class EditPage extends Component {
       redirect = `/${this.props.orgid}/${this.props.project.id}`;
     }
 
-    console.log(this.state.archived);
-
     if (this.state.archived) {
       data.archived = true;
     }
@@ -140,7 +136,6 @@ class EditPage extends Component {
   }
 
   render() {
-    console.log(typeof this.state.archived);
     // Initialize variables
     let customInvalid;
     let disableSubmit;
@@ -227,8 +222,8 @@ class EditPage extends Component {
                   <CustomInput type="switch"
                                id="archived"
                                name="archived"
-                               label="Archived"
-                               value={false}
+                               label="Archive"
+                               value={this.state.archived}
                                onChange={this.handleChange}/>
                 </div>
               </FormGroup>
