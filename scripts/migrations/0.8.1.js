@@ -120,8 +120,8 @@ function elementHelper() {
 
       // Create array with numElements/25000 indexes
       const tmpArray = [];
-      for (let i = 0; i < elementIDs.length / 20000; i++) {
-        tmpArray.push(elementIDs.slice(i * 20000, i * 20000 + 20000));
+      for (let i = 0; i < elementIDs.length / 5000; i++) {
+        tmpArray.push(elementIDs.slice(i * 5000, i * 5000 + 5000));
       }
 
       // Run batches synchronously using the array.reduce() function
