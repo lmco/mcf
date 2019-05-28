@@ -233,18 +233,7 @@ class ElementEdit extends Component {
    */
   render() {
     // // Initialize variables
-    let targetInvalid;
-    let sourceInvalid;
     let customInvalid;
-
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.target)) {
-      targetInvalid = true;
-    }
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.source)) {
-      sourceInvalid = true;
-    }
 
     // Verify if custom data is correct JSON format
     try {
