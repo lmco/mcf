@@ -27,7 +27,8 @@ import {
   Input,
   FormFeedback,
   Button,
-  UncontrolledAlert
+  UncontrolledAlert,
+  CustomInput
 } from 'reactstrap';
 
 /* eslint-enable no-unused-vars */
@@ -42,13 +43,16 @@ class EditPage extends Component {
     let name;
     let custom;
     let visibility;
+    let archived;
 
     if (this.props.org) {
       name = this.props.org.name;
+      archived = this.props.org.archived;
       custom = this.props.org.custom;
     }
     else {
       name = this.props.project.name;
+      archived = this.props.project.archived;
       custom = this.props.project.custom;
       visibility = this.props.visibility;
     }
@@ -56,6 +60,7 @@ class EditPage extends Component {
     this.state = {
       name: name,
       visibility: visibility,
+      archived: archived,
       custom: JSON.stringify(custom || {}, null, 2),
       error: null
     };
@@ -71,6 +76,10 @@ class EditPage extends Component {
 
   // Define handle change function
   handleChange(event) {
+    if (event.target.name === 'archived') {
+      // Change the state to opposite value
+      this.setState({ [event.target.name]: !event.target.value });
+    }
     // Change the state with new value
     this.setState({ [event.target.name]: event.target.value });
 
@@ -97,6 +106,10 @@ class EditPage extends Component {
       data.visibility = this.state.visibility;
       url = `/api/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
       redirect = `/${this.props.orgid}/${this.props.project.id}`;
+    }
+
+    if (this.state.archived) {
+      data.archived = true;
     }
 
     $.ajax({
@@ -171,8 +184,8 @@ class EditPage extends Component {
               </FormGroup>
               {(!this.props.project)
                 ? ''
-                : (<React.Fragment>
-                  <FormGroup>
+                // Form section for project visibility
+                : (<FormGroup>
                     <Label for="visibility">Visibility</Label>
                     <Input type="select"
                            name="visibility"
@@ -183,8 +196,7 @@ class EditPage extends Component {
                       <option value='internal'>Internal</option>
                       <option value='private'>Private</option>
                     </Input>
-                   </FormGroup>
-                </React.Fragment>)
+                   </FormGroup>)
               }
               {/* Form section for custom data */}
               <FormGroup>
@@ -200,6 +212,17 @@ class EditPage extends Component {
                 <FormFeedback>
                     Invalid: Custom data must be valid JSON
                 </FormFeedback>
+              </FormGroup>
+              {/* Form section for archiving */}
+              <FormGroup>
+                <div>
+                  <CustomInput type="switch"
+                               id="archived"
+                               name="archived"
+                               label="Archived"
+                               value={this.state.archived || false}
+                               onChange={this.handleChange}/>
+                </div>
               </FormGroup>
               {/* Button to submit changes */}
               <Button color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
