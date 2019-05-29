@@ -15,16 +15,8 @@
  * projectReferences field from every project.
  */
 
-// Node modules
-const fs = require('fs');
-const path = require('path');
-
 // NPM modules
 const mongoose = require('mongoose');
-
-// MBEE modules
-const Project = M.require('models.project');
-const utils = M.require('lib.utils');
 
 /**
  * @description Handles the database migration from 0.8.2 to 0.8.1.
