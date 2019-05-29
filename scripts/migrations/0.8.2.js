@@ -12,7 +12,7 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Migration script for version 0.8.2. Removes the
- * projectReferences field from every project.
+ * projectReferences field from every project in the database.
  */
 
 // NPM modules
