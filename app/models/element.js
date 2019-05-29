@@ -136,6 +136,24 @@ ElementSchema.virtual('contains', {
   default: []
 });
 
+// Virtual which stores elements that the retrieved element is a source of
+ElementSchema.virtual('sourceOf', {
+  ref: 'Element',
+  localField: '_id',
+  foreignField: 'source',
+  justOne: false,
+  default: []
+});
+
+// Virtual which stores elements that the retrieved element is a target of
+ElementSchema.virtual('targetOf', {
+  ref: 'Element',
+  localField: '_id',
+  foreignField: 'target',
+  justOne: false,
+  default: []
+});
+
 /* ---------------------------( Model Plugin )---------------------------- */
 // Use extensions model plugin;
 ElementSchema.plugin(extensions);
@@ -175,7 +193,7 @@ ElementSchema.statics.getValidBulkUpdateFields = function() {
  */
 ElementSchema.methods.getValidPopulateFields = function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source',
-    'target', 'project', 'branch'];
+    'target', 'project', 'branch', 'sourceOf', 'targetOf'];
 };
 
 ElementSchema.statics.getValidPopulateFields = function() {
