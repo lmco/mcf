@@ -221,12 +221,23 @@ function getElementPublicData(element, options) {
     if (element.contains.every(e => typeof e === 'object')) {
       // If the archived option is supplied
       if (options.hasOwnProperty('archived') && options.archived === true) {
-        data.contains = element.contains.map(e => utils.parseID(e._id).pop());
+        // If the user specified 'contains' in the populate field of options
+        if (options.populate && options.populate.includes('contains')) {
+          data.contains = element.contains;
+        }
+        else {
+          data.contains = element.contains.map(e => utils.parseID(e._id).pop());
+        }
       }
       else {
         // Remove all archived elements
         const tmpContains = element.contains.filter(e => e.archived !== true);
-        data.contains = tmpContains.map(e => utils.parseID(e._id).pop());
+        if (options.populate && options.populate.includes('contains')) {
+          data.contains = tmpContains.contains;
+        }
+        else {
+          data.contains = tmpContains.map(e => utils.parseID(e._id).pop());
+        }
       }
     }
   }

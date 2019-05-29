@@ -305,6 +305,11 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
       // Set the populateString option in the returnObject
       returnObject.populateString += val.join(' ');
+
+      // 'contains' is already in returnObject by default, so prevent duplicates.
+      if (val.includes('contains')) {
+        returnObject.populateString.replace('contains ', '');
+      }
     }
 
     // Handle the archived option
