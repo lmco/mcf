@@ -92,26 +92,11 @@ module.exports.up = function() {
  */
 function projectHelper() {
   return new Promise((resolve, reject) => {
-    // Find all projects, getting just their ids
-    Project.find({}, '_id').lean()
-    .then((projects) => {
-      const bulkArray = [];
-      projects.forEach((proj) => {
-        proj.projectReferences = undefined;
-        bulkArray.push({
-          updateOne: {
-            filter: { _id: proj._id },
-            update: proj
-          }
-        });
-      });
-
-      return Project.bulkWrite(bulkArray);
-    })
-    .then((updated) => {
-      console.log(updated);
-      return resolve();
-    })
+    // Remove the projectReferences field from all projects. NOTE: we use mongo
+    // directly here because Mongoose uses $set for all updates, which is not desired
+    mongoose.connection.db.collection('projects')
+    .updateMany({}, { $unset: { projectReferences: '' } })
+    .then(() => resolve())
     .catch((error) => reject(error));
   });
 }
