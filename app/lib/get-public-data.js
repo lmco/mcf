@@ -396,23 +396,12 @@ function getProjectPublicData(project, options) {
   let createdBy = null;
   let lastModifiedBy = null;
   let archivedBy;
-  let projectReferences;
 
   // Loop through each permission key/value pair
   Object.keys(project.permissions || {}).forEach((u) => {
     // Return highest permission
     permissions[u] = project.permissions[u].pop();
   });
-
-  // If projectReferences are defined
-  if (project.hasOwnProperty('projectReferences')) {
-    projectReferences = [];
-    // Loop through each project reference
-    project.projectReferences.forEach((ref) => {
-      // Split concatenated id and return only project id
-      projectReferences.push(utils.parseID(ref).pop());
-    });
-  }
 
   // If project.createdBy is defined
   if (project.createdBy) {
@@ -458,7 +447,6 @@ function getProjectPublicData(project, options) {
       : utils.parseID(project._id)[0],
     name: project.name,
     permissions: permissions,
-    projectReferences: projectReferences,
     custom: project.custom || {},
     visibility: project.visibility,
     createdOn: (project.createdOn) ? project.createdOn.toString() : undefined,
