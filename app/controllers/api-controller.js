@@ -66,6 +66,7 @@ module.exports = {
   putUsers,
   patchUsers,
   deleteUsers,
+  searchUsers,
   getUser,
   postUser,
   putUser,
@@ -2531,6 +2532,100 @@ function whoami(req, res) {
   // Returns 200: OK and the users public data
   res.header('Content-Type', 'application/json');
   return res.status(200).send(json);
+}
+
+/**
+ * GET /users/search
+ *
+ * @description Does a text based search on elements and returns any matches.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with elements
+ */
+function searchUsers(req, res) {
+  // Define options and query
+  // Note: Undefined if not set
+  let options;
+  let query = '';
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    limit: 'number',
+    skip: 'number',
+    q: 'string',
+    minified: 'boolean',
+    name: 'string',
+    createdBy: 'string',
+    lastModifiedBy: 'string'
+  };
+
+  // Loop through req.query
+  if (req.query) {
+    Object.keys(req.query).forEach((k) => {
+      // If the key starts with custom., add it to the validOptions object
+      if (k.startsWith('custom.')) {
+        validOptions[k] = 'string';
+      }
+    });
+  }
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    const error = new M.CustomError('Request Failed.', 500, 'critical');
+    return res.status(error.status).send(error);
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occured with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for q (query)
+  if (options.q) {
+    query = options.q;
+    delete options.q;
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Find users
+  // NOTE: search() sanitizes input params
+  UserController.search(req.user, query, options)
+  .then((users) => {
+    // Verify users public data array is not empty
+    if (users.length === 0) {
+      const error = new M.CustomError('No users found.', 404, 'warn');
+      return res.status(error.status).send(error);
+    }
+
+    const usersPublicData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? usersPublicData : formatJSON(usersPublicData);
+
+    // Return a 200: OK and public user data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+    })
+  // If an error was thrown, return it and its status
+  .catch((error) => res.status(error.status || 500).send(error));
 }
 
 /**
