@@ -300,6 +300,7 @@ function getElementPublicData(element, options) {
 
   // If the fields options is defined
   if (options.hasOwnProperty('fields')) {
+    console.log(options.fields)
     // If fields should be excluded
     if (options.fields.every(f => f.startsWith('-'))) {
       // For each of those fields
@@ -319,6 +320,7 @@ function getElementPublicData(element, options) {
       options.fields.forEach((f) => {
         returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
       });
+      console.log(returnObj)
       return returnObj;
     }
   }
