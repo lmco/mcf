@@ -852,7 +852,7 @@ api.route('/orgs/:orgid')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: limit
@@ -954,7 +954,7 @@ api.route('/projects')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: limit
@@ -1034,13 +1034,6 @@ api.route('/projects')
  *                 type: object
  *                 description: Any preset permissions. Keys are the users
  *                              usernames, and values are the permission.
- *               projectReferences:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Any projects to reference in the model. Projects
- *                              must be in the same organization and must have a
- *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
@@ -1054,7 +1047,7 @@ api.route('/projects')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1122,13 +1115,6 @@ api.route('/projects')
  *                 type: object
  *                 description: Any preset permissions. Keys are the users
  *                              usernames, and values are the permission.
- *               projectReferences:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Any projects to reference in the model. Projects
- *                              must be in the same organization and must have a
- *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
@@ -1142,7 +1128,7 @@ api.route('/projects')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1213,13 +1199,6 @@ api.route('/projects')
  *                 description: An object where keys are usernames and values
  *                              are the new role the user has. To remove a user,
  *                              the role should be REMOVE_ALL.
- *               projectReferences:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Any projects to reference in the model. Projects
- *                              must be in the same organization and must have a
- *                              visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
@@ -1232,7 +1211,7 @@ api.route('/projects')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1373,7 +1352,7 @@ api.route('/orgs/:orgid/projects')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1444,13 +1423,6 @@ api.route('/orgs/:orgid/projects')
  *               type: object
  *               description: Any preset permissions. Keys are the users
  *                            usernames, and values are the permission.
- *             projectReferences:
- *               type: array
- *               items:
- *                 type: string
- *               description: Any projects to reference in the model. Projects
- *                            must be in the same organization and must have a
- *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
@@ -1464,7 +1436,7 @@ api.route('/orgs/:orgid/projects')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1537,13 +1509,6 @@ api.route('/orgs/:orgid/projects')
  *               type: object
  *               description: Any preset permissions. Keys are the users
  *                            usernames, and values are the permission.
- *             projectReferences:
- *               type: array
- *               items:
- *                 type: string
- *               description: Any projects to reference in the model. Projects
- *                            must be in the same organization and must have a
- *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
@@ -1557,7 +1522,7 @@ api.route('/orgs/:orgid/projects')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -1627,13 +1592,6 @@ api.route('/orgs/:orgid/projects')
  *                 description: An object where keys are usernames and values
  *                              are the new role the user has. To remove a user,
  *                              the role should be REMOVE_ALL.
- *             projectReferences:
- *               type: array
- *               items:
- *                 type: string
- *               description: Any projects to reference in the model. Projects
- *                            must be in the same organization and must have a
- *                            visibility level of 'internal' to be referenced.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
@@ -1646,7 +1604,7 @@ api.route('/orgs/:orgid/projects')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, lastModifiedBy, name, org,
- *                      permissions, projectReferences, updatedOn, visibility]
+ *                      permissions, updatedOn, visibility]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2762,8 +2720,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *                 description: An optional field to specify the namespace of
  *                              the source element. The source's project must
- *                              be in the given project's projectReferences
- *                              array.
+ *                              be in the same organization or the default org.
  *                 properties:
  *                   org:
  *                     type: string
@@ -2778,8 +2735,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *                 description: An optional field to specify the namespace of
  *                              the target element. The targets's project must
- *                              be in the given project's projectReferences
- *                              array.
+ *                              be in the same organization or the default org.
  *                 properties:
  *                   org:
  *                     type: string
@@ -2892,8 +2848,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *                 description: An optional field to specify the namespace of
  *                              the source element. The source's project must
- *                              be in the given project's projectReferences
- *                              array.
+ *                              be in the same organization or the default org.
  *                 properties:
  *                   org:
  *                     type: string
@@ -2908,8 +2863,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *                 description: An optional field to specify the namespace of
  *                              the target element. The targets's project must
- *                              be in the given project's projectReferences
- *                              array.
+ *                              be in the same organization or the default org.
  *                 properties:
  *                   org:
  *                     type: string
@@ -3023,8 +2977,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *                 description: An optional field to specify the namespace of
  *                              the source element. The source's project must
- *                              be in the given project's projectReferences
- *                              array.
+ *                              be in the same organization or the default org.
  *                 properties:
  *                   org:
  *                     type: string
@@ -3038,8 +2991,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 type: object
  *                 description: An optional field to specify the namespace of
  *                              the target element. The target's project must
- *                              be in the given project's projectReferences
- *                              array.
+ *                              be in the same organization or the default org.
  *                 properties:
  *                   org:
  *                     type: string
@@ -3323,8 +3275,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *               description: An optional field to specify the namespace of
  *                            the source element. The source's project must
- *                            be in the given project's projectReferences
- *                            array.
+ *                            be in the same organization or the default org.
  *               properties:
  *                 org:
  *                   type: string
@@ -3340,8 +3291,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *               description: An optional field to specify the namespace of
  *                            the target element. The target's project must
- *                            be in the given project's projectReferences
- *                            array.
+ *                            be in the same organization or the default org.
  *               properties:
  *                 org:
  *                   type: string
@@ -3456,8 +3406,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *               description: An optional field to specify the namespace of
  *                            the source element. The source's project must
- *                            be in the given project's projectReferences
- *                            array.
+ *                            be in the same organization or the default org.
  *               properties:
  *                 org:
  *                   type: string
@@ -3473,8 +3422,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *               description: An optional field to specify the namespace of
  *                            the target element. The target's project must
- *                            be in the given project's projectReferences
- *                            array.
+ *                            be in the same organization or the default org.
  *               properties:
  *                 org:
  *                   type: string
@@ -3585,8 +3533,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *               description: An optional field to specify the namespace of
  *                            the source element. The source's project must
- *                            be in the given project's projectReferences
- *                            array.
+ *                            be in the same organization or the default org.
  *               properties:
  *                 org:
  *                   type: string
@@ -3600,8 +3547,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               type: object
  *               description: An optional field to specify the namespace of
  *                            the target element. The target's project must
- *                            be in the given project's projectReferences
- *                            array.
+ *                            be in the same organization or the default org.
  *               properties:
  *                 org:
  *                   type: string
