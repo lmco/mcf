@@ -246,10 +246,8 @@ function getElementPublicData(element, options) {
   if (element.sourceOf) {
     // If all contents are objects (they should be)
     if (element.sourceOf.every(e => typeof e === 'object')) {
-      console.log('Every should have passed...')
       // If the archived option is supplied
       if (options.hasOwnProperty('archived') && options.archived === true) {
-        console.log('Archived?')
         // If user is populating sourceOf, return objects else just ids
         if (options.populate && options.populate.includes('sourceOf')) {
           data.sourceOf = element.sourceOf.map(e => getElementPublicData(e, {}));
@@ -259,7 +257,6 @@ function getElementPublicData(element, options) {
         }
       }
       else {
-        console.log('Should be in else...')
         // Remove all archived elements
         const tmpSourceOf = element.sourceOf.filter(e => e.archived !== true);
         // If user is populating sourceOf, return objects else just ids
@@ -279,12 +276,24 @@ function getElementPublicData(element, options) {
     if (element.targetOf.every(e => typeof e === 'object')) {
       // If the archived option is supplied
       if (options.hasOwnProperty('archived') && options.archived === true) {
-        data.targetOf = element.targetOf.map(e => getElementPublicData(e, {}));
+        // If user is populating targetOf, return objects else just ids
+        if (options.populate && options.populate.includes('targetOf')) {
+          data.targetOf = element.targetOf.map(e => getElementPublicData(e, {}));
+        }
+        else {
+          data.targetOf = element.targetOf.map(e => utils.parseID(e._id).pop());
+        }
       }
       else {
         // Remove all archived elements
-        const tmpTargetOf = element.targetOf.filter(e => e.archived !== true);
-        data.targetOf = tmpTargetOf.map(e => getElementPublicData(e, {}));
+        const tmpTargetOf = element.sourceOf.filter(e => e.archived !== true);
+        // If user is populating targetOf, return objects else just ids
+        if (options.populate && options.populate.includes('targetOf')) {
+          data.targetOf = tmpTargetOf.map(e => getElementPublicData(e, {}));
+        }
+        else {
+          data.targetOf = tmpTargetOf.map(e => utils.parseID(e._id).pop());
+        }
       }
     }
   }
