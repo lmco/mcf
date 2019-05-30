@@ -2604,7 +2604,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf]
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -2802,7 +2802,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf]
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -2933,7 +2933,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf]
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3064,7 +3064,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf]
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3223,7 +3223,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf]
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3367,7 +3367,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf]
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3501,7 +3501,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf]
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3630,7 +3630,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf]
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false

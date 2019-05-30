@@ -65,19 +65,24 @@ class ProjectElements extends Component {
 
   // Define the open and close of the element side panel function
   openElementInfo(id, refreshFunction) {
-    // The currently selected element
-    this.setState({ id: id, refreshFunction: refreshFunction });
-
     // Select the clicked element
     $('.element-tree').removeClass('tree-selected');
     $(`#tree-${id}`).addClass('tree-selected');
 
     if (this.state.sidePanel === 'addElement') {
-      // do nothing
+      // Only set the refresh function
+      // The ID is not set here to avoid updating the 'parent' field on the
+      // add element panel. That parent field should only be passed in when
+      // the addElement panel is first opened.
+      this.setState({ refreshFunction: refreshFunction });
     }
     else {
       // Toggle the element side panel
-      this.setState({ sidePanel: 'elementInfo' });
+      this.setState({
+        id: id,
+        refreshFunction: refreshFunction,
+        sidePanel: 'elementInfo'
+      });
     }
 
     // Get the sidebar html element and toggle it
