@@ -219,15 +219,11 @@ function getElementPublicData(element, options) {
   if (element.contains) {
     // If all contents are objects (they should be)
     if (element.contains.every(e => typeof e === 'object')) {
-      // Initialize data.contains as an array
-      data.contains = [];
       // If the archived option is supplied
       if (options.hasOwnProperty('archived') && options.archived === true) {
         // If the user specified 'contains' in the populate field of options
         if (options.populate && options.populate.includes('contains')) {
-          for (let i = 0; i < element.contains.length; i++) {
-            data.contains[i] = getElementPublicData(element.contains[i], {});
-          }
+          data.contains = element.contains.map(e => getElementPublicData(e, {}));
         }
         else {
           data.contains = element.contains.map(e => utils.parseID(e._id).pop());
@@ -237,9 +233,7 @@ function getElementPublicData(element, options) {
         // Remove all archived elements
         const tmpContains = element.contains.filter(e => e.archived !== true);
         if (options.populate && options.populate.includes('contains')) {
-          for (let i = 0; i < tmpContains.length; i++) {
-            data.contains[i] = getElementPublicData(tmpContains[i], {});
-          }
+          data.contains = tmpContains.map(e => getElementPublicData(e, {}));
         }
         else {
           data.contains = tmpContains.map(e => utils.parseID(e._id).pop());
