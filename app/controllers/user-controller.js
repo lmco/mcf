@@ -1002,12 +1002,11 @@ function search(requestingUser, query, options) {
       searchQuery.$text = { $search: query };
 
       // If the lean option is supplied
-      // not sure what the lean option does but this if statement currently does nothing
       if (validOptions.lean) {
         // Search for the user
         User.find(searchQuery, { score: { $meta: 'textScore' } },
           { limit: validOptions.limit, skip: validOptions.skip })
-        .sort({ score: { $meta: 'textScore' } })
+        .sort({ score: { $meta: 'textScore' } }).lean()
         // .populate(validOptions.populateString || 'contains').lean();
         .then((foundUser) => resolve(foundUser))
         .catch((error) => reject(M.CustomError.parseCustomError(error)));
