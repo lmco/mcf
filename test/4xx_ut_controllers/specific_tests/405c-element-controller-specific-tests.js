@@ -84,11 +84,6 @@ describe(M.getModuleName(module.filename), () => {
       // Add project to array of created projects
       projIDs.push(utils.parseID(retProj[0].id).pop());
 
-      // Update the project references array in the main project
-      return ProjectController.update(adminUser, org.id,
-        { id: projIDs[0], projectReferences: [projIDs[1]] });
-    })
-    .then(() => {
       // Create test elements for the main project
       const elems = testData.elements;
       return ElementController.create(adminUser, org.id, projIDs[0], branchID, elems);
