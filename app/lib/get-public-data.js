@@ -235,14 +235,29 @@ function getElementPublicData(element, options) {
   if (element.sourceOf) {
     // If all contents are objects (they should be)
     if (element.sourceOf.every(e => typeof e === 'object')) {
+      console.log('Every should have passed...')
       // If the archived option is supplied
       if (options.hasOwnProperty('archived') && options.archived === true) {
-        data.sourceOf = element.sourceOf.map(e => getElementPublicData(e, {}));
+        console.log('Archived?')
+        // If user is populating sourceOf, return objects else just ids
+        if (options.populate && options.populate.includes('sourceOf')) {
+          data.sourceOf = element.sourceOf.map(e => getElementPublicData(e, {}));
+        }
+        else {
+          data.sourceOf = element.sourceOf.map(e => utils.parseID(e._id).pop());
+        }
       }
       else {
+        console.log('Should be in else...')
         // Remove all archived elements
         const tmpSourceOf = element.sourceOf.filter(e => e.archived !== true);
-        data.sourceOf = tmpSourceOf.map(e => getElementPublicData(e, {}));
+        // If user is populating sourceOf, return objects else just ids
+        if (options.populate && options.populate.includes('sourceOf')) {
+          data.sourceOf = tmpSourceOf.map(e => getElementPublicData(e, {}));
+        }
+        else {
+          data.sourceOf = tmpSourceOf.map(e => utils.parseID(e._id).pop());
+        }
       }
     }
   }

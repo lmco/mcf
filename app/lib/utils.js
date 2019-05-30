@@ -248,7 +248,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
   // Define the populateString for elements, since we populate contains by default
   if (model.modelName === 'Element') {
-    returnObject.populateString = 'contains ';
+    returnObject.populateString = 'contains sourceOf';
   }
   // Not a valid mongoose model, throw an error
   else if (!model.hasOwnProperty('modelName')) {
@@ -293,6 +293,8 @@ module.exports.validateOptions = function(options, validOptions, model) {
           'Every value in the populate array must be a string.', 400, 'warn'
         );
       }
+
+      // TODO: Handle the sourceOf field being provided in populate string
 
       // Ensure each field is able to be populated
       const validPopulateFields = model.getValidPopulateFields();

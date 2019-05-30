@@ -258,13 +258,13 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           // Find all elements in a project
           return Element.find(searchQuery, validOptions.fieldsString,
             { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString || 'contains')
+          .populate(validOptions.populateString)
           .lean();
         }
         else {
           return Element.find(searchQuery, validOptions.fieldsString,
             { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString || 'contains');
+          .populate(validOptions.populateString);
         }
       }
       // Find elements by ID
@@ -282,7 +282,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           // Add find operation to promises array
           promises.push(Element.find(searchQuery, validOptions.fieldsString,
             { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString || 'contains')
+          .populate(validOptions.populateString)
           .lean()
           .then((_foundElements) => {
             foundElements = foundElements.concat(_foundElements);
@@ -292,7 +292,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
           // Add find operation to promises array
           promises.push(Element.find(searchQuery, validOptions.fieldsString,
             { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString || 'contains')
+          .populate(validOptions.populateString)
           .then((_foundElements) => {
             foundElements = foundElements.concat(_foundElements);
           }));
@@ -743,7 +743,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         if (validOptions.lean) {
           // Add find operation to promises array
           promises.push(Element.find(tmpQuery, validOptions.fieldsString)
-          .populate(validOptions.populateString || 'contains').lean()
+          .populate(validOptions.populateString).lean()
           .then((_foundElements) => {
             populatedElements = populatedElements.concat(_foundElements);
           }));
@@ -751,7 +751,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         else {
           // Add find operation to promises array
           promises.push(Element.find(tmpQuery, validOptions.fieldsString)
-          .populate(validOptions.populateString || 'contains')
+          .populate(validOptions.populateString)
           .then((_foundElements) => {
             populatedElements = populatedElements.concat(_foundElements);
           }));
@@ -1209,7 +1209,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         if (validOptions.lean) {
           // Add find operation to promises array
           promises2.push(Element.find(searchQuery, validOptions.fieldsString)
-          .populate(validOptions.populateString || 'contains').lean()
+          .populate(validOptions.populateString).lean()
           .then((_foundElements) => {
             foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
           }));
@@ -1217,7 +1217,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         else {
           // Add find operation to promises array
           promises2.push(Element.find(searchQuery, validOptions.fieldsString)
-          .populate(validOptions.populateString || 'contains')
+          .populate(validOptions.populateString)
           .then((_foundElements) => {
             foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
           }));
@@ -2005,14 +2005,14 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
           { limit: validOptions.limit, skip: validOptions.skip })
         .sort({ score: { $meta: 'textScore' } })
-        .populate(validOptions.populateString || 'contains').lean();
+        .populate(validOptions.populateString).lean();
       }
       else {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
           { limit: validOptions.limit, skip: validOptions.skip })
         .sort({ score: { $meta: 'textScore' } })
-        .populate(validOptions.populateString || 'contains');
+        .populate(validOptions.populateString);
       }
     })
     .then((foundElements) => resolve(foundElements))
