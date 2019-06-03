@@ -1599,6 +1599,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
     let elementsToFind = [];
     let foundIDs = [];
+    let uniqueIDs = [];
 
     // Check the type of the elements parameter
     if (Array.isArray(saniElements) && saniElements.length !== 0) {
@@ -1693,22 +1694,59 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       return Promise.all(promises);
     })
     .then(() => {
-      const uniqueIDs = {};
-
+      const uniqueIDsObj = {};
       // Parse foundIDs and only return unique ones
       foundIDs.forEach((id) => {
-        if (!uniqueIDs[id]) {
-          uniqueIDs[id] = id;
+        if (!uniqueIDsObj[id]) {
+          uniqueIDsObj[id] = id;
         }
       });
 
+      uniqueIDs = Object.keys(uniqueIDsObj);
+
       // TODO: Change the emitter to return elements rather than ids
       // Emit the event elements-deleted
-      EventEmitter.emit('elements-deleted', Object.keys(uniqueIDs));
+      EventEmitter.emit('elements-deleted', uniqueIDs);
 
-      // Return just the unique ids
-      return resolve(Object.keys(uniqueIDs));
+      // Create query to find all relationships which point to deleted elements
+      const relQuery = {
+        $or: [
+          { source: { $in: uniqueIDs } },
+          { target: { $in: uniqueIDs } }
+        ]
+      };
+
+      // Find all relationships which are now broken
+      return Element.find(relQuery).lean();
     })
+    .then((relationships) => {
+      const bulkArray = [];
+
+      // For each relationship
+      relationships.forEach((rel) => {
+        // If the source no longer exists, set it to the undefined element
+        if (uniqueIDs.includes(rel.source)) {
+          rel.source = utils.createID(rel.branch, 'undefined');
+        }
+
+        // If the target no longer exists, set it to the undefined element
+        if (uniqueIDs.includes(rel.target)) {
+          rel.target = utils.createID(rel.branch, 'undefined');
+        }
+
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: rel._id },
+            update: rel
+          }
+        });
+      });
+
+      // Save relationship changes to database
+      return Element.bulkWrite(bulkArray);
+    })
+    // Return unique IDs of elements deleted
+    .then(() => resolve(uniqueIDs))
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
   });
 }
