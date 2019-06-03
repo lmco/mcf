@@ -488,34 +488,47 @@ function findAllUsers(done) {
  * controller.
  */
 function searchUser(done) {
-  const userData = testData.users[0];
+  const userData = [
+    testData.users[0],
+    testData.users[1],
+    testData.users[2],
+    testData.users[3]
+  ];
 
   // Find user via controller
-  UserController.search(adminUser, `"${userData.fname}"`, {})
+  UserController.search(adminUser, `"${userData[0].fname}"`, {})
   .then((foundUsers) => {
-    // Expect foundUsers array to contain 4 users (depending on test_data.json)
-    chai.expect(foundUsers.length).to.equal(4);
-    const foundUser = foundUsers[0];
+    // Expect foundUsers array to contain all users with the same first name (all 4)
+    chai.expect(foundUsers.length).to.equal(userData.length);
 
-    // Verify user found
-    chai.expect(foundUser._id).to.equal(userData.username);
-    chai.expect(foundUser.username).to.equal(userData.username);
-    chai.expect(foundUser.preferredName).to.equal(userData.preferredName);
-    chai.expect(foundUser.fname).to.equal(userData.fname);
-    chai.expect(foundUser.lname).to.equal(userData.lname);
-    chai.expect(foundUser.admin).to.equal(userData.admin);
-    chai.expect(foundUser.custom).to.deep.equal(userData.custom);
+    // Convert foundUsers to JMI type 2 for easier lookup
+    const jmi2Users = jmi.convertJMI(1, 2, foundUsers, 'username');
+    // Loop through each user data object
+    userData.forEach((userDataObject) => {
+      const foundUser = jmi2Users[userDataObject.username];
+      // Ensure user was found
+      chai.expect(foundUser).to.not.equal(undefined);
 
-    // Expect the password to be hashed
-    chai.expect(foundUser.password).to.not.equal(userData.password);
+      // Verify expected response
+      chai.expect(foundUser._id).to.equal(userDataObject.username);
+      chai.expect(foundUser.username).to.equal(userDataObject.username);
+      chai.expect(foundUser.preferredName).to.equal(userDataObject.preferredName);
+      chai.expect(foundUser.fname).to.equal(userDataObject.fname);
+      chai.expect(foundUser.lname).to.equal(userDataObject.lname);
+      chai.expect(foundUser.admin).to.equal(userDataObject.admin);
+      chai.expect(foundUser.custom).to.deep.equal(userDataObject.custom);
 
-    // Verify additional properties
-    chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-    chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
-    chai.expect(foundUser.archivedBy).to.equal(null);
-    chai.expect(foundUser.createdOn).to.not.equal(null);
-    chai.expect(foundUser.updatedOn).to.not.equal(null);
-    chai.expect(foundUser.archivedOn).to.equal(null);
+      // Expect the password to be hashed
+      chai.expect(foundUser.password).to.not.equal(userDataObject.password);
+
+      // Verify additional properties
+      chai.expect(foundUser.createdBy).to.equal(adminUser.username);
+      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundUser.archivedBy).to.equal(null);
+      chai.expect(foundUser.createdOn).to.not.equal(null);
+      chai.expect(foundUser.updatedOn).to.not.equal(null);
+      chai.expect(foundUser.archivedOn).to.equal(null);
+    })
     done();
   })
   .catch((error) => {
