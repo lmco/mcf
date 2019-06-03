@@ -485,12 +485,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
             + ` #${index}'s sourceNamespace is missing a branch.`);
 
-          // Ensure the sourceNamespace org is the same org
-          assert.ok(elem.sourceNamespace.org === orgID, `Element #${index}'s `
-            + 'source cannot reference elements outside its org.');
+          // Ensure the sourceNamespace org is the same org or default org
+          const validOrgs = [orgID, M.config.server.defaultOrganizationId];
+          assert.ok(validOrgs.includes(elem.sourceNamespace.org), 'Element '
+            + `#${index}'s source cannot reference elements outside its org `
+            + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
 
           // Add project id to projectRefs array. Later we verify these projects
-          // are in the foundProject's projectReferences array
+          // exist and have a visibility of 'internal'.
           projectRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
 
           // Change element source to referenced project's id
@@ -511,12 +513,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
             + ` #${index}'s targetNamespace is missing a branch.`);
 
-          // Ensure the targetNamespace org is the same org
-          assert.ok(elem.targetNamespace.org === orgID, `Element #${index}'s `
-            + 'target cannot reference elements outside its org.');
+          // Ensure the targetNamespace org is the same org or default org
+          const validOrgs = [orgID, M.config.server.defaultOrganizationId];
+          assert.ok(validOrgs.includes(elem.targetNamespace.org), 'Element '
+            + `#${index}'s target cannot reference elements outside its org `
+            + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
 
           // Add project id to projectRefs array. Later we verify these projects
-          // are in the foundProject's projectReferences array
+          // exist and have a visibility of 'internal'.
           projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
 
           // Change element target to referenced project's id
@@ -562,15 +566,20 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.CustomError('User does not have permission to create'
-            + ' elements on the project '
-            + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
+          + ' elements on the project '
+          + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
       }
 
-      // Verify that the found project's projectReferences contains the specified refs
-      projectRefs.forEach((ref) => {
-        if (!foundProject.projectReferences.includes(ref)) {
-          throw new M.CustomError(`The project [${utils.parseID(ref).pop()}] `
-            + 'is not in the found project\'s projectReference list.', 403, 'warn');
+      // Find all referenced projects
+      return Project.find({ _id: { $in: projectRefs } }).lean();
+    })
+    .then((referencedProjects) => {
+      // Verify that each project has a visibility of 'internal'
+      referencedProjects.forEach((proj) => {
+        if (proj.visibility !== 'internal') {
+          throw new M.CustomError(`The project [${utils.parseID(proj._id).pop()}] `
+          + `in the org [${utils.parseID(proj._id)[0]}] does not have a visibility `
+          + ' of internal.', 403, 'warn');
         }
       });
 
@@ -872,6 +881,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     let foundUpdatedElements = [];
     const arrIDs = [];
     const sourceTargetIDs = [];
+    const projRefs = [];
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -990,19 +1000,20 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
               + ` #${index}'s sourceNamespace is missing a branch.`);
 
-            // Ensure the sourceNamespace org is the same org
-            assert.ok(elem.sourceNamespace.org === orgID, `Element #${index}'s `
-              + 'source cannot reference elements outside its org.');
-            // Ensure the project is in the projectReferences array
-            const tmpProj = utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project);
-            assert.ok(foundProject.projectReferences.includes(tmpProj),
-              `The project [${elem.sourceNamespace.project}] is not in the `
-              + 'projectReferences list.');
+            // Ensure the sourceNamespace org is the same org or default org
+            const validOrgs = [orgID, M.config.server.defaultOrganizationId];
+            assert.ok(validOrgs.includes(elem.sourceNamespace.org), 'Element '
+              + `#${index}'s source cannot reference elements outside its org `
+              + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
 
             // Reset the elem source with new project
             const tmpSource = utils.parseID(elem.source).pop();
             elem.source = utils.createID(elem.sourceNamespace.org,
               elem.sourceNamespace.project, branchID, tmpSource);
+
+            // Add project id to projectRefs array. Later we verify these projects
+            // exist and have a visibility of 'internal'.
+            projRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
 
             // Remove the last source which has the wrong project
             sourceTargetIDs.pop();
@@ -1030,19 +1041,20 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
               + ` #${index}'s targetNamespace is missing a branch.`);
 
-            // Ensure the targetNamespace org is the same org
-            assert.ok(elem.targetNamespace.org === orgID, `Element #${index}'s `
-              + 'target cannot reference elements outside its org.');
-            // Ensure the project is in the projectReferences array
-            const tmpProj = utils.createID(elem.targetNamespace.org, elem.targetNamespace.project);
-            assert.ok(foundProject.projectReferences.includes(tmpProj),
-              `The project [${elem.targetNamespace.project}] is not in the `
-                + 'projectReferences list.');
+            // Ensure the targetNamespace org is the same org or default org
+            const validOrgs = [orgID, M.config.server.defaultOrganizationId];
+            assert.ok(validOrgs.includes(elem.targetNamespace.org), 'Element '
+              + `#${index}'s target cannot reference elements outside its org `
+              + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
 
             // Reset the elem target with new project
             const tmpTarget = utils.parseID(elem.target).pop();
             elem.target = utils.createID(elem.targetNamespace.org,
               elem.targetNamespace.project, branchID, tmpTarget);
+
+            // Add project id to projectRefs array. Later we verify these projects
+            // exist and have a visibility of 'internal'.
+            projRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
 
             // Remove the last target which has the wrong project
             sourceTargetIDs.pop();
@@ -1058,6 +1070,18 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       catch (err) {
         throw new M.CustomError(err.message, 403, 'warn');
       }
+
+      return Project.find({ _id: { $in: projRefs } }).lean();
+    })
+    .then((referencedProjects) => {
+      // Verify each project reference has a visibility of 'internal'
+      referencedProjects.forEach((proj) => {
+        if (proj.visibility !== 'internal') {
+          throw new M.CustomError(`The project [${utils.parseID(proj._id).pop()}] `
+            + `in the org [${utils.parseID(proj._id)[0]}] does not have a visibility `
+            + ' of internal.', 403, 'warn');
+        }
+      });
 
       const promises = [];
       searchQuery = { branch: utils.createID(orgID, projID, branchID) };

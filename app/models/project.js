@@ -36,10 +36,6 @@ const utils = M.require('lib.utils');
  * @property {Object} permissions - An object whose keys identify a
  * projects's roles. The keys are the users username, and values are arrays of
  * given permissions.
- * @property {string[]} projectReferences - An array of references to other
- * projects within the same org. Elements in those projects are able to be
- * source and targets of elements in this project. NOTE: The referenced projects
- * visibility level must be 'internal'.
  * @property {Object} custom - JSON used to store additional data.
  * @property {string} visibility - The visibility level of a project defining
  * its permissions behaviour.
@@ -91,10 +87,6 @@ const ProjectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: {}
   },
-  projectReferences: [{
-    type: String,
-    ref: 'Project'
-  }],
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -126,7 +118,7 @@ ProjectSchema.statics.getPermissionLevels = function() {
  * @memberOf ProjectSchema
  */
 ProjectSchema.methods.getValidUpdateFields = function() {
-  return ['name', 'custom', 'archived', 'permissions', 'visibility', 'projectReferences'];
+  return ['name', 'custom', 'archived', 'permissions', 'visibility'];
 };
 ProjectSchema.statics.getValidUpdateFields = function() {
   return ProjectSchema.methods.getValidUpdateFields();

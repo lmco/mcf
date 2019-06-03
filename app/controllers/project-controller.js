@@ -199,9 +199,6 @@ function find(requestingUser, organizationID, projects, options) {
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
- * @param {string[]} [projects.projectReferences] - An array of referenced
- * projects. These projects must be in the same organization and must have a
- * visibility of 'internal' to be referenced.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -252,7 +249,6 @@ function create(requestingUser, organizationID, projects, options) {
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundOrg = {};
     let projObjects = [];
-    const projectReferences = [];
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -278,7 +274,7 @@ function create(requestingUser, organizationID, projects, options) {
     // Create array of id's for lookup and array of valid keys
     const arrIDs = [];
     const validProjKeys = ['id', 'name', 'custom', 'visibility', 'permissions',
-      'projectReferences', 'archived'];
+      'archived'];
 
     // Check that each project has an id, and add to arrIDs
     try {
@@ -307,22 +303,6 @@ function create(requestingUser, organizationID, projects, options) {
         // Add requesting user as admin on project
         proj.permissions[reqUser._id] = 'admin';
 
-        // Check if updating the project references array
-        if (proj.hasOwnProperty('projectReferences')) {
-          proj.projectReferences = proj.projectReferences.map((project) => {
-            const projID = utils.createID(orgID, project);
-            // Check for duplicate project references. If multiple projects
-            // being created reference the same project, that project only gets
-            // found once.
-            if (!projectReferences.includes(projID)) {
-              // Add project ID to array of projects to be searched for
-              projectReferences.push(projID);
-            }
-            // Return the concatenated project ID
-            return projID;
-          });
-        }
-
         index++;
       });
     }
@@ -348,29 +328,6 @@ function create(requestingUser, organizationID, projects, options) {
         throw new M.CustomError('User does not have permission to create'
           + ` projects on the org [${foundOrg._id}].`, 403, 'warn');
       }
-
-      // Find any project references
-      return Project.find({ _id: { $in: projectReferences } });
-    })
-    .then((_projReferences) => {
-      // Verify the same number of projects are found as desired
-      if (_projReferences.length !== projectReferences.length) {
-        const foundIDs = _projReferences.map(p => p._id);
-        const notFound = projectReferences.filter(p => !foundIDs.includes(p))
-        .map(p => utils.parseID(p).pop());
-        throw new M.CustomError(
-          `The following projects [${notFound.toString()}] were not found in `
-          + `the org [${orgID}].`, 404, 'warn'
-        );
-      }
-
-      // Verify that each referenced project has a visibility of 'internal'
-      _projReferences.forEach((project) => {
-        if (project.visibility !== 'internal') {
-          throw new M.CustomError(`The project [${utils.parseID(project._id).pop()}]`
-            + ' must have a visibility level of \'internal\' to be referenced.', 403, 'warn');
-        }
-      });
 
       // Find any existing, conflicting projects
       return Project.find(searchQuery, '_id').lean();
@@ -572,9 +529,6 @@ function create(requestingUser, organizationID, projects, options) {
  * the key is the username, and the value is the role which the user is to have
  * in the project. To remove a user from a project, the value must be
  * 'remove_all'.
- * @param {string[]} [projects.projectReferences] - An array of referenced
- * projects. These projects must be in the same organization and must have a
- * visibility of 'internal' to be referenced.
  * @param {Object} [projects.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
@@ -634,7 +588,6 @@ function update(requestingUser, organizationID, projects, options) {
     let existingUsers = [];
     let updatingPermissions = false;
     let foundOrg = {};
-    const projectReferences = [];
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -678,22 +631,6 @@ function update(requestingUser, organizationID, projects, options) {
           updatingPermissions = true;
         }
 
-        // Check if updating the project references array
-        if (proj.hasOwnProperty('projectReferences')) {
-          proj.projectReferences = proj.projectReferences.map((project) => {
-            const projID = utils.createID(orgID, project);
-            // Check for duplicate project references. If multiple projects
-            // being created reference the same project, that project only gets
-            // found once.
-            if (!projectReferences.includes(projID)) {
-              // Add project ID to array of projects to be searched for
-              projectReferences.push(projID);
-            }
-            // Return the concatenated project ID
-            return projID;
-          });
-        }
-
         index++;
       });
     }
@@ -714,29 +651,6 @@ function update(requestingUser, organizationID, projects, options) {
 
       // Set function-wide foundOrg
       foundOrg = _foundOrganization;
-
-      // Find any project references
-      return Project.find({ _id: { $in: projectReferences } });
-    })
-    .then((_projReferences) => {
-      // Verify the same number of projects are found as desired
-      if (_projReferences.length !== projectReferences.length) {
-        const foundIDs = _projReferences.map(p => p._id);
-        const notFound = projectReferences.filter(p => !foundIDs.includes(p))
-        .map(p => utils.parseID(p).pop());
-        throw new M.CustomError(
-          `The following projects [${notFound.toString()}] were not found in `
-          + `the org [${orgID}].`, 404, 'warn'
-        );
-      }
-
-      // Verify that each referenced project has a visibility of 'internal'
-      _projReferences.forEach((project) => {
-        if (project.visibility !== 'internal') {
-          throw new M.CustomError(`The project [${utils.parseID(project._id).pop()}]`
-          + ' must have a visibility level of \'internal\' to be referenced.', 403, 'warn');
-        }
-      });
 
       // Find the projects to update
       return Project.find(searchQuery).lean();
@@ -956,9 +870,6 @@ function update(requestingUser, organizationID, projects, options) {
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
- * @param {string[]} [projects.projectReferences] - An array of referenced
- * projects. These projects must be in the same organization and must have a
- * visibility of 'internal' to be referenced.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
@@ -1253,9 +1164,6 @@ function remove(requestingUser, organizationID, projects, options) {
     })
     // Delete any branches in the project
     .then(() => Branch.deleteMany(ownedQuery).lean())
-    // Delete the project references from any projectReferences arrays
-    .then(() => Project.updateMany({}, { $pull: { projectReferences:
-          { $in: foundProjects.map(p => p._id) } } }, { multi: true }))
     // Delete the projects
     .then(() => Project.deleteMany(searchQuery).lean())
     .then((retQuery) => {
