@@ -56,7 +56,7 @@ function clean(_args) {
   }
 
   // Clean data
-  if (args.includes('--all') || args.includes('--data')){
+  if (args.includes('--all') || args.includes('--data')) {
     execSync(`rm -rf ${root}/data/*`);
   }
 
