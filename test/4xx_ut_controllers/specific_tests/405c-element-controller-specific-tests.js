@@ -120,12 +120,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create and archived element', createArchivedElement);
+  it('should create an archived element', createArchivedElement);
   it('should archive an element', archiveElement);
   it('should create an element whose source is on a different project', createExternalSource);
   it('should create an element whose target is on a different project', createExternalTarget);
   it('should update an element source to be on a different project', updateExternalSource);
   it('should update an element target to be on a different project', updateExternalTarget);
+  it('should delete an element which is part of a relationship', deleteRelElement);
   it('should populate allowed fields when finding an element', optionPopulateFind);
   it('should find an archived element when the option archived is provided', optionArchivedFind);
   it('should find an element and it\'s subtree when the option subtree '
@@ -367,6 +368,30 @@ function updateExternalTarget(done) {
 }
 
 /**
+ * @description Verifies that when an element is part of a relationship and gets
+ * deleted, the relationship gets updated and is pointed to the 'undefined'
+ * element.
+ */
+function deleteRelElement(done) {
+  const rel = utils.parseID(elements[7]._id).pop();
+  const delElem = utils.parseID(elements[8]._id).pop();
+  ElementController.remove(adminUser, org.id, projIDs[0], branchID, delElem)
+  .then(() => ElementController.find(adminUser, org.id, projIDs[0], branchID, rel))
+  .then((foundElements) => {
+    const relationship = foundElements[0];
+    chai.expect(relationship.source).to.equal(utils.createID(relationship.branch, 'undefined'));
+    chai.expect(relationship.target).to.equal(utils.createID(relationship.branch, 'undefined'));
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
  * @description Verifies that the fields specified in the element model function
  * getValidPopulateFields() can all be populated in the find() function using
  * the option 'populate'.
@@ -458,8 +483,8 @@ function optionSubtreeFind(done) {
   // Find the element and it's subtree
   ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options)
   .then((foundElements) => {
-    // Expect there to be 4 elements found, the searched element and 3 in subtree
-    chai.expect(foundElements.length).to.equal(4);
+    // Expect there to be 5 elements found, the searched element and 4 in subtree
+    chai.expect(foundElements.length).to.equal(5);
     // Attempt to convert elements to JMI3, if successful then its a valid tree
     const jmi3Elements = jmi.convertJMI(1, 3, foundElements);
     // Verify that there is only one top level key in jmi3, which should be the

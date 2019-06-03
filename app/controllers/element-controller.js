@@ -1742,8 +1742,11 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
         });
       });
 
-      // Save relationship changes to database
-      return Element.bulkWrite(bulkArray);
+      // If there are relationships to update, make a bulkWrite() call
+      if (bulkArray.length > 0) {
+        // Save relationship changes to database
+        return Element.bulkWrite(bulkArray);
+      }
     })
     // Return unique IDs of elements deleted
     .then(() => resolve(uniqueIDs))
