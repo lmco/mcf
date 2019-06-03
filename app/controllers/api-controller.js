@@ -2623,7 +2623,7 @@ function searchUsers(req, res) {
     // Return a 200: OK and public user data
     res.header('Content-Type', 'application/json');
     return res.status(200).send(json);
-    })
+  })
   // If an error was thrown, return it and its status
   .catch((error) => res.status(error.status || 500).send(error));
 }
