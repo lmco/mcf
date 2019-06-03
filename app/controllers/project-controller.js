@@ -583,6 +583,7 @@ function update(requestingUser, organizationID, projects, options) {
     const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const duplicateCheck = {};
+    const loweredVisibility = [];
     let foundProjects = [];
     let projectsToUpdate = [];
     let existingUsers = [];
@@ -807,6 +808,12 @@ function update(requestingUser, organizationID, projects, options) {
               updateProj.archivedOn = null;
             }
           }
+          // If updating the visibility from internal to private
+          else if (key === 'visibility' && updateProj[key] === 'private'
+            && proj[key] === 'internal') {
+            // Add project ID to loweredVisibility array
+            loweredVisibility.push(proj._id);
+          }
         });
 
         // Update lastModifiedBy field and updatedOn
@@ -827,6 +834,52 @@ function update(requestingUser, organizationID, projects, options) {
 
       // Return when all promises have been complete
       return Promise.all(promises);
+    })
+    .then(() => {
+      // Create query to find all elements which reference elements on any
+      // projects whose visibility was just lowered to 'private'
+      const relRegex = `^(${loweredVisibility.join(':)|(')}:)`;
+      const relQuery = {
+        project: { $nin: loweredVisibility },
+        $or: [
+          { source: { $regex: relRegex } },
+          { target: { $regex: relRegex } }
+        ]
+      };
+
+      // Find broken relationships
+      return Element.find(relQuery).lean();
+    })
+    .then((foundElements) => {
+      const bulkArray = [];
+
+      // For each broken relationship
+      foundElements.forEach((elem) => {
+        const sourceProjID = utils.createID(utils.parseID(elem.source).slice(0, 2));
+        const targetProjID = utils.createID(utils.parseID(elem.target).slice(0, 2));
+
+        // If the source no longer exists, set it to the undefined element
+        if (loweredVisibility.includes(sourceProjID)) {
+          elem.source = utils.createID(elem.branch, 'undefined');
+        }
+
+        // If the target no longer exists, set it to the undefined element
+        if (loweredVisibility.includes(targetProjID)) {
+          elem.target = utils.createID(elem.branch, 'undefined');
+        }
+
+        bulkArray.push({
+          updateOne: {
+            filter: { _id: elem._id },
+            update: elem
+          }
+        });
+      });
+
+      // If there are relationships to fix
+      if (bulkArray.length > 0) {
+        return Element.bulkWrite(bulkArray);
+      }
     })
     .then(() => {
       // If the lean option is supplied
