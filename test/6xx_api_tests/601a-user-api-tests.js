@@ -85,7 +85,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET a user', getUser);
   it('should GET multiple users', getUsers);
   it('should GET all users', getAllUsers);
-  it('should GET users through search text', searchUsers)
+  it('should GET users through search text', searchUsers);
   it('should PATCH a user', patchUser);
   it('should PATCH multiple users', patchUsers);
   it('should PATCH a users password', patchUserPassword);

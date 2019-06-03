@@ -4142,14 +4142,14 @@ api.route('/users/whoami')
 
 /**
  * @swagger
- * /api/users/search
+ * /api/users/search:
  *   get:
  *     tags:
  *       - users
- *     description: Finds multiple users using text based search on the
- *                  documentation and name fields.  Allows for exact searches by
+ *     description: Finds multiple users using text based search on the fname,
+ *                  lname, and preferredName fields. Allows for exact searches by
  *                  quoting the desired string "exact search", or the ability to
- *                  not include a word in a search by using a dash -not.  Returns
+ *                  not include a word in a search by using a dash -not. Returns
  *                  the users public data
  *     produces:
  *       - application/json
@@ -4158,6 +4158,12 @@ api.route('/users/whoami')
  *         description: The desired text to be searched for.
  *         in: query
  *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
+ *         in: query
+ *         type: string
+ *         required: false
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.
@@ -4166,49 +4172,28 @@ api.route('/users/whoami')
  *       - name: skip
  *         description: The number of objects to skip returning. For example,
  *                      if 10 objects are found and skip is 5, the first five
- *                      objects will NOT be returned.  NOTE, skip cannot be a
+ *                      objects will NOT be returned. NOTE, skip cannot be a
  *                      negative number.
  *         in: query
  *         type: number
  *       - name: minified
- *         description: If true, the returned JSON is minified.  If false, the
+ *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
- *                      in the config.  The default value is false.
+ *                      in the config. The default value is false.
  *         in: query
  *         type: boolean
  *         default: false
- *       - name: name
- *         description: Search for users with a specific name.
- *         in: query
- *         type: string
- *       - name: createdBy
- *         description: Search for users created by a specific admin
- *         in: query
- *         type: string
- *       - name: lastModifiedBy
- *         description: Search for users last modified by a specific admin.
- *         in: query
- *         type: string
- *       - name: custom
- *         description: Search for a specific key/value pair in the custom data.
- *                      To find a specific key, separate the keys using dot
- *                      notation. For example, custom.hello.
- *         in: query
- *         type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET users, returns elements public
+ *         description: OK, Succeeded to GET users, returns users public
  *                      data.
  *       400:
  *         description: Bad Request, Failed to GET users due to invalid data.
  *       401:
  *         description: Unauthorized, Failed to GET users due to not being
  *                      logged in.
- *       403:
- *         description: Forbidden, Failed to GET users due to not having
- *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET users due to user not existing?
+ *         description: Not Found, Failed to GET users
  *       500:
  *         description: Internal Server Error, Failed to GET users due to
  *                      server side issue.

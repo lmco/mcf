@@ -2557,9 +2557,7 @@ function searchUsers(req, res) {
     skip: 'number',
     q: 'string',
     minified: 'boolean',
-    name: 'string',
-    createdBy: 'string',
-    lastModifiedBy: 'string'
+    populate: 'array'
   };
 
   // Loop through req.query

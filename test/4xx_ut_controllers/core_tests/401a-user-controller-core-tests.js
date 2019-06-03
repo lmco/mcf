@@ -528,7 +528,7 @@ function searchUser(done) {
       chai.expect(foundUser.createdOn).to.not.equal(null);
       chai.expect(foundUser.updatedOn).to.not.equal(null);
       chai.expect(foundUser.archivedOn).to.equal(null);
-    })
+    });
     done();
   })
   .catch((error) => {

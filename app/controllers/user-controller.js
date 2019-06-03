@@ -11,6 +11,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Provides an abstraction layer on top of the User model that
  * implements controller logic and behavior for Users.
@@ -916,7 +917,7 @@ function remove(requestingUser, users, options) {
 /**
  * @description A function which searches for users using mongo's built in text
  * search.  Returns any users that match the text search, in order of the best
- * matches to the worst.  Searches the name, ___, ___, and ___ fields.
+ * matches to the worst.  Searches the fname, preferredName, and lname fields.
  *
  * @param {User} requestingUser - The object containing the requesting user
  * @param {string} query - The text-based query to search the database for.
@@ -931,18 +932,11 @@ function remove(requestingUser, users, options) {
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
- * @param {string} [options.name] - Search for users with a specific name.
- * @param {string} [options.createdBy] - Search for users with a specific
- * createdBy value.
- * @param {string} [options.lastModifiedBy] - Search for users with a
- * specific lastModifiedBy value.
- * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} An array of found users.
  *
  * @example
- * search({User}, 'query', 'options')
+ * search({User}, 'query', {'populate':'createdBy'})
  * .then(function(users) {
  *   // Do something with the found users
  * })
@@ -968,57 +962,33 @@ function search(requestingUser, query, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    // TODO: do something with reqUser for admin vs regular user
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const searchQuery = { }; // idk about this
-
-    // Initialize valid options ( is this necessary? )
-    let validOptions = {};
+    const searchQuery = { };
 
     // Validate and set the options
-    validOptions = utils.validateOptions(options, ['limit',
+    const validOptions = utils.validateOptions(options, ['populate', 'limit',
       'skip', 'lean'], User);
 
-    // Ensure options are valid
-    if (options) {
-      // Create array of valid search options
-      const validSearchOptions = ['fname', 'preferredName', 'lname'];
+    // Find the user
+    searchQuery.$text = { $search: query };
 
-      // Loop through provided options
-      Object.keys(options).forEach((o) => {
-        // If the provided option is a valid search option
-        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-          // Ensure the search option is a string
-          if (typeof options[o] !== 'string') {
-            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
-          }
-
-          // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
-        }
-      });
-
-      // Find the user
-      searchQuery.$text = { $search: query };
-
-      // If the lean option is supplied
-      if (validOptions.lean) {
-        // Search for the user
-        User.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: validOptions.limit, skip: validOptions.skip })
-        .sort({ score: { $meta: 'textScore' } }).lean()
-        // .populate(validOptions.populateString || 'contains').lean();
-        .then((foundUser) => resolve(foundUser))
-        .catch((error) => reject(M.CustomError.parseCustomError(error)));
-      }
-      else {
-        // Search for the user
-        User.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: validOptions.limit, skip: validOptions.skip })
-        .sort({ score: { $meta: 'textScore' } })
-        .then((foundUser) => resolve(foundUser))
-        .catch((error) => reject(M.CustomError.parseCustomError(error)));
-      }
+    // If the lean option is supplied
+    if (validOptions.lean) {
+      // Search for the user
+      User.find(searchQuery, { score: { $meta: 'textScore' } },
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(validOptions.populateString).lean()
+      .then((foundUsers) => resolve(foundUsers))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
+    else {
+      // Search for the user
+      User.find(searchQuery, { score: { $meta: 'textScore' } },
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(validOptions.populateString)
+      .then((foundUsers) => resolve(foundUsers))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
     }
   });
 }
