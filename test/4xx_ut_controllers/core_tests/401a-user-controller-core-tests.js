@@ -84,6 +84,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a user', findUser);
   it('should find multiple users', findUsers);
   it('should find all users', findAllUsers);
+  it('should find a user through text search', searchUser);
   it('should update a user', updateUser);
   it('should update multiple users', updateUsers);
   it('should update a users password', updateUserPassword);
@@ -481,6 +482,50 @@ function findAllUsers(done) {
     done();
   });
 }
+
+/**
+ * @description Finds a user through text based search via the user
+ * controller.
+ */
+function searchUser(done) {
+  const userData = testData.users[0];
+
+  // Find user via controller
+  UserController.search(adminUser, `"${userData.fname}"`, {})
+  .then((foundUsers) => {
+    // Expect foundUsers array to contain 4 users (depending on test_data.json)
+    chai.expect(foundUsers.length).to.equal(4);
+    const foundUser = foundUsers[0];
+
+    // Verify user found
+    chai.expect(foundUser._id).to.equal(userData.username);
+    chai.expect(foundUser.username).to.equal(userData.username);
+    chai.expect(foundUser.preferredName).to.equal(userData.preferredName);
+    chai.expect(foundUser.fname).to.equal(userData.fname);
+    chai.expect(foundUser.lname).to.equal(userData.lname);
+    chai.expect(foundUser.admin).to.equal(userData.admin);
+    chai.expect(foundUser.custom).to.deep.equal(userData.custom);
+
+    // Expect the password to be hashed
+    chai.expect(foundUser.password).to.not.equal(userData.password);
+
+    // Verify additional properties
+    chai.expect(foundUser.createdBy).to.equal(adminUser.username);
+    chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundUser.archivedBy).to.equal(null);
+    chai.expect(foundUser.createdOn).to.not.equal(null);
+    chai.expect(foundUser.updatedOn).to.not.equal(null);
+    chai.expect(foundUser.archivedOn).to.equal(null);
+    done();
+  })
+  .catch((error) => {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
 
 /**
  * @description Updates a user using the user controller
