@@ -2557,7 +2557,11 @@ function searchUsers(req, res) {
     skip: 'number',
     q: 'string',
     minified: 'boolean',
-    populate: 'array'
+    populate: 'array',
+    fname: 'string',
+    preferredName: 'string',
+    lname: 'string',
+    email: 'string'
   };
 
   // Loop through req.query
