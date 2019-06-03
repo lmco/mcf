@@ -55,6 +55,11 @@ function clean(_args) {
     execSync(`rm -rf ${root}/build ${root}/logs`);
   }
 
+  // Clean data
+  if (args.includes('--all') || args.includes('--data')){
+    execSync(`rm -rf ${root}/data/*`);
+  }
+
   // Clean node_modules
   if (args.includes('--all') || args.includes('--node-modules')) {
     execSync(`rm -rf ${root}/node_modules`);
