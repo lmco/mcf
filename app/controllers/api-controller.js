@@ -1782,7 +1782,11 @@ function getUsers(req, res) {
     fname: 'string',
     preferredName: 'string',
     lname: 'string',
-    email: 'string'
+    email: 'string',
+    custom: 'string',
+    createdBy: 'string',
+    lastModifiedBy: 'string',
+    archivedBy: 'string'
   };
 
   // Sanity Check: there should always be a user in the request
