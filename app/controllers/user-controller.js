@@ -127,6 +127,25 @@ function find(requestingUser, users, options) {
       delete searchQuery.archived;
     }
 
+    // Ensure search options are valid
+    if (options) {
+      // List of valid search options
+      const validSearchOptions = ['fname', 'preferredName', 'lname', 'email'];
+
+      // Check each option for valid search queries
+      Object.keys(options).forEach((o) => {
+        // If the search option is valid
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
+    }
+
     // Check the type of the users parameter
     if (Array.isArray(saniUsers)) {
       // An array of usernames, find all
@@ -967,25 +986,6 @@ function search(requestingUser, query, options) {
     // Validate and set the options
     const validOptions = utils.validateOptions(options, ['populate', 'limit',
       'skip', 'lean'], User);
-
-    // Ensure search options are valid
-    if (options) {
-      // List of valid search options
-      const validSearchOptions = ['fname', 'preferredName', 'lname', 'email'];
-
-      // Check each option for valid search queries
-      Object.keys(options).forEach((o) => {
-        // If the search option is valid
-        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-          // Ensure the search option is a string
-          if (typeof options[o] !== 'string') {
-            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
-          }
-          // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
-        }
-      });
-    }
 
     // Find the user
     searchQuery.$text = { $search: query };

@@ -1778,7 +1778,11 @@ function getUsers(req, res) {
     limit: 'number',
     skip: 'number',
     usernames: 'array',
-    minified: 'boolean'
+    minified: 'boolean',
+    fname: 'string',
+    preferredName: 'string',
+    lname: 'string',
+    email: 'string'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2557,11 +2561,7 @@ function searchUsers(req, res) {
     skip: 'number',
     q: 'string',
     minified: 'boolean',
-    populate: 'array',
-    fname: 'string',
-    preferredName: 'string',
-    lname: 'string',
-    email: 'string'
+    populate: 'array'
   };
 
   // Loop through req.query
