@@ -856,8 +856,9 @@ function update(requestingUser, organizationID, projects, options) {
       // For each broken relationship
       foundElements.forEach((elem) => {
         // If the source no longer exists, set it to the undefined element
-        if (loweredVisibility.includes(utils.createID(elem.source.org, elem.source.project))) {
+        if (loweredVisibility.includes(elem.source.project)) {
           // Add broken relationship details to custom data
+          if (!elem.custom) elem.custom = {};
           if (!elem.custom.mbee) elem.custom.mbee = {};
           if (!elem.custom.mbee.broken_relationships) elem.custom.mbee.broken_relationships = [];
           elem.custom.mbee.broken_relationships.push(
@@ -869,8 +870,9 @@ function update(requestingUser, organizationID, projects, options) {
         }
 
         // If the target no longer exists, set it to the undefined element
-        if (loweredVisibility.includes(utils.createID(elem.target.org, elem.target.project))) {
+        if (loweredVisibility.includes(elem.target.project)) {
           // Add broken relationship details to custom data
+          if (!elem.custom) elem.custom = {};
           if (!elem.custom.mbee) elem.custom.mbee = {};
           if (!elem.custom.mbee.broken_relationships) elem.custom.mbee.broken_relationships = [];
           elem.custom.mbee.broken_relationships.push(

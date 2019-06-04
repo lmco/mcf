@@ -1726,26 +1726,12 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       relationships.forEach((rel) => {
         // If the source no longer exists, set it to the undefined element
         if (uniqueIDs.includes(rel.source)) {
-          // Add broken relationship details to custom data
-          if (!rel.custom.mbee) rel.custom.mbee = {};
-          if (!rel.custom.mbee.broken_relationships) rel.custom.mbee.broken_relationships = [];
-          rel.custom.mbee.broken_relationships.push(
-            { date: Date.now(), type: 'source', id: rel.source }
-          );
-
           // Reset source to the undefined element
           rel.source = utils.createID(rel.branch, 'undefined');
         }
 
         // If the target no longer exists, set it to the undefined element
         if (uniqueIDs.includes(rel.target)) {
-          // Add broken relationship details to custom data
-          if (!rel.custom.mbee) rel.custom.mbee = {};
-          if (!rel.custom.mbee.broken_relationships) rel.custom.mbee.broken_relationships = [];
-          rel.custom.mbee.broken_relationships.push(
-            { date: Date.now(), type: 'target', id: rel.target }
-          );
-
           // Reset target to the undefined element
           rel.target = utils.createID(rel.branch, 'undefined');
         }
