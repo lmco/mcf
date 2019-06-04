@@ -205,8 +205,7 @@ UserSchema.statics.getValidPopulateFields = function() {
 UserSchema.index({
   fname: 'text',
   preferredName: 'text',
-  lname: 'text',
-  email: 'text'
+  lname: 'text'
 });
 
 /* ---------------------------( User Properties )---------------------------- */

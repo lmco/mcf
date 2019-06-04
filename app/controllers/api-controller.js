@@ -2537,12 +2537,12 @@ function whoami(req, res) {
 /**
  * GET /users/search
  *
- * @description Does a text based search on elements and returns any matches.
+ * @description Does a text based search on users and returns any matches.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
- * @return {Object} Response object with elements
+ * @return {Object} Response object with found users
  */
 function searchUsers(req, res) {
   // Define options and query
