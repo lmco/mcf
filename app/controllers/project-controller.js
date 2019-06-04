@@ -848,23 +848,36 @@ function update(requestingUser, organizationID, projects, options) {
       };
 
       // Find broken relationships
-      return Element.find(relQuery).lean();
+      return Element.find(relQuery).populate('source target').lean();
     })
     .then((foundElements) => {
       const bulkArray = [];
 
       // For each broken relationship
       foundElements.forEach((elem) => {
-        const sourceProjID = utils.createID(utils.parseID(elem.source).slice(0, 2));
-        const targetProjID = utils.createID(utils.parseID(elem.target).slice(0, 2));
-
         // If the source no longer exists, set it to the undefined element
-        if (loweredVisibility.includes(sourceProjID)) {
+        if (loweredVisibility.includes(utils.createID(elem.source.org, elem.source.project))) {
+          // Add broken relationship details to custom data
+          if (!elem.custom.mbee) elem.custom.mbee = {};
+          if (!elem.custom.mbee.broken_relationships) elem.custom.mbee.broken_relationships = [];
+          elem.custom.mbee.broken_relationships.push(
+            { date: Date.now(), type: 'source', element: elem.source, reason: 'Project Visibility' }
+          );
+
+          // Reset source to the undefined element
           elem.source = utils.createID(elem.branch, 'undefined');
         }
 
         // If the target no longer exists, set it to the undefined element
-        if (loweredVisibility.includes(targetProjID)) {
+        if (loweredVisibility.includes(utils.createID(elem.target.org, elem.target.project))) {
+          // Add broken relationship details to custom data
+          if (!elem.custom.mbee) elem.custom.mbee = {};
+          if (!elem.custom.mbee.broken_relationships) elem.custom.mbee.broken_relationships = [];
+          elem.custom.mbee.broken_relationships.push(
+            { date: Date.now(), type: 'target', element: elem.target, reason: 'Project Visibility' }
+          );
+
+          // Reset target to the undefined element
           elem.target = utils.createID(elem.branch, 'undefined');
         }
 
