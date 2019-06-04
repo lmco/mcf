@@ -490,7 +490,7 @@ function optionFieldsFind(done) {
   // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
-  const fieldsAlwaysProvided = ['_id', 'contains'];
+  const fieldsAlwaysProvided = ['_id', 'contains', 'sourceOf', 'targetOf'];
 
   // Find the element only with specific fields.
   ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, findOptions)
@@ -697,7 +697,7 @@ function optionFieldsCreate(done) {
   // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
-  const fieldsAlwaysProvided = ['_id', 'contains'];
+  const fieldsAlwaysProvided = ['_id', 'contains', 'sourceOf', 'targetOf'];
 
   // Create the element only with specific fields returned
   ElementController.create(adminUser, org.id, projIDs[0], branchID, elemObjFind, findOptions)
@@ -848,7 +848,7 @@ function optionFieldsUpdate(done) {
   // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
-  const fieldsAlwaysProvided = ['_id', 'contains'];
+  const fieldsAlwaysProvided = ['_id', 'contains', 'sourceOf', 'targetOf'];
 
   // Update the element only with specific fields returned
   ElementController.update(adminUser, org.id, projIDs[0], branchID, updateObjFind, findOptions)
@@ -1001,7 +1001,7 @@ function optionFieldsReplace(done) {
   // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
-  const fieldsAlwaysProvided = ['_id', 'contains'];
+  const fieldsAlwaysProvided = ['_id', 'contains', 'sourceOf', 'targetOf'];
 
   // Replace the element only with specific fields returned
   ElementController.createOrReplace(adminUser, org.id, projIDs[0], branchID,

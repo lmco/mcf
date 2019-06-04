@@ -242,6 +242,62 @@ function getElementPublicData(element, options) {
     }
   }
 
+  // Handle the virtual sourceOf field
+  if (element.sourceOf) {
+    // If all contents are objects (they should be)
+    if (element.sourceOf.every(e => typeof e === 'object')) {
+      // If the archived option is supplied
+      if (options.hasOwnProperty('archived') && options.archived === true) {
+        // If user is populating sourceOf, return objects else just ids
+        if (options.populate && options.populate.includes('sourceOf')) {
+          data.sourceOf = element.sourceOf.map(e => getElementPublicData(e, {}));
+        }
+        else {
+          data.sourceOf = element.sourceOf.map(e => utils.parseID(e._id).pop());
+        }
+      }
+      else {
+        // Remove all archived elements
+        const tmpSourceOf = element.sourceOf.filter(e => e.archived !== true);
+        // If user is populating sourceOf, return objects else just ids
+        if (options.populate && options.populate.includes('sourceOf')) {
+          data.sourceOf = tmpSourceOf.map(e => getElementPublicData(e, {}));
+        }
+        else {
+          data.sourceOf = tmpSourceOf.map(e => utils.parseID(e._id).pop());
+        }
+      }
+    }
+  }
+
+  // Handle the virtual targetOf field
+  if (element.targetOf) {
+    // If all contents are objects (they should be)
+    if (element.targetOf.every(e => typeof e === 'object')) {
+      // If the archived option is supplied
+      if (options.hasOwnProperty('archived') && options.archived === true) {
+        // If user is populating targetOf, return objects else just ids
+        if (options.populate && options.populate.includes('targetOf')) {
+          data.targetOf = element.targetOf.map(e => getElementPublicData(e, {}));
+        }
+        else {
+          data.targetOf = element.targetOf.map(e => utils.parseID(e._id).pop());
+        }
+      }
+      else {
+        // Remove all archived elements
+        const tmpTargetOf = element.targetOf.filter(e => e.archived !== true);
+        // If user is populating targetOf, return objects else just ids
+        if (options.populate && options.populate.includes('targetOf')) {
+          data.targetOf = tmpTargetOf.map(e => getElementPublicData(e, {}));
+        }
+        else {
+          data.targetOf = tmpTargetOf.map(e => utils.parseID(e._id).pop());
+        }
+      }
+    }
+  }
+
   // If the fields options is defined
   if (options.hasOwnProperty('fields')) {
     // If fields should be excluded

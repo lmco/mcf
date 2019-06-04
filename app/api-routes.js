@@ -2561,7 +2561,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project, branch]
+ *                      parent, source, target, project, branch, sourceOf,
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -2756,7 +2757,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project, branch]
+ *                      parent, source, target, project, branch, sourceOf,
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -2884,7 +2886,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project, branch]
+ *                      parent, source, target, project, branch, sourceOf,
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3012,7 +3015,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project, branch]
+ *                      parent, source, target, project, branch, sourceOf,
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3170,7 +3174,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project, branch, contains]
+ *                      parent, source, target, project, branch, sourceOf,
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3311,7 +3316,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project, branch, contains]
+ *                      parent, source, target, project, branch, sourceOf,
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3442,7 +3448,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project, branch, contains]
+ *                      parent, source, target, project, branch, sourceOf,
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3568,7 +3575,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project, branch, contains]
+ *                      parent, source, target, project, branch, sourceOf,
+ *                      targetOf, contains]
  *         in: query
  *         type: string
  *         required: false
@@ -3723,7 +3731,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy, contains]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3824,7 +3832,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy, contains]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3905,7 +3913,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy, contains]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3988,7 +3996,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                              this field.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy, contains]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false

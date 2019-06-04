@@ -246,13 +246,10 @@ module.exports.validateOptions = function(options, validOptions, model) {
   // Define valid searchOptions for the branch model
   const branchSearchOptions = ['tag', 'source'];
 
-  // Define the populateString for elements, since we populate contains by default
+  // Add required populate fields to populate string for Element model
   if (model.modelName === 'Element') {
-    returnObject.populateString = 'contains ';
-  }
-  // Not a valid mongoose model, throw an error
-  else if (!model.hasOwnProperty('modelName')) {
-    throw new M.CustomError('A valid model was not provided.', 500, 'error');
+    // Set populateString to include require virtuals
+    returnObject.populateString = 'contains sourceOf targetOf ';
   }
 
   // Check if no options provided
@@ -296,20 +293,19 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
       // Ensure each field is able to be populated
       const validPopulateFields = model.getValidPopulateFields();
+      const requiredElementFields = ['contains', 'sourceOf', 'targetOf'];
       val.forEach((p) => {
         // If the field cannot be populated, throw an error
         if (!validPopulateFields.includes(p)) {
           throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
         }
+
+        // If the field is not a required virtual on the Element model
+        if (!(model.modelName === 'Element' && requiredElementFields.includes(p))) {
+          // Add field to populateString
+          returnObject.populateString += `${p} `;
+        }
       });
-
-      // Set the populateString option in the returnObject
-      returnObject.populateString += val.join(' ');
-
-      // 'contains' is already in returnObject by default, so prevent duplicates.
-      if (val.includes('contains')) {
-        returnObject.populateString.replace('contains ', '');
-      }
     }
 
     // Handle the archived option
