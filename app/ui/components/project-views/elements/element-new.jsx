@@ -88,10 +88,13 @@ class ElementNew extends Component {
       id: this.state.id,
       name: this.state.name,
       type: this.state.type,
-      parent: this.state.parent,
-      source: this.state.source,
-      target: this.state.target
+      parent: this.state.parent
     };
+
+    if (this.state.source !== null && this.state.target !== null) {
+      data.source = this.state.source;
+      data.target = this.state.target;
+    }
 
     const oid = this.props.project.org;
     const pid = this.props.project.id;
@@ -126,6 +129,10 @@ class ElementNew extends Component {
    */
   parentSelectHandler(_id) {
     this.setState({ parent: _id });
+
+    // This is used to select the parent in the main tree.
+    // It allows the main tree to be refreshed when the new element is added.
+    $(`#element-tree-container #tree-${_id} > .element-name`).click();
   }
 
   /**
@@ -243,7 +250,8 @@ class ElementNew extends Component {
           </FormGroup>
           <Button className='btn btn'
                   outline color="primary"
-                  disabled={disableSubmit} onClick={this.onSubmit}>
+                  disabled={disableSubmit}
+                  onClick={this.onSubmit}>
             Submit
           </Button>
           <Button className='btn btn'
