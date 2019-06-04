@@ -56,7 +56,8 @@ class ProjectElements extends Component {
 
   createNewElement() {
     this.setState({
-      sidePanel: 'addElement'
+      sidePanel: 'addElement',
+      refreshFunction: this.getElement
     });
 
     // Get the sidebar html element and toggle it

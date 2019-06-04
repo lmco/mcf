@@ -65,6 +65,8 @@ class ElementNew extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.parentSelectHandler = this.parentSelectHandler.bind(this);
+    this.sourceSelectHandler = this.sourceSelectHandler.bind(this);
+    this.targetSelectHandler = this.targetSelectHandler.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -86,7 +88,9 @@ class ElementNew extends Component {
       id: this.state.id,
       name: this.state.name,
       type: this.state.type,
-      parent: this.state.parent
+      parent: this.state.parent,
+      source: this.state.source,
+      target: this.state.target
     };
 
     const oid = this.props.project.org;
@@ -122,6 +126,22 @@ class ElementNew extends Component {
    */
   parentSelectHandler(_id) {
     this.setState({ parent: _id });
+  }
+
+  /**
+   * This function is called when the ElementSelector for the source field
+   * changes.
+   */
+  sourceSelectHandler(_id) {
+    this.setState({ source: _id });
+  }
+
+  /**
+   * This function is called when the ElementSelector for the target field
+   * changes.
+   */
+  targetSelectHandler(_id) {
+    this.setState({ target: _id });
   }
 
   render() {
@@ -198,6 +218,27 @@ class ElementNew extends Component {
                   project={this.props.project}
                   selectedHandler={this.parentSelectHandler} />
               </div>
+            </Col>
+          </FormGroup>
+          <FormGroup row>
+            <Label for='name' sm={2}>Source</Label>
+            <Col sm={10} className={'selector-value'}>
+              {this.state.source || 'null'}
+              <ElementSelector
+                self={this.state.id}
+                project={this.props.project}
+                selectedHandler={this.sourceSelectHandler} />
+            </Col>
+          </FormGroup>
+          {/* Form section for Element target */}
+          <FormGroup row>
+            <Label for='name' sm={2}>Target</Label>
+            <Col sm={10} className={'selector-value'}>
+              {this.state.target || 'null'}
+              <ElementSelector
+                self={this.state.id}
+                project={this.props.project}
+                selectedHandler={this.targetSelectHandler} />
             </Col>
           </FormGroup>
           <Button className='btn btn'
