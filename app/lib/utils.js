@@ -267,20 +267,12 @@ module.exports.validateOptions = function(options, validOptions, model) {
     let val = options[opt];
 
     // Special case, ignore these as the controller handles these
-    if (model.modelName === 'Element'
-      && (elemSearchOptions.includes(opt) || opt.startsWith('custom.'))) {
-      // Ignore iteration of loop
-      return;
-    }
-    // Special case, ignore these as the controller handles these
-    if (model.modelName === 'Branch'
-      && (branchSearchOptions.includes(opt) || opt.startsWith('custom.'))) {
-      // Ignore iteration of loop
-      return;
-    }
-    // Special case, ignore these as the controller handles these
-    if (model.modelName === 'User'
-      && (userSearchOptions.includes(opt) || opt.startsWith('custom.'))) {
+    if ((model.modelName === 'Element'
+      && (elemSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'Branch'
+      && (branchSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'User'
+      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
       // Ignore iteration of loop
       return;
     }
