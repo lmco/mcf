@@ -68,6 +68,14 @@ const utils = M.require('lib.utils');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {string} [options.fname] - A string that will search for matches with
+ * the user fname field, or first name
+ * @param {string} [options.lname] - A string that will search for matches with
+ * the user lname field, or last name
+ * @param {string} [options.preferredName] - A string that will search for matches
+ * with the user preferredName field
+ * @param {string} [options.email] - A string that will search for matches with
+ * the user email field
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
