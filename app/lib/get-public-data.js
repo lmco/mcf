@@ -286,7 +286,7 @@ function getElementPublicData(element, options) {
       }
       else {
         // Remove all archived elements
-        const tmpTargetOf = element.sourceOf.filter(e => e.archived !== true);
+        const tmpTargetOf = element.targetOf.filter(e => e.archived !== true);
         // If user is populating targetOf, return objects else just ids
         if (options.populate && options.populate.includes('targetOf')) {
           data.targetOf = tmpTargetOf.map(e => getElementPublicData(e, {}));
