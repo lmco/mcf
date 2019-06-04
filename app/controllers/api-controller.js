@@ -2568,16 +2568,6 @@ function searchUsers(req, res) {
     populate: 'array'
   };
 
-  // Loop through req.query
-  if (req.query) {
-    Object.keys(req.query).forEach((k) => {
-      // If the key starts with custom., add it to the validOptions object
-      if (k.startsWith('custom.')) {
-        validOptions[k] = 'string';
-      }
-    });
-  }
-
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     const error = new M.CustomError('Request Failed.', 500, 'critical');
