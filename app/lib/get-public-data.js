@@ -126,47 +126,51 @@ function getElementPublicData(element, options) {
 
   // If element.source is defined
   if (element.source) {
-    const sourceIdParts = utils.parseID(element.source);
     // If element.source is populated
     if (typeof element.source === 'object') {
       // Get the public data of source
       source = getElementPublicData(element.source, {});
     }
-    // If source element's project is not the same as the elements parent
-    else if (sourceIdParts[1] !== idParts[1]) {
-      // Set source to object with org, project and element id
-      source = {
-        org: sourceIdParts[0],
-        project: sourceIdParts[1],
-        element: sourceIdParts.pop()
-      };
-    }
     else {
-      // Set source to just the element id
-      source = sourceIdParts.pop();
+      const sourceIdParts = utils.parseID(element.source);
+      // If source element's project is not the same as the elements parent
+      if (sourceIdParts[1] !== idParts[1]) {
+        // Set source to object with org, project and element id
+        source = {
+          org: sourceIdParts[0],
+          project: sourceIdParts[1],
+          element: sourceIdParts.pop()
+        };
+      }
+      else {
+        // Set source to just the element id
+        source = sourceIdParts.pop();
+      }
     }
   }
 
   // If element.target is defined
   if (element.target) {
-    const targetIdParts = utils.parseID(element.target);
     // If element.target is populated
     if (typeof element.target === 'object') {
       // Get the public data of target
       target = getElementPublicData(element.target, {});
     }
-    // If target element's project is not the same as the elements parent
-    else if (targetIdParts[1] !== idParts[1]) {
-      // Set target to object with org, project and element id
-      target = {
-        org: targetIdParts[0],
-        project: targetIdParts[1],
-        element: targetIdParts.pop()
-      };
-    }
     else {
-      // Set target to just the element id
-      target = targetIdParts.pop();
+      const targetIdParts = utils.parseID(element.target);
+      // If target element's project is not the same as the elements parent
+      if (targetIdParts[1] !== idParts[1]) {
+        // Set target to object with org, project and element id
+        target = {
+          org: targetIdParts[0],
+          project: targetIdParts[1],
+          element: targetIdParts.pop()
+        };
+      }
+      else {
+        // Set target to just the element id
+        target = targetIdParts.pop();
+      }
     }
   }
 
