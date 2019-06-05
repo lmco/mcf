@@ -11,6 +11,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Provides an abstraction layer on top of the User model that
  * implements controller logic and behavior for Users.
@@ -25,7 +26,8 @@ module.exports = {
   update,
   createOrReplace,
   remove,
-  updatePassword
+  updatePassword,
+  search
 };
 
 // Node.js Modules
@@ -66,6 +68,20 @@ const utils = M.require('lib.utils');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {string} [options.fname] - A string that will search for matches with
+ * the user fname field, or first name
+ * @param {string} [options.lname] - A string that will search for matches with
+ * the user lname field, or last name
+ * @param {string} [options.preferredName] - A string that will search for matches
+ * with the user preferredName field
+ * @param {string} [options.email] - A string that will search for matches with
+ * the user email field
+ * @param {string} [options.createdBy] - A string that will search for matches for
+ * users that were created by a specific person
+ * @param {string} [options.lastModifiedBy] - A string that will search for matches for
+ * users that were last modified by a specific person
+ * @param {string} [options.archivedBy] - A string that will search for matches for
+ * users that were archived by a specific person
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
@@ -123,6 +139,26 @@ function find(requestingUser, users, options) {
     // If the archived field is true, remove it from the query
     if (validOptions.archived) {
       delete searchQuery.archived;
+    }
+
+    // Ensure search options are valid
+    if (options) {
+      // List of valid search options
+      const validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
+
+      // Check each option for valid search queries
+      Object.keys(options).forEach((o) => {
+        // If the search option is valid
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
     }
 
     // Check the type of the users parameter
@@ -909,6 +945,85 @@ function remove(requestingUser, users, options) {
       return resolve(foundUsernames);
     })
     .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
+ * @description A function which searches for users using mongo's built in text
+ * search.  Returns any users that match the text search, in order of the best
+ * matches to the worst.  Searches the fname, preferredName, and lname fields.
+ *
+ * @param {User} requestingUser - The object containing the requesting user
+ * @param {string} query - The text-based query to search the database for.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects.  By default, no fields are populated.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
+ *
+ * @return {Promise} An array of found users.
+ *
+ * @example
+ * search({User}, 'query', {'populate':'createdBy'})
+ * .then(function(users) {
+ *   // Do something with the found users
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function search(requestingUser, query, options) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof query === 'string', 'Query is not a string.');
+
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (err) {
+      throw new M.CustomError(err.message, 400, 'warn');
+    }
+
+    // Sanitize input parameters and create function-wide variables
+    const searchQuery = { };
+
+    // Validate and set the options
+    const validOptions = utils.validateOptions(options, ['populate', 'limit',
+      'skip', 'lean'], User);
+
+    // Find the user
+    searchQuery.$text = { $search: query };
+
+    // If the lean option is supplied
+    if (validOptions.lean) {
+      // Search for the user
+      User.find(searchQuery, { score: { $meta: 'textScore' } },
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(validOptions.populateString).lean()
+      .then((foundUsers) => resolve(foundUsers))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
+    else {
+      // Search for the user
+      User.find(searchQuery, { score: { $meta: 'textScore' } },
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(validOptions.populateString)
+      .then((foundUsers) => resolve(foundUsers))
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    }
   });
 }
 

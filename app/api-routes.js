@@ -3769,6 +3769,41 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: fname
+ *         description: A search parameter that will attempt to find matches with
+ *                      the user's first name, or fname field.
+ *         in: query
+ *         type: string
+ *       - name: lname
+ *         description: A search parameter that will attempt to find matches with
+ *                      the user's last name, or lname field.
+ *         in: query
+ *         type: string
+ *       - name: preferredName
+ *         description: A search parameter that will attempt to find matches with
+ *                      the user's preferredName field.
+ *         in: query
+ *         type: string
+ *       - name: email
+ *         description: A search parameter that will attempt to find matches with
+ *                      the user's email field.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: A search parameter that will attempt to find users that
+ *                      were created by a specific person.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: A search parameter that will attempt to find users that
+ *                      were last modified by a specific person.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: A search parameter that will attempt to find users that
+ *                      were archived by a specific person.
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
@@ -4145,6 +4180,72 @@ api.route('/users/whoami')
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.whoami
+);
+
+
+/**
+ * @swagger
+ * /api/users/search:
+ *   get:
+ *     tags:
+ *       - users
+ *     description: Finds multiple users using text based search on the fname,
+ *                  lname, and preferredName fields. Allows for exact searches by
+ *                  quoting the desired string "exact search", or the ability to
+ *                  not include a word in a search by using a dash -not. Returns
+ *                  the users public data
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: q
+ *         description: The desired text to be searched for.
+ *         in: query
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET users, returns users public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET users due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET users due to not being
+ *                      logged in.
+ *       404:
+ *         description: Not Found, Failed to GET users
+ *       500:
+ *         description: Internal Server Error, Failed to GET users due to
+ *                      server side issue.
+ */
+api.route('/users/search')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.searchUsers
 );
 
 

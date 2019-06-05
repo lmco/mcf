@@ -245,6 +245,9 @@ module.exports.validateOptions = function(options, validOptions, model) {
     'createdBy', 'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the branch model
   const branchSearchOptions = ['tag', 'source'];
+  // Define valid searchOptions for the user model
+  const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
+    'createdBy', 'lastModifiedBy', 'archivedBy'];
 
   // Add required populate fields to populate string for Element model
   if (model.modelName === 'Element') {
@@ -262,14 +265,12 @@ module.exports.validateOptions = function(options, validOptions, model) {
     let val = options[opt];
 
     // Special case, ignore these as the controller handles these
-    if (model.modelName === 'Element'
-      && (elemSearchOptions.includes(opt) || opt.startsWith('custom.'))) {
-      // Ignore iteration of loop
-      return;
-    }
-    // Special case, ignore these as the controller handles these
-    if (model.modelName === 'Branch'
-      && (branchSearchOptions.includes(opt) || opt.startsWith('custom.'))) {
+    if ((model.modelName === 'Element'
+      && (elemSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'Branch'
+      && (branchSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'User'
+      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
       // Ignore iteration of loop
       return;
     }
