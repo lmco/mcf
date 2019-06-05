@@ -956,6 +956,8 @@ function remove(requestingUser, users, options) {
  * @param {User} requestingUser - The object containing the requesting user
  * @param {string} query - The text-based query to search the database for.
  * @param {Object} [options] - A parameter that provides supported options.
+ * @param {boolean} [options.archived] - A parameter that if true, will return
+ * search results containing both archived and regular users.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects.  By default, no fields are populated.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
@@ -996,14 +998,18 @@ function search(requestingUser, query, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
-    const searchQuery = { };
+    const searchQuery = { archived: false };
 
     // Validate and set the options
-    const validOptions = utils.validateOptions(options, ['populate', 'limit',
-      'skip', 'lean'], User);
+    const validOptions = utils.validateOptions(options, ['archived', 'populate',
+      'limit', 'skip', 'lean'], User);
 
     // Find the user
     searchQuery.$text = { $search: query };
+    // If the archived field is true, remove it from the query
+    if (validOptions.archived) {
+      delete searchQuery.archived;
+    }
 
     // If the lean option is supplied
     if (validOptions.lean) {

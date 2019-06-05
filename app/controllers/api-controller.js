@@ -2561,6 +2561,7 @@ function searchUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
+    archived: 'boolean',
     limit: 'number',
     skip: 'number',
     q: 'string',

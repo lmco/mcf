@@ -4201,6 +4201,11 @@ api.route('/users/whoami')
  *         description: The desired text to be searched for.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Flag to include archived users in search results.
+ *         in: query
+ *         type: boolean
+ *         required: false
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy]
