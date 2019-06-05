@@ -168,7 +168,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
           // Ensure the search option is a string
           if (typeof options[o] !== 'string') {
-            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
           }
 
           // If the search option is an element reference
@@ -1383,7 +1383,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       // Check the branch is not a tagged branch
       if (foundBranch.tag) {
         throw new M.OperationError(`[${branchID}] is a tag and `
-          + 'does not allow updates to elements.', 403, 'warn');
+          + 'does not allow updates to elements.', 'warn');
       }
 
       // Check the type of the elements parameter
