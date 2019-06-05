@@ -246,7 +246,8 @@ module.exports.validateOptions = function(options, validOptions, model) {
   // Define valid searchOptions for the branch model
   const branchSearchOptions = ['tag', 'source'];
   // Define valid searchOptions for the user model
-  const userSearchOptions = ['fname', 'preferredName', 'lname', 'email'];
+  const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
+    'createdBy', 'lastModifiedBy', 'archivedBy'];
 
   // Define the populateString for elements, since we populate contains by default
   if (model.modelName === 'Element') {
