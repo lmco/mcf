@@ -76,6 +76,12 @@ const utils = M.require('lib.utils');
  * with the user preferredName field
  * @param {string} [options.email] - A string that will search for matches with
  * the user email field
+ * @param {string} [options.createdBy] - A string that will search for matches for
+ * users that were created by a specific person
+ * @param {string} [options.lastModifiedBy] - A string that will search for matches for
+ * users that were last modified by a specific person
+ * @param {string} [options.archivedBy] - A string that will search for matches for
+ * users that were archived by a specific person
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
@@ -138,7 +144,8 @@ function find(requestingUser, users, options) {
     // Ensure search options are valid
     if (options) {
       // List of valid search options
-      const validSearchOptions = ['fname', 'preferredName', 'lname', 'email'];
+      const validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
 
       // Check each option for valid search queries
       Object.keys(options).forEach((o) => {

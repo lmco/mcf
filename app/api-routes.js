@@ -3781,6 +3781,21 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      the user's email field.
  *         in: query
  *         type: string
+ *       - name: createdBy
+ *         description: A search parameter that will attempt to find users that
+ *                      were created by a specific person.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: A search parameter that will attempt to find users that
+ *                      were last modified by a specific person.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: A search parameter that will attempt to find users that
+ *                      were archived by a specific person.
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
