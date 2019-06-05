@@ -3761,6 +3761,26 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: fname
+ *         description: A search parameter that will attempt to find matches with
+ *                      the user's first name, or fname field.
+ *         in: query
+ *         type: string
+ *       - name: lname
+ *         description: A search parameter that will attempt to find matches with
+ *                      the user's last name, or lname field.
+ *         in: query
+ *         type: string
+ *       - name: preferredName
+ *         description: A search parameter that will attempt to find matches with
+ *                      the user's preferredName field.
+ *         in: query
+ *         type: string
+ *       - name: email
+ *         description: A search parameter that will attempt to find matches with
+ *                      the user's email field.
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
