@@ -73,7 +73,7 @@ const ProjectSchema = new mongoose.Schema({
       // TODO: NOt a user friendly error, find a better way to fail. Possibly pre('validate') hook?
       if (_org !== this.org) {
         // Immutable field, return error
-        throw new M.CustomError('Assigned org cannot be changed.', 403, 'warn');
+        throw new M.OperationError('Assigned org cannot be changed.', 'warn');
       }
       // No change, return the value
       return this.org;

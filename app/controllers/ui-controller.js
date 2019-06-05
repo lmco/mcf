@@ -52,7 +52,7 @@ const validators = M.require('lib.validators');
 function home(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
-    M.log.critical(new M.CustomError('/ executed with invalid req.user object'));
+    M.log.critical('/ executed with invalid req.user object');
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -71,7 +71,7 @@ function home(req, res) {
 function whoami(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
-    M.log.critical(new M.CustomError('/whoami executed with invalid req.user object'));
+    M.log.critical('/whoami executed with invalid req.user object');
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -90,7 +90,7 @@ function whoami(req, res) {
 function organization(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
-    M.log.critical(new M.CustomError('/ executed with invalid req.user object'));
+    M.log.critical('/ executed with invalid req.user object');
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -109,7 +109,7 @@ function organization(req, res) {
 function project(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
-    M.log.critical(new M.CustomError('/ executed with invalid req.user object'));
+    M.log.critical('/ executed with invalid req.user object');
     // redirect to the login screen
     res.redirect('/login');
   }
@@ -262,7 +262,7 @@ function login(req, res) {
 function logout(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
-    M.log.critical(new M.CustomError('/logout executed with invalid req.user object'));
+    M.log.critical('/logout executed with invalid req.user object');
     // redirect to the login screen
     res.redirect('/login');
   }

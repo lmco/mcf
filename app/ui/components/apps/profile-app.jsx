@@ -50,7 +50,7 @@ class ProfileApp extends Component {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
       if (err) {
-        this.setState({ error: err.responseJSON.description });
+        this.setState({ error: err.responseText });
       }
       else {
         this.setState({ user: data });

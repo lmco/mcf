@@ -357,10 +357,10 @@ module.exports.importTestData = function(filename) {
 module.exports.createRequest = function(user, params, body, method, query = {}) {
   // Error-Check
   if (typeof params !== 'object') {
-    throw M.CustomError('params is not of type object.');
+    throw M.DataFormatError('params is not of type object.', 'warn');
   }
   if (typeof params !== 'object') {
-    throw M.CustomError('body is not of type object.');
+    throw M.DataFormatError('body is not of type object.', 'warn');
   }
 
   return {

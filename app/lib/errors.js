@@ -73,8 +73,10 @@ const ServerError = class ServerError extends CustomError {};
 const DatabaseError = class DatabaseError extends CustomError {};
 
 /**
- * @description
- * @param error
+ * @description Returns an HTTP status code depending on what error is passed in.
+ *
+ * @param {Object} error - The error to parse and return a status code for.
+ *
  * @return {number} An HTTP status code.
  */
 function getStatusCode(error) {
@@ -88,6 +90,7 @@ function getStatusCode(error) {
     case 'DataFormatError': return 400;
     case 'AuthorizationError': return 401;
     case 'PermissionError': return 403;
+    case 'OperationError': return 403;
     case 'NotFoundError': return 404;
     case 'BrewingError': return 418;
     case 'ServerError': return 500;

@@ -67,7 +67,7 @@ function handleBasicAuth(req, res, username, password) {
       }
       // Check for empty user
       if (!user) {
-        return reject(new M.CustomError('No user found.', 401));
+        return reject(new M.NotFoundError('No user found.', 'warn'));
       }
 
       return resolve(user);
@@ -124,7 +124,7 @@ function handleTokenAuth(req, res, token) {
           req.user = null;
           req.session.destroy();
           // Return error
-          return reject(new M.CustomError('No user found.', 404));
+          return reject(new M.NotFoundError('No user found.', 'warn'));
         }
         // return User object if authentication was successful
         return resolve(user);
@@ -132,7 +132,7 @@ function handleTokenAuth(req, res, token) {
     }
     // If token is expired user is unauthorized
     else {
-      return reject(new M.CustomError('Token is expired or session is invalid.', 401));
+      return reject(new M.AuthorizationError('Token is expired or session is invalid.', 'warn'));
     }
   });
 }

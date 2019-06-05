@@ -29,10 +29,11 @@ const BranchController = M.require('controllers.branch-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
-const utils = M.require('lib.utils');
+const errors = M.require('lib.errors');
 const jmi = M.require('lib.jmi-conversions');
 const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
+const utils = M.require('lib.utils');
 
 // Expose `API Controller functions`
 module.exports = {
@@ -232,8 +233,9 @@ function getOrgs(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -243,7 +245,8 @@ function getOrgs(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check query for ids
@@ -275,8 +278,9 @@ function getOrgs(req, res) {
   .then((orgs) => {
     // Verify orgs array is not empty
     if (orgs.length === 0) {
-      const error = new M.CustomError('No orgs found.', 404, 'warn');
-      return res.status(error.status).send(error);
+      const error = new M.NotFoundError('No orgs found.', 'warn');
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     // Get the public data of each org
@@ -292,7 +296,10 @@ function getOrgs(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -320,8 +327,9 @@ function postOrgs(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -331,7 +339,8 @@ function postOrgs(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -360,7 +369,10 @@ function postOrgs(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -389,8 +401,9 @@ function putOrgs(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -400,7 +413,8 @@ function putOrgs(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -429,7 +443,10 @@ function putOrgs(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -457,8 +474,9 @@ function patchOrgs(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -468,7 +486,8 @@ function patchOrgs(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -497,7 +516,10 @@ function patchOrgs(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -530,13 +552,15 @@ function deleteOrgs(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If req.body contains objects, grab the org IDs from the objects
@@ -561,7 +585,10 @@ function deleteOrgs(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -590,8 +617,9 @@ function getOrg(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -601,7 +629,8 @@ function getOrg(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -619,10 +648,11 @@ function getOrg(req, res) {
   .then((orgs) => {
     // If no orgs found, return 404 error
     if (orgs.length === 0) {
-      const error = new M.CustomError(
-        `Organization [${req.params.orgid}] not found.`, 404, 'warn'
+      const error = new M.NotFoundError(
+        `Organization [${req.params.orgid}] not found.`, 'warn'
       );
-      return res.status(error.status).send(error);
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     // Get the public data of each org
@@ -638,7 +668,10 @@ function getOrg(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -667,16 +700,18 @@ function postOrg(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
-    const error = new M.CustomError(
-      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -686,7 +721,8 @@ function postOrg(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -718,7 +754,10 @@ function postOrg(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -747,16 +786,18 @@ function putOrg(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
-    const error = new M.CustomError(
-      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -766,7 +807,8 @@ function putOrg(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -798,7 +840,10 @@ function putOrg(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -826,16 +871,18 @@ function patchOrg(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
-    const error = new M.CustomError(
-      'Organization ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -845,7 +892,8 @@ function patchOrg(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set body org id
@@ -877,7 +925,10 @@ function patchOrg(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -909,13 +960,15 @@ function deleteOrg(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Check options for minified
@@ -938,7 +991,10 @@ function deleteOrg(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /* -----------------------( Project API Endpoints )-------------------------- */
@@ -970,8 +1026,9 @@ function getAllProjects(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -981,7 +1038,8 @@ function getAllProjects(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -998,8 +1056,9 @@ function getAllProjects(req, res) {
   .then((projects) => {
     // Verify project array is not empty
     if (projects.length === 0) {
-      const error = new M.CustomError('No projects found.', 404, 'warn');
-      return res.status(error.status).send(error);
+      const error = new M.NotFoundError('No projects found.', 'warn');
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     const publicProjectData = sani.html(
@@ -1014,7 +1073,10 @@ function getAllProjects(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1048,8 +1110,9 @@ function getProjects(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1059,7 +1122,8 @@ function getProjects(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check if ids was provided in the request query
@@ -1092,8 +1156,9 @@ function getProjects(req, res) {
   .then((projects) => {
     // Verify project array is not empty
     if (projects.length === 0) {
-      const error = new M.CustomError('No projects found.', 404, 'warn');
-      return res.status(error.status).send(error);
+      const error = new M.NotFoundError('No projects found.', 'warn');
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     const publicProjectData = sani.html(
@@ -1108,7 +1173,10 @@ function getProjects(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1136,8 +1204,9 @@ function postProjects(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1147,7 +1216,8 @@ function postProjects(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -1175,7 +1245,10 @@ function postProjects(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1204,8 +1277,9 @@ function putProjects(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1215,7 +1289,8 @@ function putProjects(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -1243,7 +1318,10 @@ function putProjects(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1271,8 +1349,9 @@ function patchProjects(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1282,7 +1361,8 @@ function patchProjects(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -1310,7 +1390,10 @@ function patchProjects(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1338,8 +1421,9 @@ function deleteProjects(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1349,7 +1433,8 @@ function deleteProjects(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // If req.body contains objects, grab the project IDs from the objects
@@ -1376,7 +1461,10 @@ function deleteProjects(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1405,8 +1493,9 @@ function getProject(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1416,7 +1505,8 @@ function getProject(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -1434,10 +1524,11 @@ function getProject(req, res) {
   .then((projects) => {
     // If no projects found, return 404 error
     if (projects.length === 0) {
-      const error = new M.CustomError(
-        `Project [${req.params.projectid}] not found.`, 404, 'warn'
+      const error = new M.NotFoundError(
+        `Project [${req.params.projectid}] not found.`, 'warn'
       );
-      return res.status(error.status).send(error);
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     const publicProjectData = sani.html(
@@ -1452,7 +1543,10 @@ function getProject(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1481,16 +1575,18 @@ function postProject(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
-    const error = new M.CustomError(
-      'Project ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -1500,7 +1596,8 @@ function postProject(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the projectid in req.body in case it wasn't provided
@@ -1531,7 +1628,10 @@ function postProject(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1560,16 +1660,18 @@ function putProject(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
-    const error = new M.CustomError(
-      'Project ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -1579,7 +1681,8 @@ function putProject(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1610,7 +1713,10 @@ function putProject(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1638,16 +1744,18 @@ function patchProject(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
-    const error = new M.CustomError(
-      'Project ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -1657,7 +1765,8 @@ function patchProject(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1688,7 +1797,10 @@ function patchProject(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1715,8 +1827,9 @@ function deleteProject(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1726,7 +1839,8 @@ function deleteProject(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -1749,7 +1863,10 @@ function deleteProject(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /* -----------------------( User API Endpoints )------------------------------*/
@@ -1782,8 +1899,9 @@ function getUsers(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1793,7 +1911,8 @@ function getUsers(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set usernames to undefined
@@ -1838,7 +1957,10 @@ function getUsers(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1867,8 +1989,9 @@ function postUsers(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1878,7 +2001,8 @@ function postUsers(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -1906,7 +2030,10 @@ function postUsers(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -1935,8 +2062,9 @@ function putUsers(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -1946,7 +2074,8 @@ function putUsers(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -1974,7 +2103,10 @@ function putUsers(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2003,8 +2135,9 @@ function patchUsers(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2014,7 +2147,8 @@ function patchUsers(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2042,7 +2176,10 @@ function patchUsers(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2070,8 +2207,9 @@ function deleteUsers(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2081,7 +2219,8 @@ function deleteUsers(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2102,7 +2241,10 @@ function deleteUsers(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2131,8 +2273,9 @@ function getUser(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2142,7 +2285,8 @@ function getUser(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2160,10 +2304,11 @@ function getUser(req, res) {
   .then((users) => {
     // If no user found, return 404 error
     if (users.length === 0) {
-      const error = new M.CustomError(
-        `User [${req.params.username}] not found.`, 404, 'warn'
+      const error = new M.NotFoundError(
+        `User [${req.params.username}] not found.`, 'warn'
       );
-      return res.status(error.status).send(error);
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     const publicUserData = sani.html(
@@ -2178,7 +2323,10 @@ function getUser(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2207,16 +2355,18 @@ function postUser(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If username was provided in the body, ensure it matches username in params
   if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
-    const error = new M.CustomError(
-      'Username in body does not match username in params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Username in body does not match username in params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2229,7 +2379,8 @@ function postUser(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2257,7 +2408,10 @@ function postUser(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2286,16 +2440,18 @@ function putUser(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If username was provided in the body, ensure it matches username in params
   if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
-    const error = new M.CustomError(
-      'Username in body does not match username in params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Username in body does not match username in params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2308,7 +2464,8 @@ function putUser(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2336,7 +2493,10 @@ function putUser(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2365,16 +2525,18 @@ function patchUser(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If username was provided in the body, ensure it matches username in params
   if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
-    const error = new M.CustomError(
-      'Username in body does not match username in params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Username in body does not match username in params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -2384,7 +2546,8 @@ function patchUser(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set body username
@@ -2414,7 +2577,10 @@ function patchUser(req, res) {
     res.header('Content-Type', 'application/json');
     return res.status(200).send(json);
   })
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2441,8 +2607,9 @@ function deleteUser(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2452,7 +2619,8 @@ function deleteUser(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2475,7 +2643,10 @@ function deleteUser(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2499,10 +2670,11 @@ function whoami(req, res) {
     minified: 'boolean'
   };
 
-  // Sanity check: there should always be a user in the request
+  // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2512,7 +2684,8 @@ function whoami(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2556,32 +2729,37 @@ function patchPassword(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Ensure old password was provided
   if (!req.body.oldPassword) {
-    const error = new M.CustomError('Old password not in request body.', 400, 'warn');
-    return res.status(error.status).send(error);
+    const error = new M.DataFormatError('Old password not in request body.', 'warn');
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Ensure new password was provided
   if (!req.body.password) {
-    const error = new M.CustomError('New password not in request body.', 400, 'warn');
-    return res.status(error.status).send(error);
+    const error = new M.DataFormatError('New password not in request body.', 'warn');
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Ensure confirmed password was provided
   if (!req.body.confirmPassword) {
-    const error = new M.CustomError('Confirmed password not in request body.', 400, 'warn');
-    return res.status(error.status).send(error);
+    const error = new M.DataFormatError('Confirmed password not in request body.', 'warn');
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Ensure user is not trying to change another user's password
   if (req.user.username !== req.params.username) {
-    const error = new M.CustomError('Cannot change another user\'s password.', 403, 'warn');
-    return res.status(error.status).send(error);
+    const error = new M.OperationError('Cannot change another user\'s password.', 'warn');
+    res.header('Content-Type', 'text/plain');
+    return res.status(403).send(error.message);
   }
 
   // Attempt to parse query options
@@ -2591,7 +2769,8 @@ function patchPassword(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2616,7 +2795,10 @@ function patchPassword(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /* -----------------------( Elements API Endpoints )------------------------- */
@@ -2671,8 +2853,9 @@ function getElements(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2682,7 +2865,8 @@ function getElements(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check query for element IDs
@@ -2704,9 +2888,10 @@ function getElements(req, res) {
     const validFormats = ['jmi1', 'jmi2', 'jmi3'];
     // If the provided format is not valid, error out
     if (!validFormats.includes(options.format)) {
-      const error = new M.CustomError(`The format ${options.format} is not a `
-        + 'valid format.', 400, 'warn');
-      return res.status(error.status).send(error);
+      const error = new M.DataFormatError(`The format ${options.format} is not a `
+        + 'valid format.', 'warn');
+      res.header('Content-Type', 'text/plain');
+      return res.status(400).send(error.message);
     }
     format = options.format;
     delete options.format;
@@ -2732,8 +2917,9 @@ function getElements(req, res) {
 
     // Verify elements public data array is not empty
     if (elementsPublicData.length === 0) {
-      const error = new M.CustomError('No elements found.', 404, 'warn');
-      return res.status(error.status).send(error);
+      const error = new M.NotFoundError('No elements found.', 'warn');
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     const retData = elementsPublicData;
@@ -2775,7 +2961,10 @@ function getElements(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2803,8 +2992,9 @@ function postElements(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2814,7 +3004,8 @@ function postElements(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2843,7 +3034,10 @@ function postElements(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2872,8 +3066,9 @@ function putElements(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2883,7 +3078,8 @@ function putElements(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2912,7 +3108,10 @@ function putElements(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -2940,8 +3139,9 @@ function patchElements(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -2951,7 +3151,8 @@ function patchElements(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -2980,7 +3181,10 @@ function patchElements(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3006,8 +3210,9 @@ function deleteElements(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3017,7 +3222,8 @@ function deleteElements(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -3041,7 +3247,10 @@ function deleteElements(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3091,8 +3300,9 @@ function searchElements(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3102,7 +3312,8 @@ function searchElements(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for q (query)
@@ -3127,8 +3338,9 @@ function searchElements(req, res) {
   .then((elements) => {
     // Verify elements public data array is not empty
     if (elements.length === 0) {
-      const error = new M.CustomError('No elements found.', 404, 'warn');
-      return res.status(error.status).send(error);
+      const error = new M.NotFoundError('No elements found.', 'warn');
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     const elementsPublicData = sani.html(
@@ -3143,7 +3355,10 @@ function searchElements(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3173,8 +3388,9 @@ function getElement(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3184,7 +3400,8 @@ function getElement(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -3203,10 +3420,11 @@ function getElement(req, res) {
   .then((elements) => {
     // If no element found, return 404 error
     if (elements.length === 0) {
-      const error = new M.CustomError(
-        `Element [${req.params.elementid}] not found.`, 404, 'warn'
+      const error = new M.NotFoundError(
+        `Element [${req.params.elementid}] not found.`, 'warn'
       );
-      return res.status(error.status).send(error);
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     let elementsPublicData = sani.html(
@@ -3226,7 +3444,10 @@ function getElement(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3254,16 +3475,18 @@ function postElement(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
-    const error = new M.CustomError(
-      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -3273,7 +3496,8 @@ function postElement(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3305,7 +3529,10 @@ function postElement(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3334,16 +3561,18 @@ function putElement(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
-    const error = new M.CustomError(
-      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -3353,7 +3582,8 @@ function putElement(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3385,7 +3615,10 @@ function putElement(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3413,16 +3646,18 @@ function patchElement(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
-    const error = new M.CustomError(
-      'Element ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -3432,7 +3667,8 @@ function patchElement(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3464,7 +3700,10 @@ function patchElement(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3490,8 +3729,9 @@ function deleteElement(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3501,7 +3741,8 @@ function deleteElement(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -3524,7 +3765,10 @@ function deleteElement(req, res) {
     // Return 200: OK and deleted element
     return res.status(200).send(json);
   })
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /* -----------------------( Branches API Endpoints )------------------------- */
@@ -3560,8 +3804,9 @@ function getBranches(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3571,7 +3816,8 @@ function getBranches(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check query for branch IDs
@@ -3608,8 +3854,9 @@ function getBranches(req, res) {
 
     // Verify branches public data array is not empty
     if (branchesPublicData.length === 0) {
-      const error = new M.CustomError('No branches found.', 404, 'warn');
-      return res.status(error.status).send(error);
+      const error = new M.NotFoundError('No branches found.', 'warn');
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     const retData = branchesPublicData;
@@ -3622,7 +3869,10 @@ function getBranches(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3650,8 +3900,9 @@ function postBranches(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3661,7 +3912,8 @@ function postBranches(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -3690,7 +3942,10 @@ function postBranches(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3718,8 +3973,9 @@ function patchBranches(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3729,7 +3985,8 @@ function patchBranches(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -3758,7 +4015,10 @@ function patchBranches(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3785,8 +4045,9 @@ function deleteBranches(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3796,7 +4057,8 @@ function deleteBranches(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // If req.body contains objects, grab the branch IDs from the objects
@@ -3824,7 +4086,10 @@ function deleteBranches(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3853,8 +4118,9 @@ function getBranch(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -3864,7 +4130,8 @@ function getBranch(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -3883,10 +4150,11 @@ function getBranch(req, res) {
   .then((branch) => {
     // If no branch found, return 404 error
     if (branch.length === 0) {
-      const error = new M.CustomError(
-        `Project [${req.params.branchid}] not found.`, 404, 'warn'
+      const error = new M.NotFoundError(
+        `Project [${req.params.branchid}] not found.`, 'warn'
       );
-      return res.status(error.status).send(error);
+      res.header('Content-Type', 'text/plain');
+      return res.status(404).send(error.message);
     }
 
     const publicBranchData = sani.html(
@@ -3901,7 +4169,10 @@ function getBranch(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -3929,16 +4200,18 @@ function postBranch(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.branchid)) {
-    const error = new M.CustomError(
-      'Branch ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Branch ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -3948,7 +4221,8 @@ function postBranch(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -3980,7 +4254,10 @@ function postBranch(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -4008,16 +4285,18 @@ function patchBranch(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.branchid)) {
-    const error = new M.CustomError(
-      'Branch ID in the body does not match ID in the params.', 400, 'warn'
+    const error = new M.DataFormatError(
+      'Branch ID in the body does not match ID in the params.', 'warn'
     );
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(400).send(error.message);
   }
 
   // Attempt to parse query options
@@ -4027,7 +4306,8 @@ function patchBranch(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4059,7 +4339,10 @@ function patchBranch(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
@@ -4086,8 +4369,9 @@ function deleteBranch(req, res) {
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
   }
 
   // Attempt to parse query options
@@ -4097,7 +4381,8 @@ function deleteBranch(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
   }
 
   // Check options for minified
@@ -4121,7 +4406,10 @@ function deleteBranch(req, res) {
     return res.status(200).send(json);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => res.status(error.status || 500).send(error));
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
