@@ -107,7 +107,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters
@@ -137,10 +137,10 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
           // Ensure the search option is a string
           if ((o === 'tag') && typeof options[o] !== 'boolean') {
-            throw new M.CustomError(`The option '${o}' is not a boolean.`, 400, 'warn');
+            throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
           }
           else if ((typeof options[o] !== 'string') && (o !== 'tag')) {
-            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
           }
 
           // If the search option is a branch reference
@@ -164,7 +164,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -173,15 +173,15 @@ function find(requestingUser, organizationID, projectID, branches, options) {
     .then((project) => {
       // Check that the project was found
       if (!project) {
-        throw new M.CustomError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 'warn');
       }
 
       // Verify the user has read permissions on the project
       if (!reqUser.admin && (!project.permissions[reqUser._id]
         || !project.permissions[reqUser._id].includes('read'))) {
-        throw new M.CustomError('User does not have permission to get'
-          + ` branches on the project [${projID}].`, 403, 'warn');
+        throw new M.PermissionError('User does not have permission to get'
+          + ` branches on the project [${projID}].`, 'warn');
       }
 
       // Check the type of the branches parameter
@@ -201,7 +201,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
       }
       else {
         // Invalid parameter, throw an error
-        throw new M.CustomError('Invalid input for finding branches.', 400, 'warn');
+        throw new M.DataFormatError('Invalid input for finding branches.', 'warn');
       }
 
       // If the lean option is supplied
@@ -211,17 +211,17 @@ function find(requestingUser, organizationID, projectID, branches, options) {
           { limit: validOptions.limit, skip: validOptions.skip })
         .populate(validOptions.populateString).lean()
         .then((finishedBranches) => resolve(finishedBranches))
-        .catch((error) => reject(M.CustomError.parseCustomError(error)));
+        .catch((error) => reject(error));
       }
       else {
         return Branch.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
         .populate(validOptions.populateString)
         .then((finishedBranches) => resolve(finishedBranches))
-        .catch((error) => reject(M.CustomError.parseCustomError(error)));
+        .catch((error) => reject(error));
       }
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -235,8 +235,6 @@ function find(requestingUser, organizationID, projectID, branches, options) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branchedFrom - The ID of the branch that the branch is being
- * branched from.
  * @param {(Object|Object[])} branches - Either an array of objects containing
  * branch data or a single object containing branch data to create.
  * @param {string} branches.id - The ID of the branch being created.
@@ -290,7 +288,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
     // Sanitize input parameters and create function-wide variables
     const saniBranches = sani.mongo(JSON.parse(JSON.stringify(branches)));
@@ -320,7 +318,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
     }
     else {
       // Branches is not an object or array, throw an error
-      throw new M.CustomError('Invalid input for creating branches.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for creating branches.', 'warn');
     }
 
     // Create array of id's for lookup and array of valid keys
@@ -355,7 +353,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
       });
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Find the organization
@@ -363,7 +361,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project to verify existence and permissions
@@ -372,16 +370,16 @@ function create(requestingUser, organizationID, projectID, branches, options) {
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
-        throw new M.CustomError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 'warn');
       }
 
       // Verify user has write permissions on the project
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
-        throw new M.CustomError('User does not have permission to create'
+        throw new M.PermissionError('User does not have permission to create'
           + ' branches on the project '
-          + `[${projID}].`, 403, 'warn');
+          + `[${projID}].`, 'warn');
       }
 
       // Find the branchedFrom to verify existence
@@ -390,8 +388,8 @@ function create(requestingUser, organizationID, projectID, branches, options) {
     .then((foundBranch) => {
       // Check that the branch was found
       if (!foundBranch) {
-        throw new M.CustomError(`Branch [${sourceID}] not found in the `
-          + `project [${projID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Branch [${sourceID}] not found in the `
+          + `project [${projID}].`, 'warn');
       }
 
       // Create searchQuery to search for any existing, conflicting branches
@@ -407,8 +405,8 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         const foundBranchIDs = foundBranches.map(b => utils.parseID(b._id).pop());
 
         // There are one or more branches with conflicting IDs
-        throw new M.CustomError('Branches with the following IDs already exist'
-          + ` [${foundBranchIDs.toString()}].`, 403, 'warn');
+        throw new M.OperationError('Branches with the following IDs already exist'
+          + ` [${foundBranchIDs.toString()}].`, 'warn');
       }
 
       sourceID = utils.createID(orgID, projID, sourceID);
@@ -531,7 +529,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
     .then((queryResult) => {
       if (queryResult.result.n !== (newBranches.length * elementsCloning.length)) {
         // Not all elements were created
-        throw new M.CustomError('Not all elements got cloned from branch.', 403, 'warn');
+        M.log.error('Not all elements were cloned from branch.');
       }
 
       // reset created variable
@@ -560,12 +558,12 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         // Delete the branches
         .then(() => Branch.deleteMany({ _id: { $in: arrIDs } }).lean())
         // Reject with error
-        .then(() => reject(M.CustomError.parseCustomError(error)))
-        .catch(() => reject(M.CustomError.parseCustomError(error)));
+        .then(() => reject(error))
+        .catch(() => reject(error));
       }
       else {
         // Reject with error
-        return reject(M.CustomError.parseCustomError(error));
+        return reject(error);
       }
     });
   });
@@ -634,7 +632,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -664,7 +662,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
       branchesToUpdate = [saniBranches];
     }
     else {
-      throw new M.CustomError('Invalid input for updating branches.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for updating branches.', 'warn');
     }
 
     // Find the organization
@@ -672,7 +670,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -682,15 +680,15 @@ function update(requestingUser, organizationID, projectID, branches, options) {
       foundProject = _foundProject;
       // Check that the project was found
       if (!foundProject) {
-        throw new M.CustomError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 'warn');
       }
 
       // Verify user has write permissions on the project
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
-        throw new M.CustomError('User does not have permission to update'
-          + ` branch on the project [${projID}].`, 403, 'warn');
+        throw new M.PermissionError('User does not have permission to update'
+          + ` branch on the project [${projID}].`, 'warn');
       }
     })
     .then(() => {
@@ -704,8 +702,8 @@ function update(requestingUser, organizationID, projectID, branches, options) {
           branch.id = utils.createID(orgID, projID, branch.id);
           // If a duplicate ID, throw an error
           if (duplicateCheck[branch.id]) {
-            throw new M.CustomError(`Multiple objects with the same ID [${utils.parseID(branch.id).pop()}] exist in the`
-              + ' update.', 400, 'warn');
+            throw new M.DataFormatError('Multiple objects with the same ID '
+              + `[${utils.parseID(branch.id).pop()}] exist in the update.`, 'warn');
           }
           else {
             duplicateCheck[branch.id] = branch.id;
@@ -717,7 +715,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
         });
       }
       catch (err) {
-        throw new M.CustomError(err.message, 403, 'warn');
+        throw new M.DataFormatError(err.message, 'warn');
       }
 
       // Create searchQuery
@@ -734,8 +732,8 @@ function update(requestingUser, organizationID, projectID, branches, options) {
         const foundIDs = foundBranches.map(b => b._id);
         const notFound = arrIDs.filter(b => !foundIDs.includes(b))
         .map(b => utils.parseID(b).pop());
-        throw new M.CustomError(
-          `The following branches were not found: [${notFound.toString()}].`, 404, 'warn'
+        throw new M.NotFoundError(
+          `The following branches were not found: [${notFound.toString()}].`, 'warn'
         );
       }
 
@@ -749,7 +747,8 @@ function update(requestingUser, organizationID, projectID, branches, options) {
       foundBranches.forEach((branch) => {
         // Check the branch is not a tags
         if (branch.tag) {
-          throw new M.CustomError(`Tags [${utils.parseID(branch._id).pop()}] can not be updated.`, 403, 'warn');
+          throw new M.OperationError(`Tags [${utils.parseID(branch._id).pop()}]`
+          + ' can not be updated.', 'warn');
         }
 
         const updateBranch = jmiType2[branch._id];
@@ -759,24 +758,24 @@ function update(requestingUser, organizationID, projectID, branches, options) {
 
         // Error Check: if branch is currently archived, it must first be unarchived
         if (branch.archived && updateBranch.archived !== false) {
-          throw new M.CustomError(`Branch [${utils.parseID(branch._id).pop()}]`
-            + ' is archived. Archived objects cannot be modified.', 403, 'warn');
+          throw new M.OperationError(`Branch [${utils.parseID(branch._id).pop()}]`
+            + ' is archived. Archived objects cannot be modified.', 'warn');
         }
 
         // For each key in the updated object
         Object.keys(updateBranch).forEach((key) => {
           // Check if the field is valid to update
           if (!validFields.includes(key)) {
-            throw new M.CustomError(`Branch property [${key}] cannot `
-              + 'be changed.', 400, 'warn');
+            throw new M.OperationError(`Branch property [${key}] cannot `
+              + 'be changed.', 'warn');
           }
 
           // Get validator for field if one exists
           if (validators.branch.hasOwnProperty(key)) {
             // If validation fails, throw error
             if (!RegExp(validators.branch[key]).test(updateBranch[key])) {
-              throw new M.CustomError(
-                `Invalid ${key}: [${updateBranch[key]}]`, 403, 'warn'
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateBranch[key]}]`, 'warn'
               );
             }
           }
@@ -785,8 +784,8 @@ function update(requestingUser, organizationID, projectID, branches, options) {
           if (key === 'archived') {
             // Error Check: ensure the root branch is not being archived
             if (Branch.getValidRootSource().includes(branch.id)) {
-              throw new M.CustomError(
-                `User cannot archive the master branch: ${branch.id}.`, 403, 'warn'
+              throw new M.OperationError(
+                `User cannot archive the master branch: ${branch.id}.`, 'warn'
               );
             }
             // If the branch is being archived
@@ -835,7 +834,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
 
       return resolve(foundUpdatedBranches);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -884,7 +883,7 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and function-wide variables
@@ -912,7 +911,7 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
     }
     else {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for removing branches.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for removing branches.', 'warn');
     }
 
     // Find the organization
@@ -920,7 +919,7 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -929,14 +928,14 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
     .then((foundProject) => {
       // Verify the project was found or exists
       if (foundProject === null) {
-        throw new M.CustomError(`The project [${projID}] was not found.`, 404, 'warn');
+        throw new M.NotFoundError(`The project [${projID}] was not found.`, 'warn');
       }
 
       // Verify the requesting user has at least project write permissions
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
-        throw new M.CustomError('User does not have permission to delete'
-          + ` branches on the project [${projID}].`, 403, 'warn');
+        throw new M.PermissionError('User does not have permission to delete'
+          + ` branches on the project [${projID}].`, 'warn');
       }
 
       // Find all the branches to delete
@@ -952,8 +951,8 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
       const notFoundIDs = searchedIDs.filter(b => !foundBranchIDs.includes(b));
       // Some branches not found, throw an error
       if (notFoundIDs.length > 0) {
-        throw new M.CustomError('The following branches were not found: '
-          + `[${notFoundIDs.map(b => utils.parseID(b).pop())}].`, 404, 'warn');
+        throw new M.NotFoundError('The following branches were not found: '
+          + `[${notFoundIDs.map(b => utils.parseID(b).pop())}].`, 'warn');
       }
 
       // Check that user is not removing the master branch
@@ -961,8 +960,8 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
         // If trying to delete the master branch, throw an error
         const branchID = utils.parseID(id).pop();
         if (Branch.getValidRootSource().includes(branchID)) {
-          throw new M.CustomError(
-            `User cannot delete branch: ${branchID}.`, 403, 'warn'
+          throw new M.OperationError(
+            `User cannot delete branch: ${branchID}.`, 'warn'
           );
         }
       });
@@ -983,6 +982,6 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
       }
       return resolve(foundBranches.map(b => b._id));
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }

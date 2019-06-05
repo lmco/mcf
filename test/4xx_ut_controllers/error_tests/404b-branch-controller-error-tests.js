@@ -123,7 +123,7 @@ function updateTag(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`Tags [${tagID}] can not be updated.`);
+    chai.expect(error.message).to.equal(`Tags [${tagID}] can not be updated.`);
     done();
   });
 }
@@ -142,7 +142,7 @@ function deleteMasterBranch(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`User cannot delete branch: ${branchID}.`);
+    chai.expect(error.message).to.equal(`User cannot delete branch: ${branchID}.`);
     done();
   });
 }
