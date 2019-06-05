@@ -138,7 +138,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters
@@ -187,7 +187,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -196,15 +196,15 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     .then((project) => {
       // Check that the project was found
       if (!project) {
-        throw new M.CustomError(`Project [${projID}] not found in the `
-        + `organization [${orgID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the `
+        + `organization [${orgID}].`, 'warn');
       }
 
       // Verify the user has read permissions on the project
       if (!reqUser.admin && (!project.permissions[reqUser._id]
         || !project.permissions[reqUser._id].includes('read'))) {
-        throw new M.CustomError('User does not have permission to get'
-            + ` elements on the project [${utils.parseID(project._id).pop()}].`, 403, 'warn');
+        throw new M.PermissionError('User does not have permission to get'
+            + ` elements on the project [${utils.parseID(project._id).pop()}].`, 'warn');
       }
 
       // Find the branch
@@ -213,8 +213,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
     .then((foundBranch) => {
       // Check that the project was found
       if (!foundBranch) {
-        throw new M.CustomError(`Branch [${branchID}] not found in the `
-          + `project [${projID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Branch [${branchID}] not found in the `
+          + `project [${projID}].`, 'warn');
       }
 
       let elementsToFind = [];
@@ -235,7 +235,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       }
       else {
         // Invalid parameter, throw an error
-        throw new M.CustomError('Invalid input for finding elements.', 400, 'warn');
+        throw new M.DataFormatError('Invalid input for finding elements.', 'warn');
       }
 
       // If wanting to find subtree, find subtree ids
@@ -312,7 +312,7 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       // foundElements
       return resolve(foundElements);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -393,7 +393,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
     // Sanitize input parameters and create function-wide variables
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
@@ -424,7 +424,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     }
     else {
       // elements is not an object or array, throw an error
-      throw new M.CustomError('Invalid input for creating elements.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for creating elements.', 'warn');
     }
 
     // Create array of id's for lookup and array of valid keys
@@ -533,7 +533,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       });
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Attempt to convert elements to JMI type 2, to see if duplicate ids exist
@@ -541,7 +541,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       jmi.convertJMI(1, 2, elementsToCreate, '_id');
     }
     catch (err) {
-      throw new M.CustomError('Cannot create multiple elements with the same ID.', 403, 'warn');
+      throw new M.DataFormatError('Cannot create multiple elements with the same ID.', 'warn');
     }
 
     // Find the organization
@@ -549,7 +549,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -558,16 +558,16 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
-        throw new M.CustomError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 'warn');
       }
 
       // Verify user has write permissions on the project
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
-        throw new M.CustomError('User does not have permission to create'
+        throw new M.PermissionError('User does not have permission to create'
           + ' elements on the project '
-          + `[${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
+          + `[${utils.parseID(foundProject._id).pop()}].`, 'warn');
       }
 
       // Find all referenced projects
@@ -577,9 +577,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       // Verify that each project has a visibility of 'internal'
       referencedProjects.forEach((proj) => {
         if (proj.visibility !== 'internal') {
-          throw new M.CustomError(`The project [${utils.parseID(proj._id).pop()}] `
+          throw new M.PermissionError(`The project [${utils.parseID(proj._id).pop()}] `
           + `in the org [${utils.parseID(proj._id)[0]}] does not have a visibility `
-          + ' of internal.', 403, 'warn');
+          + ' of internal.', 'warn');
         }
       });
 
@@ -589,14 +589,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     .then((foundBranch) => {
       // Check that the branch was found
       if (!foundBranch) {
-        throw new M.CustomError(`Branch [${branchID}] not found in the `
-          + `project [${projID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Branch [${branchID}] not found in the `
+          + `project [${projID}].`, 'warn');
       }
 
       // Check the branch is not a tagged branch
       if (foundBranch.tag) {
-        throw new M.CustomError(`[${branchID}] is a tag and does`
-        + ' not allow elements to be created.', 403, 'warn');
+        throw new M.OperationError(`[${branchID}] is a tag and does`
+        + ' not allow elements to be created.', 'warn');
       }
 
       const promises = [];
@@ -611,8 +611,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
             const foundElementIDs = foundElements.map(e => utils.parseID(e._id).pop());
 
             // There are one or more elements with conflicting IDs
-            throw new M.CustomError('Elements with the following IDs already exist'
-              + ` [${foundElementIDs.toString()}].`, 403, 'warn');
+            throw new M.OperationError('Elements with the following IDs already exist'
+              + ` [${foundElementIDs.toString()}].`, 'warn');
           }
         }));
       }
@@ -709,7 +709,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           }
           catch (e) {
             // Parent not found in db, throw an error
-            throw new M.CustomError(`Parent element ${element.parent} not found.`, 404, 'warn');
+            throw new M.NotFoundError(`Parent element ${element.parent} not found.`, 'warn');
           }
         }
 
@@ -721,7 +721,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           }
           catch (e) {
             // Source not found in db, throw an error
-            throw new M.CustomError(`Source element ${element.source} not found.`, 404, 'warn');
+            throw new M.NotFoundError(`Source element ${element.source} not found.`, 'warn');
           }
         }
 
@@ -733,7 +733,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
           }
           catch (e) {
             // Target not found in db, throw an error
-            throw new M.CustomError(`Target element ${element.target} not found.`, 404, 'warn');
+            throw new M.NotFoundError(`Target element ${element.target} not found.`, 'warn');
           }
         }
       });
@@ -776,7 +776,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
       return resolve(populatedElements);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -863,7 +863,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -892,7 +892,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -902,15 +902,15 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       foundProject = _foundProject;
       // Check that the project was found
       if (!foundProject) {
-        throw new M.CustomError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 'warn');
       }
 
       // Verify user has write permissions on the project
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
-        throw new M.CustomError('User does not have permission to update'
-          + ` elements on the project [${utils.parseID(foundProject._id).pop()}].`, 403, 'warn');
+        throw new M.PermissionError('User does not have permission to update'
+          + ` elements on the project [${utils.parseID(foundProject._id).pop()}].`, 'warn');
       }
       // Find the branch
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
@@ -918,14 +918,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
     .then((foundBranch) => {
       // Check that the branch was found
       if (!foundBranch) {
-        throw new M.CustomError(`Branch [${branchID}] not found in the `
-          + `project [${projID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Branch [${branchID}] not found in the `
+          + `project [${projID}].`, 'warn');
       }
 
       // Check the branch is not a tagged branch
       if (foundBranch.tag) {
-        throw new M.CustomError(`[${branchID}] is a tag and `
-          + 'does not allow updates to elements.', 403, 'warn');
+        throw new M.OperationError(`[${branchID}] is a tag and `
+          + 'does not allow updates to elements.', 'warn');
       }
 
       // Check the type of the elements parameter
@@ -942,7 +942,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           Object.keys(e).forEach((key) => {
             // If it can't be updated in bulk,throw an error
             if (!validBulkFields.includes(key)) {
-              throw new M.CustomError(`Cannot update the field ${key} in bulk.`, 400, 'warn');
+              throw new M.OperationError(`Cannot update the field ${key} in bulk.`, 'warn');
             }
           });
         });
@@ -959,7 +959,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         }
       }
       else {
-        throw new M.CustomError('Invalid input for updating elements.', 400, 'warn');
+        throw new M.DataFormatError('Invalid input for updating elements.', 'warn');
       }
     })
     .then(() => {
@@ -973,8 +973,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           elem.id = utils.createID(orgID, projID, branchID, elem.id);
           // If a duplicate ID, throw an error
           if (duplicateCheck[elem.id]) {
-            throw new M.CustomError(`Multiple objects with the same ID [${elem.id}] exist in the`
-              + ' update.', 400, 'warn');
+            throw new M.DataFormatError('Multiple objects with the same ID '
+              + `[${elem.id}] exist in the update.`, 'warn');
           }
           else {
             duplicateCheck[elem.id] = elem.id;
@@ -1068,7 +1068,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         });
       }
       catch (err) {
-        throw new M.CustomError(err.message, 403, 'warn');
+        throw new M.DataFormatError(err.message, 'warn');
       }
 
       return Project.find({ _id: { $in: projRefs } }).lean();
@@ -1077,9 +1077,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Verify each project reference has a visibility of 'internal'
       referencedProjects.forEach((proj) => {
         if (proj.visibility !== 'internal') {
-          throw new M.CustomError(`The project [${utils.parseID(proj._id).pop()}] `
+          throw new M.PermissionError(`The project [${utils.parseID(proj._id).pop()}] `
             + `in the org [${utils.parseID(proj._id)[0]}] does not have a visibility `
-            + ' of internal.', 403, 'warn');
+            + ' of internal.', 'warn');
         }
       });
 
@@ -1108,8 +1108,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         const foundIDs = foundElements.map(e => e._id);
         const notFound = arrIDs.filter(e => !foundIDs.includes(e))
         .map(e => utils.parseID(e).pop());
-        throw new M.CustomError(
-          `The following elements were not found: [${notFound.toString()}].`, 404, 'warn'
+        throw new M.NotFoundError(
+          `The following elements were not found: [${notFound.toString()}].`, 'warn'
         );
       }
 
@@ -1133,24 +1133,24 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
         // Error Check: if element is currently archived, it must first be unarchived
         if (element.archived && updateElement.archived !== false) {
-          throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
-              + ' is archived. Archived objects cannot be modified.', 403, 'warn');
+          throw new M.OperationError(`Element [${utils.parseID(element._id).pop()}]`
+              + ' is archived. Archived objects cannot be modified.', 'warn');
         }
 
         // For each key in the updated object
         Object.keys(updateElement).forEach((key) => {
           // Check if the field is valid to update
           if (!validFields.includes(key)) {
-            throw new M.CustomError(`Element property [${key}] cannot `
-                + 'be changed.', 400, 'warn');
+            throw new M.OperationError(`Element property [${key}] cannot `
+                + 'be changed.', 'warn');
           }
 
           // Get validator for field if one exists
           if (validators.element.hasOwnProperty(key)) {
             // If validation fails, throw error
             if (!RegExp(validators.element[key]).test(updateElement[key])) {
-              throw new M.CustomError(
-                `Invalid ${key}: [${updateElement[key]}]`, 403, 'warn'
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateElement[key]}]`, 'warn'
               );
             }
           }
@@ -1159,27 +1159,27 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           if (key === 'source' || key === 'target') {
             // If the source/target is the element id, throw error
             if (updateElement[key] === element._id) {
-              throw new M.CustomError(`Element's ${key} cannot be self`
-                + ` [${utils.parseID(element._id).pop()}].`, 403, 'warn');
+              throw new M.OperationError(`Element's ${key} cannot be self`
+                + ` [${utils.parseID(element._id).pop()}].`, 'warn');
             }
 
             // If source/target does not exist, throw error
             if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
-              throw new M.CustomError(`The ${key} element `
+              throw new M.NotFoundError(`The ${key} element `
                 + `[${utils.parseID(updateElement[key]).pop()}] was not found `
-                + `in the project [${utils.parseID(updateElement[key])[1]}].`, 404, 'warn');
+                + `in the project [${utils.parseID(updateElement[key])[1]}].`, 'warn');
             }
 
             // If no target exists and is not being updated, throw error
             if (key === 'source' && !(updateElement.target || element.target)) {
-              throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
-                + ' target is required if source is provided.', 403, 'warn');
+              throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
+                + ' target is required if source is provided.', 'warn');
             }
 
             // If no source exists and is not being updated, throw error
             if (key === 'target' && !(updateElement.source || element.source)) {
-              throw new M.CustomError(`Element [${utils.parseID(element._id).pop()}]`
-                + ' source is required if target is provided.', 403, 'warn');
+              throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
+                + ' source is required if target is provided.', 'warn');
             }
           }
 
@@ -1188,8 +1188,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             const elemID = utils.parseID(element._id).pop();
             // Error Check: ensure user cannot archive root elements
             if (Element.getValidRootElements().includes(elemID)) {
-              throw new M.CustomError(
-                `User cannot archive the root element: ${elemID}.`, 403, 'warn'
+              throw new M.OperationError(
+                `User cannot archive the root element: ${elemID}.`, 'warn'
               );
             }
 
@@ -1257,7 +1257,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
       return resolve(foundUpdatedElements);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -1338,7 +1338,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -1358,7 +1358,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -1367,8 +1367,8 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
-        throw new M.CustomError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the `
+          + `organization [${orgID}].`, 'warn');
       }
       // Find the branch
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
@@ -1376,13 +1376,13 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then((foundBranch) => {
       // Check that the branch was found
       if (!foundBranch) {
-        throw new M.CustomError(`Branch [${branchID}] not found in the `
-          + `project [${projID}].`, 404, 'warn');
+        throw new M.NotFoundError(`Branch [${branchID}] not found in the `
+          + `project [${projID}].`, 'warn');
       }
 
       // Check the branch is not a tagged branch
       if (foundBranch.tag) {
-        throw new M.CustomError(`[${branchID}] is a tag and `
+        throw new M.OperationError(`[${branchID}] is a tag and `
           + 'does not allow updates to elements.', 403, 'warn');
       }
 
@@ -1396,8 +1396,8 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         elementsToLookup = [saniElements];
       }
       else {
-        throw new M.CustomError('Invalid input for creating/replacing'
-          + ' elements.', 400, 'warn');
+        throw new M.DataFormatError('Invalid input for creating/replacing'
+          + ' elements.', 'warn');
       }
 
       // Create list of ids
@@ -1411,8 +1411,8 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
           const tmpID = utils.createID(orgID, projID, branchID, elem.id);
           // If a duplicate ID, throw an error
           if (duplicateCheck[tmpID]) {
-            throw new M.CustomError(`Multiple objects with the same ID [${elem.id}] exist in the`
-              + ' update.', 400, 'warn');
+            throw new M.DataFormatError('Multiple objects with the same ID '
+              + `[${elem.id}] exist in the update.`, 'warn');
           }
           else {
             duplicateCheck[tmpID] = tmpID;
@@ -1422,7 +1422,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         });
       }
       catch (err) {
-        throw new M.CustomError(err.message, 403, 'warn');
+        throw new M.DataFormatError(err.message, 'warn');
       }
 
       const promises = [];
@@ -1450,8 +1450,8 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       // Error Check: ensure user cannot replace root element
       foundElementIDs.forEach((id) => {
         if (Element.getValidRootElements().includes(utils.parseID(id).pop())) {
-          throw new M.CustomError(
-            `User cannot replace root element: ${utils.parseID(id).pop()}.`, 403, 'warn'
+          throw new M.OperationError(
+            `User cannot replace root element: ${utils.parseID(id).pop()}.`, 'warn'
           );
         }
       });
@@ -1535,7 +1535,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
 
       return resolve(createdElements);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -1588,7 +1588,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -1611,14 +1611,14 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     }
     else {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for removing elements.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for removing elements.', 'warn');
     }
     // Find the organization
     Org.findOne({ _id: orgID }).lean()
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -1627,14 +1627,14 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     .then((foundProject) => {
       // Verify the project was found or exists
       if (foundProject === null) {
-        throw new M.CustomError(`The project [${projID}] was not found.`, 404, 'warn');
+        throw new M.NotFoundError(`The project [${projID}] was not found.`, 'warn');
       }
 
       // Verify the requesting user has at least project write permissions
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
-        throw new M.CustomError('User does not have permission to delete'
-          + ` elements on the project [${projID}].`, 403, 'warn');
+        throw new M.PermissionError('User does not have permission to delete'
+          + ` elements on the project [${projID}].`, 'warn');
       }
 
       // Find the elements to delete
@@ -1643,13 +1643,13 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     .then((foundBranch) => {
       // Verify the project was found or exists
       if (foundBranch === null) {
-        throw new M.CustomError(`The branch [${branchID}] was not found.`, 404, 'warn');
+        throw new M.NotFoundError(`The branch [${branchID}] was not found.`, 'warn');
       }
 
       // Check the branch is not a tagged branch
       if (foundBranch.tag) {
-        throw new M.CustomError(`[${branchID}] is a tag and`
-          + ' does not allow elements to be deleted.', 403, 'warn');
+        throw new M.OperationError(`[${branchID}] is a tag and`
+          + ' does not allow elements to be deleted.', 'warn');
       }
 
       // Find the elements to delete
@@ -1662,9 +1662,9 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       const notFoundIDs = elementsToFind.filter(e => !foundElementIDs.includes(e));
       // Some elements not found, throw an error
       if (notFoundIDs.length > 0) {
-        throw new M.CustomError('The following elements were not found: '
+        throw new M.NotFoundError('The following elements were not found: '
           + `[${notFoundIDs.map(e => utils.parseID(e)
-          .pop())}].`, 404, 'warn');
+          .pop())}].`, 'warn');
       }
 
       // Find all element IDs and their subtree IDs
@@ -1677,8 +1677,8 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       foundIDs.forEach((id) => {
         const elemID = utils.parseID(id).pop();
         if (Element.getValidRootElements().includes(elemID)) {
-          throw new M.CustomError(
-            `User cannot delete root element: ${elemID}.`, 403, 'warn'
+          throw new M.OperationError(
+            `User cannot delete root element: ${elemID}.`, 'warn'
           );
         }
       });
@@ -1709,7 +1709,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Return just the unique ids
       return resolve(Object.keys(uniqueIDs));
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -1736,7 +1736,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
 function findElementTree(organizationID, projectID, branch, elementIDs) {
   // Ensure elementIDs is an array
   if (!Array.isArray(elementIDs)) {
-    throw new M.CustomError('ElementIDs array is not an array.', 400, 'warn');
+    throw new M.DataFormatError('ElementIDs array is not an array.', 'warn');
   }
 
   // Set the foundElements array to initial element IDs
@@ -1770,7 +1770,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
         }
       })
       .then(() => resolve())
-      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+      .catch((error) => reject(error));
     });
   }
 
@@ -1818,13 +1818,13 @@ function moveElementCheck(organizationID, projectID, branch, element) {
 
     // Error Check: ensure elements parent is not self
     if (element.parent === elementID) {
-      throw new M.CustomError('Elements parent cannot be self.', 403, 'warn');
+      throw new M.OperationError('Elements parent cannot be self.', 'warn');
     }
 
     // Error Check: ensure the root elements is not being edited
     if (Element.getValidRootElements().includes(element.id)) {
-      throw new M.CustomError(
-        `Cannot edit the root element: ${element.id}.`, 403, 'warn'
+      throw new M.OperationError(
+        `Cannot edit the root element: ${element.id}.`, 'warn'
       );
     }
 
@@ -1835,8 +1835,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
         .then((foundElement) => {
           // If foundElement is null, reject with error
           if (!foundElement) {
-            throw new M.CustomError('Parent element '
-              + `[${utils.parseID(e.parent).pop()}] not found.`, 404, 'warn');
+            throw new M.NotFoundError('Parent element '
+              + `[${utils.parseID(e.parent).pop()}] not found.`, 'warn');
           }
 
           // If element.parent is root, resolve... there is no conflict
@@ -1848,8 +1848,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
           // If elementID is equal to foundElement.id, a circular reference would
           // exist, reject with an error
           if (elementID === foundElement.id) {
-            throw new M.CustomError('A circular reference exists in the model,'
-              + ' element cannot be moved.', 400, 'warn');
+            throw new M.OperationError('A circular reference would exist in'
+              + ' the model, element cannot be moved.', 'warn');
           }
           else {
             // Find the parents parent
@@ -1857,7 +1857,7 @@ function moveElementCheck(organizationID, projectID, branch, element) {
           }
         })
         .then(() => resolve())
-        .catch((error) => rej(M.CustomError.parseCustomError(error)));
+        .catch((error) => rej(error));
       });
     }
 
@@ -1937,7 +1937,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -1967,7 +1967,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
           // Ensure the search option is a string
           if (typeof options[o] !== 'string') {
-            throw new M.CustomError(`The option '${o}' is not a string.`, 400, 'warn');
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
           }
 
           // If the search option is an element reference
@@ -1987,7 +1987,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     .then((organization) => {
       // Check that the org was found
       if (!organization) {
-        throw new M.CustomError(`Organization [${orgID}] not found.`, 404, 'warn');
+        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
       // Find the project
@@ -1996,15 +1996,15 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     .then((project) => {
       // Ensure the project was found
       if (project === null) {
-        throw new M.CustomError(`The project [${projID}] on the org ${orgID} `
-          + 'was not found.', 404, 'warn');
+        throw new M.NotFoundError(`The project [${projID}] on the org ${orgID} `
+          + 'was not found.', 'warn');
       }
 
       // Verify the user has read permissions on the project
       if (!reqUser.admin && (!project.permissions[reqUser._id]
         || !project.permissions[reqUser._id].includes('read'))) {
-        throw new M.CustomError('User does not have permission to get'
-          + ` elements on the project ${utils.parseID(project._id).pop()}.`, 403, 'warn');
+        throw new M.PermissionError('User does not have permission to get'
+          + ` elements on the project ${utils.parseID(project._id).pop()}.`, 'warn');
       }
 
       // Find the elements to delete
@@ -2013,8 +2013,8 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     .then((foundBranch) => {
       // Ensure the project was found
       if (foundBranch === null) {
-        throw new M.CustomError(`The branch [${branchID}] on the project ${projID} `
-          + 'was not found.', 404, 'warn');
+        throw new M.NotFoundError(`The branch [${branchID}] on the project ${projID} `
+          + 'was not found.', 'warn');
       }
 
       searchQuery.$text = { $search: query };
@@ -2040,6 +2040,6 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       }
     })
     .then((foundElements) => resolve(foundElements))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }

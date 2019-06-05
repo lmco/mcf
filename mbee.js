@@ -163,6 +163,9 @@ if (installComplete) {
     DataFormatError: {
       value: M.require('lib.errors').DataFormatError
     },
+    OperationError: {
+      value: M.require('lib.errors').OperationError
+    },
     AuthorizationError: {
       value: M.require('lib.errors').AuthorizationError
     },

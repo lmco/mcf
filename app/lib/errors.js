@@ -15,6 +15,7 @@
  */
 
 const CustomError = class CustomError extends Error {
+
   /**
    * @description The CustomError constructor. It requires a description
    * and can optionally take a level.
@@ -56,6 +57,7 @@ const CustomError = class CustomError extends Error {
 
 // 400
 const DataFormatError = class DataFormatError extends CustomError {};
+const OperationError = class OperationError extends CustomError {};
 
 // 401
 const AuthorizationError = class AuthorizationError extends CustomError {};
@@ -99,6 +101,7 @@ module.exports = {
   CustomError,
   getStatusCode,
   DataFormatError,
+  OperationError,
   AuthorizationError,
   PermissionError,
   NotFoundError,
