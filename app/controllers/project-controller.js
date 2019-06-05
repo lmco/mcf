@@ -115,7 +115,7 @@ function find(requestingUser, organizationID, projects, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters
@@ -154,7 +154,7 @@ function find(requestingUser, organizationID, projects, options) {
     }
     else if (!((typeof projects === 'object' && projects !== null) || projects === undefined)) {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for finding projects.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for finding projects.', 'warn');
     }
 
     // If the lean option is supplied
@@ -164,7 +164,7 @@ function find(requestingUser, organizationID, projects, options) {
         { limit: validOptions.limit, skip: validOptions.skip })
       .populate(validOptions.populateString).lean()
       .then((finishedProjects) => resolve(finishedProjects))
-      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+      .catch((error) => reject(error));
     }
     else {
       // Find the projects
@@ -172,7 +172,7 @@ function find(requestingUser, organizationID, projects, options) {
         { limit: validOptions.limit, skip: validOptions.skip })
       .populate(validOptions.populateString)
       .then((finishedProjects) => resolve(finishedProjects))
-      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+      .catch((error) => reject(error));
     }
   });
 }
@@ -240,7 +240,7 @@ function create(requestingUser, organizationID, projects, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and function-wide variables
@@ -268,7 +268,7 @@ function create(requestingUser, organizationID, projects, options) {
     }
     else {
       // projects is not an object or array, throw an error
-      throw new M.CustomError('Invalid input for creating projects.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for creating projects.', 'warn');
     }
 
     // Create array of id's for lookup and array of valid keys
@@ -307,7 +307,7 @@ function create(requestingUser, organizationID, projects, options) {
       });
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Create searchQuery to search for any existing, conflicting projects
@@ -319,14 +319,14 @@ function create(requestingUser, organizationID, projects, options) {
       foundOrg = _foundOrg;
       // If the org was not found
       if (foundOrg === null) {
-        throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
+        throw new M.NotFoundError(`The org [${orgID}] was not found.`, 'warn');
       }
 
       // Verify user has write permissions on the org
       if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
         || !foundOrg.permissions[reqUser._id].includes('write'))) {
-        throw new M.CustomError('User does not have permission to create'
-          + ` projects on the org [${foundOrg._id}].`, 403, 'warn');
+        throw new M.PermissionError('User does not have permission to create'
+          + ` projects on the org [${foundOrg._id}].`, 'warn');
       }
 
       // Find any existing, conflicting projects
@@ -339,8 +339,8 @@ function create(requestingUser, organizationID, projects, options) {
         const foundProjectIDs = foundProjects.map(p => utils.parseID(p._id).pop());
 
         // There are one or more projects with conflicting IDs
-        throw new M.CustomError('Projects with the following IDs already exist'
-          + ` [${foundProjectIDs.toString()}].`, 403, 'warn');
+        throw new M.OperationError('Projects with the following IDs already exist'
+          + ` [${foundProjectIDs.toString()}].`, 'warn');
       }
 
       // Get all existing users for permissions
@@ -359,7 +359,7 @@ function create(requestingUser, organizationID, projects, options) {
         Object.keys(projObj.permissions).forEach((u) => {
           // If user does not exist, throw an error
           if (!foundUsernames.includes(u)) {
-            throw new M.CustomError(`User [${u}] not found.`, 404, 'warn');
+            throw new M.NotFoundError(`User [${u}] not found.`, 'warn');
           }
 
           const permission = projObj.permissions[u];
@@ -376,7 +376,7 @@ function create(requestingUser, organizationID, projects, options) {
               projObj.permissions[u] = ['read', 'write', 'admin'];
               break;
             default:
-              throw new M.CustomError(`Invalid permission [${permission}].`, 400, 'warn');
+              throw new M.DataFormatError(`Invalid permission [${permission}].`, 'warn');
           }
 
           // Check if they have been added to the org
@@ -501,7 +501,7 @@ function create(requestingUser, organizationID, projects, options) {
       }
     })
     .then((foundCreatedProjects) => resolve(foundCreatedProjects))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -575,7 +575,7 @@ function update(requestingUser, organizationID, projects, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -603,7 +603,7 @@ function update(requestingUser, organizationID, projects, options) {
       projectsToUpdate = [saniProjects];
     }
     else {
-      throw new M.CustomError('Invalid input for updating projects.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for updating projects.', 'warn');
     }
 
     // Create list of ids
@@ -617,8 +617,8 @@ function update(requestingUser, organizationID, projects, options) {
         proj.id = utils.createID(orgID, proj.id);
         // If a duplicate ID, throw an error
         if (duplicateCheck[proj.id]) {
-          throw new M.CustomError(`Multiple objects with the same ID [${proj.id}] exist in the`
-            + ' update.', 400, 'warn');
+          throw new M.DataFormatError('Multiple objects with the same ID '
+            + `[${proj.id}] exist in the update.`, 'warn');
         }
         else {
           duplicateCheck[proj.id] = proj.id;
@@ -635,7 +635,7 @@ function update(requestingUser, organizationID, projects, options) {
       });
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Create searchQuery
@@ -646,7 +646,7 @@ function update(requestingUser, organizationID, projects, options) {
     .then((_foundOrganization) => {
       // Check if the organization was found
       if (_foundOrganization === null) {
-        throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
+        throw new M.NotFoundError(`The org [${orgID}] was not found.`, 'warn');
       }
 
       // Set function-wide foundOrg
@@ -663,8 +663,8 @@ function update(requestingUser, organizationID, projects, options) {
       foundProjects.forEach((proj) => {
         if (!reqUser.admin && (!proj.permissions[reqUser._id]
           || !proj.permissions[reqUser._id].includes('admin'))) {
-          throw new M.CustomError('User does not have permission to update'
-            + ` the project [${utils.parseID(proj._id).pop()}].`, 403, 'warn');
+          throw new M.PermissionError('User does not have permission to update'
+            + ` the project [${utils.parseID(proj._id).pop()}].`, 'warn');
         }
       });
 
@@ -672,9 +672,9 @@ function update(requestingUser, organizationID, projects, options) {
       if (foundProjects.length !== arrIDs.length) {
         const foundIDs = foundProjects.map(p => p._id);
         const notFound = arrIDs.filter(p => !foundIDs.includes(p)).map(p => utils.parseID(p).pop());
-        throw new M.CustomError(
+        throw new M.NotFoundError(
           `The following projects [${notFound.toString()}] were not found in `
-            + `the org [${orgID}].`, 404, 'warn'
+            + `the org [${orgID}].`, 'warn'
         );
       }
 
@@ -706,24 +706,24 @@ function update(requestingUser, organizationID, projects, options) {
 
         // Error Check: if proj is currently archived, it must first be unarchived
         if (proj.archived && updateProj.archived !== false) {
-          throw new M.CustomError(`Project [${proj._id}] is archived. `
-              + 'Archived objects cannot be modified.', 403, 'warn');
+          throw new M.OperationError(`Project [${proj._id}] is archived. `
+              + 'Archived objects cannot be modified.', 'warn');
         }
 
         // For each key in the updated object
         Object.keys(updateProj).forEach((key) => {
           // Check if the field is valid to update
           if (!validFields.includes(key)) {
-            throw new M.CustomError(`Project property [${key}] cannot `
-                + 'be changed.', 400, 'warn');
+            throw new M.OperationError(`Project property [${key}] cannot `
+                + 'be changed.', 'warn');
           }
 
           // Get validator for field if one exists
           if (validators.project.hasOwnProperty(key)) {
             // If validation fails, throw error
             if (!RegExp(validators.project[key]).test(updateProj[key])) {
-              throw new M.CustomError(
-                `Invalid ${key}: [${updateProj[key]}]`, 403, 'warn'
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateProj[key]}]`, 'warn'
               );
             }
           }
@@ -738,17 +738,17 @@ function update(requestingUser, organizationID, projects, options) {
               let permValue = updateProj[key][user];
               // Ensure user is not updating own permissions
               if (user === reqUser.username) {
-                throw new M.CustomError('User cannot update own permissions.', 403, 'warn');
+                throw new M.OperationError('User cannot update own permissions.', 'warn');
               }
 
               // If user does not exist, throw an error
               if (!existingUsers.includes(user)) {
-                throw new M.CustomError(`User [${user}] not found.`, 404, 'warn');
+                throw new M.NotFoundError(`User [${user}] not found.`, 'warn');
               }
 
               // Value must be an string containing highest permissions
               if (typeof permValue !== 'string') {
-                throw new M.CustomError(`Permission for ${user} must be a string.`, 400, 'warn');
+                throw new M.DataFormatError(`Permission for ${user} must be a string.`, 'warn');
               }
 
               // Lowercase the permission value
@@ -756,8 +756,8 @@ function update(requestingUser, organizationID, projects, options) {
 
               // Value must be valid permission
               if (!validPermissions.includes(permValue)) {
-                throw new M.CustomError(
-                  `${permValue} is not a valid permission`, 400, 'warn'
+                throw new M.DataFormatError(
+                  `${permValue} is not a valid permission`, 'warn'
                 );
               }
 
@@ -777,8 +777,8 @@ function update(requestingUser, organizationID, projects, options) {
                   break;
                 // Default case, unknown permission, throw an error
                 default:
-                  throw new M.CustomError(
-                    `${permValue} is not a valid permission`, 400, 'warn'
+                  throw new M.DataFormatError(
+                    `${permValue} is not a valid permission`, 'warn'
                   );
               }
 
@@ -845,7 +845,7 @@ function update(requestingUser, organizationID, projects, options) {
 
       return resolve(foundUpdatedProjects);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -913,7 +913,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -935,7 +935,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       projectsToLookUp = [saniProjects];
     }
     else {
-      throw new M.CustomError('Invalid input for updating projects.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for updating projects.', 'warn');
     }
 
     // TODO: Reevaluate placement of code block, consider putting after org find (inspect other fxn)
@@ -950,8 +950,8 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
         const tmpID = utils.createID(orgID, proj.id);
         // If a duplicate ID, throw an error
         if (duplicateCheck[tmpID]) {
-          throw new M.CustomError(`Multiple objects with the same ID [${proj.id}] exist in the`
-            + ' update.', 400, 'warn');
+          throw new M.DataFormatError(`Multiple objects with the same ID [${proj.id}] exist in the`
+            + ' update.', 'warn');
         }
         else {
           duplicateCheck[tmpID] = tmpID;
@@ -961,7 +961,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       });
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Create searchQuery
@@ -972,7 +972,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     .then((_foundOrganization) => {
       // Check if the organization was found
       if (_foundOrganization === null) {
-        throw new M.CustomError(`The org [${orgID}] was not found.`, 404, 'warn');
+        throw new M.NotFoundError(`The org [${orgID}] was not found.`, 'warn');
       }
 
       // Find the projects to update
@@ -1051,7 +1051,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       // Return the newly created projects
       return resolve(createdProjects);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -1102,7 +1102,7 @@ function remove(requestingUser, organizationID, projects, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and function-wide variables
@@ -1120,7 +1120,7 @@ function remove(requestingUser, organizationID, projects, options) {
       assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Define searchQuery and ownedQuery
@@ -1140,7 +1140,7 @@ function remove(requestingUser, organizationID, projects, options) {
     }
     else {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for removing projects.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for removing projects.', 'warn');
     }
 
     // Find the projects to delete
@@ -1155,8 +1155,8 @@ function remove(requestingUser, organizationID, projects, options) {
       const notFoundIDs = searchedIDs.filter(p => !foundProjectIDs.includes(p));
       // Some projects not found, throw an error
       if (notFoundIDs.length > 0) {
-        throw new M.CustomError('The following projects were not found: '
-          + `[${notFoundIDs.map(p => utils.parseID(p).pop())}].`, 404, 'warn');
+        throw new M.NotFoundError('The following projects were not found: '
+          + `[${notFoundIDs.map(p => utils.parseID(p).pop())}].`, 'warn');
       }
 
       // Delete any elements in the project
@@ -1177,6 +1177,6 @@ function remove(requestingUser, organizationID, projects, options) {
       }
       return resolve(foundProjects.map(p => p._id));
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
