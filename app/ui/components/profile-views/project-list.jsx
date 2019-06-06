@@ -169,7 +169,7 @@ class ProjectList extends Component {
             permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                key={`proj-key-${project.id}`}
                                                project={project}
-                                               href={`/project/${orgId}/${project.id}`}/>);
+                                               href={`/orgs/${orgId}/projects/${project.id}`}/>);
           }
         });
       }
@@ -177,7 +177,7 @@ class ProjectList extends Component {
         projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                                       key={`proj-key-${project.id}`}
                                                                       project={project}
-                                                                      href={`/project/${orgId}/${project.id}`}/>));
+                                                                      href={`/orgs/${orgId}/projects/${project.id}`}/>));
       }
 
       // Verify if projects
@@ -190,7 +190,7 @@ class ProjectList extends Component {
       return (
         <React.Fragment>
             <ListItem key={`org-key-${org.id}`} className='proj-org-header'>
-                <a href={`/${orgId}`}>{org.name}</a>
+                <a href={`/orgs/${orgId}`}>{org.name}</a>
             </ListItem>
             <List key={`org-list-key-${org.id}`}>
                 {permProjects}

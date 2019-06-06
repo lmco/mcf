@@ -44,7 +44,6 @@ class ProjectApp extends Component {
     // Initialize state props
     this.state = {
       project: null,
-      orgid: null,
       url: null,
       error: null,
       admin: false,
@@ -60,7 +59,6 @@ class ProjectApp extends Component {
 
     // Set states
     this.setState({ url: url });
-    this.setState({ orgid: orgId });
 
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
@@ -164,11 +162,11 @@ class ProjectApp extends Component {
             <SidebarLink id='Elements'
                          title='Model'
                          icon='fas fa-sitemap'
-                         routerLink={`${this.props.match.url}/elements`}/>
+                         routerLink={`${this.props.match.url}/branches/master/elements`}/>
             <SidebarLink id='Search'
                          title='Search'
                          icon='fas fa-search'
-                         routerLink={`${this.props.match.url}/search`}/>
+                         routerLink={`${this.props.match.url}/branches/master/search`}/>
             <SidebarLink id='Members'
                          title='Members'
                          icon='fas fa-users'
@@ -189,20 +187,20 @@ class ProjectApp extends Component {
                          render={ (props) => <InformationPage {...props}
                                                               permissions={this.state.permissions}
                                                               project={this.state.project} /> } />
+                  { /* Route to element page */ }
+                  <Route path={`${this.props.match.url}/branches/:branchid/elements`}
+                         render={ (props) => <ProjectElements {...props}
+                                                              permissions={this.state.permissions}
+                                                              url={this.state.url}
+                                                              project={this.state.project}/> } />
+                  <Route path={`${this.props.match.url}/branches/:branchid/search`}
+                         render={ (props) => <Search {...props}
+                                                     project={this.state.project} /> } />
                   { /* Route to members page */ }
                   <Route path={`${this.props.match.url}/users`}
                          render={ (props) => <MembersPage {...props}
                                                           project={this.state.project}
                                                           admin={this.state.admin}/> } />
-                  { /* Route to element page */ }
-                  <Route path={`${this.props.match.url}/elements`}
-                         render={ (props) => <ProjectElements {...props}
-                                                              permissions={this.state.permissions}
-                                                              url={this.state.url}
-                                                              project={this.state.project}/> } />
-                  <Route path={`${this.props.match.url}/search`}
-                         render={ (props) => <Search {...props}
-                                                     project={this.state.project} /> } />
                 </Switch>
               )
           }
@@ -215,5 +213,7 @@ class ProjectApp extends Component {
 
 // Export component
 ReactDOM.render(<Router>
-                    <Route path={'/project/:orgid/:projectid'} component={ProjectApp} />
+                  <Switch>
+                    <Route path={'/orgs/:orgid/projects/:projectid'} component={ProjectApp} />
+                  </Switch>
                 </Router>, document.getElementById('main'));
