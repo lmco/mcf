@@ -196,6 +196,18 @@ UserSchema.statics.getValidPopulateFields = function() {
   return UserSchema.methods.getValidPopulateFields();
 };
 
+/* ------------------------------( User Index )------------------------------ */
+/**
+ * @description Adds a compound text index on the first name, preferred name,
+ * and last name of the user.
+ * @memberOf UserSchema
+ */
+UserSchema.index({
+  fname: 'text',
+  preferredName: 'text',
+  lname: 'text'
+});
+
 /* ---------------------------( User Properties )---------------------------- */
 // Required for virtual getters
 UserSchema.set('toJSON', { virtuals: true });

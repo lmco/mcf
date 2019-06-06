@@ -67,6 +67,7 @@ module.exports = {
   putUsers,
   patchUsers,
   deleteUsers,
+  searchUsers,
   getUser,
   postUser,
   putUser,
@@ -1894,7 +1895,15 @@ function getUsers(req, res) {
     limit: 'number',
     skip: 'number',
     usernames: 'array',
-    minified: 'boolean'
+    minified: 'boolean',
+    fname: 'string',
+    preferredName: 'string',
+    lname: 'string',
+    email: 'string',
+    custom: 'string',
+    createdBy: 'string',
+    lastModifiedBy: 'string',
+    archivedBy: 'string'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2704,6 +2713,94 @@ function whoami(req, res) {
   // Returns 200: OK and the users public data
   res.header('Content-Type', 'application/json');
   return res.status(200).send(json);
+}
+
+/**
+ * GET /users/search
+ *
+ * @description Does a text based search on users and returns any matches.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Response object with found users
+ */
+function searchUsers(req, res) {
+  // Define options and query
+  // Note: Undefined if not set
+  let options;
+  let query = '';
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    archived: 'boolean',
+    limit: 'number',
+    skip: 'number',
+    q: 'string',
+    minified: 'boolean',
+    populate: 'array'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    return res.status(500).send('Request Failed.');
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  }
+
+  // Check options for q (query)
+  if (options.q) {
+    query = options.q;
+    delete options.q;
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Find users
+  // NOTE: search() sanitizes input params
+  UserController.search(req.user, query, options)
+  .then((users) => {
+    // Verify users public data array is not empty
+    if (users.length === 0) {
+      res.header('Content-Type', 'text/plain');
+      const error = new M.NotFoundError('No users found.', 'warn');
+      return res.status(404).send(error.message);
+    }
+
+    const usersPublicData = sani.html(
+      users.map(u => publicData.getPublicData(u, 'user', options))
+    );
+
+    // Format JSON if minify option is not true
+    const json = (minified) ? usersPublicData : formatJSON(usersPublicData);
+
+    // Return a 200: OK and public user data
+    res.header('Content-Type', 'application/json');
+    return res.status(200).send(json);
+  })
+  // If an error was thrown, return it and its status
+  .catch((error) => {
+    res.header('Content-Type', 'text/plain');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  });
 }
 
 /**
