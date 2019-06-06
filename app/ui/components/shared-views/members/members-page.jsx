@@ -21,8 +21,10 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import { Button, Modal, ModalBody } from 'reactstrap';
+import { Button, Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
+import UserListItem from '../list-items/user-list-item.jsx';
+import List from '../../general/list/list.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -36,6 +38,7 @@ class MembersPage extends Component {
     this.state = {
       admin: false,
       modal: false,
+      selectedUser: null,
       error: null
     };
 
@@ -44,9 +47,17 @@ class MembersPage extends Component {
   }
 
   // Define toggle function
-  handleToggle() {
+  handleToggle(username, perm) {
+    // Verify username provided
+    if (typeof username === 'string') {
+      // Set selected user state
+      this.setState({ selectedUser: { username: username, perm: perm } });
+    }
+    else {
+      this.setState({ selectedUser: null });
+    }
     // Set the create modal state
-    this.setState({ modal: !this.state.modal });
+    this.setState((prevState) => ({ modal: !prevState.modal }));
   }
 
   render() {
@@ -64,10 +75,26 @@ class MembersPage extends Component {
     }
 
     // Loop through project members
-    const listItems = users.map(user => (<tr key={`key-${user}`}>
-                <td>{user}</td>
-                <td>{userperm[user]}</td>
-              </tr>));
+    const listItems = users.map(user => {
+      const perm = userperm[user];
+      return (
+        <div className='user-info' key={`user-info-${user}`}>
+          <UserListItem className='user-name'
+                        user={user}
+                        permission={perm}
+                        _key={`key-${user}`}
+                        href={`/profile/${user}`}/>
+          <div className='controls-container'>
+            <UncontrolledTooltip placement='top' target={`edit-${user}-roles`}>
+              Edit
+            </UncontrolledTooltip>
+            <i id={`edit-${user}-roles`}
+               className='fas fa-user-edit add-btn'
+               onClick={() => this.handleToggle(user, perm)}/>
+          </div>
+        </div>
+      );
+    });
 
     // Return project member list
     return (
@@ -77,21 +104,19 @@ class MembersPage extends Component {
           <ModalBody>
             {(this.props.project && !this.props.org)
               ? (<MemberEdit project={this.props.project}
+                             selectedUser={this.state.selectedUser}
                              toggle={this.handleToggle}/>)
-              : (<MemberEdit org={this.props.org} toggle={this.handleToggle}/>)
+              : (<MemberEdit org={this.props.org}
+                             selectedUser={this.state.selectedUser}
+                             toggle={this.handleToggle}/>)
             }
           </ModalBody>
         </Modal>
         <div id='workspace'>
           <div id='workspace-header' className='workspace-header'>
-            <table className='workspace-title'>
-              <tbody>
-              <tr>
-                <td className='user-title'><h2>Users</h2></td>
-                <td><h2>Permissions</h2></td>
-              </tr>
-              </tbody>
-            </table>
+            <h2 className='workspace-title'>
+              Members
+            </h2>
             {/* Verify user is admin */}
             {(!this.props.admin)
               ? ''
@@ -108,11 +133,18 @@ class MembersPage extends Component {
           </div>
           <div id='workspace-body' className='extra-padding'>
             <div className='main-workspace table-padding'>
-              <table className='table-width'>
-                <tbody>
-                  {listItems}
-                </tbody>
-              </table>
+              <List>
+                <div className='template-header' key='user-info-template'>
+                  <UserListItem className='head-info'
+                                label={true}
+                                user={{ fname: 'Name',
+                                  lname: '',
+                                  username: 'Username' }}
+                                permission={'admin'}
+                                _key='user-template'/>
+                </div>
+                {listItems}
+              </List>
             </div>
           </div>
         </div>

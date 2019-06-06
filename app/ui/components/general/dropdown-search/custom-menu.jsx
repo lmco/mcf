@@ -19,7 +19,7 @@
 
 // React Modules
 import React from 'react';
-import { Input } from 'reactstrap';
+import { Input, UncontrolledDropdown, UncontrolledCollapse, Button } from 'reactstrap';
 
 /* eslint-enable no-unused-vars */
 
@@ -39,28 +39,49 @@ function CustomMenu(props) {
   return (
     <div style={style} className={className} aria-labelledby={labeledBy}>
       {/* Input to filter list */}
-      <Input autoFocus
-             className="mx-3 my-2 w-auto"
-             placeholder="Type to filter..."
-             onChange={props.onChange}
-             value={searchParam}/>
+      <div className='username-search'>
+        <Input autoFocus
+               placeholder='Search...'
+               className="user-searchbar my-2 w-auto"
+               onChange={props.onChange}
+               value={searchParam}/>
+        <Button id='searchBtn'
+                className='search-button'
+                color='primary'>
+          Search
+        </Button>
+      </div>
       {/* List of children */}
-      <ul className="list-unstyled" onClick={props.onChange}>
-          {React.Children.toArray(children).filter(
-            child => {
-              let ret = null;
-              // Verify if the children name or value start with search parameter
-              try {
-                ret = (!searchParam
-                          || child.props.children.toLowerCase().startsWith(searchParam));
-              }
-              catch (err) {
-                ret = child.props.value.startsWith(searchParam);
-              }
-              return ret;
-            }
-          )}
-      </ul>
+      <div className='dropdown-list'>
+        <UncontrolledCollapse toggler='#searchBtn'>
+          <UncontrolledDropdown>
+            <ul className='drop-list' onClick={props.onChange}>
+              {React.Children.toArray(children).filter(
+                child => {
+                  let ret = null;
+                  // Verify if the children name or value start with search parameter
+                  if (child.props.value.startsWith(searchParam)) {
+                    ret = child.props.value.startsWith(searchParam);
+                  }
+                  else {
+                    try {
+                      child.props.children.forEach((name) => {
+                        if (name.toLowerCase().startsWith(searchParam)) {
+                          ret = name.toLowerCase().startsWith(searchParam);
+                        }
+                      });
+                    }
+                    catch (err) {
+                      ret = child.props.value.startsWith(searchParam);
+                    }
+                  }
+                  return ret;
+                }
+              )}
+            </ul>
+          </UncontrolledDropdown>
+        </UncontrolledCollapse>
+       </div>
     </div>
   );
 }

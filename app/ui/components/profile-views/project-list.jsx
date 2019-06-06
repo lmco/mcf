@@ -169,7 +169,7 @@ class ProjectList extends Component {
             permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                key={`proj-key-${project.id}`}
                                                project={project}
-                                               href={`/${orgId}/${project.id}`}/>);
+                                               href={`/project/${orgId}/${project.id}`}/>);
           }
         });
       }
@@ -177,7 +177,7 @@ class ProjectList extends Component {
         projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                                       key={`proj-key-${project.id}`}
                                                                       project={project}
-                                                                      href={`/${orgId}/${project.id}`}/>));
+                                                                      href={`/project/${orgId}/${project.id}`}/>));
       }
 
       // Verify if projects

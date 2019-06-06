@@ -112,3 +112,35 @@ textarea[name="custom"] {
 
   }
 }
+
+.dropdown-list {
+  border: 1px solid #ced4da;
+  position: absolute;
+  background-color: white;
+  width: 85%;
+
+  .drop-list {
+    margin-bottom: 0;
+    padding-left: 0;
+  }
+}
+
+.grayed-out {
+  color: #c0c0c0;
+}
+
+.minimize {
+  font-size: smaller;
+}
+
+.spacing {
+  padding: 0 24px;
+}
+
+.bottom-spacing {
+  padding-bottom: 10px;
+}
+
+.bold-name {
+  font-weight: 600;
+}

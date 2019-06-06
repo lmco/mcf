@@ -81,6 +81,10 @@ function triggerModal(e) {
   }
 }
 function doLogin() {
+  // Remove any left over sessions
+  window.sessionStorage.removeItem('mbee-user');
+
+  // Send the header
   $('#login-form').submit();
 }
 </script>

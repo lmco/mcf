@@ -39,7 +39,7 @@ function OrganizationProjects(props) {
       const username = props.user.username;
       if (project.permissions[username]) {
         listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
-                        <a href={`/${org.id}/${project.id}`}>
+                        <a href={`/project/${org.id}/${project.id}`}>
                           {project.name}
                         </a>
                        </ListItem>);
@@ -47,7 +47,7 @@ function OrganizationProjects(props) {
     }
     else {
       listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
-                      <a href={`/${org.id}/${project.id}`}>
+                      <a href={`/project/${org.id}/${project.id}`}>
                         {project.name}
                       </a>
                      </ListItem>);

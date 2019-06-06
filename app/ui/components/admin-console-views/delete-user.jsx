@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.components.shared-views.members.member-edit
+ * @module ui.components.admin-console-views.delete-user
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,7 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders the user role edit page.
+ * @description This renders the delete user page.
  */
 
 /* Modified ESLint rules for React. */
@@ -19,25 +19,15 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form,
-  FormGroup,
-  Label,
-  Input,
-  Button,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledAlert
-} from 'reactstrap';
+import { Form, FormGroup, Label, Button, UncontrolledAlert, DropdownItem } from 'reactstrap';
 
 // MBEE Modules
-import CustomMenu from '../../general/dropdown-search/custom-menu.jsx';
+import ListItem from '../general/list/list-item.jsx';
+import CustomMenu from '../general/dropdown-search/custom-menu.jsx';
 
 /* eslint-enable no-unused-vars */
 
-// Define component
-class MemberEdit extends Component {
+class DeleteUser extends Component {
 
   constructor(props) {
     // Initialize parent props
@@ -45,12 +35,14 @@ class MemberEdit extends Component {
 
     // Initialize state props
     this.state = {
-      users: null,
+      users: [],
       username: '',
-      permissions: '',
-      dropDownOpen: false,
       error: null
     };
+
+    if (this.props.selectedUser) {
+      this.state.username = this.props.selectedUser;
+    }
 
     // Bind component functions
     this.handleChange = this.handleChange.bind(this);
@@ -60,40 +52,23 @@ class MemberEdit extends Component {
 
   // Define handle change function
   handleChange(event) {
-    // Change the state with new value
+    // Set the state of the changed states in the form
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  // Define the submit function
+  // Define the on submit function
   onSubmit() {
-    // Initialize variables
-    const username = this.state.username;
-    let url;
-    const data = {
-      permissions: {
-        [username]: this.state.permissions
-      }
-    };
+    // Initialize project data
+    const url = `/api/users/${this.state.username}`;
 
-    // Verify if org provided
-    if (this.props.org) {
-      // Set url and redirect to org information
-      url = `/api/orgs/${this.props.org.id}`;
-    }
-    else {
-      // Set url and redirect to project information
-      url = `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
-    }
-
-    // Send a patch request to update data
+    // Delete the project selected
     $.ajax({
-      method: 'PATCH',
+      method: 'DELETE',
       url: `${url}?minified=true`,
-      data: JSON.stringify(data),
       contentType: 'application/json',
       statusCode: {
         200: () => {
-          // Update the page to reload to user page
+          // On success, return to the project-views page
           window.location.reload();
         },
         401: (err) => {
@@ -101,9 +76,6 @@ class MemberEdit extends Component {
 
           // Refresh when session expires
           window.location.reload();
-        },
-        404: (err) => {
-          this.setState({ error: err.responseJSON.description });
         },
         403: (err) => {
           this.setState({ error: err.responseJSON.description });
@@ -129,6 +101,9 @@ class MemberEdit extends Component {
           200: (users) => {
             // Loop through users
             const userOpts = users.map((user) => {
+              if (user.provider !== 'local') {
+                return;
+              }
               if (user.fname) {
                 return (<DropdownItem key={`user-${user.username}`}
                                       value={user.username}>
@@ -157,47 +132,26 @@ class MemberEdit extends Component {
         }
       });
     }
-    else {
-      const username = this.props.selectedUser.username;
-      const permission = this.props.selectedUser.perm;
-      this.setState({ username: username, permission: permission });
-    }
   }
 
   render() {
-    // Initialize variables
-    let title;
-    let selectedUser;
-    const permission = this.state.permission;
+    const selectedUser = this.props.selectedUser;
 
-    if (this.props.selectedUser) {
-      selectedUser = this.props.selectedUser.username;
-    }
-
-    // Verify if org provided
-    if (this.props.org) {
-      // Set title to org name
-      title = this.props.org.name;
-    }
-    else {
-      // Set title to project name
-      title = this.props.project.name;
-    }
-
-    // Render project edit page
+    // Return the project delete form
     return (
-      <div className='extra-padding'>
-        <h2>User Roles</h2>
-        <hr />
-        <div>
-          <h3 className='edit-role-title'> {title} </h3>
+      <div id='workspace'>
+        <div id='workspace-header' className='workspace-header'>
+          <h2 className='workspace-title workspace-title-padding'>
+            Delete User
+          </h2>
+        </div>
+        <div className='extra-padding'>
           {(!this.state.error)
             ? ''
             : (<UncontrolledAlert color="danger">
-                {this.state.error}
-              </UncontrolledAlert>)
+              {this.state.error}
+            </UncontrolledAlert>)
           }
-          {/* Create form to update user roles */}
           <Form>
             {(!selectedUser)
               ? (<FormGroup>
@@ -206,35 +160,18 @@ class MemberEdit extends Component {
                   <div className='username-search'>
                     {/* List all the usernames with a filter option */}
                     <CustomMenu username={this.state.username}
-                                dropDownOpen={this.state.dropDownOpen}
                                 onChange={this.updateUsername}>
                       {this.state.users}
                     </CustomMenu>
                   </div>
-                </FormGroup>)
-              : ''
+                 </FormGroup>)
+              : (<FormGroup>
+                  <Label for="username">Do you want to delete {selectedUser}?</Label>
+                 </FormGroup>)
             }
-            {/* Permissions user updates with */}
-            <FormGroup>
-              {(!selectedUser)
-                ? (<Label for="permissions">Permissions</Label>)
-                : (<Label for='username'>Change permissions [{permission}] for {selectedUser}:</Label>)
-              }
-              <Input type="select"
-                     name='permissions'
-                     id="permissions"
-                     value={this.state.permissions}
-                     onChange={this.handleChange}>
-                <option>Choose one...</option>
-                <option>read</option>
-                <option>write</option>
-                <option>admin</option>
-                <option>REMOVE_ALL</option>
-              </Input>
-            </FormGroup>
-            {/* Button to submit changes */}
-            <Button onClick={this.onSubmit}> Submit </Button>{' '}
-            <Button outline color="secondary" onClick={this.props.toggle}>Cancel</Button>
+            {/* Button to submit and delete project */}
+            <Button color='danger' onClick={this.onSubmit}> Delete </Button>{' '}
+            <Button outline onClick={this.props.toggle}> Cancel </Button>
           </Form>
         </div>
       </div>
@@ -243,5 +180,4 @@ class MemberEdit extends Component {
 
 }
 
-// Export component
-export default MemberEdit;
+export default DeleteUser;

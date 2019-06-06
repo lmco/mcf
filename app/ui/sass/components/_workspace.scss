@@ -219,11 +219,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    p {
-      font-size: 15px;
-      margin: 0;
-      display: inline-block;
-    }
     a:hover {
       color:  lighten($mbee-navbar-color, 20);
     }
@@ -270,30 +265,53 @@
   }
 }
 
-.user-list-item {
+.template-header {
   display: grid;
-  grid-template-columns: minmax(auto, 48%) minmax(auto, 48%) 1fr;
-  grid-template-areas: "username perm";
-  justify-content: space-between;
+  grid-template-columns: 1fr minmax(2px, 60px);
+  grid-template-areas: "main button";
+  justify-content: left;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+
+  .head-info {
+    grid-area: main;
+    justify-content: space-around;
+  }
+}
+
+.template-item {
+  margin: 1em;
+  font-size: smaller;
+  grid-area: header;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.user-info {
+  display: grid;
+  grid-template-columns: 1fr minmax(2px, 60px);
+  grid-template-areas: "main button";
+  justify-content: left;
   align-items: center;
 
-  .username {
-    margin: 8px;
-    grid-area: username;
-    p {
-      margin: 0;
-      display: inline-block;
-    }
+  &:hover {
+    background: #f7f7f7;
   }
 
-  .permission {
-    grid-area: perm;
-    p {
-      font-size: 15px;
-      margin: 0;
-      display: inline-block;
-    }
+  .user-name {
+    grid-area: main;
+    justify-content: space-around;
+    margin: 5px;
+    font-size: smaller;
   }
+}
+
+#username-header {
+  margin: 0.5em;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
 }
 
 .required-fields {
