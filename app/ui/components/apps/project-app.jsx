@@ -109,34 +109,6 @@ class ProjectApp extends Component {
     });
   }
 
-  setMountedComponentStates(user, org) {
-    // Initialize variables
-    const username = user.username;
-    const perm = org.permissions[username];
-    const admin = user.admin;
-
-    // Set user state
-    this.setState({ user: user });
-
-    // Verify if user is admin
-    if ((admin) || (perm === 'admin')) {
-      // Set the admin state
-      this.setState({ admin: true });
-      this.setState({ permissions: 'admin' });
-    }
-    else {
-      this.setState({ permissions: perm });
-    }
-
-    // Verify is user has write permissions
-    if (admin || (perm === 'admin') || (perm === 'write')) {
-      this.setState({ write: true });
-    }
-
-    // Set the org state
-    this.setState({ org: org });
-  }
-
   render() {
     // Initialize variables
     let title;
@@ -243,5 +215,5 @@ class ProjectApp extends Component {
 
 // Export component
 ReactDOM.render(<Router>
-                    <Route path={'/:orgid/:projectid'} component={ProjectApp} />
+                    <Route path={'/project/:orgid/:projectid'} component={ProjectApp} />
                 </Router>, document.getElementById('main'));

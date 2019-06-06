@@ -191,6 +191,41 @@ function authenticate(req, res, next) {
   } /* end if (authorization) */
 
   /**********************************************************************
+   * Handle Session Token Authentication
+   **********************************************************************
+   * This section authenticates a user via a stored session token.
+   * The user's credentials are passed to the handleTokenAuth function.
+   */
+  // Check for token session
+  else if (req.session.token) {
+    M.log.verbose('Authenticating user via Session Token Auth...');
+    const token = req.session.token;
+
+    // Handle Token Authentication
+    AuthModule.handleTokenAuth(req, res, token)
+    .then(user => {
+      // Successfully authenticated token session!
+      M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
+
+      // Set user req object
+      req.user = user;
+
+      // Move to the next function
+      next();
+    })
+    .catch(err => {
+      // log the error
+      M.log.warn(err.stack);
+      req.flash('loginError', 'Session Expired');
+
+      // return proper error for API route or redirect for UI
+      return (req.originalUrl.startsWith('/api'))
+        ? res.status(401).send(new M.CustomError('Session Expired', 401, 'warn'))
+        : res.redirect(`/login?next=${req.originalUrl}`);
+    });
+  }
+
+  /**********************************************************************
    * Handle Form Input Authentication
    **********************************************************************
    * This section authenticates a user via form input. This is used
@@ -227,41 +262,6 @@ function authenticate(req, res, next) {
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send(new M.CustomError('Invalid username or password.', 401, 'warn'))
         : res.redirect('back');
-    });
-  }
-
-  /**********************************************************************
-   * Handle Session Token Authentication
-   **********************************************************************
-   * This section authenticates a user via a stored session token.
-   * The user's credentials are passed to the handleTokenAuth function.
-   */
-  // Check for token session
-  else if (req.session.token) {
-    M.log.verbose('Authenticating user via Session Token Auth...');
-    const token = req.session.token;
-
-    // Handle Token Authentication
-    AuthModule.handleTokenAuth(req, res, token)
-    .then(user => {
-      // Successfully authenticated token session!
-      M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
-
-      // Set user req object
-      req.user = user;
-
-      // Move to the next function
-      next();
-    })
-    .catch(err => {
-      // log the error
-      M.log.warn(err.stack);
-      req.flash('loginError', 'Session Expired');
-
-      // return proper error for API route or redirect for UI
-      return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send(new M.CustomError('Session Expired', 401, 'warn'))
-        : res.redirect(`/login?next=${req.originalUrl}`);
     });
   }
 
