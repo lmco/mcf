@@ -163,10 +163,22 @@ router.param('projectid', (req, res, next, project) => {
   next();
 });
 
+// Parameter validation for the 'projectid' param
+// eslint-disable-next-line consistent-return
+router.param('branchid', (req, res, next, branch) => {
+  next();
+});
+
+// Parameter validation for the 'projectid' param
+// eslint-disable-next-line consistent-return
+router.param('elementid', (req, res, next, branch) => {
+  next();
+});
+
 /**
  * @description This renders an organization for a user
  **/
-router.route('/:orgid')
+router.route('/orgs/:orgid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -176,7 +188,7 @@ router.route('/:orgid')
 /**
  * @description This renders an organization's member page for a user
  **/
-router.route('/:orgid/users')
+router.route('/orgs/:orgid/users')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -186,7 +198,7 @@ router.route('/:orgid/users')
 /**
  * @description This renders an organization's projects page for a user
  **/
-router.route('/:orgid/projects')
+router.route('/orgs/:orgid/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -196,7 +208,7 @@ router.route('/:orgid/projects')
 /**
  * @description This renders a project for a user
  **/
-router.route('/project/:orgid/:projectid')
+router.route('/orgs/:orgid/projects/:projectid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -206,7 +218,7 @@ router.route('/project/:orgid/:projectid')
 /**
  * @description This renders a project members page form for a user
  **/
-router.route('/project/:orgid/:projectid/users')
+router.route('/orgs/:orgid/projects/:projectid/users')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -216,7 +228,17 @@ router.route('/project/:orgid/:projectid/users')
 /**
  * @description This renders a project's element page for a user
  **/
-router.route('/project/:orgid/:projectid/elements')
+router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.project
+);
+
+/**
+ * @description This renders a project's element page for a user
+ **/
+router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements#:elementid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -226,7 +248,7 @@ router.route('/project/:orgid/:projectid/elements')
 /**
  * @description This renders a project's search page for a user
  **/
-router.route('/project/:orgid/:projectid/search')
+router.route('/branch/:orgid/projects/:projectid/branches/:branchid/search')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
