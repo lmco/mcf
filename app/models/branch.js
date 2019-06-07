@@ -96,7 +96,7 @@ BranchSchema.statics.getValidUpdateFields = function() {
 
 /**
  * @description Returns a list of valid root source fields
- * @memberOf ElementSchema
+ * @memberOf BranchSchema
  */
 BranchSchema.methods.getValidRootSource = function() {
   return ['master'];
