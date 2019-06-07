@@ -111,16 +111,16 @@ class ProfileEdit extends Component {
           window.location.replace(reroute);
         },
         401: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
 
           // Refresh when session expires
           window.location.reload();
         },
         403: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         },
         404: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         }
       }
     });

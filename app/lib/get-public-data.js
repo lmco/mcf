@@ -50,7 +50,7 @@ module.exports.getPublicData = function(object, type, options) {
     case 'user':
       return getUserPublicData(object, options);
     default:
-      throw new M.CustomError(`Invalid model type [${type}]`, 400, 'warn');
+      throw new M.DataFormatError(`Invalid model type [${type}]`, 'warn');
   }
 };
 

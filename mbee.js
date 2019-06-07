@@ -158,9 +158,29 @@ if (installComplete) {
     enumerable: true
   });
 
-  // Initialize the CustomError Class
-  Object.defineProperty(M, 'CustomError', {
-    value: M.require('lib.errors').CustomError
+  // Initialize the custom error classes
+  Object.defineProperties(M, {
+    DataFormatError: {
+      value: M.require('lib.errors').DataFormatError
+    },
+    OperationError: {
+      value: M.require('lib.errors').OperationError
+    },
+    AuthorizationError: {
+      value: M.require('lib.errors').AuthorizationError
+    },
+    PermissionError: {
+      value: M.require('lib.errors').PermissionError
+    },
+    NotFoundError: {
+      value: M.require('lib.errors').NotFoundError
+    },
+    ServerError: {
+      value: M.require('lib.errors').ServerError
+    },
+    DatabaseError: {
+      value: M.require('lib.errors').DatabaseError
+    }
   });
 }
 

@@ -62,10 +62,10 @@ function authenticate(req, res, next) {
     if (parts.length < 2) {
       M.log.debug('Parts length < 2');
       // Create the error
-      error = new M.CustomError('Username or password not provided.', 400, 'warn');
+      error = new M.AuthorizationError('Username or password not provided.', 'warn');
       // Return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
-        ? res.status(error.status).send(error)
+        ? res.status(401).send(error.message)
         : res.redirect('/login');
     }
     // Get the auth scheme and check auth scheme is basic
@@ -93,10 +93,10 @@ function authenticate(req, res, next) {
         M.log.debug('Credentials length < 2');
 
         // Create the error
-        error = new M.CustomError('Username or password not provided.', 400, 'warn');
+        error = new M.AuthorizationError('Username or password not provided.', 'warn');
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(error.status).send(error)
+          ? res.status(401).send(error.message)
           : res.redirect('/login');
       }
 
@@ -107,9 +107,9 @@ function authenticate(req, res, next) {
       // Error check - username/password not empty
       if (!username || !password || username === '' || password === '') {
         // return proper error for API route or redirect for UI
-        error = new M.CustomError('Username or password not provided.', 401, 'warn');
+        error = new M.AuthorizationError('Username or password not provided.', 'warn');
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(error.status).send(error)
+          ? res.status(401).send(error.message)
           : res.redirect('back');
       }
       // Handle Basic Authentication
@@ -127,8 +127,8 @@ function authenticate(req, res, next) {
       .catch(err => {
         // Log the error
         M.log.error(err.stack);
-        error = new M.CustomError('Invalid username or password.', 401, 'warn');
-        if (err.description === 'Invalid username or password.') {
+        error = new M.AuthorizationError('Invalid username or password.', 'warn');
+        if (err.message === 'Invalid username or password.') {
           req.flash('loginError', err.message);
         }
         else {
@@ -137,7 +137,7 @@ function authenticate(req, res, next) {
 
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(401).send(error)
+          ? res.status(401).send(error.message)
           : res.redirect(`/login?next=${req.originalUrl}`);
       });
     }
@@ -169,15 +169,15 @@ function authenticate(req, res, next) {
         next();
       })
       .catch(err => {
-        if (err.description === 'Invalid username or password.') {
-          req.flash('loginError', err.description);
+        if (err.message === 'Invalid username or password.') {
+          req.flash('loginError', err.message);
         }
         else {
           req.flash('loginError', 'Internal Server Error');
         }
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
-          ? res.status(401).send(new M.CustomError('Invalid username or password.', 401, 'warn'))
+          ? res.status(401).send('Invalid username or password.')
           : res.redirect(`/login?next=${req.originalUrl}`);
       });
     }
@@ -185,7 +185,7 @@ function authenticate(req, res, next) {
     else {
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send(new M.CustomError('Invalid authorization scheme.', 401, 'warn'))
+        ? res.status(401).send('Invalid authorization scheme.')
         : res.redirect(`/login?next=${req.originalUrl}`);
     }
   } /* end if (authorization) */
@@ -220,7 +220,7 @@ function authenticate(req, res, next) {
 
       // return proper error for API route or redirect for UI
       return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send(new M.CustomError('Session Expired', 401, 'warn'))
+        ? res.status(401).send('Session Expired')
         : res.redirect(`/login?next=${req.originalUrl}`);
     });
   }
@@ -260,7 +260,7 @@ function authenticate(req, res, next) {
       // return proper error for API route or redirect for UI
       // 'back' returns to the original login?next=originalUrl
       return (req.originalUrl.startsWith('/api'))
-        ? res.status(401).send(new M.CustomError('Invalid username or password.', 401, 'warn'))
+        ? res.status(401).send('Invalid username or password.')
         : res.redirect('back');
     });
   }
@@ -268,11 +268,11 @@ function authenticate(req, res, next) {
   // Verify if credentials are empty or null
   else {
     // Create the error
-    error = new M.CustomError('Username or password not provided.', 401, 'warn');
+    error = new M.AuthorizationError('Username or password not provided.', 'warn');
 
     // return proper error for API route or redirect for UI
     return (req.originalUrl.startsWith('/api'))
-      ? res.status(error.status).send(error)
+      ? res.status(401).send(error.message)
       : res.redirect(`/login?next=${req.originalUrl}`);
   }
 }

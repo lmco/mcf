@@ -132,7 +132,7 @@ UserSchema.pre('save', function(next) {
   // Check validation status NOT successful
   if (!AuthController.validatePassword(this.password, this.provider)) {
     // Failed validation, throw error
-    throw new M.CustomError('Password validation failed.', 400, 'warn');
+    throw new M.DataFormatError('Password validation failed.', 'warn');
   }
 
   // Hash plaintext password

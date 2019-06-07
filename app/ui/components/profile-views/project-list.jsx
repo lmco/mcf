@@ -63,7 +63,7 @@ class ProjectList extends Component {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
       if (err) {
-        this.setState({ error: err.responseJSON.description });
+        this.setState({ error: err.responseText });
       }
       else {
         this.setState({ user: data });
@@ -78,13 +78,13 @@ class ProjectList extends Component {
             },
             401: (error) => {
               // Throw error and set state
-              this.setState({ error: error.responseJSON.description });
+              this.setState({ error: error.responseText });
 
               // Refresh when session expires
               window.location.reload();
             },
             404: (error) => {
-              this.setState({ error: error.responseJSON.description });
+              this.setState({ error: error.responseText });
             }
           }
         });

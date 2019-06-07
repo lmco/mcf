@@ -131,13 +131,13 @@ class UserList extends Component {
         },
         401: (error) => {
           // Throw error and set state
-          this.setState({ error: error.responseJSON.description });
+          this.setState({ error: error.responseText });
 
           // Refresh when session expires
           window.location.reload();
         },
         404: (error) => {
-          this.setState({ error: error.responseJSON.description });
+          this.setState({ error: error.responseText });
         }
       }
     });

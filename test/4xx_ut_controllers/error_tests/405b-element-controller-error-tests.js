@@ -151,7 +151,7 @@ function updateSourceToSelf(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('Element\'s source cannot be self'
+    chai.expect(error.message).to.equal('Element\'s source cannot be self'
       + ` [${elemDataObject.id}].`);
     done();
   });
@@ -178,7 +178,7 @@ function updateTargetToSelf(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('Element\'s target cannot be self'
+    chai.expect(error.message).to.equal('Element\'s target cannot be self'
       + ` [${elemDataObject.id}].`);
     done();
   });
@@ -205,7 +205,7 @@ function updateNonExistentSource(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('The source element '
+    chai.expect(error.message).to.equal('The source element '
       + '[NonExistentElement] was not found in the project [project00].');
     done();
   });
@@ -232,7 +232,7 @@ function updateNonExistentTarget(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('The target element '
+    chai.expect(error.message).to.equal('The target element '
       + '[NonExistentElement] was not found in the project [project00].');
     done();
   });
@@ -259,7 +259,7 @@ function updateSourceWithNoTarget(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`Element [${elemDataObject.id}]`
+    chai.expect(error.message).to.equal(`Element [${elemDataObject.id}]`
       + ' target is required if source is provided.');
     done();
   });
@@ -286,7 +286,7 @@ function updateTargetWithNoSource(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`Element [${elemDataObject.id}]`
+    chai.expect(error.message).to.equal(`Element [${elemDataObject.id}]`
       + ' source is required if target is provided.');
     done();
   });
@@ -307,7 +307,7 @@ function createInTag(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`[${tagID}] is a tag and does`
+    chai.expect(error.message).to.equal(`[${tagID}] is a tag and does`
       + ' not allow elements to be created.');
     done();
   });
@@ -333,7 +333,7 @@ function updateInTag(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`[${tagID}] is a tag and `
+    chai.expect(error.message).to.equal(`[${tagID}] is a tag and `
       + 'does not allow updates to elements.');
     done();
   });
@@ -352,7 +352,7 @@ function deleteInTag(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`[${tagID}] is a tag and`
+    chai.expect(error.message).to.equal(`[${tagID}] is a tag and`
       + ' does not allow elements to be deleted.');
     done();
   });

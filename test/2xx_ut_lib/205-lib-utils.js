@@ -65,7 +65,7 @@ function invalidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Argument is not a string.');
     done();
   }
 }
@@ -99,7 +99,7 @@ function parseInvalidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Invalid UID.');
     done();
   }
 }

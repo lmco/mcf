@@ -77,7 +77,7 @@ module.exports.createID = function(...args) {
   args.forEach((a) => {
     // Verify the argument is a string
     if (typeof a !== 'string') {
-      throw new M.CustomError('Argument is not a string.', 400);
+      throw new M.DataFormatError('Argument is not a string.', 'warn');
     }
   });
 
@@ -94,7 +94,7 @@ module.exports.createID = function(...args) {
  */
 module.exports.parseID = function(uid) {
   if (!uid.includes(this.ID_DELIMITER)) {
-    throw new M.CustomError('Invalid UID.', 400);
+    throw new M.DataFormatError('Invalid UID.', 'warn');
   }
   return uid.split(this.ID_DELIMITER);
 };
@@ -178,7 +178,7 @@ module.exports.parseOptions = function(options, validOptions) {
     // Check options are valid
     if (!validOptions.hasOwnProperty(key)) {
       // Invalid key, throw error
-      throw new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      throw new M.DataFormatError(`Invalid parameter: ${key}`, 'warn');
     }
   });
 
@@ -213,7 +213,7 @@ module.exports.parseOptions = function(options, validOptions) {
     else if (validOptions[option] === 'number') {
       const number = parseInt(options[option], 10);
       if (isNaN(number)) { // eslint-disable-line no-restricted-globals
-        throw new M.CustomError(`${options[option]} is not a number`, 400, 'warn');
+        throw new M.DataFormatError(`${options[option]} is not a number`, 'warn');
       }
       else {
         parsedOptions[option] = number;
@@ -276,19 +276,19 @@ module.exports.validateOptions = function(options, validOptions, model) {
     }
     // If the option is not valid for the calling function
     else if (!validOptions.includes(opt)) {
-      throw new M.CustomError(`Invalid option [${opt}].`, 400, 'warn');
+      throw new M.DataFormatError(`Invalid option [${opt}].`, 'warn');
     }
 
     // Handle the populate option
     if (opt === 'populate') {
       // Ensure the value is an array
       if (!Array.isArray(val)) {
-        throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+        throw new M.DataFormatError('The option \'populate\' is not an array.', 'warn');
       }
       // Ensure every item in val is a string
       if (!val.every(o => typeof o === 'string')) {
-        throw new M.CustomError(
-          'Every value in the populate array must be a string.', 400, 'warn'
+        throw new M.DataFormatError(
+          'Every value in the populate array must be a string.', 'warn'
         );
       }
 
@@ -298,7 +298,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       val.forEach((p) => {
         // If the field cannot be populated, throw an error
         if (!validPopulateFields.includes(p)) {
-          throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          throw new M.OperationError(`The field ${p} cannot be populated.`, 'warn');
         }
 
         // If the field is not a required virtual on the Element model
@@ -313,7 +313,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'archived') {
       // Ensure value is a boolean
       if (typeof val !== 'boolean') {
-        throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
+        throw new M.DataFormatError('The option \'archived\' is not a boolean.', 'warn');
       }
 
       // Set the field archived in the returnObject
@@ -324,7 +324,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'subtree') {
       // Ensure value is a boolean
       if (typeof options.subtree !== 'boolean') {
-        throw new M.CustomError('The option \'subtree\' is not a boolean.', 400, 'warn');
+        throw new M.DataFormatError('The option \'subtree\' is not a boolean.', 'warn');
       }
 
       // Set the subtree option in the returnObject
@@ -335,12 +335,12 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'fields') {
       // Ensure the value is an array
       if (!Array.isArray(val)) {
-        throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        throw new M.DataFormatError('The option \'fields\' is not an array.', 'warn');
       }
       // Ensure every item in the array is a string
       if (!val.every(o => typeof o === 'string')) {
-        throw new M.CustomError(
-          'Every value in the fields array must be a string.', 400, 'warn'
+        throw new M.DataFormatError(
+          'Every value in the fields array must be a string.', 'warn'
         );
       }
 
@@ -355,7 +355,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'limit') {
       // Ensure the value is a number
       if (typeof options.limit !== 'number') {
-        throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        throw new M.DataFormatError('The option \'limit\' is not a number.', 'warn');
       }
 
       // Set the limit option in the returnObject
@@ -366,12 +366,12 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'skip') {
       // Ensure the value is a number
       if (typeof options.skip !== 'number') {
-        throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+        throw new M.DataFormatError('The option \'skip\' is not a number.', 'warn');
       }
 
       // Ensure the value is not negative
       if (options.skip < 0) {
-        throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+        throw new M.DataFormatError('The option \'skip\' cannot be negative.', 'warn');
       }
 
       // Set the skip option in the returnObject
@@ -382,7 +382,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'lean') {
       // Ensure the value is a boolean
       if (typeof options.lean !== 'boolean') {
-        throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        throw new M.DataFormatError('The option \'lean\' is not a boolean.', 'warn');
       }
 
       // Set the lean option in the returnObject
