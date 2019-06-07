@@ -125,7 +125,7 @@ class OrganizationList extends Component {
 
   render() {
     // Loop through all orgs
-    const orgs = this.state.orgs.map(org => <OrgListItem className='hover-darken' key={`org-key-${org.id}`} org={org} href={`/${org.id}`}/>);
+    const orgs = this.state.orgs.map(org => <OrgListItem className='hover-darken' key={`org-key-${org.id}`} org={org} href={`/orgs/${org.id}`}/>);
 
     // Return org list
     return (

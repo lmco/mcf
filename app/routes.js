@@ -10,6 +10,7 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Defines the MBEE routes mounted at '/'.
  */
@@ -80,13 +81,39 @@ router.route('/')
 );
 
 /**
+ * @description This renders the admin console for admins ONLY.
+ **/
+router.route('/admin')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.adminConsole
+);
+
+/**
  * @description This renders the user page for logged in users
  **/
 router.route('/profile')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.whoami
+  UIController.profile
+);
+
+// Parameter validation for the 'username' param
+// eslint-disable-next-line consistent-return
+router.param('username', (req, res, next, username) => {
+  next();
+});
+
+/**
+ * @description This renders the user page for logged in users
+ **/
+router.route('/profile/:username')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.profile
 );
 
 /**
@@ -96,7 +123,7 @@ router.route('/profile/orgs')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.whoami
+  UIController.profile
 );
 
 /**
@@ -106,17 +133,7 @@ router.route('/profile/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  UIController.whoami
-);
-
-/**
- * @description This renders the user page for logged in users
- **/
-router.route('/profile/edit')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.whoami
+  UIController.profile
 );
 
 /**
@@ -146,11 +163,22 @@ router.param('projectid', (req, res, next, project) => {
   next();
 });
 
+// Parameter validation for the 'projectid' param
+// eslint-disable-next-line consistent-return
+router.param('branchid', (req, res, next, branch) => {
+  next();
+});
+
+// Parameter validation for the 'projectid' param
+// eslint-disable-next-line consistent-return
+router.param('elementid', (req, res, next, branch) => {
+  next();
+});
 
 /**
  * @description This renders an organization for a user
  **/
-router.route('/:orgid')
+router.route('/orgs/:orgid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -160,7 +188,7 @@ router.route('/:orgid')
 /**
  * @description This renders an organization's member page for a user
  **/
-router.route('/:orgid/users')
+router.route('/orgs/:orgid/users')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -170,17 +198,7 @@ router.route('/:orgid/users')
 /**
  * @description This renders an organization's projects page for a user
  **/
-router.route('/:orgid/projects')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.organization
-);
-
-/**
- * @description This renders an organization's edit form for an admin user
- **/
-router.route('/:orgid/edit')
+router.route('/orgs/:orgid/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -190,7 +208,7 @@ router.route('/:orgid/edit')
 /**
  * @description This renders a project for a user
  **/
-router.route('/:orgid/:projectid')
+router.route('/orgs/:orgid/projects/:projectid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -200,7 +218,7 @@ router.route('/:orgid/:projectid')
 /**
  * @description This renders a project members page form for a user
  **/
-router.route('/:orgid/:projectid/users')
+router.route('/orgs/:orgid/projects/:projectid/users')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -210,7 +228,17 @@ router.route('/:orgid/:projectid/users')
 /**
  * @description This renders a project's element page for a user
  **/
-router.route('/:orgid/:projectid/elements')
+router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.project
+);
+
+/**
+ * @description This renders a project's element page for a user
+ **/
+router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements#:elementid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -220,22 +248,11 @@ router.route('/:orgid/:projectid/elements')
 /**
  * @description This renders a project's search page for a user
  **/
-router.route('/:orgid/:projectid/search')
+router.route('/branch/:orgid/projects/:projectid/branches/:branchid/search')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   UIController.project
 );
-
-/**
- * @description This renders a project edit form for an admin user
- **/
-router.route('/:orgid/:projectid/edit')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.project
-);
-
 
 module.exports = router;

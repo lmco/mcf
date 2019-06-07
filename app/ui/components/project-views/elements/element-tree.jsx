@@ -20,6 +20,8 @@
 
 // React Modules
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+
 
 /* eslint-enable no-unused-vars */
 
@@ -97,6 +99,11 @@ class ElementTree extends Component {
             }
           });
           this.setState({ children: result });
+
+          // Verify if the state is displaying the children
+          if (this.props.childrenOpen.hasOwnProperty(this.state.id)) {
+            this.setState({ isOpen: this.props.childrenOpen[this.state.id] });
+          }
         },
         401: (err) => {
           this.setState({ children: null });
@@ -116,7 +123,12 @@ class ElementTree extends Component {
   }
 
   toggleCollapse() {
-    this.setState({ isOpen: !this.state.isOpen });
+    this.setState((prevState) => {
+      this.props.setChildOpen(this.state.id, !prevState.isOpen);
+      return (
+        { isOpen: !prevState.isOpen }
+      );
+    });
   }
 
 
@@ -204,6 +216,8 @@ class ElementTree extends Component {
                          parent={this.state}
                          parentRefresh={this.refresh}
                          clickHandler={this.props.clickHandler}
+                         childrenOpen={this.props.childrenOpen}
+                         setChildOpen={this.props.setChildOpen}
                          isOpen={false}/>
           );
         }
@@ -309,10 +323,14 @@ class ElementTree extends Component {
         <i className={`fas ${expandIcon}`}
            onClick={this.toggleCollapse}>
         </i>
-        <span className='element-name' onClick={this.handleClick}>
-          {elementIcon}
-          {element}
-        </span>
+        <Link to={`#${this.props.id}`}
+              onClick={this.handleClick}
+              className='element-link'>
+          <span className='element-name'>
+            {elementIcon}
+            {element}
+          </span>
+        </Link>
         {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
       </div>
     );

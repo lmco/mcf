@@ -188,7 +188,7 @@ class OrgApp extends Component {
 // Export component
 ReactDOM.render(
   <Router>
-    <Route path={'/:orgid'} component={OrgApp} />
+    <Route path={'/orgs/:orgid'} component={OrgApp} />
   </Router>,
   document.getElementById('main')
 );

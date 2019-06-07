@@ -23,7 +23,8 @@
 module.exports = {
   home,
   flightManual,
-  whoami,
+  adminConsole,
+  profile,
   organization,
   project,
   swaggerDoc,
@@ -63,20 +64,39 @@ function home(req, res) {
 }
 
 /**
+ * @description Renders the admin console.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ */
+function adminConsole(req, res) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical('/admin executed with invalid req.user object');
+
+    // redirect to the login screen
+    res.redirect('/login');
+  }
+  utils.render(req, res, 'admin-console', {
+    title: 'MBEE | Model-Based Engineering Environment'
+  });
+}
+
+/**
  * @description Renders the current user's page.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  */
-function whoami(req, res) {
+function profile(req, res) {
   // Sanity check: confirm req.user exists
   if (!req.user) {
-    M.log.critical('/whoami executed with invalid req.user object');
+    M.log.critical('/profile executed with invalid req.user object');
     // redirect to the login screen
     res.redirect('/login');
   }
-  utils.render(req, res, 'user', {
-    name: 'user',
+  utils.render(req, res, 'profile', {
+    name: 'profile',
     title: 'MBEE | Model-Based Engineering Environment'
   });
 }

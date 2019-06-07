@@ -44,6 +44,8 @@ class ProjectElements extends Component {
       id: null,
       refreshFunction: null,
       treeRoot: null,
+      branch: 'model',
+      childrenOpen: {},
       error: null
     };
 
@@ -52,6 +54,7 @@ class ProjectElements extends Component {
     this.editElementInfo = this.editElementInfo.bind(this);
     this.createNewElement = this.createNewElement.bind(this);
     this.getElement = this.getElement.bind(this);
+    this.setChildOpen = this.setChildOpen.bind(this);
   }
 
   createNewElement() {
@@ -112,7 +115,8 @@ class ProjectElements extends Component {
   getElement() {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
-    const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
+    const branchId = this.props.match.params.branchid;
+    const base = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
     const url = `${base}/elements/model?fields=id,name,contains,type&minified=true`;
 
     $.ajax({
@@ -136,8 +140,17 @@ class ProjectElements extends Component {
     });
   }
 
+  setChildOpen(id, state) {
+    this.state.childrenOpen[id] = state;
+  }
+
   componentDidMount() {
     this.getElement();
+
+    if (this.props.location.hash) {
+      const elementid = this.props.location.hash.replace('#', '');
+      this.openElementInfo(elementid);
+    }
   }
 
   render() {
@@ -180,6 +193,8 @@ class ProjectElements extends Component {
                           project={this.props.project}
                           parent={null}
                           isOpen={true}
+                          childrenOpen={this.state.childrenOpen}
+                          setChildOpen={this.setChildOpen}
                           parentRefresh={this.getElement}
                           clickHandler={this.openElementInfo}/>;
     }

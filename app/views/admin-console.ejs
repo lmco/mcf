@@ -1,0 +1,22 @@
+<%
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module views.admin-console
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description This page renders the admin console by grabbing the javascript
+ * after being compiled by the admin-console-app.jsx file.
+ */
+%>
+<div id="main"></div>
+
+<%- contentFor('scripts') %>
+<script type="text/javascript" src="/js/admin-console-app.js"></script>

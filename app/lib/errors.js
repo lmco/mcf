@@ -57,13 +57,13 @@ const CustomError = class CustomError extends Error {
 
 // 400
 const DataFormatError = class DataFormatError extends CustomError {};
-const OperationError = class OperationError extends CustomError {};
 
 // 401
 const AuthorizationError = class AuthorizationError extends CustomError {};
 
 // 403
 const PermissionError = class PermissionError extends CustomError {};
+const OperationError = class OperationError extends CustomError {};
 
 // 404
 const NotFoundError = class NotFoundError extends CustomError {};

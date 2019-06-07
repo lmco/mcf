@@ -96,28 +96,30 @@ class HomeApp extends Component {
   }
 
   setMountedComponentStates(user, orgs) {
-    // Set user state
-    this.setState({ user: user });
-
     // Add event listener for window resizing
     window.addEventListener('resize', this.handleResize);
     // Handle initial size of window
     this.handleResize();
 
     // Initialize variables
-    const writePermOrgs = [];
+    let writePermOrgs = [];
 
-    // Loop through orgs
-    orgs.forEach((org) => {
-      // Initialize variables
-      const perm = org.permissions[user.username];
+    if (!user.admin) {
+      // Loop through orgs
+      orgs.forEach((org) => {
+        // Initialize variables
+        const perm = org.permissions[user.username];
 
-      // Verify if user has write or admin permissions
-      if ((perm === 'write') || (perm === 'admin')) {
-        // Push the org to the org permissions
-        writePermOrgs.push(org);
-      }
-    });
+        // Verify if user has write or admin permissions
+        if ((perm === 'write') || (perm === 'admin')) {
+          // Push the org to the org permissions
+          writePermOrgs.push(org);
+        }
+      });
+    }
+    else if (user.admin) {
+      writePermOrgs = orgs;
+    }
 
     // Verify there are orgs
     if (writePermOrgs.length > 0) {
@@ -168,18 +170,28 @@ class HomeApp extends Component {
   render() {
     // Initialize variables
     let titleClass = 'workspace-title workspace-title-padding';
+    let list;
 
     // Loop through all orgs
-    const list = this.state.orgs.map(org => {
-      const username = this.state.user.username;
+    if (this.state.orgs.length > 0) {
+      list = this.state.orgs.map(org => {
+        const username = this.state.user.username;
 
-      if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
-        return (<OrgList org={org} key={`org-key-${org.id}`} user={this.state.user} write={this.state.write} admin={this.state.admin}/>);
-      }
-      else {
-        return (<OrgList key={`org-key-${org.id}`} org={org} user={this.state.user} admin={this.state.admin}/>);
-      }
-    });
+        if (!this.state.user.admin) {
+          if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
+            return (<OrgList org={org} key={`org-key-${org.id}`} user={this.state.user} write={this.state.write}
+                             admin={this.state.admin}/>);
+          }
+          else {
+            return (<OrgList key={`org-key-${org.id}`} org={org} user={this.state.user} admin={this.state.admin}/>);
+          }
+        }
+        else {
+          return (<OrgList org={org} key={`org-key-${org.id}`} user={this.state.user} write={this.state.write}
+                           admin={this.state.admin}/>);
+        }
+      });
+    }
 
     // Verify user is admin
     if (this.state.admin) {
