@@ -248,7 +248,7 @@ router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements#:elem
 /**
  * @description This renders a project's search page for a user
  **/
-router.route('/branch/:orgid/projects/:projectid/branches/:branchid/search')
+router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/search')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
