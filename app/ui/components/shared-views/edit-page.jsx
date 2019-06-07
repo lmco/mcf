@@ -103,12 +103,12 @@ class EditPage extends Component {
 
     if (this.props.org) {
       url = `/api/orgs/${this.props.org.id}`;
-      redirect = `/${this.props.org.id}`;
+      redirect = `/orgs/${this.props.org.id}`;
     }
     else {
       data.visibility = this.state.visibility;
       url = `/api/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
-      redirect = `/${this.props.orgid}/${this.props.project.id}`;
+      redirect = `/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
     }
 
     if (this.state.archived) {
