@@ -372,6 +372,8 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
  */
 function create(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
+    M.log.debug('create(): Start of function');
+
     // Ensure input parameters are correct type
     try {
       assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
@@ -432,6 +434,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
     const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
       'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace',
       'archived'];
+
+    M.log.debug('create(): Before element validation');
 
     // Check that each element has an id and set the parent if null
     try {
@@ -536,6 +540,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       throw new M.CustomError(err.message, 403, 'warn');
     }
 
+    M.log.debug('create(): Before JMI2 conversion');
+
     // Attempt to convert elements to JMI type 2, to see if duplicate ids exist
     try {
       jmi.convertJMI(1, 2, elementsToCreate, '_id');
@@ -598,6 +604,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.CustomError(`[${branchID}] is a tag and does`
         + ' not allow elements to be created.', 403, 'warn');
       }
+
+      M.log.debug('create(): Before finding pre-existing elements');
 
       const promises = [];
       for (let i = 0; i < arrIDs.length / 50000; i++) {
@@ -692,6 +700,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       // Create query for finding elements
       const findExtraElementsQuery = { _id: { $in: elementsToFind } };
 
+      M.log.debug('create(): Before finding extra elements');
+
       // Find extra elements, and only return _id for faster lookup
       return Element.find(findExtraElementsQuery, '_id').lean();
     })
@@ -738,9 +748,13 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         }
       });
 
+      M.log.debug('create(): Before insertMany()');
+
       return Element.insertMany(elementObjects, { rawResult: true });
     })
     .then((createdElements) => {
+      M.log.debug('create(): After insertMany()');
+
       const promises = [];
       const createdIDs = createdElements.ops.map(e => e._id);
       // Find elements in batches
@@ -771,6 +785,8 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       return Promise.all(promises);
     })
     .then(() => {
+      M.log.debug('create(): Before elements-created event emitter');
+
       // Emit the event elements-created
       EventEmitter.emit('elements-created', populatedElements);
 

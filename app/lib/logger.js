@@ -75,6 +75,7 @@ const formatter = printf((msg) => {
   const stack = new Error().stack;
   const lines = stack.split('\n');
   const reduced = [];
+  let extra = '';
 
   // For each line in the stack trace, remove winston specific lines
   for (let i = 0; i < lines.length; i++) {
@@ -108,6 +109,15 @@ const formatter = printf((msg) => {
   .replace('verbose', 'VERBOSE')
   .replace('debug', 'DEBUG');
 
+  // Add memory usage to debug level statements
+  if (msg.level.includes('debug')) {
+    // Get heap usage
+    const heap = process.memoryUsage();
+    const heapTotal = (heap.heapTotal / 1024 / 1024).toFixed(2);
+    const heapUsed = (heap.heapUsed / 1024 / 1024).toFixed(2);
+    extra = `[heap ${(heapUsed / heapTotal * 100).toFixed(2)}% ${heapUsed}/${heapTotal}]`;
+  }
+
   // If we want colored logs, this is our return string
   if (M.config.log.colorize) {
     const ts = `${fmt.color.light_grey}${msg.timestamp}${fmt.color.esc}`; // timestamp
@@ -118,7 +128,7 @@ const formatter = printf((msg) => {
       msgPrint += `\n${msg.stack || reduced.join('\n')}`;
     }
     const sep = `${fmt.color.light_grey}::${fmt.color.esc}`;
-    return `${ts} [${level}] ${f}\u001b[30m:${line} ${sep} ${msgPrint}`;
+    return `${ts} [${level}] ${f}\u001b[30m:${line} ${sep} ${extra} ${msgPrint}`;
   }
 
   // If colorize is false, we remove colors from the log level, timestamp and file.
@@ -135,7 +145,7 @@ const formatter = printf((msg) => {
   .replace('\u001b[39m', '');
   const ts = `${msg.timestamp}`; // timestamp
   const f = `${file}`;           // file
-  return `${ts} [${level}] ${f}:${line} -> ${msg.message}`;
+  return `${ts} [${level}] ${f}:${line} -> ${extra} ${msg.message}`;
 });
 
 // Check that the logs directory exists
