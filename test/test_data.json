@@ -51,6 +51,18 @@
       "custom": {
         "location": "Location03"
       }
+    },
+    {
+      "username": "testuser04",
+      "password": "Password123@",
+      "preferredName": "Preferred",
+      "fname": "First",
+      "lname": "Last",
+      "email": "user4@test.com",
+      "admin": false,
+      "custom": {
+        "location": "Location04"
+      }
     }
   ],
 
