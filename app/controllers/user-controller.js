@@ -542,7 +542,8 @@ function update(requestingUser, users, options) {
 
 
         // Error Check: if user currently archived, they must first be unarchived
-        if (user.archived && updateUser.archived !== false) {
+        if (user.archived && (updateUser.archived === undefined
+          || JSON.parse(updateUser.archived) !== false)) {
           throw new M.OperationError(`User [${user._id}] is archived. `
               + 'Archived objects cannot be modified.', 'warn');
         }

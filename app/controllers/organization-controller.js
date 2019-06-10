@@ -555,7 +555,8 @@ function update(requestingUser, orgs, options) {
         }
 
         // Error Check: if org is currently archived, it must first be unarchived
-        if (org.archived && updateOrg.archived !== false) {
+        if (org.archived && (updateOrg.archived === undefined
+          || JSON.parse(updateOrg.archived) !== false)) {
           throw new M.OperationError(`Organization [${org._id}] is archived. `
               + 'Archived objects cannot be modified.', 'warn');
         }
