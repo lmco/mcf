@@ -1148,7 +1148,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         delete updateElement._id;
 
         // Error Check: if element is currently archived, it must first be unarchived
-        if (element.archived && updateElement.archived !== false) {
+        if (element.archived && (updateElement.archived === undefined
+          || JSON.parse(updateElement.archived) !== false)) {
           throw new M.OperationError(`Element [${utils.parseID(element._id).pop()}]`
               + ' is archived. Archived objects cannot be modified.', 'warn');
         }

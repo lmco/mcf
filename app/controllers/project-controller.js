@@ -706,7 +706,8 @@ function update(requestingUser, organizationID, projects, options) {
         delete updateProj._id;
 
         // Error Check: if proj is currently archived, it must first be unarchived
-        if (proj.archived && updateProj.archived !== false) {
+        if (proj.archived && (updateProj.archived === undefined
+          || JSON.parse(updateProj.archived) !== false)) {
           throw new M.OperationError(`Project [${proj._id}] is archived. `
               + 'Archived objects cannot be modified.', 'warn');
         }

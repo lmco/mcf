@@ -757,7 +757,8 @@ function update(requestingUser, organizationID, projectID, branches, options) {
         delete updateBranch._id;
 
         // Error Check: if branch is currently archived, it must first be unarchived
-        if (branch.archived && updateBranch.archived !== false) {
+        if (branch.archived && (updateBranch.archived === undefined
+          || JSON.parse(updateBranch.archived) !== false)) {
           throw new M.OperationError(`Branch [${utils.parseID(branch._id).pop()}]`
             + ' is archived. Archived objects cannot be modified.', 'warn');
         }
