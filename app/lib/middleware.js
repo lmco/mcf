@@ -16,10 +16,6 @@
  * express to perform actions during requests.
  */
 
-// Node modules
-const fs = require('fs');
-const path = require('path');
-
 /**
  * @description Log the route and method requested by a user.
  *
@@ -43,8 +39,17 @@ module.exports.logRoute = function logRoute(req, res, next) {
  * @param {function} next - Callback to express authentication flow.
  */
 module.exports.logIP = function logIP(req, res, next) {
+  let ip = req.ip;
+  // If IP is ::1, set it equal to 127.0.0.1
+  if (req.ip === '::1') {
+    ip = '127.0.0.1';
+  }
+  // If IP starts with ::ffff:, remove the ::ffff:
+  else if (req.ip.startsWith('::ffff:')) {
+    ip = ip.replace('::ffff:', '');
+  }
   // Log the method, url, and ip address for the request
-  M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${req.ip}`);
+  M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${ip}`);
   next();
 };
 
@@ -56,24 +61,22 @@ module.exports.logIP = function logIP(req, res, next) {
 module.exports.logResponse = function(req, res) {
   // Set username to anonymous if req.user is not defined
   const username = (req.user) ? req.user.username : 'anonymous';
+  const date = JSON.stringify(new Date()).replace(/"/g, '');
+  let ip = req.ip;
   // If IP is ::1, set it equal to 127.0.0.1
-  const ip = (req.ip === '::1') ? '127.0.0.1' : req.ip;
+  if (req.ip === '::1') {
+    ip = '127.0.0.1';
+  }
+  // If IP starts with ::ffff:, remove the ::ffff:
+  else if (req.ip.startsWith('::ffff:')) {
+    ip = ip.replace('::ffff:', '');
+  }
   // Get the response size in bytes
   const size = res.get('Content-Length');
 
-  // Define the log file path and log entry
-  const filePath = path.join(M.root, 'logs', M.config.log.api_file);
-  const log = `${ip} ${username} [${Date.now()}] "${req.method} `
-    + `${req.originalUrl}" ${res.statusCode} ${size}\n`;
-
-  // If the API log file already exists, append to file
-  if (fs.existsSync(filePath)) {
-    fs.appendFileSync(filePath, log);
-  }
-  // If the API log file does not exist, write to it
-  else {
-    fs.writeFileSync(filePath, log);
-  }
+  // Log the info at 'info' level
+  M.log.info(`RESPONSE: ${ip} ${username} [${date}] "${req.method} `
+    + `${req.originalUrl}" ${res.statusCode} ${size}`);
 };
 
 /**
