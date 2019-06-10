@@ -799,7 +799,8 @@ api.route('/orgs/:orgid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getOrg
+  APIController.getOrg,
+  Middleware.logResponse
 )
 .post(
   AuthController.authenticate,

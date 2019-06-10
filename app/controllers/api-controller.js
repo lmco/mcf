@@ -602,7 +602,7 @@ function deleteOrgs(req, res) {
  *
  * @return {Object} Response object with org's public data
  */
-function getOrg(req, res) {
+function getOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -649,11 +649,9 @@ function getOrg(req, res) {
   .then((orgs) => {
     // If no orgs found, return 404 error
     if (orgs.length === 0) {
-      const error = new M.NotFoundError(
+      throw new M.NotFoundError(
         `Organization [${req.params.orgid}] not found.`, 'warn'
       );
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
     }
 
     // Get the public data of each org
@@ -666,12 +664,14 @@ function getOrg(req, res) {
 
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
-    res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.header('Content-Type', 'text/html');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    next();
   });
 }
 

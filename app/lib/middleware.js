@@ -10,10 +10,15 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This file defines middleware functions which can be used by
  * express to perform actions during requests.
  */
+
+// Node modules
+const fs = require('fs');
+const path = require('path');
 
 /**
  * @description Log the route and method requested by a user.
@@ -41,6 +46,34 @@ module.exports.logIP = function logIP(req, res, next) {
   // Log the method, url, and ip address for the request
   M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${req.ip}`);
   next();
+};
+
+/**
+ * @description Log the response to an HTTP request
+ * @param {Object} req - Request object from express.
+ * @param {Object} res - Response object from express.
+ */
+module.exports.logResponse = function(req, res) {
+  // Set username to anonymous if req.user is not defined
+  const username = (req.user) ? req.user.username : 'anonymous';
+  // If IP is ::1, set it equal to 127.0.0.1
+  const ip = (req.ip === '::1') ? '127.0.0.1' : req.ip;
+  // Get the response size in bytes
+  const size = res.get('Content-Length');
+
+  // Define the log file path and log entry
+  const filePath = path.join(M.root, 'logs', M.config.log.api_file);
+  const log = `${ip} ${username} [${Date.now()}] "${req.method} `
+    + `${req.originalUrl}" ${res.statusCode} ${size}\n`;
+
+  // If the API log file already exists, append to file
+  if (fs.existsSync(filePath)) {
+    fs.appendFileSync(filePath, log);
+  }
+  // If the API log file does not exist, write to it
+  else {
+    fs.writeFileSync(filePath, log);
+  }
 };
 
 /**
