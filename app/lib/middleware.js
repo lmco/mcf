@@ -72,7 +72,8 @@ module.exports.logResponse = function(req, res) {
     ip = ip.replace('::ffff:', '');
   }
   // Get the response size in bytes
-  const size = res.get('Content-Length');
+  // TODO: POSt /api/orgs is not returning a Content-Length header...
+  const size = res.get('Content-Length') || 'NaN';
 
   // Log the info at 'info' level
   M.log.info(`RESPONSE: ${ip} ${username} [${date}] "${req.method} `

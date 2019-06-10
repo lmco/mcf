@@ -46,7 +46,10 @@ api.get(
   '/coffee',
   AuthController.authenticate,
   Middleware.logRoute,
-  (req, res) => res.status(418).send('I\'m a teapot.'),
+  (req, res, next) => {
+    res.status(418).send('I\'m a teapot.');
+    next();
+  },
   Middleware.logResponse
 );
 

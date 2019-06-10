@@ -138,13 +138,15 @@ function swaggerSpec() {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with swagger JSON
  */
-function swaggerJSON(req, res) {
+function swaggerJSON(req, res, next) {
   // Return swagger specification
   res.header('Content-Type', 'application/json');
-  return res.status(200).send(formatJSON(swaggerSpec()));
+  res.status(200).send(formatJSON(swaggerSpec()));
+  next();
 }
 
 /**
@@ -154,12 +156,14 @@ function swaggerJSON(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with session token
  */
-function login(req, res) {
+function login(req, res, next) {
   res.header('Content-Type', 'application/json');
-  return res.status(200).send(formatJSON({ token: req.session.token }));
+  res.status(200).send(formatJSON({ token: req.session.token }));
+  next();
 }
 
 /**
@@ -169,12 +173,13 @@ function login(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with 200 status code
  */
-function test(req, res) {
-  res.header('Content-Type', 'application/json');
-  return res.status(200).send('');
+function test(req, res, next) {
+  res.status(200).send('');
+  next();
 }
 
 /**
@@ -184,10 +189,11 @@ function test(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with version
  */
-function version(req, res) {
+function version(req, res, next) {
   // Create version object
   const obj = {
     version: M.version,
@@ -197,7 +203,8 @@ function version(req, res) {
 
   // Return version object
   res.header('Content-Type', 'application/json');
-  return res.status(200).send(formatJSON(obj));
+  res.status(200).send(formatJSON(obj));
+  next();
 }
 
 /* ----------------------( Organization API Endpoints )---------------------- */
@@ -208,13 +215,14 @@ function version(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with orgs' public data
  *
  * NOTE: All users are members of the 'default' org, should always have
  * access to at least this organization.
  */
-function getOrgs(req, res) {
+function getOrgs(req, res, next) {
   // Define options and ids
   // Note: Undefined if not set
   let ids;
@@ -236,7 +244,8 @@ function getOrgs(req, res) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // Attempt to parse query options
@@ -247,7 +256,8 @@ function getOrgs(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check query for ids
@@ -279,9 +289,7 @@ function getOrgs(req, res) {
   .then((orgs) => {
     // Verify orgs array is not empty
     if (orgs.length === 0) {
-      const error = new M.NotFoundError('No orgs found.', 'warn');
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
+      throw new M.NotFoundError('No orgs found.', 'warn');
     }
 
     // Get the public data of each org
@@ -294,12 +302,14 @@ function getOrgs(req, res) {
 
     // Return 200: OK and public org data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    next();
   });
 }
 
@@ -310,10 +320,11 @@ function getOrgs(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with orgs' public data
  */
-function postOrgs(req, res) {
+function postOrgs(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -330,7 +341,8 @@ function postOrgs(req, res) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // Attempt to parse query options
@@ -341,7 +353,8 @@ function postOrgs(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check options for minified
@@ -367,12 +380,14 @@ function postOrgs(req, res) {
 
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -384,10 +399,11 @@ function postOrgs(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with orgs' public data
  */
-function putOrgs(req, res) {
+function putOrgs(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -404,7 +420,8 @@ function putOrgs(req, res) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // Attempt to parse query options
@@ -415,7 +432,8 @@ function putOrgs(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check options for minified
@@ -441,12 +459,14 @@ function putOrgs(req, res) {
 
     // Return 200: OK and created/replaced orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -457,10 +477,11 @@ function putOrgs(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with orgs' public data
  */
-function patchOrgs(req, res) {
+function patchOrgs(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -477,7 +498,8 @@ function patchOrgs(req, res) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // Attempt to parse query options
@@ -488,7 +510,8 @@ function patchOrgs(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check options for minified
@@ -514,12 +537,14 @@ function patchOrgs(req, res) {
 
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -532,10 +557,11 @@ function patchOrgs(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with array of deleted org IDs.
  */
-function deleteOrgs(req, res) {
+function deleteOrgs(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -554,14 +580,16 @@ function deleteOrgs(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // If req.body contains objects, grab the org IDs from the objects
@@ -583,12 +611,14 @@ function deleteOrgs(req, res) {
     const json = (minified) ? orgIDs : formatJSON(orgIDs);
 
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -599,6 +629,7 @@ function deleteOrgs(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with org's public data
  */
