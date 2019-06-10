@@ -651,7 +651,8 @@ function getOrg(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // Attempt to parse query options
@@ -662,7 +663,8 @@ function getOrg(req, res, next) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check options for minified
@@ -696,13 +698,13 @@ function getOrg(req, res, next) {
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    next();
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/html');
     res.status(errors.getStatusCode(error)).send(error.message);
-    next();
+    return next();
   });
 }
 
@@ -714,10 +716,11 @@ function getOrg(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with org's public data
  */
-function postOrg(req, res) {
+function postOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -734,7 +737,8 @@ function postOrg(req, res) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -743,7 +747,8 @@ function postOrg(req, res) {
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    return next();
   }
 
   // Attempt to parse query options
@@ -754,7 +759,8 @@ function postOrg(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -783,12 +789,14 @@ function postOrg(req, res) {
 
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -800,10 +808,11 @@ function postOrg(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with org's public data
  */
-function putOrg(req, res) {
+function putOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -820,7 +829,8 @@ function putOrg(req, res) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -829,7 +839,8 @@ function putOrg(req, res) {
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    return next();
   }
 
   // Attempt to parse query options
@@ -840,7 +851,8 @@ function putOrg(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -869,12 +881,14 @@ function putOrg(req, res) {
 
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -885,10 +899,11 @@ function putOrg(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with updated org
  */
-function patchOrg(req, res) {
+function patchOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -905,7 +920,8 @@ function patchOrg(req, res) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(500).send('Request Failed.');
+    return next();
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -914,7 +930,8 @@ function patchOrg(req, res) {
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    return next();
   }
 
   // Attempt to parse query options
@@ -925,7 +942,8 @@ function patchOrg(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Set body org id
@@ -954,12 +972,14 @@ function patchOrg(req, res) {
 
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -971,10 +991,11 @@ function patchOrg(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with deleted org ID.
  */
-function deleteOrg(req, res) {
+function deleteOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -985,6 +1006,14 @@ function deleteOrg(req, res) {
     minified: 'boolean'
   };
 
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    res.header('Content-Type', 'text/plain');
+    res.status(500).send('Request Failed.');
+    return next();
+  }
+
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -993,14 +1022,8 @@ function deleteOrg(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
-  }
-
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check options for minified
@@ -1020,12 +1043,14 @@ function deleteOrg(req, res) {
 
     // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
