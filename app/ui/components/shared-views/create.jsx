@@ -72,17 +72,17 @@ class Create extends Component {
       if (!this.props.org) {
         // Set org as the state prop
         url = `/api/orgs/${this.state.org}/projects/${this.state.id}`;
-        redirect = `/${this.state.org}/${this.state.id}`;
+        redirect = `/orgs/${this.state.org}/projects/${this.state.id}`;
       }
       else {
         // Set org as the parent prop
         url = `/api/orgs/${this.props.org.id}/projects/${this.state.id}`;
-        redirect = `/${this.props.org.id}/${this.state.id}`;
+        redirect = `/orgs/${this.props.org.id}/projects/${this.state.id}`;
       }
     }
     else {
       url = `/api/orgs/${this.state.id}`;
-      redirect = `/${this.state.id}`;
+      redirect = `/orgs/${this.state.id}`;
     }
 
     // Initialize project data
@@ -107,7 +107,7 @@ class Create extends Component {
           window.location.reload();
         },
         403: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         }
       }
     });

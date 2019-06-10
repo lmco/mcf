@@ -58,11 +58,9 @@ module.exports.disableUserAPI = function disableUserAPI(req, res, next) {
     // Create error message '<method> <url> is disabled'
     const message = `${req.method} ${req.originalUrl} is disabled.`;
     // Create custom error 403 Forbidden
-    const error = new M.CustomError(message, 403);
-    // Log custom error
-    M.log.error(error);
+    const error = new M.OperationError(message, 'error');
     // Return error to user
-    return res.status(403).send(error);
+    return res.status(403).send(error.message);
   }
   next();
 };

@@ -20,6 +20,8 @@
 
 // React Modules
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+
 
 /* eslint-enable no-unused-vars */
 
@@ -97,26 +99,36 @@ class ElementTree extends Component {
             }
           });
           this.setState({ children: result });
+
+          // Verify if the state is displaying the children
+          if (this.props.childrenOpen.hasOwnProperty(this.state.id)) {
+            this.setState({ isOpen: this.props.childrenOpen[this.state.id] });
+          }
         },
         401: (err) => {
           this.setState({ children: null });
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
 
           // Refresh when session expires
           window.location.reload();
         },
         403: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         },
         404: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         }
       }
     });
   }
 
   toggleCollapse() {
-    this.setState({ isOpen: !this.state.isOpen });
+    this.setState((prevState) => {
+      this.props.setChildOpen(this.state.id, !prevState.isOpen);
+      return (
+        { isOpen: !prevState.isOpen }
+      );
+    });
   }
 
 
@@ -154,13 +166,13 @@ class ElementTree extends Component {
           },
           401: (err) => {
             // Throw error and set state
-            this.setState({ error: err.responseJSON.description });
+            this.setState({ error: err.responseText });
 
             // Refresh when session expires
             window.location.reload();
           },
           404: (err) => {
-            this.setState({ error: err.responseJSON.description });
+            this.setState({ error: err.responseText });
           }
         }
       });
@@ -204,6 +216,8 @@ class ElementTree extends Component {
                          parent={this.state}
                          parentRefresh={this.refresh}
                          clickHandler={this.props.clickHandler}
+                         childrenOpen={this.props.childrenOpen}
+                         setChildOpen={this.props.setChildOpen}
                          isOpen={false}/>
           );
         }
@@ -216,7 +230,7 @@ class ElementTree extends Component {
       // Element should be rendered as the ID initially
       element = (
         <span className={'element-id'}>
-           {this.state.data.id} : {this.state.data.type}
+           {this.state.data.id}
         </span>
       );
       // If the name is not blank, render the name
@@ -224,12 +238,13 @@ class ElementTree extends Component {
         element = (
           <span>
             {this.state.data.name}
-            <span className={'element-id'}>({this.state.data.id} : {this.state.data.type})</span>
+            <span className={'element-id'}>({this.state.data.id})</span>
           </span>
         );
       }
     }
 
+    // TODO (jk) We should abstract this into a "data types" library or similar.
     const iconMappings = {
       Package: {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
@@ -250,6 +265,30 @@ class ElementTree extends Component {
       diagram: {
         icon: 'sitemap',
         color: 'lightgreen'
+      },
+      association: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      Association: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      relationship: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      Relationship: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      Edge: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
+      },
+      edge: {
+        icon: 'arrows-alt-h',
+        color: '#333333'
       },
       'uml:Diagram': {
         icon: 'sitemap',
@@ -284,10 +323,14 @@ class ElementTree extends Component {
         <i className={`fas ${expandIcon}`}
            onClick={this.toggleCollapse}>
         </i>
-        <span className='element-name' onClick={this.handleClick}>
-          {elementIcon}
-          {element}
-        </span>
+        <Link to={`#${this.props.id}`}
+              onClick={this.handleClick}
+              className='element-link'>
+          <span className='element-name'>
+            {elementIcon}
+            {element}
+          </span>
+        </Link>
         {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
       </div>
     );

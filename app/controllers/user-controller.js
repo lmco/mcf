@@ -11,6 +11,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Provides an abstraction layer on top of the User model that
  * implements controller logic and behavior for Users.
@@ -25,7 +26,8 @@ module.exports = {
   update,
   createOrReplace,
   remove,
-  updatePassword
+  updatePassword,
+  search
 };
 
 // Node.js Modules
@@ -66,6 +68,20 @@ const utils = M.require('lib.utils');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {string} [options.fname] - A string that will search for matches with
+ * the user fname field, or first name
+ * @param {string} [options.lname] - A string that will search for matches with
+ * the user lname field, or last name
+ * @param {string} [options.preferredName] - A string that will search for matches
+ * with the user preferredName field
+ * @param {string} [options.email] - A string that will search for matches with
+ * the user email field
+ * @param {string} [options.createdBy] - A string that will search for matches for
+ * users that were created by a specific person
+ * @param {string} [options.lastModifiedBy] - A string that will search for matches for
+ * users that were last modified by a specific person
+ * @param {string} [options.archivedBy] - A string that will search for matches for
+ * users that were archived by a specific person
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
@@ -106,7 +122,7 @@ function find(requestingUser, users, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters
@@ -125,6 +141,26 @@ function find(requestingUser, users, options) {
       delete searchQuery.archived;
     }
 
+    // Ensure search options are valid
+    if (options) {
+      // List of valid search options
+      const validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
+
+      // Check each option for valid search queries
+      Object.keys(options).forEach((o) => {
+        // If the search option is valid
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
+    }
+
     // Check the type of the users parameter
     if (Array.isArray(saniUsers)) {
       // An array of usernames, find all
@@ -136,7 +172,7 @@ function find(requestingUser, users, options) {
     }
     else if (!((typeof saniUsers === 'object' && saniUsers !== null) || saniUsers === undefined)) {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for finding users.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for finding users.', 'warn');
     }
 
     // If the lean option is supplied
@@ -146,7 +182,7 @@ function find(requestingUser, users, options) {
         { limit: validOptions.limit, skip: validOptions.skip })
       .populate(validOptions.populateString).lean()
       .then((foundUser) => resolve(foundUser))
-      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+      .catch((error) => reject(error));
     }
     else {
       // Find the users
@@ -154,7 +190,7 @@ function find(requestingUser, users, options) {
         { limit: validOptions.limit, skip: validOptions.skip })
       .populate(validOptions.populateString)
       .then((foundUser) => resolve(foundUser))
-      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+      .catch((error) => reject(error));
     }
   });
 }
@@ -222,7 +258,7 @@ function create(requestingUser, users, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -248,7 +284,7 @@ function create(requestingUser, users, options) {
     }
     else {
       // users is not an object or array, throw an error
-      throw new M.CustomError('Invalid input for creating users.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for creating users.', 'warn');
     }
 
     // Create array of id's for lookup and array of valid keys
@@ -277,7 +313,7 @@ function create(requestingUser, users, options) {
       });
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Create searchQuery to search for any existing, conflicting users
@@ -292,8 +328,8 @@ function create(requestingUser, users, options) {
         const foundUserUsernames = foundUsers.map(u => u._id);
 
         // There are one or more users with conflicting usernames
-        throw new M.CustomError('Users with the following usernames already exist'
-            + ` [${foundUserUsernames.toString()}].`, 403, 'warn');
+        throw new M.OperationError('Users with the following usernames already exist'
+            + ` [${foundUserUsernames.toString()}].`, 'warn');
       }
 
       // For each object of user data, create the user object
@@ -346,7 +382,7 @@ function create(requestingUser, users, options) {
       }
     })
     .then((foundCreatedUsers) => resolve(foundCreatedUsers))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -418,7 +454,7 @@ function update(requestingUser, users, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -442,7 +478,7 @@ function update(requestingUser, users, options) {
       usersToUpdate = [saniUsers];
     }
     else {
-      throw new M.CustomError('Invalid input for updating users.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for updating users.', 'warn');
     }
 
     // Create list of usernames
@@ -455,8 +491,8 @@ function update(requestingUser, users, options) {
         assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);
         // If a duplicate ID, throw an error
         if (duplicateCheck[user.username]) {
-          throw new M.CustomError(`Multiple objects with the same ID [${user.username}] exist in`
-            + ' the update.', 400, 'warn');
+          throw new M.DataFormatError(`Multiple objects with the same ID [${user.username}] exist in`
+            + ' the update.', 'warn');
         }
         else {
           duplicateCheck[user.username] = user.username;
@@ -467,12 +503,12 @@ function update(requestingUser, users, options) {
       });
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Ensure user cannot update others, unless sys-admin
     if (!reqUser.admin && (arrUsernames.length > 1 || arrUsernames[0] !== reqUser.username)) {
-      throw new M.CustomError('Cannot update other users unless admin.', 403, 'warn');
+      throw new M.PermissionError('Cannot update other users unless admin.', 'warn');
     }
 
     // Create searchQuery
@@ -484,8 +520,8 @@ function update(requestingUser, users, options) {
       if (_foundUsers.length !== arrUsernames.length) {
         const foundIDs = _foundUsers.map(u => u._id);
         const notFound = arrUsernames.filter(u => !foundIDs.includes(u));
-        throw new M.CustomError(
-          `The following users were not found: [${notFound.toString()}].`, 404, 'warn'
+        throw new M.NotFoundError(
+          `The following users were not found: [${notFound.toString()}].`, 'warn'
         );
       }
       // Set the function-wide foundUsers
@@ -507,32 +543,32 @@ function update(requestingUser, users, options) {
 
         // Error Check: if user currently archived, they must first be unarchived
         if (user.archived && updateUser.archived !== false) {
-          throw new M.CustomError(`User [${user._id}] is archived. `
-              + 'Archived objects cannot be modified.', 403, 'warn');
+          throw new M.OperationError(`User [${user._id}] is archived. `
+              + 'Archived objects cannot be modified.', 'warn');
         }
 
         // For each key in the updated object
         Object.keys(updateUser).forEach((key) => {
           // Check if the field is valid to update
           if (!validFields.includes(key)) {
-            throw new M.CustomError(`User property [${key}] cannot `
-                + 'be changed.', 400, 'warn');
+            throw new M.OperationError(`User property [${key}] cannot `
+                + 'be changed.', 'warn');
           }
 
           // Get validator for field if one exists
           if (validators.user.hasOwnProperty(key)) {
             // If validation fails, throw error
             if (!RegExp(validators.user[key]).test(updateUser[key])) {
-              throw new M.CustomError(
-                `Invalid ${key}: [${updateUser[key]}]`, 403, 'warn'
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateUser[key]}]`, 'warn'
               );
             }
           }
 
           // If updating the admin key, ensure the requesting user is an admin
           if (key === 'admin' && !reqUser.admin) {
-            throw new M.CustomError(`${reqUser.username} does not have`
-              + ' permissions to update the admin field.', 403, 'warn');
+            throw new M.PermissionError(`${reqUser.username} does not have`
+              + ' permissions to update the admin field.', 'warn');
           }
 
           // If the type of field is mixed
@@ -540,14 +576,14 @@ function update(requestingUser, users, options) {
             && User.schema.obj[key].type.schemaName === 'Mixed') {
             // Only objects should be passed into mixed data
             if (typeof updateUser !== 'object') {
-              throw new M.CustomError(`${key} must be an object`, 400, 'warn');
+              throw new M.DataFormatError(`${key} must be an object`, 'warn');
             }
           }
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
             // User cannot archive or unarchive themselves
             if (user._id === reqUser._id) {
-              throw new M.CustomError('User cannot archive or unarchive themselves', 403, 'warn');
+              throw new M.OperationError('User cannot archive or unarchive themselves', 'warn');
             }
 
             // If the user is being archived
@@ -596,7 +632,7 @@ function update(requestingUser, users, options) {
 
       return resolve(foundUpdatedUsers);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -662,7 +698,7 @@ function createOrReplace(requestingUser, users, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -683,7 +719,7 @@ function createOrReplace(requestingUser, users, options) {
       usersToLookup = [saniUsers];
     }
     else {
-      throw new M.CustomError('Invalid input for updating users.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for updating users.', 'warn');
     }
 
     // Create list of usernames
@@ -696,8 +732,8 @@ function createOrReplace(requestingUser, users, options) {
         assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);
         // If a duplicate ID, throw an error
         if (duplicateCheck[user.username]) {
-          throw new M.CustomError(`Multiple objects with the same ID [${user.username}] exist in`
-            + ' the update.', 400, 'warn');
+          throw new M.DataFormatError(`Multiple objects with the same ID [${user.username}] exist in`
+            + ' the update.', 'warn');
         }
         else {
           duplicateCheck[user.username] = user.username;
@@ -707,7 +743,7 @@ function createOrReplace(requestingUser, users, options) {
       });
     }
     catch (err) {
-      throw new M.CustomError(err.message, 403, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Create searchQuery
@@ -756,7 +792,7 @@ function createOrReplace(requestingUser, users, options) {
       }
     })
     .then(() => resolve(createdUsers))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }
 
@@ -802,7 +838,7 @@ function remove(requestingUser, users, options) {
       assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -829,7 +865,7 @@ function remove(requestingUser, users, options) {
     }
     else {
       // Invalid parameter, throw an error
-      throw new M.CustomError('Invalid input for removing users.', 400, 'warn');
+      throw new M.DataFormatError('Invalid input for removing users.', 'warn');
     }
 
     // Find the users to delete
@@ -843,8 +879,8 @@ function remove(requestingUser, users, options) {
       const notFoundUsernames = searchedUsernames.filter(u => !foundUsernames.includes(u));
       // Some users not found, throw an error
       if (notFoundUsernames.length > 0) {
-        throw new M.CustomError('The following users were not found: '
-          + `[${notFoundUsernames}].`, 404, 'warn');
+        throw new M.NotFoundError('The following users were not found: '
+          + `[${notFoundUsernames}].`, 'warn');
       }
 
       // Create memberQuery
@@ -856,7 +892,7 @@ function remove(requestingUser, users, options) {
       foundUsers.forEach((user) => {
         // If trying to delete the self, throw an error
         if (user._id === reqUser._id) {
-          throw new M.CustomError('User cannot delete self.', 403, 'warn');
+          throw new M.OperationError('User cannot delete self.', 'warn');
         }
       });
 
@@ -908,7 +944,92 @@ function remove(requestingUser, users, options) {
 
       return resolve(foundUsernames);
     })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
+  });
+}
+
+/**
+ * @description A function which searches for users using mongo's built in text
+ * search.  Returns any users that match the text search, in order of the best
+ * matches to the worst.  Searches the fname, preferredName, and lname fields.
+ *
+ * @param {User} requestingUser - The object containing the requesting user
+ * @param {string} query - The text-based query to search the database for.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {boolean} [options.archived] - A parameter that if true, will return
+ * search results containing both archived and regular users.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects.  By default, no fields are populated.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
+ *
+ * @return {Promise} An array of found users.
+ *
+ * @example
+ * search({User}, 'query', {'populate':'createdBy'})
+ * .then(function(users) {
+ *   // Do something with the found users
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function search(requestingUser, query, options) {
+  return new Promise((resolve, reject) => {
+    // Ensure input parameters are correct type
+    try {
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      // Ensure that requesting user has an _id field
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
+      assert.ok(typeof query === 'string', 'Query is not a string.');
+
+      const optionsTypes = ['undefined', 'object'];
+      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    }
+    catch (err) {
+      throw new M.DataFormatError(err.message, 'warn');
+    }
+
+    // Sanitize input parameters and create function-wide variables
+    const searchQuery = { archived: false };
+
+    // Validate and set the options
+    const validOptions = utils.validateOptions(options, ['archived', 'populate',
+      'limit', 'skip', 'lean'], User);
+
+    // Find the user
+    searchQuery.$text = { $search: query };
+    // If the archived field is true, remove it from the query
+    if (validOptions.archived) {
+      delete searchQuery.archived;
+    }
+
+    // If the lean option is supplied
+    if (validOptions.lean) {
+      // Search for the user
+      User.find(searchQuery, { score: { $meta: 'textScore' } },
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(validOptions.populateString).lean()
+      .then((foundUsers) => resolve(foundUsers))
+      .catch((error) => reject(error));
+    }
+    else {
+      // Search for the user
+      User.find(searchQuery, { score: { $meta: 'textScore' } },
+        { limit: validOptions.limit, skip: validOptions.skip })
+      .sort({ score: { $meta: 'textScore' } })
+      .populate(validOptions.populateString)
+      .then((foundUsers) => resolve(foundUsers))
+      .catch((error) => reject(error));
+    }
   });
 }
 
@@ -949,7 +1070,7 @@ function updatePassword(requestingUser, oldPassword, newPassword, confirmPasswor
       assert.ok(typeof confirmPassword === 'string', 'Passwords do not match.');
     }
     catch (err) {
-      throw new M.CustomError(err.message, 400, 'warn');
+      throw new M.DataFormatError(err.message, 'warn');
     }
 
     // Sanitize input parameters and create function-wide variables
@@ -958,7 +1079,7 @@ function updatePassword(requestingUser, oldPassword, newPassword, confirmPasswor
 
     // Check if newPassword and confirmPassword match
     if (confirmPassword !== newPassword) {
-      throw new M.CustomError('Passwords do not match.', 400, 'warn');
+      throw new M.DataFormatError('Passwords do not match.', 'warn');
     }
 
     // Find the requesting user
@@ -968,7 +1089,7 @@ function updatePassword(requestingUser, oldPassword, newPassword, confirmPasswor
 
       // Ensure the user was found
       if (user === null) {
-        throw new M.CustomError('User not found.', 404, 'warn');
+        throw new M.NotFoundError('User not found.', 'warn');
       }
 
       // Verify the old password matches
@@ -977,7 +1098,7 @@ function updatePassword(requestingUser, oldPassword, newPassword, confirmPasswor
     .then((verified) => {
       // Ensure old password was verified
       if (!verified) {
-        throw new M.CustomError('Old password is incorrect.', 403, 'warn');
+        throw new M.AuthorizationError('Old password is incorrect.', 'warn');
       }
 
       // Update password on requesting user
@@ -988,6 +1109,6 @@ function updatePassword(requestingUser, oldPassword, newPassword, confirmPasswor
       return foundUser.save();
     })
     .then((updatedUser) => resolve(updatedUser))
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    .catch((error) => reject(error));
   });
 }

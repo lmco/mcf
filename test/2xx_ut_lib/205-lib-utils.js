@@ -43,8 +43,8 @@ describe(M.getModuleName(module.filename), () => {
  */
 function validUID(done) {
   try {
-    const uid = utils.createID('org', 'project', 'element');
-    chai.expect(uid).to.equal('org:project:element');
+    const uid = utils.createID('org', 'project', 'branch', 'element');
+    chai.expect(uid).to.equal('org:project:branch:element');
     done();
   }
   catch (error) {
@@ -60,12 +60,12 @@ function validUID(done) {
  */
 function invalidUID(done) {
   try {
-    utils.createID('org', 'project', 9);
+    utils.createID('org', 'project', 'master', 9);
     chai.expect(true).to.equal(false);
     done();
   }
   catch (error) {
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Argument is not a string.');
     done();
   }
 }
@@ -99,7 +99,7 @@ function parseInvalidUID(done) {
     done();
   }
   catch (error) {
-    chai.expect(error.message).to.equal('Bad Request');
+    chai.expect(error.message).to.equal('Invalid UID.');
     done();
   }
 }

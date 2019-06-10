@@ -7,10 +7,11 @@
  *
  * @license LMPI - Lockheed Martin Proprietary Information
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This renders the element component
  */
@@ -26,10 +27,9 @@ import {
   Label,
   Input,
   FormFeedback,
-  Row,
   Col,
-  UncontrolledTooltip,
-  UncontrolledAlert
+  UncontrolledAlert,
+  Tooltip
 } from 'reactstrap';
 
 // MBEE Modules
@@ -43,19 +43,25 @@ class ElementEdit extends Component {
   constructor(props) {
     // Initialize parent props
     super(props);
+
+    // Set mounted variable
+    this.mounted = false;
+
     // Initialize state props
     this.state = {
       id: this.props.id,
       name: '',
       type: '',
       parent: null,
-      target: null,
       source: null,
+      target: null,
       documentation: '',
       custom: {},
       org: null,
       project: null,
       parentUpdate: null,
+      isSaveTooltipOpen: false,
+      isExitTooltipOpen: false,
       error: null
     };
 
@@ -64,6 +70,10 @@ class ElementEdit extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.parentSelectHandler = this.parentSelectHandler.bind(this);
+    this.handleSaveTooltipToggle = this.handleSaveTooltipToggle.bind(this);
+    this.handleExitTooltipToggle = this.handleExitTooltipToggle.bind(this);
+    this.sourceSelectHandler = this.sourceSelectHandler.bind(this);
+    this.targetSelectHandler = this.targetSelectHandler.bind(this);
   }
 
   getElement() {
@@ -104,19 +114,23 @@ class ElementEdit extends Component {
         },
         401: (err) => {
           // Throw error and set state
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
 
           // Refresh when session expires
           window.location.reload();
         },
         404: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         }
       }
     });
   }
 
   componentDidMount() {
+    // Set the mounted variable
+    this.mounted = true;
+
+    // Get element information
     this.getElement();
   }
 
@@ -186,16 +200,16 @@ class ElementEdit extends Component {
           }
         },
         401: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
 
           // Refresh when session expires
           window.location.reload();
         },
         404: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         },
         403: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         }
       }
     });
@@ -209,20 +223,57 @@ class ElementEdit extends Component {
     this.setState({ parent: _id });
   }
 
+  // Toggles the tooltip
+  handleSaveTooltipToggle() {
+    const isTooltipOpen = this.state.isSaveTooltipOpen;
+
+    // Verify component is not unmounted
+    if (!this.mounted) {
+      return;
+    }
+
+    return this.setState({ isSaveTooltipOpen: !isTooltipOpen });
+  }
+
+  // Toggles the tooltip
+  handleExitTooltipToggle() {
+    const isTooltipOpen = this.state.isExitTooltipOpen;
+
+    // Verify component is not unmounted
+    if (!this.mounted) {
+      return;
+    }
+
+    return this.setState({ isExitTooltipOpen: !isTooltipOpen });
+  }
+
+  componentWillUnmount() {
+    // Set mounted variable
+    this.mounted = false;
+  }
+
+  /**
+   * This function is called when the ElementSelector for the source field
+   * changes.
+   */
+  sourceSelectHandler(_id) {
+    this.setState({ source: _id });
+  }
+
+  /**
+   * This function is called when the ElementSelector for the target field
+   * changes.
+   */
+  targetSelectHandler(_id) {
+    this.setState({ target: _id });
+  }
+
+  /**
+   * Renders the component
+   */
   render() {
     // // Initialize variables
-    let targetInvalid;
-    let sourceInvalid;
     let customInvalid;
-
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.target)) {
-      targetInvalid = true;
-    }
-    // Verify id
-    if (!RegExp(validators.id).test(this.state.source)) {
-      sourceInvalid = true;
-    }
 
     // Verify if custom data is correct JSON format
     try {
@@ -241,13 +292,21 @@ class ElementEdit extends Component {
               Element Edit
             </h2>
             <div className='side-icons'>
-              <UncontrolledTooltip placement='left' target='saveBtn'>
+              <Tooltip
+                placement='left'
+                isOpen={this.state.isSaveTooltipOpen}
+                target='saveBtn'
+                toggle={this.handleSaveTooltipToggle}>
                 Save
-              </UncontrolledTooltip>
+              </Tooltip>
               <i id='saveBtn' className='fas fa-save edit-btn' onClick={this.onSubmit}/>
-              <UncontrolledTooltip placement='left' target='cancelBtn'>
+              <Tooltip
+                placement='left'
+                isOpen={this.state.isExitTooltipOpen}
+                target='cancelBtn'
+                toggle={this.handleExitTooltipToggle}>
                 Exit
-              </UncontrolledTooltip>
+              </Tooltip>
               <i id='cancelBtn' className='fas fa-times exit-btn' onClick={() => { this.props.closeSidePanel(); }}/>
             </div>
           </div>
@@ -276,16 +335,13 @@ class ElementEdit extends Component {
               // Form section for Element parent
               : (<FormGroup row>
                 <Label for='parent' sm={2}><b>Parent</b></Label>
-                  <Col sm={10} className={'parent'}>
+                  <Col sm={10} className={'selector-value'}>
                     {this.state.parent || ''}
                     <ElementSelector
+                      self={this.state.id}
                       project={this.props.project}
                       selectedHandler={this.parentSelectHandler} />
                   </Col>
-                  {/* Verify fields are valid, or display feedback */}
-                <FormFeedback>
-                  Invalid: An Element parent may only contain letters, numbers, space, or dashes.
-                </FormFeedback>
                  </FormGroup>)
             }
             {/* Form section for Element type */}
@@ -303,38 +359,24 @@ class ElementEdit extends Component {
             {/* Form section for Element source */}
             <FormGroup row>
               <Label for='name' sm={2}><b>Source</b></Label>
-              <Col sm={10}>
-                <Input type='text'
-                       name='source'
-                       id='source'
-                       placeholder='Source ID'
-                       invalid={sourceInvalid}
-                       value={this.state.source || ''}
-                       onChange={this.handleChange}/>
+              <Col sm={10} className={'selector-value'}>
+                {this.state.source || 'null'}
+                <ElementSelector
+                  self={this.state.id}
+                  project={this.props.project}
+                  selectedHandler={this.sourceSelectHandler} />
               </Col>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback>
-                Invalid:
-                An Element source may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
             </FormGroup>
             {/* Form section for Element target */}
             <FormGroup row>
               <Label for='name' sm={2}><b>Target</b></Label>
-              <Col sm={10}>
-                <Input type='text'
-                       name='target'
-                       id='target'
-                       placeholder='Target ID'
-                       invalid={targetInvalid}
-                       value={this.state.target || ''}
-                       onChange={this.handleChange}/>
+              <Col sm={10} className={'selector-value'}>
+                {this.state.target || 'null'}
+                <ElementSelector
+                  self={this.state.id}
+                  project={this.props.project}
+                  selectedHandler={this.targetSelectHandler} />
               </Col>
-              {/* Verify fields are valid, or display feedback */}
-              <FormFeedback>
-                Invalid:
-                An Element target may only contain letters, numbers, space, or dashes.
-              </FormFeedback>
             </FormGroup>
             {/* Form section for custom data */}
             <FormGroup>

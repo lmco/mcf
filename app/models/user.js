@@ -132,7 +132,7 @@ UserSchema.pre('save', function(next) {
   // Check validation status NOT successful
   if (!AuthController.validatePassword(this.password, this.provider)) {
     // Failed validation, throw error
-    throw new M.CustomError('Password validation failed.', 400, 'warn');
+    throw new M.DataFormatError('Password validation failed.', 'warn');
   }
 
   // Hash plaintext password
@@ -195,6 +195,18 @@ UserSchema.methods.getValidPopulateFields = function() {
 UserSchema.statics.getValidPopulateFields = function() {
   return UserSchema.methods.getValidPopulateFields();
 };
+
+/* ------------------------------( User Index )------------------------------ */
+/**
+ * @description Adds a compound text index on the first name, preferred name,
+ * and last name of the user.
+ * @memberOf UserSchema
+ */
+UserSchema.index({
+  fname: 'text',
+  preferredName: 'text',
+  lname: 'text'
+});
 
 /* ---------------------------( User Properties )---------------------------- */
 // Required for virtual getters

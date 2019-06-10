@@ -52,6 +52,7 @@ class InformationPage extends Component {
     // Initialize variables
     let name;
     let id;
+    let visibility;
     let orgid = null;
     let custom;
     let isButtonDisplayed = false;
@@ -73,6 +74,7 @@ class InformationPage extends Component {
       name = this.props.project.name;
       id = this.props.project.id;
       orgid = this.props.project.org;
+      visibility = this.props.project.visibility;
       custom = this.props.project.custom;
     }
 
@@ -117,10 +119,17 @@ class InformationPage extends Component {
                 </tr>
                 {(orgid === null)
                   ? <tr/>
-                  : (<tr>
-                    <th>Org ID:</th>
-                    <td><a href={`/${orgid}`}>{orgid}</a></td>
-                  </tr>)
+                  : (<React.Fragment>
+                      <tr>
+                        <th>Org ID:</th>
+                        <td><a href={`/${orgid}`}>{orgid}</a></td>
+                      </tr>
+                      <tr>
+                        <th>Visibility:</th>
+                        <td>{visibility}</td>
+                      </tr>
+                    </React.Fragment>
+                  )
                 }
                 </tbody>
               </table>

@@ -63,7 +63,7 @@ class ProjectList extends Component {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
       if (err) {
-        this.setState({ error: err.responseJSON.description });
+        this.setState({ error: err.responseText });
       }
       else {
         this.setState({ user: data });
@@ -78,13 +78,13 @@ class ProjectList extends Component {
             },
             401: (error) => {
               // Throw error and set state
-              this.setState({ error: error.responseJSON.description });
+              this.setState({ error: error.responseText });
 
               // Refresh when session expires
               window.location.reload();
             },
             404: (error) => {
-              this.setState({ error: error.responseJSON.description });
+              this.setState({ error: error.responseText });
             }
           }
         });
@@ -169,7 +169,7 @@ class ProjectList extends Component {
             permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                key={`proj-key-${project.id}`}
                                                project={project}
-                                               href={`/${orgId}/${project.id}`}/>);
+                                               href={`/orgs/${orgId}/projects/${project.id}`}/>);
           }
         });
       }
@@ -177,7 +177,7 @@ class ProjectList extends Component {
         projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                                       key={`proj-key-${project.id}`}
                                                                       project={project}
-                                                                      href={`/${orgId}/${project.id}`}/>));
+                                                                      href={`/orgs/${orgId}/projects/${project.id}`}/>));
       }
 
       // Verify if projects
@@ -190,7 +190,7 @@ class ProjectList extends Component {
       return (
         <React.Fragment>
             <ListItem key={`org-key-${org.id}`} className='proj-org-header'>
-                <a href={`/${orgId}`}>{org.name}</a>
+                <a href={`/orgs/${orgId}`}>{org.name}</a>
             </ListItem>
             <List key={`org-list-key-${org.id}`}>
                 {permProjects}

@@ -26,6 +26,7 @@ const fs = require('fs');
 
 // MBEE modules
 const Element = M.require('models.element');
+const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
@@ -221,6 +222,8 @@ module.exports.removeTestOrg = function() {
 
     // Delete elements
     Element.deleteMany(ownedQuery)
+    // Delete any branches in the org
+    .then(() => Branch.deleteMany(ownedQuery))
     // Delete any projects in the org
     .then(() => Project.deleteMany({ org: testData.orgs[0].id }))
     // Delete the orgs
@@ -241,6 +244,7 @@ module.exports.createTestProject = function(adminUser, orgID) {
       _id: utils.createID(orgID, testData.projects[0].id),
       org: orgID,
       name: testData.projects[0].name,
+      createdBy: adminUser._id,
       custom: null
     });
     newProject.permissions[adminUser._id] = ['read', 'write', 'admin'];
@@ -249,15 +253,76 @@ module.exports.createTestProject = function(adminUser, orgID) {
     .then((_newProj) => {
       createdProject = _newProj;
 
-      const newElement = new Element({
-        _id: utils.createID(orgID, testData.projects[0].id, 'model'),
+      const newBranch = new Branch({
+        _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id),
         project: _newProj._id,
+        createdBy: adminUser._id,
+        name: testData.branches[0].name,
+        source: null
+      });
+
+      return newBranch.save();
+    })
+    .then((_newBranch) => {
+      const newElement = new Element({
+        _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id, 'model'),
+        project: createdProject._id,
+        branch: _newBranch._id,
+        createdBy: adminUser._id,
         name: 'Model'
       });
 
       return newElement.save();
     })
     .then(() => resolve(createdProject))
+    .catch((error) => reject(error));
+  });
+};
+
+/**
+ * @description Helper function to create a tag in MBEE tests
+ */
+module.exports.createTag = function(adminUser, orgID, projID) {
+  return new Promise((resolve, reject) => {
+    // Create a new tag
+    let createdTag;
+    const newTag = new Branch({
+      _id: utils.createID(orgID, projID, 'tag'),
+      project: projID,
+      createdBy: adminUser._id,
+      name: 'Tagged Branch',
+      tag: true,
+      source: utils.createID(orgID, projID, 'master')
+    });
+
+    return newTag.save()
+    .then((_newBranch) => {
+      createdTag = _newBranch;
+
+      // Create a root element for tag
+      const newElement = new Element({
+        _id: utils.createID(_newBranch._id, 'model'),
+        project: utils.createID(orgID, projID),
+        branch: _newBranch._id,
+        createdBy: adminUser._id,
+        name: 'Model'
+      });
+
+      return newElement.save();
+    })
+    .then(() => {
+      // Create a non root element in the tag
+      const newElement = new Element({
+        _id: utils.createID(createdTag._id, testData.elements[1].id),
+        project: utils.createID(orgID, projID),
+        branch: createdTag._id,
+        createdBy: adminUser._id,
+        name: 'Model'
+      });
+
+      return newElement.save();
+    })
+    .then(() => resolve(createdTag))
     .catch((error) => reject(error));
   });
 };
@@ -292,10 +357,10 @@ module.exports.importTestData = function(filename) {
 module.exports.createRequest = function(user, params, body, method, query = {}) {
   // Error-Check
   if (typeof params !== 'object') {
-    throw M.CustomError('params is not of type object.');
+    throw M.DataFormatError('params is not of type object.', 'warn');
   }
   if (typeof params !== 'object') {
-    throw M.CustomError('body is not of type object.');
+    throw M.DataFormatError('body is not of type object.', 'warn');
   }
 
   return {

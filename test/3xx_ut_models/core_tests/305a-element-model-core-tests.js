@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.304a-element-model-tests
+ * @module test.305a-element-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -23,6 +23,7 @@ const chai = require('chai');
 
 // MBEE modules
 const Element = M.require('models.element');
+const Branch = M.require('models.branch');
 const Org = M.require('models.organization');
 const Project = M.require('models.project');
 const db = M.require('lib.db');
@@ -35,6 +36,8 @@ const testData = testUtils.importTestData('test_data.json');
 let org = null;
 let project = null;
 let projID = null;
+let branch = null;
+let branchID = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -77,6 +80,21 @@ describe(M.getModuleName(module.filename), () => {
       // Update project for test data
       project = retProj;
       projID = utils.parseID(project.id).pop();
+      // Create the branch model object
+      const newBranch = new Branch({
+        _id: utils.createID(org.id, projID, testData.branches[0].id),
+        name: testData.branches[0].name,
+        project: project._id
+      });
+
+      // Save the project model object to the database
+      return newBranch.save();
+    })
+    .then((retBranch) => {
+      // Update branch for test data
+      branch = retBranch;
+      branchID = utils.parseID(branch.id).pop();
+
       done();
     })
     .catch((error) => {
@@ -117,10 +135,11 @@ describe(M.getModuleName(module.filename), () => {
 function createElement(done) {
   // Create new element object
   const newElement = new Element({
-    _id: utils.createID(org.id, projID, testData.elements[0].id),
+    _id: utils.createID(org.id, projID, branchID, testData.elements[0].id),
     name: testData.elements[0].name,
     project: utils.createID(org.id, projID),
-    parent: null
+    parent: null,
+    branch: utils.createID(org.id, projID, branchID)
   });
 
   // Save element object to database
@@ -128,10 +147,11 @@ function createElement(done) {
   .then((createdElement) => {
     // Check element object saved correctly
     chai.expect(createdElement._id).to.equal(
-      utils.createID(project._id, testData.elements[0].id)
+      utils.createID(branch._id, testData.elements[0].id)
     );
     chai.expect(createdElement.name).to.equal(testData.elements[0].name);
     chai.expect(createdElement.project).to.equal(project._id);
+    chai.expect(createdElement.branch).to.equal(branch._id);
     chai.expect(createdElement.parent).to.equal(null);
     done();
   })
@@ -148,7 +168,7 @@ function createElement(done) {
  */
 function findElement(done) {
   // Find the element
-  Element.findOne({ _id: utils.createID(project._id, testData.elements[0].id) })
+  Element.findOne({ _id: utils.createID(branch._id, testData.elements[0].id) })
   .then((element) => {
     // Verify found element is correct
     chai.expect(element.name).to.equal(testData.elements[0].name);
@@ -168,12 +188,12 @@ function findElement(done) {
 function updateElement(done) {
   // Update the element
   Element.findOneAndUpdate(
-    { _id: utils.createID(project._id, testData.elements[0].id) },
+    { _id: utils.createID(branch._id, testData.elements[0].id) },
     { name: `${testData.elements[0]}_edit` }
   )
   // Find the updated element
   .then(() => Element.findOne({
-    _id: utils.createID(project._id, testData.elements[0].id) }))
+    _id: utils.createID(branch._id, testData.elements[0].id) }))
   .then((element) => {
     // Verify the found element was update successfully
     chai.expect(element.name).to.equal(`${testData.elements[0]}_edit`);
@@ -193,7 +213,7 @@ function updateElement(done) {
 function deleteElement(done) {
   // Find and delete the element
   Element.findOneAndRemove({
-    _id: utils.createID(project._id, testData.elements[0].id) })
+    _id: utils.createID(branch._id, testData.elements[0].id) })
 
   // Attempt to find the element
   .then(() => Element.find())

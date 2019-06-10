@@ -74,6 +74,7 @@ class ProfileHome extends Component {
           <ModalBody>
             {(!this.state.editPasswordModal)
               ? (<ProfileEdit user={this.props.user}
+                              viewingUser={this.props.viewingUser}
                               togglePasswordModal={this.togglePasswordModal}
                               toggle={this.handleToggle}/>)
               : (<PasswordEdit user={this.props.user}
@@ -83,13 +84,18 @@ class ProfileHome extends Component {
         </Modal>
         <div id='workspace'>
           <div id='workspace-header' className='workspace-header'>
-            <h2 className='workspace-title'>{user.name}</h2>
+            <h2 className='workspace-title'>
+              {user.fname} {user.lname}
+            </h2>
             <div className='workspace-header-button'>
-              <Button className='btn'
-                      outline color="secondary"
-                      onClick={this.handleToggle}>
-                Edit
-              </Button>
+              {(!this.props.admin)
+                ? ''
+                : (<Button className='btn'
+                           outline color="secondary"
+                           onClick={this.handleToggle}>
+                    Edit
+                  </Button>)
+              }
             </div>
           </div>
           <div id='workspace-body'>

@@ -84,7 +84,8 @@ class Search extends Component {
     // Build query URL
     const oid = this.props.project.org;
     const pid = this.props.project.id;
-    const url = `/api/orgs/${oid}/projects/${pid}/branches/master/elements/search`;
+    const bid = this.props.match.params.branchid;
+    const url = `/api/orgs/${oid}/projects/${pid}/branches/${bid}/elements/search`;
 
     // Do ajax request
     const start = new Date();

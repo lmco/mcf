@@ -27,7 +27,8 @@ import {
   Input,
   FormFeedback,
   Button,
-  UncontrolledAlert
+  UncontrolledAlert,
+  CustomInput
 } from 'reactstrap';
 
 /* eslint-enable no-unused-vars */
@@ -41,18 +42,25 @@ class EditPage extends Component {
     // Initialize state props
     let name;
     let custom;
+    let visibility;
+    let archived;
 
     if (this.props.org) {
       name = this.props.org.name;
+      archived = this.props.org.archived;
       custom = this.props.org.custom;
     }
     else {
       name = this.props.project.name;
+      archived = this.props.project.archived;
       custom = this.props.project.custom;
+      visibility = this.props.visibility;
     }
 
     this.state = {
       name: name,
+      visibility: visibility,
+      archived: archived,
       custom: JSON.stringify(custom || {}, null, 2),
       error: null
     };
@@ -68,8 +76,15 @@ class EditPage extends Component {
 
   // Define handle change function
   handleChange(event) {
-    // Change the state with new value
-    this.setState({ [event.target.name]: event.target.value });
+    // Verify target being changed
+    if (event.target.name === 'archived') {
+      // Change the archive state to opposite value
+      this.setState(prevState => ({ archived: !prevState.archived }));
+    }
+    else {
+      // Change the state with new value
+      this.setState({ [event.target.name]: event.target.value });
+    }
 
     // Resize custom data field
     $('textarea[name="custom"]').autoResize();
@@ -80,20 +95,25 @@ class EditPage extends Component {
     // Initialize variables
     let url;
     let redirect;
-
-    if (this.props.org) {
-      url = `/api/orgs/${this.props.org.id}`;
-      redirect = `/${this.props.org.id}`;
-    }
-    else {
-      url = `/api/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
-      redirect = `/${this.props.orgid}/${this.props.project.id}`;
-    }
-
     const data = {
       name: this.state.name,
       custom: JSON.parse(this.state.custom)
     };
+
+
+    if (this.props.org) {
+      url = `/api/orgs/${this.props.org.id}`;
+      redirect = `/orgs/${this.props.org.id}`;
+    }
+    else {
+      data.visibility = this.state.visibility;
+      url = `/api/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
+      redirect = `/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
+    }
+
+    if (this.state.archived) {
+      data.archived = true;
+    }
 
     $.ajax({
       method: 'PATCH',
@@ -103,13 +123,13 @@ class EditPage extends Component {
       statusCode: {
         200: () => { window.location.replace(redirect); },
         401: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
 
           // Refresh when session expires
           window.location.reload();
         },
         403: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         }
       }
     });
@@ -165,6 +185,22 @@ class EditPage extends Component {
                        value={this.state.name || ''}
                        onChange={this.handleChange}/>
               </FormGroup>
+              {(!this.props.project)
+                ? ''
+                // Form section for project visibility
+                : (<FormGroup>
+                    <Label for="visibility">Visibility</Label>
+                    <Input type="select"
+                           name="visibility"
+                           id="visibility"
+                           value={this.state.visibility || ''}
+                           onChange={this.handleChange}>
+                      <option>Choose one...</option>
+                      <option value='internal'>Internal</option>
+                      <option value='private'>Private</option>
+                    </Input>
+                   </FormGroup>)
+              }
               {/* Form section for custom data */}
               <FormGroup>
                 <Label for="custom">Custom Data</Label>
@@ -179,6 +215,17 @@ class EditPage extends Component {
                 <FormFeedback>
                     Invalid: Custom data must be valid JSON
                 </FormFeedback>
+              </FormGroup>
+              {/* Form section for archiving */}
+              <FormGroup>
+                <div>
+                  <CustomInput type="switch"
+                               id="archived"
+                               name="archived"
+                               label="Archive"
+                               value={this.state.archived}
+                               onChange={this.handleChange}/>
+                </div>
               </FormGroup>
               {/* Button to submit changes */}
               <Button color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>

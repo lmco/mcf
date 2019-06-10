@@ -48,15 +48,16 @@
     }
   }
 
-  .element-tree > .element-name > span {
+  .element-tree > .element-link > span {
     transition: all .15s ease-in-out;
   }
 
-  .element-tree > .element-name:hover {
+  .element-tree > .element-link:hover {
     cursor: pointer;
+    text-decoration: none;
   }
 
-  .element-tree > .element-name:hover > span:not(.element-id) {
+  .element-tree > .element-link:hover > span:not(.element-id) {
     color: lighten($mbee-navbar-color, 20%);
   }
 
@@ -68,5 +69,8 @@
     color: transparent;
   }
 
+  .element-link {
+    color: black;
+  }
 }
 

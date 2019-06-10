@@ -65,6 +65,8 @@ class ElementNew extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.parentSelectHandler = this.parentSelectHandler.bind(this);
+    this.sourceSelectHandler = this.sourceSelectHandler.bind(this);
+    this.targetSelectHandler = this.targetSelectHandler.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -89,6 +91,11 @@ class ElementNew extends Component {
       parent: this.state.parent
     };
 
+    if (this.state.source !== null && this.state.target !== null) {
+      data.source = this.state.source;
+      data.target = this.state.target;
+    }
+
     const oid = this.props.project.org;
     const pid = this.props.project.id;
     const baseUrl = `/api/orgs/${oid}/projects/${pid}/branches/master`;
@@ -104,13 +111,13 @@ class ElementNew extends Component {
           this.props.closeSidePanel(null, true, false);
         },
         401: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
 
           // Refresh when session expires
           window.location.reload();
         },
         403: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         }
       }
     });
@@ -122,6 +129,26 @@ class ElementNew extends Component {
    */
   parentSelectHandler(_id) {
     this.setState({ parent: _id });
+
+    // This is used to select the parent in the main tree.
+    // It allows the main tree to be refreshed when the new element is added.
+    $(`#element-tree-container #tree-${_id} > .element-name`).click();
+  }
+
+  /**
+   * This function is called when the ElementSelector for the source field
+   * changes.
+   */
+  sourceSelectHandler(_id) {
+    this.setState({ source: _id });
+  }
+
+  /**
+   * This function is called when the ElementSelector for the target field
+   * changes.
+   */
+  targetSelectHandler(_id) {
+    this.setState({ target: _id });
   }
 
   render() {
@@ -192,7 +219,7 @@ class ElementNew extends Component {
           <FormGroup row>
             <Label for="parent" sm={2}>Parent</Label>
             <Col sm={10}>
-              <div id="parent">
+              <div id="parent" className={'selector-value'}>
                 {this.state.parent || 'Select an element.'}
                 <ElementSelector
                   project={this.props.project}
@@ -200,9 +227,31 @@ class ElementNew extends Component {
               </div>
             </Col>
           </FormGroup>
+          <FormGroup row>
+            <Label for='name' sm={2}>Source</Label>
+            <Col sm={10} className={'selector-value'}>
+              {this.state.source || 'null'}
+              <ElementSelector
+                self={this.state.id}
+                project={this.props.project}
+                selectedHandler={this.sourceSelectHandler} />
+            </Col>
+          </FormGroup>
+          {/* Form section for Element target */}
+          <FormGroup row>
+            <Label for='name' sm={2}>Target</Label>
+            <Col sm={10} className={'selector-value'}>
+              {this.state.target || 'null'}
+              <ElementSelector
+                self={this.state.id}
+                project={this.props.project}
+                selectedHandler={this.targetSelectHandler} />
+            </Col>
+          </FormGroup>
           <Button className='btn btn'
                   outline color="primary"
-                  disabled={disableSubmit} onClick={this.onSubmit}>
+                  disabled={disableSubmit}
+                  onClick={this.onSubmit}>
             Submit
           </Button>
           <Button className='btn btn'

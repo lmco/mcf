@@ -17,8 +17,9 @@
  */
 
 // Node Modules
-const fs = require('fs');     // Access the filesystem
-const path = require('path'); // Find directory paths
+const fs = require('fs');                       // Access the filesystem
+const path = require('path');                   // Find directory paths
+const { execSync } = require('child_process');  // Execute shell commands
 
 // Project Metadata
 const pkg = require(path.join(__dirname, 'package.json'));
@@ -53,6 +54,23 @@ Object.defineProperty(M, 'version', {
  */
 Object.defineProperty(M, 'build', {
   value: (pkg.hasOwnProperty('build')) ? pkg.build : 'NO_BUILD_NUMBER',
+  writable: false,
+  enumerable: true
+});
+
+/**
+ * Defines the last commit hash by calling the git command `git rev-parse HEAD`.
+ * If the commit cannot be retrieved it is set to an empty string.
+ */
+let commit = '';
+try {
+  commit = execSync('git rev-parse HEAD').toString();
+}
+catch (err) {
+  // Do nothing
+}
+Object.defineProperty(M, 'commit', {
+  value: commit,
   writable: false,
   enumerable: true
 });
@@ -140,9 +158,29 @@ if (installComplete) {
     enumerable: true
   });
 
-  // Initialize the CustomError Class
-  Object.defineProperty(M, 'CustomError', {
-    value: M.require('lib.errors').CustomError
+  // Initialize the custom error classes
+  Object.defineProperties(M, {
+    DataFormatError: {
+      value: M.require('lib.errors').DataFormatError
+    },
+    OperationError: {
+      value: M.require('lib.errors').OperationError
+    },
+    AuthorizationError: {
+      value: M.require('lib.errors').AuthorizationError
+    },
+    PermissionError: {
+      value: M.require('lib.errors').PermissionError
+    },
+    NotFoundError: {
+      value: M.require('lib.errors').NotFoundError
+    },
+    ServerError: {
+      value: M.require('lib.errors').ServerError
+    },
+    DatabaseError: {
+      value: M.require('lib.errors').DatabaseError
+    }
   });
 }
 

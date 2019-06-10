@@ -44,6 +44,8 @@ class ProjectElements extends Component {
       id: null,
       refreshFunction: null,
       treeRoot: null,
+      branch: 'model',
+      childrenOpen: {},
       error: null
     };
 
@@ -52,6 +54,7 @@ class ProjectElements extends Component {
     this.editElementInfo = this.editElementInfo.bind(this);
     this.createNewElement = this.createNewElement.bind(this);
     this.getElement = this.getElement.bind(this);
+    this.setChildOpen = this.setChildOpen.bind(this);
   }
 
   createNewElement() {
@@ -65,19 +68,24 @@ class ProjectElements extends Component {
 
   // Define the open and close of the element side panel function
   openElementInfo(id, refreshFunction) {
-    // The currently selected element
-    this.setState({ id: id, refreshFunction: refreshFunction });
-
     // Select the clicked element
     $('.element-tree').removeClass('tree-selected');
     $(`#tree-${id}`).addClass('tree-selected');
 
     if (this.state.sidePanel === 'addElement') {
-      // do nothing
+      // Only set the refresh function
+      // The ID is not set here to avoid updating the 'parent' field on the
+      // add element panel. That parent field should only be passed in when
+      // the addElement panel is first opened.
+      this.setState({ refreshFunction: refreshFunction });
     }
     else {
       // Toggle the element side panel
-      this.setState({ sidePanel: 'elementInfo' });
+      this.setState({
+        id: id,
+        refreshFunction: refreshFunction,
+        sidePanel: 'elementInfo'
+      });
     }
 
     // Get the sidebar html element and toggle it
@@ -107,7 +115,8 @@ class ProjectElements extends Component {
   getElement() {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
-    const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
+    const branchId = this.props.match.params.branchid;
+    const base = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
     const url = `${base}/elements/model?fields=id,name,contains,type&minified=true`;
 
     $.ajax({
@@ -122,17 +131,26 @@ class ProjectElements extends Component {
           window.location.reload();
         },
         403: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         },
         404: (err) => {
-          this.setState({ error: err.responseJSON.description });
+          this.setState({ error: err.responseText });
         }
       }
     });
   }
 
+  setChildOpen(id, state) {
+    this.state.childrenOpen[id] = state;
+  }
+
   componentDidMount() {
     this.getElement();
+
+    if (this.props.location.hash) {
+      const elementid = this.props.location.hash.replace('#', '');
+      this.openElementInfo(elementid);
+    }
   }
 
   render() {
@@ -175,6 +193,8 @@ class ProjectElements extends Component {
                           project={this.props.project}
                           parent={null}
                           isOpen={true}
+                          childrenOpen={this.state.childrenOpen}
+                          setChildOpen={this.setChildOpen}
                           parentRefresh={this.getElement}
                           clickHandler={this.openElementInfo}/>;
     }

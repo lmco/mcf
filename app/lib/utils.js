@@ -62,16 +62,22 @@ module.exports.render = function(req, res, name, params) {
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *
- * @param {string} args - An arbitrary number of strings to be appended.
+ * @param {(...string|string[])} args - An arbitrary number of strings to be
+ * appended or an array of strings.
  *
  * @return {string} Concatenated args with uid delimiter
  */
 module.exports.createID = function(...args) {
+  // If passed in an array of strings, set equal to args
+  if (Array.isArray(args[0]) && args[0].every(e => typeof e === 'string')) {
+    args = args[0]; // eslint-disable-line
+  }
+
   // For each argument
   args.forEach((a) => {
     // Verify the argument is a string
     if (typeof a !== 'string') {
-      throw new M.CustomError('Argument is not a string.', 400);
+      throw new M.DataFormatError('Argument is not a string.', 'warn');
     }
   });
 
@@ -88,7 +94,7 @@ module.exports.createID = function(...args) {
  */
 module.exports.parseID = function(uid) {
   if (!uid.includes(this.ID_DELIMITER)) {
-    throw new M.CustomError('Invalid UID.', 400);
+    throw new M.DataFormatError('Invalid UID.', 'warn');
   }
   return uid.split(this.ID_DELIMITER);
 };
@@ -172,7 +178,7 @@ module.exports.parseOptions = function(options, validOptions) {
     // Check options are valid
     if (!validOptions.hasOwnProperty(key)) {
       // Invalid key, throw error
-      throw new M.CustomError(`Invalid parameter: ${key}`, 400, 'warn');
+      throw new M.DataFormatError(`Invalid parameter: ${key}`, 'warn');
     }
   });
 
@@ -207,7 +213,7 @@ module.exports.parseOptions = function(options, validOptions) {
     else if (validOptions[option] === 'number') {
       const number = parseInt(options[option], 10);
       if (isNaN(number)) { // eslint-disable-line no-restricted-globals
-        throw new M.CustomError(`${options[option]} is not a number`, 400, 'warn');
+        throw new M.DataFormatError(`${options[option]} is not a number`, 'warn');
       }
       else {
         parsedOptions[option] = number;
@@ -235,16 +241,18 @@ module.exports.validateOptions = function(options, validOptions, model) {
   // Define the object to be returned to the user. Initialize populateString
   const returnObject = { populateString: '' };
   // Define valid searchOptions for the element model
-  const searchOptions = ['parent', 'source', 'target', 'type', 'name',
+  const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+    'createdBy', 'lastModifiedBy', 'archivedBy'];
+  // Define valid searchOptions for the branch model
+  const branchSearchOptions = ['tag', 'source'];
+  // Define valid searchOptions for the user model
+  const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
     'createdBy', 'lastModifiedBy', 'archivedBy'];
 
-  // Define the populateString for elements, since we populate contains by default
+  // Add required populate fields to populate string for Element model
   if (model.modelName === 'Element') {
-    returnObject.populateString = 'contains ';
-  }
-  // Not a valid mongoose model, throw an error
-  else if (!model.hasOwnProperty('modelName')) {
-    throw new M.CustomError('A valid model was not provided.', 500, 'error');
+    // Set populateString to include require virtuals
+    returnObject.populateString = 'contains sourceOf targetOf ';
   }
 
   // Check if no options provided
@@ -257,47 +265,55 @@ module.exports.validateOptions = function(options, validOptions, model) {
     let val = options[opt];
 
     // Special case, ignore these as the controller handles these
-    if (model.modelName === 'Element'
-      && (searchOptions.includes(opt) || opt.startsWith('custom.'))) {
+    if ((model.modelName === 'Element'
+      && (elemSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'Branch'
+      && (branchSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'User'
+      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
       // Ignore iteration of loop
       return;
     }
     // If the option is not valid for the calling function
     else if (!validOptions.includes(opt)) {
-      throw new M.CustomError(`Invalid option [${opt}].`, 400, 'warn');
+      throw new M.DataFormatError(`Invalid option [${opt}].`, 'warn');
     }
 
     // Handle the populate option
     if (opt === 'populate') {
       // Ensure the value is an array
       if (!Array.isArray(val)) {
-        throw new M.CustomError('The option \'populate\' is not an array.', 400, 'warn');
+        throw new M.DataFormatError('The option \'populate\' is not an array.', 'warn');
       }
       // Ensure every item in val is a string
       if (!val.every(o => typeof o === 'string')) {
-        throw new M.CustomError(
-          'Every value in the populate array must be a string.', 400, 'warn'
+        throw new M.DataFormatError(
+          'Every value in the populate array must be a string.', 'warn'
         );
       }
 
       // Ensure each field is able to be populated
       const validPopulateFields = model.getValidPopulateFields();
+      const requiredElementFields = ['contains', 'sourceOf', 'targetOf'];
       val.forEach((p) => {
         // If the field cannot be populated, throw an error
         if (!validPopulateFields.includes(p)) {
-          throw new M.CustomError(`The field ${p} cannot be populated.`, 400, 'warn');
+          throw new M.OperationError(`The field ${p} cannot be populated.`, 'warn');
+        }
+
+        // If the field is not a required virtual on the Element model
+        if (!(model.modelName === 'Element' && requiredElementFields.includes(p))) {
+          // Add field to populateString
+          returnObject.populateString += `${p} `;
         }
       });
-
-      // Set the populateString option in the returnObject
-      returnObject.populateString += val.join(' ');
     }
 
     // Handle the archived option
     if (opt === 'archived') {
       // Ensure value is a boolean
       if (typeof val !== 'boolean') {
-        throw new M.CustomError('The option \'archived\' is not a boolean.', 400, 'warn');
+        throw new M.DataFormatError('The option \'archived\' is not a boolean.', 'warn');
       }
 
       // Set the field archived in the returnObject
@@ -308,7 +324,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'subtree') {
       // Ensure value is a boolean
       if (typeof options.subtree !== 'boolean') {
-        throw new M.CustomError('The option \'subtree\' is not a boolean.', 400, 'warn');
+        throw new M.DataFormatError('The option \'subtree\' is not a boolean.', 'warn');
       }
 
       // Set the subtree option in the returnObject
@@ -319,12 +335,12 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'fields') {
       // Ensure the value is an array
       if (!Array.isArray(val)) {
-        throw new M.CustomError('The option \'fields\' is not an array.', 400, 'warn');
+        throw new M.DataFormatError('The option \'fields\' is not an array.', 'warn');
       }
       // Ensure every item in the array is a string
       if (!val.every(o => typeof o === 'string')) {
-        throw new M.CustomError(
-          'Every value in the fields array must be a string.', 400, 'warn'
+        throw new M.DataFormatError(
+          'Every value in the fields array must be a string.', 'warn'
         );
       }
 
@@ -339,7 +355,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'limit') {
       // Ensure the value is a number
       if (typeof options.limit !== 'number') {
-        throw new M.CustomError('The option \'limit\' is not a number.', 400, 'warn');
+        throw new M.DataFormatError('The option \'limit\' is not a number.', 'warn');
       }
 
       // Set the limit option in the returnObject
@@ -350,12 +366,12 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'skip') {
       // Ensure the value is a number
       if (typeof options.skip !== 'number') {
-        throw new M.CustomError('The option \'skip\' is not a number.', 400, 'warn');
+        throw new M.DataFormatError('The option \'skip\' is not a number.', 'warn');
       }
 
       // Ensure the value is not negative
       if (options.skip < 0) {
-        throw new M.CustomError('The option \'skip\' cannot be negative.', 400, 'warn');
+        throw new M.DataFormatError('The option \'skip\' cannot be negative.', 'warn');
       }
 
       // Set the skip option in the returnObject
@@ -366,7 +382,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'lean') {
       // Ensure the value is a boolean
       if (typeof options.lean !== 'boolean') {
-        throw new M.CustomError('The option \'lean\' is not a boolean.', 400, 'warn');
+        throw new M.DataFormatError('The option \'lean\' is not a boolean.', 'warn');
       }
 
       // Set the lean option in the returnObject

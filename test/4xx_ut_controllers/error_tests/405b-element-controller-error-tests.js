@@ -1,18 +1,18 @@
 /**
- * Classification: UNCLASSIFIED
- *
- * @module test.404b-element-controller-error-tests
- *
- * @copyright Copyright (C) 2019, Lockheed Martin Corporation
- *
- * @license LMPI - Lockheed Martin Proprietary Information
- *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
- *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- *
- * @description This tests for expected errors within the element controller.
- */
+* Classification: UNCLASSIFIED
+*
+* @module test.405b-element-controller-error-tests
+*
+* @copyright Copyright (C) 2019, Lockheed Martin Corporation
+*
+* @license LMPI - Lockheed Martin Proprietary Information
+*
+* @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+*
+* @author Austin Bieber <austin.j.bieber@lmco.com>
+*
+* @description This tests for expected errors within the element controller.
+*/
 
 // NPM modules
 const chai = require('chai');
@@ -29,6 +29,8 @@ let adminUser = null;
 let org = null;
 let proj = null;
 let projID = null;
+let branchID = null;
+let tagID = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -65,6 +67,12 @@ describe(M.getModuleName(module.filename), () => {
       // Set global project
       proj = retProj;
       projID = utils.parseID(proj.id).pop();
+      branchID = testData.branches[0].id;
+
+      return testUtils.createTag(adminUser, org.id, projID);
+    })
+    .then((tag) => {
+      tagID = utils.parseID(tag.id).pop();
 
       const elemDataObjects = [
         testData.elements[1],
@@ -74,7 +82,7 @@ describe(M.getModuleName(module.filename), () => {
         testData.elements[5],
         testData.elements[6]
       ];
-      return ElementController.create(adminUser, org.id, projID, 'master', elemDataObjects);
+      return ElementController.create(adminUser, org.id, projID, branchID, elemDataObjects);
     })
     .then(() => done())
     .catch((error) => {
@@ -113,10 +121,12 @@ describe(M.getModuleName(module.filename), () => {
     + ' updating a source', updateSourceWithNoTarget);
   it('should reject an update saying a source is required when'
     + ' updating a target', updateTargetWithNoSource);
-  it('should reject creating an element whose source is in an external project'
-    + ' that is not included in the project\'s projectReferences', createNonRefExternalSource);
-  it('should reject creating an element whose target is in an external project'
-    + ' that is not included in the project\'s projectReferences', createNonRefExternalTarget);
+  it('should reject creating elements to a tag '
+    + 'saying elements cannot be created.', createInTag);
+  it('should reject updating elements to a ta '
+    + 'saying elements cannot be update.', updateInTag);
+  it('should reject delete an element in a tag '
+    + 'saying elements cannot be deleted.', deleteInTag);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -134,14 +144,14 @@ function updateSourceToSelf(done) {
   };
 
   // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, 'master', update)
+  ElementController.update(adminUser, org.id, projID, branchID, update)
   .then(() => {
     // Should not succeed, force to fail
     done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('Element\'s source cannot be self'
+    chai.expect(error.message).to.equal('Element\'s source cannot be self'
       + ` [${elemDataObject.id}].`);
     done();
   });
@@ -161,14 +171,14 @@ function updateTargetToSelf(done) {
   };
 
   // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, 'master', update)
+  ElementController.update(adminUser, org.id, projID, branchID, update)
   .then(() => {
     // Should not succeed, force to fail
     done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('Element\'s target cannot be self'
+    chai.expect(error.message).to.equal('Element\'s target cannot be self'
       + ` [${elemDataObject.id}].`);
     done();
   });
@@ -188,14 +198,14 @@ function updateNonExistentSource(done) {
   };
 
   // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, 'master', update)
+  ElementController.update(adminUser, org.id, projID, branchID, update)
   .then(() => {
     // Should not succeed, force to fail
     done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('The source element '
+    chai.expect(error.message).to.equal('The source element '
       + '[NonExistentElement] was not found in the project [project00].');
     done();
   });
@@ -215,14 +225,14 @@ function updateNonExistentTarget(done) {
   };
 
   // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, 'master', update)
+  ElementController.update(adminUser, org.id, projID, branchID, update)
   .then(() => {
     // Should not succeed, force to fail
     done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('The target element '
+    chai.expect(error.message).to.equal('The target element '
       + '[NonExistentElement] was not found in the project [project00].');
     done();
   });
@@ -242,14 +252,14 @@ function updateSourceWithNoTarget(done) {
   };
 
   // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, 'master', update)
+  ElementController.update(adminUser, org.id, projID, branchID, update)
   .then(() => {
     // Should not succeed, force to fail
     done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`Element [${elemDataObject.id}]`
+    chai.expect(error.message).to.equal(`Element [${elemDataObject.id}]`
       + ' target is required if source is provided.');
     done();
   });
@@ -269,81 +279,81 @@ function updateTargetWithNoSource(done) {
   };
 
   // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, 'master', update)
+  ElementController.update(adminUser, org.id, projID, branchID, update)
   .then(() => {
     // Should not succeed, force to fail
     done(new Error('Element updated successfully.'));
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal(`Element [${elemDataObject.id}]`
+    chai.expect(error.message).to.equal(`Element [${elemDataObject.id}]`
       + ' source is required if target is provided.');
     done();
   });
 }
 
 /**
- * @description Verifies that an element cannot have a source in an external
- * project that is not in the current project projectReferences array.
+ * @description Verifies that the tag can not create
+ * elements.
  */
-function createNonRefExternalSource(done) {
-  // Create element data with sourceNamespace with project not in the current
-  // project's projectReferences list
-  const elemObj = {
-    id: 'external-source',
-    source: 'model',
-    sourceNamespace: {
-      org: org.id,
-      project: 'doesnotexist',
-      branch: 'master'
-    },
-    target: 'model'
-  };
+function createInTag(done) {
+  const elementObj = testData.elements[0];
 
-  // Attempt to create the element through the element controller
-  ElementController.create(adminUser, org.id, projID, 'master', elemObj)
+  // Attempt to create an element
+  ElementController.create(adminUser, org.id, projID, tagID, elementObj)
   .then(() => {
     // Should not succeed, force to fail
-    done(new Error('Element created successfully.'));
+    done(new Error('Element was successfully created.'));
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('The project '
-      + `[${elemObj.sourceNamespace.project}] is not in the found project's `
-      + 'projectReference list.');
+    chai.expect(error.message).to.equal(`[${tagID}] is a tag and does`
+      + ' not allow elements to be created.');
     done();
   });
 }
 
 /**
- * @description Verifies that an element cannot have a target in an external
- * project that is not in the current project projectReferences array.
+ * @description Verifies that the tag can not update
+ * elements.
  */
-function createNonRefExternalTarget(done) {
-  // Create element data with targetNamespace with project not in the current
-  // project's projectReferences list
-  const elemObj = {
-    id: 'external-source',
-    source: 'model',
-    target: 'model',
-    targetNamespace: {
-      org: org.id,
-      project: 'doesnotexist',
-      branch: 'master'
-    }
+function updateInTag(done) {
+  // Create the object to update element
+  const updateObj = {
+    name: 'model_edit',
+    id: 'model'
   };
 
-  // Attempt to create the element through the element controller
-  ElementController.create(adminUser, org.id, projID, 'master', elemObj)
+
+  // Update element via controller
+  ElementController.update(adminUser, org.id, projID, tagID, updateObj)
   .then(() => {
     // Should not succeed, force to fail
-    done(new Error('Element created successfully.'));
+    done(new Error('Element was successfully updated.'));
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.description).to.equal('The project '
-      + `[${elemObj.targetNamespace.project}] is not in the found project's `
-      + 'projectReference list.');
+    chai.expect(error.message).to.equal(`[${tagID}] is a tag and `
+      + 'does not allow updates to elements.');
+    done();
+  });
+}
+
+/**
+ * @description Verifies that the tag can not delete
+ * elements.
+ */
+function deleteInTag(done) {
+  // Attempt deleting an element via controller
+  ElementController.remove(adminUser, org.id, projID, tagID, testData.elements[1].id)
+  .then(() => {
+    // Should not succeed, force to fail
+    done(new Error('Element was successfully deleted.'));
+  })
+  .catch((error) => {
+    // Ensure error message is correct
+    chai.expect(error.message).to.equal(`[${tagID}] is a tag and`
+      + ' does not allow elements to be deleted.');
     done();
   });
 }
