@@ -1881,11 +1881,17 @@ function moveElementCheck(organizationID, projectID, branch, element) {
       throw new M.OperationError('Elements parent cannot be self.', 'warn');
     }
 
-    // Error Check: ensure the root elements is not being edited
+    // Error Check: ensure the root elements are not being moved
     if (Element.getValidRootElements().includes(element.id)) {
-      throw new M.OperationError(
-        `Cannot edit the root element: ${element.id}.`, 'warn'
-      );
+      const parent = utils.parseID(element.parent).pop();
+      if (element.id === 'model'
+        || (element.id === '__mbee__' && parent !== 'model')
+        || (element.id === 'holding_bin' && parent !== '__mbee__')
+        || (element.id === 'undefined' && parent !== '__mbee__')) {
+        throw new M.OperationError(
+          `Cannot move the root element: ${element.id}.`, 'warn'
+        );
+      }
     }
 
     // Define nested helper function
