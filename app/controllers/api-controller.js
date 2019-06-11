@@ -256,7 +256,7 @@ function getOrgs(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check query for ids
@@ -302,13 +302,13 @@ function getOrgs(req, res) {
     // Return 200: OK and public org data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -319,11 +319,10 @@ function getOrgs(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with orgs' public data
  */
-function postOrgs(req, res, next) {
+function postOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -354,7 +353,7 @@ function postOrgs(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -381,13 +380,13 @@ function postOrgs(req, res, next) {
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -399,11 +398,10 @@ function postOrgs(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with orgs' public data
  */
-function putOrgs(req, res, next) {
+function putOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -434,7 +432,7 @@ function putOrgs(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -461,13 +459,13 @@ function putOrgs(req, res, next) {
     // Return 200: OK and created/replaced orgs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -478,11 +476,10 @@ function putOrgs(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with orgs' public data
  */
-function patchOrgs(req, res, next) {
+function patchOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -513,7 +510,7 @@ function patchOrgs(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -540,13 +537,13 @@ function patchOrgs(req, res, next) {
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -559,11 +556,10 @@ function patchOrgs(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with array of deleted org IDs.
  */
-function deleteOrgs(req, res, next) {
+function deleteOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -574,6 +570,15 @@ function deleteOrgs(req, res, next) {
     minified: 'boolean'
   };
 
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    res.header('Content-Type', 'text/plain');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
+  }
+
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -581,15 +586,6 @@ function deleteOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    res.header('Content-Type', 'text/plain');
-    res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
-  }
-
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     middleware.logResponse(error.message.length, req, res);
@@ -615,13 +611,13 @@ function deleteOrgs(req, res, next) {
 
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -632,11 +628,10 @@ function deleteOrgs(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with org's public data
  */
-function getOrg(req, res, next) {
+function getOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -668,7 +663,7 @@ function getOrg(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -702,13 +697,13 @@ function getOrg(req, res, next) {
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/html');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -720,11 +715,10 @@ function getOrg(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with org's public data
  */
-function postOrg(req, res, next) {
+function postOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -753,7 +747,7 @@ function postOrg(req, res, next) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -765,7 +759,7 @@ function postOrg(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -795,13 +789,13 @@ function postOrg(req, res, next) {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -813,11 +807,10 @@ function postOrg(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with org's public data
  */
-function putOrg(req, res, next) {
+function putOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -846,7 +839,7 @@ function putOrg(req, res, next) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -858,7 +851,7 @@ function putOrg(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -888,13 +881,13 @@ function putOrg(req, res, next) {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -905,11 +898,10 @@ function putOrg(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with updated org
  */
-function patchOrg(req, res, next) {
+function patchOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -938,7 +930,7 @@ function patchOrg(req, res, next) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -950,7 +942,7 @@ function patchOrg(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set body org id
@@ -980,13 +972,13 @@ function patchOrg(req, res, next) {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1031,7 +1023,7 @@ function deleteOrg(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1052,13 +1044,13 @@ function deleteOrg(req, res, next) {
     // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
