@@ -2779,6 +2779,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: gzip
+ *         description: If true, will process an uploaded gzip file.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to POST elements, return element public

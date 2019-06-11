@@ -19,9 +19,12 @@
 
 // Node.js Modules
 const path = require('path');
+const zlib = require('zlib');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
+const multer = require('multer');
+const upload = multer().single('test.json.gz');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -3079,12 +3082,14 @@ function postElements(req, res) {
   // Note: Undefined if not set
   let options;
   let minified = false;
+  let elementData;
 
   // Define valid option type
   const validOptions = {
     populate: 'array',
     fields: 'array',
-    minified: 'boolean'
+    minified: 'boolean',
+    gzip: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -3114,10 +3119,37 @@ function postElements(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Check if the element data was provided in zip format
+  if (options.gzip) {
+    upload(req, res, function(error) {
+      if (error) {
+        M.log.error(error);
+      }
+      console.log(req.file)
+      zlib.gunzip(req.file, (err, result) => {
+        if (err) {
+          M.log.error(err);
+        }
+        console.log(result)
+        elementData = result;
+      });
+    });
+
+/*    const gzip = zlib.createGzip();
+    let r = fs.createReadStream(req.buffer);
+    let w = fs.createWriteStream(path.join(M.root, 'data', 'unzipData.txt'));
+    r.pipe(gzip).pipe(w);*/
+
+
+  }
+  else {
+    elementData = req.body;
+  }
+
   // Create the specified elements
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, req.body, options)
+    req.params.branchid, elementData, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
