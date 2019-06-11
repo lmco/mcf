@@ -41,16 +41,16 @@ const Middleware = M.require('lib.middleware');
  *       200:
  *         description: OK, the API is up.
  */
-api.get('/test', Middleware.logRoute, APIController.test, Middleware.logResponse);
+api.get('/test', Middleware.logRoute, APIController.test);
 api.get(
   '/coffee',
   AuthController.authenticate,
   Middleware.logRoute,
-  (req, res, next) => {
-    res.status(418).send('I\'m a teapot.');
-    next();
-  },
-  Middleware.logResponse
+  (req, res) => {
+    const str = 'I\'m a teapot.';
+    res.status(418).send(str);
+    Middleware.logResponse(str.length, req, res);
+  }
 );
 
 
@@ -69,9 +69,7 @@ api.get(
  */
 api.get('/doc/swagger.json',
   Middleware.logRoute,
-  APIController.swaggerJSON,
-  Middleware.logResponse);
-
+  APIController.swaggerJSON);
 
 /**
  * @swagger
@@ -99,8 +97,7 @@ api.route('/login')
   AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,
-  APIController.login,
-  Middleware.logResponse
+  APIController.login
 );
 
 
@@ -127,8 +124,7 @@ api.route('/version')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.version,
-  Middleware.logResponse
+  APIController.version
 );
 
 
@@ -466,32 +462,27 @@ api.route('/orgs')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getOrgs,
-  Middleware.logResponse
+  APIController.getOrgs
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postOrgs,
-  Middleware.logResponse
+  APIController.postOrgs
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putOrgs,
-  Middleware.logResponse
+  APIController.putOrgs
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchOrgs,
-  Middleware.logResponse
+  APIController.patchOrgs
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteOrgs,
-  Middleware.logResponse
+  APIController.deleteOrgs
 );
 
 
@@ -813,32 +804,27 @@ api.route('/orgs/:orgid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getOrg,
-  Middleware.logResponse
+  APIController.getOrg
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postOrg,
-  Middleware.logResponse
+  APIController.postOrg
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putOrg,
-  Middleware.logResponse
+  APIController.putOrg
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchOrg,
-  Middleware.logResponse
+  APIController.patchOrg
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteOrg,
-  Middleware.logResponse
+  APIController.deleteOrg
 );
 
 
@@ -916,8 +902,7 @@ api.route('/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getAllProjects,
-  Middleware.logResponse
+  APIController.getAllProjects
 );
 
 
@@ -1309,32 +1294,27 @@ api.route('/orgs/:orgid/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjects,
-  Middleware.logResponse
+  APIController.getProjects
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postProjects,
-  Middleware.logResponse
+  APIController.postProjects
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putProjects,
-  Middleware.logResponse
+  APIController.putProjects
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchProjects,
-  Middleware.logResponse
+  APIController.patchProjects
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteProjects,
-  Middleware.logResponse
+  APIController.deleteProjects
 );
 
 
@@ -1709,32 +1689,27 @@ api.route('/orgs/:orgid/projects/:projectid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProject,
-  Middleware.logResponse
+  APIController.getProject
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postProject,
-  Middleware.logResponse
+  APIController.postProject
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putProject,
-  Middleware.logResponse
+  APIController.putProject
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchProject,
-  Middleware.logResponse
+  APIController.patchProject
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteProject,
-  Middleware.logResponse
+  APIController.deleteProject
 );
 
 /**
@@ -2068,26 +2043,22 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getBranches,
-  Middleware.logResponse
+  APIController.getBranches
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postBranches,
-  Middleware.logResponse
+  APIController.postBranches
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchBranches,
-  Middleware.logResponse
+  APIController.patchBranches
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteBranches,
-  Middleware.logResponse
+  APIController.deleteBranches
 );
 
 
@@ -2398,26 +2369,22 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getBranch,
-  Middleware.logResponse
+  APIController.getBranch
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postBranch,
-  Middleware.logResponse
+  APIController.postBranch
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchBranch,
-  Middleware.logResponse
+  APIController.patchBranch
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteBranch,
-  Middleware.logResponse
+  APIController.deleteBranch
 );
 
 /**
@@ -2546,8 +2513,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.searchElements,
-  Middleware.logResponse
+  APIController.searchElements
 );
 
 
@@ -3153,32 +3119,27 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getElements,
-  Middleware.logResponse
+  APIController.getElements
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postElements,
-  Middleware.logResponse
+  APIController.postElements
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putElements,
-  Middleware.logResponse
+  APIController.putElements
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchElements,
-  Middleware.logResponse
+  APIController.patchElements
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteElements,
-  Middleware.logResponse
+  APIController.deleteElements
 );
 
 
@@ -3722,32 +3683,27 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getElement,
-  Middleware.logResponse
+  APIController.getElement
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postElement,
-  Middleware.logResponse
+  APIController.postElement
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putElement,
-  Middleware.logResponse
+  APIController.putElement
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchElement,
-  Middleware.logResponse
+  APIController.patchElement
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteElement,
-  Middleware.logResponse
+  APIController.deleteElement
 );
 
 
@@ -4162,36 +4118,31 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.getUsers,
-  Middleware.logResponse
+  APIController.getUsers
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.postUsers,
-  Middleware.logResponse
+  APIController.postUsers
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.putUsers,
-  Middleware.logResponse
+  APIController.putUsers
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.patchUsers,
-  Middleware.logResponse
+  APIController.patchUsers
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.deleteUsers,
-  Middleware.logResponse
+  APIController.deleteUsers
 );
 
 
@@ -4233,8 +4184,7 @@ api.route('/users/whoami')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.whoami,
-  Middleware.logResponse
+  APIController.whoami
 );
 
 
@@ -4305,8 +4255,7 @@ api.route('/users/search')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.searchUsers,
-  Middleware.logResponse
+  APIController.searchUsers
 );
 
 
@@ -4659,36 +4608,31 @@ api.route('/users/:username')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.getUser,
-  Middleware.logResponse
+  APIController.getUser
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.postUser,
-  Middleware.logResponse
+  APIController.postUser
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.putUser,
-  Middleware.logResponse
+  APIController.putUser
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.patchUser,
-  Middleware.logResponse
+  APIController.patchUser
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.deleteUser,
-  Middleware.logResponse
+  APIController.deleteUser
 );
 
 
@@ -4756,8 +4700,7 @@ api.route('/users/:username/password')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.patchPassword,
-  Middleware.logResponse
+  APIController.patchPassword
 );
 
 

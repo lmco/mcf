@@ -31,6 +31,7 @@ const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const errors = M.require('lib.errors');
 const jmi = M.require('lib.jmi-conversions');
+const middleware = M.require('lib.middleware');
 const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -138,15 +139,15 @@ function swaggerSpec() {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with swagger JSON
  */
-function swaggerJSON(req, res, next) {
+function swaggerJSON(req, res) {
   // Return swagger specification
+  const json = formatJSON(swaggerSpec());
   res.header('Content-Type', 'application/json');
-  res.status(200).send(formatJSON(swaggerSpec()));
-  next();
+  res.status(200).send(json);
+  middleware.logResponse(json.length, req, res);
 }
 
 /**
@@ -156,14 +157,14 @@ function swaggerJSON(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with session token
  */
-function login(req, res, next) {
+function login(req, res) {
+  const json = formatJSON({ token: req.session.token });
   res.header('Content-Type', 'application/json');
-  res.status(200).send(formatJSON({ token: req.session.token }));
-  next();
+  res.status(200).send(json);
+  middleware.logResponse(json.length, req, res);
 }
 
 /**
@@ -173,13 +174,12 @@ function login(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with 200 status code
  */
-function test(req, res, next) {
+function test(req, res) {
   res.status(200).send('');
-  next();
+  middleware.logResponse(0, req, res);
 }
 
 /**
@@ -189,22 +189,21 @@ function test(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with version
  */
-function version(req, res, next) {
+function version(req, res) {
   // Create version object
-  const obj = {
+  const json = formatJSON({
     version: M.version,
     schemaVersion: M.schemaVersion,
     build: `${M.build}`
-  };
+  });
 
   // Return version object
   res.header('Content-Type', 'application/json');
-  res.status(200).send(formatJSON(obj));
-  next();
+  res.status(200).send(json);
+  middleware.logResponse(json.length, req, res);
 }
 
 /* ----------------------( Organization API Endpoints )---------------------- */
@@ -215,14 +214,13 @@ function version(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with orgs' public data
  *
  * NOTE: All users are members of the 'default' org, should always have
  * access to at least this organization.
  */
-function getOrgs(req, res, next) {
+function getOrgs(req, res) {
   // Define options and ids
   // Note: Undefined if not set
   let ids;
@@ -243,9 +241,10 @@ function getOrgs(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -340,9 +339,10 @@ function postOrgs(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -419,9 +419,10 @@ function putOrgs(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -497,9 +498,10 @@ function patchOrgs(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -587,9 +589,10 @@ function deleteOrgs(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If req.body contains objects, grab the org IDs from the objects
@@ -650,9 +653,10 @@ function getOrg(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -736,9 +740,10 @@ function postOrg(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -828,9 +833,10 @@ function putOrg(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -919,9 +925,10 @@ function patchOrg(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -1009,9 +1016,10 @@ function deleteOrg(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    res.status(500).send('Request Failed.');
-    return next();
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1062,10 +1070,11 @@ function deleteOrg(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with projects' public data
  */
-function getAllProjects(req, res) {
+function getAllProjects(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1084,8 +1093,10 @@ function getAllProjects(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1096,7 +1107,8 @@ function getAllProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check options for minified
@@ -1113,9 +1125,7 @@ function getAllProjects(req, res) {
   .then((projects) => {
     // Verify project array is not empty
     if (projects.length === 0) {
-      const error = new M.NotFoundError('No projects found.', 'warn');
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
+      throw new M.NotFoundError('No projects found.', 'warn');
     }
 
     const publicProjectData = sani.html(
@@ -1127,12 +1137,16 @@ function getAllProjects(req, res) {
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    console.log('Calling next');
+    return next(json.length);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
+    console.log(error);
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -1144,10 +1158,11 @@ function getAllProjects(req, res) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with projects' public data
  */
-function getProjects(req, res) {
+function getProjects(req, res, next) {
   // Define options and ids
   // Note: Undefined if not set
   let ids;
@@ -1168,8 +1183,10 @@ function getProjects(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1180,7 +1197,8 @@ function getProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check if ids was provided in the request query
@@ -1213,9 +1231,7 @@ function getProjects(req, res) {
   .then((projects) => {
     // Verify project array is not empty
     if (projects.length === 0) {
-      const error = new M.NotFoundError('No projects found.', 'warn');
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
+      throw new M.NotFoundError('No projects found.', 'warn');
     }
 
     const publicProjectData = sani.html(
@@ -1227,12 +1243,14 @@ function getProjects(req, res) {
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -1243,10 +1261,11 @@ function getProjects(req, res) {
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
+ * @param {function} next - Callback function
  *
  * @return {Object} Response object with created projects.
  */
-function postProjects(req, res) {
+function postProjects(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1262,8 +1281,10 @@ function postProjects(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1274,7 +1295,8 @@ function postProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   }
 
   // Check options for minified
@@ -1299,12 +1321,14 @@ function postProjects(req, res) {
 
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    return next();
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    return next();
   });
 }
 
@@ -1335,8 +1359,10 @@ function putProjects(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1407,8 +1433,10 @@ function patchProjects(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1479,8 +1507,10 @@ function deleteProjects(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1551,8 +1581,10 @@ function getProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1633,8 +1665,10 @@ function postProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1718,8 +1752,10 @@ function putProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1802,8 +1838,10 @@ function patchProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1885,8 +1923,10 @@ function deleteProject(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1965,8 +2005,10 @@ function getUsers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2055,8 +2097,10 @@ function postUsers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2128,8 +2172,10 @@ function putUsers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2201,8 +2247,10 @@ function patchUsers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2273,8 +2321,10 @@ function deleteUsers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2339,8 +2389,10 @@ function getUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2421,8 +2473,10 @@ function postUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2506,8 +2560,10 @@ function putUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2591,8 +2647,10 @@ function patchUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2673,8 +2731,10 @@ function deleteUser(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2738,8 +2798,10 @@ function whoami(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2801,8 +2863,10 @@ function searchUsers(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2883,8 +2947,10 @@ function patchPassword(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Ensure old password was provided
@@ -3007,8 +3073,10 @@ function getElements(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3102,7 +3170,7 @@ function getElements(req, res) {
         return res.status(200).send(json);
       }
       catch (err) {
-        return res.status(err.status || 500).send(err);
+        return res.status(errors.getStatusCode(err)).send(err.message);
       }
     }
 
@@ -3146,8 +3214,10 @@ function postElements(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3220,8 +3290,10 @@ function putElements(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3293,8 +3365,10 @@ function patchElements(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3364,8 +3438,10 @@ function deleteElements(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3454,8 +3530,10 @@ function searchElements(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3542,8 +3620,10 @@ function getElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3629,8 +3709,10 @@ function postElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3715,8 +3797,10 @@ function putElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3800,8 +3884,10 @@ function patchElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3883,8 +3969,10 @@ function deleteElement(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3958,8 +4046,10 @@ function getBranches(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4054,8 +4144,10 @@ function postBranches(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4127,8 +4219,10 @@ function patchBranches(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4199,8 +4293,10 @@ function deleteBranches(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4272,8 +4368,10 @@ function getBranch(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4354,8 +4452,10 @@ function postBranch(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4439,8 +4539,10 @@ function patchBranch(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4523,8 +4625,10 @@ function deleteBranch(req, res) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
-    return res.status(500).send('Request Failed.');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
