@@ -124,6 +124,9 @@ function postOrg(done) {
     // Verify specific fields not returned
     chai.expect(postedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -179,6 +182,9 @@ function postOrgs(done) {
       chai.expect(postedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -222,6 +228,9 @@ function putOrg(done) {
     // Verify specific fields not returned
     chai.expect(replacedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -279,6 +288,9 @@ function putOrgs(done) {
       chai.expect(replacedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -321,6 +333,9 @@ function getOrg(done) {
     // Verify specific fields not returned
     chai.expect(foundOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -378,6 +393,9 @@ function getOrgs(done) {
       chai.expect(foundOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -437,6 +455,9 @@ function getAllOrgs(done) {
       chai.expect(foundOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -478,6 +499,9 @@ function patchOrg(done) {
     // Verify specific fields not returned
     chai.expect(patchedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -538,6 +562,9 @@ function patchOrgs(done) {
       chai.expect(patchedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -568,6 +595,9 @@ function deleteOrg(done) {
 
     // Verify correct org deleted
     chai.expect(deletedID).to.equal(testData.orgs[0].id);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -600,6 +630,9 @@ function deleteOrgs(done) {
     const deletedIDs = JSON.parse(_data);
     // Verify correct orgs deleted
     chai.expect(deletedIDs).to.have.members(orgData.map(p => p.id));
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 

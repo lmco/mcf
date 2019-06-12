@@ -366,8 +366,10 @@ module.exports.createRequest = function(user, params, body, method, query = {}) 
   return {
     headers: this.getHeaders(),
     method: method,
+    originalUrl: 'ThisIsATest',
     params: params,
     body: body,
+    ip: '::1',
     query: query,
     user: user,
     session: {}
@@ -382,7 +384,7 @@ module.exports.createRequest = function(user, params, body, method, query = {}) 
 module.exports.createResponse = function(res) {
   // Verifies the response code: 200 OK
   res.status = function status(code) {
-    chai.expect(code).to.equal(200);
+    res.statusCode = code;
     return this;
   };
   // Provides headers to response object

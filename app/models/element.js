@@ -106,7 +106,8 @@ const ElementSchema = new mongoose.Schema({
   source: {
     type: String,
     ref: 'Element',
-    default: null
+    default: null,
+    index: true
   },
   target: {
     type: String,

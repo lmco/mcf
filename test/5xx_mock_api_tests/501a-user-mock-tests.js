@@ -114,6 +114,9 @@ function whoami(done) {
     // NOTE: Test admin does not have a name, custom data or email
     chai.expect(foundUser.username).to.equal(adminUser.username);
     chai.expect(foundUser).to.not.have.any.keys('password', '_id', '__v');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -157,6 +160,9 @@ function postUser(done) {
     chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(createdUser.archived).to.equal(false);
     chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -212,6 +218,9 @@ function postUsers(done) {
       chai.expect(createdUser.archived).to.equal(false);
       chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -255,6 +264,9 @@ function putUser(done) {
     chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(replacedUser.archived).to.equal(false);
     chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -311,6 +323,9 @@ function putUsers(done) {
       chai.expect(replacedUser.archived).to.equal(false);
       chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -354,6 +369,9 @@ function getUser(done) {
     chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(foundUser.archived).to.equal(false);
     chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -371,9 +389,10 @@ function getUsers(done) {
     testData.users[2],
     testData.users[3]
   ];
+  const usernames = userData.map(u => u.username);
   const params = {};
   const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, userData.map(u => u.username), method);
+  const req = testUtils.createRequest(adminUser, params, usernames, method);
 
   // Create response object
   const res = {};
@@ -410,6 +429,9 @@ function getUsers(done) {
       chai.expect(foundUser.archived).to.equal(false);
       chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -477,6 +499,9 @@ function getAllUsers(done) {
         chai.expect(foundUser).to.not.have.any.keys('password', '_id', '__v');
       }
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -539,8 +564,13 @@ function searchUsers(done) {
       chai.expect(foundUser.archived).to.equal(false);
       chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
+
+  // Searches for a user
   APIController.searchUsers(req, res);
 }
 
@@ -584,6 +614,9 @@ function patchUser(done) {
     chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -644,6 +677,9 @@ function patchUsers(done) {
       chai.expect(updatedUser.archived).to.equal(false);
       chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -693,6 +729,9 @@ function patchUserPassword(done) {
     chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -721,6 +760,9 @@ function deleteUser(done) {
 
     // Verify expected response
     chai.expect(deletedUsername).to.equal(userData.username);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -754,6 +796,9 @@ function deleteUsers(done) {
 
     // Verify expected response
     chai.expect(deletedUsernames).to.have.members(userData.map(u => u.username));
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 

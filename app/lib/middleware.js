@@ -54,32 +54,6 @@ module.exports.logIP = function logIP(req, res, next) {
 };
 
 /**
- * @description Log the response to an HTTP request
- *
- * @param {number} responseLength - The length of the response in bytes.
- * @param {Object} req - Request object from express.
- * @param {Object} res - Response object from express.
- */
-module.exports.logResponse = function(responseLength, req, res) {
-  // Set username to anonymous if req.user is not defined
-  const username = (req.user) ? req.user.username : 'anonymous';
-  const date = JSON.stringify(new Date()).replace(/"/g, '');
-  let ip = req.ip;
-  // If IP is ::1, set it equal to 127.0.0.1
-  if (req.ip === '::1') {
-    ip = '127.0.0.1';
-  }
-  // If IP starts with ::ffff:, remove the ::ffff:
-  else if (req.ip.startsWith('::ffff:')) {
-    ip = ip.replace('::ffff:', '');
-  }
-
-  // Log the info at 'info' level
-  M.log.info(`RESPONSE: ${ip} ${username} [${date}] "${req.method} `
-    + `${req.originalUrl}" ${res.statusCode} ${responseLength.toString()}`);
-};
-
-/**
  * @description Disables specific user api methods using the configuration
  * server.api.userAPI
  *

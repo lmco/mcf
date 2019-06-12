@@ -31,7 +31,7 @@ const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const errors = M.require('lib.errors');
 const jmi = M.require('lib.jmi-conversions');
-const middleware = M.require('lib.middleware');
+const logger = M.require('lib.logger');
 const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -147,7 +147,7 @@ function swaggerJSON(req, res) {
   const json = formatJSON(swaggerSpec());
   res.header('Content-Type', 'application/json');
   res.status(200).send(json);
-  middleware.logResponse(json.length, req, res);
+  logger.logResponse(json.length, req, res);
 }
 
 /**
@@ -164,7 +164,7 @@ function login(req, res) {
   const json = formatJSON({ token: req.session.token });
   res.header('Content-Type', 'application/json');
   res.status(200).send(json);
-  middleware.logResponse(json.length, req, res);
+  logger.logResponse(json.length, req, res);
 }
 
 /**
@@ -179,7 +179,7 @@ function login(req, res) {
  */
 function test(req, res) {
   res.status(200).send('');
-  middleware.logResponse(0, req, res);
+  logger.logResponse(0, req, res);
 }
 
 /**
@@ -203,7 +203,7 @@ function version(req, res) {
   // Return version object
   res.header('Content-Type', 'application/json');
   res.status(200).send(json);
-  middleware.logResponse(json.length, req, res);
+  logger.logResponse(json.length, req, res);
 }
 
 /* ----------------------( Organization API Endpoints )---------------------- */
@@ -244,7 +244,7 @@ function getOrgs(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -256,7 +256,7 @@ function getOrgs(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check query for ids
@@ -302,13 +302,13 @@ function getOrgs(req, res) {
     // Return 200: OK and public org data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -341,7 +341,7 @@ function postOrgs(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -353,7 +353,7 @@ function postOrgs(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -380,13 +380,13 @@ function postOrgs(req, res) {
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -420,7 +420,7 @@ function putOrgs(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -432,7 +432,7 @@ function putOrgs(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -459,13 +459,13 @@ function putOrgs(req, res) {
     // Return 200: OK and created/replaced orgs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -498,7 +498,7 @@ function patchOrgs(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -510,7 +510,7 @@ function patchOrgs(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -537,13 +537,13 @@ function patchOrgs(req, res) {
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -576,7 +576,7 @@ function deleteOrgs(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -588,7 +588,7 @@ function deleteOrgs(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If req.body contains objects, grab the org IDs from the objects
@@ -611,13 +611,13 @@ function deleteOrgs(req, res) {
 
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -651,7 +651,7 @@ function getOrg(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -663,7 +663,7 @@ function getOrg(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -697,13 +697,13 @@ function getOrg(req, res) {
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/html');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -737,7 +737,7 @@ function postOrg(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -747,7 +747,7 @@ function postOrg(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -759,7 +759,7 @@ function postOrg(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -789,13 +789,13 @@ function postOrg(req, res) {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -829,7 +829,7 @@ function putOrg(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -839,7 +839,7 @@ function putOrg(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -851,7 +851,7 @@ function putOrg(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -881,13 +881,13 @@ function putOrg(req, res) {
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -920,7 +920,7 @@ function patchOrg(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -930,7 +930,7 @@ function patchOrg(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -942,7 +942,7 @@ function patchOrg(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set body org id
@@ -972,13 +972,13 @@ function patchOrg(req, res) {
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1011,7 +1011,7 @@ function deleteOrg(req, res, next) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1023,7 +1023,7 @@ function deleteOrg(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1044,13 +1044,13 @@ function deleteOrg(req, res, next) {
     // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1087,7 +1087,7 @@ function getAllProjects(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1099,7 +1099,7 @@ function getAllProjects(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1129,13 +1129,13 @@ function getAllProjects(req, res) {
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1174,7 +1174,7 @@ function getProjects(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1186,7 +1186,7 @@ function getProjects(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check if ids was provided in the request query
@@ -1232,13 +1232,13 @@ function getProjects(req, res) {
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1271,7 +1271,7 @@ function postProjects(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1283,7 +1283,7 @@ function postProjects(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1309,13 +1309,13 @@ function postProjects(req, res) {
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1349,7 +1349,7 @@ function putProjects(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1361,7 +1361,7 @@ function putProjects(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1387,13 +1387,13 @@ function putProjects(req, res) {
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1426,7 +1426,7 @@ function patchProjects(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1438,7 +1438,7 @@ function patchProjects(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1464,13 +1464,13 @@ function patchProjects(req, res) {
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1503,7 +1503,7 @@ function deleteProjects(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1515,7 +1515,7 @@ function deleteProjects(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If req.body contains objects, grab the project IDs from the objects
@@ -1540,13 +1540,13 @@ function deleteProjects(req, res) {
     // Return 200: OK and the deleted project IDs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1580,7 +1580,7 @@ function getProject(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1592,7 +1592,7 @@ function getProject(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1625,13 +1625,13 @@ function getProject(req, res) {
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1665,7 +1665,7 @@ function postProject(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1675,7 +1675,7 @@ function postProject(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1687,7 +1687,7 @@ function postProject(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the projectid in req.body in case it wasn't provided
@@ -1716,13 +1716,13 @@ function postProject(req, res) {
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1756,7 +1756,7 @@ function putProject(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1766,7 +1766,7 @@ function putProject(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1778,7 +1778,7 @@ function putProject(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1807,13 +1807,13 @@ function putProject(req, res) {
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1846,7 +1846,7 @@ function patchProject(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1856,7 +1856,7 @@ function patchProject(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1868,7 +1868,7 @@ function patchProject(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1897,13 +1897,13 @@ function patchProject(req, res) {
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1935,7 +1935,7 @@ function deleteProject(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1947,7 +1947,7 @@ function deleteProject(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1968,13 +1968,13 @@ function deleteProject(req, res) {
     // Return 200: OK and the deleted project ID
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2020,7 +2020,7 @@ function getUsers(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2032,7 +2032,7 @@ function getUsers(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set usernames to undefined
@@ -2075,13 +2075,13 @@ function getUsers(req, res) {
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2115,7 +2115,7 @@ function postUsers(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2127,7 +2127,7 @@ function postUsers(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2153,13 +2153,13 @@ function postUsers(req, res) {
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2193,7 +2193,7 @@ function putUsers(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2205,7 +2205,7 @@ function putUsers(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2231,13 +2231,13 @@ function putUsers(req, res) {
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2271,7 +2271,7 @@ function patchUsers(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2283,7 +2283,7 @@ function patchUsers(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2309,13 +2309,13 @@ function patchUsers(req, res) {
     // Return 200: OK and the updated users
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2348,7 +2348,7 @@ function deleteUsers(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2360,7 +2360,7 @@ function deleteUsers(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2379,13 +2379,13 @@ function deleteUsers(req, res) {
     // Return 200: OK and deleted usernames
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2419,7 +2419,7 @@ function getUser(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2431,7 +2431,7 @@ function getUser(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2464,13 +2464,13 @@ function getUser(req, res) {
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2504,7 +2504,7 @@ function postUser(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2514,7 +2514,7 @@ function postUser(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2529,7 +2529,7 @@ function postUser(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2555,13 +2555,13 @@ function postUser(req, res) {
     // Return 200: OK and created user
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2595,7 +2595,7 @@ function putUser(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2605,7 +2605,7 @@ function putUser(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2620,7 +2620,7 @@ function putUser(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2646,13 +2646,13 @@ function putUser(req, res) {
     // Return 200: OK and created/replaced user
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2686,7 +2686,7 @@ function patchUser(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2696,7 +2696,7 @@ function patchUser(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2708,7 +2708,7 @@ function patchUser(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set body username
@@ -2737,12 +2737,12 @@ function patchUser(req, res) {
     // Return 200: OK and updated user
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2774,7 +2774,7 @@ function deleteUser(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2786,7 +2786,7 @@ function deleteUser(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2807,13 +2807,13 @@ function deleteUser(req, res) {
     // Return 200: OK and the deleted username
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2844,7 +2844,7 @@ function whoami(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2856,7 +2856,7 @@ function whoami(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2875,7 +2875,7 @@ function whoami(req, res) {
   // Returns 200: OK and the users public data
   res.header('Content-Type', 'application/json');
   res.status(200).send(json);
-  middleware.logResponse(json.length, req, res);
+  logger.logResponse(json.length, req, res);
 }
 
 /**
@@ -2911,7 +2911,7 @@ function searchUsers(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2923,7 +2923,7 @@ function searchUsers(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for q (query)
@@ -2960,13 +2960,13 @@ function searchUsers(req, res) {
     // Return a 200: OK and public user data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2997,7 +2997,7 @@ function patchPassword(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Ensure old password was provided
@@ -3005,7 +3005,7 @@ function patchPassword(req, res) {
     const error = new M.DataFormatError('Old password not in request body.', 'warn');
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Ensure new password was provided
@@ -3013,7 +3013,7 @@ function patchPassword(req, res) {
     const error = new M.DataFormatError('New password not in request body.', 'warn');
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Ensure confirmed password was provided
@@ -3021,7 +3021,7 @@ function patchPassword(req, res) {
     const error = new M.DataFormatError('Confirmed password not in request body.', 'warn');
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Ensure user is not trying to change another user's password
@@ -3029,7 +3029,7 @@ function patchPassword(req, res) {
     const error = new M.OperationError('Cannot change another user\'s password.', 'warn');
     res.header('Content-Type', 'text/plain');
     res.status(403).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3041,7 +3041,7 @@ function patchPassword(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3064,13 +3064,13 @@ function patchPassword(req, res) {
     // Returns 200: OK and the updated user's public data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3130,7 +3130,7 @@ function getElements(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3142,7 +3142,7 @@ function getElements(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check query for element IDs
@@ -3168,7 +3168,7 @@ function getElements(req, res) {
         + 'valid format.', 'warn');
       res.header('Content-Type', 'text/plain');
       res.status(400).send(error.message);
-      middleware.logResponse(error.message.length, req, res);
+      logger.logResponse(error.message.length, req, res);
     }
     format = options.format;
     delete options.format;
@@ -3222,7 +3222,7 @@ function getElements(req, res) {
         // Return a 200: OK and public JMI type 3 element data
         res.header('Content-Type', 'application/json');
         res.status(200).send(json);
-        middleware.logResponse(json.length, req, res);
+        logger.logResponse(json.length, req, res);
       }
       catch (err) {
         throw err;
@@ -3235,13 +3235,13 @@ function getElements(req, res) {
     // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3274,7 +3274,7 @@ function postElements(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3286,7 +3286,7 @@ function postElements(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3313,13 +3313,13 @@ function postElements(req, res) {
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3353,7 +3353,7 @@ function putElements(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3365,7 +3365,7 @@ function putElements(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3392,13 +3392,13 @@ function putElements(req, res) {
     // Return 200: OK and the new/replaced elements
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3431,7 +3431,7 @@ function patchElements(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3443,7 +3443,7 @@ function patchElements(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3470,13 +3470,13 @@ function patchElements(req, res) {
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3507,7 +3507,7 @@ function deleteElements(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3519,7 +3519,7 @@ function deleteElements(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3541,13 +3541,13 @@ function deleteElements(req, res) {
     // Return 200: OK and the deleted element ids
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3602,7 +3602,7 @@ function searchElements(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3614,7 +3614,7 @@ function searchElements(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for q (query)
@@ -3652,13 +3652,13 @@ function searchElements(req, res) {
     // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3693,7 +3693,7 @@ function getElement(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3705,7 +3705,7 @@ function getElement(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3744,13 +3744,13 @@ function getElement(req, res) {
     // Return 200: OK and the elements
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3783,7 +3783,7 @@ function postElement(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3793,7 +3793,7 @@ function postElement(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3805,7 +3805,7 @@ function postElement(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3835,13 +3835,13 @@ function postElement(req, res) {
     // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3875,7 +3875,7 @@ function putElement(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3885,7 +3885,7 @@ function putElement(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3897,7 +3897,7 @@ function putElement(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3927,13 +3927,13 @@ function putElement(req, res) {
     // Return 200: OK and the created/replaced element
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3966,7 +3966,7 @@ function patchElement(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3976,7 +3976,7 @@ function patchElement(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3988,7 +3988,7 @@ function patchElement(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -4018,13 +4018,13 @@ function patchElement(req, res) {
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4055,7 +4055,7 @@ function deleteElement(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4067,7 +4067,7 @@ function deleteElement(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4089,12 +4089,12 @@ function deleteElement(req, res) {
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element ID
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4135,7 +4135,7 @@ function getBranches(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4147,7 +4147,7 @@ function getBranches(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check query for branch IDs
@@ -4195,13 +4195,13 @@ function getBranches(req, res) {
     // Return a 200: OK and public branch data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4234,7 +4234,7 @@ function postBranches(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4246,7 +4246,7 @@ function postBranches(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4273,13 +4273,13 @@ function postBranches(req, res) {
     // Return 200: OK and created branch data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4312,7 +4312,7 @@ function patchBranches(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4324,7 +4324,7 @@ function patchBranches(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4351,13 +4351,13 @@ function patchBranches(req, res) {
     // Return 200: OK and the updated branches
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4389,7 +4389,7 @@ function deleteBranches(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4401,7 +4401,7 @@ function deleteBranches(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If req.body contains objects, grab the branch IDs from the objects
@@ -4427,13 +4427,13 @@ function deleteBranches(req, res) {
     // Return 200: OK and the deleted branch IDs
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4467,7 +4467,7 @@ function getBranch(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4479,7 +4479,7 @@ function getBranch(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4513,13 +4513,13 @@ function getBranch(req, res) {
     // Return 200: OK and public branch data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4552,7 +4552,7 @@ function postBranch(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4562,7 +4562,7 @@ function postBranch(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4574,7 +4574,7 @@ function postBranch(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4604,13 +4604,13 @@ function postBranch(req, res) {
     // Return 200: OK and the created branch
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4643,7 +4643,7 @@ function patchBranch(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4653,7 +4653,7 @@ function patchBranch(req, res) {
     );
     res.header('Content-Type', 'text/plain');
     res.status(400).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4665,7 +4665,7 @@ function patchBranch(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4695,13 +4695,13 @@ function patchBranch(req, res) {
     // Return 200: OK and the updated branch
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4733,7 +4733,7 @@ function deleteBranch(req, res) {
     const error = new M.ServerError('Request Failed');
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4745,7 +4745,7 @@ function deleteBranch(req, res) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4767,13 +4767,13 @@ function deleteBranch(req, res) {
     // Return 200: OK and the deleted branch ID
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    middleware.logResponse(json.length, req, res);
+    logger.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    middleware.logResponse(error.message.length, req, res);
+    logger.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4791,5 +4791,5 @@ function deleteBranch(req, res) {
 function invalidRoute(req, res) {
   const json = 'Invalid Route or Method.';
   res.status(404).send(json);
-  middleware.logResponse(json.length, req, res);
+  logger.logResponse(json.length, req, res);
 }

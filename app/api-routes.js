@@ -27,6 +27,7 @@ const api = express.Router();
 const APIController = M.require('controllers.api-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
+const logger = M.require('lib.logger');
 
 
 /**
@@ -49,7 +50,7 @@ api.get(
   (req, res) => {
     const str = 'I\'m a teapot.';
     res.status(418).send(str);
-    Middleware.logResponse(str.length, req, res);
+    logger.logResponse(str.length, req, res);
   }
 );
 
