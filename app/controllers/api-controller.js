@@ -2031,7 +2031,8 @@ function getUsers(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set usernames to undefined
@@ -2073,12 +2074,14 @@ function getUsers(req, res) {
 
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2123,7 +2126,8 @@ function postUsers(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2148,12 +2152,14 @@ function postUsers(req, res) {
 
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2198,7 +2204,8 @@ function putUsers(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2223,12 +2230,14 @@ function putUsers(req, res) {
 
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2273,7 +2282,8 @@ function patchUsers(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2298,12 +2308,14 @@ function patchUsers(req, res) {
 
     // Return 200: OK and the updated users
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2347,7 +2359,8 @@ function deleteUsers(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2365,12 +2378,14 @@ function deleteUsers(req, res) {
 
     // Return 200: OK and deleted usernames
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2415,7 +2430,8 @@ function getUser(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2433,11 +2449,9 @@ function getUser(req, res) {
   .then((users) => {
     // If no user found, return 404 error
     if (users.length === 0) {
-      const error = new M.NotFoundError(
+      throw new M.NotFoundError(
         `User [${req.params.username}] not found.`, 'warn'
       );
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
     }
 
     const publicUserData = sani.html(
@@ -2449,12 +2463,14 @@ function getUser(req, res) {
 
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2497,7 +2513,8 @@ function postUser(req, res) {
       'Username in body does not match username in params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2511,7 +2528,8 @@ function postUser(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2536,12 +2554,14 @@ function postUser(req, res) {
 
     // Return 200: OK and created user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2584,7 +2604,8 @@ function putUser(req, res) {
       'Username in body does not match username in params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2598,7 +2619,8 @@ function putUser(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2623,12 +2645,14 @@ function putUser(req, res) {
 
     // Return 200: OK and created/replaced user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2671,7 +2695,8 @@ function patchUser(req, res) {
       'Username in body does not match username in params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -2682,7 +2707,8 @@ function patchUser(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set body username
@@ -2710,11 +2736,13 @@ function patchUser(req, res) {
 
     // Return 200: OK and updated user
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2757,7 +2785,8 @@ function deleteUser(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2777,12 +2806,14 @@ function deleteUser(req, res) {
 
     // Return 200: OK and the deleted username
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2824,7 +2855,8 @@ function whoami(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -2842,7 +2874,8 @@ function whoami(req, res) {
 
   // Returns 200: OK and the users public data
   res.header('Content-Type', 'application/json');
-  return res.status(200).send(json);
+  res.status(200).send(json);
+  middleware.logResponse(json.length, req, res);
 }
 
 /**
@@ -2888,7 +2921,9 @@ function searchUsers(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.header('Content-Type', 'text/plain');
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for q (query)
@@ -2912,9 +2947,7 @@ function searchUsers(req, res) {
   .then((users) => {
     // Verify users public data array is not empty
     if (users.length === 0) {
-      res.header('Content-Type', 'text/plain');
-      const error = new M.NotFoundError('No users found.', 'warn');
-      return res.status(404).send(error.message);
+      throw new M.NotFoundError('No users found.', 'warn');
     }
 
     const usersPublicData = sani.html(
@@ -2926,12 +2959,14 @@ function searchUsers(req, res) {
 
     // Return a 200: OK and public user data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -2969,28 +3004,32 @@ function patchPassword(req, res) {
   if (!req.body.oldPassword) {
     const error = new M.DataFormatError('Old password not in request body.', 'warn');
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Ensure new password was provided
   if (!req.body.password) {
     const error = new M.DataFormatError('New password not in request body.', 'warn');
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Ensure confirmed password was provided
   if (!req.body.confirmPassword) {
     const error = new M.DataFormatError('Confirmed password not in request body.', 'warn');
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Ensure user is not trying to change another user's password
   if (req.user.username !== req.params.username) {
     const error = new M.OperationError('Cannot change another user\'s password.', 'warn');
     res.header('Content-Type', 'text/plain');
-    return res.status(403).send(error.message);
+    res.status(403).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3001,7 +3040,8 @@ function patchPassword(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3023,12 +3063,14 @@ function patchPassword(req, res) {
 
     // Returns 200: OK and the updated user's public data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
