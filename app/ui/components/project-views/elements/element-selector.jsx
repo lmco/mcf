@@ -39,6 +39,7 @@ class ElementSelector extends React.Component {
       modal: false,
       selectedElement: '',
       selectedElementPreview: '',
+      childrenOpen: {},
       error: null
     };
 
@@ -46,6 +47,7 @@ class ElementSelector extends React.Component {
     this.getRootElement = this.getRootElement.bind(this);
     this.selectElementHandler = this.selectElementHandler.bind(this);
     this.select = this.select.bind(this);
+    this.setChildOpen = this.setChildOpen.bind(this);
   }
 
   componentDidMount() {
@@ -115,6 +117,10 @@ class ElementSelector extends React.Component {
     });
   }
 
+  setChildOpen(id, state) {
+    this.state.childrenOpen[id] = state;
+  }
+
   /**
    * Confirms and finalizes the element selection. Then closes the modal.
    */
@@ -136,6 +142,8 @@ class ElementSelector extends React.Component {
                           project={this.props.project}
                           parent={null}
                           isOpen={true}
+                          childrenOpen={this.state.childrenOpen}
+                          setChildOpen={this.setChildOpen}
                           parentRefresh={this.getRootElement}
                           clickHandler={this.selectElementHandler}/>;
     }
