@@ -1062,11 +1062,10 @@ function deleteOrg(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with projects' public data
  */
-function getAllProjects(req, res, next) {
+function getAllProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1100,7 +1099,7 @@ function getAllProjects(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1130,15 +1129,13 @@ function getAllProjects(req, res, next) {
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    console.log('Calling next');
-    return next(json.length);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
-    console.log(error);
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1150,11 +1147,10 @@ function getAllProjects(req, res, next) {
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with projects' public data
  */
-function getProjects(req, res, next) {
+function getProjects(req, res) {
   // Define options and ids
   // Note: Undefined if not set
   let ids;
@@ -1190,7 +1186,7 @@ function getProjects(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check if ids was provided in the request query
@@ -1236,13 +1232,13 @@ function getProjects(req, res, next) {
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1253,11 +1249,10 @@ function getProjects(req, res, next) {
  *
  * @param {Object} req - request express object
  * @param {Object} res - response express object
- * @param {function} next - Callback function
  *
  * @return {Object} Response object with created projects.
  */
-function postProjects(req, res, next) {
+function postProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1288,7 +1283,7 @@ function postProjects(req, res, next) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1314,13 +1309,13 @@ function postProjects(req, res, next) {
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
-    return next();
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
-    return next();
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1365,7 +1360,8 @@ function putProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1390,12 +1386,14 @@ function putProjects(req, res) {
 
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1439,7 +1437,8 @@ function patchProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1464,12 +1463,14 @@ function patchProjects(req, res) {
 
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1513,7 +1514,8 @@ function deleteProjects(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If req.body contains objects, grab the project IDs from the objects
@@ -1537,12 +1539,14 @@ function deleteProjects(req, res) {
 
     // Return 200: OK and the deleted project IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1587,7 +1591,8 @@ function getProject(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1605,11 +1610,9 @@ function getProject(req, res) {
   .then((projects) => {
     // If no projects found, return 404 error
     if (projects.length === 0) {
-      const error = new M.NotFoundError(
+      throw new M.NotFoundError(
         `Project [${req.params.projectid}] not found.`, 'warn'
       );
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
     }
 
     const publicProjectData = sani.html(
@@ -1621,12 +1624,14 @@ function getProject(req, res) {
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1669,7 +1674,8 @@ function postProject(req, res) {
       'Project ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1680,7 +1686,8 @@ function postProject(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the projectid in req.body in case it wasn't provided
@@ -1708,12 +1715,14 @@ function postProject(req, res) {
 
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1756,7 +1765,8 @@ function putProject(req, res) {
       'Project ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1767,7 +1777,8 @@ function putProject(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1795,12 +1806,14 @@ function putProject(req, res) {
 
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1842,7 +1855,8 @@ function patchProject(req, res) {
       'Project ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -1853,7 +1867,8 @@ function patchProject(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1881,12 +1896,14 @@ function patchProject(req, res) {
 
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -1929,7 +1946,8 @@ function deleteProject(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -1949,12 +1967,14 @@ function deleteProject(req, res) {
 
     // Return 200: OK and the deleted project ID
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
