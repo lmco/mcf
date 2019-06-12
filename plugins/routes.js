@@ -37,32 +37,36 @@ loadPlugins();
  */
 function loadPlugins() {
   const loadedPlugins = [];
+  const plugins = M.config.server.plugins;
 
   // Clone or copy plugins from their source into the plugins directory
-  for (let i = 0; i < M.config.server.plugins.plugins.length; i++) {
-    const data = M.config.server.plugins.plugins[i];
+  Object.keys(plugins).forEach((k) => {
+    if (k === 'enabled') return;
+    console.log(k)
+    console.log(plugins[k])
+    console.log(plugins)
     // Git repos
-    if (data.source.endsWith('.git')) {
-      clonePluginFromGitRepo(data);
+    if (plugins[k].source.endsWith('.git')) {
+      clonePluginFromGitRepo(plugins[k]);
     }
     // Local plugins
-    else if (data.source.startsWith('/') || data.source.startsWith('.')) {
-      copyPluginFromLocalDir(data);
+    else if (plugins[k].source.startsWith('/') || plugins[k].source.startsWith('.')) {
+      copyPluginFromLocalDir(plugins[k]);
     }
     // Website downloads
-    else if (data.source.endsWith('.zip') || data.source.endsWith('.gz')) {
-      downloadPluginFromWebsite(data);
+    else if (plugins[k].source.endsWith('.zip') || plugins[k].source.endsWith('.gz')) {
+      downloadPluginFromWebsite(plugins[k]);
     }
     else {
       M.log.warn('Plugin type unknown');
     }
-  }
+  });
 
   // List the contents of the plugins directory
   const files = fs.readdirSync(__dirname);
 
   // Get a list of plugin names in the config
-  const pluginName = M.config.server.plugins.plugins.map(plugin => plugin.name);
+  const pluginName = Object.keys(plugins);
 
   files.forEach((f) => {
     // Skip routes.js
@@ -132,7 +136,7 @@ function loadPlugins() {
     // Add plugin name/title to array of loaded plugins
     loadedPlugins.push({
       name: namespace,
-      title: M.config.server.plugins.plugins.filter(p => p.name === namespace)[0].title
+      title: plugins[f].title
     });
   });
 
