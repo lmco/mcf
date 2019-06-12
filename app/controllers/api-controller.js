@@ -24,7 +24,8 @@ const zlib = require('zlib');
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
 const multer = require('multer');
-const upload = multer().single('test.json.gz');
+// const upload = multer().single('test.json.gz');
+const upload = multer().single('file');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -3138,9 +3139,7 @@ function postElements(req, res) {
 /*    const gzip = zlib.createGzip();
     let r = fs.createReadStream(req.buffer);
     let w = fs.createWriteStream(path.join(M.root, 'data', 'unzipData.txt'));
-    r.pipe(gzip).pipe(w);*/
-
-
+    r.pipe(gzip).pipe(w);    */
   }
   else {
     elementData = req.body;
