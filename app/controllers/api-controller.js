@@ -4146,7 +4146,8 @@ function getBranches(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check query for branch IDs
@@ -4183,9 +4184,7 @@ function getBranches(req, res) {
 
     // Verify branches public data array is not empty
     if (branchesPublicData.length === 0) {
-      const error = new M.NotFoundError('No branches found.', 'warn');
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
+      throw new M.NotFoundError('No branches found.', 'warn');
     }
 
     const retData = branchesPublicData;
@@ -4195,12 +4194,14 @@ function getBranches(req, res) {
 
     // Return a 200: OK and public branch data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4244,7 +4245,8 @@ function postBranches(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4270,12 +4272,14 @@ function postBranches(req, res) {
 
     // Return 200: OK and created branch data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4319,7 +4323,8 @@ function patchBranches(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4345,12 +4350,14 @@ function patchBranches(req, res) {
 
     // Return 200: OK and the updated branches
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4393,7 +4400,8 @@ function deleteBranches(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // If req.body contains objects, grab the branch IDs from the objects
@@ -4418,12 +4426,14 @@ function deleteBranches(req, res) {
 
     // Return 200: OK and the deleted branch IDs
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4468,7 +4478,8 @@ function getBranch(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4487,11 +4498,9 @@ function getBranch(req, res) {
   .then((branch) => {
     // If no branch found, return 404 error
     if (branch.length === 0) {
-      const error = new M.NotFoundError(
-        `Project [${req.params.branchid}] not found.`, 'warn'
+      throw new M.NotFoundError(
+        `Branch [${req.params.branchid}] not found.`, 'warn'
       );
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
     }
 
     const publicBranchData = sani.html(
@@ -4503,12 +4512,14 @@ function getBranch(req, res) {
 
     // Return 200: OK and public branch data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4550,7 +4561,8 @@ function postBranch(req, res) {
       'Branch ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4561,7 +4573,8 @@ function postBranch(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4590,12 +4603,14 @@ function postBranch(req, res) {
 
     // Return 200: OK and the created branch
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4637,7 +4652,8 @@ function patchBranch(req, res) {
       'Branch ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -4648,7 +4664,8 @@ function patchBranch(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4677,12 +4694,14 @@ function patchBranch(req, res) {
 
     // Return 200: OK and the updated branch
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4725,7 +4744,8 @@ function deleteBranch(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4746,12 +4766,14 @@ function deleteBranch(req, res) {
 
     // Return 200: OK and the deleted branch ID
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4767,5 +4789,7 @@ function deleteBranch(req, res) {
  * @return {Object} Response error message
  */
 function invalidRoute(req, res) {
-  return res.status(404).send('Invalid Route or Method.');
+  const json = 'Invalid Route or Method.';
+  res.status(404).send(json);
+  middleware.logResponse(json.length, req, res);
 }
