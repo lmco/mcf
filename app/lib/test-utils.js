@@ -21,7 +21,6 @@
  */
 // Node modules
 const path = require('path');
-const chai = require('chai');
 const fs = require('fs');
 
 // MBEE modules
