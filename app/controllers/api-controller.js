@@ -3141,7 +3141,8 @@ function getElements(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check query for element IDs
@@ -3166,7 +3167,8 @@ function getElements(req, res) {
       const error = new M.DataFormatError(`The format ${options.format} is not a `
         + 'valid format.', 'warn');
       res.header('Content-Type', 'text/plain');
-      return res.status(400).send(error.message);
+      res.status(400).send(error.message);
+      middleware.logResponse(error.message.length, req, res);
     }
     format = options.format;
     delete options.format;
@@ -3192,9 +3194,7 @@ function getElements(req, res) {
 
     // Verify elements public data array is not empty
     if (elementsPublicData.length === 0) {
-      const error = new M.NotFoundError('No elements found.', 'warn');
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
+      throw new M.NotFoundError('No elements found.', 'warn');
     }
 
     const retData = elementsPublicData;
@@ -3221,10 +3221,11 @@ function getElements(req, res) {
 
         // Return a 200: OK and public JMI type 3 element data
         res.header('Content-Type', 'application/json');
-        return res.status(200).send(json);
+        res.status(200).send(json);
+        middleware.logResponse(json.length, req, res);
       }
       catch (err) {
-        return res.status(errors.getStatusCode(err)).send(err.message);
+        throw err;
       }
     }
 
@@ -3233,12 +3234,14 @@ function getElements(req, res) {
 
     // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3282,7 +3285,8 @@ function postElements(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3308,12 +3312,14 @@ function postElements(req, res) {
 
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3358,7 +3364,8 @@ function putElements(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3384,12 +3391,14 @@ function putElements(req, res) {
 
     // Return 200: OK and the new/replaced elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3433,7 +3442,8 @@ function patchElements(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3459,12 +3469,14 @@ function patchElements(req, res) {
 
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3506,7 +3518,8 @@ function deleteElements(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3527,12 +3540,14 @@ function deleteElements(req, res) {
 
     // Return 200: OK and the deleted element ids
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3598,7 +3613,8 @@ function searchElements(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for q (query)
@@ -3623,9 +3639,7 @@ function searchElements(req, res) {
   .then((elements) => {
     // Verify elements public data array is not empty
     if (elements.length === 0) {
-      const error = new M.NotFoundError('No elements found.', 'warn');
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
+      throw new M.NotFoundError('No elements found.', 'warn');
     }
 
     const elementsPublicData = sani.html(
@@ -3637,12 +3651,14 @@ function searchElements(req, res) {
 
     // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3688,7 +3704,8 @@ function getElement(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -3707,11 +3724,9 @@ function getElement(req, res) {
   .then((elements) => {
     // If no element found, return 404 error
     if (elements.length === 0) {
-      const error = new M.NotFoundError(
+      throw new M.NotFoundError(
         `Element [${req.params.elementid}] not found.`, 'warn'
       );
-      res.header('Content-Type', 'text/plain');
-      return res.status(404).send(error.message);
     }
 
     let elementsPublicData = sani.html(
@@ -3728,12 +3743,14 @@ function getElement(req, res) {
 
     // Return 200: OK and the elements
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3775,7 +3792,8 @@ function postElement(req, res) {
       'Element ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3786,7 +3804,8 @@ function postElement(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3815,12 +3834,14 @@ function postElement(req, res) {
 
     // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3863,7 +3884,8 @@ function putElement(req, res) {
       'Element ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3874,7 +3896,8 @@ function putElement(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3903,12 +3926,14 @@ function putElement(req, res) {
 
     // Return 200: OK and the created/replaced element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -3950,7 +3975,8 @@ function patchElement(req, res) {
       'Element ID in the body does not match ID in the params.', 'warn'
     );
     res.header('Content-Type', 'text/plain');
-    return res.status(400).send(error.message);
+    res.status(400).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Attempt to parse query options
@@ -3961,7 +3987,8 @@ function patchElement(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3990,12 +4017,14 @@ function patchElement(req, res) {
 
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
-    return res.status(200).send(json);
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
@@ -4037,7 +4066,8 @@ function deleteElement(req, res) {
   catch (error) {
     // Error occurred with options, report it
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   }
 
   // Check options for minified
@@ -4057,12 +4087,14 @@ function deleteElement(req, res) {
     const json = (minified) ? parsedID : formatJSON(parsedID);
 
     res.header('Content-Type', 'application/json');
-    // Return 200: OK and deleted element
-    return res.status(200).send(json);
+    // Return 200: OK and deleted element ID
+    res.status(200).send(json);
+    middleware.logResponse(json.length, req, res);
   })
   .catch((error) => {
     res.header('Content-Type', 'text/plain');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    res.status(errors.getStatusCode(error)).send(error.message);
+    middleware.logResponse(error.message.length, req, res);
   });
 }
 
