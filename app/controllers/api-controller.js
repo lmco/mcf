@@ -3117,11 +3117,10 @@ async function postElements(req, res) {
 
   // Set the lean option to true for better performance
   options.lean = true;
-
   // Handle element data from both regular requests and zipped files
   const elementDataPromise = new Promise((resolve, reject) => {
     // Handle gzip
-    if (options.gzip) {
+    if (req.headers['content-type'] === 'application/gzip') {
       upload(req, res, function(error) {
         if (error) {
           M.log.error(error);

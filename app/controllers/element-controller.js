@@ -410,7 +410,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean', 'gzip'], Element);
+      'lean'], Element);
 
     // Define array to store element data
     let elementsToCreate = [];
