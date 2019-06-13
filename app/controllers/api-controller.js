@@ -24,8 +24,7 @@ const zlib = require('zlib');
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
 const multer = require('multer');
-// const upload = multer().single('test.json.gz');
-const upload = multer().single('file');
+const upload = multer({ dest: './uploads/' }).single('zipfile');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -3078,12 +3077,11 @@ function getElements(req, res) {
  *
  * @return {Object} Response object with created elements
  */
-function postElements(req, res) {
+async function postElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
   let minified = false;
-  let elementData;
 
   // Define valid option type
   const validOptions = {
@@ -3120,30 +3118,37 @@ function postElements(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Check if the element data was provided in zip format
-  if (options.gzip) {
-    upload(req, res, function(error) {
-      if (error) {
-        M.log.error(error);
-      }
-      console.log(req.file)
-      zlib.gunzip(req.file, (err, result) => {
-        if (err) {
-          M.log.error(err);
+  // Handle element data from both regular requests and zipped files
+  const elementDataPromise = new Promise((resolve, reject) => {
+    // Handle gzip
+    if (options.gzip) {
+      upload(req, res, function(error) {
+        if (error) {
+          M.log.error(error);
+          reject(error);
         }
-        console.log(result)
-        elementData = result;
+        const chunks = [];
+        req.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+        req.on('end', () => {
+          const buffer = Buffer.concat(chunks);
+          zlib.gunzip(buffer, (err, result) => {
+            if (err) {
+              M.log.error(err);
+              reject(err);
+            }
+            resolve(JSON.parse(result.toString()));
+          });
+        });
       });
-    });
-
-/*    const gzip = zlib.createGzip();
-    let r = fs.createReadStream(req.buffer);
-    let w = fs.createWriteStream(path.join(M.root, 'data', 'unzipData.txt'));
-    r.pipe(gzip).pipe(w);    */
-  }
-  else {
-    elementData = req.body;
-  }
+    }
+    else {
+      resolve(req.body);
+    }
+  });
+  // Get the elementData
+  const elementData = await elementDataPromise;
 
   // Create the specified elements
   // NOTE: create() sanitizes input params
