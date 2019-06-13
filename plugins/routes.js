@@ -42,9 +42,6 @@ function loadPlugins() {
   // Clone or copy plugins from their source into the plugins directory
   Object.keys(plugins).forEach((k) => {
     if (k === 'enabled') return;
-    console.log(k)
-    console.log(plugins[k])
-    console.log(plugins)
     // Git repos
     if (plugins[k].source.endsWith('.git')) {
       clonePluginFromGitRepo(plugins[k]);
