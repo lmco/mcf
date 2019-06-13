@@ -37,7 +37,6 @@ class ElementTree extends Component {
       isOpen: props.isOpen,
       data: props.data,
       children: null,
-      modalEdit: false,
       elementWindow: false,
       isSelected: true,
       error: null
