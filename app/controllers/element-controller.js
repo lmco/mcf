@@ -1179,7 +1179,6 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
               throw new M.OperationError(`Element's ${key} cannot be self`
                 + ` [${utils.parseID(element._id).pop()}].`, 'warn');
             }
-
             // If source/target does not exist, throw error
             if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
               throw new M.NotFoundError(`The ${key} element `
@@ -1188,13 +1187,13 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             }
 
             // If no target exists and is not being updated, throw error
-            if (key === 'source' && !(updateElement.target || element.target)) {
+            if (key === 'source' && !(updateElement.target !== undefined || element.target)) {
               throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
                 + ' target is required if source is provided.', 'warn');
             }
 
             // If no source exists and is not being updated, throw error
-            if (key === 'target' && !(updateElement.source || element.source)) {
+            if (key === 'target' && !(updateElement.source !== undefined || element.source)) {
               throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
                 + ' source is required if target is provided.', 'warn');
             }
