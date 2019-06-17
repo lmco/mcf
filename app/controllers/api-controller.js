@@ -3123,8 +3123,8 @@ async function postElements(req, res) {
     if (req.headers['content-type'] === 'application/gzip') {
       upload(req, res, function(error) {
         if (error) {
-          M.log.error(error);
-          reject(error);
+          M.log.warn(error.message);
+          return reject(new M.DataFormatError('Problem uploading file', 'warn'));
         }
         const chunks = [];
         req.on('data', (chunk) => {
@@ -3134,21 +3134,26 @@ async function postElements(req, res) {
           const buffer = Buffer.concat(chunks);
           zlib.gunzip(buffer, (err, result) => {
             if (err) {
-              M.log.error(err);
-              reject(err);
+              M.log.warn(err.message);
+              return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
             }
-            resolve(JSON.parse(result.toString()));
+            return resolve(JSON.parse(result.toString()));
           });
         });
       });
     }
     else {
-      resolve(req.body);
+      return resolve(req.body);
     }
   });
   // Get the elementData
-  const elementData = await elementDataPromise;
-
+  let elementData;
+  try {
+    elementData = await elementDataPromise;
+  }
+  catch (err) {
+    return res.status(400).send(err.message);
+  }
   // Create the specified elements
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
