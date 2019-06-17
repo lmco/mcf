@@ -3126,23 +3126,29 @@ async function postElements(req, res) {
           M.log.warn(error.message);
           return reject(new M.DataFormatError('Problem uploading file', 'warn'));
         }
+        // We receive the data in chunks, not all at once
         const chunks = [];
         req.on('data', (chunk) => {
+          // hold each chunk in memory
           chunks.push(chunk);
         });
         req.on('end', () => {
+          // combine the chunks into a single buffer when req is done sending
           const buffer = Buffer.concat(chunks);
+          // unzip the data
           zlib.gunzip(buffer, (err, result) => {
             if (err) {
               M.log.warn(err.message);
               return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
             }
+            // return the unzipped data
             return resolve(JSON.parse(result.toString()));
           });
         });
       });
     }
     else {
+      // If it's not a zip file, the data we want will be in req.body
       return resolve(req.body);
     }
   });
