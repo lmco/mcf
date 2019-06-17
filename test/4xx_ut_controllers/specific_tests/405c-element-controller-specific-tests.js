@@ -515,7 +515,7 @@ function optionFieldsFind(done) {
   // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
-  const fieldsAlwaysProvided = ['_id', 'contains', 'sourceOf', 'targetOf'];
+  const fieldsAlwaysProvided = ['_id'];
 
   // Find the element only with specific fields.
   ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, findOptions)
@@ -528,7 +528,7 @@ function optionFieldsFind(done) {
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+    const visibleFields = Object.keys(elem._doc);
 
     // Check that the only keys in the element are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
@@ -542,7 +542,7 @@ function optionFieldsFind(done) {
     const elem = foundElements[0];
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+    const visibleFields = Object.keys(elem._doc);
 
     // Check that the keys in the notFindOptions are not in elem
     chai.expect(Object.keys(visibleFields)).to.not.have.members(['createdOn', 'updatedOn']);
@@ -722,7 +722,7 @@ function optionFieldsCreate(done) {
   // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
-  const fieldsAlwaysProvided = ['_id', 'contains', 'sourceOf', 'targetOf'];
+  const fieldsAlwaysProvided = ['_id'];
 
   // Create the element only with specific fields returned
   ElementController.create(adminUser, org.id, projIDs[0], branchID, elemObjFind, findOptions)
@@ -735,7 +735,7 @@ function optionFieldsCreate(done) {
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+    const visibleFields = Object.keys(elem._doc);
 
     // Check that the only keys in the element are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
@@ -750,7 +750,7 @@ function optionFieldsCreate(done) {
     const elem = createdElements[0];
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+    const visibleFields = Object.keys(elem._doc);
 
     // Check that the keys in the notFindOptions are not in elem
     chai.expect(Object.keys(visibleFields)).to.not.have.members(['createdOn', 'updatedOn']);
@@ -873,7 +873,7 @@ function optionFieldsUpdate(done) {
   // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
-  const fieldsAlwaysProvided = ['_id', 'contains', 'sourceOf', 'targetOf'];
+  const fieldsAlwaysProvided = ['_id'];
 
   // Update the element only with specific fields returned
   ElementController.update(adminUser, org.id, projIDs[0], branchID, updateObjFind, findOptions)
@@ -886,7 +886,7 @@ function optionFieldsUpdate(done) {
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+    const visibleFields = Object.keys(elem._doc);
 
     // Check that the only keys in the element are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
@@ -901,7 +901,7 @@ function optionFieldsUpdate(done) {
     const elem = updatedElements[0];
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+    const visibleFields = Object.keys(elem._doc);
 
     // Check that the keys in the notFindOptions are not in elem
     chai.expect(Object.keys(visibleFields)).to.not.have.members(['createdOn', 'updatedOn']);
@@ -1026,7 +1026,7 @@ function optionFieldsReplace(done) {
   // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
-  const fieldsAlwaysProvided = ['_id', 'contains', 'sourceOf', 'targetOf'];
+  const fieldsAlwaysProvided = ['_id'];
 
   // Replace the element only with specific fields returned
   ElementController.createOrReplace(adminUser, org.id, projIDs[0], branchID,
@@ -1040,7 +1040,7 @@ function optionFieldsReplace(done) {
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+    const visibleFields = Object.keys(elem._doc);
 
     // Check that the only keys in the element are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
@@ -1055,7 +1055,7 @@ function optionFieldsReplace(done) {
     const elem = replacedElements[0];
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields = Object.keys(elem._doc).concat(Object.keys(elem.$$populatedVirtuals));
+    const visibleFields = Object.keys(elem._doc);
 
     // Check that the keys in the notFindOptions are not in elem
     chai.expect(Object.keys(visibleFields)).to.not.have.members(['createdOn', 'updatedOn']);
