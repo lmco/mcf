@@ -112,7 +112,8 @@ const ElementSchema = new mongoose.Schema({
   target: {
     type: String,
     ref: 'Element',
-    default: null
+    default: null,
+    index: true
   },
   documentation: {
     type: String,
