@@ -120,15 +120,16 @@ function handleGzipUpload(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+
     // Verify response body
-    const createdElement = JSON.parse(body);
+    const createdElements = JSON.parse(body);
+    const createdElement = createdElements[0];
 
     // Verify element created properly
     chai.expect(createdElement.id).to.equal(elemData.id);
     chai.expect(createdElement.name).to.equal(elemData.name);
     chai.expect(createdElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(createdElement.project).to.equal(projID);
-
     done();
   });
 }

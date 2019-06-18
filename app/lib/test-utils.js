@@ -375,6 +375,42 @@ module.exports.createRequest = function(user, params, body, method, query = {}) 
 };
 
 /**
+ * @description Helper function for setting mock request parameters.  Creates a read
+ * stream of a file and gives the stream request-like properties
+ *
+ * @param {Object} user - The user making the request
+ * @param {Object} params - Parameters for API req
+ * @param {Object} body - Body for API req
+ * @param {string} method - API method of req
+ * @param {Object} [query] - query options for API req
+ * @param {string} filepath - The path to the file to create the read stream of
+ * @param {Object} headers - Headers for the API req
+ *
+ * @returns {Object} req - Request Object
+ */
+module.exports.createReadStreamRequest = function(user, params, body, method, query = {},
+  filepath, headers) {
+  // Error-Check
+  if (typeof params !== 'object') {
+    throw M.DataFormatError('params is not of type object.', 'warn');
+  }
+  if (typeof body !== 'object') {
+    throw M.DataFormatError('body is not of type object.', 'warn');
+  }
+
+  const req = fs.createReadStream(filepath);
+  req.user = user;
+  req.params = params;
+  req.body = body;
+  req.method = method;
+  req.query = query;
+  req.headers = this.getHeaders(headers);
+  req.session = {};
+
+  return req;
+};
+
+/**
  * @description Helper function for setting mock response status and header.
  *
  * @param {Object} res - Response Object
