@@ -141,6 +141,9 @@ function postProject(done) {
     // Verify specific fields not returned
     chai.expect(createdProj).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -201,6 +204,9 @@ function postProjects(done) {
       chai.expect(createdProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -250,6 +256,9 @@ function putProject(done) {
     // Verify specific fields not returned
     chai.expect(replacedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -311,6 +320,9 @@ function putProjects(done) {
       chai.expect(replacedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -360,6 +372,9 @@ function getProject(done) {
     // Verify specific fields not returned
     chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -422,6 +437,9 @@ function getProjects(done) {
       chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -485,6 +503,9 @@ function getAllProjectsOnOrg(done) {
       chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -546,6 +567,9 @@ function getAllProjects(done) {
       chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -599,6 +623,9 @@ function patchProject(done) {
     // Verify specific fields not returned
     chai.expect(updatedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -665,6 +692,9 @@ function patchProjects(done) {
       chai.expect(updatedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -698,6 +728,9 @@ function deleteProject(done) {
 
     // Verify correct project deleted
     chai.expect(deletedID).to.equal(projData.id);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -735,6 +768,9 @@ function deleteProjects(done) {
 
     // Verify correct project found
     chai.expect(deletedIDs).to.have.members(projData.map(p => p.id));
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 

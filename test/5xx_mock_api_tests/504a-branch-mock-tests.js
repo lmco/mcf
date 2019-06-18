@@ -151,6 +151,9 @@ function postBranch(done) {
     // Verify specific fields not returned
     chai.expect(createdBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -215,6 +218,9 @@ function postBranches(done) {
       chai.expect(createdBranch).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -265,6 +271,9 @@ function getBranch(done) {
     // Verify specific fields not returned
     chai.expect(foundBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -327,6 +336,9 @@ function getBranches(done) {
       chai.expect(foundBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -393,6 +405,9 @@ function getAllBranches(done) {
       chai.expect(foundBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -447,6 +462,9 @@ function patchBranch(done) {
     // Verify specific fields not returned
     chai.expect(updatedBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -515,6 +533,9 @@ function patchBranches(done) {
       chai.expect(updatedBranch).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -546,6 +567,9 @@ function deleteBranch(done) {
   res.send = function send(_data) {
     const branchid = JSON.parse(_data);
     chai.expect(branchid).to.equal(testData.branches[1].id);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -581,6 +605,9 @@ function deleteBranches(done) {
   res.send = function send(_data) {
     const arrDeletedBranchIDs = JSON.parse(_data);
     chai.expect(arrDeletedBranchIDs).to.have.members(branchData.map(b => b.id));
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 

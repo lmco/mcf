@@ -153,7 +153,7 @@ const buildComplete = fs.existsSync(`${M.root}/build`);
 if (installComplete) {
   // Initialize the MBEE logger/helper functions
   Object.defineProperty(M, 'log', {
-    value: M.require('lib.logger'),
+    value: M.require('lib.logger').logger,
     writable: false,
     enumerable: true
   });
