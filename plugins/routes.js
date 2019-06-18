@@ -37,11 +37,10 @@ loadPlugins();
  */
 function loadPlugins() {
   const loadedPlugins = [];
-  const plugins = M.config.server.plugins;
+  const plugins = M.config.server.plugins.plugins;
 
   // Clone or copy plugins from their source into the plugins directory
   Object.keys(plugins).forEach((k) => {
-    if (k === 'enabled') return;
     // Git repos
     if (plugins[k].source.endsWith('.git')) {
       clonePluginFromGitRepo(plugins[k]);
