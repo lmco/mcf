@@ -401,7 +401,7 @@ module.exports.getHeaders = function(contentType = 'application/json', user = te
   const formattedCreds = `${user.username}:${user.password}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
-    'Content-Type': contentType,
+    'content-type': contentType,
     authorization: basicAuthHeader
   };
 };
