@@ -23,7 +23,8 @@
     "request": "^2.86.0",
     "swagger-jsdoc": "^1.9.7",
     "winston": "^3.2.1",
-    "yarn": "^1.13.0"
+    "yarn": "^1.13.0",
+    "multer": "^1.4.1"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.7.2",

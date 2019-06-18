@@ -19,9 +19,12 @@
 
 // Node.js Modules
 const path = require('path');
+const zlib = require('zlib');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
+const multer = require('multer');
+const upload = multer({ dest: './uploads/' }).single('zipfile');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -3263,7 +3266,7 @@ function getElements(req, res) {
  *
  * @return {Object} Response object with created elements
  */
-function postElements(req, res) {
+async function postElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3273,7 +3276,8 @@ function postElements(req, res) {
   const validOptions = {
     populate: 'array',
     fields: 'array',
-    minified: 'boolean'
+    minified: 'boolean',
+    gzip: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -3305,11 +3309,54 @@ function postElements(req, res) {
 
   // Set the lean option to true for better performance
   options.lean = true;
-
+  // Handle element data from both regular requests and zipped files
+  const elementDataPromise = new Promise((resolve, reject) => {
+    // Handle gzip
+    if (req.headers['content-type'] === 'application/gzip') {
+      upload(req, res, function(error) {
+        if (error) {
+          M.log.warn(error.message);
+          return reject(new M.DataFormatError('Problem uploading file', 'warn'));
+        }
+        // We receive the data in chunks so we want to collect the entire file
+        // before trying to unzip
+        const chunks = [];
+        req.on('data', (chunk) => {
+          // hold each chunk in memory
+          chunks.push(chunk);
+        });
+        req.on('end', () => {
+          // combine the chunks into a single buffer when req is done sending
+          const buffer = Buffer.concat(chunks);
+          // unzip the data
+          zlib.gunzip(buffer, (err, result) => {
+            if (err) {
+              M.log.warn(err.message);
+              return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
+            }
+            // return the unzipped data
+            return resolve(JSON.parse(result.toString()));
+          });
+        });
+      });
+    }
+    else {
+      // If it's not a zip file, the data we want will be in req.body
+      return resolve(req.body);
+    }
+  });
+  // Get the elementData
+  let elementData;
+  try {
+    elementData = await elementDataPromise;
+  }
+  catch (err) {
+    return res.status(400).send(err.message);
+  }
   // Create the specified elements
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, req.body, options)
+    req.params.branchid, elementData, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
