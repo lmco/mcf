@@ -104,11 +104,19 @@ module.exports = {
  * This function is used for formatting all API responses.
  *
  * @param {Object} obj - An object to convert to JSON-formatted string.
+ * @param {boolean} [minified = false] - Whether or not to format the object
  *
  * @returns {string} JSON string of object parameter
  */
-function formatJSON(obj) {
-  return JSON.stringify(obj, null, M.config.server.api.json.indent);
+function formatJSON(obj, minified = false) {
+  // If the object should be minified
+  if (minified) {
+    return JSON.stringify(obj);
+  }
+  // Stringify and format the object
+  else {
+    return JSON.stringify(obj, null, M.config.server.api.json.indent);
+  }
 }
 
 /**
@@ -296,8 +304,8 @@ function getOrgs(req, res) {
       orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    // Format JSON
+    const json = formatJSON(orgsPublicData, minified);
 
     // Return 200: OK and public org data
     res.header('Content-Type', 'application/json');
@@ -374,8 +382,8 @@ function postOrgs(req, res) {
       orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    // Format JSON
+    const json = formatJSON(orgsPublicData, minified);
 
     // Return 200: OK and created orgs
     res.header('Content-Type', 'application/json');
@@ -453,8 +461,8 @@ function putOrgs(req, res) {
       orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    // Format JSON
+    const json = formatJSON(orgsPublicData, minified);
 
     // Return 200: OK and created/replaced orgs
     res.header('Content-Type', 'application/json');
@@ -531,8 +539,8 @@ function patchOrgs(req, res) {
       orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData : formatJSON(orgsPublicData);
+    // Format JSON
+    const json = formatJSON(orgsPublicData, minified);
 
     // Return 200: OK and the updated orgs
     res.header('Content-Type', 'application/json');
@@ -606,8 +614,8 @@ function deleteOrgs(req, res) {
   OrgController.remove(req.user, req.body, options)
   // Return 200: OK and the deleted org IDs
   .then((orgIDs) => {
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgIDs : formatJSON(orgIDs);
+    // Format JSON
+    const json = formatJSON(orgIDs, minified);
 
     res.header('Content-Type', 'application/json');
     res.status(200).send(json);
@@ -691,8 +699,8 @@ function getOrg(req, res) {
       orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
+    // Format JSON
+    const json = formatJSON(orgsPublicData[0], minified);
 
     // Return a 200: OK and the org's public data
     res.header('Content-Type', 'application/json');
@@ -783,8 +791,8 @@ function postOrg(req, res) {
       orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
+    // Format JSON
+    const json = formatJSON(orgsPublicData[0], minified);
 
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -875,8 +883,8 @@ function putOrg(req, res) {
       orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
+    // Format JSON
+    const json = formatJSON(orgsPublicData[0], minified);
 
     // Return 200: OK and created org
     res.header('Content-Type', 'application/json');
@@ -966,8 +974,8 @@ function patchOrg(req, res) {
       orgs.map(o => publicData.getPublicData(o, 'org', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgsPublicData[0] : formatJSON(orgsPublicData[0]);
+    // Format JSON
+    const json = formatJSON(orgsPublicData[0], minified);
 
     // Return 200: OK and the updated org
     res.header('Content-Type', 'application/json');
@@ -1038,8 +1046,8 @@ function deleteOrg(req, res, next) {
   .then((orgIDs) => {
     const orgID = orgIDs[0];
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? orgID : formatJSON(orgID);
+    // Format JSON
+    const json = formatJSON(orgID, minified);
 
     // Return 200: OK and the deleted org IDs
     res.header('Content-Type', 'application/json');
@@ -1123,8 +1131,8 @@ function getAllProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    // Format JSON
+    const json = formatJSON(publicProjectData, minified);
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
@@ -1226,8 +1234,8 @@ function getProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    // Format JSON
+    const json = formatJSON(publicProjectData, minified);
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
@@ -1303,8 +1311,8 @@ function postProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    // Format JSON
+    const json = formatJSON(publicProjectData, minified);
 
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
@@ -1381,8 +1389,8 @@ function putProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    // Format JSON
+    const json = formatJSON(publicProjectData, minified);
 
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
@@ -1458,8 +1466,8 @@ function patchProjects(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData : formatJSON(publicProjectData);
+    // Format JSON
+    const json = formatJSON(publicProjectData, minified);
 
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
@@ -1534,8 +1542,8 @@ function deleteProjects(req, res) {
   .then((projectIDs) => {
     const parsedIDs = projectIDs.map(p => utils.parseID(p).pop());
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+    // Format JSON
+    const json = formatJSON(parsedIDs, minified);
 
     // Return 200: OK and the deleted project IDs
     res.header('Content-Type', 'application/json');
@@ -1619,8 +1627,8 @@ function getProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
+    // Format JSON
+    const json = formatJSON(publicProjectData[0], minified);
 
     // Return 200: OK and public project data
     res.header('Content-Type', 'application/json');
@@ -1710,8 +1718,8 @@ function postProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
+    // Format JSON
+    const json = formatJSON(publicProjectData[0], minified);
 
     // Return 200: OK and created project data
     res.header('Content-Type', 'application/json');
@@ -1801,8 +1809,8 @@ function putProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
+    // Format JSON
+    const json = formatJSON(publicProjectData[0], minified);
 
     // Return 200: OK and created/replaced project data
     res.header('Content-Type', 'application/json');
@@ -1891,8 +1899,8 @@ function patchProject(req, res) {
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicProjectData[0] : formatJSON(publicProjectData[0]);
+    // Format JSON
+    const json = formatJSON(publicProjectData[0], minified);
 
     // Return 200: OK and updated project data
     res.header('Content-Type', 'application/json');
@@ -1962,8 +1970,8 @@ function deleteProject(req, res) {
   .then((projectIDs) => {
     const parsedIDs = utils.parseID(projectIDs[0]).pop();
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+    // Format JSON
+    const json = formatJSON(parsedIDs, minified);
 
     // Return 200: OK and the deleted project ID
     res.header('Content-Type', 'application/json');
@@ -2069,8 +2077,8 @@ function getUsers(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    // Format JSON
+    const json = formatJSON(publicUserData, minified);
 
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
@@ -2147,8 +2155,8 @@ function postUsers(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    // Format JSON
+    const json = formatJSON(publicUserData, minified);
 
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
@@ -2225,8 +2233,8 @@ function putUsers(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    // Format JSON
+    const json = formatJSON(publicUserData, minified);
 
     // Return 200: OK and public user data
     res.header('Content-Type', 'application/json');
@@ -2303,8 +2311,8 @@ function patchUsers(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    // Format JSON
+    const json = formatJSON(publicUserData, minified);
 
     // Return 200: OK and the updated users
     res.header('Content-Type', 'application/json');
@@ -2373,8 +2381,8 @@ function deleteUsers(req, res) {
   // NOTE: remove() sanitizes req.body
   UserController.remove(req.user, req.body, options)
   .then((usernames) => {
-    // Format JSON if minify option is not true
-    const json = (minified) ? usernames : formatJSON(usernames);
+    // Format JSON
+    const json = formatJSON(usernames, minified);
 
     // Return 200: OK and deleted usernames
     res.header('Content-Type', 'application/json');
@@ -2458,8 +2466,8 @@ function getUser(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
+    // Format JSON
+    const json = formatJSON(publicUserData[0], minified);
 
     // Return a 200: OK and the user's public data
     res.header('Content-Type', 'application/json');
@@ -2549,8 +2557,8 @@ function postUser(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
+    // Format JSON
+    const json = formatJSON(publicUserData[0], minified);
 
     // Return 200: OK and created user
     res.header('Content-Type', 'application/json');
@@ -2640,8 +2648,8 @@ function putUser(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
+    // Format JSON
+    const json = formatJSON(publicUserData[0], minified);
 
     // Return 200: OK and created/replaced user
     res.header('Content-Type', 'application/json');
@@ -2731,8 +2739,8 @@ function patchUser(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData[0] : formatJSON(publicUserData[0]);
+    // Format JSON
+    const json = formatJSON(publicUserData[0], minified);
 
     // Return 200: OK and updated user
     res.header('Content-Type', 'application/json');
@@ -2801,8 +2809,8 @@ function deleteUser(req, res) {
   .then((usernames) => {
     const username = usernames[0];
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? username : formatJSON(username);
+    // Format JSON
+    const json = formatJSON(username, minified);
 
     // Return 200: OK and the deleted username
     res.header('Content-Type', 'application/json');
@@ -2869,8 +2877,8 @@ function whoami(req, res) {
     publicData.getPublicData(req.user, 'user', options)
   );
 
-  // Format JSON if minify option is not true
-  const json = (minified) ? publicUserData : formatJSON(publicUserData);
+  // Format JSON
+  const json = formatJSON(publicUserData, minified);
 
   // Returns 200: OK and the users public data
   res.header('Content-Type', 'application/json');
@@ -2954,8 +2962,8 @@ function searchUsers(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? usersPublicData : formatJSON(usersPublicData);
+    // Format JSON
+    const json = formatJSON(usersPublicData, minified);
 
     // Return a 200: OK and public user data
     res.header('Content-Type', 'application/json');
@@ -3058,8 +3066,8 @@ function patchPassword(req, res) {
       publicData.getPublicData(user, 'user', options)
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicUserData : formatJSON(publicUserData);
+    // Format JSON
+    const json = formatJSON(publicUserData, minified);
 
     // Returns 200: OK and the updated user's public data
     res.header('Content-Type', 'application/json');
@@ -3216,8 +3224,8 @@ function getElements(req, res) {
           jmiData = jmi.convertJMI(1, 3, elementsPublicData, 'id');
         }
 
-        // Format JSON if minify option is not true
-        const json = (minified) ? jmiData : formatJSON(jmiData);
+        // Format JSON
+        const json = formatJSON(jmiData, minified);
 
         // Return a 200: OK and public JMI type 3 element data
         res.header('Content-Type', 'application/json');
@@ -3229,8 +3237,8 @@ function getElements(req, res) {
       }
     }
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? retData : formatJSON(retData);
+    // Format JSON
+    const json = formatJSON(retData, minified);
 
     // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
@@ -3307,8 +3315,8 @@ function postElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    // Format JSON
+    const json = formatJSON(elementsPublicData, minified);
 
     // Return 200: OK and the new elements
     res.header('Content-Type', 'application/json');
@@ -3386,8 +3394,8 @@ function putElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    // Format JSON
+    const json = formatJSON(elementsPublicData, minified);
 
     // Return 200: OK and the new/replaced elements
     res.header('Content-Type', 'application/json');
@@ -3464,8 +3472,8 @@ function patchElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    // Format JSON
+    const json = formatJSON(elementsPublicData, minified);
 
     // Return 200: OK and the updated elements
     res.header('Content-Type', 'application/json');
@@ -3535,8 +3543,8 @@ function deleteElements(req, res) {
   .then((elements) => {
     const parsedIDs = elements.map(e => utils.parseID(e).pop());
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+    // Format JSON
+    const json = formatJSON(parsedIDs, minified);
 
     // Return 200: OK and the deleted element ids
     res.header('Content-Type', 'application/json');
@@ -3646,8 +3654,8 @@ function searchElements(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    // Format JSON
+    const json = formatJSON(elementsPublicData, minified);
 
     // Return a 200: OK and public element data
     res.header('Content-Type', 'application/json');
@@ -3738,8 +3746,8 @@ function getElement(req, res) {
       elementsPublicData = elementsPublicData[0];
     }
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData : formatJSON(elementsPublicData);
+    // Format JSON
+    const json = formatJSON(elementsPublicData, minified);
 
     // Return 200: OK and the elements
     res.header('Content-Type', 'application/json');
@@ -3829,8 +3837,8 @@ function postElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
+    // Format JSON
+    const json = formatJSON(elementsPublicData[0], minified);
 
     // Return 200: OK and the created element
     res.header('Content-Type', 'application/json');
@@ -3921,8 +3929,8 @@ function putElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
+    // Format JSON
+    const json = formatJSON(elementsPublicData[0], minified);
 
     // Return 200: OK and the created/replaced element
     res.header('Content-Type', 'application/json');
@@ -4012,8 +4020,8 @@ function patchElement(req, res) {
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? elementsPublicData[0] : formatJSON(elementsPublicData[0]);
+    // Format JSON
+    const json = formatJSON(elementsPublicData[0], minified);
 
     // Return 200: OK and the updated element
     res.header('Content-Type', 'application/json');
@@ -4083,8 +4091,8 @@ function deleteElement(req, res) {
   .then((element) => {
     const parsedID = utils.parseID(element[0]).pop();
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? parsedID : formatJSON(parsedID);
+    // Format JSON
+    const json = formatJSON(parsedID, minified);
 
     res.header('Content-Type', 'application/json');
     // Return 200: OK and deleted element ID
@@ -4189,8 +4197,8 @@ function getBranches(req, res) {
 
     const retData = branchesPublicData;
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? retData : formatJSON(retData);
+    // Format JSON
+    const json = formatJSON(retData, minified);
 
     // Return a 200: OK and public branch data
     res.header('Content-Type', 'application/json');
@@ -4267,8 +4275,8 @@ function postBranches(req, res) {
       branches.map(b => publicData.getPublicData(b, 'branch', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicBranchData : formatJSON(publicBranchData);
+    // Format JSON
+    const json = formatJSON(publicBranchData, minified);
 
     // Return 200: OK and created branch data
     res.header('Content-Type', 'application/json');
@@ -4345,8 +4353,8 @@ function patchBranches(req, res) {
       branches.map(b => publicData.getPublicData(b, 'branch', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? branchesPublicData : formatJSON(branchesPublicData);
+    // Format JSON
+    const json = formatJSON(branchesPublicData, minified);
 
     // Return 200: OK and the updated branches
     res.header('Content-Type', 'application/json');
@@ -4421,8 +4429,8 @@ function deleteBranches(req, res) {
   .then((branchIDs) => {
     const parsedIDs = branchIDs.map(p => utils.parseID(p).pop());
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+    // Format JSON
+    const json = formatJSON(parsedIDs, minified);
 
     // Return 200: OK and the deleted branch IDs
     res.header('Content-Type', 'application/json');
@@ -4507,8 +4515,8 @@ function getBranch(req, res) {
       branch.map(b => publicData.getPublicData(b, 'branch', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? publicBranchData[0] : formatJSON(publicBranchData[0]);
+    // Format JSON
+    const json = formatJSON(publicBranchData[0], minified);
 
     // Return 200: OK and public branch data
     res.header('Content-Type', 'application/json');
@@ -4598,8 +4606,8 @@ function postBranch(req, res) {
       branch.map(b => publicData.getPublicData(b, 'branch', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? branchesPublicData[0] : formatJSON(branchesPublicData[0]);
+    // Format JSON
+    const json = formatJSON(branchesPublicData[0], minified);
 
     // Return 200: OK and the created branch
     res.header('Content-Type', 'application/json');
@@ -4689,8 +4697,8 @@ function patchBranch(req, res) {
       branch.map(b => publicData.getPublicData(b, 'branch', options))
     );
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? branchPublicData[0] : formatJSON(branchPublicData[0]);
+    // Format JSON
+    const json = formatJSON(branchPublicData[0], minified);
 
     // Return 200: OK and the updated branch
     res.header('Content-Type', 'application/json');
@@ -4761,8 +4769,8 @@ function deleteBranch(req, res) {
   .then((branchID) => {
     const parsedIDs = utils.parseID(branchID[0]).pop();
 
-    // Format JSON if minify option is not true
-    const json = (minified) ? parsedIDs : formatJSON(parsedIDs);
+    // Format JSON
+    const json = formatJSON(parsedIDs, minified);
 
     // Return 200: OK and the deleted branch ID
     res.header('Content-Type', 'application/json');
