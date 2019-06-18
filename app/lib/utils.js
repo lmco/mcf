@@ -248,6 +248,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
   // Define valid searchOptions for the user model
   const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
     'createdBy', 'lastModifiedBy', 'archivedBy'];
+  const requiredElementFields = ['contains', 'sourceOf', 'targetOf'];
 
   // Add required populate fields to populate string for Element model
   if (model.modelName === 'Element') {
@@ -294,7 +295,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
       // Ensure each field is able to be populated
       const validPopulateFields = model.getValidPopulateFields();
-      const requiredElementFields = ['contains', 'sourceOf', 'targetOf'];
       val.forEach((p) => {
         // If the field cannot be populated, throw an error
         if (!validPopulateFields.includes(p)) {
@@ -349,6 +349,17 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
       // Set the fieldsString option in the returnObject
       returnObject.fieldsString = val.join(' ');
+
+      // Handle special case for element virtuals
+      if (model.modelName === 'Element') {
+        const notSpecifiedVirtuals = requiredElementFields.filter(e => !val.includes(e));
+
+        // For each virtual not specified in fields
+        notSpecifiedVirtuals.forEach((virt) => {
+          // Remove the virtual from the populateString
+          returnObject.populateString = returnObject.populateString.replace(`${virt} `, '');
+        });
+      }
     }
 
     // Handle the limit option
