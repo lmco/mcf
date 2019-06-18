@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.502a-org-mock-tests
+ * @module test.502a-org-mock-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
