@@ -176,6 +176,9 @@ function postElement(done) {
     // Verify specific fields not returned
     chai.expect(createdElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -252,6 +255,9 @@ function postElements(done) {
       chai.expect(createdElement).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -319,6 +325,9 @@ function putElement(done) {
     // Verify specific fields not returned
     chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -396,6 +405,9 @@ function putElements(done) {
       chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -463,6 +475,9 @@ function getElement(done) {
     // Verify specific fields not returned
     chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -542,6 +557,9 @@ function getElements(done) {
       chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -621,6 +639,9 @@ function getAllElements(done) {
       chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -693,6 +714,9 @@ function searchElement(done) {
     // Verify specific fields not returned
     chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -764,6 +788,9 @@ function patchElement(done) {
     // Verify specific fields not returned
     chai.expect(updatedElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -849,6 +876,9 @@ function patchElements(done) {
       chai.expect(updatedElement).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
     });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -881,6 +911,9 @@ function deleteElement(done) {
   res.send = function send(_data) {
     const elementid = JSON.parse(_data);
     chai.expect(elementid).to.equal(testData.elements[0].id);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 
@@ -917,6 +950,9 @@ function deleteElements(done) {
   res.send = function send(_data) {
     const arrDeletedElemIDs = JSON.parse(_data);
     chai.expect(arrDeletedElemIDs).to.have.members(elemData.map(p => p.id));
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
     done();
   };
 

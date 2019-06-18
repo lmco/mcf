@@ -27,6 +27,7 @@ const api = express.Router();
 const APIController = M.require('controllers.api-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
+const logger = M.require('lib.logger');
 
 
 /**
@@ -46,7 +47,11 @@ api.get(
   '/coffee',
   AuthController.authenticate,
   Middleware.logRoute,
-  (req, res) => res.status(418).send('I\'m a teapot.')
+  (req, res) => {
+    const str = 'I\'m a teapot.';
+    res.status(418).send(str);
+    logger.logResponse(str.length, req, res);
+  }
 );
 
 
@@ -63,8 +68,9 @@ api.get(
  *       200:
  *         description: OK, Succeeded to get the swagger doc.
  */
-api.get('/doc/swagger.json', Middleware.logRoute, APIController.swaggerJSON);
-
+api.get('/doc/swagger.json',
+  Middleware.logRoute,
+  APIController.swaggerJSON);
 
 /**
  * @swagger

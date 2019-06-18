@@ -10,6 +10,7 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This file defines middleware functions which can be used by
  * express to perform actions during requests.
@@ -38,8 +39,17 @@ module.exports.logRoute = function logRoute(req, res, next) {
  * @param {function} next - Callback to express authentication flow.
  */
 module.exports.logIP = function logIP(req, res, next) {
+  let ip = req.ip;
+  // If IP is ::1, set it equal to 127.0.0.1
+  if (req.ip === '::1') {
+    ip = '127.0.0.1';
+  }
+  // If IP starts with ::ffff:, remove the ::ffff:
+  else if (req.ip.startsWith('::ffff:')) {
+    ip = ip.replace('::ffff:', '');
+  }
   // Log the method, url, and ip address for the request
-  M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${req.ip}`);
+  M.log.verbose(`${req.method} "${req.originalUrl}" requested from ${ip}`);
   next();
 };
 
