@@ -18,14 +18,12 @@
 // NPM modules
 const chai = require('chai');
 const path = require('path');
-const fs = require('fs');
 
 // MBEE modules
 const ProjController = M.require('controllers.project-controller');
 const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
-const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
