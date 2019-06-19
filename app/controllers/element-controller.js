@@ -247,7 +247,6 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   const promises = [];
 
-  console.log('Pre-if')
   // If no IDs provided, find all elements in a project
   if (elementsToFind.length === 0) {
     // Get the number of elements in the branch
@@ -273,7 +272,6 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
       else {
         numLoops = elementCount / batchLimit;
       }
-      console.log('Pre-loop');
 
       // Find elements in batches of 50K in smallest number loops possible
       for (let i = 0; i < numLoops; i++) {
@@ -281,14 +279,13 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
         batchSkip = i * 50000 + validOptions.skip;
         // Set limit if its a defined option and on last iteration
         if (validOptions.limit > 0 && ((elementCount && validOptions.limit) / batchLimit) - i < 1) {
-          batchLimit = validOptions.limit;
+          batchLimit = validOptions.limit - i * batchLimit;
         }
-        console.log(`I (${i}) WILL SURVIVE!!`)
+
         // Add find operation to array of promises
         promises.push(findHelper(searchQuery, validOptions.fieldsString,
           batchLimit, batchSkip, validOptions.populateString, validOptions.lean)
         .then((elems) => {
-          console.log(process.memoryUsage().heapUsed / 1024 / 1024);
           foundElements = foundElements.concat(elems);
         }));
       }
@@ -310,6 +307,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
     }
   }
 
+  // Wait for promises to resolve before returning elements
   await Promise.all(promises);
 
   // Return the found elements
@@ -319,6 +317,15 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 /**
  * @description Find helper function which simplifies the actual Element.find()
  * database call
+ *
+ * @param {Object} query - THe query to send to the database
+ * @param {string} fields - Fields to include (or not include) in the found objects
+ * @param {number} limit - The maximum number of elements to return.
+ * @param {number} skip - The number of elements to skip.
+ * @param {string} populate - A string containing a space delimited list of
+ * fields to populate
+ * @param {boolean} lean - If true, returns raw JSON rather than converting to
+ * instances of the Element model.
  */
 async function findHelper(query, fields, limit, skip, populate, lean) {
   if (lean) {
