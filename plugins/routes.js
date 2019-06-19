@@ -41,6 +41,8 @@ function loadPlugins() {
 
   // Clone or copy plugins from their source into the plugins directory
   Object.keys(plugins).forEach((k) => {
+    // Get the name of the plugin
+    plugins[k].name = k;
     // Git repos
     if (plugins[k].source.endsWith('.git')) {
       clonePluginFromGitRepo(plugins[k]);
