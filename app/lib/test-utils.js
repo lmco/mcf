@@ -407,6 +407,8 @@ module.exports.createReadStreamRequest = function(user, params, body, method, qu
   req.query = query;
   req.headers = this.getHeaders(headers);
   req.session = {};
+  req.originalUrl = 'ThisIsATest';
+  req.ip = '::1';
 
   return req;
 };

@@ -160,23 +160,26 @@ function find(requestingUser, organizationID, projects, options) {
     // Find the organization
     Organization.findOne({ _id: orgID }).lean()
     .then((foundOrg) => {
-      // Ensure the organization was found
-      if (foundOrg === null) {
-        throw new M.NotFoundError(`Organization [${orgID}] was not found.`,
-          'warn');
-      }
+      // Handle special case where user is requesting all projects they have access to
+      if (organizationID !== null) {
+        // Ensure the organization was found
+        if (foundOrg === null) {
+          throw new M.NotFoundError(`Organization [${orgID}] was not found.`,
+            'warn');
+        }
 
-      // Ensure the user has at least read permissions on the organization
-      if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-        || !foundOrg.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to find'
-          + ` projects on the organization [${orgID}].`, 'warn');
-      }
+        // Ensure the user has at least read permissions on the organization
+        if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
+          || !foundOrg.permissions[reqUser._id].includes('read'))) {
+          throw new M.PermissionError('User does not have permission to find'
+            + ` projects on the organization [${orgID}].`, 'warn');
+        }
 
-      // If the org is archived and the user hasn't specified archived = true
-      if (foundOrg.archived && !validOptions.archived) {
-        throw new M.PermissionError(`The organization [${orgID}] is archived.`
-          + ' It must first be unarchived before finding projects.', 'warn');
+        // If the org is archived and the user hasn't specified archived = true
+        if (foundOrg.archived && !validOptions.archived) {
+          throw new M.PermissionError(`The organization [${orgID}] is archived.`
+            + ' It must first be unarchived before finding projects.', 'warn');
+        }
       }
 
       // If the lean option is supplied
