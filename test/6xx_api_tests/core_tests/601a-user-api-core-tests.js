@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.601a-user-api-tests
+ * @module test.601a-user-api-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
