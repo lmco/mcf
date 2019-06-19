@@ -167,6 +167,19 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Verify the user has at least read permissions on the organization
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to get'
+          + ` branches on the organization [${orgID}].`, 'warn');
+      }
+
+      // Verify the organization is not archived
+      if (organization.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before finding branches.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -182,6 +195,12 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.PermissionError('User does not have permission to get'
           + ` branches on the project [${projID}].`, 'warn');
+      }
+
+      // Verify the project is not archived
+      if (project.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before finding branches.', 'warn');
       }
 
       // Check the type of the branches parameter
@@ -364,6 +383,19 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Verify user has at least read permissions on the org
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to create'
+          + ` branches on the organization [${orgID}].`, 'warn');
+      }
+
+      // Verify the organization is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before creating branches.', 'warn');
+      }
+
       // Find the project to verify existence and permissions
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -380,6 +412,12 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         throw new M.PermissionError('User does not have permission to create'
           + ' branches on the project '
           + `[${projID}].`, 'warn');
+      }
+
+      // Verify the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before creating branches.', 'warn');
       }
 
       // Find the branchedFrom to verify existence
@@ -673,6 +711,19 @@ function update(requestingUser, organizationID, projectID, branches, options) {
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Verify the user has at least read permissions on the organization
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to update'
+          + ` branches on the organization [${orgID}].`, 'warn');
+      }
+
+      // Verify the organization is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before updating branches.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -689,6 +740,12 @@ function update(requestingUser, organizationID, projectID, branches, options) {
         || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.PermissionError('User does not have permission to update'
           + ` branch on the project [${projID}].`, 'warn');
+      }
+
+      // Verify the organization is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before updating branches.', 'warn');
       }
     })
     .then(() => {
@@ -921,6 +978,13 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
       // Check that the org was found
       if (!organization) {
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
+      }
+
+      // Ensure the user has at least read access on the organization
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to delete'
+          + ` branches on the organization [${orgID}].`, 'warn');
       }
 
       // Find the project
