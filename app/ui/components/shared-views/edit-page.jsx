@@ -27,8 +27,7 @@ import {
   Input,
   FormFeedback,
   Button,
-  UncontrolledAlert,
-  CustomInput
+  UncontrolledAlert
 } from 'reactstrap';
 
 /* eslint-enable no-unused-vars */
@@ -49,6 +48,11 @@ class EditPage extends Component {
       name = this.props.org.name;
       archived = this.props.org.archived;
       custom = this.props.org.custom;
+    }
+    else if (this.props.branch) {
+      name = this.props.branch.name;
+      archived = this.props.branch.archived;
+      custom = this.props.branch.custom;
     }
     else {
       name = this.props.project.name;
@@ -94,7 +98,6 @@ class EditPage extends Component {
   onSubmit() {
     // Initialize variables
     let url;
-    let redirect;
     const data = {
       name: this.state.name,
       custom: JSON.parse(this.state.custom)
@@ -103,17 +106,17 @@ class EditPage extends Component {
 
     if (this.props.org) {
       url = `/api/orgs/${this.props.org.id}`;
-      redirect = `/orgs/${this.props.org.id}`;
+    }
+    else if (this.props.branch) {
+      const branch = this.props.branch;
+      url = `/api/orgs/${branch.org}/projects/${branch.project}/branches/${branch.id}`;
     }
     else {
       data.visibility = this.state.visibility;
       url = `/api/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
-      redirect = `/orgs/${this.props.orgid}/projects/${this.props.project.id}`;
     }
 
-    if (this.state.archived) {
-      data.archived = true;
-    }
+    data.archived = this.state.archived;
 
     $.ajax({
       method: 'PATCH',
@@ -121,7 +124,7 @@ class EditPage extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: () => { window.location.replace(redirect); },
+        200: () => { window.location.reload(); },
         401: (err) => {
           this.setState({ error: err.responseText });
 
@@ -143,6 +146,9 @@ class EditPage extends Component {
 
     if (this.props.org) {
       title = 'Organization';
+    }
+    else if (this.props.branch) {
+      title = ` [${this.props.branch.id}] Branch`;
     }
     else {
       title = 'Project';
@@ -217,15 +223,16 @@ class EditPage extends Component {
                 </FormFeedback>
               </FormGroup>
               {/* Form section for archiving */}
-              <FormGroup>
-                <div>
-                  <CustomInput type="switch"
-                               id="archived"
-                               name="archived"
-                               label="Archive"
-                               value={this.state.archived}
-                               onChange={this.handleChange}/>
-                </div>
+              <FormGroup check className='bottom-spacing'>
+                <Label check>
+                  <Input type="checkbox"
+                         name="archived"
+                         id="archived"
+                         checked={this.state.archived}
+                         value={this.state.archived || false}
+                         onChange={this.handleChange} />
+                  Archived
+                </Label>
               </FormGroup>
               {/* Button to submit changes */}
               <Button color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>

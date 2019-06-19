@@ -114,8 +114,8 @@ class ProfileApp extends Component {
         <div id='container'>
           { /* Create the sidebar with sidebar links */ }
           <Sidebar title={title}>
-            <SidebarLink id='Info'
-                         title='Info'
+            <SidebarLink id='Information'
+                         title='Information'
                          icon='fas fa-info'
                          routerLink={routerLink} />
             {(otherUser !== null)

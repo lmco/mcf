@@ -113,7 +113,7 @@ class MembersPage extends Component {
           </ModalBody>
         </Modal>
         <div id='workspace'>
-          <div id='workspace-header' className='workspace-header'>
+          <div id='workspace-header' className='workspace-header header-box-depth'>
             <h2 className='workspace-title'>
               Members
             </h2>

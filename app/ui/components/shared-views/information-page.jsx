@@ -45,7 +45,7 @@ class InformationPage extends Component {
   // Define toggle function
   handleToggle() {
     // Open or close modal
-    this.setState({ modal: !this.state.modal });
+    this.setState((prevState) => ({ modal: !prevState.modal }));
   }
 
   render() {
@@ -92,7 +92,7 @@ class InformationPage extends Component {
           </ModalBody>
         </Modal>
         <div id='workspace'>
-          <div id='workspace-header' className='workspace-header'>
+          <div id='workspace-header' className='workspace-header header-box-depth'>
             <h2 className={titleClass}>{name}</h2>
             { /* Verify user is an admin */}
             {(!isButtonDisplayed)

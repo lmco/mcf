@@ -57,7 +57,7 @@ class Element extends Component {
 
     if (elementId) {
       // Initalize variables
-      const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
+      const url = `${this.props.url}/elements/${elementId}?minified=true`;
       // Get project data
       $.ajax({
         method: 'GET',

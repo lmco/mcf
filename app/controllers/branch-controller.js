@@ -650,7 +650,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Element);
+      'lean'], Branch);
 
     // Check the type of the branches parameter
     if (Array.isArray(saniBranches)) {

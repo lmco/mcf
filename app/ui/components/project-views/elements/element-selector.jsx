@@ -70,11 +70,8 @@ class ElementSelector extends React.Component {
    * need it. We should consider creating a tree wrapper to handle this.
    */
   getRootElement() {
-    const orgId = this.props.project.org;
-    const projId = this.props.project.id;
-    const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
     const opts = '?fields=id,name,contains,type&minified=true';
-    const url = `${base}/elements/model${opts}`;
+    const url = `${this.props.url}/elements/model${opts}`;
     $.ajax({
       method: 'GET',
       url: url,
