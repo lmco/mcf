@@ -157,23 +157,44 @@ function find(requestingUser, organizationID, projects, options) {
       throw new M.DataFormatError('Invalid input for finding projects.', 'warn');
     }
 
-    // If the lean option is supplied
-    if (validOptions.lean) {
-      // Find the projects
-      Project.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .populate(validOptions.populateString).lean()
-      .then((finishedProjects) => resolve(finishedProjects))
-      .catch((error) => reject(error));
-    }
-    else {
-      // Find the projects
-      Project.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .populate(validOptions.populateString)
-      .then((finishedProjects) => resolve(finishedProjects))
-      .catch((error) => reject(error));
-    }
+    // Find the organization
+    Organization.findOne({ _id: orgID }).lean()
+    .then((foundOrg) => {
+      // Ensure the organization was found
+      if (foundOrg === null) {
+        throw new M.NotFoundError(`Organization [${orgID}] was not found.`,
+          'warn');
+      }
+
+      // Ensure the user has at least read permissions on the organization
+      if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
+        || !foundOrg.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to find'
+          + ` projects on the organization [${orgID}].`, 'warn');
+      }
+
+      // If the org is archived and the user hasn't specified archived = true
+      if (foundOrg.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before finding projects.', 'warn');
+      }
+
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        // Find the projects
+        return Project.find(searchQuery, validOptions.fieldsString,
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .populate(validOptions.populateString).lean();
+      }
+      else {
+        // Find the projects
+        return Project.find(searchQuery, validOptions.fieldsString,
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .populate(validOptions.populateString);
+      }
+    })
+    .then((finishedProjects) => resolve(finishedProjects))
+    .catch((error) => reject(error));
   });
 }
 
