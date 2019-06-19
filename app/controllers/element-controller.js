@@ -107,213 +107,229 @@ const jmi = M.require('lib.jmi-conversions');
  *   M.log.error(error);
  * });
  */
-function find(requestingUser, organizationID, projectID, branch, elements, options) {
-  return new Promise((resolve, reject) => {
-    // Set options if no elements were provided, but options were
-    if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
-      // Note: assumes input param elements is input option param
-      options = elements; // eslint-disable-line no-param-reassign
-      elements = undefined; // eslint-disable-line no-param-reassign
+async function find(requestingUser, organizationID, projectID, branch, elements, options) {
+  // Set options if no elements were provided, but options were
+  if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
+    // Note: assumes input param elements is input option param
+    options = elements; // eslint-disable-line no-param-reassign
+    elements = undefined; // eslint-disable-line no-param-reassign
+  }
+
+  // Ensure input parameters are correct type
+  try {
+    assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+    assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+    // Ensure that requesting user has an _id field
+    assert.ok(requestingUser._id, 'Requesting user is not populated.');
+    assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+    assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+    assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
+
+    const elementsTypes = ['undefined', 'object', 'string'];
+    const optionsTypes = ['undefined', 'object'];
+    assert.ok(elementsTypes.includes(typeof elements), 'Elements parameter is an invalid type.');
+    // If elements is an object, ensure it's an array of strings
+    if (typeof elements === 'object') {
+      assert.ok(Array.isArray(elements), 'Elements is an object, but not an array.');
+      assert.ok(elements.every(e => typeof e === 'string'), 'Elements is not an array of'
+        + ' strings.');
     }
+    assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+  }
+  catch (err) {
+    throw new M.DataFormatError(err.message, 'warn');
+  }
 
-    // Ensure input parameters are correct type
-    try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
+  // Sanitize input parameters
+  const saniElements = (elements !== undefined)
+    ? sani.mongo(JSON.parse(JSON.stringify(elements)))
+    : undefined;
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const branchID = sani.mongo(branch);
+  let foundElements = [];
+  const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
-      const elementsTypes = ['undefined', 'object', 'string'];
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(elementsTypes.includes(typeof elements), 'Elements parameter is an invalid type.');
-      // If elements is an object, ensure it's an array of strings
-      if (typeof elements === 'object') {
-        assert.ok(Array.isArray(elements), 'Elements is an object, but not an array.');
-        assert.ok(elements.every(e => typeof e === 'string'), 'Elements is not an array of'
-          + ' strings.');
-      }
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+  // Initialize validOptions
+  const validOptions = utils.validateOptions(options, ['archived', 'populate',
+    'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
 
-    // Sanitize input parameters
-    const saniElements = (elements !== undefined)
-      ? sani.mongo(JSON.parse(JSON.stringify(elements)))
-      : undefined;
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branchID = sani.mongo(branch);
-    let foundElements = [];
-    const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
+  // Ensure options are valid
+  if (options) {
+    // Create array of valid search options
+    const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+      'createdBy', 'lastModifiedBy', 'archivedBy'];
 
-    // Initialize validOptions
-    const validOptions = utils.validateOptions(options, ['archived', 'populate',
-      'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
-
-    // Ensure options are valid
-    if (options) {
-      // Create array of valid search options
-      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-        'createdBy', 'lastModifiedBy', 'archivedBy'];
-
-      // Loop through provided options, look for validSearchOptions
-      Object.keys(options).forEach((o) => {
-        // If the provided option is a valid search option
-        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-          // Ensure the search option is a string
-          if (typeof options[o] !== 'string') {
-            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
-          }
-
-          // If the search option is an element reference
-          if (['parent', 'source', 'target'].includes(o)) {
-            // Make value the concatenated ID
-            options[o] = utils.createID(orgID, projID, branchID, options[o]);
-          }
-          // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+    // Loop through provided options, look for validSearchOptions
+    Object.keys(options).forEach((o) => {
+      // If the provided option is a valid search option
+      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the search option is a string
+        if (typeof options[o] !== 'string') {
+          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
-      });
+
+        // If the search option is an element reference
+        if (['parent', 'source', 'target'].includes(o)) {
+          // Make value the concatenated ID
+          options[o] = utils.createID(orgID, projID, branchID, options[o]);
+        }
+        // Add the search option to the searchQuery
+        searchQuery[o] = sani.mongo(options[o]);
+      }
+    });
+  }
+
+  // Find the organization
+  const organization = await Org.findOne({ _id: orgID }).lean();
+
+  // Check that the org was found
+  if (!organization) {
+    throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
+  }
+
+  // Find the project
+  const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
+
+  // Check that the project was found
+  if (!project) {
+    throw new M.NotFoundError(`Project [${projID}] not found in the `
+    + `organization [${orgID}].`, 'warn');
+  }
+
+  // Verify the user has read permissions on the project
+  if (!reqUser.admin && (!project.permissions[reqUser._id]
+    || !project.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to get'
+        + ` elements on the project [${utils.parseID(project._id).pop()}].`, 'warn');
+  }
+
+  // Find the branch
+  const foundBranch = await Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
+
+  // Check that the project was found
+  if (!foundBranch) {
+    throw new M.NotFoundError(`Branch [${branchID}] not found in the `
+      + `project [${projID}].`, 'warn');
+  }
+
+  let elementsToFind = [];
+
+  // Check the type of the elements parameter
+  if (Array.isArray(saniElements)) {
+    // An array of element ids, find all
+    elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branchID, e));
+  }
+  else if (typeof saniElements === 'string') {
+    // A single element id
+    elementsToFind = [utils.createID(orgID, projID, branchID, saniElements)];
+  }
+  else if (((typeof saniElements === 'object' && saniElements !== null)
+    || saniElements === undefined)) {
+    // Find all elements in the project
+    elementsToFind = [];
+  }
+  else {
+    // Invalid parameter, throw an error
+    throw new M.DataFormatError('Invalid input for finding elements.', 'warn');
+  }
+
+  // If wanting to find subtree, find subtree ids
+  if (validOptions.subtree) {
+    elementsToFind = await findElementTree(orgID, projID, branchID, elementsToFind);
+  }
+
+  // If the archived field is true, remove it from the query
+  if (validOptions.archived) {
+    delete searchQuery.archived;
+  }
+
+  const promises = [];
+
+  console.log('Pre-if')
+  // If no IDs provided, find all elements in a project
+  if (elementsToFind.length === 0) {
+    // Get the number of elements in the branch
+    const elementCount = await Element.countDocuments(searchQuery);
+
+    // If options.limit is defined an is less that 50k or count is less than 50k, find normally
+    if ((validOptions.limit > 0 && validOptions.limit < 50000) || elementCount < 50000) {
+      // Find the elements
+      foundElements = await findHelper(searchQuery, validOptions.fieldsString,
+        validOptions.limit, validOptions.skip, validOptions.populateString,
+        validOptions.lean);
     }
+    else {
+      // Define batchLimit, batchSkip and numLoops
+      let batchLimit = 50000;
+      let batchSkip = 0;
+      let numLoops = 0;
 
-    // Find the organization
-    Org.findOne({ _id: orgID }).lean()
-    .then((organization) => {
-      // Check that the org was found
-      if (!organization) {
-        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
-      }
-
-      // Find the project
-      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-    })
-    .then((project) => {
-      // Check that the project was found
-      if (!project) {
-        throw new M.NotFoundError(`Project [${projID}] not found in the `
-        + `organization [${orgID}].`, 'warn');
-      }
-
-      // Verify the user has read permissions on the project
-      if (!reqUser.admin && (!project.permissions[reqUser._id]
-        || !project.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to get'
-            + ` elements on the project [${utils.parseID(project._id).pop()}].`, 'warn');
-      }
-
-      // Find the branch
-      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
-    })
-    .then((foundBranch) => {
-      // Check that the project was found
-      if (!foundBranch) {
-        throw new M.NotFoundError(`Branch [${branchID}] not found in the `
-          + `project [${projID}].`, 'warn');
-      }
-
-      let elementsToFind = [];
-
-      // Check the type of the elements parameter
-      if (Array.isArray(saniElements)) {
-        // An array of element ids, find all
-        elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branchID, e));
-      }
-      else if (typeof saniElements === 'string') {
-        // A single element id
-        elementsToFind = [utils.createID(orgID, projID, branchID, saniElements)];
-      }
-      else if (((typeof saniElements === 'object' && saniElements !== null)
-        || saniElements === undefined)) {
-        // Find all elements in the project
-        elementsToFind = [];
+      // Get number of loops = the smallest value divided by 50K
+      if (validOptions.limit && validOptions.limit !== 0) {
+        numLoops = (elementCount && validOptions.limit) / batchLimit;
       }
       else {
-        // Invalid parameter, throw an error
-        throw new M.DataFormatError('Invalid input for finding elements.', 'warn');
+        numLoops = elementCount / batchLimit;
       }
+      console.log('Pre-loop');
 
-      // If wanting to find subtree, find subtree ids
-      if (validOptions.subtree) {
-        return findElementTree(orgID, projID, branchID, elementsToFind);
-      }
-
-      return elementsToFind;
-    })
-    .then((elementIDs) => {
-      // If the archived field is true, remove it from the query
-      if (validOptions.archived) {
-        delete searchQuery.archived;
-      }
-
-      // If no IDs provided, find all elements in a project
-      if (elementIDs.length === 0) {
-        // If the lean option is supplied
-        if (validOptions.lean) {
-          // Find all elements in a project
-          return Element.find(searchQuery, validOptions.fieldsString,
-            { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString)
-          .lean();
+      // Find elements in batches of 50K in smallest number loops possible
+      for (let i = 0; i < numLoops; i++) {
+        // Skip past already found elements
+        batchSkip = i * 50000 + validOptions.skip;
+        // Set limit if its a defined option and on last iteration
+        if (validOptions.limit > 0 && ((elementCount && validOptions.limit) / batchLimit) - i < 1) {
+          batchLimit = validOptions.limit;
         }
-        else {
-          return Element.find(searchQuery, validOptions.fieldsString,
-            { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString);
-        }
+        console.log(`I (${i}) WILL SURVIVE!!`)
+        // Add find operation to array of promises
+        promises.push(findHelper(searchQuery, validOptions.fieldsString,
+          batchLimit, batchSkip, validOptions.populateString, validOptions.lean)
+        .then((elems) => {
+          console.log(process.memoryUsage().heapUsed / 1024 / 1024);
+          foundElements = foundElements.concat(elems);
+        }));
       }
-      // Find elements by ID
+    }
+  }
+  else {
+    // Find elements in batches
+    for (let i = 0; i < elementsToFind.length / 50000; i++) {
+      // Split elementIDs list into batches of 50000
+      searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
 
-      const promises = [];
+      // Add find operation to array of promises
+      promises.push(findHelper(searchQuery, validOptions.fieldsString,
+        validOptions.limit, validOptions.skip, validOptions.populateString,
+        validOptions.lean)
+      .then((elems) => {
+        foundElements = foundElements.concat(elems);
+      }));
+    }
+  }
 
-      // Find elements in batches
-      for (let i = 0; i < elementIDs.length / 50000; i++) {
-        // Split elementIDs list into batches of 50000
-        // Need to sanitize _id
-        searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
+  await Promise.all(promises);
 
-        // If the lean option is supplied
-        if (validOptions.lean) {
-          // Add find operation to promises array
-          promises.push(Element.find(searchQuery, validOptions.fieldsString,
-            { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString)
-          .lean()
-          .then((_foundElements) => {
-            foundElements = foundElements.concat(_foundElements);
-          }));
-        }
-        else {
-          // Add find operation to promises array
-          promises.push(Element.find(searchQuery, validOptions.fieldsString,
-            { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString)
-          .then((_foundElements) => {
-            foundElements = foundElements.concat(_foundElements);
-          }));
-        }
-      }
+  // Return the found elements
+  return foundElements;
+}
 
-      // Return when all elements have been found
-      return Promise.all(promises);
-    })
-    .then((found) => {
-      // If each item in found is not undefined, its the return from Element.find()
-      if (!found.every(o => typeof o === 'undefined')) {
-        return resolve(found);
-      }
-
-      // Each item in found is undefined, which is the return from Promise.all(), return
-      // foundElements
-      return resolve(foundElements);
-    })
-    .catch((error) => reject(error));
-  });
+/**
+ * @description Find helper function which simplifies the actual Element.find()
+ * database call
+ */
+async function findHelper(query, fields, limit, skip, populate, lean) {
+  if (lean) {
+    return Element.find(query, fields, { limit: limit, skip: skip })
+    .populate(populate)
+    .lean();
+  }
+  else {
+    return Element.find(query, fields, { limit: limit, skip: skip })
+    .populate(populate);
+  }
 }
 
 /**
