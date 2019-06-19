@@ -54,8 +54,6 @@ class ElementTree extends Component {
 
   componentDidMount() {
     // Build URL to get element data
-    const orgId = this.props.project.org;
-    const projId = this.props.project.id;
     const contains = this.state.data.contains;
     const parent = this.state.data.id;
     if (contains === null || contains.length === 0) {
@@ -64,7 +62,7 @@ class ElementTree extends Component {
 
     const elements = contains.join(',');
 
-    const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
+    const base = this.props.url;
     let url = `${base}/elements?ids=${elements}&fields=id,name,contains,type&minified=true`;
     if (url.length > 2047) {
       url = `${base}/elements?parent=${parent}&fields=id,name,contains,type&minified=true`;
@@ -150,9 +148,7 @@ class ElementTree extends Component {
     }
     else {
       // Build URL to get element data
-      const orgId = this.props.project.org;
-      const projId = this.props.project.id;
-      const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
+      const base = this.props.url;
       const url = `${base}/elements/${this.state.id}?minified=true`;
 
       // Get project data
@@ -217,7 +213,8 @@ class ElementTree extends Component {
                          clickHandler={this.props.clickHandler}
                          childrenOpen={this.props.childrenOpen}
                          setChildOpen={this.props.setChildOpen}
-                         isOpen={false}/>
+                         isOpen={false}
+                         url={this.props.url}/>
           );
         }
       }

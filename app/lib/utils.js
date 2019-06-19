@@ -244,7 +244,8 @@ module.exports.validateOptions = function(options, validOptions, model) {
   const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
     'createdBy', 'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the branch model
-  const branchSearchOptions = ['tag', 'source'];
+  const branchSearchOptions = ['tag', 'source', 'name',
+    'createdBy', 'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the user model
   const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
     'createdBy', 'lastModifiedBy', 'archivedBy'];

@@ -33,7 +33,6 @@ import {
 } from 'reactstrap';
 
 // MBEE Modules
-import validators from '../../../../../build/json/validators.json';
 import ElementSelector from './element-selector.jsx';
 
 /* eslint-enable no-unused-vars */
@@ -79,7 +78,7 @@ class ElementEdit extends Component {
   getElement() {
     // Initialize variables
     const elementId = this.state.id;
-    const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
+    const url = `${this.props.url}/elements/${elementId}?minified=true`;
 
     // Get element data
     $.ajax({
@@ -162,7 +161,7 @@ class ElementEdit extends Component {
     // Initialize variables
     let parentUpdated;
     const elementId = this.state.id;
-    const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
+    const url = `${this.props.url}/elements/${elementId}?minified=true`;
     const data = {
       name: this.state.name,
       type: this.state.type,
@@ -339,6 +338,7 @@ class ElementEdit extends Component {
                     {this.state.parent || ''}
                     <ElementSelector
                       self={this.state.id}
+                      url={this.props.url}
                       project={this.props.project}
                       selectedHandler={this.parentSelectHandler} />
                   </Col>
@@ -363,6 +363,7 @@ class ElementEdit extends Component {
                 {this.state.source || 'null'}
                 <ElementSelector
                   self={this.state.id}
+                  url={this.props.url}
                   project={this.props.project}
                   selectedHandler={this.sourceSelectHandler} />
               </Col>
@@ -374,6 +375,7 @@ class ElementEdit extends Component {
                 {this.state.target || 'null'}
                 <ElementSelector
                   self={this.state.id}
+                  url={this.props.url}
                   project={this.props.project}
                   selectedHandler={this.targetSelectHandler} />
               </Col>

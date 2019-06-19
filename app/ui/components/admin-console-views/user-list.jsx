@@ -11,7 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders the admin console page.
+ * @description This renders the user list.
  */
 
 /* Modified ESLint rules for React. */
@@ -209,7 +209,7 @@ class UserList extends Component {
         </Modal>
         {/* Display the list of users */}
         <div id='workspace' ref={this.ref}>
-          <div id='workspace-header' className='workspace-header'>
+          <div id='workspace-header' className='workspace-header header-box-depth'>
             <h2 className='workspace-title workspace-title-padding'>
               Users
             </h2>

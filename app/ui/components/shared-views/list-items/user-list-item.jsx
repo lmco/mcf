@@ -185,7 +185,7 @@ class UserListItem extends Component {
     // Render the organization stat list items
     return (
       <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
-        <div id='username-header' className={classNames}>
+        <div id='user-list-items' className={classNames}>
           <a href={this.props.href}>
             <span className={archivedClass}>
               {name}

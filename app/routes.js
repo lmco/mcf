@@ -208,7 +208,7 @@ router.route('/orgs/:orgid/projects')
 /**
  * @description This renders a project for a user
  **/
-router.route('/orgs/:orgid/projects/:projectid')
+router.route('/orgs/:orgid/projects/:projectid/info')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -219,6 +219,16 @@ router.route('/orgs/:orgid/projects/:projectid')
  * @description This renders a project members page form for a user
  **/
 router.route('/orgs/:orgid/projects/:projectid/users')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.project
+);
+
+/**
+ * @description This renders a project's element page for a user
+ **/
+router.route('/orgs/:orgid/projects/:projectid/branches')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,

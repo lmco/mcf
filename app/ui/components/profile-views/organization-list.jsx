@@ -144,7 +144,7 @@ class OrganizationList extends Component {
         </Modal>
         {/* Display the list of orgs */}
         <div id='workspace' ref={this.ref}>
-          <div id='workspace-header' className='workspace-header'>
+          <div id='workspace-header' className='workspace-header header-box-depth'>
             <h2 className='workspace-title workspace-title-padding'>
               Your Organizations
             </h2>
