@@ -190,6 +190,19 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Ensure the user has at least read access on the organization
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to get'
+          + ` elements on the organization [${orgID}].`, 'warn');
+      }
+
+      // Ensure the organization is not archived
+      if (organization.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before finding elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -204,7 +217,13 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       if (!reqUser.admin && (!project.permissions[reqUser._id]
         || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.PermissionError('User does not have permission to get'
-            + ` elements on the project [${utils.parseID(project._id).pop()}].`, 'warn');
+            + ` elements on the project [${projID}].`, 'warn');
+      }
+
+      // Ensure the organization is not archived
+      if (project.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before finding elements.', 'warn');
       }
 
       // Find the branch
@@ -215,6 +234,12 @@ function find(requestingUser, organizationID, projectID, branch, elements, optio
       if (!foundBranch) {
         throw new M.NotFoundError(`Branch [${branchID}] not found in the `
           + `project [${projID}].`, 'warn');
+      }
+
+      // Ensure the branch is not archived
+      if (foundBranch.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before finding elements.', 'warn');
       }
 
       let elementsToFind = [];
