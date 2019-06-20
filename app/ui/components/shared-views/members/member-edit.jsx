@@ -19,20 +19,14 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form,
+import {
+  Form,
   FormGroup,
   Label,
   Input,
   Button,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledAlert
+  UncontrolledAlert, Spinner, Row, Col
 } from 'reactstrap';
-
-// MBEE Modules
-import CustomMenu from '../../general/dropdown-search/custom-menu.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -49,19 +43,32 @@ class MemberEdit extends Component {
       username: '',
       permissions: '',
       dropDownOpen: false,
+      results: null,
       error: null
     };
 
     // Bind component functions
     this.handleChange = this.handleChange.bind(this);
+    this.userChange = this.userChange.bind(this);
+    this.selectUser = this.selectUser.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-    this.updateUsername = this.updateUsername.bind(this);
+    this.doSearch = this.doSearch.bind(this);
   }
 
   // Define handle change function
   handleChange(event) {
     // Change the state with new value
     this.setState({ [event.target.name]: event.target.value });
+  }
+
+  userChange(event) {
+    this.setState({ username: event.target.value });
+
+    this.doSearch(event.target.value);
+  }
+
+  selectUser(username) {
+    this.setState({ username: username, results: null });
   }
 
   // Define the submit function
@@ -112,52 +119,62 @@ class MemberEdit extends Component {
     });
   }
 
-  // Define update username
-  updateUsername(event) {
-    // Change the username with new value
-    this.setState({ username: event.target.value });
-    this.setState({ dropDownOpen: !this.state.dropDownOpen });
+
+  doSearch(e) {
+    // Pre-search state resets
+    this.setState({
+      message: '',
+      results: 'Searching ...'
+    }, () => { this.render(); });
+
+    let query = this.state.username;
+
+    // Disable form submit
+    if (typeof e !== 'string') {
+      e.preventDefault();
+    }
+    else if (e) {
+      query = e;
+    }
+
+    // Build query URL
+    const url = '/api/users/search';
+    // Do ajax request
+    $.ajax({
+      method: 'GET',
+      url: `${url}?q=${query}&limit=5&minified=true`,
+      statusCode: {
+        401: () => {
+          // Refresh when session expires
+          window.location.reload();
+        }
+      }
+    })
+    .done(data => {
+      // Loop through users
+      const userOpts = data.map((user) => (
+          <div className='members-dropdown-item' key={`user-${user.username}`}
+               onClick={() => this.selectUser(user.username)}>
+            <span>{user.fname} {user.lname}</span>
+            <span className='member-username'>@{user.username}</span>
+          </div>));
+
+      this.setState({
+        results: userOpts
+      });
+    })
+    .fail(res => {
+      if (res.status === 404) {
+        this.setState({ results: [] });
+      }
+      if (res.status === 400) {
+        this.setState({ results: [] });
+      }
+    });
   }
 
   componentDidMount() {
-    if (!this.props.selectedUser) {
-      // Get all the users
-      $.ajax({
-        method: 'GET',
-        url: '/api/users?minified=true',
-        statusCode: {
-          200: (users) => {
-            // Loop through users
-            const userOpts = users.map((user) => {
-              if (user.fname) {
-                return (<DropdownItem key={`user-${user.username}`}
-                                      value={user.username}>
-                  {user.fname} {user.lname}
-                </DropdownItem>);
-              }
-              else {
-                return (<DropdownItem key={`user-${user.username}`}
-                                      value={user.username}>{user.username}</DropdownItem>);
-              }
-            });
-
-            // Set the user state
-            this.setState({ users: userOpts });
-          },
-          401: (err) => {
-            // Throw error and set state
-            this.setState({ error: err.responseText });
-
-            // Refresh when session expires
-            window.location.reload();
-          },
-          404: (err) => {
-            this.setState({ error: err.responseText });
-          }
-        }
-      });
-    }
-    else {
+    if (this.props.selectedUser) {
       const username = this.props.selectedUser.username;
       const permission = this.props.selectedUser.perm;
       this.setState({ username: username, permission: permission });
@@ -184,6 +201,22 @@ class MemberEdit extends Component {
       title = this.props.project.name;
     }
 
+    // Set search results or loading icons ...
+    let searchResults = '';
+    if (this.state.results === 'Searching ...') {
+      searchResults = (
+        <div style={{ width: '100%', textAlign: 'center' }}>
+          <Spinner type="grow" color="primary" />
+          <span style={{ paddingLeft: '20px' }}>
+            Searching ...
+          </span>
+        </div>
+      );
+    }
+    else if (Array.isArray(this.state.results)) {
+      searchResults = this.state.results;
+    }
+
     // Render project edit page
     return (
       <div className='extra-padding'>
@@ -198,22 +231,41 @@ class MemberEdit extends Component {
               </UncontrolledAlert>)
           }
           {/* Create form to update user roles */}
-          <Form>
-            {(!selectedUser)
-              ? (<FormGroup>
-                  {/* Create a search bar for username input */}
-                  <Label for='username'>Username</Label>
-                  <div className='username-search'>
-                    {/* List all the usernames with a filter option */}
-                    <CustomMenu username={this.state.username}
-                                dropDownOpen={this.state.dropDownOpen}
-                                onChange={this.updateUsername}>
-                      {this.state.users}
-                    </CustomMenu>
-                  </div>
-                </FormGroup>)
-              : ''
-            }
+          {(!selectedUser)
+            ? (<div>
+              <Form inline>
+                <Row form>
+                  <Col>
+                    <FormGroup>
+                      <Input type='search'
+                             name='username'
+                             style={{ width: '325px' }}
+                             id='username'
+                             placeholder='Search User...'
+                             value={this.state.username || ''}
+                             onChange={this.userChange}/>
+                    </FormGroup>
+                  </Col>
+                  <Col md={2} sm={4} xs={6} >
+                    <Button className='btn'
+                            outline color="primary"
+                            type='submit'
+                            onClick={this.doSearch}>
+                      Search
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+              {(searchResults.length !== 0)
+                ? (<div className='members-dropdown'>
+                    {searchResults}
+                   </div>)
+                : ''
+              }
+            </div>)
+            : ''
+          }
+          <Form style={{ 'padding-top': '10px' }}>
             {/* Permissions user updates with */}
             <FormGroup>
               {(!selectedUser)
@@ -232,10 +284,10 @@ class MemberEdit extends Component {
                 <option>REMOVE_ALL</option>
               </Input>
             </FormGroup>
-            {/* Button to submit changes */}
-            <Button onClick={this.onSubmit}> Submit </Button>{' '}
-            <Button outline color="secondary" onClick={this.props.toggle}>Cancel</Button>
           </Form>
+          {/* Button to submit changes */}
+          <Button onClick={this.onSubmit}> Submit </Button>{' '}
+          <Button outline color="secondary" onClick={this.props.toggle}>Cancel</Button>
         </div>
       </div>
     );

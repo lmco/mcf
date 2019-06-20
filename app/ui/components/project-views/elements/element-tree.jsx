@@ -63,9 +63,9 @@ class ElementTree extends Component {
     const elements = contains.join(',');
 
     const base = this.props.url;
-    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,type&minified=true`;
+    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,archived,type&minified=true&archived=true`;
     if (url.length > 2047) {
-      url = `${base}/elements?parent=${parent}&fields=id,name,contains,type&minified=true`;
+      url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&archived=true`;
     }
 
     $.ajax({
@@ -95,6 +95,7 @@ class ElementTree extends Component {
               }
             }
           });
+
           this.setState({ children: result });
 
           // Verify if the state is displaying the children
@@ -195,8 +196,8 @@ class ElementTree extends Component {
 
     // If the element contains other elements, handle the subtree
     if (this.state.data !== null
-            && Array.isArray(this.state.data.contains)
-            && this.state.data.contains.length >= 1) {
+      && Array.isArray(this.state.data.contains)
+      && this.state.data.contains.length >= 1) {
       // Icon should be chevron to show subtree is collapsible
       expandIcon = (this.state.isOpen) ? 'fa-caret-down' : 'fa-caret-right';
 
@@ -209,6 +210,7 @@ class ElementTree extends Component {
                          data={this.state.children[i]}
                          project={this.props.project}
                          parent={this.state}
+                         archived={this.props.archived}
                          parentRefresh={this.refresh}
                          clickHandler={this.props.clickHandler}
                          childrenOpen={this.props.childrenOpen}
@@ -223,20 +225,39 @@ class ElementTree extends Component {
     // Build the rendered element item
     let element = '';
     if (this.state.data !== null) {
-      // Element should be rendered as the ID initially
-      element = (
-        <span className={'element-id'}>
+      if (!this.state.data.archived) {
+        // Element should be rendered as the ID initially
+        element = (
+          <span className={'element-id'}>
            {this.state.data.id}
         </span>
-      );
-      // If the name is not blank, render the name
-      if (this.state.data.name !== '') {
-        element = (
-          <span>
+        );
+        // If the name is not blank, render the name
+        if (this.state.data.name !== '') {
+          element = (
+            <span>
             {this.state.data.name}
-            <span className={'element-id'}>({this.state.data.id})</span>
+              <span className={'element-id'}>({this.state.data.id})</span>
+          </span>
+          );
+        }
+      }
+      else if (this.props.archived && this.state.data.archived) {
+        // Element should be rendered as the ID initially
+        element = (
+          <span className='element-id'>
+           {this.state.data.id}
           </span>
         );
+        // If the name is not blank, render the name
+        if (this.state.data.name !== '') {
+          element = (
+            <span className='grayed-out'>
+              {this.state.data.name}
+              <span className='element-id'>({this.state.data.id})</span>
+            </span>
+          );
+        }
       }
     }
 
@@ -306,30 +327,34 @@ class ElementTree extends Component {
     if (this.state.data !== null
       && iconMappings.hasOwnProperty(this.state.data.type)) {
       const icon = iconMappings[this.state.data.type].icon;
-      const color = iconMappings[this.state.data.type].color;
+      const color = (this.state.data.archived) ? '#c0c0c0' : iconMappings[this.state.data.type].color;
       elementIcon = (
         <i className={`fas fa-${icon}`}
            style={{ color: color }}/>
       );
     }
 
-    return (
-      <div id={`tree-${this.props.id}`}
-           className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
-        <i className={`fas ${expandIcon}`}
-           onClick={this.toggleCollapse}>
-        </i>
-        <Link to={`#${this.props.id}`}
-              onClick={this.handleClick}
-              className='element-link'>
-          <span className='element-name'>
-            {elementIcon}
-            {element}
-          </span>
-        </Link>
-        {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
-      </div>
-    );
+    if (this.state.data.archived && !this.props.archived) {
+      return null;
+    }
+    else {
+      return (
+        <div id={`tree-${this.props.id}`}
+             className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
+          <i className={`fas ${expandIcon}`}
+             onClick={this.toggleCollapse}>
+          </i>
+          <Link to={`#${this.props.id}`}
+                onClick={this.handleClick}
+                className='element-link'>
+      <span className='element-name'>
+        {elementIcon}
+        {element}
+      </span>
+          </Link>
+          {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
+        </div>);
+    }
   }
 
 }

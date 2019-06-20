@@ -107,18 +107,21 @@ class UserListItem extends Component {
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`read-${user.username}`}
                 _key={`read-${user.username}`}/>,
           <Stat title='Write'
                 icon='fas fa-check'
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`write-${user.username}`}
                 _key={`write-${user.username}`}/>,
           <Stat title='Admin'
                 icon='fas fa-check'
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`admin-${user.username}`}
                 _key={`admin-${user.username}`}/>
         ];
       }
@@ -129,18 +132,21 @@ class UserListItem extends Component {
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`read-${user.username}`}
                 _key={`read-${user.username}`}/>,
           <Stat title='Write'
                 icon='fas fa-check'
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`write-${user.username}`}
                 _key={`write-${user.username}`}/>,
           <Stat title=''
                 icon='fas fa-window-minimize'
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`admin-${user.username}`}
                 _key={`admin-${user.username}`}/>
         ];
       }
@@ -152,18 +158,21 @@ class UserListItem extends Component {
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`read-${user.username}`}
                 _key={`read-${user.username}`}/>,
           <Stat title=''
                 icon='fas fa-window-minimize'
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`write-${user.username}`}s
                 _key={`write-${user.username}`}/>,
           <Stat title=''
                 icon='fas fa-window-minimize'
                 className={minimizeClass}
                 label={this.props.label}
                 noToolTip={true}
+                key={`admin-${user.username}`}
                 _key={`admin-${user.username}`}/>
         ];
       }

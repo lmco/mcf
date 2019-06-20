@@ -22,14 +22,9 @@ import React, { Component } from 'react';
 import {
   Input,
   InputGroup,
-  InputGroupAddon,
   Badge,
-  Modal,
-  ModalBody
+  Label
 } from 'reactstrap';
-
-// MBEE Modules
-import Edit from '../../shared-views/edit-page.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -184,9 +179,22 @@ class BranchBar extends Component {
               </Input>
             </InputGroup>
             <div className='branch-tag'>
+              <div className='archived-check-box'>
+                <Label check className='minimize'>
+                  <Input type='checkbox'
+                         name='archived'
+                         id='archived'
+                         checked={this.props.archived}
+                         value={this.state.archived}
+                         onChange={this.props.displayArchElems} />
+                  <div style={{ paddingTop: '3px' }}>
+                    Include archived
+                  </div>
+                </Label>
+              </div>
             {(!tag)
               ? ''
-              : (<Badge color="primary">Tag</Badge>)
+              : (<Badge color='primary'>Tag</Badge>)
             }
             {(!archived)
               ? ''
