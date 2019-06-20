@@ -142,7 +142,8 @@ class ElementSelector extends React.Component {
                           childrenOpen={this.state.childrenOpen}
                           setChildOpen={this.setChildOpen}
                           parentRefresh={this.getRootElement}
-                          clickHandler={this.selectElementHandler}/>;
+                          clickHandler={this.selectElementHandler}
+                          url={this.props.url}/>;
     }
 
 
@@ -153,7 +154,7 @@ class ElementSelector extends React.Component {
 
     return (
       <div className={'element-selector'}>
-        <i className={'fas fa-caret-square-down'} onClick={this.toggle}></i>
+        <i className={'fas fa-caret-square-down'} onClick={this.toggle}/>
         <Modal size="lg"
                isOpen={this.state.modal}
                toggle={this.toggle}
