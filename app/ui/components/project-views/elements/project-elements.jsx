@@ -48,6 +48,7 @@ class ProjectElements extends Component {
       treeRoot: null,
       branch: props.match.params.branchid,
       childrenOpen: {},
+      archived: false,
       error: null
     };
 
@@ -57,6 +58,7 @@ class ProjectElements extends Component {
     this.createNewElement = this.createNewElement.bind(this);
     this.getElement = this.getElement.bind(this);
     this.setChildOpen = this.setChildOpen.bind(this);
+    this.displayArchivedElems = this.displayArchivedElems.bind(this);
   }
 
   createNewElement() {
@@ -119,7 +121,7 @@ class ProjectElements extends Component {
     const projId = this.props.project.id;
     const branchId = this.state.branch;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
-    const url = `${base}/elements/model?fields=id,name,contains,type&minified=true`;
+    const url = `${base}/elements/model?fields=id,name,contains,type,archived&minified=true&archived=true`;
 
     this.setState({ url: base });
 
@@ -146,6 +148,11 @@ class ProjectElements extends Component {
 
   setChildOpen(id, state) {
     this.state.childrenOpen[id] = state;
+  }
+
+  displayArchivedElems() {
+    // Change the archive state to opposite value
+    this.setState(prevState => ({ archived: !prevState.archived }));
   }
 
   componentDidMount() {
@@ -198,6 +205,7 @@ class ProjectElements extends Component {
                           project={this.props.project}
                           parent={null}
                           isOpen={true}
+                          archived={this.state.archived}
                           childrenOpen={this.state.childrenOpen}
                           setChildOpen={this.setChildOpen}
                           parentRefresh={this.getElement}
@@ -224,6 +232,8 @@ class ProjectElements extends Component {
           <div id='element-tree-container' className='main-workspace'>
             <BranchBar project={this.props.project}
                        branchid={this.state.branch}
+                       archived={this.state.archived}
+                       displayArchElems={this.displayArchivedElems}
                        permissions={this.props.permissions}/>
             {tree}
           </div>
