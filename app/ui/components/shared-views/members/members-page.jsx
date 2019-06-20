@@ -85,7 +85,8 @@ class MembersPage extends Component {
                         _key={`key-${user}`}
                         href={`/profile/${user}`}/>
           <div className='controls-container'>
-            <UncontrolledTooltip placement='top' target={`edit-${user}-roles`}>
+            <UncontrolledTooltip placement='top'
+                                 target={`edit-${user}-roles`}>
               Edit
             </UncontrolledTooltip>
             <i id={`edit-${user}-roles`}
