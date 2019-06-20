@@ -157,23 +157,47 @@ function find(requestingUser, organizationID, projects, options) {
       throw new M.DataFormatError('Invalid input for finding projects.', 'warn');
     }
 
-    // If the lean option is supplied
-    if (validOptions.lean) {
-      // Find the projects
-      Project.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .populate(validOptions.populateString).lean()
-      .then((finishedProjects) => resolve(finishedProjects))
-      .catch((error) => reject(error));
-    }
-    else {
-      // Find the projects
-      Project.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .populate(validOptions.populateString)
-      .then((finishedProjects) => resolve(finishedProjects))
-      .catch((error) => reject(error));
-    }
+    // Find the organization
+    Organization.findOne({ _id: orgID }).lean()
+    .then((foundOrg) => {
+      // Handle special case where user is requesting all projects they have access to
+      if (organizationID !== null) {
+        // Ensure the organization was found
+        if (foundOrg === null) {
+          throw new M.NotFoundError(`Organization [${orgID}] was not found.`,
+            'warn');
+        }
+
+        // Ensure the user has at least read permissions on the organization
+        if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
+          || !foundOrg.permissions[reqUser._id].includes('read'))) {
+          throw new M.PermissionError('User does not have permission to find'
+            + ` projects on the organization [${orgID}].`, 'warn');
+        }
+
+        // If the org is archived and the user hasn't specified archived = true
+        if (foundOrg.archived && !validOptions.archived) {
+          throw new M.PermissionError(`The organization [${orgID}] is archived.`
+            + ' It must first be unarchived before finding projects.', 'warn');
+        }
+      }
+
+      // If the lean option is supplied
+      if (validOptions.lean) {
+        // Find the projects
+        return Project.find(searchQuery, validOptions.fieldsString,
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .populate(validOptions.populateString).lean();
+      }
+      else {
+        // Find the projects
+        return Project.find(searchQuery, validOptions.fieldsString,
+          { limit: validOptions.limit, skip: validOptions.skip })
+        .populate(validOptions.populateString);
+      }
+    })
+    .then((finishedProjects) => resolve(finishedProjects))
+    .catch((error) => reject(error));
   });
 }
 
@@ -327,6 +351,12 @@ function create(requestingUser, organizationID, projects, options) {
         || !foundOrg.permissions[reqUser._id].includes('write'))) {
         throw new M.PermissionError('User does not have permission to create'
           + ` projects on the org [${foundOrg._id}].`, 'warn');
+      }
+
+      // Verify the org is not archived
+      if (_foundOrg.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before creating projects.', 'warn');
       }
 
       // Find any existing, conflicting projects
@@ -648,6 +678,19 @@ function update(requestingUser, organizationID, projects, options) {
       // Check if the organization was found
       if (_foundOrganization === null) {
         throw new M.NotFoundError(`The org [${orgID}] was not found.`, 'warn');
+      }
+
+      // Ensure the user has at least read access on the organization
+      if (!reqUser.admin && (!_foundOrganization.permissions[reqUser._id]
+        || !_foundOrganization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to update'
+          + ` projects on the organization [${orgID}].`, 'warn');
+      }
+
+      // Verify the org is not archived
+      if (_foundOrganization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before updating projects.', 'warn');
       }
 
       // Set function-wide foundOrg
@@ -1044,6 +1087,12 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
         throw new M.NotFoundError(`The org [${orgID}] was not found.`, 'warn');
       }
 
+      // Verify the organization is not archived
+      if (_foundOrganization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before replacing projects.', 'warn');
+      }
+
       // Find the projects to update
       return Project.find(searchQuery).lean();
     })
@@ -1212,8 +1261,18 @@ function remove(requestingUser, organizationID, projects, options) {
       throw new M.DataFormatError('Invalid input for removing projects.', 'warn');
     }
 
-    // Find the projects to delete
-    Project.find(searchQuery).lean()
+    // Find the organization
+    Organization.findOne({ _id: orgID }).lean()
+    .then((foundOrg) => {
+      // Verify the organization was found
+      if (foundOrg === null) {
+        throw new M.NotFoundError(`The organization [${orgID}] was not found`,
+          'warn');
+      }
+
+      // Find the projects to delete
+      return Project.find(searchQuery).lean();
+    })
     .then((_foundProjects) => {
       // Set the function-wide foundProjects and create ownedQuery
       foundProjects = _foundProjects;

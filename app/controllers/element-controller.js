@@ -189,6 +189,19 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
     throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
   }
 
+  // Ensure that the user has at least read permissions on the org
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to get'
+      + ` elements on the organization [${orgID}].`, 'warn');
+  }
+
+  // Verify the org is not archived
+  if (organization.archived) {
+    throw new M.PermissionError(`The organization [${orgID}] is archived.`
+      + ' It must first be unarchived before finding elements.', 'warn');
+  }
+
   // Find the project
   const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
 
@@ -205,6 +218,12 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
         + ` elements on the project [${utils.parseID(project._id).pop()}].`, 'warn');
   }
 
+  // Verify the project is not archived
+  if (project.archived) {
+    throw new M.PermissionError(`The project [${projID}] is archived.`
+      + ' It must first be unarchived before finding elements.', 'warn');
+  }
+
   // Find the branch
   const foundBranch = await Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
 
@@ -212,6 +231,12 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   if (!foundBranch) {
     throw new M.NotFoundError(`Branch [${branchID}] not found in the `
       + `project [${projID}].`, 'warn');
+  }
+
+  // Verify the branch is not archived
+  if (foundBranch.archived) {
+    throw new M.PermissionError(`The branch [${branchID}] is archived.`
+      + ' It must first be unarchived before finding elements.', 'warn');
   }
 
   let elementsToFind = [];
@@ -581,6 +606,19 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Verify the user has at least read access on the organization
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to create'
+          + ` elements on the organization [${orgID}].`, 'warn');
+      }
+
+      // Verify the org is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before creating elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -597,6 +635,12 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.PermissionError('User does not have permission to create'
           + ' elements on the project '
           + `[${utils.parseID(foundProject._id).pop()}].`, 'warn');
+      }
+
+      // Verify the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before creating elements.', 'warn');
       }
 
       // Find all referenced projects
@@ -620,6 +664,12 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       if (!foundBranch) {
         throw new M.NotFoundError(`Branch [${branchID}] not found in the `
           + `project [${projID}].`, 'warn');
+      }
+
+      // Verify the branch is not archived
+      if (foundBranch.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before creating elements.', 'warn');
       }
 
       // Check the branch is not a tagged branch
@@ -934,6 +984,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Ensure that the user has at least read access on the organization
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to update'
+          + ` elements on the organization [${orgID}].`, 'warn');
+      }
+
+      // Ensure the organization is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before updating elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -949,7 +1012,13 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.PermissionError('User does not have permission to update'
-          + ` elements on the project [${utils.parseID(foundProject._id).pop()}].`, 'warn');
+          + ` elements on the project [${projID}].`, 'warn');
+      }
+
+      // Ensure the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before updating elements.', 'warn');
       }
       // Find the branch
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
@@ -959,6 +1028,12 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       if (!foundBranch) {
         throw new M.NotFoundError(`Branch [${branchID}] not found in the `
           + `project [${projID}].`, 'warn');
+      }
+
+      // Ensure the branch is not archived
+      if (foundBranch.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before updating elements.', 'warn');
       }
 
       // Check the branch is not a tagged branch
@@ -1400,6 +1475,12 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Ensure the org is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before replacing elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -1409,6 +1490,13 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         throw new M.NotFoundError(`Project [${projID}] not found in the `
           + `organization [${orgID}].`, 'warn');
       }
+
+      // Ensure the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before replacing elements.', 'warn');
+      }
+
       // Find the branch
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
     })
@@ -1417,6 +1505,12 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       if (!foundBranch) {
         throw new M.NotFoundError(`Branch [${branchID}] not found in the `
           + `project [${projID}].`, 'warn');
+      }
+
+      // Ensure the branch is not archived
+      if (foundBranch.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before replacing elements.', 'warn');
       }
 
       // Check the branch is not a tagged branch
@@ -1659,6 +1753,13 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Check that the org was found
       if (!organization) {
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
+      }
+
+      // Verify the requesting user has at least read permissions on the org
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to delete'
+          + ` elements in the organization [${orgID}].`, 'warn');
       }
 
       // Find the project
@@ -2078,6 +2179,19 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Verify the requesting user has at least read permissions
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('write'))) {
+        throw new M.PermissionError('User does not have permission to search'
+          + ` elements in the organization [${orgID}].`, 'warn');
+      }
+
+      // Ensure the org is not archived
+      if (organization.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before searching elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -2091,18 +2205,30 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       // Verify the user has read permissions on the project
       if (!reqUser.admin && (!project.permissions[reqUser._id]
         || !project.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to get'
-          + ` elements on the project ${utils.parseID(project._id).pop()}.`, 'warn');
+        throw new M.PermissionError('User does not have permission to search'
+          + ` elements on the project ${projID}.`, 'warn');
+      }
+
+      // Ensure the project is not archived
+      if (project.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before searching elements.', 'warn');
       }
 
       // Find the elements to delete
-      return Branch.find({ _id: utils.createID(orgID, projID, branchID) }).lean();
+      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
     })
     .then((foundBranch) => {
       // Ensure the project was found
       if (foundBranch === null) {
         throw new M.NotFoundError(`The branch [${branchID}] on the project ${projID} `
           + 'was not found.', 'warn');
+      }
+
+      // Ensure the branch is not archived
+      if (foundBranch.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before searching elements.', 'warn');
       }
 
       searchQuery.$text = { $search: query };
