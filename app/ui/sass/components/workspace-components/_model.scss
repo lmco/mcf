@@ -84,12 +84,18 @@
   }
 
   .branch-input {
-    width: 250px;
+    width: 200px;
   }
 
   .branch-tag {
     padding-left: 10px;
     padding-top: 3px;
+
+    .archived-check-box {
+      padding-left: 30px;
+      position: sticky;
+    }
+
   }
 
   .branch-label {
