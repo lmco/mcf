@@ -241,6 +241,7 @@ class MemberEdit extends Component {
                              name='username'
                              style={{ width: '325px' }}
                              id='username'
+                             autocomplete='off'
                              placeholder='Search User...'
                              value={this.state.username || ''}
                              onChange={this.userChange}/>
