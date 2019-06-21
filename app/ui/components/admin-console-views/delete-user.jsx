@@ -19,10 +19,9 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Button, UncontrolledAlert, DropdownItem } from 'reactstrap';
+import {Form, FormGroup, Label, Button, UncontrolledAlert, DropdownItem, Row, Col, Input} from 'reactstrap';
 
 // MBEE Modules
-import ListItem from '../general/list/list-item.jsx';
 import CustomMenu from '../general/dropdown-search/custom-menu.jsx';
 
 /* eslint-enable no-unused-vars */
@@ -154,17 +153,38 @@ class DeleteUser extends Component {
           }
           <Form>
             {(!selectedUser)
-              ? (<FormGroup>
-                  {/* Create a search bar for username input */}
-                  <Label for='username'>Username</Label>
-                  <div className='username-search'>
-                    {/* List all the usernames with a filter option */}
-                    <CustomMenu username={this.state.username}
-                                onChange={this.updateUsername}>
-                      {this.state.users}
-                    </CustomMenu>
-                  </div>
-                 </FormGroup>)
+              ? (<div>
+                <Form inline>
+                  <Row form>
+                    <Col>
+                      <FormGroup>
+                        <Input type='search'
+                               name='username'
+                               style={{ width: '325px' }}
+                               id='username'
+                               autocomplete='off'
+                               placeholder='Search User...'
+                               value={this.state.username || ''}
+                               onChange={this.userChange}/>
+                      </FormGroup>
+                    </Col>
+                    <Col md={2} sm={4} xs={6} >
+                      <Button className='btn'
+                              outline color="primary"
+                              type='submit'
+                              onClick={this.doSearch}>
+                        Search
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form>
+                {(searchResults.length !== 0)
+                  ? (<div className='members-dropdown'>
+                    {searchResults}
+                  </div>)
+                  : ''
+                }
+              </div>)
               : (<FormGroup>
                   <Label for="username">Do you want to delete {selectedUser}?</Label>
                  </FormGroup>)
