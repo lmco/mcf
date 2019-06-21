@@ -179,6 +179,16 @@ class BranchBar extends Component {
               </Input>
             </InputGroup>
             <div className='branch-tag'>
+              <div>
+              {(!tag)
+                ? ''
+                : (<Badge color='primary'>Tag</Badge>)
+              }
+              {(!archived)
+                ? ''
+                : (<Badge color='secondary'>Archived</Badge>)
+              }
+            </div>
               <div className='archived-check-box'>
                 <Label check className='minimize'>
                   <Input type='checkbox'
@@ -192,14 +202,6 @@ class BranchBar extends Component {
                   </div>
                 </Label>
               </div>
-            {(!tag)
-              ? ''
-              : (<Badge color='primary'>Tag</Badge>)
-            }
-            {(!archived)
-              ? ''
-              : (<Badge color='secondary'>Archived</Badge>)
-            }
             </div>
           </div>
         </div>
