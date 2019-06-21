@@ -23,6 +23,9 @@
 const path = require('path');
 const fs = require('fs');
 
+// NPM modules
+const chai = require('chai');
+
 // MBEE modules
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
@@ -452,4 +455,35 @@ module.exports.readCaFile = function() {
   if (M.config.test.hasOwnProperty('ca')) {
     return fs.readFileSync(`${M.root}/${M.config.test.ca}`);
   }
+};
+
+/**
+ * @description Tests response logging. This is designed for the 500 tests and
+ * expects the res and req objects to be the mock objects created in those tests.
+ *
+ * @param {number} responseLength - The length of the response in bytes.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {function} done - The callback function to mark the end of the test.
+ */
+module.exports.testResponseLogging = function(responseLength, req, res, done) {
+  // Get the log file path
+  const filePath = path.join(M.root, 'logs', M.config.log.file);
+
+  // Read the file
+  const fileContents = fs.readFileSync(filePath).toString();
+  // Split the file, and remove an non-response entries, and get the final response
+  const response = fileContents.split('\n').filter(e => e.includes('RESPONSE: ')).pop();
+  // split on spaces
+  const content = response.split('RESPONSE: ')[1].split(' ');
+
+  // Ensure parts of response log are correct
+  chai.expect(content[0]).to.equal((req.ip === '::1') ? '127.0.0.1' : req.ip);
+  chai.expect(content[1]).to.equal((req.user) ? req.user.username : 'anonymous');
+  chai.expect(content[3]).to.equal(`"${req.method}`);
+  chai.expect(content[4]).to.equal(`${req.originalUrl}"`);
+  chai.expect(content[5]).to.equal(res.statusCode.toString());
+  chai.expect(content[6]).to.equal(responseLength.toString());
+
+  done();
 };

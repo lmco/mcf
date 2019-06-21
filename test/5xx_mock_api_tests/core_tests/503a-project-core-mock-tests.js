@@ -144,7 +144,9 @@ function postProject(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs a project
@@ -207,7 +209,9 @@ function postProjects(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs multiple projects
@@ -259,7 +263,9 @@ function putProject(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PUTs a project
@@ -323,7 +329,9 @@ function putProjects(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PUTs multiple projects
@@ -375,7 +383,9 @@ function getProject(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs a project
@@ -440,7 +450,9 @@ function getProjects(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple projects
@@ -506,7 +518,9 @@ function getAllProjectsOnOrg(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple projects
@@ -570,7 +584,9 @@ function getAllProjects(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple projects
@@ -626,7 +642,9 @@ function patchProject(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs a project
@@ -695,7 +713,9 @@ function patchProjects(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs multiple projects
@@ -731,7 +751,9 @@ function deleteProject(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs a project
@@ -771,7 +793,9 @@ function deleteProjects(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs multiple project
