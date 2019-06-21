@@ -28,7 +28,7 @@ const id = customValidators.id || '([_a-z0-9])([-_a-z0-9]){0,}';
 module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
-  'whoami', 'profile', 'edit', 'proj', 'elements', 'branch'];
+  'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous'];
 
 /**
  * @description Regular Expressions to validate organization data
