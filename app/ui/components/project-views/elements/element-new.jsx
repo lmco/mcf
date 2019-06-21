@@ -96,10 +96,7 @@ class ElementNew extends Component {
       data.target = this.state.target;
     }
 
-    const oid = this.props.project.org;
-    const pid = this.props.project.id;
-    const baseUrl = `/api/orgs/${oid}/projects/${pid}/branches/master`;
-    const url = `${baseUrl}/elements/${data.id}`;
+    const url = `${this.props.url}/elements/${data.id}`;
 
     $.ajax({
       method: 'POST',
@@ -222,6 +219,7 @@ class ElementNew extends Component {
               <div id="parent" className={'selector-value'}>
                 {this.state.parent || 'Select an element.'}
                 <ElementSelector
+                  url={this.props.url}
                   project={this.props.project}
                   selectedHandler={this.parentSelectHandler} />
               </div>
@@ -233,6 +231,7 @@ class ElementNew extends Component {
               {this.state.source || 'null'}
               <ElementSelector
                 self={this.state.id}
+                url={this.props.url}
                 project={this.props.project}
                 selectedHandler={this.sourceSelectHandler} />
             </Col>
@@ -244,6 +243,7 @@ class ElementNew extends Component {
               {this.state.target || 'null'}
               <ElementSelector
                 self={this.state.id}
+                url={this.props.url}
                 project={this.props.project}
                 selectedHandler={this.targetSelectHandler} />
             </Col>

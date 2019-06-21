@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.501a-user-mock-tests
+ * @module test.601a-user-api-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -12,15 +12,15 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests mock requests of the API controller functionality:
+ * @description This tests the user API controller functionality:
  * GET, POST, PATCH, and DELETE a user.
  */
 
 // NPM modules
 const chai = require('chai');
+const request = require('request');
 
 // MBEE modules
-const APIController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 const jmi = M.require('lib.jmi-conversions');
 
@@ -28,6 +28,7 @@ const jmi = M.require('lib.jmi-conversions');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const test = M.config.test;
 let adminUser = null;
 
 /* --------------------( Main )-------------------- */
@@ -39,15 +40,16 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Creates the admin user.
+   * Before: Run before all tests. Find
+   * non-admin user and elevate to admin user.
    */
   before((done) => {
-    // Connect to the database
+    // Open the database connection
     db.connect()
     // Create test admin
     .then(() => testUtils.createTestAdmin())
-    .then((reqUser) => {
-      adminUser = reqUser;
+    .then((_adminUser) => {
+      adminUser = _adminUser;
       done();
     })
     .catch((error) => {
@@ -75,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should get the requesting users data', whoami);
+  it('should GET the requesting users data', whoami);
   it('should POST a user', postUser);
   it('should POST multiple users', postUsers);
   it('should PUT a user', putUser);
@@ -93,52 +95,51 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies mock whoami request to get current user.
+ * @description Makes a GET request to /api/users/whoami. Verifies return of
+ * requesting user from API.
  */
 function whoami(done) {
-  // Create request object
-  const params = {};
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, {}, method);
+  const userData = testData.adminUser;
+  request({
+    url: `${test.url}/api/users/whoami`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundUser = JSON.parse(body);
 
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const foundUser = JSON.parse(_data);
-
-    // Verify expected response
     // NOTE: Test admin does not have a name, custom data or email
-    chai.expect(foundUser.username).to.equal(adminUser.username);
+    chai.expect(foundUser.username).to.equal(userData.username);
     chai.expect(foundUser).to.not.have.any.keys('password', '_id', '__v');
     done();
-  };
-
-  // GETs the requesting user
-  APIController.whoami(req, res);
+  });
 }
 
 /**
- * @description Verifies mock POST request to create a single user.
+ * @description Verifies POST /api/users/:username creates a user.
  */
 function postUser(done) {
-  // Create request object
   const userData = testData.users[0];
-  const params = { username: userData.username };
-  const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, userData, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const createdUser = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users/${userData.username}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(userData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const createdUser = JSON.parse(body);
 
     // Verify expected response
     chai.expect(createdUser.username).to.equal(userData.username);
@@ -158,33 +159,31 @@ function postUser(done) {
     chai.expect(createdUser.archived).to.equal(false);
     chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
-  };
-
-  // POSTs a user
-  APIController.postUser(req, res);
+  });
 }
 
 /**
- * @description Verifies mock POST request to create multiple users.
+ * @description Verifies POST /api/users creates multiple users.
  */
 function postUsers(done) {
-  // Create request object
   const userData = [
     testData.users[1],
     testData.users[2]
   ];
-  const params = {};
-  const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, userData, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const createdUsers = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(userData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const createdUsers = JSON.parse(body);
     // Expect correct number of users to be created
     chai.expect(createdUsers.length).to.equal(userData.length);
 
@@ -213,30 +212,28 @@ function postUsers(done) {
       chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
-  };
-
-  // POSTs multiple users
-  APIController.postUsers(req, res);
+  });
 }
 
 /**
- * @description Verifies mock PUT request to create/replace a single user.
+ * @description Verifies PUT /api/users/:username creates or replaces a user.
  */
 function putUser(done) {
-  // Create request object
   const userData = testData.users[0];
-  const params = { username: userData.username };
-  const method = 'PUT';
-  const req = testUtils.createRequest(adminUser, params, userData, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const replacedUser = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users/${userData.username}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PUT',
+    body: JSON.stringify(userData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const replacedUser = JSON.parse(body);
 
     // Verify expected response
     chai.expect(replacedUser.username).to.equal(userData.username);
@@ -256,34 +253,32 @@ function putUser(done) {
     chai.expect(replacedUser.archived).to.equal(false);
     chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
-  };
-
-  // PUTs a user
-  APIController.putUser(req, res);
+  });
 }
 
 /**
- * @description Verifies mock PUT request to create/replace multiple users.
+ * @description Verifies PUT /api/users creates or replaces multiple users.
  */
 function putUsers(done) {
-  // Create request object
   const userData = [
     testData.users[1],
     testData.users[2],
     testData.users[3]
   ];
-  const params = {};
-  const method = 'PUT';
-  const req = testUtils.createRequest(adminUser, params, userData, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const replacedUsers = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PUT',
+    body: JSON.stringify(userData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const replacedUsers = JSON.parse(body);
     // Expect correct number of users to be created
     chai.expect(replacedUsers.length).to.equal(userData.length);
 
@@ -312,30 +307,27 @@ function putUsers(done) {
       chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
-  };
-
-  // PUTs multiple users
-  APIController.putUsers(req, res);
+  });
 }
 
 /**
- * @description Verifies mock GET request to find a single user.
+ * @description Verifies GET /api/users/:username finds a user.
  */
 function getUser(done) {
-  // Create request object
   const userData = testData.users[0];
-  const params = { username: userData.username };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, {}, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const foundUser = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users/${userData.username}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundUser = JSON.parse(body);
 
     // Verify expected response
     chai.expect(foundUser.username).to.equal(userData.username);
@@ -355,34 +347,32 @@ function getUser(done) {
     chai.expect(foundUser.archived).to.equal(false);
     chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
-  };
-
-  // GETs a user
-  APIController.getUser(req, res);
+  });
 }
 
 /**
- * @description Verifies mock GET request to find multiple users.
+ * @description Verifies GET /api/users finds multiple users.
  */
 function getUsers(done) {
-  // Create request object
   const userData = [
     testData.users[1],
     testData.users[2],
     testData.users[3]
   ];
-  const params = {};
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, userData.map(u => u.username), method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const foundUsers = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET',
+    body: JSON.stringify(userData.map(u => u.username))
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundUsers = JSON.parse(body);
     // Expect correct number of users to be found
     chai.expect(foundUsers.length).to.equal(userData.length);
 
@@ -411,14 +401,11 @@ function getUsers(done) {
       chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
-  };
-
-  // GETs multiple users
-  APIController.getUsers(req, res);
+  });
 }
 
 /**
- * @description Verifies mock GET request to find all users.
+ * @description Verifies GET /api/users finds all users if no ids are provided.
  */
 function getAllUsers(done) {
   // Create request object
@@ -429,18 +416,19 @@ function getAllUsers(done) {
     testData.users[2],
     testData.users[3]
   ];
-  const params = {};
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, {}, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const foundUsers = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundUsers = JSON.parse(body);
     // Expect correct number of users to be found
     chai.expect(foundUsers.length).to.be.at.least(userData.length);
 
@@ -478,14 +466,11 @@ function getAllUsers(done) {
       }
     });
     done();
-  };
-
-  // GETs all users
-  APIController.getUsers(req, res);
+  });
 }
 
 /**
- * @description Verifies mock GET request to search users.
+ * @description Verifies GET /api/users/search
  */
 function searchUsers(done) {
   // Create request object
@@ -495,27 +480,25 @@ function searchUsers(done) {
     testData.users[2],
     testData.users[3]
   ];
-  const params = {};
-  const body = [];
-  const method = 'GET';
-  const query = { q: `"${userData[0].fname}"` };
-  const req = testUtils.createRequest(adminUser, params, body, method, query);
-
-  // Create response object
-  const res = [];
-  testUtils.createResponse(res);
-
-  // Verify the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const foundUsers = JSON.parse(_data);
-
-    // Expect the search to find the users (currently all given the same first name)
+  request({
+    url: `${test.url}/api/users/search?q=${userData[0].fname}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status 200
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundUsers = JSON.parse(body);
+    // Expect correct number of users to be found
     chai.expect(foundUsers.length).to.equal(userData.length);
 
     // Convert foundUsers to JMI type 2 for easier lookup
     const jmi2Users = jmi.convertJMI(1, 2, foundUsers, 'username');
-    // Loops through each user data object
+    // Loop through each user data object
     userData.forEach((userDataObject) => {
       const foundUser = jmi2Users[userDataObject.username];
       // Ensure user was found
@@ -540,32 +523,32 @@ function searchUsers(done) {
       chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
-  };
-  APIController.searchUsers(req, res);
+  });
 }
 
 /**
- * @description Verifies mock PATCH request to update a single user.
+ * @description Verifies PATCH /api/users/:username updates a user.
  */
 function patchUser(done) {
-  // Create request object
   const userData = testData.users[0];
   const updateObj = {
     username: userData.username,
     fname: 'Updated First Name'
   };
-  const params = { username: userData.username };
-  const method = 'PATCH';
-  const req = testUtils.createRequest(adminUser, params, updateObj, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const updatedUser = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users/${userData.username}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify(updateObj)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const updatedUser = JSON.parse(body);
 
     // Verify expected response
     chai.expect(updatedUser.username).to.equal(userData.username);
@@ -585,17 +568,13 @@ function patchUser(done) {
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
-  };
-
-  // PATCHs a user
-  APIController.patchUser(req, res);
+  });
 }
 
 /**
- * @description Verifies mock PACTH request to update multiple users.
+ * @description Verifies PATCH /api/users updates multiple users.
  */
 function patchUsers(done) {
-  // Create request object
   const userData = [
     testData.users[1],
     testData.users[2],
@@ -605,18 +584,20 @@ function patchUsers(done) {
     username: u.username,
     fname: 'Updated First Name'
   }));
-  const params = {};
-  const method = 'PATCH';
-  const req = testUtils.createRequest(adminUser, params, updateObj, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const updatedUsers = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify(updateObj)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const updatedUsers = JSON.parse(body);
     // Expect correct number of users to be updated
     chai.expect(updatedUsers.length).to.equal(userData.length);
 
@@ -645,10 +626,7 @@ function patchUsers(done) {
       chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
     done();
-  };
-
-  // PATCHs multiple users
-  APIController.patchUsers(req, res);
+  });
 }
 
 /**
@@ -657,24 +635,25 @@ function patchUsers(done) {
 function patchUserPassword(done) {
   // Create request object
   const userData = testData.users[0];
-  userData._id = userData.username;
-  const body = {
+  const updateObj = {
     password: 'NewPass1234?',
     confirmPassword: 'NewPass1234?',
     oldPassword: userData.password
   };
-  const params = { username: userData.username };
-  const method = 'PATCH';
-  const req = testUtils.createRequest(userData, params, body, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const updatedUser = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users/${userData.username}/password`,
+    headers: testUtils.getHeaders('application/json', userData),
+    ca: testUtils.readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify(updateObj)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const updatedUser = JSON.parse(body);
 
     // Verify expected response
     chai.expect(updatedUser.username).to.equal(userData.username);
@@ -694,69 +673,61 @@ function patchUserPassword(done) {
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
-  };
-
-  // PATCHs a users password
-  APIController.patchPassword(req, res);
+  });
 }
 
 /**
- * @description Verifies mock DELETE request to delete a single user.
+ * @description Verifies DELETE /api/users/:username deletes a user.
  */
 function deleteUser(done) {
-  // Create request object
   const userData = testData.users[0];
-  const params = { username: userData.username };
-  const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, {}, method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const deletedUsername = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users/${userData.username}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'DELETE'
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const deletedUsername = JSON.parse(body);
 
     // Verify expected response
     chai.expect(deletedUsername).to.equal(userData.username);
     done();
-  };
-
-  // DELETEs a user
-  APIController.deleteUser(req, res);
+  });
 }
 
 /**
- * @description Verifies mock DELETE request to delete multiple user.
+ * @description Verifies DELETE /api/users/ deletes multiple users.
  */
 function deleteUsers(done) {
-  // Create request object
   const userData = [
     testData.users[1],
     testData.users[2],
     testData.users[3]
   ];
-  const params = {};
-  const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, userData.map(u => u.username), method);
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const deletedUsernames = JSON.parse(_data);
+  request({
+    url: `${test.url}/api/users`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify(userData.map(u => u.username))
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const deletedUsernames = JSON.parse(body);
     chai.expect(deletedUsernames.length).to.equal(userData.length);
 
     // Verify expected response
     chai.expect(deletedUsernames).to.have.members(userData.map(u => u.username));
     done();
-  };
-
-  // DELETEs multiple users
-  APIController.deleteUsers(req, res);
+  });
 }

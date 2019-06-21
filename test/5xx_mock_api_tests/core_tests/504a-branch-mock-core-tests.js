@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.504a-branch-mock-tests
+ * @module test.504a-branch-mock-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -151,7 +151,12 @@ function postBranch(done) {
     // Verify specific fields not returned
     chai.expect(createdBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs a branch
@@ -215,7 +220,12 @@ function postBranches(done) {
       chai.expect(createdBranch).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs multiple branches
@@ -265,7 +275,12 @@ function getBranch(done) {
     // Verify specific fields not returned
     chai.expect(foundBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs an branch
@@ -327,7 +342,12 @@ function getBranches(done) {
       chai.expect(foundBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple branches
@@ -393,7 +413,12 @@ function getAllBranches(done) {
       chai.expect(foundBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple branches
@@ -447,7 +472,12 @@ function patchBranch(done) {
     // Verify specific fields not returned
     chai.expect(updatedBranch).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs an branch
@@ -515,7 +545,12 @@ function patchBranches(done) {
       chai.expect(updatedBranch).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs multiple branches
@@ -546,7 +581,12 @@ function deleteBranch(done) {
   res.send = function send(_data) {
     const branchid = JSON.parse(_data);
     chai.expect(branchid).to.equal(testData.branches[1].id);
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs an branch
@@ -581,7 +621,12 @@ function deleteBranches(done) {
   res.send = function send(_data) {
     const arrDeletedBranchIDs = JSON.parse(_data);
     chai.expect(arrDeletedBranchIDs).to.have.members(branchData.map(b => b.id));
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs multiple branches

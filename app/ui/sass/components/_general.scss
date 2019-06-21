@@ -144,3 +144,45 @@ textarea[name="custom"] {
 .bold-name {
   font-weight: 600;
 }
+
+.bolder-name {
+  font-weight: 700;
+}
+
+.box-list {
+  padding: 5px 10px;
+  margin: 15px;
+
+  .box-list-header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .box-list-footer {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 5px;
+
+    .footer-btn {
+      color: black;
+      &:hover {
+        cursor: pointer;
+        color: #cccccc;
+      }
+
+      .btn-label {
+        font-size: small;
+        font-weight: 100;
+      }
+
+      i {
+        padding: 5px;
+        font-size: small;
+      }
+    }
+  }
+}
+
+.transparent {
+  color: transparent;
+}

@@ -107,213 +107,261 @@ const jmi = M.require('lib.jmi-conversions');
  *   M.log.error(error);
  * });
  */
-function find(requestingUser, organizationID, projectID, branch, elements, options) {
-  return new Promise((resolve, reject) => {
-    // Set options if no elements were provided, but options were
-    if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
-      // Note: assumes input param elements is input option param
-      options = elements; // eslint-disable-line no-param-reassign
-      elements = undefined; // eslint-disable-line no-param-reassign
+async function find(requestingUser, organizationID, projectID, branch, elements, options) {
+  // Set options if no elements were provided, but options were
+  if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
+    // Note: assumes input param elements is input option param
+    options = elements; // eslint-disable-line no-param-reassign
+    elements = undefined; // eslint-disable-line no-param-reassign
+  }
+
+  // Ensure input parameters are correct type
+  try {
+    assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+    assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+    // Ensure that requesting user has an _id field
+    assert.ok(requestingUser._id, 'Requesting user is not populated.');
+    assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
+    assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+    assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
+
+    const elementsTypes = ['undefined', 'object', 'string'];
+    const optionsTypes = ['undefined', 'object'];
+    assert.ok(elementsTypes.includes(typeof elements), 'Elements parameter is an invalid type.');
+    // If elements is an object, ensure it's an array of strings
+    if (typeof elements === 'object') {
+      assert.ok(Array.isArray(elements), 'Elements is an object, but not an array.');
+      assert.ok(elements.every(e => typeof e === 'string'), 'Elements is not an array of'
+        + ' strings.');
     }
+    assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+  }
+  catch (err) {
+    throw new M.DataFormatError(err.message, 'warn');
+  }
 
-    // Ensure input parameters are correct type
-    try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-      assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
+  // Sanitize input parameters
+  const saniElements = (elements !== undefined)
+    ? sani.mongo(JSON.parse(JSON.stringify(elements)))
+    : undefined;
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const branchID = sani.mongo(branch);
+  let foundElements = [];
+  const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
-      const elementsTypes = ['undefined', 'object', 'string'];
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(elementsTypes.includes(typeof elements), 'Elements parameter is an invalid type.');
-      // If elements is an object, ensure it's an array of strings
-      if (typeof elements === 'object') {
-        assert.ok(Array.isArray(elements), 'Elements is an object, but not an array.');
-        assert.ok(elements.every(e => typeof e === 'string'), 'Elements is not an array of'
-          + ' strings.');
-      }
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+  // Initialize validOptions
+  const validOptions = utils.validateOptions(options, ['archived', 'populate',
+    'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
 
-    // Sanitize input parameters
-    const saniElements = (elements !== undefined)
-      ? sani.mongo(JSON.parse(JSON.stringify(elements)))
-      : undefined;
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branchID = sani.mongo(branch);
-    let foundElements = [];
-    const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
+  // Ensure options are valid
+  if (options) {
+    // Create array of valid search options
+    const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+      'createdBy', 'lastModifiedBy', 'archivedBy'];
 
-    // Initialize validOptions
-    const validOptions = utils.validateOptions(options, ['archived', 'populate',
-      'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
-
-    // Ensure options are valid
-    if (options) {
-      // Create array of valid search options
-      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-        'createdBy', 'lastModifiedBy', 'archivedBy'];
-
-      // Loop through provided options, look for validSearchOptions
-      Object.keys(options).forEach((o) => {
-        // If the provided option is a valid search option
-        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-          // Ensure the search option is a string
-          if (typeof options[o] !== 'string') {
-            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
-          }
-
-          // If the search option is an element reference
-          if (['parent', 'source', 'target'].includes(o)) {
-            // Make value the concatenated ID
-            options[o] = utils.createID(orgID, projID, branchID, options[o]);
-          }
-          // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+    // Loop through provided options, look for validSearchOptions
+    Object.keys(options).forEach((o) => {
+      // If the provided option is a valid search option
+      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the search option is a string
+        if (typeof options[o] !== 'string') {
+          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
-      });
+
+        // If the search option is an element reference
+        if (['parent', 'source', 'target'].includes(o)) {
+          // Make value the concatenated ID
+          options[o] = utils.createID(orgID, projID, branchID, options[o]);
+        }
+        // Add the search option to the searchQuery
+        searchQuery[o] = sani.mongo(options[o]);
+      }
+    });
+  }
+
+  // Find the organization
+  const organization = await Org.findOne({ _id: orgID }).lean();
+
+  // Check that the org was found
+  if (!organization) {
+    throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
+  }
+
+  // Ensure that the user has at least read permissions on the org
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to get'
+      + ` elements on the organization [${orgID}].`, 'warn');
+  }
+
+  // Verify the org is not archived
+  if (organization.archived) {
+    throw new M.PermissionError(`The organization [${orgID}] is archived.`
+      + ' It must first be unarchived before finding elements.', 'warn');
+  }
+
+  // Find the project
+  const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
+
+  // Check that the project was found
+  if (!project) {
+    throw new M.NotFoundError(`Project [${projID}] not found in the `
+    + `organization [${orgID}].`, 'warn');
+  }
+
+  // Verify the user has read permissions on the project
+  if (!reqUser.admin && (!project.permissions[reqUser._id]
+    || !project.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to get'
+        + ` elements on the project [${utils.parseID(project._id).pop()}].`, 'warn');
+  }
+
+  // Verify the project is not archived
+  if (project.archived) {
+    throw new M.PermissionError(`The project [${projID}] is archived.`
+      + ' It must first be unarchived before finding elements.', 'warn');
+  }
+
+  // Find the branch
+  const foundBranch = await Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
+
+  // Check that the project was found
+  if (!foundBranch) {
+    throw new M.NotFoundError(`Branch [${branchID}] not found in the `
+      + `project [${projID}].`, 'warn');
+  }
+
+  // Verify the branch is not archived
+  if (foundBranch.archived) {
+    throw new M.PermissionError(`The branch [${branchID}] is archived.`
+      + ' It must first be unarchived before finding elements.', 'warn');
+  }
+
+  let elementsToFind = [];
+
+  // Check the type of the elements parameter
+  if (Array.isArray(saniElements)) {
+    // An array of element ids, find all
+    elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branchID, e));
+  }
+  else if (typeof saniElements === 'string') {
+    // A single element id
+    elementsToFind = [utils.createID(orgID, projID, branchID, saniElements)];
+  }
+  else if (((typeof saniElements === 'object' && saniElements !== null)
+    || saniElements === undefined)) {
+    // Find all elements in the project
+    elementsToFind = [];
+  }
+  else {
+    // Invalid parameter, throw an error
+    throw new M.DataFormatError('Invalid input for finding elements.', 'warn');
+  }
+
+  // If wanting to find subtree, find subtree ids
+  if (validOptions.subtree) {
+    elementsToFind = await findElementTree(orgID, projID, branchID, elementsToFind);
+  }
+
+  // If the archived field is true, remove it from the query
+  if (validOptions.archived) {
+    delete searchQuery.archived;
+  }
+
+  const promises = [];
+
+  // If no IDs provided, find all elements in a project
+  if (elementsToFind.length === 0) {
+    // Get the number of elements in the branch
+    const elementCount = await Element.countDocuments(searchQuery);
+
+    // If options.limit is defined an is less that 50k or count is less than 50k, find normally
+    if ((validOptions.limit > 0 && validOptions.limit < 50000) || elementCount < 50000) {
+      // Find the elements
+      foundElements = await findHelper(searchQuery, validOptions.fieldsString,
+        validOptions.limit, validOptions.skip, validOptions.populateString,
+        validOptions.lean);
     }
+    else {
+      // Define batchLimit, batchSkip and numLoops
+      let batchLimit = 50000;
+      let batchSkip = 0;
+      let numLoops = 0;
 
-    // Find the organization
-    Org.findOne({ _id: orgID }).lean()
-    .then((organization) => {
-      // Check that the org was found
-      if (!organization) {
-        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
-      }
-
-      // Find the project
-      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-    })
-    .then((project) => {
-      // Check that the project was found
-      if (!project) {
-        throw new M.NotFoundError(`Project [${projID}] not found in the `
-        + `organization [${orgID}].`, 'warn');
-      }
-
-      // Verify the user has read permissions on the project
-      if (!reqUser.admin && (!project.permissions[reqUser._id]
-        || !project.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to get'
-            + ` elements on the project [${utils.parseID(project._id).pop()}].`, 'warn');
-      }
-
-      // Find the branch
-      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
-    })
-    .then((foundBranch) => {
-      // Check that the project was found
-      if (!foundBranch) {
-        throw new M.NotFoundError(`Branch [${branchID}] not found in the `
-          + `project [${projID}].`, 'warn');
-      }
-
-      let elementsToFind = [];
-
-      // Check the type of the elements parameter
-      if (Array.isArray(saniElements)) {
-        // An array of element ids, find all
-        elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branchID, e));
-      }
-      else if (typeof saniElements === 'string') {
-        // A single element id
-        elementsToFind = [utils.createID(orgID, projID, branchID, saniElements)];
-      }
-      else if (((typeof saniElements === 'object' && saniElements !== null)
-        || saniElements === undefined)) {
-        // Find all elements in the project
-        elementsToFind = [];
+      // Get number of loops = the smallest value divided by 50K
+      if (validOptions.limit && validOptions.limit !== 0) {
+        numLoops = (elementCount && validOptions.limit) / batchLimit;
       }
       else {
-        // Invalid parameter, throw an error
-        throw new M.DataFormatError('Invalid input for finding elements.', 'warn');
+        numLoops = elementCount / batchLimit;
       }
 
-      // If wanting to find subtree, find subtree ids
-      if (validOptions.subtree) {
-        return findElementTree(orgID, projID, branchID, elementsToFind);
-      }
-
-      return elementsToFind;
-    })
-    .then((elementIDs) => {
-      // If the archived field is true, remove it from the query
-      if (validOptions.archived) {
-        delete searchQuery.archived;
-      }
-
-      // If no IDs provided, find all elements in a project
-      if (elementIDs.length === 0) {
-        // If the lean option is supplied
-        if (validOptions.lean) {
-          // Find all elements in a project
-          return Element.find(searchQuery, validOptions.fieldsString,
-            { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString)
-          .lean();
+      // Find elements in batches of 50K in smallest number loops possible
+      for (let i = 0; i < numLoops; i++) {
+        // Skip past already found elements
+        batchSkip = i * 50000 + validOptions.skip;
+        // Set limit if its a defined option and on last iteration
+        if (validOptions.limit > 0 && ((elementCount && validOptions.limit) / batchLimit) - i < 1) {
+          batchLimit = validOptions.limit - i * batchLimit;
         }
-        else {
-          return Element.find(searchQuery, validOptions.fieldsString,
-            { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString);
-        }
+
+        // Add find operation to array of promises
+        promises.push(findHelper(searchQuery, validOptions.fieldsString,
+          batchLimit, batchSkip, validOptions.populateString, validOptions.lean)
+        .then((elems) => {
+          foundElements = foundElements.concat(elems);
+        }));
       }
-      // Find elements by ID
+    }
+  }
+  else {
+    // Find elements in batches
+    for (let i = 0; i < elementsToFind.length / 50000; i++) {
+      // Split elementIDs list into batches of 50000
+      searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
 
-      const promises = [];
+      // Add find operation to array of promises
+      promises.push(findHelper(searchQuery, validOptions.fieldsString,
+        validOptions.limit, validOptions.skip, validOptions.populateString,
+        validOptions.lean)
+      .then((elems) => {
+        foundElements = foundElements.concat(elems);
+      }));
+    }
+  }
 
-      // Find elements in batches
-      for (let i = 0; i < elementIDs.length / 50000; i++) {
-        // Split elementIDs list into batches of 50000
-        // Need to sanitize _id
-        searchQuery._id = elementIDs.slice(i * 50000, i * 50000 + 50000);
+  // Wait for promises to resolve before returning elements
+  await Promise.all(promises);
 
-        // If the lean option is supplied
-        if (validOptions.lean) {
-          // Add find operation to promises array
-          promises.push(Element.find(searchQuery, validOptions.fieldsString,
-            { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString)
-          .lean()
-          .then((_foundElements) => {
-            foundElements = foundElements.concat(_foundElements);
-          }));
-        }
-        else {
-          // Add find operation to promises array
-          promises.push(Element.find(searchQuery, validOptions.fieldsString,
-            { limit: validOptions.limit, skip: validOptions.skip })
-          .populate(validOptions.populateString)
-          .then((_foundElements) => {
-            foundElements = foundElements.concat(_foundElements);
-          }));
-        }
-      }
+  // Return the found elements
+  return foundElements;
+}
 
-      // Return when all elements have been found
-      return Promise.all(promises);
-    })
-    .then((found) => {
-      // If each item in found is not undefined, its the return from Element.find()
-      if (!found.every(o => typeof o === 'undefined')) {
-        return resolve(found);
-      }
-
-      // Each item in found is undefined, which is the return from Promise.all(), return
-      // foundElements
-      return resolve(foundElements);
-    })
-    .catch((error) => reject(error));
-  });
+/**
+ * @description Find helper function which simplifies the actual Element.find()
+ * database call
+ *
+ * @param {Object} query - THe query to send to the database
+ * @param {string} fields - Fields to include (or not include) in the found objects
+ * @param {number} limit - The maximum number of elements to return.
+ * @param {number} skip - The number of elements to skip.
+ * @param {string} populate - A string containing a space delimited list of
+ * fields to populate
+ * @param {boolean} lean - If true, returns raw JSON rather than converting to
+ * instances of the Element model.
+ */
+async function findHelper(query, fields, limit, skip, populate, lean) {
+  if (lean) {
+    return Element.find(query, fields, { limit: limit, skip: skip })
+    .populate(populate)
+    .lean();
+  }
+  else {
+    return Element.find(query, fields, { limit: limit, skip: skip })
+    .populate(populate);
+  }
 }
 
 /**
@@ -558,6 +606,19 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Verify the user has at least read access on the organization
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to create'
+          + ` elements on the organization [${orgID}].`, 'warn');
+      }
+
+      // Verify the org is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before creating elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -574,6 +635,12 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.PermissionError('User does not have permission to create'
           + ' elements on the project '
           + `[${utils.parseID(foundProject._id).pop()}].`, 'warn');
+      }
+
+      // Verify the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before creating elements.', 'warn');
       }
 
       // Find all referenced projects
@@ -597,6 +664,12 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       if (!foundBranch) {
         throw new M.NotFoundError(`Branch [${branchID}] not found in the `
           + `project [${projID}].`, 'warn');
+      }
+
+      // Verify the branch is not archived
+      if (foundBranch.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before creating elements.', 'warn');
       }
 
       // Check the branch is not a tagged branch
@@ -911,6 +984,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Ensure that the user has at least read access on the organization
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to update'
+          + ` elements on the organization [${orgID}].`, 'warn');
+      }
+
+      // Ensure the organization is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before updating elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -926,7 +1012,13 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.PermissionError('User does not have permission to update'
-          + ` elements on the project [${utils.parseID(foundProject._id).pop()}].`, 'warn');
+          + ` elements on the project [${projID}].`, 'warn');
+      }
+
+      // Ensure the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before updating elements.', 'warn');
       }
       // Find the branch
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
@@ -936,6 +1028,12 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       if (!foundBranch) {
         throw new M.NotFoundError(`Branch [${branchID}] not found in the `
           + `project [${projID}].`, 'warn');
+      }
+
+      // Ensure the branch is not archived
+      if (foundBranch.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before updating elements.', 'warn');
       }
 
       // Check the branch is not a tagged branch
@@ -1148,7 +1246,8 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         delete updateElement._id;
 
         // Error Check: if element is currently archived, it must first be unarchived
-        if (element.archived && updateElement.archived !== false) {
+        if (element.archived && (updateElement.archived === undefined
+          || JSON.parse(updateElement.archived) !== false)) {
           throw new M.OperationError(`Element [${utils.parseID(element._id).pop()}]`
               + ' is archived. Archived objects cannot be modified.', 'warn');
         }
@@ -1178,7 +1277,6 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
               throw new M.OperationError(`Element's ${key} cannot be self`
                 + ` [${utils.parseID(element._id).pop()}].`, 'warn');
             }
-
             // If source/target does not exist, throw error
             if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
               throw new M.NotFoundError(`The ${key} element `
@@ -1187,13 +1285,13 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             }
 
             // If no target exists and is not being updated, throw error
-            if (key === 'source' && !(updateElement.target || element.target)) {
+            if (key === 'source' && !(updateElement.target !== undefined || element.target)) {
               throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
                 + ' target is required if source is provided.', 'warn');
             }
 
             // If no source exists and is not being updated, throw error
-            if (key === 'target' && !(updateElement.source || element.source)) {
+            if (key === 'target' && !(updateElement.source !== undefined || element.source)) {
               throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
                 + ' source is required if target is provided.', 'warn');
             }
@@ -1377,6 +1475,12 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Ensure the org is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before replacing elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -1386,6 +1490,13 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         throw new M.NotFoundError(`Project [${projID}] not found in the `
           + `organization [${orgID}].`, 'warn');
       }
+
+      // Ensure the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before replacing elements.', 'warn');
+      }
+
       // Find the branch
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
     })
@@ -1394,6 +1505,12 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       if (!foundBranch) {
         throw new M.NotFoundError(`Branch [${branchID}] not found in the `
           + `project [${projID}].`, 'warn');
+      }
+
+      // Ensure the branch is not archived
+      if (foundBranch.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before replacing elements.', 'warn');
       }
 
       // Check the branch is not a tagged branch
@@ -1638,6 +1755,13 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Verify the requesting user has at least read permissions on the org
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to delete'
+          + ` elements in the organization [${orgID}].`, 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -1880,11 +2004,17 @@ function moveElementCheck(organizationID, projectID, branch, element) {
       throw new M.OperationError('Elements parent cannot be self.', 'warn');
     }
 
-    // Error Check: ensure the root elements is not being edited
+    // Error Check: ensure the root elements are not being moved
     if (Element.getValidRootElements().includes(element.id)) {
-      throw new M.OperationError(
-        `Cannot edit the root element: ${element.id}.`, 'warn'
-      );
+      const parent = utils.parseID(element.parent).pop();
+      if (element.id === 'model'
+        || (element.id === '__mbee__' && parent !== 'model')
+        || (element.id === 'holding_bin' && parent !== '__mbee__')
+        || (element.id === 'undefined' && parent !== '__mbee__')) {
+        throw new M.OperationError(
+          `Cannot move the root element: ${element.id}.`, 'warn'
+        );
+      }
     }
 
     // Define nested helper function
@@ -2049,6 +2179,19 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
       }
 
+      // Verify the requesting user has at least read permissions
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('write'))) {
+        throw new M.PermissionError('User does not have permission to search'
+          + ` elements in the organization [${orgID}].`, 'warn');
+      }
+
+      // Ensure the org is not archived
+      if (organization.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before searching elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -2062,18 +2205,30 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       // Verify the user has read permissions on the project
       if (!reqUser.admin && (!project.permissions[reqUser._id]
         || !project.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to get'
-          + ` elements on the project ${utils.parseID(project._id).pop()}.`, 'warn');
+        throw new M.PermissionError('User does not have permission to search'
+          + ` elements on the project ${projID}.`, 'warn');
+      }
+
+      // Ensure the project is not archived
+      if (project.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before searching elements.', 'warn');
       }
 
       // Find the elements to delete
-      return Branch.find({ _id: utils.createID(orgID, projID, branchID) }).lean();
+      return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
     })
     .then((foundBranch) => {
       // Ensure the project was found
       if (foundBranch === null) {
         throw new M.NotFoundError(`The branch [${branchID}] on the project ${projID} `
           + 'was not found.', 'warn');
+      }
+
+      // Ensure the branch is not archived
+      if (foundBranch.archived && !validOptions.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before searching elements.', 'warn');
       }
 
       searchQuery.$text = { $search: query };

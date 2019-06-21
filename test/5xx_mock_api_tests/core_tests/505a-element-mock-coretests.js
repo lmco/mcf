@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.505a-element-mock-tests
+ * @module test.505a-element-mock-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -176,7 +176,12 @@ function postElement(done) {
     // Verify specific fields not returned
     chai.expect(createdElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs an element
@@ -252,7 +257,12 @@ function postElements(done) {
       chai.expect(createdElement).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs multiple elements
@@ -319,7 +329,12 @@ function putElement(done) {
     // Verify specific fields not returned
     chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PUTs an element
@@ -396,7 +411,12 @@ function putElements(done) {
       chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PUTs multiple elements
@@ -463,7 +483,12 @@ function getElement(done) {
     // Verify specific fields not returned
     chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs an element
@@ -542,7 +567,12 @@ function getElements(done) {
       chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple elements
@@ -621,7 +651,12 @@ function getAllElements(done) {
       chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple elements
@@ -693,7 +728,12 @@ function searchElement(done) {
     // Verify specific fields not returned
     chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs elements through text search
@@ -764,7 +804,12 @@ function patchElement(done) {
     // Verify specific fields not returned
     chai.expect(updatedElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs an element
@@ -849,7 +894,12 @@ function patchElements(done) {
       chai.expect(updatedElement).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
     });
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs multiple elements
@@ -881,7 +931,12 @@ function deleteElement(done) {
   res.send = function send(_data) {
     const elementid = JSON.parse(_data);
     chai.expect(elementid).to.equal(testData.elements[0].id);
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs an element
@@ -917,7 +972,12 @@ function deleteElements(done) {
   res.send = function send(_data) {
     const arrDeletedElemIDs = JSON.parse(_data);
     chai.expect(arrDeletedElemIDs).to.have.members(elemData.map(p => p.id));
-    done();
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs multiple elements

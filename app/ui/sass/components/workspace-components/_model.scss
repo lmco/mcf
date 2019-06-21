@@ -74,3 +74,33 @@
   }
 }
 
+.branch-bar {
+  padding: 20px 48px 15px 17px;
+  display: flex;
+  justify-content: space-between;
+
+  .branches-dropdown {
+    display: flex;
+  }
+
+  .branch-input {
+    width: 200px;
+  }
+
+  .branch-tag {
+    padding-left: 10px;
+    padding-top: 3px;
+
+    .archived-check-box {
+      padding-left: 30px;
+      position: sticky;
+    }
+
+  }
+
+  .branch-label {
+    padding: 6px;
+    font-weight: 600;
+    font-size: small;
+  }
+}

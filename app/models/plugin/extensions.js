@@ -35,7 +35,7 @@ module.exports = function extensionPlugin(schema) {
     },
     createdOn: {
       type: Date,
-      default: Date.now()
+      default: Date.now
     },
     archivedOn: {
       type: Date,

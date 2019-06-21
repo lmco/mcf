@@ -169,7 +169,7 @@ class ProjectList extends Component {
             permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                key={`proj-key-${project.id}`}
                                                project={project}
-                                               href={`/orgs/${orgId}/projects/${project.id}`}/>);
+                                               href={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>);
           }
         });
       }
@@ -177,7 +177,7 @@ class ProjectList extends Component {
         projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                                       key={`proj-key-${project.id}`}
                                                                       project={project}
-                                                                      href={`/orgs/${orgId}/projects/${project.id}`}/>));
+                                                                      href={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>));
       }
 
       // Verify if projects
@@ -226,7 +226,7 @@ class ProjectList extends Component {
         </Modal>
         {/* Display the list of project-views */}
         <div id='workspace' ref={this.ref}>
-          <div id='workspace-header' className='workspace-header'>
+          <div id='workspace-header' className='workspace-header header-box-depth'>
             <h2 className='workspace-title'>Your Projects</h2>
             <div className='workspace-header-button'>
               {/* Verify user has write permission */}

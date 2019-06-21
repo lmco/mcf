@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.603a-project-api-tests
+ * @module test.503a-project-mock-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -12,15 +12,15 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This tests the project API controller functionality:
- * GET, POST, PATCH, and DELETE of a project.
+ * @description This tests mock requests of the API controller functionality:
+ * GET, POST, PATCH, and DELETE projects.
  */
 
 // NPM modules
 const chai = require('chai');
-const request = require('request');
 
 // MBEE modules
+const APIController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 const jmi = M.require('lib.jmi-conversions');
 
@@ -28,9 +28,8 @@ const jmi = M.require('lib.jmi-conversions');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
-const test = M.config.test;
-let org = null;
 let adminUser = null;
+let org = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -101,25 +100,28 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies POST /api/orgs/:orgid/projects/:projectid creates a
- * project.
+ * @description Verifies mock POST request to create a project.
  */
 function postProject(done) {
+  // Create request object
   const projData = testData.projects[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(projData)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const createdProj = JSON.parse(body);
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, projData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const createdProj = JSON.parse(_data);
 
     // Verify project created properly
     chai.expect(createdProj.id).to.equal(projData.id);
@@ -139,34 +141,44 @@ function postProject(done) {
     // Verify specific fields not returned
     chai.expect(createdProj).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // POSTs a project
+  APIController.postProject(req, res);
 }
 
 /**
- * @description Verifies POST /api/orgs/:orgid/projects creates multiple
- * projects.
+ * @description Verifies mock POST request to create multiple projects.
  */
 function postProjects(done) {
+  // Create request object
   const projData = [
     testData.projects[1],
     testData.projects[2],
     testData.projects[3]
   ];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(projData)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const createdProjects = JSON.parse(body);
+  const params = {
+    orgid: org.id
+  };
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, projData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const createdProjects = JSON.parse(_data);
     chai.expect(createdProjects.length).to.equal(projData.length);
 
     // Convert createdProjects to JMI type 2 for easier lookup
@@ -194,30 +206,41 @@ function postProjects(done) {
       chai.expect(createdProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // POSTs multiple projects
+  APIController.postProjects(req, res);
 }
 
 /**
- * @description Verifies PUT /api/orgs/:orgid/projects/:projectid creates or
- * replaces a project.
+ * @description Verifies mock PUT request to create/replace a project.
  */
 function putProject(done) {
+  // Create request object
   const projData = testData.projects[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'PUT',
-    body: JSON.stringify(projData)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const replacedProj = JSON.parse(body);
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'PUT';
+  const req = testUtils.createRequest(adminUser, params, projData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const replacedProj = JSON.parse(_data);
 
     // Verify project created/replaced properly
     chai.expect(replacedProj.id).to.equal(projData.id);
@@ -237,35 +260,45 @@ function putProject(done) {
     // Verify specific fields not returned
     chai.expect(replacedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // PUTs a project
+  APIController.putProject(req, res);
 }
 
 /**
- * @description Verifies PUT /api/orgs/:orgid/projects creates or replaces
- * multiple projects.
+ * @description Verifies mock PUT request to create/replace multiple projects.
  */
 function putProjects(done) {
+  // Create request object
   const projData = [
     testData.projects[1],
     testData.projects[2],
     testData.projects[3],
     testData.projects[4]
   ];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'PUT',
-    body: JSON.stringify(projData)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const replacedProjects = JSON.parse(body);
+  const params = {
+    orgid: org.id
+  };
+  const method = 'PUT';
+  const req = testUtils.createRequest(adminUser, params, projData, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const replacedProjects = JSON.parse(_data);
     chai.expect(replacedProjects.length).to.equal(projData.length);
 
     // Convert replacedProjects to JMI type 2 for easier lookup
@@ -293,31 +326,43 @@ function putProjects(done) {
       chai.expect(replacedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // PUTs multiple projects
+  APIController.putProjects(req, res);
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects/:projectid finds a
- * project.
+ * @description Verifies mock GET request to find a project.
  */
 function getProject(done) {
+  // Create request object
   const projData = testData.projects[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const foundProj = JSON.parse(body);
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
 
-    // Verify project created properly
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundProj = JSON.parse(_data);
+
+    // Verify correct project found
     chai.expect(foundProj.id).to.equal(projData.id);
     chai.expect(foundProj.name).to.equal(projData.name);
     chai.expect(foundProj.custom).to.deep.equal(projData.custom || {});
@@ -335,36 +380,46 @@ function getProject(done) {
     // Verify specific fields not returned
     chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // GETs a project
+  APIController.getProject(req, res);
 }
 
-
 /**
- * @description Verifies GET /api/orgs/:orgid/projects finds multiple
- * projects.
+ * @description Verifies mock GET request to find multiple projects.
  */
 function getProjects(done) {
+  // Create request object
   const projData = [
     testData.projects[1],
     testData.projects[2],
     testData.projects[3],
     testData.projects[4]
   ];
-  const projIDs = projData.map(p => p.id).join(',');
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects?ids=${projIDs}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const foundProjects = JSON.parse(body);
+  const params = {
+    orgid: org.id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, projData.map(p => p.id), method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundProjects = JSON.parse(_data);
+    chai.expect(Array.isArray(foundProjects)).to.equal(true);
     chai.expect(foundProjects.length).to.equal(projData.length);
 
     // Convert foundProjects to JMI type 2 for easier lookup
@@ -373,7 +428,7 @@ function getProjects(done) {
     projData.forEach((projDataObject) => {
       const foundProj = jmi2Projects[projDataObject.id];
 
-      // Verify project created properly
+      // Verify correct project found
       chai.expect(foundProj.id).to.equal(projDataObject.id);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
@@ -392,15 +447,23 @@ function getProjects(done) {
       chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // GETs multiple projects
+  APIController.getProjects(req, res);
 }
 
 /**
- * @description Verifies GET /api/orgs/:orgid/projects finds all projects in
- * an org when no body or query parameters are provided.
+ * @description Verifies mock GET request to find all projects in an org.
  */
 function getAllProjectsOnOrg(done) {
+  // Create request object
   const projData = [
     testData.projects[0],
     testData.projects[1],
@@ -408,19 +471,23 @@ function getAllProjectsOnOrg(done) {
     testData.projects[3],
     testData.projects[4]
   ];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const foundProjects = JSON.parse(body);
+  const params = {
+    orgid: org.id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundProjects = JSON.parse(_data);
+    chai.expect(Array.isArray(foundProjects)).to.equal(true);
     chai.expect(foundProjects.length).to.equal(projData.length);
 
     // Convert foundProjects to JMI type 2 for easier lookup
@@ -429,7 +496,7 @@ function getAllProjectsOnOrg(done) {
     projData.forEach((projDataObject) => {
       const foundProj = jmi2Projects[projDataObject.id];
 
-      // Verify project created properly
+      // Verify correct project found
       chai.expect(foundProj.id).to.equal(projDataObject.id);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
@@ -448,15 +515,24 @@ function getAllProjectsOnOrg(done) {
       chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // GETs multiple projects
+  APIController.getProjects(req, res);
 }
 
 /**
- * @description Verifies GET /api/projects finds all projects a user has access
+ * @description Verifies mock GET request to find all projects a user has access
  * to.
  */
 function getAllProjects(done) {
+  // Create request object
   const projData = [
     testData.projects[0],
     testData.projects[1],
@@ -464,19 +540,20 @@ function getAllProjects(done) {
     testData.projects[3],
     testData.projects[4]
   ];
-  request({
-    url: `${test.url}/api/projects`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'GET'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const foundProjects = JSON.parse(body);
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, {}, {}, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const foundProjects = JSON.parse(_data);
+    chai.expect(Array.isArray(foundProjects)).to.equal(true);
     chai.expect(foundProjects.length).to.equal(projData.length);
 
     // Convert foundProjects to JMI type 2 for easier lookup
@@ -485,7 +562,7 @@ function getAllProjects(done) {
     projData.forEach((projDataObject) => {
       const foundProj = jmi2Projects[projDataObject.id];
 
-      // Verify project created properly
+      // Verify correct project found
       chai.expect(foundProj.id).to.equal(projDataObject.id);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
@@ -504,36 +581,47 @@ function getAllProjects(done) {
       chai.expect(foundProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // GETs multiple projects
+  APIController.getAllProjects(req, res);
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid updates a
- * project.
+ * @description Verifies mock PATCH request to update a project.
  */
 function patchProject(done) {
+  // Create request object
   const projData = testData.projects[0];
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'PATCH';
   const updateObj = {
     id: projData.id,
     name: 'Updated Name'
   };
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify(updateObj)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const updatedProj = JSON.parse(body);
+  const req = testUtils.createRequest(adminUser, params, updateObj, method);
 
-    // Verify project updated properly
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const updatedProj = JSON.parse(_data);
+
+    // Verify correct project updated
     chai.expect(updatedProj.id).to.equal(projData.id);
     chai.expect(updatedProj.name).to.equal(updateObj.name);
     chai.expect(updatedProj.custom).to.deep.equal(projData.custom || {});
@@ -551,49 +639,59 @@ function patchProject(done) {
     // Verify specific fields not returned
     chai.expect(updatedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // PATCHs a project
+  APIController.patchProject(req, res);
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects updates multiple
- * projects.
+ * @description Verifies mock PATCH request to update multiple projects.
  */
 function patchProjects(done) {
+  // Create request object
   const projData = [
     testData.projects[1],
     testData.projects[2],
     testData.projects[3],
     testData.projects[4]
   ];
-  // Update each project name
+  const params = {
+    orgid: org.id
+  };
+  const method = 'PATCH';
   const updateObj = projData.map((p) => ({
     id: p.id,
     name: 'Updated Name'
   }));
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'PATCH',
-    body: JSON.stringify(updateObj)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const updatedProjects = JSON.parse(body);
-    chai.expect(updatedProjects.length).to.equal(projData.length);
+  const req = testUtils.createRequest(adminUser, params, updateObj, method);
 
-    // Convert updatedProjects to JMI type 2 for easier lookup
-    const jmi2Projects = jmi.convertJMI(1, 2, updatedProjects, 'id');
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const updateProjects = JSON.parse(_data);
+    chai.expect(Array.isArray(updateProjects)).to.equal(true);
+    chai.expect(updateProjects.length).to.equal(projData.length);
+
+    // Convert updateProjects to JMI type 2 for easier lookup
+    const jmi2Projects = jmi.convertJMI(1, 2, updateProjects, 'id');
     // Loop through each project data object
     projData.forEach((projDataObject) => {
       const updatedProj = jmi2Projects[projDataObject.id];
 
-      // Verify project updated properly
+      // Verify correct project updated
       chai.expect(updatedProj.id).to.equal(projDataObject.id);
       chai.expect(updatedProj.name).to.equal('Updated Name');
       chai.expect(updatedProj.custom).to.deep.equal(projDataObject.custom || {});
@@ -612,64 +710,94 @@ function patchProjects(done) {
       chai.expect(updatedProj).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // PATCHs multiple projects
+  APIController.patchProjects(req, res);
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid deletes a
- * project.
+ * @description Verifies mock DELETE request to delete a project.
  */
 function deleteProject(done) {
+  // Create request object
   const projData = testData.projects[0];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'DELETE'
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const deletedID = JSON.parse(body);
+  const params = {
+    orgid: org.id,
+    projectid: testData.projects[0].id
+  };
+  const method = 'PATCH';
+  const req = testUtils.createRequest(adminUser, params, {}, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const deletedID = JSON.parse(_data);
 
     // Verify correct project deleted
     chai.expect(deletedID).to.equal(projData.id);
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // DELETEs a project
+  APIController.deleteProject(req, res);
 }
 
 /**
- * @description Verifies DELETE /api/orgs/:orgid/projects deletes multiple
- * projects.
+ * @description Verifies mock DELETE request to delete multiple project.
  */
 function deleteProjects(done) {
+  // Create request object
   const projData = [
     testData.projects[1],
     testData.projects[2],
     testData.projects[3],
     testData.projects[4]
   ];
-  request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'DELETE',
-    body: JSON.stringify(projData.map(p => p.id))
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-    // Verify response body
-    const deletedIDs = JSON.parse(body);
+  const params = {
+    orgid: org.id
+  };
+  const method = 'PATCH';
+  const req = testUtils.createRequest(adminUser, params, projData.map(p => p.id), method);
 
-    // Verify correct project deleted
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Parse the JSON response
+    const deletedIDs = JSON.parse(_data);
+
+    // Verify correct project found
     chai.expect(deletedIDs).to.have.members(projData.map(p => p.id));
-    done();
-  });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // DELETEs multiple project
+  APIController.deleteProjects(req, res);
 }

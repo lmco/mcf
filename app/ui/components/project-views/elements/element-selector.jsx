@@ -39,6 +39,7 @@ class ElementSelector extends React.Component {
       modal: false,
       selectedElement: '',
       selectedElementPreview: '',
+      childrenOpen: {},
       error: null
     };
 
@@ -46,6 +47,7 @@ class ElementSelector extends React.Component {
     this.getRootElement = this.getRootElement.bind(this);
     this.selectElementHandler = this.selectElementHandler.bind(this);
     this.select = this.select.bind(this);
+    this.setChildOpen = this.setChildOpen.bind(this);
   }
 
   componentDidMount() {
@@ -68,11 +70,8 @@ class ElementSelector extends React.Component {
    * need it. We should consider creating a tree wrapper to handle this.
    */
   getRootElement() {
-    const orgId = this.props.project.org;
-    const projId = this.props.project.id;
-    const base = `/api/orgs/${orgId}/projects/${projId}/branches/master`;
     const opts = '?fields=id,name,contains,type&minified=true';
-    const url = `${base}/elements/model${opts}`;
+    const url = `${this.props.url}/elements/model${opts}`;
     $.ajax({
       method: 'GET',
       url: url,
@@ -115,6 +114,10 @@ class ElementSelector extends React.Component {
     });
   }
 
+  setChildOpen(id, state) {
+    this.state.childrenOpen[id] = state;
+  }
+
   /**
    * Confirms and finalizes the element selection. Then closes the modal.
    */
@@ -136,8 +139,11 @@ class ElementSelector extends React.Component {
                           project={this.props.project}
                           parent={null}
                           isOpen={true}
+                          childrenOpen={this.state.childrenOpen}
+                          setChildOpen={this.setChildOpen}
                           parentRefresh={this.getRootElement}
-                          clickHandler={this.selectElementHandler}/>;
+                          clickHandler={this.selectElementHandler}
+                          url={this.props.url}/>;
     }
 
 
@@ -148,7 +154,7 @@ class ElementSelector extends React.Component {
 
     return (
       <div className={'element-selector'}>
-        <i className={'fas fa-caret-square-down'} onClick={this.toggle}></i>
+        <i className={'fas fa-caret-square-down'} onClick={this.toggle}/>
         <Modal size="lg"
                isOpen={this.state.modal}
                toggle={this.toggle}

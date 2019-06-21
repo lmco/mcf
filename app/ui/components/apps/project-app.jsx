@@ -31,6 +31,7 @@ import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import ProjectElements from '../project-views/elements/project-elements.jsx';
 import Search from '../project-views/search/search.jsx';
+import BranchesTags from '../project-views/branches/branches-tags.jsx';
 
 // Define component
 class ProjectApp extends Component {
@@ -44,7 +45,6 @@ class ProjectApp extends Component {
     // Initialize state props
     this.state = {
       project: null,
-      url: null,
       error: null,
       admin: false,
       permissions: null
@@ -56,9 +56,6 @@ class ProjectApp extends Component {
     const orgId = this.props.match.params.orgid;
     const projId = this.props.match.params.projectid;
     const url = `/api/orgs/${orgId}/projects/${projId}`;
-
-    // Set states
-    this.setState({ url: url });
 
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
@@ -155,14 +152,14 @@ class ProjectApp extends Component {
               ? (<SidebarHeader title='Dashboard'/>)
               : ''
             }
-            <SidebarLink id='Home'
-                         title='Home'
-                         icon='fas fa-home'
-                         routerLink={`${this.props.match.url}`}/>
             <SidebarLink id='Elements'
                          title='Model'
                          icon='fas fa-sitemap'
                          routerLink={`${this.props.match.url}/branches/master/elements`}/>
+            <SidebarLink id='Branches'
+                         title='Branches/Tags'
+                         icon='fas fa-code-branch'
+                         routerLink={`${this.props.match.url}/branches`}/>
             <SidebarLink id='Search'
                          title='Search'
                          icon='fas fa-search'
@@ -171,6 +168,10 @@ class ProjectApp extends Component {
                          title='Members'
                          icon='fas fa-users'
                          routerLink={`${this.props.match.url}/users`}/>
+            <SidebarLink id='Information'
+                         title='Information'
+                         icon='fas fa-info'
+                         routerLink={`${this.props.match.url}/info`}/>
             {(!displayPlugins)
               ? ''
               : (plugins)
@@ -182,25 +183,28 @@ class ProjectApp extends Component {
               ? <div id='view' className="loading"> {this.state.error || 'Loading your project...'} </div>
               : (
                 <Switch>
-                  { /* Route to project home page */ }
-                  <Route exact path={`${this.props.match.url}/`}
-                         render={ (props) => <InformationPage {...props}
-                                                              permissions={this.state.permissions}
-                                                              project={this.state.project} /> } />
                   { /* Route to element page */ }
                   <Route path={`${this.props.match.url}/branches/:branchid/elements`}
                          render={ (props) => <ProjectElements {...props}
                                                               permissions={this.state.permissions}
-                                                              url={this.state.url}
                                                               project={this.state.project}/> } />
                   <Route path={`${this.props.match.url}/branches/:branchid/search`}
                          render={ (props) => <Search {...props}
                                                      project={this.state.project} /> } />
+                  <Route path={`${this.props.match.url}/branches`}
+                         render={ (props) => <BranchesTags {...props}
+                                                           permissions={this.state.permissions}
+                                                           project={this.state.project} /> } />
                   { /* Route to members page */ }
                   <Route path={`${this.props.match.url}/users`}
                          render={ (props) => <MembersPage {...props}
                                                           project={this.state.project}
                                                           admin={this.state.admin}/> } />
+                  { /* Route to project home page */ }
+                  <Route exact path={`${this.props.match.url}/info`}
+                         render={ (props) => <InformationPage {...props}
+                                                              permissions={this.state.permissions}
+                                                              project={this.state.project} /> } />
                 </Switch>
               )
           }

@@ -97,10 +97,19 @@ class Delete extends Component {
     if (this.props.element) {
       const orgid = this.props.element.org;
       const projid = this.props.element.project;
+      const branchid = this.props.element.branch;
       const elemid = this.props.element.id;
 
       // Set url to state options
-      url = `/api/orgs/${orgid}/projects/${projid}/branches/master/elements/${elemid}`;
+      url = `/api/orgs/${orgid}/projects/${projid}/branches/${branchid}/elements/${elemid}`;
+    }
+    else if (this.props.branch) {
+      const orgid = this.props.branch.org;
+      const projid = this.props.branch.project;
+      const branchid = this.props.branch.id;
+
+      // Set url to state options
+      url = `/api/orgs/${orgid}/projects/${projid}/branches/${branchid}`;
     }
     else if (this.props.projects) {
       // Set url to state options
@@ -132,7 +141,7 @@ class Delete extends Component {
           }
           else {
             // On success, return to the project-views page
-            window.location.replace('/');
+            window.location.reload();
           }
         },
         401: (err) => {
@@ -160,6 +169,9 @@ class Delete extends Component {
     else if (this.props.element) {
       title = 'Element';
     }
+    else if (this.props.branch) {
+      title = 'Branch';
+    }
     else {
       title = 'Organization';
     }
@@ -179,9 +191,12 @@ class Delete extends Component {
     else if (this.props.element) {
       name = (<span className='element-name'>
                 {this.props.element.name} {' '}
-          <span className={'element-id'}>({this.props.element.id} : {this.props.element.type})</span>
+          <span className={'element-id'}>({this.props.element.id})</span>
               </span>
       );
+    }
+    else if (this.props.branch) {
+      name = this.props.branch.name ? this.props.branch.name : this.props.branch.id;
     }
 
     // Return the project delete form
@@ -235,7 +250,7 @@ class Delete extends Component {
                 </FormGroup>)
             }
             {/* Verify if project provided */}
-            {(this.props.org || this.props.project || this.props.element)
+            {(this.props.org || this.props.project || this.props.branch || this.props.element)
               ? (<FormGroup>
                   <Label for="id">Do you want to delete {name}?</Label>
                  </FormGroup>)

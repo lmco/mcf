@@ -141,8 +141,8 @@ class OrgList extends Component {
                   New Project
                 </UncontrolledTooltip>
                 <i id={`newproj-${orgId}`} className='fas fa-plus add-btn' onClick={this.handleCreateProjToggle}/>
-                  {(!this.props.admin)
-                    ? ''
+                  {(!this.props.admin || orgId === 'default')
+                    ? <i id={`delete-${orgId}`} className='fas fa-trash-alt transparent' />
                     : (<React.Fragment>
                         <UncontrolledTooltip placement='top' target={`delete-${orgId}`}>
                           Delete

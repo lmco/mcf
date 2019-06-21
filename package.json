@@ -1,6 +1,6 @@
 {
   "name": "mbee",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "schemaVersion": "0.8.2",
   "build": "NO_BUILD_NUMBER",
   "description": "Model-Based Engineering Environment",
@@ -23,7 +23,8 @@
     "request": "^2.86.0",
     "swagger-jsdoc": "^1.9.7",
     "winston": "^3.2.1",
-    "yarn": "^1.13.0"
+    "yarn": "^1.13.0",
+    "multer": "^1.4.1"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.7.2",

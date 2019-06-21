@@ -21,7 +21,12 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import { Modal, ModalBody, UncontrolledTooltip, Tooltip } from 'reactstrap';
+import {
+  Modal,
+  ModalBody,
+  UncontrolledTooltip,
+  Badge,
+  Tooltip } from 'reactstrap';
 import Delete from '../../shared-views/delete.jsx';
 import CustomData from '../../general/custom-data/custom-data.jsx';
 
@@ -57,7 +62,7 @@ class Element extends Component {
 
     if (elementId) {
       // Initalize variables
-      const url = `${this.props.url}/branches/master/elements/${elementId}?minified=true`;
+      const url = `${this.props.url}/elements/${elementId}?minified=true&archived=true`;
       // Get project data
       $.ajax({
         method: 'GET',
@@ -159,6 +164,12 @@ class Element extends Component {
                 <div className='element-header'>
                   <h2>
                     Element Information
+                    {(this.state.element.archived)
+                      ? (<Badge style={{ marginLeft: '15px' }} color='secondary'>
+                          Archived
+                         </Badge>)
+                      : ''
+                    }
                   </h2>
                   <div className='side-icons'>
                     {((this.props.permissions === 'write') || this.props.permissions === 'admin')

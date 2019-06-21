@@ -29,6 +29,7 @@ import Element from './element.jsx';
 import ElementEdit from './element-edit.jsx';
 import ElementNew from './element-new.jsx';
 import SidePanel from '../../general/side-panel.jsx';
+import BranchBar from '../branches/branch-bar.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -41,11 +42,13 @@ class ProjectElements extends Component {
 
     this.state = {
       sidePanel: false,
+      url: '',
       id: null,
       refreshFunction: null,
       treeRoot: null,
-      branch: 'model',
+      branch: props.match.params.branchid,
       childrenOpen: {},
+      archived: false,
       error: null
     };
 
@@ -55,6 +58,7 @@ class ProjectElements extends Component {
     this.createNewElement = this.createNewElement.bind(this);
     this.getElement = this.getElement.bind(this);
     this.setChildOpen = this.setChildOpen.bind(this);
+    this.displayArchivedElems = this.displayArchivedElems.bind(this);
   }
 
   createNewElement() {
@@ -115,9 +119,11 @@ class ProjectElements extends Component {
   getElement() {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
-    const branchId = this.props.match.params.branchid;
+    const branchId = this.state.branch;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
-    const url = `${base}/elements/model?fields=id,name,contains,type&minified=true`;
+    const url = `${base}/elements/model?fields=id,name,contains,type,archived&minified=true&archived=true`;
+
+    this.setState({ url: base });
 
     $.ajax({
       method: 'GET',
@@ -144,6 +150,11 @@ class ProjectElements extends Component {
     this.state.childrenOpen[id] = state;
   }
 
+  displayArchivedElems() {
+    // Change the archive state to opposite value
+    this.setState(prevState => ({ archived: !prevState.archived }));
+  }
+
   componentDidMount() {
     this.getElement();
 
@@ -165,14 +176,14 @@ class ProjectElements extends Component {
 
     let sidePanelView = <Element id={this.state.id}
                                  project={this.props.project}
-                                 url={this.props.url}
+                                 url={this.state.url}
                                  permissions={this.props.permissions}
                                  editElementInfo={this.editElementInfo}
                                  closeSidePanel={this.closeSidePanel}/>;
 
     if (this.state.sidePanel === 'elementEdit') {
       sidePanelView = <ElementEdit id={this.state.id}
-                                   url={this.props.url}
+                                   url={this.state.url}
                                    project={this.props.project}
                                    closeSidePanel={this.closeSidePanel}
                                    selected={this.state.selected}/>;
@@ -183,16 +194,18 @@ class ProjectElements extends Component {
                                    parent={this.state.id}
                                    project={this.props.project}
                                    closeSidePanel={this.closeSidePanel}
-                                   url={this.props.url}/>);
+                                   url={this.state.url}/>);
     }
 
     let tree = null;
     if (this.state.treeRoot !== null) {
       tree = <ElementTree id='model'
+                          url={this.state.url}
                           data={this.state.treeRoot}
                           project={this.props.project}
                           parent={null}
                           isOpen={true}
+                          archived={this.state.archived}
                           childrenOpen={this.state.childrenOpen}
                           setChildOpen={this.setChildOpen}
                           parentRefresh={this.getElement}
@@ -202,7 +215,7 @@ class ProjectElements extends Component {
     // Return element list
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header'>
+        <div id='workspace-header' className='workspace-header header-box-depth'>
           <h2 className={btnDisClassName}>{this.props.project.name} Model</h2>
           {(!isButtonDisplayed)
             ? ''
@@ -217,6 +230,11 @@ class ProjectElements extends Component {
         </div>
         <div id='workspace-body'>
           <div id='element-tree-container' className='main-workspace'>
+            <BranchBar project={this.props.project}
+                       branchid={this.state.branch}
+                       archived={this.state.archived}
+                       displayArchElems={this.displayArchivedElems}
+                       permissions={this.props.permissions}/>
             {tree}
           </div>
           <SidePanel>
