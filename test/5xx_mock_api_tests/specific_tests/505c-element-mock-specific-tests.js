@@ -148,7 +148,9 @@ function handleGzipUpload(done) {
     chai.expect(createdElement.name).to.equal(elemData.name);
     chai.expect(createdElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(createdElement.project).to.equal(projID);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs an element

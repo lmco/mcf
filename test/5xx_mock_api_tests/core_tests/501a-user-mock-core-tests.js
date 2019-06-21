@@ -117,7 +117,9 @@ function whoami(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs the requesting user
@@ -163,7 +165,9 @@ function postUser(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs a user
@@ -221,7 +225,9 @@ function postUsers(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs multiple users
@@ -267,7 +273,9 @@ function putUser(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PUTs a user
@@ -326,7 +334,9 @@ function putUsers(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PUTs multiple users
@@ -372,7 +382,9 @@ function getUser(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs a user
@@ -432,7 +444,9 @@ function getUsers(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple users
@@ -502,7 +516,9 @@ function getAllUsers(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs all users
@@ -567,7 +583,9 @@ function searchUsers(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // Searches for a user
@@ -617,7 +635,9 @@ function patchUser(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs a user
@@ -625,7 +645,7 @@ function patchUser(done) {
 }
 
 /**
- * @description Verifies mock PACTH request to update multiple users.
+ * @description Verifies mock PATCH request to update multiple users.
  */
 function patchUsers(done) {
   // Create request object
@@ -680,7 +700,9 @@ function patchUsers(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs multiple users
@@ -732,7 +754,9 @@ function patchUserPassword(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs a users password
@@ -763,7 +787,9 @@ function deleteUser(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs a user
@@ -799,7 +825,9 @@ function deleteUsers(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs multiple users

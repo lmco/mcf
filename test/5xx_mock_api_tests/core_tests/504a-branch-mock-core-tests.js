@@ -154,7 +154,9 @@ function postBranch(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs a branch
@@ -221,7 +223,9 @@ function postBranches(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs multiple branches
@@ -274,7 +278,9 @@ function getBranch(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs an branch
@@ -339,7 +345,9 @@ function getBranches(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple branches
@@ -408,7 +416,9 @@ function getAllBranches(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs multiple branches
@@ -465,7 +475,9 @@ function patchBranch(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs an branch
@@ -536,7 +548,9 @@ function patchBranches(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs multiple branches
@@ -570,7 +584,9 @@ function deleteBranch(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs an branch
@@ -608,7 +624,9 @@ function deleteBranches(done) {
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
-    done();
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs multiple branches
