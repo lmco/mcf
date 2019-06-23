@@ -3313,6 +3313,7 @@ async function postElements(req, res) {
   // Get the element data
   let elementData;
   try {
+    // This function parses both regular and gzipped data
     elementData = await utils.handleGzip(req,res);
   }
   catch (err) {
