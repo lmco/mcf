@@ -24,8 +24,6 @@ const express = require('express');
 const pluginRouter = express.Router();
 
 const protectedFileNames = ['routes.js'];
-const mbeeDependencies = require(`${M.root}/package.json`).dependencies;
-const mbeeDepList = Object.keys(mbeeDependencies);
 
 // Load the plugins
 loadPlugins();
