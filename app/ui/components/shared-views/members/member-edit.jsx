@@ -42,7 +42,6 @@ class MemberEdit extends Component {
       users: null,
       username: '',
       permissions: '',
-      dropDownOpen: false,
       results: null,
       error: null
     };
@@ -233,19 +232,16 @@ class MemberEdit extends Component {
           {/* Create form to update user roles */}
           {(!selectedUser)
             ? (<div>
-              <Form inline>
                 <Row form>
                   <Col>
-                    <FormGroup>
-                      <Input type='search'
-                             name='username'
-                             style={{ width: '325px' }}
-                             id='username'
-                             autocomplete='off'
-                             placeholder='Search User...'
-                             value={this.state.username || ''}
-                             onChange={this.userChange}/>
-                    </FormGroup>
+                    <Input type='search'
+                           name='username'
+                           style={{ width: '325px' }}
+                           id='username'
+                           autoComplete='off'
+                           placeholder='Search User...'
+                           value={this.state.username || ''}
+                           onChange={this.userChange}/>
                   </Col>
                   <Col md={2} sm={4} xs={6} >
                     <Button className='btn'
@@ -256,7 +252,6 @@ class MemberEdit extends Component {
                     </Button>
                   </Col>
                 </Row>
-              </Form>
               {(searchResults.length !== 0)
                 ? (<div className='members-dropdown'>
                     {searchResults}
@@ -266,7 +261,7 @@ class MemberEdit extends Component {
             </div>)
             : ''
           }
-          <Form style={{ 'padding-top': '10px' }}>
+          <Form style={{ paddingTop: '10px' }}>
             {/* Permissions user updates with */}
             <FormGroup>
               {(!selectedUser)
