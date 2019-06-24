@@ -18,6 +18,7 @@
 // Node modules
 const assert = require('assert');
 const path = require('path');
+const zlib = require('zlib');
 
 // MBEE modules
 const publicData = M.require('lib.get-public-data');
@@ -403,4 +404,36 @@ module.exports.validateOptions = function(options, validOptions, model) {
   });
 
   return returnObject;
+};
+
+/**
+ * @description Handles a data stream containing gzipped data.
+ *
+ * @param {Object} dataStream - The stream object carrying a gzip file
+ *
+ * @return {Promise} A promise containing the unzipped data
+ */
+module.exports.handleGzip = function(dataStream) {
+  // Create the promise to return
+  return new Promise((resolve, reject) => {
+    // We receive the data in chunks so we want to collect the entire file before trying to unzip
+    const chunks = [];
+    dataStream.on('data', (chunk) => {
+      // Hold each chunk in memory
+      chunks.push(chunk);
+    });
+    dataStream.on('end', () => {
+      // Combine the chunks into a single buffer when the stream is done sending
+      const buffer = Buffer.concat(chunks);
+      // Unzip the data
+      zlib.gunzip(buffer, (err, result) => {
+        if (err) {
+          M.log.warn(err.message);
+          return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
+        }
+        // Return the unzipped data
+        return resolve(JSON.parse(result.toString()));
+      });
+    });
+  });
 };
