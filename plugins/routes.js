@@ -96,27 +96,22 @@ function loadPlugins() {
     M.log.info(`Loading plugin '${namespace}' ...`);
 
     // Install the dependencies
-    const dependencies = pkg.dependencies;
-    if (dependencies) {
+    if (pkg.dependencies) {
       M.log.verbose('Installing plugin dependencies ...');
-      // Loop through plugin dependencies
-      Object.keys(dependencies).forEach(dep => {
-        // Skip conflicting dependencies
-        if (mbeeDepList.includes(dep)) {
-          return;
-        }
-        // Add dependency to node_modules without erasing existing node_modules
-        // directory
-        const commands = [
-          `pushd ${pluginPath}; yarn install; popd;`
-        ];
-        M.log.verbose(`Installing dependency ${dep} ...`);
-        const stdout = execSync(commands.join('; '));
-        M.log.debug(stdout.toString());
-        M.log.verbose(`${dep} installed.`);
-      });
+      const command = `cd plugins/${namespace}; yarn install; cd ..`;
+      const stdout = execSync(command);
+      M.log.debug(stdout.toString());
+      M.log.verbose('Dependencies installed.');
     }
 
+    // Run the build script if specified
+    if (pkg.scripts && pkg.scripts.build !== undefined) {
+      M.log.verbose('Running MBEE build script.');
+      const command = 'node mbee build';
+      const stdout = execSync(command);
+      M.log.debug(stdout.toString());
+      M.log.verbose('Build completed.');
+    }
 
     // Try: creates the plug-in path with the plug-in name
     try {
