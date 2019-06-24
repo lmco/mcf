@@ -22,7 +22,7 @@ const utils = require('./utils');
 const customValidators = M.config.validators || {};
 
 // This ID is used as the common regex for other ID fields in this module
-const id = customValidators.id || '([_a-z0-9])([-_a-z0-9.]){0,}([-_a-z0-9])';
+const id = customValidators.id || '([_a-z0-9])([-_a-z0-9.]){0,}';
 
 // A list of reserved keywords which cannot be used in ids
 module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
