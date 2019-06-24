@@ -407,10 +407,9 @@ module.exports.validateOptions = function(options, validOptions, model) {
 };
 
 /**
- * @description Handles both normal and gzipped JSON data uploaded from a request object.
+ * @description Handles a data stream containing gzipped data.
  *
- * @param {Object} dataStream - The request object either containing JSON data in the body or
- * carrying a stream of a gzip file containing JSON data
+ * @param {Object} dataStream - The stream object carrying a gzip file
  *
  * @return {Promise} A promise containing the unzipped data
  */
