@@ -211,15 +211,17 @@ function updateElement(done) {
  * @description Delete an element using the element model
  */
 function deleteElement(done) {
+  // Create the element ID to remove
+  const elementID = utils.createID(branch._id, testData.elements[0].id);
+
   // Find and delete the element
-  Element.findOneAndRemove({
-    _id: utils.createID(branch._id, testData.elements[0].id) })
+  Element.findOneAndRemove({ _id: elementID })
 
   // Attempt to find the element
-  .then(() => Element.find())
-  .then((elements) => {
+  .then(() => Element.findOne({ _id: elementID }))
+  .then((element) => {
     // Expect no elements to be found
-    chai.expect(elements.length).to.equal(0);
+    chai.expect(element).to.equal(null);
     done();
   })
   .catch((error) => {
