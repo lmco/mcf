@@ -3322,7 +3322,7 @@ async function postElements(req, res) {
     }
   }
   else {
-    elementData = res.body;
+    elementData = req.body;
   }
 
   // Create the specified elements
