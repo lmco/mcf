@@ -19,12 +19,9 @@
 
 // Node.js Modules
 const path = require('path');
-const zlib = require('zlib');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
-const multer = require('multer');
-const upload = multer({ dest: './uploads/' }).single('zipfile');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -3312,12 +3309,20 @@ async function postElements(req, res) {
 
   // Get the element data
   let elementData;
-  try {
-    // This function parses both regular and gzipped data
-    elementData = await utils.handleGzip(req,res);
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      elementData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
   }
-  catch (err) {
-    return res.status(400).send(err.message);
+  else {
+    elementData = res.body;
   }
 
   // Create the specified elements

@@ -19,8 +19,6 @@
 const assert = require('assert');
 const path = require('path');
 const zlib = require('zlib');
-const multer = require('multer');
-const upload = multer({ dest: './uploads/' }).single('zipfile');
 
 // MBEE modules
 const publicData = M.require('lib.get-public-data');
@@ -411,50 +409,32 @@ module.exports.validateOptions = function(options, validOptions, model) {
 /**
  * @description Handles both normal and gzipped JSON data uploaded from a request object.
  *
- * @param {Object} req - The request object either containing JSON data in the body or
+ * @param {Object} dataStream - The request object either containing JSON data in the body or
  * carrying a stream of a gzip file containing JSON data
- * @param {Object} res - The response object
  *
- * @return {Object} An object parsed from the incoming JSON data
+ * @return {Promise} A promise containing the unzipped data
  */
-module.exports.handleGzip = async function(req, res) {
-  // Handle element data from both regular requests and zipped files
-  const dataPromise = new Promise((resolve, reject) => {
-    // Handle gzip
-    if (req.headers['content-type'] === 'application/gzip') {
-      upload(req, res, function(error) {
-        if (error) {
-          M.log.warn(error.message);
-          return reject(new M.DataFormatError('Problem uploading file', 'warn'));
+module.exports.handleGzip = function(dataStream) {
+  // Create the promise to return
+  return new Promise((resolve, reject) => {
+    // We receive the data in chunks so we want to collect the entire file before trying to unzip
+    const chunks = [];
+    dataStream.on('data', (chunk) => {
+      // Hold each chunk in memory
+      chunks.push(chunk);
+    });
+    dataStream.on('end', () => {
+      // Combine the chunks into a single buffer when the stream is done sending
+      const buffer = Buffer.concat(chunks);
+      // Unzip the data
+      zlib.gunzip(buffer, (err, result) => {
+        if (err) {
+          M.log.warn(err.message);
+          return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
         }
-        // We receive the data in chunks so we want to collect the entire file
-        // before trying to unzip
-        const chunks = [];
-        req.on('data', (chunk) => {
-          // hold each chunk in memory
-          chunks.push(chunk);
-        });
-        req.on('end', () => {
-          // combine the chunks into a single buffer when req is done sending
-          const buffer = Buffer.concat(chunks);
-          // unzip the data
-          zlib.gunzip(buffer, (err, result) => {
-            if (err) {
-              M.log.warn(err.message);
-              return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
-            }
-            // return the unzipped data
-            return resolve(JSON.parse(result.toString()));
-          });
-        });
+        // Return the unzipped data
+        return resolve(JSON.parse(result.toString()));
       });
-    }
-    else {
-      // If it's not a zip file, the data we want will be in req.body
-      return resolve(req.body);
-    }
+    });
   });
-
-  // Return the promise
-  return dataPromise;
 };
