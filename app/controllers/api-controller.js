@@ -2168,6 +2168,7 @@ function postUsers(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
+    M.log.warn(error.message);
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
@@ -2570,6 +2571,7 @@ function postUser(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => {
+    M.log.warn(error.message);
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
