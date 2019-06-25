@@ -47,6 +47,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many elements. Depending on the
@@ -865,7 +866,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
       return resolve(populatedElements);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1371,7 +1372,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
       return resolve(foundUpdatedElements);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1668,7 +1669,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
 
       return resolve(createdElements);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1892,7 +1893,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     })
     // Return unique IDs of elements deleted
     .then(() => resolve(uniqueIDs))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1969,7 +1970,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
 
     Promise.all(promises)
     .then(() => resolve(foundElements))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -2053,7 +2054,7 @@ function moveElementCheck(organizationID, projectID, branch, element) {
     // Call the recursive find function
     findElementParentRecursive(element)
     .then(() => resolve())
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -2254,6 +2255,6 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       }
     })
     .then((foundElements) => resolve(foundElements))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }

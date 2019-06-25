@@ -44,6 +44,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many organizations. Depending on the
@@ -154,14 +155,14 @@ function find(requestingUser, orgs, options) {
         { limit: validOptions.limit, skip: validOptions.skip })
       .populate(validOptions.populateString).lean()
       .then((foundOrgs) => resolve(foundOrgs))
-      .catch((error) => reject(error));
+      .catch((error) => reject(errors.captureError(error)));
     }
     else {
       Organization.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
       .populate(validOptions.populateString)
       .then((foundOrgs) => resolve(foundOrgs))
-      .catch((error) => reject(error));
+      .catch((error) => reject(errors.captureError(error)));
     }
   });
 }
@@ -364,7 +365,7 @@ function create(requestingUser, orgs, options) {
       }
     })
     .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -692,7 +693,7 @@ function update(requestingUser, orgs, options) {
 
       return resolve(foundUpdatedOrgs);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -851,7 +852,7 @@ function createOrReplace(requestingUser, orgs, options) {
       }
     })
     .then(() => resolve(createdOrgs))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -969,6 +970,6 @@ function remove(requestingUser, orgs, options) {
       }
       return resolve(foundOrgs.map(o => o._id));
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }

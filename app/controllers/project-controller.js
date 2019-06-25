@@ -46,6 +46,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -197,7 +198,7 @@ function find(requestingUser, organizationID, projects, options) {
       }
     })
     .then((finishedProjects) => resolve(finishedProjects))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -531,7 +532,7 @@ function create(requestingUser, organizationID, projects, options) {
       }
     })
     .then((foundCreatedProjects) => resolve(foundCreatedProjects))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -957,7 +958,7 @@ function update(requestingUser, organizationID, projects, options) {
 
       return resolve(foundUpdatedProjects);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1169,7 +1170,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       // Return the newly created projects
       return resolve(createdProjects);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1305,6 +1306,6 @@ function remove(requestingUser, organizationID, projects, options) {
       }
       return resolve(foundProjects.map(p => p._id));
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
