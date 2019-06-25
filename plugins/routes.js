@@ -96,16 +96,16 @@ function loadPlugins() {
     // Install the dependencies
     if (pkg.dependencies) {
       M.log.verbose('Installing plugin dependencies ...');
-      const command = `cd plugins/${namespace}; yarn install; cd ..`;
+      const command = `cd plugins/${namespace}; yarn install`;
       const stdout = execSync(command);
       M.log.debug(stdout.toString());
       M.log.verbose('Dependencies installed.');
     }
 
     // Run the build script if specified
-    if (pkg.scripts && pkg.scripts.build !== undefined) {
-      M.log.verbose('Running MBEE build script.');
-      const command = 'node mbee build';
+    if (pkg.scripts && pkg.scripts.build) {
+      M.log.verbose('Running yarn build...');
+      const command = 'yarn build';
       const stdout = execSync(command);
       M.log.debug(stdout.toString());
       M.log.verbose('Build completed.');
