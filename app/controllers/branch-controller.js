@@ -38,6 +38,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many branches. Depending on the given
@@ -240,7 +241,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         .catch((error) => reject(error));
       }
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -596,12 +597,12 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         // Delete the branches
         .then(() => Branch.deleteMany({ _id: { $in: arrIDs } }).lean())
         // Reject with error
-        .then(() => reject(error))
-        .catch(() => reject(error));
+        .then(() => reject(errors.captureError(error)))
+        .catch(() => reject(errors.captureError(error)));
       }
       else {
         // Reject with error
-        return reject(error);
+        return reject(errors.captureError(error));
       }
     });
   });
@@ -892,7 +893,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
 
       return resolve(foundUpdatedBranches);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1047,6 +1048,6 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
       }
       return resolve(foundBranches.map(b => b._id));
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }

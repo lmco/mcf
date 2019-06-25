@@ -383,7 +383,7 @@ function create(requestingUser, users, options) {
       }
     })
     .then((foundCreatedUsers) => resolve(foundCreatedUsers))
-    .catch((error) => reject(errors.catchMongoError(error)));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -634,7 +634,7 @@ function update(requestingUser, users, options) {
 
       return resolve(foundUpdatedUsers);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -794,7 +794,7 @@ function createOrReplace(requestingUser, users, options) {
       }
     })
     .then(() => resolve(createdUsers))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -946,7 +946,7 @@ function remove(requestingUser, users, options) {
 
       return resolve(foundUsernames);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1030,7 +1030,7 @@ function search(requestingUser, query, options) {
       .sort({ score: { $meta: 'textScore' } })
       .populate(validOptions.populateString)
       .then((foundUsers) => resolve(foundUsers))
-      .catch((error) => reject(error));
+      .catch((error) => reject(errors.captureError(error)));
     }
   });
 }
@@ -1111,6 +1111,6 @@ function updatePassword(requestingUser, oldPassword, newPassword, confirmPasswor
       return foundUser.save();
     })
     .then((updatedUser) => resolve(updatedUser))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }

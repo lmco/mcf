@@ -99,9 +99,19 @@ function getStatusCode(error) {
   }
 }
 
-function catchMongoError(error) {
+/**
+ * @description A utility to ensure that all errors get turned into custom errors.
+ * To be used on returned errors in .catch statements
+ *
+ * @param error - the error to check
+ *
+ * @returns {CustomError|ServerError}
+ */
+function captureError(error) {
   // If the error isn't already a custom error, make it one
   if (!(error instanceof CustomError)) {
+    // Capture stack trace
+    Error.captureStackTrace(error);
     // Return a server error
     return new ServerError(error.message, 'warn');
   }
@@ -114,7 +124,7 @@ function catchMongoError(error) {
 module.exports = {
   CustomError,
   getStatusCode,
-  catchMongoError,
+  captureError,
   DataFormatError,
   OperationError,
   AuthorizationError,
