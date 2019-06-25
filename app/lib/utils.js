@@ -240,7 +240,7 @@ module.exports.parseOptions = function(options, validOptions) {
  */
 module.exports.validateOptions = function(options, validOptions, model) {
   // Define the object to be returned to the user. Initialize populateString
-  const returnObject = { populateString: '', sort: { $natural: 1 } };
+  const returnObject = { populateString: '' };
   // Define valid searchOptions for the element model
   const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
     'createdBy', 'lastModifiedBy', 'archivedBy'];
@@ -391,17 +391,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
       returnObject.skip = val;
     }
 
-    // Handle the sort option
-    if (opt === 'sort') {
-      returnObject.sort = {};
-      if (val[0] === '-') {
-        returnObject.sort[val.slice(1)] = -1;
-      }
-      else {
-        returnObject.sort[val] = 1;
-      }
-    }
-
     // Handle the lean option
     if (opt === 'lean') {
       // Ensure the value is a boolean
@@ -413,9 +402,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
       returnObject.lean = val;
     }
   });
-
-  // If sort was not specified, give it a default value
-  //if (!returnObject.sort) returnObject.sort = { $natural: 1 };
 
   return returnObject;
 };

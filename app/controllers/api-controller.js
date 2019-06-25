@@ -243,8 +243,7 @@ function getOrgs(req, res) {
     limit: 'number',
     skip: 'number',
     ids: 'array',
-    minified: 'boolean',
-    sort: 'string'
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2020,8 +2019,7 @@ function getUsers(req, res) {
     custom: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
-    archivedBy: 'string',
-    sort: 'string'
+    archivedBy: 'string'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -3121,8 +3119,7 @@ function getElements(req, res) {
     name: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
-    archivedBy: 'string',
-    sort: 'string'
+    archivedBy: 'string'
   };
 
   // Loop through req.query
@@ -3613,8 +3610,7 @@ function searchElements(req, res) {
     name: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
-    archivedBy: 'string',
-    sort: 'string'
+    archivedBy: 'string'
   };
 
   // Loop through req.query
@@ -4157,8 +4153,7 @@ function getBranches(req, res) {
     ids: 'array',
     minified: 'boolean',
     source: 'string',
-    tag: 'boolean',
-    sort: 'string'
+    tag: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request

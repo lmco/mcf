@@ -79,9 +79,6 @@ const jmi = M.require('lib.jmi-conversions');
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
- * @param {string} [options.sort] - Provide a particular field to sort the results by.
- * You may also add a negative sign in front of the field to indicate sorting in
- * reverse order.
  * @param {string} [options.parent] - Search for elements with a specific
  * parent.
  * @param {string} [options.source] - Search for elements with a specific
@@ -156,7 +153,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Initialize validOptions
   const validOptions = utils.validateOptions(options, ['archived', 'populate',
-    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+    'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
 
   // Ensure options are valid
   if (options) {
@@ -172,6 +169,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
         if (typeof options[o] !== 'string') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
+
         // If the search option is an element reference
         if (['parent', 'source', 'target'].includes(o)) {
           // Make value the concatenated ID
@@ -283,7 +281,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
     if ((validOptions.limit > 0 && validOptions.limit < 50000) || elementCount < 50000) {
       // Find the elements
       foundElements = await findHelper(searchQuery, validOptions.fieldsString,
-        validOptions.limit, validOptions.skip, validOptions.populateString, validOptions.sort,
+        validOptions.limit, validOptions.skip, validOptions.populateString,
         validOptions.lean);
     }
     else {
@@ -311,7 +309,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
         // Add find operation to array of promises
         promises.push(findHelper(searchQuery, validOptions.fieldsString,
-          batchLimit, batchSkip, validOptions.populateString, validOptions.sort, validOptions.lean)
+          batchLimit, batchSkip, validOptions.populateString, validOptions.lean)
         .then((elems) => {
           foundElements = foundElements.concat(elems);
         }));
@@ -326,7 +324,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
       // Add find operation to array of promises
       promises.push(findHelper(searchQuery, validOptions.fieldsString,
-        validOptions.limit, validOptions.skip, validOptions.populateString, validOptions.sort,
+        validOptions.limit, validOptions.skip, validOptions.populateString,
         validOptions.lean)
       .then((elems) => {
         foundElements = foundElements.concat(elems);
@@ -345,26 +343,23 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
  * @description Find helper function which simplifies the actual Element.find()
  * database call
  *
- * @param {Object} query - The query to send to the database
+ * @param {Object} query - THe query to send to the database
  * @param {string} fields - Fields to include (or not include) in the found objects
  * @param {number} limit - The maximum number of elements to return.
  * @param {number} skip - The number of elements to skip.
  * @param {string} populate - A string containing a space delimited list of
  * fields to populate
- * @param {Object} sort - an optional argument that enables sorting by different fields
  * @param {boolean} lean - If true, returns raw JSON rather than converting to
  * instances of the Element model.
  */
-async function findHelper(query, fields, limit, skip, populate, sort, lean) {
+async function findHelper(query, fields, limit, skip, populate, lean) {
   if (lean) {
     return Element.find(query, fields, { limit: limit, skip: skip })
-    .sort(sort)
     .populate(populate)
     .lean();
   }
   else {
     return Element.find(query, fields, { limit: limit, skip: skip })
-    .sort(sort)
     .populate(populate);
   }
 }
@@ -2086,9 +2081,6 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
- * @param {string} [options.sort] - Provide a particular field to sort the results by.
- * You may also add a negative sign in front of the field to indicate sorting in
- * reverse order.
  * @param {string} [options.parent] - Search for elements with a specific
  * parent.
  * @param {string} [options.source] - Search for elements with a specific
@@ -2150,7 +2142,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     // TODO: Look at the element key from the model
     // Validate and set the options
     validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'limit', 'skip', 'lean', 'sort'], Element);
+      'limit', 'skip', 'lean'], Element);
 
     // Ensure options are valid
     if (options) {

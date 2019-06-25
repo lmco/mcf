@@ -66,9 +66,6 @@ const jmi = M.require('lib.jmi-conversions');
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
- * @param {string} [options.sort] - Provide a particular field to sort the results by.
- * You may also add a negative sign in front of the field to indicate sorting in
- * reverse order.
  *
  * @return {Promise} Array of found branch objects
  *
@@ -127,7 +124,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean', 'sort'], Branch);
+      'fields', 'limit', 'skip', 'lean'], Branch);
 
     // Ensure options are valid
     if (options) {
@@ -231,7 +228,6 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         // Find branches in a project
         return Branch.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
-        .sort(validOptions.sort)
         .populate(validOptions.populateString).lean()
         .then((finishedBranches) => resolve(finishedBranches))
         .catch((error) => reject(error));
@@ -239,7 +235,6 @@ function find(requestingUser, organizationID, projectID, branches, options) {
       else {
         return Branch.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
-        .sort(validOptions.sort)
         .populate(validOptions.populateString)
         .then((finishedBranches) => resolve(finishedBranches))
         .catch((error) => reject(error));
