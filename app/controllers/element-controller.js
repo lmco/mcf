@@ -2245,19 +2245,29 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         delete searchQuery.archived;
       }
 
+      // Here we're adding sorting by metadata
+      // If no sorting option was specified ($natural is the default) then remove
+      // $natural because it doesn't work with metadata sorting
+      if (validOptions.sort.$natural) {
+        validOptions.sort = { score: { $meta: 'textScore' } };
+      }
+      else {
+        validOptions.sort.score = { $meta: 'textScore' };
+      }
+
       // If the lean option is supplied
       if (validOptions.lean) {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
           { limit: validOptions.limit, skip: validOptions.skip })
-        .sort({ score: { $meta: 'textScore' } })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString).lean();
       }
       else {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
           { limit: validOptions.limit, skip: validOptions.skip })
-        .sort({ score: { $meta: 'textScore' } })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString);
       }
     })

@@ -393,11 +393,15 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
     // Handle the sort option
     if (opt === 'sort') {
+      // Get rid of the default value
       returnObject.sort = {};
+      // If the user has specified sorting in reverse order
       if (val[0] === '-') {
+        // Return {sort_field: -1}
         returnObject.sort[val.slice(1)] = -1;
       }
       else {
+        // Return {sort_field: 1}
         returnObject.sort[val] = 1;
       }
     }
@@ -413,9 +417,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
       returnObject.lean = val;
     }
   });
-
-  // If sort was not specified, give it a default value
-  //if (!returnObject.sort) returnObject.sort = { $natural: 1 };
 
   return returnObject;
 };

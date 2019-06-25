@@ -1017,12 +1017,22 @@ function search(requestingUser, query, options) {
       delete searchQuery.archived;
     }
 
+    // Here we're adding sorting by metadata.
+    // If no sorting option was specified ($natural is the default) then remove
+    // $natural because it doesn't work with metadata sorting
+    if (validOptions.sort.$natural) {
+      validOptions.sort = { score: { $meta: 'textScore' } };
+    }
+    else {
+      validOptions.sort.score = { $meta: 'textScore' };
+    }
+
     // If the lean option is supplied
     if (validOptions.lean) {
       // Search for the user
       User.find(searchQuery, { score: { $meta: 'textScore' } },
         { limit: validOptions.limit, skip: validOptions.skip })
-      .sort({ score: { $meta: 'textScore' } })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString).lean()
       .then((foundUsers) => resolve(foundUsers))
       .catch((error) => reject(error));
@@ -1031,7 +1041,7 @@ function search(requestingUser, query, options) {
       // Search for the user
       User.find(searchQuery, { score: { $meta: 'textScore' } },
         { limit: validOptions.limit, skip: validOptions.skip })
-      .sort({ score: { $meta: 'textScore' } })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString)
       .then((foundUsers) => resolve(foundUsers))
       .catch((error) => reject(error));
