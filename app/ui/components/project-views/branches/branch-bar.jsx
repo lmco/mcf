@@ -38,16 +38,14 @@ class BranchBar extends Component {
     // Initialize state props
     this.state = {
       branches: null,
-      branch: '',
       currentBranch: null,
       modal: false
     };
 
     this.handleChange = this.handleChange.bind(this);
-    this.handleToggle = this.handleToggle.bind(this);
   }
 
-  // Define handle org change function
+  // Handles branch change
   handleChange(event) {
     if (event.target.value !== null) {
       const orgId = this.props.project.org;
@@ -58,39 +56,28 @@ class BranchBar extends Component {
     }
   }
 
-  // Define toggle function
-  handleToggle() {
-    // Open or close modal
-    this.setState((prevState) => ({ modal: !prevState.modal }));
-  }
-
   componentDidMount() {
+    // Initialize variables
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches`;
     const url = `${base}?archived=true&minified=true`;
 
+    // Grab all branches
     $.ajax({
       method: 'GET',
       url: url,
       statusCode: {
         200: (data) => {
+          // Set branch state
+          this.setState({ branches: data });
+
+          // Grab the current branch data
           data.forEach((branch) => {
             if (branch.id === this.props.branchid) {
               this.setState({ currentBranch: branch });
             }
           });
-
-          const result = data.sort((a) => {
-            if (a.id === this.props.branchid) {
-              return -1;
-            }
-            else {
-              return 1;
-            }
-          });
-
-          this.setState({ branches: result });
         },
         401: () => {
           this.setState({ branches: null });
@@ -109,15 +96,19 @@ class BranchBar extends Component {
   }
 
   render() {
+    // Initialize variables
     let tag = false;
     let archived = false;
     const branchOptions = [];
     const tagOptions = [];
-    let swapOptions = false;
 
+    // Verify branches were grabbed
     if (this.state.branches) {
+      // Loop through branches
       this.state.branches.forEach((branch) => {
+        // Verify branch or tag
         if (!branch.tag) {
+          // Push to branch options
           branchOptions.push(
             <option className='branch-opts'
                     key={`opt-${branch.id}`}
@@ -127,9 +118,7 @@ class BranchBar extends Component {
           );
         }
         else {
-          if (branch.id === this.props.branchid) {
-            swapOptions = true;
-          }
+          // Push to tag options
           tagOptions.push(
             <option className='branch-opts'
                     key={`opt-${branch.id}`}
@@ -141,7 +130,9 @@ class BranchBar extends Component {
       });
     }
 
+    // Verify current branch is grabbed
     if (this.state.currentBranch) {
+      // Set the tag and archive badges
       tag = this.state.currentBranch.tag;
       archived = this.state.currentBranch.archived;
     }
@@ -156,26 +147,14 @@ class BranchBar extends Component {
                      name='branch'
                      id='branch'
                      className='branch-input'
-                     value={this.state.branch}
+                     value={this.props.branchid}
                      onChange={this.handleChange}>
-                {(swapOptions)
-                  ? (<React.Fragment>
-                      <option key='opt-tag'
-                              disabled={true}>Tags</option>
-                      {tagOptions}
-                      <option key='opt-branch'
-                              disabled={true}>Branches</option>
-                      {branchOptions}
-                     </React.Fragment>)
-                  : (<React.Fragment>
                       <option key='opt-branch'
                               disabled={true}>Branches</option>
                       {branchOptions}
                       <option key='opt-tag'
                               disabled={true}>Tags</option>
                       {tagOptions}
-                     </React.Fragment>)
-                }
               </Input>
             </InputGroup>
             <div className='branch-tag'>
