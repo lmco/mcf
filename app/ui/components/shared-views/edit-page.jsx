@@ -231,7 +231,7 @@ class EditPage extends Component {
                          checked={this.state.archived}
                          value={this.state.archived || false}
                          onChange={this.handleChange} />
-                  Archived
+                  Archive
                 </Label>
               </FormGroup>
               {/* Button to submit changes */}

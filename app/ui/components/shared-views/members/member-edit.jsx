@@ -76,12 +76,15 @@ class MemberEdit extends Component {
 
     // Verify if org provided
     if (this.props.org) {
-      if (Object.keys(this.props.org.permissions).hasOwnProperty(username)) {
+      if (this.props.org.permissions.hasOwnProperty(username)) {
         this.setState({ permissions: this.props.org.permissions[username] });
       }
     }
-    else if (Object.keys(this.props.project.permissions).hasOwnProperty(username)) {
+    else if (this.props.project.permissions.hasOwnProperty(username)) {
       this.setState({ permissions: this.props.project.permissions[username] });
+    }
+    else {
+      this.setState({ permissions: '' });
     }
   }
 
@@ -210,10 +213,8 @@ class MemberEdit extends Component {
     let title;
     let btnTitle = 'Add';
     let header = 'Add User';
-    let selectedUser = false;
 
     if (this.state.username.length === 0) {
-      selectedUser = false;
       header = 'Add User';
       btnTitle = 'Add';
     }
@@ -224,7 +225,6 @@ class MemberEdit extends Component {
       title = this.props.org.name;
 
       if (this.props.org.permissions.hasOwnProperty(this.state.username)) {
-        selectedUser = true;
         btnTitle = 'Save';
         header = 'Modify User';
       }
@@ -233,7 +233,6 @@ class MemberEdit extends Component {
       // Set title to project name
       title = this.props.project.name;
       if (this.props.project.permissions.hasOwnProperty(this.state.username)) {
-        selectedUser = true;
         btnTitle = 'Save';
         header = 'Modify User';
       }
@@ -315,11 +314,7 @@ class MemberEdit extends Component {
             </FormGroup>
           </Form>
           {/* Button to submit changes */}
-          <Button onClick={this.onSubmit}> {btnTitle} </Button>{' '}
-          {(!selectedUser)
-            ? ''
-            : (<Button outline color="secondary" onClick={this.resetForm}>Cancel</Button>)
-          }
+          <Button onClick={this.onSubmit}> {btnTitle} </Button>
         </div>
       </div>
     );
