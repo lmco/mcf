@@ -110,10 +110,12 @@ function getStatusCode(error) {
 function captureError(error) {
   // If the error isn't already a custom error, make it one
   if (!(error instanceof CustomError)) {
+    // Create a new server error
+    const newErr = new ServerError(error.message, 'warn');
     // Capture stack trace
-    Error.captureStackTrace(error);
-    // Return a server error
-    return new ServerError(error.message, 'warn');
+    newErr.stack = error.stack;
+    // Return the new custom error
+    return newErr;
   }
   else {
     return error;
