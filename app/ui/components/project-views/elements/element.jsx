@@ -54,6 +54,7 @@ class Element extends Component {
     this.getElement = this.getElement.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     this.handleTooltipToggle = this.handleTooltipToggle.bind(this);
+    this.handleCrossRefs = this.handleCrossRefs.bind(this);
   }
 
   getElement() {
@@ -69,7 +70,8 @@ class Element extends Component {
         url: url,
         statusCode: {
           200: (element) => {
-            this.setState({ element: element });
+            // TODO do nested AJAX call for cross-ref replacement
+            this.handleCrossRefs(element);
           },
           401: (err) => {
             // Throw error and set state
@@ -98,6 +100,67 @@ class Element extends Component {
 
     // Get element information
     this.getElement();
+  }
+
+  handleCrossRefs(_element) {
+    // Match/find all cross references
+    const allCrossRefs = _element.documentation.match(/\s\[xr:[a-zA-Z0-9\-_]{0,}\]\s/g);
+    console.log(allCrossRefs);
+
+    if (!allCrossRefs || allCrossRefs.length === 0) {
+      this.setState({ element: _element });
+      return;
+    }
+
+    // Make into an object for a unique list
+    const uniqCrossRefs = {};
+    allCrossRefs.forEach(xr => {
+      const ref = xr.replace('xr:', '').slice(2, -2);
+      uniqCrossRefs[xr] = { id: ref };
+    });
+    console.log(uniqCrossRefs)
+
+    // Get a list of IDs from the cross-referencs
+    const uniqCrossRefsValues = Object.values(uniqCrossRefs);
+    const ids = uniqCrossRefsValues.map(xr => xr.id);
+
+    // Make AJAX call to get names of cross-references elements ....
+    const url = `${this.props.url}/elements/?ids=${ids}&format=jmi2&fields=id,name,org,project,branch&minified=true`;
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (elements) => {
+          let doc = _element.documentation;
+          const refs = Object.keys(uniqCrossRefs);
+
+          for (let i = 0; i < uniqCrossRefsValues.length; i++) {
+            const ref = refs[i]
+            .replace('[', '\\[')
+            .replace(']', '\\]')
+            .replace('-', '\\-');
+
+            const id = uniqCrossRefs[refs[i]].id;
+            const re = new RegExp(ref, 'g');
+            const link = `/api/orgs/${elements[id].org}/projects/${elements[id].project}/branches/${elements[id].branch}/elements/${id}`;
+            doc = doc.replace(re, ` <a href="${link}">${elements[id].name}</a> `);
+          }
+          const element = _element;
+          element.documentation = doc;
+          this.setState({ element: element });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseText });
+
+          // Refresh when session expires
+          window.location.reload();
+        },
+        404: (err) => {
+          this.setState({ error: err.responseText });
+        }
+      }
+    });
   }
 
   // Toggles the tooltip
@@ -229,7 +292,10 @@ class Element extends Component {
                   }
                   <tr>
                     <th>Documentation:</th>
-                    <td>{element.documentation}</td>
+                    <td>
+                      <div dangerouslySetInnerHTML={{ __html: element.documentation }}>
+                      </div>
+                    </td>
                   </tr>
                   <tr>
                     <th>Org ID:</th>
