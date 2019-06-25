@@ -19,11 +19,17 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Form, FormGroup, Label, Button, UncontrolledAlert, DropdownItem } from 'reactstrap';
-
-// MBEE Modules
-import ListItem from '../general/list/list-item.jsx';
-import CustomMenu from '../general/dropdown-search/custom-menu.jsx';
+import {
+  Form,
+  FormGroup,
+  Label,
+  Button,
+  UncontrolledAlert,
+  Row,
+  Col,
+  Input,
+  Spinner
+} from 'reactstrap';
 
 /* eslint-enable no-unused-vars */
 
@@ -37,6 +43,7 @@ class DeleteUser extends Component {
     this.state = {
       users: [],
       username: '',
+      results: null,
       error: null
     };
 
@@ -48,6 +55,8 @@ class DeleteUser extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.updateUsername = this.updateUsername.bind(this);
+    this.selectUser = this.selectUser.bind(this);
+    this.doSearch = this.doSearch.bind(this);
   }
 
   // Define handle change function
@@ -86,56 +95,86 @@ class DeleteUser extends Component {
 
   // Define update username
   updateUsername(event) {
-    // Change the username with new value
     this.setState({ username: event.target.value });
-    this.setState({ dropDownOpen: !this.state.dropDownOpen });
+
+    this.doSearch(event.target.value);
   }
 
-  componentDidMount() {
-    if (!this.props.selectedUser) {
-      // Get all the users
-      $.ajax({
-        method: 'GET',
-        url: '/api/users?minified=true',
-        statusCode: {
-          200: (users) => {
-            // Loop through users
-            const userOpts = users.map((user) => {
-              if (user.provider !== 'local') {
-                return;
-              }
-              if (user.fname) {
-                return (<DropdownItem key={`user-${user.username}`}
-                                      value={user.username}>
-                  {user.fname} {user.lname}
-                </DropdownItem>);
-              }
-              else {
-                return (<DropdownItem key={`user-${user.username}`}
-                                      value={user.username}>{user.username}</DropdownItem>);
-              }
-            });
+  selectUser(username) {
+    this.setState({ username: username, results: null });
+  }
 
-            // Set the user state
-            this.setState({ users: userOpts });
-          },
-          401: (err) => {
-            // Throw error and set state
-            this.setState({ error: err.responseText });
+  doSearch(e) {
+    // Pre-search state resets
+    this.setState({
+      message: '',
+      results: 'Searching ...'
+    }, () => { this.render(); });
 
-            // Refresh when session expires
-            window.location.reload();
-          },
-          404: (err) => {
-            this.setState({ error: err.responseText });
-          }
-        }
-      });
+    let query = this.state.username;
+
+    // Disable form submit
+    if (typeof e !== 'string') {
+      e.preventDefault();
     }
+    else if (e) {
+      query = e;
+    }
+
+    // Build query URL
+    const url = '/api/users/search';
+    // Do ajax request
+    $.ajax({
+      method: 'GET',
+      url: `${url}?q=${query}&limit=5&minified=true`,
+      statusCode: {
+        401: () => {
+          // Refresh when session expires
+          window.location.reload();
+        }
+      }
+    })
+    .done(data => {
+      // Loop through users
+      const userOpts = data.map((user) => (
+        <div className='members-dropdown-item' key={`user-${user.username}`}
+             onClick={() => this.selectUser(user.username)}>
+          <span>{user.fname} {user.lname}</span>
+          <span className='member-username'>@{user.username}</span>
+        </div>));
+
+      this.setState({
+        results: userOpts
+      });
+    })
+    .fail(res => {
+      if (res.status === 404) {
+        this.setState({ results: [] });
+      }
+      if (res.status === 400) {
+        this.setState({ results: [] });
+      }
+    });
   }
 
   render() {
     const selectedUser = this.props.selectedUser;
+    // Set search results or loading icons ...
+    let searchResults = '';
+
+    if (this.state.results === 'Searching ...') {
+      searchResults = (
+        <div style={{ width: '100%', textAlign: 'center' }}>
+          <Spinner type="grow" color="primary" />
+          <span style={{ paddingLeft: '20px' }}>
+            Searching ...
+          </span>
+        </div>
+      );
+    }
+    else if (Array.isArray(this.state.results)) {
+      searchResults = this.state.results;
+    }
 
     // Return the project delete form
     return (
@@ -154,17 +193,34 @@ class DeleteUser extends Component {
           }
           <Form>
             {(!selectedUser)
-              ? (<FormGroup>
-                  {/* Create a search bar for username input */}
-                  <Label for='username'>Username</Label>
-                  <div className='username-search'>
-                    {/* List all the usernames with a filter option */}
-                    <CustomMenu username={this.state.username}
-                                onChange={this.updateUsername}>
-                      {this.state.users}
-                    </CustomMenu>
-                  </div>
-                 </FormGroup>)
+              ? (<div style={{ paddingBottom: '10px' }}>
+                  <Row form>
+                    <Col>
+                      <Input type='search'
+                             name='username'
+                             style={{ width: '325px' }}
+                             id='username'
+                             autoComplete='off'
+                             placeholder='Search User...'
+                             value={this.state.username || ''}
+                             onChange={this.updateUsername}/>
+                    </Col>
+                    <Col md={2} sm={4} xs={6} >
+                      <Button className='btn'
+                              outline color="primary"
+                              type='submit'
+                              onClick={this.doSearch}>
+                        Search
+                      </Button>
+                    </Col>
+                  </Row>
+                {(searchResults.length !== 0)
+                  ? (<div className='members-dropdown'>
+                    {searchResults}
+                  </div>)
+                  : ''
+                }
+              </div>)
               : (<FormGroup>
                   <Label for="username">Do you want to delete {selectedUser}?</Label>
                  </FormGroup>)

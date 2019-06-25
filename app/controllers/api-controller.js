@@ -19,12 +19,9 @@
 
 // Node.js Modules
 const path = require('path');
-const zlib = require('zlib');
 
 // NPM Modules
 const swaggerJSDoc = require('swagger-jsdoc');
-const multer = require('multer');
-const upload = multer({ dest: './uploads/' }).single('zipfile');
 
 // MBEE Modules
 const ElementController = M.require('controllers.element-controller');
@@ -3311,50 +3308,25 @@ async function postElements(req, res) {
 
   // Set the lean option to true for better performance
   options.lean = true;
-  // Handle element data from both regular requests and zipped files
-  const elementDataPromise = new Promise((resolve, reject) => {
-    // Handle gzip
-    if (req.headers['content-type'] === 'application/gzip') {
-      upload(req, res, function(error) {
-        if (error) {
-          M.log.warn(error.message);
-          return reject(new M.DataFormatError('Problem uploading file', 'warn'));
-        }
-        // We receive the data in chunks so we want to collect the entire file
-        // before trying to unzip
-        const chunks = [];
-        req.on('data', (chunk) => {
-          // hold each chunk in memory
-          chunks.push(chunk);
-        });
-        req.on('end', () => {
-          // combine the chunks into a single buffer when req is done sending
-          const buffer = Buffer.concat(chunks);
-          // unzip the data
-          zlib.gunzip(buffer, (err, result) => {
-            if (err) {
-              M.log.warn(err.message);
-              return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
-            }
-            // return the unzipped data
-            return resolve(JSON.parse(result.toString()));
-          });
-        });
-      });
-    }
-    else {
-      // If it's not a zip file, the data we want will be in req.body
-      return resolve(req.body);
-    }
-  });
-  // Get the elementData
+
+  // Get the element data
   let elementData;
-  try {
-    elementData = await elementDataPromise;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      elementData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
   }
-  catch (err) {
-    return res.status(400).send(err.message);
+  else {
+    elementData = req.body;
   }
+
   // Create the specified elements
   // NOTE: create() sanitizes input params
   ElementController.create(req.user, req.params.orgid, req.params.projectid,

@@ -72,7 +72,9 @@ function getElementPublicData(element, options) {
   let archivedBy;
   let parent = null;
   let source;
+  let sourceNamespace;
   let target;
+  let targetNamespace;
   let project;
   let branch;
 
@@ -136,10 +138,11 @@ function getElementPublicData(element, options) {
       // If source element's project is not the same as the elements parent
       if (sourceIdParts[1] !== idParts[1]) {
         // Set source to object with org, project and element id
-        source = {
+        source = sourceIdParts.pop();
+        sourceNamespace = {
           org: sourceIdParts[0],
           project: sourceIdParts[1],
-          element: sourceIdParts.pop()
+          branch: sourceIdParts[2]
         };
       }
       else {
@@ -161,10 +164,11 @@ function getElementPublicData(element, options) {
       // If target element's project is not the same as the elements parent
       if (targetIdParts[1] !== idParts[1]) {
         // Set target to object with org, project and element id
-        target = {
+        target = targetIdParts.pop();
+        targetNamespace = {
           org: targetIdParts[0],
           project: targetIdParts[1],
-          element: targetIdParts.pop()
+          branch: targetIdParts[2]
         };
       }
       else {
@@ -206,7 +210,9 @@ function getElementPublicData(element, options) {
     org: idParts[0],
     parent: parent,
     source: source,
+    sourceNamespace: sourceNamespace,
     target: target,
+    targetNamespace: targetNamespace,
     type: element.type,
     documentation: element.documentation,
     custom: element.custom || {},
