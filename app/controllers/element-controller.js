@@ -197,7 +197,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the org is not archived
-  if (organization.archived) {
+  if (organization.archived && !validOptions.archived) {
     throw new M.PermissionError(`The organization [${orgID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
@@ -219,7 +219,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the project is not archived
-  if (project.archived) {
+  if (project.archived && !validOptions.archived) {
     throw new M.PermissionError(`The project [${projID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
@@ -234,7 +234,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the branch is not archived
-  if (foundBranch.archived) {
+  if (foundBranch.archived && !validOptions.archived) {
     throw new M.PermissionError(`The branch [${branchID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
