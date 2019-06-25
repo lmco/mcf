@@ -166,18 +166,11 @@ class ElementEdit extends Component {
       name: this.state.name,
       type: this.state.type,
       parent: this.state.parent,
+      source: this.state.source,
+      target: this.state.target,
       documentation: this.state.documentation,
       custom: JSON.parse(this.state.custom)
     };
-
-    // Check variables are defined
-    if (this.state.target) {
-      data.target = this.state.target;
-    }
-
-    if (this.state.source) {
-      data.source = this.state.source;
-    }
 
     if (this.state.parentUpdate !== this.state.parent) {
       parentUpdated = true;
@@ -339,6 +332,7 @@ class ElementEdit extends Component {
                     <ElementSelector
                       self={this.state.id}
                       url={this.props.url}
+                      currentSelection={this.state.parent}
                       project={this.props.project}
                       selectedHandler={this.parentSelectHandler} />
                   </Col>
@@ -362,11 +356,16 @@ class ElementEdit extends Component {
               <Col sm={10} className={'selector-value'}>
                 {this.state.source || 'null'}
                 <ElementSelector
+                  currentSelection={this.state.source}
                   self={this.state.id}
                   url={this.props.url}
                   project={this.props.project}
                   selectedHandler={this.sourceSelectHandler} />
               </Col>
+              {(this.state.target && !this.state.source)
+                ? (<div className='warning-label'>*The source needs to be set with the target.</div>)
+                : ''
+              }
             </FormGroup>
             {/* Form section for Element target */}
             <FormGroup row>
@@ -374,11 +373,16 @@ class ElementEdit extends Component {
               <Col sm={10} className={'selector-value'}>
                 {this.state.target || 'null'}
                 <ElementSelector
+                  currentSelection={this.state.target}
                   self={this.state.id}
                   url={this.props.url}
                   project={this.props.project}
                   selectedHandler={this.targetSelectHandler} />
               </Col>
+              {(!this.state.target && this.state.source)
+                ? (<div className='warning-label'>*The target needs to be set with the source.</div>)
+                : ''
+              }
             </FormGroup>
             {/* Form section for custom data */}
             <FormGroup>
