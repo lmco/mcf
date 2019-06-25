@@ -150,7 +150,7 @@ class ElementTree extends Component {
     else {
       // Build URL to get element data
       const base = this.props.url;
-      const url = `${base}/elements/${this.state.id}?minified=true`;
+      const url = `${base}/elements/${this.state.id}?minified=true&archived=true`;
 
       // Get project data
       $.ajax({
@@ -186,10 +186,11 @@ class ElementTree extends Component {
 
   // Create the element tree list
   render() {
+    const initColor = (this.state.data.archived) ? '#c0c0c0' : '#333';
     // Initialize variables
     let elementIcon = (
       <i className={'fas fa-cube'}
-         style={{ color: '#333' }}/>
+         style={{ color: initColor }}/>
     );
     let expandIcon = 'fa-caret-right transparent';
     const subtree = [];
