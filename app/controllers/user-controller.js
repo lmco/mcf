@@ -974,6 +974,9 @@ function remove(requestingUser, users, options) {
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  *
  * @return {Promise} An array of found users.
  *
@@ -1008,7 +1011,7 @@ function search(requestingUser, query, options) {
 
     // Validate and set the options
     const validOptions = utils.validateOptions(options, ['archived', 'populate',
-      'limit', 'skip', 'lean'], User);
+      'limit', 'skip', 'lean', 'sort'], User);
 
     // Find the user
     searchQuery.$text = { $search: query };

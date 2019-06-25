@@ -156,7 +156,7 @@ class BranchBar extends Component {
                      name='branch'
                      id='branch'
                      className='branch-input'
-                     value={this.state.branch || ''}
+                     value={this.state.branch}
                      onChange={this.handleChange}>
                 {(swapOptions)
                   ? (<React.Fragment>

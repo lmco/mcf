@@ -242,9 +242,9 @@ function getOrgs(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
+    sort: 'string',
     ids: 'array',
-    minified: 'boolean',
-    sort: 'string'
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -1174,6 +1174,7 @@ function getProjects(req, res) {
     limit: 'number',
     skip: 'number',
     ids: 'array',
+    sort: 'string',
     minified: 'boolean'
   };
 
@@ -2011,6 +2012,7 @@ function getUsers(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
+    sort: 'string',
     usernames: 'array',
     minified: 'boolean',
     fname: 'string',
@@ -2020,8 +2022,7 @@ function getUsers(req, res) {
     custom: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
-    archivedBy: 'string',
-    sort: 'string'
+    archivedBy: 'string'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -2910,6 +2911,7 @@ function searchUsers(req, res) {
     archived: 'boolean',
     limit: 'number',
     skip: 'number',
+    sort: 'string',
     q: 'string',
     minified: 'boolean',
     populate: 'array'
@@ -3111,6 +3113,7 @@ function getElements(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
+    sort: 'string',
     ids: 'array',
     format: 'string',
     minified: 'boolean',
@@ -3121,8 +3124,7 @@ function getElements(req, res) {
     name: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
-    archivedBy: 'string',
-    sort: 'string'
+    archivedBy: 'string'
   };
 
   // Loop through req.query
@@ -3604,6 +3606,7 @@ function searchElements(req, res) {
     archived: 'boolean',
     limit: 'number',
     skip: 'number',
+    sort: 'string',
     q: 'string',
     minified: 'boolean',
     parent: 'string',
@@ -3613,8 +3616,7 @@ function searchElements(req, res) {
     name: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
-    archivedBy: 'string',
-    sort: 'string'
+    archivedBy: 'string'
   };
 
   // Loop through req.query
@@ -4154,11 +4156,11 @@ function getBranches(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
+    sort: 'string',
     ids: 'array',
     minified: 'boolean',
     source: 'string',
-    tag: 'boolean',
-    sort: 'string'
+    tag: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request

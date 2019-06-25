@@ -346,7 +346,7 @@
   background: white;
   border-radius: 5px;
   border-bottom: #c0c0c0c0 solid 1px;
-  width: 65%;
+  width: 325px;
   box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
   border-right: #c0c0c0c0 solid 1px;
   border-left: #c0c0c0c0 solid 1px;
@@ -354,4 +354,18 @@
 
 .member-username {
   font-size: small;
+}
+
+.roles-box {
+  background-color: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  margin-bottom: 15px;
+
+  hr {
+    border: 1px solid #ccc;
+  }
+}
+
+.members-box {
+  padding: 10px;
 }

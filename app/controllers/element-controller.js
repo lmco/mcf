@@ -199,7 +199,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the org is not archived
-  if (organization.archived) {
+  if (organization.archived && !validOptions.archived) {
     throw new M.PermissionError(`The organization [${orgID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
@@ -221,7 +221,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the project is not archived
-  if (project.archived) {
+  if (project.archived && !validOptions.archived) {
     throw new M.PermissionError(`The project [${projID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
@@ -236,7 +236,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the branch is not archived
-  if (foundBranch.archived) {
+  if (foundBranch.archived && !validOptions.archived) {
     throw new M.PermissionError(`The branch [${branchID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
@@ -283,8 +283,8 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
     if ((validOptions.limit > 0 && validOptions.limit < 50000) || elementCount < 50000) {
       // Find the elements
       foundElements = await findHelper(searchQuery, validOptions.fieldsString,
-        validOptions.limit, validOptions.skip, validOptions.populateString, validOptions.sort,
-        validOptions.lean);
+        validOptions.limit, validOptions.skip, validOptions.populateString,
+        validOptions.sort, validOptions.lean);
     }
     else {
       // Define batchLimit, batchSkip and numLoops
@@ -310,8 +310,8 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
         }
 
         // Add find operation to array of promises
-        promises.push(findHelper(searchQuery, validOptions.fieldsString,
-          batchLimit, batchSkip, validOptions.populateString, validOptions.sort, validOptions.lean)
+        promises.push(findHelper(searchQuery, validOptions.fieldsString, batchLimit, batchSkip,
+          validOptions.populateString, validOptions.sort, validOptions.lean)
         .then((elems) => {
           foundElements = foundElements.concat(elems);
         }));
@@ -326,8 +326,8 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
       // Add find operation to array of promises
       promises.push(findHelper(searchQuery, validOptions.fieldsString,
-        validOptions.limit, validOptions.skip, validOptions.populateString, validOptions.sort,
-        validOptions.lean)
+        validOptions.limit, validOptions.skip, validOptions.populateString,
+        validOptions.sort, validOptions.lean)
       .then((elems) => {
         foundElements = foundElements.concat(elems);
       }));
@@ -345,7 +345,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
  * @description Find helper function which simplifies the actual Element.find()
  * database call
  *
- * @param {Object} query - The query to send to the database
+ * @param {Object} query - THe query to send to the database
  * @param {string} fields - Fields to include (or not include) in the found objects
  * @param {number} limit - The maximum number of elements to return.
  * @param {number} skip - The number of elements to skip.
