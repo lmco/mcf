@@ -158,9 +158,16 @@ class ElementNew extends Component {
       idInvalid = true;
       disableSubmit = true;
     }
+
     // Verify parent was selected
     if (this.state.parent === null) {
       // Disable submit
+      disableSubmit = true;
+    }
+
+    // Verify target and source are set
+    if ((!this.state.target && this.state.source)
+      || (!this.state.source && this.state.target)) {
       disableSubmit = true;
     }
 
@@ -219,6 +226,7 @@ class ElementNew extends Component {
               <div id="parent" className={'selector-value'}>
                 {this.state.parent || 'Select an element.'}
                 <ElementSelector
+                  currentSelection={this.state.parent}
                   url={this.props.url}
                   project={this.props.project}
                   selectedHandler={this.parentSelectHandler} />
@@ -230,11 +238,16 @@ class ElementNew extends Component {
             <Col sm={10} className={'selector-value'}>
               {this.state.source || 'null'}
               <ElementSelector
+                currentSelection={this.state.source}
                 self={this.state.id}
                 url={this.props.url}
                 project={this.props.project}
                 selectedHandler={this.sourceSelectHandler} />
             </Col>
+            {(this.state.target && !this.state.source)
+              ? (<div className='warning-label'>*The source needs to be set with the target.</div>)
+              : ''
+            }
           </FormGroup>
           {/* Form section for Element target */}
           <FormGroup row>
@@ -242,11 +255,16 @@ class ElementNew extends Component {
             <Col sm={10} className={'selector-value'}>
               {this.state.target || 'null'}
               <ElementSelector
+                currentSelection={this.state.target}
                 self={this.state.id}
                 url={this.props.url}
                 project={this.props.project}
                 selectedHandler={this.targetSelectHandler} />
             </Col>
+            {(!this.state.target && this.state.source)
+              ? (<div className='warning-label'>*The target needs to be set with the source.</div>)
+              : ''
+            }
           </FormGroup>
           <Button className='btn btn'
                   outline color="primary"
