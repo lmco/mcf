@@ -99,10 +99,22 @@ function getStatusCode(error) {
   }
 }
 
+function catchMongoError(error) {
+  // If the error isn't already a custom error, make it one
+  if (!(error instanceof CustomError)) {
+    // Return a server error
+    return new ServerError(error.message, 'warn');
+  }
+  else {
+    return error;
+  }
+}
+
 // Export error Classes and functions
 module.exports = {
   CustomError,
   getStatusCode,
+  catchMongoError,
   DataFormatError,
   OperationError,
   AuthorizationError,

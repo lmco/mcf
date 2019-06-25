@@ -44,6 +44,7 @@ const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -382,7 +383,7 @@ function create(requestingUser, users, options) {
       }
     })
     .then((foundCreatedUsers) => resolve(foundCreatedUsers))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.catchMongoError(error)));
   });
 }
 
