@@ -97,7 +97,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should sort the search results returned by findProject', optionSortFind);
+  it('should sort find results', optionSortFind);
 });
 
 /* --------------------( Tests )-------------------- */

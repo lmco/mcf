@@ -161,7 +161,7 @@ describe(M.getModuleName(module.filename), () => {
     + 'from search()', optionSkipSearch);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from search()', optionLeanSearch);
-  //it('should sort find results', optionSortFind);
+  it('should sort find results', optionSortFind);
   it('should sort search results', optionSortSearch);
 });
 
@@ -1311,74 +1311,69 @@ function optionSortFind(done) {
   // Create element objects
   const testElems = [{
     id: 'testelem00',
-    name: 'b',
-    documentation: 'searchme'
+    name: 'b'
   },
-    {
-      id: 'testelem01',
-      name: 'c',
-      documentation: 'searchme'
-    },
-    {
-      id: 'testelem02',
-      name: 'a',
-      documentation: 'searchme'
-    },
-    {
-      id: 'testelem03',
-      name: 'd',
-      documentation: 'no'
-    }];
+  {
+    id: 'testelem01',
+    name: 'c'
+  },
+  {
+    id: 'testelem02',
+    name: 'a'
+  }];
   // Create sort options
-  const sortOption = { sort: 'fname' };
-  const sortOptionReverse = { sort: '-fname' };
+  const sortOption = { sort: 'name' };
+  const sortOptionReverse = { sort: '-name' };
 
   // Create the test users
-  UserController.create(adminUser, [user1, user2, user3])
-    .then((createdUsers) => {
-      // Validate that 3 users were created
-      chai.expect(createdUsers.length).to.equal(3);
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, testElems)
+  .then((createdElems) => {
+    // Validate that 3 elements were created
+    chai.expect(createdElems.length).to.equal(3);
 
-      // Find the users and return them sorted
-      return UserController.find(adminUser, [user1.username, user2.username, user3.username],
-        sortOption);
-    })
-    .then((foundUsers) => {
-      // Expect to find all three users
-      chai.expect(foundUsers.length).to.equal(3);
+    // Find the elements and return them sorted
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      testElems.map((e) => e.id),
+      sortOption);
+  })
+  .then((foundElems) => {
+    // Expect to find all three elements
+    chai.expect(foundElems.length).to.equal(3);
 
-      // Validate that the sort option is working
-      chai.expect(foundUsers[0].fname).to.equal('a');
-      chai.expect(foundUsers[0].username).to.equal('testuser1');
-      chai.expect(foundUsers[1].fname).to.equal('b');
-      chai.expect(foundUsers[1].username).to.equal('testuser2');
-      chai.expect(foundUsers[2].fname).to.equal('c');
-      chai.expect(foundUsers[2].username).to.equal('testuser0');
+    // Validate that the sort option is working
+    chai.expect(foundElems[0].name).to.equal('a');
+    chai.expect(foundElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(foundElems[1].name).to.equal('b');
+    chai.expect(foundElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(foundElems[2].name).to.equal('c');
+    chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
 
-      // Find the users and return them sorted in reverse
-      return UserController.find(adminUser, [user1.username, user2.username, user3.username],
-        sortOptionReverse);
-    })
-    .then((foundUsers) => {
-      // Expect to find all three users
-      chai.expect(foundUsers.length).to.equal(3);
+    // Find the users and return them sorted in reverse
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      testElems.map((e) => e.id),
+      sortOptionReverse);
+  })
+  .then((foundElems) => {
+    // Expect to find all three elements
+    chai.expect(foundElems.length).to.equal(3);
 
-      // Validate that the sort option is working
-      chai.expect(foundUsers[0].fname).to.equal('c');
-      chai.expect(foundUsers[0].username).to.equal('testuser0');
-      chai.expect(foundUsers[1].fname).to.equal('b');
-      chai.expect(foundUsers[1].username).to.equal('testuser2');
-      chai.expect(foundUsers[2].fname).to.equal('a');
-      chai.expect(foundUsers[2].username).to.equal('testuser1');
-    })
-    .then(() => UserController.remove(adminUser, [user1.username, user2.username, user3.username]))
-    .then(() => done())
-    .catch((error) => {
-      M.log.error(error.message);
-      // Expect no error
-      chai.expect(error.message).to.equal(null);
-      done();
-    });
+    // Validate that the sort option is working
+    chai.expect(foundElems[0].name).to.equal('c');
+    chai.expect(foundElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(foundElems[1].name).to.equal('b');
+    chai.expect(foundElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(foundElems[2].name).to.equal('a');
+    chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+  })
+  .then(() => ElementController.remove(adminUser, org.id, projIDs[0], branchID,
+    testElems.map((e) => e.id)))
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
 }
 
 /**
