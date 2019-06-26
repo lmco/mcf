@@ -323,6 +323,14 @@ class ElementTree extends Component {
       'uml:Property': {
         icon: 'circle',
         color: 'Gold'
+      },
+      Document: {
+        icon: 'file-alt',
+        color: '#465faf'
+      },
+      View: {
+        icon: 'align-center',
+        color: '#b0f2c8'
       }
     };
     if (this.state.data !== null
