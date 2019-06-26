@@ -72,6 +72,9 @@ const errors = M.require('lib.errors');
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  *
  * @return {Promise} Array of found organization objects
  *
@@ -121,7 +124,7 @@ function find(requestingUser, orgs, options) {
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean'], Organization);
+      'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
 
     // Define searchQuery
     const searchQuery = { archived: false };
@@ -153,6 +156,7 @@ function find(requestingUser, orgs, options) {
       // Find the orgs
       Organization.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString).lean()
       .then((foundOrgs) => resolve(foundOrgs))
       .catch((error) => reject(errors.captureError(error)));
@@ -160,6 +164,7 @@ function find(requestingUser, orgs, options) {
     else {
       Organization.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString)
       .then((foundOrgs) => resolve(foundOrgs))
       .catch((error) => reject(errors.captureError(error)));

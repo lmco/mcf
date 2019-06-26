@@ -75,6 +75,9 @@ const errors = M.require('lib.errors');
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  *
  * @return {Promise} Array of found project objects
  *
@@ -128,7 +131,7 @@ function find(requestingUser, organizationID, projects, options) {
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean'], Project);
+      'fields', 'limit', 'skip', 'lean', 'sort'], Project);
 
     // Define searchQuery
     const searchQuery = { archived: false };
@@ -188,12 +191,14 @@ function find(requestingUser, organizationID, projects, options) {
         // Find the projects
         return Project.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString).lean();
       }
       else {
         // Find the projects
         return Project.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString);
       }
     })

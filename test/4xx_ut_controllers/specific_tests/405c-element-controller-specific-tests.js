@@ -161,6 +161,8 @@ describe(M.getModuleName(module.filename), () => {
     + 'from search()', optionSkipSearch);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from search()', optionLeanSearch);
+  it('should sort find results', optionSortFind);
+  it('should sort search results', optionSortSearch);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -1296,6 +1298,159 @@ function optionLeanSearch(done) {
   })
   .catch((error) => {
     M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Validates that the find results can be sorted
+ */
+function optionSortFind(done) {
+  // Create element objects
+  const testElems = [{
+    id: 'testelem00',
+    name: 'b'
+  },
+  {
+    id: 'testelem01',
+    name: 'c'
+  },
+  {
+    id: 'testelem02',
+    name: 'a'
+  }];
+  // Create sort options
+  const sortOption = { sort: 'name' };
+  const sortOptionReverse = { sort: '-name' };
+
+  // Create the test users
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, testElems)
+  .then((createdElems) => {
+    // Validate that 3 elements were created
+    chai.expect(createdElems.length).to.equal(3);
+
+    // Find the elements and return them sorted
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      testElems.map((e) => e.id),
+      sortOption);
+  })
+  .then((foundElems) => {
+    // Expect to find all three elements
+    chai.expect(foundElems.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundElems[0].name).to.equal('a');
+    chai.expect(foundElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(foundElems[1].name).to.equal('b');
+    chai.expect(foundElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(foundElems[2].name).to.equal('c');
+    chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+
+    // Find the users and return them sorted in reverse
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      testElems.map((e) => e.id),
+      sortOptionReverse);
+  })
+  .then((foundElems) => {
+    // Expect to find all three elements
+    chai.expect(foundElems.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundElems[0].name).to.equal('c');
+    chai.expect(foundElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(foundElems[1].name).to.equal('b');
+    chai.expect(foundElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(foundElems[2].name).to.equal('a');
+    chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+  })
+  .then(() => ElementController.remove(adminUser, org.id, projIDs[0], branchID,
+    testElems.map((e) => e.id)))
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Validates that the search results can be sorted
+ */
+function optionSortSearch(done) {
+  // Create element objects
+  const testElems = [{
+    id: 'testelem00',
+    name: 'b',
+    documentation: 'searchme'
+  },
+  {
+    id: 'testelem01',
+    name: 'c',
+    documentation: 'searchme'
+  },
+  {
+    id: 'testelem02',
+    name: 'a',
+    documentation: 'searchme'
+  },
+  {
+    id: 'testelem03',
+    name: 'd',
+    documentation: 'no'
+  }];
+
+  // Create sort options
+  const sortOption = { sort: 'name' };
+  const sortOptionReverse = { sort: '-name' };
+  // Search term
+  const searchQuery = 'searchme';
+
+  // Create the test elements
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, testElems)
+  .then((createdElems) => {
+    // Validate that 4 elements were created
+    chai.expect(createdElems.length).to.equal(4);
+
+    // Search the elements and return them sorted
+    return ElementController.search(adminUser, org.id, projIDs[0], branchID,
+      searchQuery, sortOption);
+  })
+  .then((foundElems) => {
+    // Expect to only find three elements
+    chai.expect(foundElems.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundElems[0].name).to.equal('a');
+    chai.expect(foundElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(foundElems[1].name).to.equal('b');
+    chai.expect(foundElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(foundElems[2].name).to.equal('c');
+    chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+
+    // Search the elements and return them sorted in reverse
+    return ElementController.search(adminUser, org.id, projIDs[0], branchID,
+      searchQuery, sortOptionReverse);
+  })
+  .then((foundElems) => {
+    // Expect to find three elements
+    chai.expect(foundElems.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundElems[0].name).to.equal('c');
+    chai.expect(foundElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(foundElems[1].name).to.equal('b');
+    chai.expect(foundElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(foundElems[2].name).to.equal('a');
+    chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+  })
+  .then(() => ElementController.remove(adminUser, org.id, projIDs[0], branchID,
+    testElems.map((e) => e.id)))
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error.message);
     // Expect no error
     chai.expect(error.message).to.equal(null);
     done();

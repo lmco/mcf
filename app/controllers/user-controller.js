@@ -85,6 +85,9 @@ const errors = M.require('lib.errors');
  * users that were archived by a specific person
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  *
  * @return {Promise} Array of found users' public data objects.
  *
@@ -133,7 +136,7 @@ function find(requestingUser, users, options) {
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean'], User);
+      'fields', 'limit', 'skip', 'lean', 'sort'], User);
 
     // Define searchQuery
     const searchQuery = { archived: false };
@@ -181,6 +184,7 @@ function find(requestingUser, users, options) {
       // Find the users
       User.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString).lean()
       .then((foundUser) => resolve(foundUser))
       .catch((error) => reject(error));
@@ -189,6 +193,7 @@ function find(requestingUser, users, options) {
       // Find the users
       User.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString)
       .then((foundUser) => resolve(foundUser))
       .catch((error) => reject(error));
@@ -970,6 +975,9 @@ function remove(requestingUser, users, options) {
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  *
  * @return {Promise} An array of found users.
  *
@@ -1004,7 +1012,7 @@ function search(requestingUser, query, options) {
 
     // Validate and set the options
     const validOptions = utils.validateOptions(options, ['archived', 'populate',
-      'limit', 'skip', 'lean'], User);
+      'limit', 'skip', 'lean', 'sort'], User);
 
     // Find the user
     searchQuery.$text = { $search: query };
@@ -1013,12 +1021,22 @@ function search(requestingUser, query, options) {
       delete searchQuery.archived;
     }
 
+    // Here we're adding sorting by metadata.
+    // If no sorting option was specified ($natural is the default) then remove
+    // $natural because it doesn't work with metadata sorting
+    if (validOptions.sort.$natural) {
+      validOptions.sort = { score: { $meta: 'textScore' } };
+    }
+    else {
+      validOptions.sort.score = { $meta: 'textScore' };
+    }
+
     // If the lean option is supplied
     if (validOptions.lean) {
       // Search for the user
       User.find(searchQuery, { score: { $meta: 'textScore' } },
         { limit: validOptions.limit, skip: validOptions.skip })
-      .sort({ score: { $meta: 'textScore' } })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString).lean()
       .then((foundUsers) => resolve(foundUsers))
       .catch((error) => reject(error));
@@ -1027,7 +1045,7 @@ function search(requestingUser, query, options) {
       // Search for the user
       User.find(searchQuery, { score: { $meta: 'textScore' } },
         { limit: validOptions.limit, skip: validOptions.skip })
-      .sort({ score: { $meta: 'textScore' } })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString)
       .then((foundUsers) => resolve(foundUsers))
       .catch((error) => reject(errors.captureError(error)));
