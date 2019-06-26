@@ -43,15 +43,26 @@ class ElementSelector extends React.Component {
       error: null
     };
 
+    if (props.currentSelection) {
+      this.state.selectedElementPreview = props.currentSelection;
+    }
+
     this.toggle = this.toggle.bind(this);
     this.getRootElement = this.getRootElement.bind(this);
     this.selectElementHandler = this.selectElementHandler.bind(this);
     this.select = this.select.bind(this);
     this.setChildOpen = this.setChildOpen.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
   componentDidMount() {
     this.getRootElement();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.currentSelection !== this.props.currentSelection) {
+      this.setState({ selectedElementPreview: this.props.currentSelection });
+    }
   }
 
   /**
@@ -131,6 +142,12 @@ class ElementSelector extends React.Component {
     this.props.selectedHandler(this.state.selectedElementPreview);
   }
 
+  clear() {
+    this.setState({
+      selectedElementPreview: null
+    });
+  }
+
   render() {
     let tree = '';
     if (this.state.treeRoot !== null) {
@@ -166,6 +183,10 @@ class ElementSelector extends React.Component {
           <ModalFooter>
             <p>
               Selected: {this.state.selectedElementPreview}
+              {(this.state.selectedElementPreview)
+                ? <i className='fas fa-times-circle clear-btn' onClick={this.clear}/>
+                : 'null'
+              }
               {error}
             </p>
             <Button color="primary"

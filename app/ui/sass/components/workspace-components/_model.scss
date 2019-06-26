@@ -65,6 +65,16 @@
     background: $highlight-color-primary;
   }
 
+  .clear-btn {
+    color: #9c9c9c;
+    padding-left: 10px;
+
+    &:hover {
+      color: darken(#9c9c9c, 15);
+      cursor: pointer;
+    }
+  }
+
   .transparent {
     color: transparent;
   }
