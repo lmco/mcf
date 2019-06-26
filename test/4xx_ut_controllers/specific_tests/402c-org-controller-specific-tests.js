@@ -22,7 +22,6 @@ const chai = require('chai');
 // MBEE modules
 const OrgController = M.require('controllers.organization-controller');
 const db = M.require('lib.db');
-const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions

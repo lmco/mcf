@@ -23,11 +23,9 @@ const chai = require('chai');
 const BranchController = M.require('controllers.branch-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
-const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
-const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
 let proj = null;
