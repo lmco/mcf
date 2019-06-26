@@ -188,6 +188,12 @@ api.route('/version')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -873,6 +879,12 @@ api.route('/orgs/:orgid')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -975,6 +987,12 @@ api.route('/projects')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -1787,6 +1805,12 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -2446,6 +2470,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -2604,6 +2634,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: format
  *         description: The desired format of the response. If jmi1, the
  *                      elements are returned in an array of element objects. If
@@ -3768,6 +3804,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -4230,6 +4272,12 @@ api.route('/users/whoami')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified

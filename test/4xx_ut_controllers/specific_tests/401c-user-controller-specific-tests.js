@@ -102,6 +102,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a limited number of users from search()', optionLimitSearch);
   it('should return a second batch of users with the limit and skip option '
     + 'from search()', optionSkipSearch);
+  it('should sort find results', optionSortFind);
+  it('should sort search results', optionSortSearch);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -1184,7 +1186,7 @@ function optionSkipSearch(done) {
     return UserController.search(adminUser, searchQuery, firstOptions);
   })
   .then((foundUsers) => {
-    // Expect to find the first two unarchived users
+    // Expect to find the first two users
     chai.expect(foundUsers.length).to.equal(2);
 
     // Add user ids to the firstBatchIDs array
@@ -1202,6 +1204,161 @@ function optionSkipSearch(done) {
     chai.expect(secondBatchIDs).to.not.have.members(firstBatchIDs);
   })
   .then(() => UserController.remove(adminUser, [user1.username, user2.username, user3.username]))
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Validates that the find results can be sorted
+ */
+function optionSortFind(done) {
+  // Create user objects
+  const user1 = {
+    username: 'testuser0',
+    password: 'Abc123!@',
+    fname: 'c'
+  };
+  const user2 = {
+    username: 'testuser1',
+    password: 'Abc123!@',
+    fname: 'a'
+  };
+  const user3 = {
+    username: 'testuser2',
+    password: 'Abc123!@',
+    fname: 'b'
+  };
+  // Create sort options
+  const sortOption = { sort: 'fname' };
+  const sortOptionReverse = { sort: '-fname' };
+
+  // Create the test users
+  UserController.create(adminUser, [user1, user2, user3])
+  .then((createdUsers) => {
+    // Validate that 3 users were created
+    chai.expect(createdUsers.length).to.equal(3);
+
+    // Find the users and return them sorted
+    return UserController.find(adminUser, [user1.username, user2.username, user3.username],
+      sortOption);
+  })
+  .then((foundUsers) => {
+    // Expect to find all three users
+    chai.expect(foundUsers.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundUsers[0].fname).to.equal('a');
+    chai.expect(foundUsers[0].username).to.equal('testuser1');
+    chai.expect(foundUsers[1].fname).to.equal('b');
+    chai.expect(foundUsers[1].username).to.equal('testuser2');
+    chai.expect(foundUsers[2].fname).to.equal('c');
+    chai.expect(foundUsers[2].username).to.equal('testuser0');
+
+    // Find the users and return them sorted in reverse
+    return UserController.find(adminUser, [user1.username, user2.username, user3.username],
+      sortOptionReverse);
+  })
+  .then((foundUsers) => {
+    // Expect to find all three users
+    chai.expect(foundUsers.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundUsers[0].fname).to.equal('c');
+    chai.expect(foundUsers[0].username).to.equal('testuser0');
+    chai.expect(foundUsers[1].fname).to.equal('b');
+    chai.expect(foundUsers[1].username).to.equal('testuser2');
+    chai.expect(foundUsers[2].fname).to.equal('a');
+    chai.expect(foundUsers[2].username).to.equal('testuser1');
+  })
+  .then(() => UserController.remove(adminUser, [user1.username, user2.username, user3.username]))
+  .then(() => done())
+  .catch((error) => {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Validates that the search results can be sorted
+ */
+function optionSortSearch(done) {
+  // Create user objects
+  const user1 = {
+    username: 'testuser00',
+    password: 'Abc123!@',
+    fname: 'b',
+    lname: 'searchme'
+  };
+  const user2 = {
+    username: 'testuser01',
+    password: 'Abc123!@',
+    fname: 'c',
+    lname: 'searchme'
+  };
+  const user3 = {
+    username: 'testuser02',
+    password: 'Abc123!@',
+    fname: 'a',
+    lname: 'searchme'
+  };
+  const user4 = {
+    username: 'testuser03',
+    password: 'Abc123!@',
+    fname: 'd',
+    lname: 'no'
+  };
+
+  // Create sort options
+  const sortOption = { sort: 'fname' };
+  const sortOptionReverse = { sort: '-fname' };
+  // Search term
+  const searchQuery = 'searchme';
+
+  // Create the test users
+  UserController.create(adminUser, [user1, user2, user3, user4])
+  .then((createdUsers) => {
+    // Validate that 4 users were created
+    chai.expect(createdUsers.length).to.equal(4);
+
+    // Search the users and return them sorted
+    return UserController.search(adminUser, searchQuery, sortOption);
+  })
+  .then((foundUsers) => {
+    // Expect to only find three users
+    chai.expect(foundUsers.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundUsers[0].fname).to.equal('a');
+    chai.expect(foundUsers[0].username).to.equal('testuser02');
+    chai.expect(foundUsers[1].fname).to.equal('b');
+    chai.expect(foundUsers[1].username).to.equal('testuser00');
+    chai.expect(foundUsers[2].fname).to.equal('c');
+    chai.expect(foundUsers[2].username).to.equal('testuser01');
+
+    // Search the users and return them sorted in reverse
+    return UserController.search(adminUser, searchQuery, sortOptionReverse);
+  })
+  .then((foundUsers) => {
+    // Expect to find three users
+    chai.expect(foundUsers.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundUsers[0].fname).to.equal('c');
+    chai.expect(foundUsers[0].username).to.equal('testuser01');
+    chai.expect(foundUsers[1].fname).to.equal('b');
+    chai.expect(foundUsers[1].username).to.equal('testuser00');
+    chai.expect(foundUsers[2].fname).to.equal('a');
+    chai.expect(foundUsers[2].username).to.equal('testuser02');
+  })
+  .then(() => UserController.remove(adminUser, [user1.username, user2.username,
+    user3.username, user4.username]))
   .then(() => done())
   .catch((error) => {
     M.log.error(error.message);

@@ -1087,6 +1087,7 @@ function getAllProjects(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
+    sort: 'string',
     minified: 'boolean'
   };
 
