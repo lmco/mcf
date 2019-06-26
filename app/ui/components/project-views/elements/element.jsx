@@ -71,7 +71,13 @@ class Element extends Component {
         statusCode: {
           200: (element) => {
             // TODO do nested AJAX call for cross-ref replacement
-            this.handleCrossRefs(element);
+            this.handleCrossRefs(element)
+            .then(elementChanged => {
+              this.setState({ element: elementChanged });
+            })
+            .catch(err => {
+              this.setState({ error: err });
+            });
           },
           401: (err) => {
             // Throw error and set state
@@ -103,63 +109,77 @@ class Element extends Component {
   }
 
   handleCrossRefs(_element) {
-    // Match/find all cross references
-    const allCrossRefs = _element.documentation.match(/\s\[xr:[a-zA-Z0-9\-_]{0,}\]\s/g);
-    console.log(allCrossRefs);
+    return new Promise((resolve, reject) => {
+      // Match/find all cross references
+      const allCrossRefs = _element.documentation.match(/\s\[xr:[a-zA-Z0-9\-_]{0,}\]\s/g);
 
-    if (!allCrossRefs || allCrossRefs.length === 0) {
-      this.setState({ element: _element });
-      return;
-    }
-
-    // Make into an object for a unique list
-    const uniqCrossRefs = {};
-    allCrossRefs.forEach(xr => {
-      const ref = xr.replace('xr:', '').slice(2, -2);
-      uniqCrossRefs[xr] = { id: ref };
-    });
-    console.log(uniqCrossRefs)
-
-    // Get a list of IDs from the cross-referencs
-    const uniqCrossRefsValues = Object.values(uniqCrossRefs);
-    const ids = uniqCrossRefsValues.map(xr => xr.id);
-
-    // Make AJAX call to get names of cross-references elements ....
-    const url = `${this.props.url}/elements/?ids=${ids}&format=jmi2&fields=id,name,org,project,branch&minified=true`;
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (elements) => {
-          let doc = _element.documentation;
-          const refs = Object.keys(uniqCrossRefs);
-
-          for (let i = 0; i < uniqCrossRefsValues.length; i++) {
-            const ref = refs[i]
-            .replace('[', '\\[')
-            .replace(']', '\\]')
-            .replace('-', '\\-');
-
-            const id = uniqCrossRefs[refs[i]].id;
-            const re = new RegExp(ref, 'g');
-            const link = `/api/orgs/${elements[id].org}/projects/${elements[id].project}/branches/${elements[id].branch}/elements/${id}`;
-            doc = doc.replace(re, ` <a href="${link}">${elements[id].name}</a> `);
-          }
-          const element = _element;
-          element.documentation = doc;
-          this.setState({ element: element });
-        },
-        401: (err) => {
-          // Throw error and set state
-          this.setState({ error: err.responseText });
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (err) => {
-          this.setState({ error: err.responseText });
-        }
+      // If no cross refs, resolve the element with no changes
+      if (!allCrossRefs || allCrossRefs.length === 0) {
+        return resolve(_element);
       }
+
+      // Make into an object for a uniqueness
+      // TODO - This can be done more efficiently, but it's ok for now.
+      const uniqCrossRefs = {};
+      allCrossRefs.forEach(xr => {
+        const ref = xr.replace('xr:', '').slice(2, -2);
+        uniqCrossRefs[xr] = { id: ref };
+      });
+
+      // Get a list of IDs from the cross-referencs
+      const uniqCrossRefsValues = Object.values(uniqCrossRefs);
+      const ids = uniqCrossRefsValues.map(xr => xr.id);
+
+      // Make AJAX call to get names of cross-references elements ....
+      const opts = [
+        `ids=${ids}`,
+        'format=jmi2',
+        'fields=id,name,org,project,branch',
+        'minified=true'
+      ].join('&');
+      $.ajax({
+        method: 'GET',
+        url: `${this.props.url}/elements/?${opts}`,
+        statusCode: {
+          200: (elements) => {
+            // Keep track of documentation field
+            // and cross reference text
+            let doc = _element.documentation;
+            const refs = Object.keys(uniqCrossRefs);
+
+            // Loop over cross refs list and replace each occurance of that
+            // cross-ref in the documentation fiels
+            for (let i = 0; i < uniqCrossRefsValues.length; i++) {
+              // Get the ref, replacing special characters for use in regex
+              const ref = refs[i]
+              .replace('[', '\\[')
+              .replace(']', '\\]')
+              .replace('-', '\\-');
+              // Create the regex for replacement
+              const re = new RegExp(ref, 'g');
+
+              // Capture the element ID and link
+              const id = uniqCrossRefs[refs[i]].id;
+              const oid = elements[id].org;
+              const pid = elements[id].project;
+              const bid = elements[id].branch;
+              const link = `/api/orgs/${oid}/projects/${pid}/branches/${bid}/elements/${id}`;
+              doc = doc.replace(re, ` <a href="${link}">${elements[id].name}</a> `);
+            }
+
+            // Resolve the element
+            const element = _element;
+            element.documentation = doc;
+            return resolve(element);
+          },
+          401: (err) => {
+            reject(err.responseText);
+            // Refresh when session expires
+            window.location.reload();
+          },
+          404: (err) => reject(err.responseText)
+        }
+      });
     });
   }
 
