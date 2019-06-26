@@ -126,3 +126,15 @@
   padding-top: 8px;
   padding-bottom: 8px;
 }
+
+.cross-ref {
+
+}
+
+.cross-ref-broken {
+  color: $color-danger;
+
+  &:hover {
+    color: darken($color-danger, 20%);
+  }
+}

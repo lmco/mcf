@@ -54,6 +54,7 @@ class Element extends Component {
     this.getElement = this.getElement.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     this.handleTooltipToggle = this.handleTooltipToggle.bind(this);
+    this.handleCrossRefs = this.handleCrossRefs.bind(this);
   }
 
   getElement() {
@@ -69,7 +70,14 @@ class Element extends Component {
         url: url,
         statusCode: {
           200: (element) => {
-            this.setState({ element: element });
+            // TODO do nested AJAX call for cross-ref replacement
+            this.handleCrossRefs(element)
+            .then(elementChanged => {
+              this.setState({ element: elementChanged });
+            })
+            .catch(err => {
+              this.setState({ error: err });
+            });
           },
           401: (err) => {
             // Throw error and set state
@@ -98,6 +106,85 @@ class Element extends Component {
 
     // Get element information
     this.getElement();
+  }
+
+  handleCrossRefs(_element) {
+    return new Promise((resolve, reject) => {
+      // Match/find all cross references
+      const allCrossRefs = _element.documentation.match(/\[cf:[a-zA-Z0-9\-_]{0,}\]/g);
+
+      // If no cross refs, resolve the element with no changes
+      if (!allCrossRefs || allCrossRefs.length === 0) {
+        return resolve(_element);
+      }
+
+      // Make into an object for a uniqueness
+      // TODO - This can be done more efficiently, but it's ok for now.
+      const uniqCrossRefs = {};
+      allCrossRefs.forEach(xr => {
+        const ref = xr.replace('cf:', '').slice(1, -1);
+        uniqCrossRefs[xr] = { id: ref };
+      });
+
+      // Get a list of IDs from the cross-referencs
+      const uniqCrossRefsValues = Object.values(uniqCrossRefs);
+      const ids = uniqCrossRefsValues.map(xr => xr.id);
+
+      // Make AJAX call to get names of cross-references elements ....
+      const opts = [
+        `ids=${ids}`,
+        'format=jmi2',
+        'fields=id,name,org,project,branch',
+        'minified=true'
+      ].join('&');
+      $.ajax({
+        method: 'GET',
+        url: `${this.props.url}/elements/?${opts}`,
+        statusCode: {
+          200: (elements) => {
+            // Keep track of documentation field
+            // and cross reference text
+            let doc = _element.documentation;
+            const refs = Object.keys(uniqCrossRefs);
+
+            // Loop over cross refs list and replace each occurance of that
+            // cross-ref in the documentation fiels
+            for (let i = 0; i < refs.length; i++) {
+              // Get the ref, replacing special characters for use in regex
+              const ref = refs[i]
+              .replace('[', '\\[')
+              .replace(']', '\\]')
+              .replace('-', '\\-');
+              // Create the regex for replacement
+              const re = new RegExp(ref, 'g');
+
+              // Capture the element ID and link
+              const id = uniqCrossRefs[refs[i]].id;
+              if (!elements.hasOwnProperty(id)) {
+                doc = doc.replace(re, ` <a class="cross-ref-broken" href="#">${refs[i]}</a> `);
+                continue;
+              }
+              const oid = elements[id].org;
+              const pid = elements[id].project;
+              const bid = elements[id].branch;
+              const link = `/api/orgs/${oid}/projects/${pid}/branches/${bid}/elements/${id}`;
+              doc = doc.replace(re, ` <a class="cross-ref" href="${link}">${elements[id].name}</a> `);
+            }
+
+            // Resolve the element
+            const element = _element;
+            element.documentation = doc;
+            return resolve(element);
+          },
+          401: (err) => {
+            reject(err.responseText);
+            // Refresh when session expires
+            window.location.reload();
+          },
+          404: (err) => reject(err.responseText)
+        }
+      });
+    });
   }
 
   // Toggles the tooltip
@@ -229,7 +316,10 @@ class Element extends Component {
                   }
                   <tr>
                     <th>Documentation:</th>
-                    <td>{element.documentation}</td>
+                    <td>
+                      <div dangerouslySetInnerHTML={{ __html: element.documentation }}>
+                      </div>
+                    </td>
                   </tr>
                   <tr>
                     <th>Org ID:</th>
