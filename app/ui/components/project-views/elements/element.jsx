@@ -111,7 +111,7 @@ class Element extends Component {
   handleCrossRefs(_element) {
     return new Promise((resolve, reject) => {
       // Match/find all cross references
-      const allCrossRefs = _element.documentation.match(/\s\[xr:[a-zA-Z0-9\-_]{0,}\]\s/g);
+      const allCrossRefs = _element.documentation.match(/\[cf:[a-zA-Z0-9\-_]{0,}\]/g);
 
       // If no cross refs, resolve the element with no changes
       if (!allCrossRefs || allCrossRefs.length === 0) {
@@ -122,7 +122,7 @@ class Element extends Component {
       // TODO - This can be done more efficiently, but it's ok for now.
       const uniqCrossRefs = {};
       allCrossRefs.forEach(xr => {
-        const ref = xr.replace('xr:', '').slice(2, -2);
+        const ref = xr.replace('cf:', '').slice(1, -1);
         uniqCrossRefs[xr] = { id: ref };
       });
 
@@ -149,7 +149,7 @@ class Element extends Component {
 
             // Loop over cross refs list and replace each occurance of that
             // cross-ref in the documentation fiels
-            for (let i = 0; i < uniqCrossRefsValues.length; i++) {
+            for (let i = 0; i < refs.length; i++) {
               // Get the ref, replacing special characters for use in regex
               const ref = refs[i]
               .replace('[', '\\[')
@@ -160,11 +160,15 @@ class Element extends Component {
 
               // Capture the element ID and link
               const id = uniqCrossRefs[refs[i]].id;
+              if (!elements.hasOwnProperty(id)) {
+                doc = doc.replace(re, ` <a class="cross-ref-broken" href="#">${refs[i]}</a> `);
+                continue;
+              }
               const oid = elements[id].org;
               const pid = elements[id].project;
               const bid = elements[id].branch;
               const link = `/api/orgs/${oid}/projects/${pid}/branches/${bid}/elements/${id}`;
-              doc = doc.replace(re, ` <a href="${link}">${elements[id].name}</a> `);
+              doc = doc.replace(re, ` <a class="cross-ref" href="${link}">${elements[id].name}</a> `);
             }
 
             // Resolve the element
