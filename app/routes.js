@@ -238,6 +238,16 @@ router.route('/orgs/:orgid/projects/:projectid/branches')
 /**
  * @description This renders a project's element page for a user
  **/
+router.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.project
+);
+
+/**
+ * @description This renders a project's element page for a user
+ **/
 router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
 .get(
   AuthController.authenticate,

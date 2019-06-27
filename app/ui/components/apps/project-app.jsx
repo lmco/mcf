@@ -109,11 +109,15 @@ class ProjectApp extends Component {
     let title;
     let displayPlugins = false;
     const plugins = [];
+    let url;
 
     // Verify if project exists
     if (this.state.project) {
       // Set the title for sidebar
       title = <h2> {this.state.project.name}</h2>;
+      const orgId = this.state.project.org;
+      const projId = this.state.project.id;
+      url = `/api/orgs/${orgId}/projects/${projId}`;
 
       // Verify if plugins in project
       if (this.state.project.custom.integrations) {
@@ -191,12 +195,16 @@ class ProjectApp extends Component {
                   <Route path={`${this.props.match.url}/branches/:branchid/search`}
                          render={ (props) => <Search {...props}
                                                      project={this.state.project} /> } />
-                  <Route path={`${this.props.match.url}/branches`}
+                  <Route path={`${this.props.match.url}/branches/:branchid`}
+                         render={ (props) => <InformationPage {...props}
+                                                           url={url}
+                                                           branch={true}/> } />
+                  <Route exact path={`${this.props.match.url}/branches`}
                          render={ (props) => <BranchesTags {...props}
                                                            permissions={this.state.permissions}
                                                            project={this.state.project} /> } />
                   { /* Route to members page */ }
-                  <Route path={`${this.props.match.url}/users`}
+                  <Route exact path={`${this.props.match.url}/users`}
                          render={ (props) => <MembersPage {...props}
                                                           project={this.state.project}
                                                           admin={this.state.admin}/> } />
