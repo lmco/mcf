@@ -155,11 +155,9 @@
 
 .list {
   a {
-    display: block;
-    text-decoration: none;
     color: black;
+    text-decoration: none;
   }
-
   hr {
     border-color: darkgrey;
     margin: 0;
@@ -329,6 +327,15 @@
   margin: 0.5em;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.branch-link {
+  color: $mbee-navbar-color;
+
+  &:hover {
+    color: lighten($mbee-navbar-color, 20);
+    text-decoration: none;
+  }
 }
 
 .members-dropdown-item {
