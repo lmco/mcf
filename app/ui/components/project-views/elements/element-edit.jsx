@@ -344,6 +344,7 @@ class ElementEdit extends Component {
                       url={this.props.url}
                       currentSelection={this.state.parent}
                       project={this.props.project}
+                      branch={this.props.branch}
                       selectedHandler={this.parentSelectHandler} />
                   </Col>
                  </FormGroup>)
@@ -370,6 +371,7 @@ class ElementEdit extends Component {
                   self={this.state.id}
                   url={this.props.url}
                   project={this.props.project}
+                  branch={this.props.branch}
                   selectedHandler={this.sourceSelectHandler} />
               </Col>
               {(this.state.target && !this.state.source)
@@ -386,6 +388,7 @@ class ElementEdit extends Component {
                   currentSelection={this.state.target}
                   self={this.state.id}
                   url={this.props.url}
+                  branch={this.props.branch}
                   project={this.props.project}
                   selectedHandler={this.targetSelectHandler} />
               </Col>

@@ -42,12 +42,9 @@ class ProjectElements extends Component {
 
     this.state = {
       sidePanel: false,
-      url: '',
       id: null,
       refreshFunction: null,
-      treeRoot: null,
       branch: props.match.params.branchid,
-      childrenOpen: {},
       archived: false,
       error: null
     };
@@ -56,8 +53,6 @@ class ProjectElements extends Component {
     this.closeSidePanel = this.closeSidePanel.bind(this);
     this.editElementInfo = this.editElementInfo.bind(this);
     this.createNewElement = this.createNewElement.bind(this);
-    this.getElement = this.getElement.bind(this);
-    this.setChildOpen = this.setChildOpen.bind(this);
     this.displayArchivedElems = this.displayArchivedElems.bind(this);
   }
 
@@ -116,48 +111,12 @@ class ProjectElements extends Component {
     document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
-  getElement() {
-    const orgId = this.props.project.org;
-    const projId = this.props.project.id;
-    const branchId = this.state.branch;
-    const base = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
-    const url = `${base}/elements/model?fields=id,name,contains,type,archived&minified=true&archived=true`;
-
-    this.setState({ url: base });
-
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (data) => { this.setState({ treeRoot: data }); },
-        401: () => {
-          this.setState({ treeRoot: null });
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        403: (err) => {
-          this.setState({ error: err.responseText });
-        },
-        404: (err) => {
-          this.setState({ error: err.responseText });
-        }
-      }
-    });
-  }
-
-  setChildOpen(id, state) {
-    this.state.childrenOpen[id] = state;
-  }
-
   displayArchivedElems() {
     // Change the archive state to opposite value
     this.setState(prevState => ({ archived: !prevState.archived }));
   }
 
   componentDidMount() {
-    this.getElement();
-
     if (this.props.location.hash) {
       const elementid = this.props.location.hash.replace('#', '');
       this.openElementInfo(elementid);
@@ -167,6 +126,10 @@ class ProjectElements extends Component {
   render() {
     let isButtonDisplayed = false;
     let btnDisClassName = 'workspace-title workspace-title-padding';
+    const orgId = this.props.project.org;
+    const projId = this.props.project.id;
+    const branchId = this.state.branch;
+    const url = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
 
     // Check admin/write permissions
     if (this.props.permissions === 'admin' || this.props.permissions === 'write') {
@@ -176,15 +139,17 @@ class ProjectElements extends Component {
 
     let sidePanelView = <Element id={this.state.id}
                                  project={this.props.project}
-                                 url={this.state.url}
+                                 branch={this.state.branch}
+                                 url={url}
                                  permissions={this.props.permissions}
                                  editElementInfo={this.editElementInfo}
                                  closeSidePanel={this.closeSidePanel}/>;
 
     if (this.state.sidePanel === 'elementEdit') {
       sidePanelView = <ElementEdit id={this.state.id}
-                                   url={this.state.url}
+                                   url={url}
                                    project={this.props.project}
+                                   branch={this.state.branch}
                                    closeSidePanel={this.closeSidePanel}
                                    selected={this.state.selected}/>;
     }
@@ -192,24 +157,10 @@ class ProjectElements extends Component {
     else if (this.state.sidePanel === 'addElement') {
       sidePanelView = (<ElementNew id={'new-element'}
                                    parent={this.state.id}
+                                   branch={this.state.branch}
                                    project={this.props.project}
                                    closeSidePanel={this.closeSidePanel}
-                                   url={this.state.url}/>);
-    }
-
-    let tree = null;
-    if (this.state.treeRoot !== null) {
-      tree = <ElementTree id='model'
-                          url={this.state.url}
-                          data={this.state.treeRoot}
-                          project={this.props.project}
-                          parent={null}
-                          isOpen={true}
-                          archived={this.state.archived}
-                          childrenOpen={this.state.childrenOpen}
-                          setChildOpen={this.setChildOpen}
-                          parentRefresh={this.getElement}
-                          clickHandler={this.openElementInfo}/>;
+                                   url={url}/>);
     }
 
     // Return element list
@@ -229,13 +180,16 @@ class ProjectElements extends Component {
             </div>)}
         </div>
         <div id='workspace-body'>
-          <div id='element-tree-container' className='main-workspace'>
+          <div className='main-workspace'>
             <BranchBar project={this.props.project}
                        branchid={this.state.branch}
                        archived={this.state.archived}
                        displayArchElems={this.displayArchivedElems}
                        permissions={this.props.permissions}/>
-            {tree}
+            <ElementTree project={this.props.project}
+                         branch={this.state.branch}
+                         archived={this.state.archived}
+                         clickHandler={this.openElementInfo}/>
           </div>
           <SidePanel>
             { sidePanelView }
