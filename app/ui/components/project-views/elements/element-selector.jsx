@@ -39,7 +39,6 @@ class ElementSelector extends React.Component {
       modal: false,
       selectedElement: '',
       selectedElementPreview: '',
-      childrenOpen: {},
       error: null
     };
 
@@ -48,15 +47,9 @@ class ElementSelector extends React.Component {
     }
 
     this.toggle = this.toggle.bind(this);
-    this.getRootElement = this.getRootElement.bind(this);
     this.selectElementHandler = this.selectElementHandler.bind(this);
     this.select = this.select.bind(this);
-    this.setChildOpen = this.setChildOpen.bind(this);
     this.clear = this.clear.bind(this);
-  }
-
-  componentDidMount() {
-    this.getRootElement();
   }
 
   componentDidUpdate(prevProps) {
@@ -72,36 +65,6 @@ class ElementSelector extends React.Component {
     this.setState(prevState => ({
       modal: !prevState.modal
     }));
-  }
-
-  /**
-   * Gets the current model root element. This is used to render the tree.
-   *
-   * TODO (jk) - the tree currently requires us to do this work whenever we
-   * need it. We should consider creating a tree wrapper to handle this.
-   */
-  getRootElement() {
-    const opts = '?fields=id,name,contains,type&minified=true';
-    const url = `${this.props.url}/elements/model${opts}`;
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (data) => { this.setState({ treeRoot: data }); },
-        401: () => {
-          this.setState({ treeRoot: null });
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        403: (err) => {
-          this.setState({ error: err.responseText });
-        },
-        404: (err) => {
-          this.setState({ error: err.responseText });
-        }
-      }
-    });
   }
 
   /**
@@ -125,10 +88,6 @@ class ElementSelector extends React.Component {
     });
   }
 
-  setChildOpen(id, state) {
-    this.state.childrenOpen[id] = state;
-  }
-
   /**
    * Confirms and finalizes the element selection. Then closes the modal.
    */
@@ -149,21 +108,6 @@ class ElementSelector extends React.Component {
   }
 
   render() {
-    let tree = '';
-    if (this.state.treeRoot !== null) {
-      tree = <ElementTree id='model'
-                          data={this.state.treeRoot}
-                          project={this.props.project}
-                          parent={null}
-                          isOpen={true}
-                          childrenOpen={this.state.childrenOpen}
-                          setChildOpen={this.setChildOpen}
-                          parentRefresh={this.getRootElement}
-                          clickHandler={this.selectElementHandler}
-                          url={this.props.url}/>;
-    }
-
-
     let error = '';
     if (this.state.error) {
       error = <span className={'text-danger'}>{this.state.error}</span>;
@@ -178,7 +122,9 @@ class ElementSelector extends React.Component {
                className='element-selector-modal element-tree-container'>
           <ModalHeader toggle={this.toggle}>Select an element</ModalHeader>
           <ModalBody>
-            { tree }
+            <ElementTree project={this.props.project}
+                         branch={this.props.branch}
+                         clickHandler={this.selectElementHandler}/>
           </ModalBody>
           <ModalFooter>
             <p>

@@ -57,7 +57,6 @@ class ElementNew extends Component {
       custom: null,
       org: null,
       project: null,
-      branch: 'master',
       error: null
     };
 
@@ -228,6 +227,7 @@ class ElementNew extends Component {
                 <ElementSelector
                   currentSelection={this.state.parent}
                   url={this.props.url}
+                  branch={this.props.branch}
                   project={this.props.project}
                   selectedHandler={this.parentSelectHandler} />
               </div>
@@ -241,6 +241,7 @@ class ElementNew extends Component {
                 currentSelection={this.state.source}
                 self={this.state.id}
                 url={this.props.url}
+                branch={this.props.branch}
                 project={this.props.project}
                 selectedHandler={this.sourceSelectHandler} />
             </Col>
@@ -257,6 +258,7 @@ class ElementNew extends Component {
               <ElementSelector
                 currentSelection={this.state.target}
                 self={this.state.id}
+                branch={this.props.branch}
                 url={this.props.url}
                 project={this.props.project}
                 selectedHandler={this.targetSelectHandler} />
