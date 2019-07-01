@@ -338,6 +338,17 @@
   }
 }
 
+.model-dropdown-btn {
+  &:active {
+    border: none;
+    outline: none;
+  }
+  &:focus {
+    border: none;
+    outline: none;
+  }
+}
+
 .members-dropdown-item {
   display: grid;
   padding: 10px;

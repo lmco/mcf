@@ -46,6 +46,7 @@ class ProjectElements extends Component {
       refreshFunction: null,
       branch: props.match.params.branchid,
       archived: false,
+      displayIds: true,
       error: null
     };
 
@@ -54,6 +55,7 @@ class ProjectElements extends Component {
     this.editElementInfo = this.editElementInfo.bind(this);
     this.createNewElement = this.createNewElement.bind(this);
     this.displayArchivedElems = this.displayArchivedElems.bind(this);
+    this.toggleIds = this.toggleIds.bind(this);
   }
 
   createNewElement() {
@@ -114,6 +116,11 @@ class ProjectElements extends Component {
   displayArchivedElems() {
     // Change the archive state to opposite value
     this.setState(prevState => ({ archived: !prevState.archived }));
+  }
+
+  toggleIds() {
+    // Change the display id state to opposite value
+    this.setState(prevState => ({ displayIds: !prevState.displayIds }));
   }
 
   componentDidMount() {
@@ -185,10 +192,13 @@ class ProjectElements extends Component {
                        branchid={this.state.branch}
                        archived={this.state.archived}
                        displayArchElems={this.displayArchivedElems}
-                       permissions={this.props.permissions}/>
+                       permissions={this.props.permissions}
+                       displayIds={this.state.displayIds}
+                       toggleIds={this.toggleIds}/>
             <ElementTree project={this.props.project}
                          branch={this.state.branch}
                          archived={this.state.archived}
+                         displayIds={this.state.displayIds}
                          clickHandler={this.openElementInfo}/>
           </div>
           <SidePanel>

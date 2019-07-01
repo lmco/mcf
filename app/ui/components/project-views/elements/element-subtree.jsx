@@ -207,17 +207,18 @@ class ElementSubtree extends Component {
         for (let i = 0; i < this.state.children.length; i++) {
           subtree.push(
             <ElementSubtree key={`tree-${this.state.children[i].id}`}
-                         id={`${this.state.children[i].id}`}
-                         data={this.state.children[i]}
-                         project={this.props.project}
-                         parent={this.state}
-                         archived={this.props.archived}
-                         parentRefresh={this.refresh}
-                         clickHandler={this.props.clickHandler}
-                         childrenOpen={this.props.childrenOpen}
-                         setChildOpen={this.props.setChildOpen}
-                         isOpen={false}
-                         url={this.props.url}/>
+                            id={`${this.state.children[i].id}`}
+                            data={this.state.children[i]}
+                            project={this.props.project}
+                            parent={this.state}
+                            archived={this.props.archived}
+                            displayIds={this.props.displayIds}
+                            parentRefresh={this.refresh}
+                            clickHandler={this.props.clickHandler}
+                            childrenOpen={this.props.childrenOpen}
+                            setChildOpen={this.props.setChildOpen}
+                            isOpen={false}
+                            url={this.props.url}/>
           );
         }
       }
@@ -234,12 +235,19 @@ class ElementSubtree extends Component {
         </span>
         );
         // If the name is not blank, render the name
-        if (this.state.data.name !== '') {
+        if (this.state.data.name !== '' && this.props.displayIds) {
           element = (
             <span>
             {this.state.data.name}
               <span className={'element-id'}>({this.state.data.id})</span>
           </span>
+          );
+        }
+        else if (this.state.data.name !== '' && !this.props.displayIds) {
+          element = (
+            <span>
+            {this.state.data.name}
+            </span>
           );
         }
       }
@@ -251,11 +259,18 @@ class ElementSubtree extends Component {
           </span>
         );
         // If the name is not blank, render the name
-        if (this.state.data.name !== '') {
+        if (this.state.data.name !== '' && this.props.displayIds) {
           element = (
             <span className='grayed-out'>
               {this.state.data.name}
               <span className='element-id'>({this.state.data.id})</span>
+            </span>
+          );
+        }
+        else if (this.state.data.name !== '' && !this.props.displayIds) {
+          element = (
+            <span className='grayed-out'>
+            {this.state.data.name}
             </span>
           );
         }

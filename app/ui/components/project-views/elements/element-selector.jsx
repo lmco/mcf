@@ -123,6 +123,7 @@ class ElementSelector extends React.Component {
           <ModalHeader toggle={this.toggle}>Select an element</ModalHeader>
           <ModalBody>
             <ElementTree project={this.props.project}
+                         displayIds={true}
                          branch={this.props.branch}
                          clickHandler={this.selectElementHandler}/>
           </ModalBody>

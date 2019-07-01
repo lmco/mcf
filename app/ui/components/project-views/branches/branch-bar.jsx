@@ -23,6 +23,9 @@ import {
   Input,
   InputGroup,
   Badge,
+  DropdownToggle,
+  UncontrolledButtonDropdown,
+  DropdownMenu,
   Label
 } from 'reactstrap';
 
@@ -38,8 +41,7 @@ class BranchBar extends Component {
     // Initialize state props
     this.state = {
       branches: null,
-      currentBranch: null,
-      modal: false
+      currentBranch: null
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -157,8 +159,9 @@ class BranchBar extends Component {
                       {tagOptions}
               </Input>
             </InputGroup>
-            <div className='branch-tag'>
-              <div>
+          </div>
+          <div className='branch-tag'>
+            <div>
               {(!tag)
                 ? ''
                 : (<Badge color='primary'>Tag</Badge>)
@@ -168,19 +171,46 @@ class BranchBar extends Component {
                 : (<Badge color='secondary'>Archived</Badge>)
               }
             </div>
-              <div className='archived-check-box'>
-                <Label check className='minimize'>
-                  <Input type='checkbox'
-                         name='archived'
-                         id='archived'
-                         checked={this.props.archived}
-                         value={this.state.archived}
-                         onChange={this.props.displayArchElems} />
-                  <div style={{ paddingTop: '3px' }}>
-                    Include archived
+            <div className='options-btn'>
+              <UncontrolledButtonDropdown>
+                <DropdownToggle close
+                                id='toggler'
+                                aria-label='Filter'
+                                className='model-dropdown-btn'
+                                size='sm'>
+                  <span>
+                    <i className='fas fa-ellipsis-v' style={{ fontSize: '15px' }}/>
+                  </span>
+                </DropdownToggle>
+                <DropdownMenu className='options-card'>
+                  <div>
+                    <Label check className='minimize'>
+                      <Input type='checkbox'
+                             name='archived'
+                             id='archived'
+                             checked={this.props.archived}
+                             value={this.state.archived}
+                             onChange={this.props.displayArchElems} />
+                      <div style={{ paddingTop: '3px' }}>
+                        Include archived
+                      </div>
+                    </Label>
                   </div>
-                </Label>
-              </div>
+                  <div>
+                    <Label check className='minimize'>
+                      <Input type='checkbox'
+                             name='archived'
+                             id='archived'
+                             checked={this.props.displayIds}
+                             value={this.props.displayIds}
+                             onChange={this.props.toggleIds} />
+                      <div style={{ paddingTop: '3px' }}>
+                        Toggle IDs
+                      </div>
+                    </Label>
+                  </div>
+                </DropdownMenu>
+              </UncontrolledButtonDropdown>
             </div>
           </div>
         </div>
