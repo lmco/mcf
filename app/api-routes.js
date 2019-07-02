@@ -892,6 +892,32 @@ api.route('/orgs/:orgid')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: name
+ *         description: Search for projects with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: visibility
+ *         description: Search for projects with a specific level of visibility.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for projects created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for projects last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for projects archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project's public
@@ -1000,6 +1026,32 @@ api.route('/projects')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: name
+ *         description: Search for projects with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: visibility
+ *         description: Search for projects with a specific level of visibility.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for projects created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for projects last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for projects archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project's public

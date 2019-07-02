@@ -241,11 +241,14 @@ module.exports.parseOptions = function(options, validOptions) {
 module.exports.validateOptions = function(options, validOptions, model) {
   // Define the object to be returned to the user. Initialize populateString
   const returnObject = { populateString: '', sort: { $natural: 1 } };
-  // Define valid searchOptions for the element model
-  const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-    'createdBy', 'lastModifiedBy', 'archivedBy'];
+  // Define valid searchOptions for the project model
+  const projectSearchOptions = ['name', 'visibility', 'createdBy',
+    'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the branch model
   const branchSearchOptions = ['tag', 'source', 'name',
+    'createdBy', 'lastModifiedBy', 'archivedBy'];
+  // Define valid searchOptions for the element model
+  const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
     'createdBy', 'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the user model
   const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
@@ -273,7 +276,9 @@ module.exports.validateOptions = function(options, validOptions, model) {
       || (model.modelName === 'Branch'
       && (branchSearchOptions.includes(opt) || opt.startsWith('custom.')))
       || (model.modelName === 'User'
-      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
+      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'Project'
+      && (projectSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
       // Ignore iteration of loop
       return;
     }
