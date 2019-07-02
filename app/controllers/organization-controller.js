@@ -75,6 +75,15 @@ const errors = M.require('lib.errors');
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
+ * @param {string} [options.name] - Search for orgs with a specific name.
+ * @param {string} [options.createdBy] - Search for orgs with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for orgs with a specific
+ * lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for orgs with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found organization objects
  *
@@ -122,12 +131,32 @@ function find(requestingUser, orgs, options) {
       ? sani.mongo(JSON.parse(JSON.stringify(orgs)))
       : undefined;
 
+    // Define searchQuery
+    const searchQuery = { archived: false };
+
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',
       'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
 
-    // Define searchQuery
-    const searchQuery = { archived: false };
+    // Ensure options are valid
+    if (options) {
+      // Create array of valid search options
+      const validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+
+      // Loop through provided options, look for validSearchOptions
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
+    }
+
     // If not system admin, add permissions check
     if (!reqUser.admin) {
       searchQuery[`permissions.${reqUser._id}`] = 'read';
