@@ -4205,8 +4205,22 @@ function getBranches(req, res) {
     ids: 'array',
     minified: 'boolean',
     source: 'string',
-    tag: 'boolean'
+    tag: 'boolean',
+    name: 'string',
+    createdBy: 'string',
+    lastModifiedBy: 'string',
+    archivedBy: 'string'
   };
+
+  // Loop through req.query
+  if (req.query) {
+    Object.keys(req.query).forEach((k) => {
+      // If the key starts with custom., add it to the validOptions object
+      if (k.startsWith('custom.')) {
+        validOptions[k] = 'string';
+      }
+    });
+  }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {

@@ -247,8 +247,8 @@ module.exports.validateOptions = function(options, validOptions, model) {
   const projectSearchOptions = ['name', 'visibility', 'createdBy',
     'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the branch model
-  const branchSearchOptions = ['tag', 'source', 'name',
-    'createdBy', 'lastModifiedBy', 'archivedBy'];
+  const branchSearchOptions = ['tag', 'source', 'name', 'createdBy',
+    'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the element model
   const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
     'createdBy', 'lastModifiedBy', 'archivedBy'];

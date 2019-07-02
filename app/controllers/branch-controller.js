@@ -70,6 +70,19 @@ const errors = M.require('lib.errors');
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
+ * @param {boolean} [options.tag] - Search for branches with a specific tag
+ * value.
+ * @param {string} [options.source] - Search for branches with a specific source
+ * branch.
+ * @param {string} [options.name] - Search for branches with a specific name.
+ * @param {string} [options.createdBy] - Search for branches with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for branches with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for branches with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found branch objects
  *
@@ -133,7 +146,8 @@ function find(requestingUser, organizationID, projectID, branches, options) {
     // Ensure options are valid
     if (options) {
       // Create array of valid search options
-      const validSearchOptions = ['tag', 'source'];
+      const validSearchOptions = ['tag', 'source', 'name', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
 
       // Loop through provided options, look for validSearchOptions
       Object.keys(options).forEach((o) => {

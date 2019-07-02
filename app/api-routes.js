@@ -1892,6 +1892,36 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: tag
+ *         description: Search for branches with a specific tag value.
+ *         in: query
+ *         type: boolean
+ *       - name: source
+ *         description: Search for branches with a specific source branch.
+ *         in: query
+ *         type: string
+ *       - name: name
+ *         description: Search for branches with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for branches created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for branches last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for branches archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET branches, returns branches' public
