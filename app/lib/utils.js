@@ -404,15 +404,19 @@ module.exports.validateOptions = function(options, validOptions, model) {
     if (opt === 'sort') {
       // Get rid of the default value
       returnObject.sort = {};
+      // initialize sort order
+      let order = 1;
       // If the user has specified sorting in reverse order
       if (val[0] === '-') {
-        // Return {sort_field: -1}
-        returnObject.sort[val.slice(1)] = -1;
+        order = -1;
+        val = val.slice(1);
       }
-      else {
-        // Return {sort_field: 1}
-        returnObject.sort[val] = 1;
+      // Handle cases where user is looking for _id
+      if (val.includes('id') || val.includes('username')) {
+        val = '_id';
       }
+      // Return the parsed sort option in the format {sort_field: order}
+      returnObject.sort[val] = order;
     }
 
     // Handle the lean option
