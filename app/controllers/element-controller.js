@@ -1307,7 +1307,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           if (key === 'archived') {
             const elemID = utils.parseID(element._id).pop();
             // Error Check: ensure user cannot archive root elements
-            if (Element.getValidRootElements().includes(elemID)) {
+            if (Element.getValidRootElements().includes(elemID) && updateElement[key]) {
               throw new M.OperationError(
                 `User cannot archive the root element: ${elemID}.`, 'warn'
               );
