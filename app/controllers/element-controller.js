@@ -1480,6 +1480,8 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     let elementsToLookup = [];
     let createdElements = [];
     let foundElementIDs = [];
+    let isCreated = false;
+    let isDeleted = false;
     const ts = Date.now();
 
     // Find the organization
@@ -1640,11 +1642,18 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       // Emit the event elements-deleted
       EventEmitter.emit('elements-deleted', foundElements);
 
+      // Set deleted to true
+      isDeleted = true;
+
       // Create new elements
       return create(requestingUser, orgID, projID, branchID, elementsToLookup, options);
     })
     .then((_createdElements) => {
       createdElements = _createdElements;
+
+      // Set created to true
+      isCreated = true;
+
       const filePath = path.join(M.root, 'data', orgID, projID, branchID, `PUT-backup-elements-${ts}.json`);
       // Delete the temporary file.
       if (fs.existsSync(filePath)) {
@@ -1680,10 +1689,30 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       if (existingOrgFiles.length === 0) {
         fs.rmdirSync(path.join(M.root, 'data', orgID));
       }
-
       return resolve(createdElements);
     })
-    .catch((error) => reject(errors.captureError(error)));
+    .catch((error) => new Promise((res) => {
+      // Check if deleted and creation failed
+      if (isDeleted && !isCreated) {
+        // Reinsert original data
+        Element.insertMany(foundElements)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
+            `PUT-backup-elements-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      }
+      else {
+        // Resolve original error
+        return res(error);
+      }
+    }))
+    .then((error) => reject(errors.captureError(error)));
   });
 }
 

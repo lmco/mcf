@@ -1073,6 +1073,8 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     let foundProjects = [];
     let projectsToLookUp = [];
     let createdProjects = [];
+    let isCreated = false;
+    let isDeleted = false;
     const ts = Date.now();
 
     // Check the type of the projects parameter
@@ -1175,11 +1177,14 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       return Branch.deleteMany({ _id: { $in: branchDelObj } }).lean();
     })
     // Delete projects from database
-    .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }).lean())
+    .then(() => Project.deleteMany({ _id: { $in: foundProjects.map(p => p._id) } }).lean())
 
     .then(() => {
       // Emit the event projects-deleted
       EventEmitter.emit('projects-deleted', foundProjects);
+
+      // Set deleted to true
+      isDeleted = true;
 
       // Create the new/replaced projects
       return create(requestingUser, orgID, projectsToLookUp, options);
@@ -1187,11 +1192,18 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     .then((_createdProjects) => {
       createdProjects = _createdProjects;
 
+      // Set created to true
+      isCreated = true;
+
+      const filePath = path.join(M.root, 'data',
+        orgID, `PUT-backup-projects-${ts}.json`);
       // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`))) {
+      if (fs.existsSync(filePath)) {
         return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`),
-            function(err) { if (err) rej(err); else res(); });
+          fs.unlink(filePath, function(err) {
+            if (err) rej(err);
+            else res();
+          });
         });
       }
     })
@@ -1207,7 +1219,28 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       // Return the newly created projects
       return resolve(createdProjects);
     })
-    .catch((error) => reject(errors.captureError(error)));
+    .catch((error) => new Promise((res) => {
+      // Check if deleted and creation failed
+      if (isDeleted && !isCreated) {
+        // Reinsert original data
+        Project.insertMany(foundProjects)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data', orgID,
+            `PUT-backup-projects-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      }
+      else {
+        // Resolve original error
+        return res(error);
+      }
+    }))
+    .then((error) => reject(errors.captureError(error)));
   });
 }
 
