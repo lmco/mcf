@@ -197,6 +197,7 @@ class ProjectElements extends Component {
                        toggleIds={this.toggleIds}/>
             <ElementTree project={this.props.project}
                          branch={this.state.branch}
+                         linkElements={true}
                          archived={this.state.archived}
                          displayIds={this.state.displayIds}
                          clickHandler={this.openElementInfo}/>

@@ -186,6 +186,7 @@ class ElementSubtree extends Component {
 
   // Create the element tree list
   render() {
+    let elementLink;
     const initColor = (this.state.data.archived) ? '#c0c0c0' : '#333';
     // Initialize variables
     let elementIcon = (
@@ -214,6 +215,7 @@ class ElementSubtree extends Component {
                             archived={this.props.archived}
                             displayIds={this.props.displayIds}
                             parentRefresh={this.refresh}
+                            linkElements={this.props.linkElements}
                             clickHandler={this.props.clickHandler}
                             childrenOpen={this.props.childrenOpen}
                             setChildOpen={this.props.setChildOpen}
@@ -358,6 +360,28 @@ class ElementSubtree extends Component {
       );
     }
 
+    if (this.props.linkElements) {
+      elementLink = (
+        <Link to={`#${this.props.id}`}
+              onClick={this.handleClick}
+              className='element-link'>
+            <span className='element-name'>
+              {elementIcon}
+              {element}
+            </span>
+        </Link>);
+    }
+    else {
+      elementLink = (
+        <span onClick={this.handleClick}
+             className='element-link'>
+          <span className='element-name'>
+              {elementIcon}
+            {element}
+          </span>
+        </span>);
+    }
+
     if (this.state.data.archived && !this.props.archived) {
       return null;
     }
@@ -368,14 +392,7 @@ class ElementSubtree extends Component {
           <i className={`fas ${expandIcon}`}
              onClick={this.toggleCollapse}>
           </i>
-          <Link to={`#${this.props.id}`}
-                onClick={this.handleClick}
-                className='element-link'>
-            <span className='element-name'>
-              {elementIcon}
-              {element}
-            </span>
-          </Link>
+          {elementLink}
           {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
         </div>);
     }
