@@ -1072,10 +1072,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         elementsToUpdate = [saniElements];
         // If updating parent, ensure it won't cause a circular reference
         if (saniElements.hasOwnProperty('parent')) {
-          // Turn parent ID into a name-spaced ID
-          saniElements.parent = utils.createID(orgID, projID, branchID, saniElements.parent);
-          // Find if a circular reference exists
-          return moveElementCheck(orgID, projID, branchID, saniElements);
+          // The model element is the only element that can't have a parent
+          if (saniElements.id === 'model') {
+            // Throw an error if the user is trying to give the model a parent
+            if (saniElements.parent !== null) {
+              throw new M.PermissionError('Cannot change root model parent.', 'warn');
+            }
+          }
+          else {
+            // Turn parent ID into a name-spaced ID
+            saniElements.parent = utils.createID(orgID, projID, branchID, saniElements.parent);
+            // Find if a circular reference exists
+            return moveElementCheck(orgID, projID, branchID, saniElements);
+          }
         }
       }
       else {
