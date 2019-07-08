@@ -98,6 +98,7 @@ class ElementTree extends Component {
                              archived={this.props.archived}
                              displayIds={this.props.displayIds}
                              childrenOpen={this.state.childrenOpen}
+                             linkElements={this.props.linkElements}
                              setChildOpen={this.setChildOpen}
                              parentRefresh={this.getElement}
                              clickHandler={this.props.clickHandler}/>;

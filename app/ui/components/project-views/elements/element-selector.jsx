@@ -131,6 +131,7 @@ class ElementSelector extends React.Component {
           <ModalBody>
             <ElementTree project={this.props.project}
                          displayIds={true}
+                         linkElements={false}
                          branch={this.props.branch}
                          clickHandler={this.selectElementHandler}/>
           </ModalBody>
