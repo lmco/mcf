@@ -589,7 +589,7 @@ function update(requestingUser, users, options) {
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
             // User cannot archive or unarchive themselves
-            if (user._id === reqUser._id) {
+            if ((user._id === reqUser._id) && updateUser[key]) {
               throw new M.OperationError('User cannot archive or unarchive themselves', 'warn');
             }
 
