@@ -236,7 +236,7 @@ class CreateUser extends Component {
                 Invalid: Invalid username.
               </FormFeedback>
             </FormGroup>
-            {/* Create an input for project name */}
+            {/* Create an input for user name */}
             <FormGroup>
               <Label for="fname">First Name</Label>
               <Input type="fname"
