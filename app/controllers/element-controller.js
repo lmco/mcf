@@ -1712,7 +1712,12 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
         return res(error);
       }
     }))
-    .then((error) => reject(errors.captureError(error)));
+    .then((error) => {
+      // If an error was returned, reject it.
+      if (error) {
+        return reject(errors.captureError(error));
+      }
+    });
   });
 }
 
