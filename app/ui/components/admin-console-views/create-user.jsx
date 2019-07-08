@@ -174,7 +174,7 @@ class CreateUser extends Component {
       disableSubmit = true;
     }
 
-    if (!RegExp(validators.user.preferredname).test(this.state.fname)) {
+    if (!RegExp(validators.user.fname).test(this.state.preferredname)) {
       // Set invalid fields
       preferredInvalid = true;
       disableSubmit = true;

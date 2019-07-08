@@ -158,7 +158,7 @@ class ProfileEdit extends Component {
       disableSubmit = true;
     }
 
-    if (!RegExp(validators.user.preferredname).test(this.state.fname)) {
+    if (!RegExp(validators.user.fname).test(this.state.preferredname)) {
       // Set invalid fields
       preferredInvalid = true;
       disableSubmit = true;
@@ -232,7 +232,7 @@ class ProfileEdit extends Component {
                        placeholder="User's preferred name"
                        value={this.state.preferred || ''}
                        invalid={preferredInvalid}
-                       invalid={fnameInvalid}
+                       invalid={preferredInvalid}
                        onChange={this.handleChange}/>
                 {/* Verify fields are valid, or display feedback */}
                 <FormFeedback >
