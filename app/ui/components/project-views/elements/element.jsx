@@ -26,7 +26,8 @@ import {
   ModalBody,
   UncontrolledTooltip,
   Badge,
-  Tooltip } from 'reactstrap';
+  Tooltip
+} from 'reactstrap';
 import Delete from '../../shared-views/delete.jsx';
 import CustomData from '../../general/custom-data/custom-data.jsx';
 
@@ -217,6 +218,8 @@ class Element extends Component {
     let projid;
     let name;
     let custom;
+    let target;
+    let source;
 
     if (this.state.element) {
       element = this.state.element;
@@ -230,6 +233,38 @@ class Element extends Component {
       }
       else {
         name = element.id;
+      }
+
+      if (element.targetNamespace) {
+        const nameSpace = element.targetNamespace;
+        target = (
+          <a href={`/orgs/${nameSpace.org}/projects/${nameSpace.project}/branches/${nameSpace.branch}/elements#${element.target}`}>
+            <UncontrolledTooltip placement='top' target='target-elem'>
+              {`${nameSpace.org} > ${nameSpace.project} > ${nameSpace.branch}`}
+            </UncontrolledTooltip>
+            <span id='target-elem'>
+              {element.target}
+            </span>
+          </a>);
+      }
+      else {
+        target = (<span>{element.target}</span>);
+      }
+
+      if (element.sourceNamespace) {
+        const nameSpace = element.sourceNamespace;
+        source = (
+          <a href={`/orgs/${nameSpace.org}/projects/${nameSpace.project}/branches/${nameSpace.branch}/elements#${element.source}`}>
+            <UncontrolledTooltip placement='top' target='source-elem'>
+              {`${nameSpace.org} > ${nameSpace.project} > ${nameSpace.branch}`}
+            </UncontrolledTooltip>
+            <span id='source-elem'>
+              {element.source}
+            </span>
+          </a>);
+      }
+      else {
+        source = (<span>{element.source}</span>);
       }
     }
 
@@ -305,11 +340,11 @@ class Element extends Component {
                     : (<React.Fragment>
                         <tr>
                           <th>Target:</th>
-                          <td>{element.target}</td>
+                          <td>{target}</td>
                         </tr>
                         <tr>
                           <th>Source:</th>
-                          <td>{element.source}</td>
+                          <td>{source}</td>
                         </tr>
                       </React.Fragment>
                     )
