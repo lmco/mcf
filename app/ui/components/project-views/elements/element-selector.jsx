@@ -22,9 +22,16 @@
 import React from 'react';
 
 // MBEE Modules
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import {
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter
+} from 'reactstrap';
 import ElementTree from './element-tree.jsx';
 
+/* eslint-enable no-unused-vars */
 
 class ElementSelector extends React.Component {
 

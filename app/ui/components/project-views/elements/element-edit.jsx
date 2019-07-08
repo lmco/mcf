@@ -53,7 +53,9 @@ class ElementEdit extends Component {
       type: '',
       parent: null,
       source: null,
+      sourceNamespace: null,
       target: null,
+      targetNamespace: null,
       documentation: '',
       archived: false,
       custom: {},
@@ -107,6 +109,12 @@ class ElementEdit extends Component {
           }
           if (element.target) {
             this.setState({ target: element.target });
+          }
+          if (element.targetNamespace) {
+            this.setState({ targetNamespace: element.targetNamespace });
+          }
+          if (element.sourceNamespace) {
+            this.setState({ sourceNamespace: element.sourceNamespace });
           }
 
           $('textarea[name="custom"]').autoResize();
@@ -184,6 +192,13 @@ class ElementEdit extends Component {
 
     if (this.state.parentUpdate !== this.state.parent) {
       doRefresh = true;
+    }
+
+    if (this.state.targetNamespace) {
+      data.targetNamespace = this.state.targetNamespace;
+    }
+    if (this.state.sourceNamespace) {
+      data.sourceNamespace = this.state.sourceNamespace;
     }
 
     // Send a patch request to update element data
