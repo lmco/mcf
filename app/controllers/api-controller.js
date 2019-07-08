@@ -763,6 +763,15 @@ function postOrg(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
     const error = new M.DataFormatError(
@@ -853,6 +862,15 @@ function putOrg(req, res) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -946,6 +964,15 @@ function patchOrg(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.orgid)) {
     const error = new M.DataFormatError(
@@ -1035,6 +1062,15 @@ function deleteOrg(req, res, next) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // Attempt to parse query options
@@ -1723,6 +1759,15 @@ function postProject(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
     const error = new M.DataFormatError(
@@ -1812,6 +1857,15 @@ function putProject(req, res) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1904,6 +1958,15 @@ function patchProject(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If project ID was provided in the body, ensure it matches project ID in params
   if (req.body.hasOwnProperty('id') && (req.params.projectid !== req.body.id)) {
     const error = new M.DataFormatError(
@@ -1991,6 +2054,15 @@ function deleteProject(req, res) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // Attempt to parse query options
@@ -2563,6 +2635,15 @@ function postUser(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If username was provided in the body, ensure it matches username in params
   if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
     const error = new M.DataFormatError(
@@ -2652,6 +2733,15 @@ function putUser(req, res) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2745,6 +2835,15 @@ function patchUser(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If username was provided in the body, ensure it matches username in params
   if (req.body.hasOwnProperty('username') && (req.body.username !== req.params.username)) {
     const error = new M.DataFormatError(
@@ -2831,6 +2930,15 @@ function deleteUser(req, res) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // Attempt to parse query options
@@ -3864,6 +3972,15 @@ function postElement(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
     const error = new M.DataFormatError(
@@ -3954,6 +4071,15 @@ function putElement(req, res) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4047,6 +4173,15 @@ function patchElement(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.elementid)) {
     const error = new M.DataFormatError(
@@ -4134,6 +4269,15 @@ function deleteElement(req, res) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // Attempt to parse query options
@@ -4648,6 +4792,15 @@ function postBranch(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.branchid)) {
     const error = new M.DataFormatError(
@@ -4739,6 +4892,15 @@ function patchBranch(req, res) {
     logger.logResponse(error.message.length, req, res);
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
+  }
+
   // If an ID was provided in the body, ensure it matches the ID in params
   if (req.body.hasOwnProperty('id') && (req.body.id !== req.params.branchid)) {
     const error = new M.DataFormatError(
@@ -4827,6 +4989,15 @@ function deleteBranch(req, res) {
     res.header('Content-Type', 'text/plain');
     res.status(errors.getStatusCode(error)).send(error.message);
     logger.logResponse(error.message.length, req, res);
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    res.header('Content-Type', 'text/plain');
+    res.status(400).send(error.message);
+    logger.logResponse(error.message.length, req, res);
+    return res;
   }
 
   // Attempt to parse query options
