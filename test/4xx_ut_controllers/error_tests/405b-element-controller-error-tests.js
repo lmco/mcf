@@ -10,6 +10,7 @@
 * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
 *
 * @author Austin Bieber <austin.j.bieber@lmco.com>
+* @author Phillip Lee <phillip.lee@lmco.com>
 *
 * @description This tests for expected errors within the element controller.
 */
@@ -80,7 +81,9 @@ describe(M.getModuleName(module.filename), () => {
         testData.elements[3],
         testData.elements[4],
         testData.elements[5],
-        testData.elements[6]
+        testData.elements[6],
+        testData.elements[7],
+        testData.elements[8]
       ];
       return ElementController.create(adminUser, org.id, projID, branchID, elemDataObjects);
     })
@@ -127,6 +130,8 @@ describe(M.getModuleName(module.filename), () => {
     + 'saying elements cannot be update.', updateInTag);
   it('should reject delete an element in a tag '
     + 'saying elements cannot be deleted.', deleteInTag);
+  it('should reject put elements with invalid id', putInvalidId);
+  it('should reject put elements without id', putWithoutId);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -355,5 +360,74 @@ function deleteInTag(done) {
     chai.expect(error.message).to.equal(`[${tagID}] is a tag and`
       + ' does not allow elements to be deleted.');
     done();
+  });
+}
+
+/**
+ * @description Verifies invalid Id PUT call does not delete existing elements.
+ */
+function putInvalidId(done) {
+  // Create the test element objects
+  const testElemObj0 = testData.elements[7];
+  const testElemObj1 = testData.elements[8];
+  const invalidProjObj = { id: 'INVALID_ID', name: 'element name' };
+
+  ElementController.createOrReplace(adminUser, org.id, projID, branchID,
+    [testElemObj0, testElemObj1, invalidProjObj])
+  .then(() => {
+    // Should not succeed, force to fail
+    done(new Error('Element put successfully.'));
+  })
+  .catch((error) => {
+    // Verify the error message
+    chai.expect(error.message).to.equal('Element validation failed: _id: '
+      + 'Path `_id` is invalid (testorg00:project00:master:INVALID_ID).');
+
+    // Expected error, find valid elements
+    return ElementController.find(adminUser, org.id, projID, branchID,
+      [testElemObj0.id, testElemObj1.id]);
+  })
+  .then((foundProjs) => {
+    // Expect to find 2 elements
+    chai.expect(foundProjs.length).to.equal(2);
+    done();
+  })
+  .catch((error) => {
+    chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Verifies PUT call with Id does not delete existing elements.
+ * Note: This test should fail prior to deletion of existing elements.
+ */
+function putWithoutId(done) {
+  // Create the test elements
+  const testElemObj0 = testData.elements[7];
+  const testElemObj1 = testData.elements[8];
+  const invalidElemObj = { name: 'missing id' };
+
+  ElementController.createOrReplace(adminUser, org.id, projID, branchID,
+    [testElemObj0, testElemObj1, invalidElemObj])
+  .then(() => {
+    // Should not succeed, force to fail
+    done(new Error('Element put successfully.'));
+  })
+  .catch((error) => {
+    // Expected error, find valid elements
+    ElementController.find(adminUser, org.id, projID, branchID, [testElemObj0.id, testElemObj1.id])
+    .then((foundElems) => {
+      // Verify the error message
+      chai.expect(error.message).to.equal('Element #3 does not have an id.');
+
+      // Expect to find 2 elements
+      chai.expect(foundElems.length).to.equal(2);
+      done();
+    })
+    .catch((err) => {
+      chai.expect(err.message).to.equal(null);
+      done();
+    });
   });
 }

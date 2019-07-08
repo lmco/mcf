@@ -801,7 +801,9 @@ function createOrReplace(requestingUser, orgs, options) {
     let foundOrgs = [];
     let orgsToLookup = [];
     let createdOrgs = [];
-    const timestamp = Date.now();
+    let isCreated = false;
+    let isDeleted = false;
+    const ts = Date.now();
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs)) {
@@ -856,7 +858,7 @@ function createOrReplace(requestingUser, orgs, options) {
 
       // Write contents to temporary file
       return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`),
+        fs.writeFile(path.join(M.root, 'data', `PUT-backup-orgs-${ts}.json`),
           JSON.stringify(_foundOrgs), function(err) {
             if (err) rej(err);
             else res();
@@ -869,16 +871,24 @@ function createOrReplace(requestingUser, orgs, options) {
       // Emit the event orgs-deleted
       EventEmitter.emit('orgs-deleted', foundOrgs);
 
+      // Set deleted to true
+      isDeleted = true;
+
       // Create the new orgs
       return create(requestingUser, orgsToLookup, options);
     })
     .then((_createdOrgs) => {
       createdOrgs = _createdOrgs;
 
+      // Set created to true
+      isCreated = true;
+
       // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`))) {
-        return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`), function(err) {
+      const filePath = path.join(M.root, 'data',
+        `PUT-backup-orgs-${ts}.json`);
+      if (fs.existsSync(filePath)) {
+        return new Promise((res, rej) => {
+          fs.unlink(filePath, function(err) {
             if (err) rej(err);
             else res();
           });
@@ -886,7 +896,28 @@ function createOrReplace(requestingUser, orgs, options) {
       }
     })
     .then(() => resolve(createdOrgs))
-    .catch((error) => reject(errors.captureError(error)));
+    .catch((error) => new Promise((res) => {
+      // Check if deleted and creation failed
+      if (isDeleted && !isCreated) {
+        // Reinsert original data
+        Organization.insertMany(foundOrgs)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data',
+            `PUT-backup-orgs-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      }
+      else {
+        // Resolve original error
+        return res(error);
+      }
+    }))
+    .then((error) => reject(errors.captureError(error)));
   });
 }
 

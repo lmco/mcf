@@ -12,6 +12,7 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the User model that
  * implements controller logic and behavior for Users.
@@ -714,6 +715,8 @@ function createOrReplace(requestingUser, users, options) {
     let foundUsers = [];
     let usersToLookup = [];
     let createdUsers = [];
+    let isCreated = false;
+    let isDeleted = false;
     const ts = Date.now();
 
     // Check the type of the users parameter
@@ -776,19 +779,25 @@ function createOrReplace(requestingUser, users, options) {
           });
       });
     })
-    .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }).lean())
+    .then(() => User.deleteMany({ _id: { $in: foundUsers.map(u => u._id) } }).lean())
     .then(() => {
       // Emit the event users-deleted
       EventEmitter.emit('users-deleted', foundUsers);
+
+      // Set deleted to true
+      isDeleted = true;
 
       // Create the new users
       return create(requestingUser, usersToLookup, options);
     })
     .then((_createdUsers) => {
       createdUsers = _createdUsers;
+      // Set created to true
+      isCreated = true;
 
       // Delete the temporary file.
-      const filePath = path.join(M.root, 'data', `PUT-backup-users-${ts}.json`);
+      const filePath = path.join(M.root, 'data',
+        `PUT-backup-users-${ts}.json`);
       if (fs.existsSync(filePath)) {
         return new Promise(function(res, rej) {
           fs.unlink(filePath, function(err) {
@@ -799,7 +808,28 @@ function createOrReplace(requestingUser, users, options) {
       }
     })
     .then(() => resolve(createdUsers))
-    .catch((error) => reject(errors.captureError(error)));
+    .catch((error) => new Promise((res) => {
+      // Check if deleted and creation failed
+      if (isDeleted && !isCreated) {
+        // Reinsert original data
+        User.insertMany(foundUsers)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data',
+            `PUT-backup-users-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      }
+      else {
+        // Resolve original error
+        return res(error);
+      }
+    }))
+    .then((error) => reject(errors.captureError(error)));
   });
 }
 
