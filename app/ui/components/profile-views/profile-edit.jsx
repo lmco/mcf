@@ -89,7 +89,7 @@ class ProfileEdit extends Component {
       custom: JSON.parse(this.state.custom)
     };
 
-    if (this.state.email.length > 0) {
+    if (this.state.email) {
       data.email = this.state.email;
     }
 
@@ -130,6 +130,7 @@ class ProfileEdit extends Component {
     // Initialize variables
     let fnameInvalid;
     let lnameInvalid;
+    let preferredInvalid;
     let customInvalid;
     let disableSubmit;
     let titleClass = 'workspace-title workspace-title-padding';
@@ -154,6 +155,12 @@ class ProfileEdit extends Component {
     if (!RegExp(validators.user.fname).test(this.state.fname)) {
       // Set invalid fields
       fnameInvalid = true;
+      disableSubmit = true;
+    }
+
+    if (!RegExp(validators.user.preferredname).test(this.state.fname)) {
+      // Set invalid fields
+      preferredInvalid = true;
       disableSubmit = true;
     }
 
@@ -213,7 +220,7 @@ class ProfileEdit extends Component {
                        onChange={this.handleChange}/>
                 {/* Verify fields are valid, or display feedback */}
                 <FormFeedback >
-                  Invalid: A user's first name may only contain letters.
+                  Invalid: First name can only be letters, dashes, and spaces.
                 </FormFeedback>
               </FormGroup>
               {/* Form section for user's preferred name */}
@@ -224,11 +231,12 @@ class ProfileEdit extends Component {
                        id="preferred"
                        placeholder="User's preferred name"
                        value={this.state.preferred || ''}
+                       invalid={preferredInvalid}
                        invalid={fnameInvalid}
                        onChange={this.handleChange}/>
                 {/* Verify fields are valid, or display feedback */}
                 <FormFeedback >
-                  Invalid: A user's first name may only contain letters.
+                  Invalid: Preferred name can only be letters, dashes, and spaces.
                 </FormFeedback>
               </FormGroup>
               {/* Form section for user's last name */}
@@ -243,7 +251,7 @@ class ProfileEdit extends Component {
                        onChange={this.handleChange}/>
                 {/* Verify fields are valid, or display feedback */}
                 <FormFeedback >
-                  Invalid: A user's last name may only contain letters.
+                  Invalid: Last name can only be letters, dashes, and spaces.
                 </FormFeedback>
               </FormGroup>
               {/* Form section for the user's email */}

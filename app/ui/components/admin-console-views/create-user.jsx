@@ -45,6 +45,7 @@ class CreateUser extends Component {
       username: '',
       fname: '',
       lname: '',
+      preferredname: '',
       email: '',
       password: '',
       admin: false,
@@ -118,6 +119,7 @@ class CreateUser extends Component {
       username: this.state.username,
       fname: this.state.fname,
       lname: this.state.lname,
+      preferredname: this.state.preferredname,
       email: this.state.email,
       admin: this.state.admin,
       password: this.state.password
@@ -139,6 +141,9 @@ class CreateUser extends Component {
         },
         403: (err) => {
           this.setState({ error: err.responseText });
+        },
+        500: (err) => {
+          this.setState({ error: err.responseText });
         }
       }
     });
@@ -147,6 +152,9 @@ class CreateUser extends Component {
   render() {
     // Initialize validators
     let usernameInvalid;
+    let fnameInvalid;
+    let preferredInvalid;
+    let lnameInvalid;
     let emailInvalid;
     let disableSubmit;
     let customInvalid;
@@ -158,6 +166,24 @@ class CreateUser extends Component {
         usernameInvalid = true;
         disableSubmit = true;
       }
+    }
+
+    if (!RegExp(validators.user.fname).test(this.state.fname)) {
+      // Set invalid fields
+      fnameInvalid = true;
+      disableSubmit = true;
+    }
+
+    if (!RegExp(validators.user.preferredname).test(this.state.fname)) {
+      // Set invalid fields
+      preferredInvalid = true;
+      disableSubmit = true;
+    }
+
+    if (!RegExp(validators.user.lname).test(this.state.lname)) {
+      // Set invalid fields
+      lnameInvalid = true;
+      disableSubmit = true;
     }
 
     // Verify if project name is valid
@@ -205,7 +231,7 @@ class CreateUser extends Component {
                      value={this.state.username || ''}
                      invalid={usernameInvalid}
                      onChange={this.handleChange}/>
-              {/* If invalid id, notify user */}
+              {/* If invalid username, notify user */}
               <FormFeedback >
                 Invalid: Invalid username.
               </FormFeedback>
@@ -217,18 +243,43 @@ class CreateUser extends Component {
                      name="fname"
                      id="fname"
                      placeholder="First Name"
+                     invalid={fnameInvalid}
                      value={this.state.fname || ''}
                      onChange={this.handleChange}/>
+              {/* If invalid name, notify user */}
+              <FormFeedback >
+                Invalid: First name can only be letters, dashes, and spaces.
+              </FormFeedback>
             </FormGroup>
-            {/* Create an input for project name */}
+            {/* Create an input for preferred name */}
+            <FormGroup>
+              <Label for="preferredname">Preferred Name</Label>
+              <Input type="preferredname"
+                     name="preferredname"
+                     id="preferredname"
+                     invalid={preferredInvalid}
+                     placeholder="Preferred Name"
+                     value={this.state.preferredname || ''}
+                     onChange={this.handleChange}/>
+              {/* If invalid name, notify user */}
+              <FormFeedback >
+                Invalid: Preferred name can only be letters, dashes, and spaces.
+              </FormFeedback>
+            </FormGroup>
+            {/* Create an input for user last name */}
             <FormGroup>
               <Label for="lname">Last Name</Label>
               <Input type="lname"
                      name="lname"
                      id="lname"
+                     invalid={lnameInvalid}
                      placeholder="Last Name"
                      value={this.state.lname || ''}
                      onChange={this.handleChange}/>
+              {/* If invalid name, notify user */}
+              <FormFeedback >
+                Invalid: Last name can only be letters, dashes, and spaces.
+              </FormFeedback>
             </FormGroup>
             {/* Create an input for custom data */}
             <FormGroup>
