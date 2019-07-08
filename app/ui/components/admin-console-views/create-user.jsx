@@ -119,7 +119,7 @@ class CreateUser extends Component {
       username: this.state.username,
       fname: this.state.fname,
       lname: this.state.lname,
-      preferredname: this.state.preferredname,
+      preferredName: this.state.preferredname,
       email: this.state.email,
       admin: this.state.admin,
       password: this.state.password
@@ -174,7 +174,7 @@ class CreateUser extends Component {
       disableSubmit = true;
     }
 
-    if (!RegExp(validators.user.preferredname).test(this.state.fname)) {
+    if (!RegExp(validators.user.fname).test(this.state.preferredname)) {
       // Set invalid fields
       preferredInvalid = true;
       disableSubmit = true;
@@ -236,7 +236,7 @@ class CreateUser extends Component {
                 Invalid: Invalid username.
               </FormFeedback>
             </FormGroup>
-            {/* Create an input for project name */}
+            {/* Create an input for user name */}
             <FormGroup>
               <Label for="fname">First Name</Label>
               <Input type="fname"
