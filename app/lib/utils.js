@@ -412,7 +412,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         val = val.slice(1);
       }
       // Handle cases where user is looking for _id
-      if (val.includes('id') || val.includes('username')) {
+      if (val === 'id' || val === 'username') {
         val = '_id';
       }
       // Return the parsed sort option in the format {sort_field: order}
