@@ -119,7 +119,7 @@ class CreateUser extends Component {
       username: this.state.username,
       fname: this.state.fname,
       lname: this.state.lname,
-      preferredname: this.state.preferredname,
+      preferredName: this.state.preferredname,
       email: this.state.email,
       admin: this.state.admin,
       password: this.state.password
