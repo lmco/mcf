@@ -128,7 +128,7 @@ function formatJSON(obj, minified = false) {
  * @param {String} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
  *
- * @returns {string} JSON string of object parameter
+ * @returns {Object} res - The response object
  */
 function returnResponse(req, res, message, statusCode) {
   if (statusCode === 200) { res.header('Content-Type', 'application/json'); }
