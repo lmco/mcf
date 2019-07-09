@@ -123,6 +123,9 @@ class CreateBranch extends Component {
         200: (data) => {
           this.setState({ branches: data });
         },
+        400: (err) => {
+          this.setState({ error: err.responseText });
+        },
         401: () => {
           this.setState({ branches: null, tags: null });
 
@@ -177,6 +180,9 @@ class CreateBranch extends Component {
         idInvalid = true;
         disableSubmit = true;
       }
+    }
+    else {
+      disableSubmit = true;
     }
 
     // Verify custom data is valid
