@@ -20,6 +20,7 @@ const chai = require('chai');
 const request = require('request');
 const path = require('path');
 const fs = require('fs');
+const zlib = require('zlib');
 
 // MBEE modules
 const db = M.require('lib.db');
@@ -30,7 +31,7 @@ const utils = M.require('lib.utils');
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 const test = M.config.test;
-const zipFile = 'test/test_zip_data.json.gz';
+const zipfilepath = path.join(M.root, '/test/testzip.json');
 let org = null;
 let adminUser = null;
 let projID = null;
@@ -84,6 +85,7 @@ describe(M.getModuleName(module.filename), () => {
     testUtils.removeTestOrg(adminUser)
     // Delete admin user
     .then(() => testUtils.removeTestAdmin())
+    .then(() => fs.unlinkSync(zipfilepath))
     .then(() => db.disconnect())
     .then(() => done())
     .catch((error) => {
@@ -105,7 +107,12 @@ describe(M.getModuleName(module.filename), () => {
  * the contents can be used to create elements.
  */
 function handleGzipUpload(done) {
-  const elemData = testData.elements[0];
+  const elementData = testData.elements[0];
+
+  // Create a gzip file for testing
+  const zippedData = zlib.gzipSync(JSON.stringify(elementData));
+  fs.appendFileSync((zipfilepath), zippedData);
+
   request({
     url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/master/elements`,
     // Send the 'application/gzip' header
@@ -113,7 +120,7 @@ function handleGzipUpload(done) {
     ca: testUtils.readCaFile(),
     method: 'POST',
     // Send a zip file containing element data in the body
-    body: fs.createReadStream(path.join(M.root, zipFile))
+    body: fs.createReadStream(zipfilepath)
   },
   (err, response, body) => {
     // Expect no error
@@ -126,10 +133,14 @@ function handleGzipUpload(done) {
     const createdElement = createdElements[0];
 
     // Verify element created properly
-    chai.expect(createdElement.id).to.equal(elemData.id);
-    chai.expect(createdElement.name).to.equal(elemData.name);
-    chai.expect(createdElement.custom || {}).to.deep.equal(elemData.custom);
+    chai.expect(createdElement.id).to.equal(elementData.id);
+    chai.expect(createdElement.name).to.equal(elementData.name);
+    chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
     chai.expect(createdElement.project).to.equal(projID);
+
+    // Clear the data used for testing
+    fs.truncateSync(zipfilepath);
+
     done();
   });
 }
