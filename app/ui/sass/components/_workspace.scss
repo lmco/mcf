@@ -207,7 +207,7 @@
 
 .stats-list-item {
   display: grid;
-  grid-template-columns: minmax(auto, 600px) 1fr;
+  grid-template-columns: minmax(auto, 750px) 1fr;
   grid-template-areas: "header stats";
   justify-content: space-between;
   align-items: center;
@@ -310,7 +310,7 @@
 #user-list-items {
   margin: 0.5em;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 25% 25% 25% 25%;
 }
 
 .required-fields {

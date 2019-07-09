@@ -120,6 +120,9 @@ class MemberEdit extends Component {
           // Update the page to reload to user page
           window.location.reload();
         },
+        400: (err) => {
+          this.setState({ error: err.responseText });
+        },
         401: (err) => {
           this.setState({ error: err.responseText });
 
