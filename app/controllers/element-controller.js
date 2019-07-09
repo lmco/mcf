@@ -1300,13 +1300,15 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
             }
 
             // If no target exists and is not being updated, throw error
-            if (key === 'source' && !(updateElement.target !== undefined || element.target)) {
+            if (key === 'source' && !((updateElement.target !== undefined && updateElement.target !== null)
+              || element.target)) {
               throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
                 + ' target is required if source is provided.', 'warn');
             }
 
             // If no source exists and is not being updated, throw error
-            if (key === 'target' && !(updateElement.source !== undefined || element.source)) {
+            if (key === 'target' && !((updateElement.source !== undefined && updateElement.source !== null)
+              || element.source)) {
               throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
                 + ' source is required if target is provided.', 'warn');
             }
