@@ -1037,6 +1037,7 @@ function createOrReplace(reqUser, organizationID, projects, options) {
     const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const duplicateCheck = {};
     let foundProjects = [];
+    let foundOrganization = [];
     let projectsToLookUp = [];
     let createdProjects = [];
     const ts = Date.now();
@@ -1086,16 +1087,11 @@ function createOrReplace(reqUser, organizationID, projects, options) {
     // Find the organization containing the projects
     Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrganization) => {
+      foundOrganization = _foundOrganization
+
       // Check if the organization was found
       if (_foundOrganization === null) {
         throw new M.NotFoundError(`The org [${orgID}] was not found.`, 'warn');
-      }
-
-      // Ensure the user has at least read access on the organization
-      if (!reqUser.admin && (!_foundOrganization.permissions[reqUser._id]
-        || !_foundOrganization.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to update'
-          + ` projects on the organization [${orgID}].`, 'warn');
       }
 
       // Verify the organization is not archived
@@ -1110,12 +1106,22 @@ function createOrReplace(reqUser, organizationID, projects, options) {
     .then((_foundProjects) => {
       foundProjects = _foundProjects;
 
+      // Check if new projects are being created
+      if (projectsToLookUp.length > foundProjects.length) {
+        // Ensure the user has at least write access on the organization
+        if (!reqUser.admin && (!foundOrganization.permissions[reqUser._id]
+          || !foundOrganization.permissions[reqUser._id].includes('write'))) {
+          throw new M.PermissionError('User does not have permission to create'
+            + ` projects on the organization [${orgID}].`, 'warn');
+        }
+      }
+
       // Check that the user has admin permissions
       foundProjects.forEach((proj) => {
         if (!reqUser.admin && (!proj.permissions[reqUser._id]
           || !proj.permissions[reqUser._id].includes('admin'))) {
-          throw new M.PermissionError('User does not have permission to replace'
-            + ` the project [${utils.parseID(proj._id).pop()}].`, 'warn');
+          throw new M.PermissionError('User does not have permission to create or '
+            + `replace the project [${utils.parseID(proj._id).pop()}].`, 'warn');
         }
       });
 

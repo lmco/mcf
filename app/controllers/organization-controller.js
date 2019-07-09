@@ -830,8 +830,8 @@ function createOrReplace(reqUser, orgs, options) {
       foundOrgs.forEach((org) => {
         if (!reqUser.admin && (!org.permissions[reqUser._id]
           || !org.permissions[reqUser._id].includes('admin'))) {
-          throw new M.PermissionError('User does not have permission to update'
-            + ` the org [${org._id}].`, 'warn');
+          throw new M.PermissionError('User does not have permission to'
+            + ` create or replace the org [${org._id}].`, 'warn');
         }
       });
 

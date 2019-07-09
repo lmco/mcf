@@ -1491,15 +1491,15 @@ function createOrReplace(reqUser, organizationID, projectID, branch, elements, o
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
-        throw new M.NotFoundError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the`
+          + ` organization [${orgID}].`, 'warn');
       }
 
       // Verify user has write permissions on the project
       if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
         || !foundProject.permissions[reqUser._id].includes('write'))) {
-        throw new M.PermissionError('User does not have permission to replace'
-          + ` elements on the project [${projID}].`, 'warn');
+        throw new M.PermissionError('User does not have permission to create'
+          + ` or replace elements on the project [${projID}].`, 'warn');
       }
 
       // Ensure the project is not archived
