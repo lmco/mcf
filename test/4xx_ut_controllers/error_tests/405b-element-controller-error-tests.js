@@ -264,8 +264,8 @@ function updateSourceWithNoTarget(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.message).to.equal(`Element [${elemDataObject.id}]`
-      + ' target is required if source is provided.');
+    chai.expect(error.message).to.equal('If source element is provided, target'
+      + ' element is required.');
     done();
   });
 }
@@ -291,8 +291,8 @@ function updateTargetWithNoSource(done) {
   })
   .catch((error) => {
     // Ensure error message is correct
-    chai.expect(error.message).to.equal(`Element [${elemDataObject.id}]`
-      + ' source is required if target is provided.');
+    chai.expect(error.message).to.equal('If target element is provided, source'
+      + ' element is required.');
     done();
   });
 }

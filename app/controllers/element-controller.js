@@ -1260,6 +1260,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         delete updateElement.id;
         delete updateElement._id;
 
+        if (updateElement.hasOwnProperty('source') && updateElement.source === element.source) {
+          delete updateElement.source;
+        }
+
+        if (updateElement.hasOwnProperty('target') && updateElement.target === element.target) {
+          delete updateElement.target;
+        }
+
         // Error Check: if element is currently archived, it must first be unarchived
         if (element.archived && (updateElement.archived === undefined
           || JSON.parse(updateElement.archived) !== false)) {
@@ -1299,17 +1307,37 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
                 + `in the project [${utils.parseID(updateElement[key])[1]}].`, 'warn');
             }
 
-            // If no target exists and is not being updated, throw error
-            if (key === 'source' && !(updateElement.target !== undefined || element.target)) {
-              throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
-                + ' target is required if source is provided.', 'warn');
+            if ((updateElement.target && !(element.source || updateElement.source))
+              || (updateElement.source === null && updateElement.target !== null)) {
+              throw new M.DataFormatError('If target element is provided, '
+                + 'source element is required.', 'warn');
             }
 
-            // If no source exists and is not being updated, throw error
-            if (key === 'target' && !(updateElement.source !== undefined || element.source)) {
-              throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
-                + ' source is required if target is provided.', 'warn');
+            if ((updateElement.source && !(element.target || updateElement.target))
+              || (updateElement.target === null && updateElement.source !== null)) {
+              throw new M.DataFormatError('If source element is provided, '
+                + 'target element is required.', 'warn');
             }
+
+            // // If no target exists and is not being updated, throw error
+            // if (key === 'source'
+            //   // If source is null but target is being changed
+            //   && ((!updateElement.source && updateElement.target)
+            //   // If there is no target stored and no target being updated
+            //   || (updateElement.source && (!element.target && !updateElement.target)))) {
+            //   throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
+            //     + ' target is required if source is provided.', 'warn');
+            // }
+            //
+            // // If no source exists and is not being updated, throw error
+            // if (key === 'target'
+            //   // If source is null but target is being changed
+            //   && ((!updateElement.target && updateElement.source)
+            //     // If there is no target stored and no target being updated
+            //     || (updateElement.target && (!element.source && !updateElement.source)))) {
+            //   throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
+            //     + ' source is required if target is provided.', 'warn');
+            // }
           }
 
           // Set archivedBy if archived field is being changed
