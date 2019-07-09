@@ -1395,7 +1395,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  * element already exists, it is replaced with the provided data. NOTE: This
  * function is reserved for system-wide admins ONLY.
  *
- * @param {User} requestingUser - The object containing the requesting user.
+ * @param {User} reqUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to add elements to.
@@ -1442,16 +1442,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  *   M.log.error(error);
  * });
  */
-function createOrReplace(requestingUser, organizationID, projectID, branch, elements, options) {
+function createOrReplace(reqUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      assert.ok(typeof reqUser === 'object', 'Requesting user is not an object.');
+      assert.ok(reqUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions'
-        + 'to replace elements.');
+      assert.ok(reqUser._id, 'Requesting user is not populated.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
@@ -1504,8 +1502,15 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
-        throw new M.NotFoundError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the`
+          + ` organization [${orgID}].`, 'warn');
+      }
+
+      // Verify user has write permissions on the project
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
+        throw new M.PermissionError('User does not have permission to create'
+          + ` or replace elements on the project [${projID}].`, 'warn');
       }
 
       // Ensure the project is not archived
@@ -1646,7 +1651,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       isDeleted = true;
 
       // Create new elements
-      return create(requestingUser, orgID, projID, branchID, elementsToLookup, options);
+      return create(reqUser, orgID, projID, branchID, elementsToLookup, options);
     })
     .then((_createdElements) => {
       createdElements = _createdElements;

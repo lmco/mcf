@@ -736,7 +736,7 @@ function update(requestingUser, orgs, options) {
  * ids already exist, this function updates those orgs. This function is
  * restricted to system-wide admins ONLY.
  *
- * @param {User} requestingUser - The object containing the requesting user.
+ * @param {User} reqUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing
  * updates/new data for organizations, or a single object containing updates.
  * @param {string} orgs.id - The ID of the org being updated/created. Field
@@ -770,16 +770,14 @@ function update(requestingUser, orgs, options) {
  *   M.log.error(error);
  * });
  */
-function createOrReplace(requestingUser, orgs, options) {
+function createOrReplace(reqUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+      assert.ok(typeof reqUser === 'object', 'Requesting user is not an object.');
+      assert.ok(reqUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions'
-        + 'to create or replace orgs.');
+      assert.ok(reqUser._id, 'Requesting user is not populated.');
       assert.ok(typeof orgs === 'object', 'Orgs parameter is not an object.');
       assert.ok(orgs !== null, 'Orgs parameter cannot be null.');
       // If orgs is an array, ensure each item inside is an object
@@ -851,6 +849,23 @@ function createOrReplace(requestingUser, orgs, options) {
     .then((_foundOrgs) => {
       foundOrgs = _foundOrgs;
 
+      // Check if there are new orgs
+      // Note: if more orgs than found, there must be new orgs
+      if (orgsToLookup.length > foundOrgs.length) {
+        // Requires global admin to create new orgs
+        assert.ok(reqUser.admin === true, 'User does not have permissions'
+          + 'to create or replace orgs.');
+      }
+
+      // Check that the user has admin permissions
+      foundOrgs.forEach((org) => {
+        if (!reqUser.admin && (!org.permissions[reqUser._id]
+          || !org.permissions[reqUser._id].includes('admin'))) {
+          throw new M.PermissionError('User does not have permission to'
+            + ` create or replace the org [${org._id}].`, 'warn');
+        }
+      });
+
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
         fs.mkdirSync(path.join(M.root, 'data'));
@@ -875,7 +890,7 @@ function createOrReplace(requestingUser, orgs, options) {
       isDeleted = true;
 
       // Create the new orgs
-      return create(requestingUser, orgsToLookup, options);
+      return create(reqUser, orgsToLookup, options);
     })
     .then((_createdOrgs) => {
       createdOrgs = _createdOrgs;
