@@ -1087,7 +1087,7 @@ function createOrReplace(reqUser, organizationID, projects, options) {
     // Find the organization containing the projects
     Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrganization) => {
-      foundOrganization = _foundOrganization
+      foundOrganization = _foundOrganization;
 
       // Check if the organization was found
       if (_foundOrganization === null) {
