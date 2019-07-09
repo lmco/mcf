@@ -55,8 +55,8 @@ class ProfileApp extends Component {
       else {
         this.setState({ user: data });
 
-        if (this.props.match.params.username) {
-          const username = this.props.match.params.username;
+        const username = this.props.match.params.username;
+        if (username && (username !== 'projects') && (username !== 'orgs')) {
           const url = `/api/users/${username}`;
           $.ajax({
             method: 'GET',
