@@ -1,18 +1,18 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.505c-element-mock-specific-tests
+ * @module test.501c-user-mock-specific-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI - Lockheed Martin Proprietary Information
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE elements.
+ * GET, POST, PATCH, and DELETE users.
  */
 
 // NPM modules
@@ -22,11 +22,9 @@ const fs = require('fs');
 const zlib = require('zlib');
 
 // MBEE modules
-const ElementController = M.require('controllers.element-controller');
-const ProjectController = M.require('controllers.project-controller');
+const UserController = M.require('controllers.user-controller');
 const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
-const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -34,9 +32,7 @@ const testData = testUtils.importTestData('test_data.json');
 const filepath = path.join(M.root, '/test/testzip.json');
 let adminUser = null;
 let org = null;
-let proj = null;
-let projID = null;
-const branchID = 'master';
+
 
 /* --------------------( Main )-------------------- */
 /**
@@ -47,7 +43,7 @@ const branchID = 'master';
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user
    */
   before((done) => {
     // Open the database connection
@@ -64,17 +60,6 @@ describe(M.getModuleName(module.filename), () => {
     .then((retOrg) => {
       // Set global organization
       org = retOrg;
-
-      // Define project data
-      const projData = testData.projects[0];
-
-      // Create project
-      return ProjectController.create(adminUser, org.id, projData);
-    })
-    .then((retProj) => {
-      // Set global project
-      proj = retProj;
-      projID = utils.parseID(proj[0].id).pop();
       done();
     })
     .catch((error) => {
@@ -86,12 +71,11 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Remove Organization and project.
+   * After: Remove test admin.
    * Close database connection.
    */
   after((done) => {
     // Remove organization
-    // Note: Projects under organization will also be removed
     testUtils.removeTestOrg(adminUser)
     .then(() => testUtils.removeTestAdmin())
     .then(() => fs.unlinkSync(filepath))
@@ -106,29 +90,27 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should create elements from an uploaded gzip file', postGzip);
-  it('should put elements from an uploaded gzip file', putGzip);
-  it('should patch elements from an uploaded gzip file', patchGzip);
+  it('should post users from an uploaded gzip file', postGzip);
+  it('should put users from an uploaded gzip file', putGzip);
+  it('should patch users from an uploaded gzip file', patchGzip);
 });
 
 /* --------------------( Tests )-------------------- */
 
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to create elements.
+ * the contents can be used to create users.
  */
 function postGzip(done) {
-  const elementData = testData.elements[0];
+  const userData = testData.users[0];
 
   // Create a gzip file for testing
-  const zippedData = zlib.gzipSync(JSON.stringify(elementData));
+  const zippedData = zlib.gzipSync(JSON.stringify(userData));
   fs.appendFileSync((filepath), zippedData);
 
   // Initialize the request attributes
   const params = {
-    orgid: org.id,
-    projectid: projID,
-    branchid: branchID
+    orgid: org.id
   };
   const body = {};
   const method = 'POST';
@@ -149,42 +131,44 @@ function postGzip(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const createdElements = JSON.parse(_data);
-    const createdElement = createdElements[0];
+    const createdUsers = JSON.parse(_data);
+    const createdUser = createdUsers[0];
 
-    // Verify element created properly
-    chai.expect(createdElement.id).to.equal(elementData.id);
-    chai.expect(createdElement.name).to.equal(elementData.name);
-    chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
-    chai.expect(createdElement.project).to.equal(projID);
+    // Verify user created properly
+    chai.expect(createdUser.username).to.equal(userData.username);
+    chai.expect(createdUser.fname).to.equal(userData.fname);
+    chai.expect(createdUser.lname).to.equal(userData.lname);
+    chai.expect(createdUser.custom || {}).to.deep.equal(userData.custom);
 
     // Clear the data used for testing
     fs.truncateSync(filepath);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    // Remove the test user
+    UserController.remove(adminUser, userData.username)
+    .then(() => {
+      // Ensure the response was logged correctly
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    });
   };
 
-  // POSTs an element
-  apiController.postElements(req, res);
+  // POSTs a user
+  apiController.postUsers(req, res);
 }
 
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to create or replace elements.
+ * the contents can be used to create or replace users.
  */
 function putGzip(done) {
-  const elementData = testData.elements[1];
+  const userData = testData.users[0];
 
   // Create a gzip file for testing
-  const zippedData = zlib.gzipSync(JSON.stringify(elementData));
+  const zippedData = zlib.gzipSync(JSON.stringify(userData));
   fs.appendFileSync((filepath), zippedData);
 
   // Initialize the request attributes
   const params = {
-    orgid: org.id,
-    projectid: projID,
-    branchid: branchID
+    orgid: org.id
   };
   const body = {};
   const method = 'PUT';
@@ -205,48 +189,54 @@ function putGzip(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const createdElements = JSON.parse(_data);
-    const createdElement = createdElements[0];
+    const createdUsers = JSON.parse(_data);
+    const createdUser = createdUsers[0];
 
-    // Verify element created properly
-    chai.expect(createdElement.id).to.equal(elementData.id);
-    chai.expect(createdElement.name).to.equal(elementData.name);
-    chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
-    chai.expect(createdElement.project).to.equal(projID);
+    // Verify user created properly
+    chai.expect(createdUser.username).to.equal(userData.username);
+    chai.expect(createdUser.fname).to.equal(userData.fname);
+    chai.expect(createdUser.lname).to.equal(userData.lname);
+    chai.expect(createdUser.custom || {}).to.deep.equal(userData.custom);
 
     // Clear the data used for testing
     fs.truncateSync(filepath);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    // Remove the test org
+    UserController.remove(adminUser, userData.username)
+    .then(() => {
+      // Ensure the response was logged correctly
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    });
   };
 
-  // PUTs an element
-  apiController.putElements(req, res);
+  // PUTs a user
+  apiController.putUsers(req, res);
 }
 
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to update elements.
+ * the contents can be used to update users.
  */
 function patchGzip(done) {
-  const elementData = testData.elements[2];
+  const userData = testData.users[0];
 
-  // Create the element to be patched
-  ElementController.create(adminUser, org.id, projID, branchID, elementData)
+  // Create the user to be patched
+  UserController.create(adminUser, userData)
   .then(() => {
+    // create updates to the user
+    userData.fname = 'updated';
+    userData.password = undefined;
+
     // Create a gzip file for testing
-    const zippedData = zlib.gzipSync(JSON.stringify(elementData));
+    const zippedData = zlib.gzipSync(JSON.stringify(userData));
     fs.appendFileSync((filepath), zippedData);
 
     // Initialize the request attributes
     const params = {
-      orgid: org.id,
-      projectid: projID,
-      branchid: branchID
+      orgid: org.id
     };
     const body = {};
-    const method = 'POST';
+    const method = 'PATCH';
     const query = {};
     const headers = 'application/gzip';
 
@@ -264,23 +254,27 @@ function patchGzip(done) {
     // Verifies the response data
     res.send = function send(_data) {
       // Verify response body
-      const createdElements = JSON.parse(_data);
-      const createdElement = createdElements[0];
+      const createdUsers = JSON.parse(_data);
+      const createdUser = createdUsers[0];
 
-      // Verify element created properly
-      chai.expect(createdElement.id).to.equal(elementData.id);
-      chai.expect(createdElement.name).to.equal(elementData.name);
-      chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
-      chai.expect(createdElement.project).to.equal(projID);
+      // Verify user created properly
+      chai.expect(createdUser.username).to.equal(userData.username);
+      chai.expect(createdUser.fname).to.equal(userData.fname);
+      chai.expect(createdUser.lname).to.equal(userData.lname);
+      chai.expect(createdUser.custom || {}).to.deep.equal(userData.custom);
 
       // Clear the data used for testing
       fs.truncateSync(filepath);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      // Remove the test user
+      UserController.remove(adminUser, userData.username)
+      .then(() => {
+        // Ensure the response was logged correctly
+        setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      });
     };
 
-    // PATCHes an element
-    apiController.patchElements(req, res);
+    // PATCHes a user
+    apiController.patchUsers(req, res);
   });
 }

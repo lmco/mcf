@@ -345,7 +345,7 @@ function getOrgs(req, res) {
  *
  * @return {Object} Response object with orgs' public data
  */
-function postOrgs(req, res) {
+async function postOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -388,9 +388,27 @@ function postOrgs(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create organizations in request body
-  // NOTE: create() sanitizes req.body
-  OrgController.create(req.user, req.body, options)
+  // Get the org data
+  let orgData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      orgData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    orgData = req.body;
+  }
+
+  // Create organizations from org data
+  // NOTE: create() sanitizes orgData
+  OrgController.create(req.user, orgData, options)
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
@@ -424,7 +442,7 @@ function postOrgs(req, res) {
  *
  * @return {Object} Response object with orgs' public data
  */
-function putOrgs(req, res) {
+async function putOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -467,9 +485,27 @@ function putOrgs(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create or replace organizations in request body
-  // NOTE: createOrReplace() sanitizes req.body
-  OrgController.createOrReplace(req.user, req.body, options)
+  // Get the org data
+  let orgData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      orgData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    orgData = req.body;
+  }
+
+  // Create or replace organizations in org data
+  // NOTE: createOrReplace() sanitizes orgData
+  OrgController.createOrReplace(req.user, orgData, options)
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
@@ -502,7 +538,7 @@ function putOrgs(req, res) {
  *
  * @return {Object} Response object with orgs' public data
  */
-function patchOrgs(req, res) {
+async function patchOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -545,9 +581,27 @@ function patchOrgs(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the org data
+  let orgData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      orgData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    orgData = req.body;
+  }
+
   // Update the specified orgs
-  // NOTE: update() sanitizes req.body
-  OrgController.update(req.user, req.body, options)
+  // NOTE: update() sanitizes orgData
+  OrgController.update(req.user, orgData, options)
   .then((orgs) => {
     // Get the public data of each org
     const orgsPublicData = sani.html(
@@ -1343,7 +1397,7 @@ function getProjects(req, res) {
  *
  * @return {Object} Response object with created projects.
  */
-function postProjects(req, res) {
+async function postProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1386,9 +1440,27 @@ function postProjects(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the project data
+  let projectData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      projectData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    projectData = req.body;
+  }
+
   // Create the specified projects
-  // NOTE: create() sanitizes req.params.orgid and req.body
-  ProjectController.create(req.user, req.params.orgid, req.body, options)
+  // NOTE: create() sanitizes req.params.orgid and projectData
+  ProjectController.create(req.user, req.params.orgid, projectData, options)
   .then((projects) => {
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
@@ -1421,7 +1493,7 @@ function postProjects(req, res) {
  *
  * @return {Object} Response object with created/replaced projects.
  */
-function putProjects(req, res) {
+async function putProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1464,9 +1536,27 @@ function putProjects(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the project data
+  let projectData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      projectData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    projectData = req.body;
+  }
+
   // Create or replace the specified projects
-  // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
-  ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
+  // NOTE: createOrReplace() sanitizes req.params.orgid and projectData
+  ProjectController.createOrReplace(req.user, req.params.orgid, projectData, options)
   .then((projects) => {
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
@@ -1498,7 +1588,7 @@ function putProjects(req, res) {
  *
  * @return {Object} Response object with updated projects.
  */
-function patchProjects(req, res) {
+async function patchProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1541,9 +1631,27 @@ function patchProjects(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the project data
+  let projectData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      projectData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    projectData = req.body;
+  }
+
   // Update the specified projects
-  // NOTE: update() sanitizes req.params.orgid req.body
-  ProjectController.update(req.user, req.params.orgid, req.body, options)
+  // NOTE: update() sanitizes req.params.orgid projectData
+  ProjectController.update(req.user, req.params.orgid, projectData, options)
   .then((projects) => {
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
@@ -2224,7 +2332,7 @@ function getUsers(req, res) {
  *
  * @return {Object} Response object with users' public data
  */
-function postUsers(req, res) {
+async function postUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2267,9 +2375,27 @@ function postUsers(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the user data
+  let userData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      userData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    userData = req.body;
+  }
+
   // Create users
-  // NOTE: create() sanitizes req.body
-  UserController.create(req.user, req.body, options)
+  // NOTE: create() sanitizes userData
+  UserController.create(req.user, userData, options)
   .then((users) => {
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
@@ -2302,7 +2428,7 @@ function postUsers(req, res) {
  *
  * @return {Object} Response object with users' public data
  */
-function putUsers(req, res) {
+async function putUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2345,9 +2471,27 @@ function putUsers(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the user data
+  let userData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      userData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    userData = req.body;
+  }
+
   // Create or replace users
-  // NOTE: createOrReplace() sanitizes req.body
-  UserController.createOrReplace(req.user, req.body, options)
+  // NOTE: createOrReplace() sanitizes userData
+  UserController.createOrReplace(req.user, userData, options)
   .then((users) => {
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
@@ -2380,7 +2524,7 @@ function putUsers(req, res) {
  *
  * @return {Object} Response object with users' public data
  */
-function patchUsers(req, res) {
+async function patchUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2423,9 +2567,27 @@ function patchUsers(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the user data
+  let userData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      userData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    userData = req.body;
+  }
+
   // Update the specified users
-  // NOTE: update() sanitizes req.body
-  UserController.update(req.user, req.body, options)
+  // NOTE: update() sanitizes userData
+  UserController.update(req.user, userData, options)
   .then((users) => {
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
@@ -3519,7 +3681,7 @@ async function postElements(req, res) {
  *
  * @return {Object} Response object with created/replaced elements
  */
-function putElements(req, res) {
+async function putElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3562,10 +3724,28 @@ function putElements(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the element data
+  let elementData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      elementData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    elementData = req.body;
+  }
+
   // Create or replace the specified elements
   // NOTE: createOrReplace() sanitizes input params
   ElementController.createOrReplace(req.user, req.params.orgid,
-    req.params.projectid, req.params.branchid, req.body, options)
+    req.params.projectid, req.params.branchid, elementData, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -3597,7 +3777,7 @@ function putElements(req, res) {
  *
  * @return {Object} Response object with updated elements
  */
-function patchElements(req, res) {
+async function patchElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3640,10 +3820,28 @@ function patchElements(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the element data
+  let elementData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      elementData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    elementData = req.body;
+  }
+
   // Update the specified elements
   // NOTE: update() sanitizes input params
   ElementController.update(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, req.body, options)
+    req.params.branchid, elementData, options)
   .then((elements) => {
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
@@ -4452,7 +4650,7 @@ function getBranches(req, res) {
  *
  * @return {Object} Response object with created branches.
  */
-function postBranches(req, res) {
+async function postBranches(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4495,10 +4693,28 @@ function postBranches(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the branch data
+  let branchData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      branchData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    branchData = req.body;
+  }
+
   // Create the specified branches
-  // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and req.body
+  // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and branchData
   BranchController.create(req.user, req.params.orgid, req.params.projectid,
-    req.body, options)
+    branchData, options)
   .then((branches) => {
     const publicBranchData = sani.html(
       branches.map(b => publicData.getPublicData(b, 'branch', options))
@@ -4530,7 +4746,7 @@ function postBranches(req, res) {
  *
  * @return {Object} Response object with updated branches
  */
-function patchBranches(req, res) {
+async function patchBranches(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4573,10 +4789,28 @@ function patchBranches(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
+  // Get the branch data
+  let branchData;
+  if (req.headers['content-type'] === 'application/gzip') {
+    try {
+      // This function parses incoming gzipped data
+      branchData = await utils.handleGzip(req);
+    }
+    catch (error) {
+      // Error occurred with options, report it
+      res.header('Content-Type', 'text/plain');
+      res.status(errors.getStatusCode(error)).send(error.message);
+      logger.logResponse(error.message.length, req, res);
+    }
+  }
+  else {
+    branchData = req.body;
+  }
+
   // Update the specified branches
   // NOTE: update() sanitizes input params
   BranchController.update(req.user, req.params.orgid, req.params.projectid,
-    req.body, options)
+    branchData, options)
   .then((branches) => {
     const branchesPublicData = sani.html(
       branches.map(b => publicData.getPublicData(b, 'branch', options))
