@@ -183,7 +183,6 @@ UserSchema.methods.hashPassword = function() {
   const AuthController = M.require('lib.auth');
 
   // Check validation status NOT successful
-  console.log(this)
   if (!AuthController.validatePassword(this.password, this.provider)) {
     // Failed validation, throw error
     throw new M.DataFormatError('Password validation failed.', 'warn');
