@@ -19,11 +19,20 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Input, Form, FormGroup, Button, Row, Col } from 'reactstrap';
-import { Spinner } from 'reactstrap';
+import {
+  Input,
+  Form,
+  FormGroup,
+  Button,
+  Row,
+  Col,
+  Spinner
+} from 'reactstrap';
+
 
 // MBEE Modules
 import SearchResults from './search-results.jsx';
+import AdvancedSearch from './advanced-search/advanced-search.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -44,12 +53,15 @@ class Search extends Component {
     this.state = {
       query: getParams.q || null,
       results: null,
-      message: ''
+      message: '',
+      searchBtnHidden: false
     };
 
     // Bind component functions
     this.onChange = this.onChange.bind(this);
     this.doSearch = this.doSearch.bind(this);
+    this.getAdvResults = this.getAdvResults.bind(this);
+    this.toggleSearchBtn = this.toggleSearchBtn.bind(this);
   }
 
   componentDidMount() {
@@ -63,7 +75,22 @@ class Search extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
+  getAdvResults(results, message) {
+    this.setState({ results: results, message: message });
+  }
+
+  toggleSearchBtn() {
+    this.setState((prevState) => ({ searchBtnHidden: !prevState.searchBtnHidden }));
+  }
+
   doSearch(e) {
+    // Check if search input is blank or contains whitespace
+    const queryInput = this.state.query;
+    if (queryInput.length === 0 || !queryInput.trim()) {
+      this.setState({ results: null });
+      return;
+    }
+
     // Pre-search state resets
     this.setState({
       message: '',
@@ -116,6 +143,9 @@ class Search extends Component {
   }
 
   render() {
+    // Set style to hide Search button if Advanced Search is toggled
+    const style = this.state.searchBtnHidden ? { display: 'none' } : {};
+    const options = ['Parent', 'Source', 'Target', 'Type', 'Created By', 'Archived By', 'Last Modified By'];
     // Set search results or loading icons ...
     let searchResults = '';
     if (this.state.results === 'Searching ...') {
@@ -152,13 +182,18 @@ class Search extends Component {
                             <Button className='btn'
                                     outline color="primary"
                                     type='submit'
+                                    style={ style }
                                     onClick={this.doSearch}>
                                 Search
                             </Button>
                         </Col>
                     </Row>
                 </Form>
-
+                <AdvancedSearch query={this.state.query || ''}
+                                getAdvResults={this.getAdvResults}
+                                toggleSearchBtn={this.toggleSearchBtn}
+                                options={ options }
+                                {...this.props}/>
                 <div>
                   <div style={{ marginLeft: '40px', fontSize: '12px' }}>
                     {this.state.message}
