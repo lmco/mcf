@@ -43,19 +43,24 @@ class ProjectElements extends Component {
     this.state = {
       sidePanel: false,
       id: null,
-      refreshFunction: null,
+      refreshFunction: {},
       branch: props.match.params.branchid,
       archived: false,
       displayIds: true,
       error: null
     };
 
+    this.setRefreshFunctions = this.setRefreshFunctions.bind(this);
     this.openElementInfo = this.openElementInfo.bind(this);
     this.closeSidePanel = this.closeSidePanel.bind(this);
     this.editElementInfo = this.editElementInfo.bind(this);
     this.createNewElement = this.createNewElement.bind(this);
     this.displayArchivedElems = this.displayArchivedElems.bind(this);
     this.toggleIds = this.toggleIds.bind(this);
+  }
+
+  setRefreshFunctions(id, refreshFunction) {
+    this.state.refreshFunction[id] = refreshFunction;
   }
 
   createNewElement() {
@@ -68,7 +73,7 @@ class ProjectElements extends Component {
   }
 
   // Define the open and close of the element side panel function
-  openElementInfo(id, refreshFunction) {
+  openElementInfo(id) {
     // Select the clicked element
     $('.element-tree').removeClass('tree-selected');
     $(`#tree-${id}`).addClass('tree-selected');
@@ -78,13 +83,11 @@ class ProjectElements extends Component {
       // The ID is not set here to avoid updating the 'parent' field on the
       // add element panel. That parent field should only be passed in when
       // the addElement panel is first opened.
-      this.setState({ refreshFunction: refreshFunction });
     }
     else {
       // Toggle the element side panel
       this.setState({
         id: id,
-        refreshFunction: refreshFunction,
         sidePanel: 'elementInfo'
       });
     }
@@ -93,14 +96,18 @@ class ProjectElements extends Component {
     document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
-  closeSidePanel(event, refresh, isDelete) {
+  closeSidePanel(event, refreshIDs) {
     // Get the sidebar html element and toggle it
     document.getElementById('side-panel').classList.remove('side-panel-expanded');
 
     this.setState({ sidePanel: null });
 
-    if (refresh) {
-      this.state.refreshFunction(isDelete);
+    if (refreshIDs) {
+      refreshIDs.forEach((id) => {
+        if (this.state.refreshFunction.hasOwnProperty(id)) {
+          this.state.refreshFunction[id]();
+        }
+      });
     }
   }
 
@@ -200,6 +207,7 @@ class ProjectElements extends Component {
                          linkElements={true}
                          archived={this.state.archived}
                          displayIds={this.state.displayIds}
+                         setRefreshFunctions={this.setRefreshFunctions}
                          clickHandler={this.openElementInfo}/>
           </div>
           <SidePanel>

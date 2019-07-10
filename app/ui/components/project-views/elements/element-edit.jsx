@@ -210,10 +210,11 @@ class ElementEdit extends Component {
       statusCode: {
         200: () => {
           if (doRefresh) {
-            this.props.closeSidePanel(null, true, true);
+            const refreshIds = [this.state.parentUpdate, this.state.parent];
+            this.props.closeSidePanel(null, refreshIds);
           }
           else {
-            this.props.closeSidePanel(null, true);
+            this.props.closeSidePanel(null, [elementId]);
           }
         },
         401: (err) => {
