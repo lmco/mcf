@@ -335,9 +335,7 @@ function getOrgs(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -421,9 +419,7 @@ async function postOrgs(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -508,9 +504,7 @@ async function putOrgs(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -594,9 +588,7 @@ async function patchOrgs(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -660,9 +652,7 @@ function deleteOrgs(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -738,9 +728,7 @@ function getOrg(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -826,9 +814,7 @@ function postOrg(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -914,9 +900,7 @@ function putOrg(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1001,9 +985,7 @@ function patchOrg(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1071,9 +1053,7 @@ function deleteOrg(req, res, next) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /* -----------------------( Project API Endpoints )-------------------------- */
@@ -1164,9 +1144,7 @@ function getAllProjects(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1275,9 +1253,7 @@ function getProjects(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1360,9 +1336,7 @@ async function postProjects(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1446,9 +1420,7 @@ async function putProjects(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1531,9 +1503,7 @@ async function patchProjects(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1599,9 +1569,7 @@ function deleteProjects(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1676,9 +1644,7 @@ function getProject(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1763,9 +1729,7 @@ function postProject(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1850,9 +1814,7 @@ function putProject(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -1936,9 +1898,7 @@ function patchProject(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2005,9 +1965,7 @@ function deleteProject(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /* -----------------------( User API Endpoints )------------------------------*/
@@ -2105,9 +2063,7 @@ function getUsers(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2191,9 +2147,7 @@ async function postUsers(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2277,9 +2231,7 @@ async function putUsers(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2363,9 +2315,7 @@ async function patchUsers(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2425,9 +2375,7 @@ function deleteUsers(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2502,9 +2450,7 @@ function getUser(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2589,9 +2535,7 @@ function postUser(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2676,9 +2620,7 @@ function putUser(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2762,9 +2704,7 @@ function patchUser(req, res) {
     // Return 200: OK and updated user
     return returnResponse(req, res, json, 200);
   })
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2831,9 +2771,7 @@ function deleteUser(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -2971,9 +2909,7 @@ function searchUsers(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3059,9 +2995,7 @@ function patchPassword(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /* -----------------------( Elements API Endpoints )------------------------- */
@@ -3219,9 +3153,7 @@ function getElements(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3306,9 +3238,7 @@ async function postElements(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3393,9 +3323,7 @@ async function putElements(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3479,9 +3407,7 @@ async function patchElements(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3542,9 +3468,7 @@ function deleteElements(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3646,9 +3570,7 @@ function searchElements(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3730,9 +3652,7 @@ function getElement(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3817,9 +3737,7 @@ function postElement(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3905,9 +3823,7 @@ function putElement(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -3992,9 +3908,7 @@ function patchElement(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -4060,9 +3974,7 @@ function deleteElement(req, res) {
     // Return 200: OK and deleted element ID
     return returnResponse(req, res, json, 200);
   })
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /* -----------------------( Branches API Endpoints )------------------------- */
@@ -4174,9 +4086,7 @@ function getBranches(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -4260,9 +4170,7 @@ async function postBranches(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -4346,9 +4254,7 @@ async function patchBranches(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -4414,9 +4320,7 @@ function deleteBranches(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -4492,9 +4396,7 @@ function getBranch(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -4579,9 +4481,7 @@ function postBranch(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -4666,9 +4566,7 @@ function patchBranch(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
@@ -4736,9 +4634,7 @@ function deleteBranch(req, res) {
     return returnResponse(req, res, json, 200);
   })
   // If an error was thrown, return it and its status
-  .catch((error) => {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  });
+  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
 }
 
 /**
