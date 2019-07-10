@@ -53,6 +53,10 @@ class ElementSubtree extends Component {
   }
 
   componentDidMount() {
+    if (this.props.setRefreshFunctions) {
+      this.props.setRefreshFunctions(this.state.id, this.refresh);
+    }
+
     // Build URL to get element data
     const contains = this.state.data.contains;
     const parent = this.state.data.id;
@@ -141,38 +145,31 @@ class ElementSubtree extends Component {
    * When an element is delete or created, the component
    * will update.
    */
-  refresh(isDelete) {
-    // Element is being deleted
-    if (isDelete) {
-      // Call parent refresh
-      this.props.parentRefresh();
-    }
-    else {
-      // Build URL to get element data
-      const base = this.props.url;
-      const url = `${base}/elements/${this.state.id}?minified=true&archived=true`;
+  refresh() {
+    // Build URL to get element data
+    const base = this.props.url;
+    const url = `${base}/elements/${this.state.id}?minified=true&archived=true`;
 
-      // Get project data
-      $.ajax({
-        method: 'GET',
-        url: url,
-        statusCode: {
-          200: (data) => {
-            this.setState({ data: data });
-          },
-          401: (err) => {
-            // Throw error and set state
-            this.setState({ error: err.responseText });
+    // Get project data
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (data) => {
+          this.setState({ data: data });
+        },
+        401: (err) => {
+          // Throw error and set state
+          this.setState({ error: err.responseText });
 
-            // Refresh when session expires
-            window.location.reload();
-          },
-          404: (err) => {
-            this.setState({ error: err.responseText });
-          }
+          // Refresh when session expires
+          window.location.reload();
+        },
+        404: (err) => {
+          this.setState({ error: err.responseText });
         }
-      });
-    }
+      }
+    });
   }
 
   /**
@@ -181,7 +178,7 @@ class ElementSubtree extends Component {
    */
   handleClick() {
     const elementId = this.props.id.replace('tree-', '');
-    this.props.clickHandler(elementId, this.refresh);
+    this.props.clickHandler(elementId);
   }
 
   // Create the element tree list
@@ -214,6 +211,7 @@ class ElementSubtree extends Component {
                             parent={this.state}
                             archived={this.props.archived}
                             displayIds={this.props.displayIds}
+                            setRefreshFunctions={this.props.setRefreshFunctions}
                             parentRefresh={this.refresh}
                             linkElements={this.props.linkElements}
                             clickHandler={this.props.clickHandler}

@@ -104,7 +104,7 @@ class ElementNew extends Component {
       data: JSON.stringify(data),
       statusCode: {
         200: () => {
-          this.props.closeSidePanel(null, true, false);
+          this.props.closeSidePanel(null, [this.state.parent]);
         },
         401: (err) => {
           this.setState({ error: err.responseText });
@@ -125,10 +125,6 @@ class ElementNew extends Component {
    */
   parentSelectHandler(_id) {
     this.setState({ parent: _id });
-
-    // This is used to select the parent in the main tree.
-    // It allows the main tree to be refreshed when the new element is added.
-    $(`#element-tree-container #tree-${_id} > .element-name`).click();
   }
 
   /**

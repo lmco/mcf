@@ -96,6 +96,7 @@ class ElementTree extends Component {
                              parent={null}
                              isOpen={true}
                              archived={this.props.archived}
+                             setRefreshFunctions={this.props.setRefreshFunctions}
                              displayIds={this.props.displayIds}
                              childrenOpen={this.state.childrenOpen}
                              linkElements={this.props.linkElements}
