@@ -308,7 +308,7 @@ function create(requestingUser, users, options) {
           assert.ok(validUserKeys.includes(k), `Invalid key [${k}].`);
         });
 
-        // Ensure each user has a username and that its a string
+        // Ensure each user has a username and that it's a string
         assert.ok(user.hasOwnProperty('username'), `User #${index} does not have a username`);
         assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);
         // Check if user with same username is already being created
@@ -346,14 +346,13 @@ function create(requestingUser, users, options) {
         userObj.createdBy = reqUser._id;
         userObj.updatedOn = Date.now();
         userObj.archivedBy = (userObj.archived) ? reqUser._id : null;
+        userObj.hashPassword();
         return userObj;
       });
 
 
       // Create the users
-      // NOTE: .create() is being used here instead of.insertMany() so that the
-      // pre save middleware is called for password validation
-      return User.create(userObjects);
+      return User.insertMany(userObjects);
     })
     .then((_createdUsers) => {
       // Set function-wide createdUsers;

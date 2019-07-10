@@ -129,33 +129,31 @@ function putInvalidUsername(done) {
  * Note: This test should fail prior to deletion of existing users.
  */
 function putWithoutId(done) {
-  // TODO: Uncomment below pending bug fix MBX-1347
-  done();
-  // // Create the test users
-  // const testUserObj0 = testData.users[1];
-  // const testUserObj1 = testData.users[2];
-  // const invalidUserObj = { fname: 'missing username' };
-  //
-  // UserController.createOrReplace(adminUser,
-  //   [testUserObj0, testUserObj1, invalidUserObj])
-  // .then(() => {
-  //   // Should not succeed, force to fail
-  //   done(new Error('Project put successfully.'));
-  // })
-  // .catch((error) => {
-  //   // Expected error, find valid users
-  //   UserController.find(adminUser, [testUserObj0.username, testUserObj1.username])
-  //   .then((foundUsers) => {
-  //     // Verify the error message
-  //     chai.expect(error.message).to.equal('Project #3 does not have an id.');
-  //
-  //     // Expect to find 2 users
-  //     chai.expect(foundUsers.length).to.equal(2);
-  //     done();
-  //   })
-  //    .catch((err) => {
-  //       chai.expect(err.message).to.equal(null);
-  //       done();
-  //   });
-  // });
+  // Create the test users
+  const testUserObj0 = testData.users[1];
+  const testUserObj1 = testData.users[2];
+  const invalidUserObj = { fname: 'missing username' };
+
+  UserController.createOrReplace(adminUser,
+    [testUserObj0, testUserObj1, invalidUserObj])
+  .then(() => {
+    // Should not succeed, force to fail
+    done(new Error('Project put successfully.'));
+  })
+  .catch((error) => {
+    // Expected error, find valid users
+    UserController.find(adminUser, [testUserObj0.username, testUserObj1.username])
+    .then((foundUsers) => {
+      // Verify the error message
+      chai.expect(error.message).to.equal('Project #3 does not have an id.');
+
+      // Expect to find 2 users
+      chai.expect(foundUsers.length).to.equal(2);
+      done();
+    })
+    .catch((err) => {
+      chai.expect(err.message).to.equal(null);
+      done();
+    });
+  });
 }
