@@ -135,15 +135,15 @@ class ElementSelector extends React.Component {
                          branch={this.props.branch}
                          clickHandler={this.selectElementHandler}/>
           </ModalBody>
-          <ModalFooter>
-            <p>
+          <ModalFooter style={{ overflow: 'hidden' }}>
+            <p style={{ overflow: 'scroll' }}>
               Selected: {this.state.selectedElementPreview}
               {(this.state.selectedElementPreview)
                 ? <i className='fas fa-times-circle clear-btn' onClick={this.clear}/>
                 : 'null'
               }
-              {error}
             </p>
+              {error}
             <Button color="primary"
                     disabled={this.state.selectDisabled}
                     onClick={this.select}>Select</Button>
