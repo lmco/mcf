@@ -1367,6 +1367,12 @@ function remove(requestingUser, organizationID, projects, options) {
           'warn');
       }
 
+      // Verify the organization is not archived
+      if (foundOrg.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before deleting projects.', 'warn');
+      }
+
       // Find the projects to delete
       return Project.find(searchQuery).lean();
     })

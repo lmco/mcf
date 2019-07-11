@@ -1007,6 +1007,12 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
           + ` branches on the organization [${orgID}].`, 'warn');
       }
 
+      // Verify the organization is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before deleting branches.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -1021,6 +1027,12 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
         || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.PermissionError('User does not have permission to delete'
           + ` branches on the project [${projID}].`, 'warn');
+      }
+
+      // Verify the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before deleting branches.', 'warn');
       }
 
       // Find all the branches to delete
