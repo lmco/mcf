@@ -1844,6 +1844,12 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
           + ` elements in the organization [${orgID}].`, 'warn');
       }
 
+      // Verify the organization is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before deleting elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -1860,6 +1866,12 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
           + ` elements on the project [${projID}].`, 'warn');
       }
 
+      // Verify the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before deleting elements.', 'warn');
+      }
+
       // Find the elements to delete
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
     })
@@ -1867,6 +1879,12 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Verify the project was found or exists
       if (foundBranch === null) {
         throw new M.NotFoundError(`The branch [${branchID}] was not found.`, 'warn');
+      }
+
+      // Verify the branch is not archived
+      if (foundBranch.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before deleting elements.', 'warn');
       }
 
       // Check the branch is not a tagged branch
