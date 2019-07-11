@@ -99,6 +99,10 @@ class MemberEdit extends Component {
       }
     };
 
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
+
     // Verify if org provided
     if (this.props.org) {
       // Set url and redirect to org information
@@ -194,7 +198,7 @@ class MemberEdit extends Component {
   }
 
   resetForm() {
-    this.setState({ username: '', permissions: '' });
+    this.setState({ username: '', permissions: '', results: null });
   }
 
   componentDidMount() {
@@ -205,9 +209,12 @@ class MemberEdit extends Component {
     }
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.props.selectedUser !== prevProps.selectedUser) {
       this.componentDidMount();
+    }
+    if ((this.state.results !== prevState.results) && (this.state.username.length === 0)) {
+      this.setState({ results: null });
     }
   }
 
@@ -254,7 +261,15 @@ class MemberEdit extends Component {
       );
     }
     else if (Array.isArray(this.state.results)) {
-      searchResults = this.state.results;
+      if (this.state.results.length > 0) {
+        searchResults = this.state.results;
+      }
+      else {
+        searchResults = (
+          <div className='members-dropdown-item' key='no-user'>
+            <span>No matches found.</span>
+          </div>);
+      }
     }
 
     // Render project edit page
@@ -272,26 +287,13 @@ class MemberEdit extends Component {
           }
           {/* Create form to update user roles */}
           <div>
-            <Row form>
-              <Col>
-                <Input type='search'
-                       name='username'
-                       style={{ width: '325px' }}
-                       id='username'
-                       autoComplete='off'
-                       placeholder='Search User...'
-                       value={this.state.username || ''}
-                       onChange={this.userChange}/>
-              </Col>
-              <Col md={2} sm={4} xs={6} >
-                <Button className='btn'
-                        outline color="primary"
-                        type='submit'
-                        onClick={this.doSearch}>
-                  Search
-                </Button>
-              </Col>
-            </Row>
+            <Input type='search'
+                   name='username'
+                   id='username'
+                   autoComplete='off'
+                   placeholder='Search User...'
+                   value={this.state.username || ''}
+                   onChange={this.userChange}/>
           {(searchResults.length !== 0)
             ? (<div className='members-dropdown'>
                 {searchResults}
