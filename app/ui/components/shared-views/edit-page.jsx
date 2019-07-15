@@ -96,6 +96,10 @@ class EditPage extends Component {
 
   // Define the submit function
   onSubmit() {
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
+
     // Initialize variables
     let url;
     const data = {

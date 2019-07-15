@@ -75,6 +75,9 @@ class CreateBranch extends Component {
 
   // Define the submit function
   onSubmit() {
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
     // Initialize variables
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
