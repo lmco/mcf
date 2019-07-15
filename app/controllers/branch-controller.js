@@ -822,12 +822,6 @@ function update(requestingUser, organizationID, projectID, branches, options) {
 
       // For each found branch
       foundBranches.forEach((branch) => {
-        // Check the branch is not a tags
-        if (branch.tag) {
-          throw new M.OperationError(`Tags [${utils.parseID(branch._id).pop()}]`
-          + ' can not be updated.', 'warn');
-        }
-
         const updateBranch = jmiType2[branch._id];
         // Remove id and _id field from update object
         delete updateBranch.id;

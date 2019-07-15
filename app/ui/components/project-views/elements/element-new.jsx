@@ -82,6 +82,10 @@ class ElementNew extends Component {
 
   // Define the submit function
   onSubmit() {
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
+
     // Initialize variables
     const data = {
       id: this.state.id,

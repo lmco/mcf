@@ -175,6 +175,10 @@ class ElementEdit extends Component {
 
   // Define the submit function
   onSubmit() {
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
+
     // Initialize variables
     let doRefresh;
     const elementId = this.state.id;
