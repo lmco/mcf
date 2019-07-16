@@ -147,30 +147,35 @@ function clonePluginFromGitRepo(data) {
   const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
-  // Set deploy key file permissions
-  let deployKeyCmd = '';
-  if (data.hasOwnProperty('deployKey')) {
-    execSync(`chmod 400 ${data.deployKey}`);
-    deployKeyCmd = `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no" `;
+  try {
+    // Set deploy key file permissions
+    let deployKeyCmd = '';
+    if (data.hasOwnProperty('deployKey')) {
+      execSync(`chmod 400 ${data.deployKey}`);
+      deployKeyCmd = `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no" `;
+    }
+
+    let version = '';
+    // Clone a specific version
+    if (data.hasOwnProperty('version')) {
+      // Disables a warning about detachedHead
+      execSync('git config --global advice.detachedHead false');
+      version = `--branch ${data.version} `;
+    }
+
+    // Create the git clone command
+    const cmd = `${deployKeyCmd}git clone ${version}${data.source} `
+      + `${path.join(M.root, 'plugins', data.name)}`;
+
+    // Clone the repo
+    M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
+    const stdout2 = execSync(cmd);
+    M.log.verbose(stdout2.toString());
+    M.log.info('Clone complete.');
   }
-
-  let version = '';
-  // Clone a specific version
-  if (data.hasOwnProperty('version')) {
-    // Disables a warning about detachedHead
-    execSync('git config --global advice.detachedHead false');
-    version = `--branch ${data.version} `;
+  catch (error) {
+    M.log.warn(`Failed to clone plugin [${data.name}].`);
   }
-
-  // Create the git clone command
-  const cmd = `${deployKeyCmd}git clone ${version}${data.source} `
-            + `${path.join(M.root, 'plugins', data.name)}`;
-
-  // Clone the repo
-  M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
-  const stdout2 = execSync(cmd);
-  M.log.verbose(stdout2.toString());
-  M.log.info('Clone complete.');
 }
 
 /**
