@@ -4674,7 +4674,7 @@ async function like(req, res) {
 
     // Send response
     M.log.info(`${req.user.username} liked element ${id}`);
-    res.send(element.getPublicData());
+    res.send(publicData.getPublicData(element, 'element', {}));
   }
   catch (err) {
     M.log.error(err);
