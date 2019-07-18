@@ -3847,6 +3847,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   APIController.deleteElement
 );
 
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid/like')
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.like
+);
 
 /**
  * @swagger

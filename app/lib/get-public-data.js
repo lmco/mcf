@@ -222,7 +222,8 @@ function getElementPublicData(element, options) {
     lastModifiedBy: lastModifiedBy,
     archived: element.archived,
     archivedOn: (element.archivedOn) ? element.archivedOn.toString() : undefined,
-    archivedBy: archivedBy
+    archivedBy: archivedBy,
+    likedBy: element.likedBy
   };
 
   // Handle the virtual contains field

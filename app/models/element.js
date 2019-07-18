@@ -127,7 +127,13 @@ const ElementSchema = new mongoose.Schema({
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
-  }
+  },
+  likedBy: [{
+    type: String,
+    ref: 'User',
+    default: [],
+    index: true
+  }]
 }); // end of ElementSchema
 
 ElementSchema.virtual('contains', {
@@ -169,7 +175,7 @@ ElementSchema.plugin(extensions);
  */
 ElementSchema.methods.getValidUpdateFields = function() {
   return ['name', 'documentation', 'custom', 'archived', 'parent', 'type',
-    'source', 'target'];
+    'source', 'target', 'likedBy'];
 };
 
 ElementSchema.statics.getValidUpdateFields = function() {
@@ -182,7 +188,7 @@ ElementSchema.statics.getValidUpdateFields = function() {
  */
 ElementSchema.methods.getValidBulkUpdateFields = function() {
   return ['name', 'documentation', 'custom', 'archived', 'type', 'source',
-    'target'];
+    'target', 'likedBy'];
 };
 
 ElementSchema.statics.getValidBulkUpdateFields = function() {
