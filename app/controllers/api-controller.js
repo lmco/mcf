@@ -95,6 +95,7 @@ module.exports = {
   patchBranch,
   postBranch,
   deleteBranch,
+  like,
   invalidRoute
 };
 
@@ -4635,6 +4636,50 @@ function deleteBranch(req, res) {
   })
   // If an error was thrown, return it and its status
   .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+}
+
+/**
+ * TODO - add permissions checks
+ */
+async function like(req, res) {
+  try {
+    // Get the element
+    const elements = await ElementController.find(
+      req.user,
+      req.params.orgid,
+      req.params.projectid,
+      req.params.branchid,
+      req.params.elementid
+    );
+
+    // Get one element and update likedBy field as needed
+    const element = elements[0];
+    if (!element.hasOwnProperty('likedBy')) {
+      element.likedBy = [];
+    }
+    element.likedBy.push(req.user.username);
+
+    // Update the element
+    const id = utils.parseID(element._id)[3];
+    await ElementController.update(
+      req.user,
+      req.params.orgid,
+      req.params.projectid,
+      req.params.branchid,
+      {
+        id: id,
+        likedBy: element.likedBy
+      }
+    );
+
+    // Send response
+    M.log.info(`${req.user.username} liked element ${id}`);
+    res.send(publicData.getPublicData(element, 'element', {}));
+  }
+  catch (err) {
+    M.log.error(err);
+    res.status(500).send(err);
+  }
 }
 
 /**
