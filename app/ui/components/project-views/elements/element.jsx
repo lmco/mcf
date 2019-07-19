@@ -56,7 +56,6 @@ class Element extends Component {
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     this.handleTooltipToggle = this.handleTooltipToggle.bind(this);
     this.handleCrossRefs = this.handleCrossRefs.bind(this);
-    this.likeElement = this.likeElement.bind(this);
   }
 
   getElement() {
@@ -100,36 +99,6 @@ class Element extends Component {
   handleDeleteToggle() {
     // Set the delete modal state
     this.setState({ modalDelete: !this.state.modalDelete });
-  }
-
-  likeElement() {
-    const elementId = this.props.id;
-
-    if (elementId) {
-      // Initalize variables
-      const url = `${this.props.url}/elements/${elementId}/like?minified=true`;
-      // Get project data
-      $.ajax({
-        method: 'POST',
-        url: url,
-        statusCode: {
-          200: (element) => {
-            // TODO
-            window.location.reload();
-          },
-          401: (err) => {
-            // Throw error and set state
-            this.setState({ error: err.responseText });
-
-            // Refresh when session expires
-            window.location.reload();
-          },
-          404: (err) => {
-            this.setState({ error: err.responseText });
-          }
-        }
-      });
-    }
   }
 
   componentDidMount() {
@@ -330,7 +299,6 @@ class Element extends Component {
                           <UncontrolledTooltip placement='left' target='deleteBtn'>
                             Delete
                           </UncontrolledTooltip>
-                          <i id='likeBtn' className='fas fa-thumbs-up edit-btn' onClick={this.likeElement}/>
                           <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
                           <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
                           <Tooltip
@@ -403,10 +371,6 @@ class Element extends Component {
                   <tr>
                     <th>Updated On:</th>
                     <td>{element.updatedOn}</td>
-                  </tr>,
-                  <tr>
-                    <th>Liked by:</th>
-                    <td>{element.likedBy}</td>
                   </tr>
                   </tbody>
                 </table>
