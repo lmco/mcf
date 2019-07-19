@@ -358,11 +358,11 @@ class Element extends Component {
                   </tr>
                   <tr>
                     <th>Org ID:</th>
-                    <td><a href={`/${orgid}`}>{orgid}</a></td>
+                    <td><a href={`/orgs/${orgid}`}>{orgid}</a></td>
                   </tr>
                   <tr>
                     <th>Project ID:</th>
-                    <td><a href={`/${orgid}/${projid}`}>{projid}</a></td>
+                    <td><a href={`/orgs/${orgid}/projects/${projid}/branches/master/elements`}>{projid}</a></td>
                   </tr>
                   <tr>
                     <th>Last Modified By:</th>
