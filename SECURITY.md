@@ -153,10 +153,22 @@ an arbitrary admin user in the database.
 
 It's important to ensure that all test users are deleted from the database.
 
-#### UI Model Tree Refresh
-If updating the parent in the model tree, an issue occurs with the re-rendering
-of model tree elements due to the refresh element functions. Refreshing the page 
-will display the updated, correct tree.
+#### Element Search UI
+A known issue exists in the advanced element search in the UI. If the same field
+is selected more than once for the advanced search, only the first value is
+searched. For example, if searching by type `class` and the by type `block`,
+only the `class` results would be found.
+
+#### Windows Compatibility
+At this point there are still some comatibility issues with windows. The
+`packages.json` includes post/pre install scripts that use linux specific
+commands, as does the plugin loading. It is recommended you run MBEE on a linux
+based device.
+
+#### Plugin Loading
+Due to the nature of how plugins are loaded, the API and UI are not accessible
+until a plugin has been succesfully loaded. This can cause issues if plugins
+hang while loading, and can result in the UI and API from being accessible.
 
 ## Security Related Configuration
 
