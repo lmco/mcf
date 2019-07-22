@@ -22,9 +22,11 @@ All notable changes to this project will be documented in this file.
 * Added support for referencing projects in the `default` org
 * Updated clean command to delete contents of `data` directory
 * Allow for archived elements to optionally be displayed in the UI
+* Allow for element ids to be hidden from the element tree in the UI
 * Added support for re-inserting data upon a failed PUT request
 * Lowered permissions for PUT requests from system admins to org/project writers
 * Fixed bug which crashed server when a plugin failed to be cloned
+* Fixed bug which did not refresh the element tree upon creation of elements
 
 ## [0.8.0] - 2019-05-13
 ### Major Features and Improvements
