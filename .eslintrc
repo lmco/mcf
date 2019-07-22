@@ -428,7 +428,6 @@
 
     // enforce position of line comments
     // https://eslint.org/docs/rules/line-comment-position
-    // "TODO": enable?
     "line-comment-position": ["off", {
       "position": "above",
       "ignorePattern": "",
@@ -507,7 +506,6 @@
 
     // require multiline ternary
     // https://eslint.org/docs/rules/multiline-ternary
-    // "TODO": enable?
     "multiline-ternary": ["off", "never"],
 
     // require a capital letter for constructors
@@ -819,7 +817,6 @@
 
     // disallow use of undefined variable
     // https://eslint.org/docs/rules/no-undefined
-    // "TODO": enable?
     "no-undefined": "off",
 
     // disallow declaration of variables that are not used in the code
@@ -1031,8 +1028,6 @@
 
     // disallow else after a return in an if
     // https://eslint.org/docs/rules/no-else-return
-    // TODO (jk) - This was set to error, I changed it because we've encountered
-    // several cases where code is more readable by using if/else statements
     "no-else-return": ["off", { "allowElseIf": false }],
 
     // disallow empty functions, except for standalone funcs/arrows
@@ -1041,7 +1036,7 @@
       "allow": [
         "arrowFunctions",
         "functions",
-        "methods",
+        "methods"
       ]
     }],
 
