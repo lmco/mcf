@@ -106,7 +106,7 @@ describe(M.getModuleName(module.filename), () => {
 function deleteMasterBranch(done) {
   const branchID = testData.branches[0].id;
 
-  // Attempt to update the element
+  // Attempt to remove the master branch
   BranchController.remove(adminUser, org.id, projID, branchID)
   .then(() => {
     // Should not succeed, force to fail

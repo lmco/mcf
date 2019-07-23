@@ -47,6 +47,7 @@ describe(M.getModuleName(module.filename), () => {
     .then((user) => {
       // Set global admin user
       adminUser = user;
+      // Create the test org
       return testUtils.createTestOrg(adminUser);
     })
     .then((retOrg) => {
@@ -129,7 +130,7 @@ function putInvalidId(done) {
 }
 
 /**
- * @description Verifies PUT call with Id does not delete existing projects.
+ * @description Verifies PUT call without Id does not delete existing projects.
  * Note: This test should fail prior to deletion of existing projects.
  */
 function putWithoutId(done) {

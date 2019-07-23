@@ -255,7 +255,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
   else if (((typeof saniElements === 'object' && saniElements !== null)
     || saniElements === undefined)) {
-    // Find all elements in the project
+    // Find all elements in the branch
     elementsToFind = [];
   }
   else {
@@ -275,7 +275,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   const promises = [];
 
-  // If no IDs provided, find all elements in a project
+  // If no IDs provided, find all elements in the branch
   if (elementsToFind.length === 0) {
     // Get the number of elements in the branch
     const elementCount = await Element.countDocuments(searchQuery);
@@ -346,13 +346,13 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
  * @description Find helper function which simplifies the actual Element.find()
  * database call
  *
- * @param {Object} query - THe query to send to the database
+ * @param {Object} query - The query to send to the database
  * @param {string} fields - Fields to include (or not include) in the found objects
  * @param {number} limit - The maximum number of elements to return.
  * @param {number} skip - The number of elements to skip.
  * @param {string} populate - A string containing a space delimited list of
  * fields to populate
- * @param {Object} sort - an optional argument that enables sorting by different fields
+ * @param {Object} sort - An optional argument that enables sorting by different fields
  * @param {boolean} lean - If true, returns raw JSON rather than converting to
  * instances of the Element model.
  */
@@ -1045,7 +1045,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Check the branch is not a tagged branch
       if (foundBranch.tag) {
         throw new M.OperationError(`[${branchID}] is a tag and `
-          + 'does not allow updates to elements.', 'warn');
+          + 'does not allow elements to be updated.', 'warn');
       }
 
       // Check the type of the elements parameter
@@ -1260,6 +1260,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         delete updateElement.id;
         delete updateElement._id;
 
+        // If source/target unchanged, remove from update object
         if (updateElement.hasOwnProperty('source') && updateElement.source === element.source) {
           delete updateElement.source;
         }
@@ -1306,38 +1307,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
                 + `[${utils.parseID(updateElement[key]).pop()}] was not found `
                 + `in the project [${utils.parseID(updateElement[key])[1]}].`, 'warn');
             }
-
+            // If updating target but no source provided, throw error
             if ((updateElement.target && !(element.source || updateElement.source))
               || (updateElement.source === null && updateElement.target !== null)) {
               throw new M.DataFormatError('If target element is provided, '
                 + 'source element is required.', 'warn');
             }
 
+            // If updating source but no target provided, throw error
             if ((updateElement.source && !(element.target || updateElement.target))
               || (updateElement.target === null && updateElement.source !== null)) {
               throw new M.DataFormatError('If source element is provided, '
                 + 'target element is required.', 'warn');
             }
-
-            // // If no target exists and is not being updated, throw error
-            // if (key === 'source'
-            //   // If source is null but target is being changed
-            //   && ((!updateElement.source && updateElement.target)
-            //   // If there is no target stored and no target being updated
-            //   || (updateElement.source && (!element.target && !updateElement.target)))) {
-            //   throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
-            //     + ' target is required if source is provided.', 'warn');
-            // }
-            //
-            // // If no source exists and is not being updated, throw error
-            // if (key === 'target'
-            //   // If source is null but target is being changed
-            //   && ((!updateElement.target && updateElement.source)
-            //     // If there is no target stored and no target being updated
-            //     || (updateElement.target && (!element.source && !updateElement.source)))) {
-            //   throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
-            //     + ' source is required if target is provided.', 'warn');
-            // }
           }
 
           // Set archivedBy if archived field is being changed
@@ -1420,10 +1402,11 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
 /**
  * @description This function creates or replaces one or many elements. If the
- * element already exists, it is replaced with the provided data. NOTE: This
- * function is reserved for system-wide admins ONLY.
+ * element already exists, it is replaced with the provided data.
+ * NOTE: This function is reserved for user with at least write permissions
+ * on a project or is a system-wide admin.
  *
- * @param {User} reqUser - The object containing the requesting user.
+ * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to add elements to.
@@ -1470,14 +1453,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  *   M.log.error(error);
  * });
  */
-function createOrReplace(reqUser, organizationID, projectID, branch, elements, options) {
+function createOrReplace(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof reqUser === 'object', 'Requesting user is not an object.');
-      assert.ok(reqUser !== null, 'Requesting user cannot be null.');
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
-      assert.ok(reqUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
@@ -1497,6 +1480,7 @@ function createOrReplace(reqUser, organizationID, projectID, branch, elements, o
     }
 
     // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
     const branchID = sani.mongo(branch);
@@ -1687,6 +1671,7 @@ function createOrReplace(reqUser, organizationID, projectID, branch, elements, o
       // Set created to true
       isCreated = true;
 
+      // Create file path to temp data file
       const filePath = path.join(M.root, 'data', orgID, projID, branchID, `PUT-backup-elements-${ts}.json`);
       // Delete the temporary file.
       if (fs.existsSync(filePath)) {
@@ -2318,11 +2303,11 @@ function search(requestingUser, organizationID, projectID, branch, query, option
           + ' It must first be unarchived before searching elements.', 'warn');
       }
 
-      // Find the elements to delete
+      // Find the branch
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
     })
     .then((foundBranch) => {
-      // Ensure the project was found
+      // Ensure the branch was found
       if (foundBranch === null) {
         throw new M.NotFoundError(`The branch [${branchID}] on the project ${projID} `
           + 'was not found.', 'warn');
@@ -2340,9 +2325,9 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         delete searchQuery.archived;
       }
 
-      // Here we're adding sorting by metadata
+      // Add sorting by metadata
       // If no sorting option was specified ($natural is the default) then remove
-      // $natural because it doesn't work with metadata sorting
+      // $natural. $natural does not work with metadata sorting
       if (validOptions.sort.$natural) {
         validOptions.sort = { score: { $meta: 'textScore' } };
       }

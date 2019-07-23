@@ -478,12 +478,12 @@ function updateBranches(done) {
 }
 
 /**
- * @description Deletes an branch using the branch controller
+ * @description Deletes a branch using the branch controller
  */
 function deleteBranch(done) {
   const branchData = testData.branches[1];
 
-  // Create branch via controller
+  // Deletes branch via controller
   BranchController.remove(adminUser, org.id, projID, branchData.id)
   .then((deletedBranch) => {
     // Expect deletedBranch array to contain 1 branch

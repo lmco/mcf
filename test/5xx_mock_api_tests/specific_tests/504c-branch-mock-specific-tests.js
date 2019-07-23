@@ -208,14 +208,14 @@ function patchGzip(done) {
     // Verifies the response data
     res.send = function send(_data) {
       // Verify response body
-      const createdBranches = JSON.parse(_data);
-      const createdBranch = createdBranches[0];
+      const updatedBranches = JSON.parse(_data);
+      const updatedBranch = updatedBranches[0];
 
-      // Verify branch created properly
-      chai.expect(createdBranch.id).to.equal(branchData.id);
-      chai.expect(createdBranch.name).to.equal(branchData.name);
-      chai.expect(createdBranch.custom || {}).to.deep.equal(branchData.custom);
-      chai.expect(createdBranch.project).to.equal(projID);
+      // Verify branch updated properly
+      chai.expect(updatedBranch.id).to.equal(branchData.id);
+      chai.expect(updatedBranch.name).to.equal(branchData.name);
+      chai.expect(updatedBranch.custom || {}).to.deep.equal(branchData.custom);
+      chai.expect(updatedBranch.project).to.equal(projID);
 
       // Clear the data used for testing
       fs.truncateSync(filepath);

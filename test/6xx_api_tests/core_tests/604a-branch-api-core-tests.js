@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.604a-element-api-core-tests
+ * @module test.604a-branch-api-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -126,7 +126,7 @@ function postBranch(done) {
     // Verify response body
     const createdBranch = JSON.parse(body);
 
-    // Verify element created properly
+    // Verify branch created properly
     chai.expect(createdBranch.id).to.equal(branchData.id);
     chai.expect(createdBranch.name).to.equal(branchData.name);
     chai.expect(createdBranch.custom || {}).to.deep.equal(branchData.custom);
@@ -227,7 +227,7 @@ function getBranch(done) {
     // Verify response body
     const foundBranch = JSON.parse(body);
 
-    // Verify element created properly
+    // Verify branch found properly
     chai.expect(foundBranch.id).to.equal(branchData.id);
     chai.expect(foundBranch.name).to.equal(branchData.name);
     chai.expect(foundBranch.custom || {}).to.deep.equal(branchData.custom);
@@ -280,7 +280,7 @@ function getBranches(done) {
     branchData.forEach((branchObj) => {
       const foundBranch = jmi2Branches[branchObj.id];
 
-      // Verify branches created properly
+      // Verify branches found properly
       chai.expect(foundBranch.id).to.equal(branchObj.id);
       chai.expect(foundBranch.name).to.equal(branchObj.name);
       chai.expect(foundBranch.custom || {}).to.deep.equal(branchObj.custom);
@@ -328,7 +328,7 @@ function patchBranch(done) {
     // Verify response body
     const updatedBranch = JSON.parse(body);
 
-    // Verify element updated properly
+    // Verify branch updated properly
     chai.expect(updatedBranch.id).to.equal(branchData.id);
     chai.expect(updatedBranch.name).to.equal(updateObj.name);
     chai.expect(updatedBranch.custom || {}).to.deep.equal(branchData.custom);
@@ -350,8 +350,8 @@ function patchBranch(done) {
 }
 
 /**
- * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
- * updates multiple elements.
+ * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/branches
+ * updates multiple branches.
  */
 function patchBranches(done) {
   const branchData = [
@@ -380,16 +380,16 @@ function patchBranches(done) {
     // Verify response body
     const updatedBranches = JSON.parse(body);
 
-    // Expect updatedElements not to be empty
+    // Expect updatedBranches not to be empty
     chai.expect(updatedBranches.length).to.equal(branchData.length);
 
-    // Convert updatedElements to JMI type 2 for easier lookup
+    // Convert updatedBranches to JMI type 2 for easier lookup
     const jmi2Branches = jmi.convertJMI(1, 2, updatedBranches, 'id');
-    // Loop through each element data object
+    // Loop through each branch data object
     branchData.forEach((branchObj) => {
       const updatedBranch = jmi2Branches[branchObj.id];
 
-      // Verify elements created properly
+      // Verify branches created properly
       chai.expect(updatedBranch.id).to.equal(branchObj.id);
       chai.expect(updatedBranch.name).to.equal(`${branchObj.name}_edit`);
       chai.expect(updatedBranch.custom || {}).to.deep.equal(branchObj.custom);
@@ -432,7 +432,7 @@ function deleteBranch(done) {
     // Verify response body
     const deleteBranchID = JSON.parse(body);
 
-    // Verify correct element deleted
+    // Verify correct branch deleted
     chai.expect(deleteBranchID).to.equal(branchData.id);
     done();
   });

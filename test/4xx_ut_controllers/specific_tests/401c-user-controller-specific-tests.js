@@ -37,7 +37,7 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Connect to the database, create an admin user, create test user
+   * Before: Connect to the database, create an admin user
    */
   before((done) => {
     // Connect to the database
@@ -58,7 +58,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Delete test users, delete admin user, disconnect from database
+   * After: Delete admin user, disconnect from database
    */
   after((done) => {
     testUtils.removeTestAdmin()
@@ -208,7 +208,7 @@ function optionPopulateCreate(done) {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
+      // If the field is defined in the returned user
       if (createdUser.hasOwnProperty(field)) {
         // Expect each populated field to be an object
         chai.expect(typeof createdUser.field).to.equal('object');
@@ -246,7 +246,7 @@ function optionFieldsCreate(done) {
   };
   // Create the options object with the list of fields specifically to find
   const findOptions = { fields: ['fname', 'createdBy'] };
-  // Create the options object with the list of fields to specifically to NOT find
+  // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
   const fieldsAlwaysProvided = ['_id'];
@@ -373,7 +373,7 @@ function optionArchivedFind(done) {
     // Expect the array to be empty since the option archived: true was not provided
     chai.expect(foundUsers.length).to.equal(0);
 
-    // Attempt the find the element WITH providing the archived option
+    // Attempt the find the user WITH providing the archived option
     return UserController.find(adminUser, userData.username, options);
   })
   .then((foundUsers) => {
@@ -431,7 +431,7 @@ function optionLeanFind(done) {
     chai.expect(foundUser._id).to.equal(userData.username);
     chai.expect(foundUser.fname).to.equal(userData.fname);
 
-    // Verify that the element is NOT a mongoose object
+    // Verify that the user is NOT a mongoose object
     chai.expect(foundUser instanceof User).to.equal(false);
   })
   .then(() => UserController.remove(adminUser, userData.username))
@@ -574,7 +574,7 @@ function optionSkipFind(done) {
     password: 'Abc123!@',
     fname: 'Test'
   };
-  // Create an array to store first batch of element ids
+  // Create an array to store first batch of user ids
   let firstBatchIDs = [];
   // Create the first options object with just a limit
   const firstOptions = { limit: 2 };
@@ -593,7 +593,7 @@ function optionSkipFind(done) {
   .then((foundUsers) => {
     // Verify that no more than 2 users were found
     chai.expect(foundUsers.length).to.equal(2);
-    // Add element ids to the firstBatchIDs array
+    // Add user ids to the firstBatchIDs array
     firstBatchIDs = foundUsers.map(u => u._id);
 
     // Find the next batch of users
@@ -875,7 +875,7 @@ function optionFieldsReplace(done) {
   };
   // Create the options object with the list of fields specifically to find
   const findOptions = { fields: ['fname', 'createdBy'] };
-  // Create the options object with the list of fields to specifically to NOT find
+  // Create the options object with the list of fields to specifically NOT find
   const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
   // Create the list of fields which are always provided no matter what
   const fieldsAlwaysProvided = ['_id'];

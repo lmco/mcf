@@ -126,7 +126,7 @@ function putInvalidId(done) {
 }
 
 /**
- * @description Verifies PUT call with Id does not delete existing orgs.
+ * @description Verifies PUT call without Id does not delete existing orgs.
  * Note: This test should fail prior to deletion of existing orgs.
  */
 function putWithoutId(done) {

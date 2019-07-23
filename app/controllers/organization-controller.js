@@ -736,7 +736,7 @@ function update(requestingUser, orgs, options) {
  * ids already exist, this function updates those orgs. This function is
  * restricted to system-wide admins ONLY.
  *
- * @param {User} reqUser - The object containing the requesting user.
+ * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing
  * updates/new data for organizations, or a single object containing updates.
  * @param {string} orgs.id - The ID of the org being updated/created. Field
@@ -770,14 +770,14 @@ function update(requestingUser, orgs, options) {
  *   M.log.error(error);
  * });
  */
-function createOrReplace(reqUser, orgs, options) {
+function createOrReplace(requestingUser, orgs, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof reqUser === 'object', 'Requesting user is not an object.');
-      assert.ok(reqUser !== null, 'Requesting user cannot be null.');
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
-      assert.ok(reqUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
       assert.ok(typeof orgs === 'object', 'Orgs parameter is not an object.');
       assert.ok(orgs !== null, 'Orgs parameter cannot be null.');
       // If orgs is an array, ensure each item inside is an object
@@ -794,6 +794,7 @@ function createOrReplace(reqUser, orgs, options) {
     }
 
     // Sanitize input parameters and function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     const duplicateCheck = {};
     let foundOrgs = [];

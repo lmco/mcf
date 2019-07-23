@@ -126,9 +126,9 @@ describe(M.getModuleName(module.filename), () => {
     + ' updating a target', updateTargetWithNoSource);
   it('should reject creating elements to a tag '
     + 'saying elements cannot be created.', createInTag);
-  it('should reject updating elements to a ta '
+  it('should reject updating elements to a tag '
     + 'saying elements cannot be update.', updateInTag);
-  it('should reject delete an element in a tag '
+  it('should reject deleting elements in a tag '
     + 'saying elements cannot be deleted.', deleteInTag);
   it('should reject put elements with invalid id', putInvalidId);
   it('should reject put elements without id', putWithoutId);
@@ -339,7 +339,7 @@ function updateInTag(done) {
   .catch((error) => {
     // Ensure error message is correct
     chai.expect(error.message).to.equal(`[${tagID}] is a tag and `
-      + 'does not allow updates to elements.');
+      + 'does not allow elements to be updated.');
     done();
   });
 }
@@ -387,9 +387,9 @@ function putInvalidId(done) {
     return ElementController.find(adminUser, org.id, projID, branchID,
       [testElemObj0.id, testElemObj1.id]);
   })
-  .then((foundProjs) => {
+  .then((foundElements) => {
     // Expect to find 2 elements
-    chai.expect(foundProjs.length).to.equal(2);
+    chai.expect(foundElements.length).to.equal(2);
     done();
   })
   .catch((error) => {
@@ -399,7 +399,7 @@ function putInvalidId(done) {
 }
 
 /**
- * @description Verifies PUT call with Id does not delete existing elements.
+ * @description Verifies PUT call without Id does not delete existing elements.
  * Note: This test should fail prior to deletion of existing elements.
  */
 function putWithoutId(done) {
