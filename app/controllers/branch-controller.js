@@ -276,7 +276,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
  * @param {string} projectID - The ID of the owning project.
  * @param {(Object|Object[])} branches - Either an array of objects containing
  * branch data or a single object containing branch data to create.
- * @param {string} branches.id - The ID of the branch being created.
+ * @param {string} [branches.id] - The ID of the branch being created.
  * @param {string} [branches.name] - The name of the branch.
  * @param {string} [branches.tag] = false - If the branch is a tag, the value
  * should be set to true. This will hinder all create, update, and deletes of
@@ -440,13 +440,15 @@ function create(requestingUser, organizationID, projectID, branches, options) {
           + ' It must first be unarchived before creating branches.', 'warn');
       }
 
-      // Find the branchedFrom to verify existence
-      return Branch.findOne({ _id: utils.createID(orgID, projID, sourceID) }).lean();
+      sourceID = utils.createID(orgID, projID, sourceID);
+
+      // Find the source branch to verify existence
+      return Branch.findOne({ _id: sourceID }).lean();
     })
     .then((foundBranch) => {
       // Check that the branch was found
       if (!foundBranch) {
-        throw new M.NotFoundError(`Branch [${sourceID}] not found in the `
+        throw new M.NotFoundError(`Branch [${utils.parseID(sourceID).pop()}] not found in the `
           + `project [${projID}].`, 'warn');
       }
 
@@ -466,8 +468,6 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         throw new M.OperationError('Branches with the following IDs already exist'
           + ` [${foundBranchIDs.toString()}].`, 'warn');
       }
-
-      sourceID = utils.createID(orgID, projID, sourceID);
 
       // For each object of branch data, create the branch object
       branchObjects = branchesToCreate.map((branchObj) => {
@@ -519,6 +519,8 @@ function create(requestingUser, organizationID, projectID, branches, options) {
           }
 
           // Create the element object
+          // TODO: Evaluate whether it is necessary to recreate the element object
+          // TODO: or modify the old one
           const elemObj = {
             _id: elemID,
             name: e.name,
@@ -587,7 +589,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
     .then((queryResult) => {
       if (queryResult.result.n !== (newBranches.length * elementsCloning.length)) {
         // Not all elements were created
-        M.log.error('Not all elements were cloned from branch.');
+        throw new M.DatabaseError('Not all elements were cloned from branch.', 'error');
       }
 
       // reset created variable
@@ -631,7 +633,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
  * @description This function updates one or many branches. Multiple fields in
  * multiple branches can be updated at once, provided that the fields are
  * allowed to be updated. If a branch is archived, it must first be unarchived before any other
- * updates occur. This function is restricted to admins of projects and system-wide
+ * updates occur. This function is restricted to project writers and system-wide
  * admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
@@ -656,7 +658,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated project objects
+ * @return {Promise} Array of updated branch objects
  *
  * @example
  * update({User}, 'orgID', 'projID' [{Updated Branch 1},
@@ -762,7 +764,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
           + ` branch on the project [${projID}].`, 'warn');
       }
 
-      // Verify the organization is not archived
+      // Verify the project is not archived
       if (foundProject.archived) {
         throw new M.PermissionError(`The project [${projID}] is archived.`
           + ' It must first be unarchived before updating branches.', 'warn');

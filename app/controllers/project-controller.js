@@ -1004,7 +1004,7 @@ function update(requestingUser, organizationID, projects, options) {
  * data. If projects with matching ids already exist, the function replaces
  * those projects. This function is restricted to system-wide admins ONLY.
  *
- * @param {User} reqUser - The object containing the requesting user.
+ * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {(Object|Object[])} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
@@ -1040,14 +1040,14 @@ function update(requestingUser, organizationID, projects, options) {
  *   M.log.error(error);
  * });
  */
-function createOrReplace(reqUser, organizationID, projects, options) {
+function createOrReplace(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof reqUser === 'object', 'Requesting user is not an object.');
-      assert.ok(reqUser !== null, 'Requesting user cannot be null.');
+      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
-      assert.ok(reqUser._id, 'Requesting user is not populated.');
+      assert.ok(requestingUser._id, 'Requesting user is not populated.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
       assert.ok(projects !== null, 'Projects parameter cannot be null.');
@@ -1065,6 +1065,7 @@ function createOrReplace(reqUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const duplicateCheck = {};
@@ -1363,7 +1364,7 @@ function remove(requestingUser, organizationID, projects, options) {
     .then((foundOrg) => {
       // Verify the organization was found
       if (foundOrg === null) {
-        throw new M.NotFoundError(`The organization [${orgID}] was not found`,
+        throw new M.NotFoundError(`The organization [${orgID}] was not found.`,
           'warn');
       }
 

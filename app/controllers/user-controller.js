@@ -998,7 +998,7 @@ function remove(requestingUser, users, options) {
  * @param {string} query - The text-based query to search the database for.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {boolean} [options.archived] - A parameter that if true, will return
- * search results containing both archived and regular users.
+ * search results containing both archived and nonarchived users.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects.  By default, no fields are populated.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
@@ -1048,16 +1048,16 @@ function search(requestingUser, query, options) {
     const validOptions = utils.validateOptions(options, ['archived', 'populate',
       'limit', 'skip', 'lean', 'sort'], User);
 
-    // Find the user
+    // Add text to search query
     searchQuery.$text = { $search: query };
     // If the archived field is true, remove it from the query
     if (validOptions.archived) {
       delete searchQuery.archived;
     }
 
-    // Here we're adding sorting by metadata.
+    // Add sorting by metadata
     // If no sorting option was specified ($natural is the default) then remove
-    // $natural because it doesn't work with metadata sorting
+    // $natural. $natural does not work with metadata sorting
     if (validOptions.sort.$natural) {
       validOptions.sort = { score: { $meta: 'textScore' } };
     }

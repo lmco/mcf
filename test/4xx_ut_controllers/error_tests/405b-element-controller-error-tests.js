@@ -339,7 +339,7 @@ function updateInTag(done) {
   .catch((error) => {
     // Ensure error message is correct
     chai.expect(error.message).to.equal(`[${tagID}] is a tag and `
-      + 'does not allow updates to elements.');
+      + 'does not allow elements to be updated.');
     done();
   });
 }
