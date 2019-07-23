@@ -161,9 +161,16 @@ only the `class` results would be found.
 
 #### Windows Compatibility
 At this point there are still some comatibility issues with windows. The
-`packages.json` includes post/pre install scripts that use linux specific
+`package.json` includes post/pre install scripts that use linux specific
 commands, as does the plugin loading. It is recommended you run MBEE on a linux
 based device.
+
+#### Internet Explorer
+Internet Explorer does not currently have great support for React applications.
+Because MBEE is written primarily in React, users who attempt to use MBEE on
+Internet Explorer will not be able to use any of the UI feature passed the
+login screen. Seeing that Mircosoft Edge is now the supported Windows browser,
+it is not in the plans to officially support MBEE of Internet Explorer.
 
 #### Plugin Loading
 Due to the nature of how plugins are loaded, the API and UI are not accessible
