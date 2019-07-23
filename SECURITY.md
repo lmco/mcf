@@ -156,11 +156,11 @@ It's important to ensure that all test users are deleted from the database.
 #### Element Search UI
 A known issue exists in the advanced element search in the UI. If the same field
 is selected more than once for the advanced search, only the first value is
-searched. For example, if searching by type `class` and the by type `block`,
+searched. For example, if searching by type `class` and by the type `block`,
 only the `class` results would be found.
 
 #### Windows Compatibility
-At this point there are still some comatibility issues with windows. The
+At this point there are still some compatibility issues with windows. The
 `package.json` includes post/pre install scripts that use linux specific
 commands, as does the plugin loading. It is recommended you run MBEE on a linux
 based device.
@@ -168,9 +168,9 @@ based device.
 #### Internet Explorer
 Internet Explorer does not currently have great support for React applications.
 Because MBEE is written primarily in React, users who attempt to use MBEE on
-Internet Explorer will not be able to use any of the UI feature passed the
+Internet Explorer will not be able to use any of the UI features past the
 login screen. Seeing that Mircosoft Edge is now the supported Windows browser,
-it is not in the plans to officially support MBEE of Internet Explorer.
+it is not in the plans to officially support MBEE for Internet Explorer.
 
 #### Plugin Loading
 Due to the nature of how plugins are loaded, the API and UI are not accessible
