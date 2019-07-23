@@ -131,10 +131,19 @@ function formatJSON(obj, minified = false) {
  * @returns {Object} res - The response object
  */
 function returnResponse(req, res, message, statusCode) {
-  if (statusCode === 200) { res.header('Content-Type', 'application/json'); }
-  else { res.header('Content-Type', 'text/plain'); }
+  if (statusCode === 200) {
+    // We send these headers for a success response
+    res.header('Content-Type', 'application/json');
+  }
+  else {
+    // We send these headers for an error response
+    res.header('Content-Type', 'text/plain');
+  }
+  // Send the message
   res.status(statusCode).send(message);
+  // Log the response
   logger.logResponse(message.length, req, res);
+  // Return res
   return res;
 }
 
