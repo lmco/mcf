@@ -62,7 +62,7 @@ describe(M.getModuleName(module.filename), () => {
       return testUtils.createTestProject(adminUser, org.id);
     })
     .then((retProj) => {
-      // Set global project and master branch
+      // Set global project
       proj = retProj;
       projID = utils.parseID(proj.id).pop();
       done();
@@ -103,7 +103,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Validates that the find results can be sorted
  */
 function optionSortFind(done) {
-  // Create the test project objects
+  // Create the test branch objects
   const testBranches = [
     {
       id: 'testbranch00',
@@ -124,7 +124,7 @@ function optionSortFind(done) {
   const sortOption = { sort: 'name' };
   const sortOptionReverse = { sort: '-name' };
 
-  // Create the projects
+  // Create the branches
   BranchController.create(adminUser, org.id, projID, testBranches)
   .then((createdBranches) => {
     // Expect createdBranches array to contain 3 projects
@@ -134,7 +134,7 @@ function optionSortFind(done) {
       testBranches.map((p) => p.id), sortOption);
   })
   .then((foundProjects) => {
-    // Expect to find 3 projects
+    // Expect to find 3 branches
     chai.expect(foundProjects.length).to.equal(3);
 
     // Validate that the sort option is working
@@ -145,12 +145,12 @@ function optionSortFind(done) {
     chai.expect(foundProjects[2].name).to.equal('c');
     chai.expect(foundProjects[2].id).to.equal(utils.createID(org.id, projID, 'testbranch01'));
 
-    // Find the users and return them sorted in reverse
+    // Find the branches and return them sorted in reverse
     return BranchController.find(adminUser, org.id, projID, testBranches.map((b) => b.id),
       sortOptionReverse);
   })
   .then((foundBranches) => {
-    // Expect to find 3 projects
+    // Expect to find 3 branches
     chai.expect(foundBranches.length).to.equal(3);
 
     // Validate that the sort option is working

@@ -200,7 +200,7 @@ function putGzip(done) {
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
-  // POSTs a project
+  // PUTs a project
   apiController.putProjects(req, res);
 }
 
@@ -243,13 +243,13 @@ function patchGzip(done) {
     // Verifies the response data
     res.send = function send(_data) {
       // Verify response body
-      const createdProjects = JSON.parse(_data);
-      const createdProject = createdProjects[0];
+      const updatedProjects = JSON.parse(_data);
+      const updatedProject = updatedProjects[0];
 
-      // Verify project created properly
-      chai.expect(createdProject.id).to.equal(projectData.id);
-      chai.expect(createdProject.name).to.equal(projectData.name);
-      chai.expect(createdProject.custom || {}).to.deep.equal(projectData.custom);
+      // Verify project updated properly
+      chai.expect(updatedProject.id).to.equal(projectData.id);
+      chai.expect(updatedProject.name).to.equal(projectData.name);
+      chai.expect(updatedProject.custom || {}).to.deep.equal(projectData.custom);
 
       // Clear the data used for testing
       fs.truncateSync(filepath);
@@ -258,7 +258,7 @@ function patchGzip(done) {
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
     };
 
-    // POSTs a project
+    // PATCHes a project
     apiController.patchProjects(req, res);
   });
 }

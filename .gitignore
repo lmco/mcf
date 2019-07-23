@@ -6,7 +6,6 @@ docs/
 logs/*.log
 node_modules/
 plugins/*
-plugins_src/*
 !plugins/routes.js
 public/
 yarn.lock

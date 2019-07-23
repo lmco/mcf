@@ -115,7 +115,7 @@ function optionSortFind(done) {
     chai.expect(foundOrgs[2].name).to.equal('c');
     chai.expect(foundOrgs[2].id).to.equal('testorg01');
 
-    // Find the users and return them sorted in reverse
+    // Find the orgs and return them sorted in reverse
     return OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
       sortOptionReverse);
   })

@@ -201,7 +201,7 @@ function putGzip(done) {
     // Clear the data used for testing
     fs.truncateSync(filepath);
 
-    // Remove the test org
+    // Remove the test user
     UserController.remove(adminUser, userData.username)
     .then(() => {
       // Ensure the response was logged correctly
@@ -257,7 +257,7 @@ function patchGzip(done) {
       const createdUsers = JSON.parse(_data);
       const createdUser = createdUsers[0];
 
-      // Verify user created properly
+      // Verify user updated properly
       chai.expect(createdUser.username).to.equal(userData.username);
       chai.expect(createdUser.fname).to.equal(userData.fname);
       chai.expect(createdUser.lname).to.equal(userData.lname);

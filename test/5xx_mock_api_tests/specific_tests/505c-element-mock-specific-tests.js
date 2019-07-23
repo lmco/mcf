@@ -264,14 +264,14 @@ function patchGzip(done) {
     // Verifies the response data
     res.send = function send(_data) {
       // Verify response body
-      const createdElements = JSON.parse(_data);
-      const createdElement = createdElements[0];
+      const updatedElements = JSON.parse(_data);
+      const updatedElement = updatedElements[0];
 
-      // Verify element created properly
-      chai.expect(createdElement.id).to.equal(elementData.id);
-      chai.expect(createdElement.name).to.equal(elementData.name);
-      chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
-      chai.expect(createdElement.project).to.equal(projID);
+      // Verify element updated properly
+      chai.expect(updatedElement.id).to.equal(elementData.id);
+      chai.expect(updatedElement.name).to.equal(elementData.name);
+      chai.expect(updatedElement.custom || {}).to.deep.equal(elementData.custom);
+      chai.expect(updatedElement.project).to.equal(projID);
 
       // Clear the data used for testing
       fs.truncateSync(filepath);

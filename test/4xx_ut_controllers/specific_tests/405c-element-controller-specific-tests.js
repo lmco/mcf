@@ -375,11 +375,16 @@ function updateExternalTarget(done) {
  * element.
  */
 function deleteRelElement(done) {
+  // Grab element ids from relationship
   const rel = utils.parseID(elements[7]._id).pop();
+  // Grab deleted element id
   const delElem = utils.parseID(elements[8]._id).pop();
+
+  // Remove element
   ElementController.remove(adminUser, org.id, projIDs[0], branchID, delElem)
   .then(() => ElementController.find(adminUser, org.id, projIDs[0], branchID, rel))
   .then((foundElements) => {
+    // Verify relationship updated
     const relationship = foundElements[0];
     chai.expect(relationship.source).to.equal(utils.createID(relationship.branch, 'undefined'));
     chai.expect(relationship.target).to.equal(utils.createID(relationship.branch, 'undefined'));
@@ -472,7 +477,7 @@ function optionArchivedFind(done) {
 }
 
 /**
- * @description Verifies that an element and it's subtree are returned when
+ * @description Verifies that an element and its subtree are returned when
  * using the option 'subtree' in find().
  */
 function optionSubtreeFind(done) {
@@ -482,12 +487,12 @@ function optionSubtreeFind(done) {
   // was archived in a previous test
   const options = { subtree: true, archived: true };
 
-  // Find the element and it's subtree
+  // Find the element and its subtree
   ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options)
   .then((foundElements) => {
     // Expect there to be 5 elements found, the searched element and 4 in subtree
     chai.expect(foundElements.length).to.equal(5);
-    // Attempt to convert elements to JMI3, if successful then its a valid tree
+    // Attempt to convert elements to JMI3, if successful then it's a valid tree
     const jmi3Elements = jmi.convertJMI(1, 3, foundElements);
     // Verify that there is only one top level key in jmi3, which should be the
     // searched element
@@ -1325,7 +1330,7 @@ function optionSortFind(done) {
   const sortOption = { sort: 'name' };
   const sortOptionReverse = { sort: '-name' };
 
-  // Create the test users
+  // Create the test elements
   ElementController.create(adminUser, org.id, projIDs[0], branchID, testElems)
   .then((createdElems) => {
     // Validate that 3 elements were created
@@ -1348,7 +1353,7 @@ function optionSortFind(done) {
     chai.expect(foundElems[2].name).to.equal('c');
     chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
 
-    // Find the users and return them sorted in reverse
+    // Find the elements and return them sorted in reverse
     return ElementController.find(adminUser, org.id, projIDs[0], branchID,
       testElems.map((e) => e.id),
       sortOptionReverse);

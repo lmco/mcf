@@ -41,7 +41,7 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user.
    */
   before((done) => {
     // Open the database connection
@@ -199,7 +199,7 @@ function putGzip(done) {
 
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to update projects.
+ * the contents can be used to update organizations.
  */
 function patchGzip(done) {
   const orgData = testData.orgs[0];
@@ -238,7 +238,7 @@ function patchGzip(done) {
       const createdOrgs = JSON.parse(_data);
       const createdOrg = createdOrgs[0];
 
-      // Verify org created properly
+      // Verify org updated properly
       chai.expect(createdOrg.id).to.equal(orgData.id);
       chai.expect(createdOrg.name).to.equal(orgData.name);
       chai.expect(createdOrg.custom || {}).to.deep.equal(orgData.custom);
