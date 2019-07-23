@@ -407,7 +407,7 @@ function findElement(done) {
     }
     // If source was provided, verify it
     if (elemData.hasOwnProperty('source')) {
-      const sourceID = utils.createID(org.id, projID, elemData.source);
+      const sourceID = utils.createID(org.id, projID, branchID, elemData.source);
       chai.expect(foundElement.source).to.equal(sourceID);
     }
     // If target was provided, verify it

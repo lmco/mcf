@@ -11,7 +11,7 @@
  *
  * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @description This tests the element API controller functionality:
+ * @description This tests specific functionality of the element API:
  * GET, POST, PATCH, and DELETE of an element.
  */
 
@@ -130,6 +130,10 @@ function handleGzipUpload(done) {
 
     // Verify response body
     const createdElements = JSON.parse(body);
+
+    // Verify one element is returned
+    chai.expect(createdElements.length).to.equal(1);
+
     const createdElement = createdElements[0];
 
     // Verify element created properly

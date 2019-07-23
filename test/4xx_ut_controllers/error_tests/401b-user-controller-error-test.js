@@ -65,7 +65,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Delete admin user. Deletes the two test projects.
+   * After: Delete admin user. Deletes the two test users.
    */
   after((done) => {
     UserController.remove(adminUser,
@@ -83,13 +83,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should reject put user with invalid id', putInvalidUsername);
-  it('should reject put user without id', putWithoutId);
+  it('should reject put user with invalid username', putInvalidUsername);
+  it('should reject put user without username', putWithoutUsername);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies invalid Id PUT call does not delete existing users.
+ * @description Verifies invalid username PUT call does not delete existing users.
  */
 function putInvalidUsername(done) {
   // Create the test user objects
@@ -116,7 +116,7 @@ function putInvalidUsername(done) {
     return UserController.find(adminUser, [testUserObj0.username, testUserObj1.username]);
   })
   .then((foundUsers) => {
-    // Expect to find 2 projects
+    // Expect to find 2 users
     chai.expect(foundUsers.length).to.equal(2);
     done();
   })
@@ -127,10 +127,10 @@ function putInvalidUsername(done) {
 }
 
 /**
- * @description Verifies PUT call with Id does not delete existing users.
+ * @description Verifies PUT call without username does not delete existing users.
  * Note: This test should fail prior to deletion of existing users.
  */
-function putWithoutId(done) {
+function putWithoutUsername(done) {
   // Create the test users
   const testUserObj0 = testData.users[1];
   const testUserObj1 = testData.users[2];
@@ -140,7 +140,7 @@ function putWithoutId(done) {
     [testUserObj0, testUserObj1, invalidUserObj])
   .then(() => {
     // Should not succeed, force to fail
-    done(new Error('Project put successfully.'));
+    done(new Error('User put successfully.'));
   })
   .catch((error) => {
     // Expected error, find valid users

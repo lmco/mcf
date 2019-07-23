@@ -40,7 +40,7 @@ let org = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Create admin and non-admin user. Create organization.
+   * Before: Create admin and create organization.
    */
   before((done) => {
     // Connect db
@@ -67,7 +67,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Remove non-admin user and organization.
+   * After: Remove admin and organization.
    */
   after((done) => {
     // Removing the organization created
@@ -131,7 +131,7 @@ function optionSortFind(done) {
     chai.expect(foundProjects[2].name).to.equal('c');
     chai.expect(foundProjects[2].id).to.equal(utils.createID(org.id, 'testproject01'));
 
-    // Find the users and return them sorted in reverse
+    // Find the projects and return them sorted in reverse
     return ProjectController.find(adminUser, org.id, testProjects.map((p) => p.id),
       sortOptionReverse);
   })
