@@ -213,7 +213,9 @@ class ElementEdit extends Component {
       contentType: 'application/json',
       statusCode: {
         200: () => {
+          // Verify parent has been updated
           if (doRefresh) {
+            // Send the parents IDs to be refreshed in element tree
             const refreshIds = [this.state.parentUpdate, this.state.parent];
             this.props.closeSidePanel(null, refreshIds);
           }

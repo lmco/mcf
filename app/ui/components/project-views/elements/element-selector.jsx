@@ -12,9 +12,8 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description Renders an element selector that has two parts: the selected
- * element and the modal to select an element..
+ * element and the modal to select an element.
  */
-
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
@@ -35,13 +34,11 @@ import ElementTree from './element-tree.jsx';
 
 class ElementSelector extends React.Component {
 
-  /**
-   *
-   * @param props
-   * @param props.self (optional)
-   */
   constructor(props) {
+    // Initialize parent props
     super(props);
+
+    // Initialize state props
     this.state = {
       modal: false,
       selectedElement: '',
@@ -49,10 +46,13 @@ class ElementSelector extends React.Component {
       error: null
     };
 
+    // Verify currentSelection is in props
     if (props.currentSelection) {
+      // Set selectedElementPreview to the currentSelection
       this.state.selectedElementPreview = props.currentSelection;
     }
 
+    // Bind the functions
     this.toggle = this.toggle.bind(this);
     this.selectElementHandler = this.selectElementHandler.bind(this);
     this.select = this.select.bind(this);
@@ -60,13 +60,15 @@ class ElementSelector extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+    // Verify if currentSelection prop updated
     if (prevProps.currentSelection !== this.props.currentSelection) {
+      // Update selectedElementPreview state
       this.setState({ selectedElementPreview: this.props.currentSelection });
     }
   }
 
   /**
-   * Toggles the state of the modal.
+   * Toggle the state of the modal.
    */
   toggle() {
     this.setState(prevState => ({
@@ -77,9 +79,10 @@ class ElementSelector extends React.Component {
   /**
    * This is the click handler used to select an element.
    */
-  selectElementHandler(id, refreshFunction) {
-    // Cannot select self
+  selectElementHandler(id) {
+    // Verify id is not self
     if (id === this.props.self) {
+      // Display error
       this.setState({
         selectedElementPreview: null,
         selectDisabled: true,
@@ -108,6 +111,9 @@ class ElementSelector extends React.Component {
     this.props.selectedHandler(this.state.selectedElementPreview);
   }
 
+  /**
+   * Resets the selectedElementPreview state
+   */
   clear() {
     this.setState({
       selectedElementPreview: null
@@ -115,8 +121,12 @@ class ElementSelector extends React.Component {
   }
 
   render() {
+    // Initialize Variables
     let error = '';
+
+    // Verify error
     if (this.state.error) {
+      // Display error
       error = <span className={'text-danger'}>{this.state.error}</span>;
     }
 

@@ -98,7 +98,7 @@ class InformationPage extends Component {
       titleClass = 'workspace-title';
     }
 
-
+    // Populate relevant fields
     if (this.props.org) {
       name = this.props.org.name;
       id = this.props.org.id;

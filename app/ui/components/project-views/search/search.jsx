@@ -95,7 +95,7 @@ class Search extends Component {
     this.setState({
       message: '',
       results: 'Searching ...'
-    }, () => { this.render(); });
+    });
 
     // Disable form submit
     if (e) {

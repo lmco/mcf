@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.components.project-views.elements.elements-tree
+ * @module ui.components.project-views.elements.element-tree
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -34,24 +34,33 @@ class ElementTree extends Component {
     // Initialize parent props
     super(props);
 
+    // Initialize state props
     this.state = {
       url: '',
       id: null,
-      refreshFunction: null,
       treeRoot: null,
       branch: props.branch,
       childrenOpen: {},
       error: null
     };
 
+    // Bind functions
     this.getElement = this.getElement.bind(this);
     this.setChildOpen = this.setChildOpen.bind(this);
   }
 
+  /**
+   * Set the open children state and ids to the object
+   */
   setChildOpen(id, state) {
     this.state.childrenOpen[id] = state;
   }
 
+  /**
+   * This is also considered the refresh function for root
+   * element. When an element is deleted or created the
+   * elements will be updated.
+   */
   getElement() {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
@@ -83,6 +92,7 @@ class ElementTree extends Component {
   }
 
   componentDidMount() {
+    // Get element information
     this.getElement();
   }
 

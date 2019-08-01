@@ -102,6 +102,7 @@ class ProjectElements extends Component {
 
     this.setState({ sidePanel: null });
 
+    // TODO: add comments to this file
     if (refreshIDs) {
       refreshIDs.forEach((id) => {
         if (this.state.refreshFunction.hasOwnProperty(id)) {

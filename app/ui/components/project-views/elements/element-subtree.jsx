@@ -14,7 +14,6 @@
  *
  * @description This renders the element tree in the project's page.
  */
-
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
@@ -32,6 +31,7 @@ class ElementSubtree extends Component {
     // Initialize parent props
     super(props);
 
+    // Initialize state props
     this.state = {
       id: props.id,
       isOpen: props.isOpen,
@@ -42,41 +42,51 @@ class ElementSubtree extends Component {
       error: null
     };
 
+    // Bind functions
     this.toggleCollapse = this.toggleCollapse.bind(this);
     this.handleElementToggle = this.handleElementToggle.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.refresh = this.refresh.bind(this);
   }
 
+  /**
+   * Toggle the element sub tree
+   */
   handleElementToggle() {
     this.setState({ elementWindow: !this.state.elementWindow });
   }
 
   componentDidMount() {
+    // Verify setRefreshFunction is not null
     if (this.props.setRefreshFunctions) {
+      // Provide refresh function to top parent component
       this.props.setRefreshFunctions(this.state.id, this.refresh);
     }
 
     // Build URL to get element data
     const contains = this.state.data.contains;
     const parent = this.state.data.id;
+    // Verify element does not have children
     if (contains === null || contains.length === 0) {
+      // Skip ajax call for children
       return;
     }
-
     const elements = contains.join(',');
-
     const base = this.props.url;
     let url = `${base}/elements?ids=${elements}&fields=id,name,contains,archived,type&minified=true&archived=true`;
+    // Provide different url
+    // If length is too long
     if (url.length > 2047) {
       url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&archived=true`;
     }
 
+    // Get children
     $.ajax({
       method: 'GET',
       url: url,
       statusCode: {
         200: (data) => {
+          // Sort data by name or special cases
           const result = data.sort((a, b) => {
             if (!a.name) {
               return 1;
@@ -100,6 +110,7 @@ class ElementSubtree extends Component {
             }
           });
 
+          // Set the sorted data as children
           this.setState({ children: result });
 
           // Verify if the state is displaying the children
@@ -108,6 +119,7 @@ class ElementSubtree extends Component {
           }
         },
         401: (err) => {
+          // Unset children and display error
           this.setState({ children: null });
           this.setState({ error: err.responseText });
 
@@ -115,15 +127,20 @@ class ElementSubtree extends Component {
           window.location.reload();
         },
         403: (err) => {
+          // Display error
           this.setState({ error: err.responseText });
         },
         404: (err) => {
+          // Display error
           this.setState({ error: err.responseText });
         }
       }
     });
   }
 
+  /**
+   * Toggle the element to display it's children
+   */
   toggleCollapse() {
     this.setState((prevState) => {
       this.props.setChildOpen(this.state.id, !prevState.isOpen);
@@ -136,36 +153,39 @@ class ElementSubtree extends Component {
 
   componentDidUpdate(prevProps, prevStates) {
     // Verify if component needs to re-render
+    // Due to the update from state props of data
     if (this.state.data !== prevStates.data) {
       this.componentDidMount();
     }
   }
 
   /**
-   * When an element is delete or created, the component
-   * will update.
+   * When an element is deleted, created, or updates the parent
+   * the elements will be updated.
    */
   refresh() {
     // Build URL to get element data
     const base = this.props.url;
     const url = `${base}/elements/${this.state.id}?minified=true&archived=true`;
 
-    // Get project data
+    // Get element data
     $.ajax({
       method: 'GET',
       url: url,
       statusCode: {
         200: (data) => {
+          // Set the element data
           this.setState({ data: data });
         },
         401: (err) => {
-          // Throw error and set state
+          // Set error
           this.setState({ error: err.responseText });
 
           // Refresh when session expires
           window.location.reload();
         },
         404: (err) => {
+          // Set error
           this.setState({ error: err.responseText });
         }
       }
@@ -173,7 +193,7 @@ class ElementSubtree extends Component {
   }
 
   /**
-   * When an element is clicked, parses the ID and calls the passed in
+   * When an element is clicked, parses the ID and call the passed in
    * click handler function.
    */
   handleClick() {
@@ -181,11 +201,10 @@ class ElementSubtree extends Component {
     this.props.clickHandler(elementId);
   }
 
-  // Create the element tree list
   render() {
+    // Initialize variables
     let elementLink;
     const initColor = (this.state.data.archived) ? '#c0c0c0' : '#333';
-    // Initialize variables
     let elementIcon = (
       <i className={'fas fa-cube'}
          style={{ color: initColor }}/>
@@ -197,7 +216,7 @@ class ElementSubtree extends Component {
     if (this.state.data !== null
       && Array.isArray(this.state.data.contains)
       && this.state.data.contains.length >= 1) {
-      // Icon should be chevron to show subtree is collapsible
+      // Icon should be caret to show subtree is collapsible
       expandIcon = (this.state.isOpen) ? 'fa-caret-down' : 'fa-caret-right';
 
       // Create Subtrees
@@ -226,7 +245,9 @@ class ElementSubtree extends Component {
 
     // Build the rendered element item
     let element = '';
+    // Verify data available
     if (this.state.data !== null) {
+      // Verify if archived
       if (!this.state.data.archived) {
         // Element should be rendered as the ID initially
         element = (
@@ -243,6 +264,7 @@ class ElementSubtree extends Component {
           </span>
           );
         }
+        // If the name is not blank and has displayId to false
         else if (this.state.data.name !== '' && !this.props.displayIds) {
           element = (
             <span>
@@ -251,6 +273,7 @@ class ElementSubtree extends Component {
           );
         }
       }
+      // If the element is archived and archived toggle is true
       else if (this.props.archived && this.state.data.archived) {
         // Element should be rendered as the ID initially
         element = (
@@ -267,6 +290,7 @@ class ElementSubtree extends Component {
             </span>
           );
         }
+        // If the name is not blank and has displayIds to false
         else if (this.state.data.name !== '' && !this.props.displayIds) {
           element = (
             <span className='grayed-out'>
@@ -277,7 +301,6 @@ class ElementSubtree extends Component {
       }
     }
 
-    // TODO (jk) We should abstract this into a "data types" library or similar.
     const iconMappings = {
       Package: {
         icon: (this.state.isOpen) ? 'folder-open' : 'folder',
@@ -348,8 +371,11 @@ class ElementSubtree extends Component {
         color: '#b0f2c8'
       }
     };
+
+    // Verify data available and type in mapping
     if (this.state.data !== null
       && iconMappings.hasOwnProperty(this.state.data.type)) {
+      // Set the icon to a new icon and color
       const icon = iconMappings[this.state.data.type].icon;
       const color = (this.state.data.archived) ? '#c0c0c0' : iconMappings[this.state.data.type].color;
       elementIcon = (
@@ -358,6 +384,7 @@ class ElementSubtree extends Component {
       );
     }
 
+    // Verify if it is linked element
     if (this.props.linkElements) {
       elementLink = (
         <Link to={`#${this.props.id}`}
@@ -380,6 +407,8 @@ class ElementSubtree extends Component {
         </span>);
     }
 
+    // Verify data is not archived and
+    // toggle archived is false
     if (this.state.data.archived && !this.props.archived) {
       return null;
     }

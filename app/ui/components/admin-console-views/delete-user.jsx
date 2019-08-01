@@ -148,6 +148,8 @@ class DeleteUser extends Component {
       });
     })
     .fail(res => {
+      // Verify failed status
+      // Set empty results array
       if (res.status === 404) {
         this.setState({ results: [] });
       }

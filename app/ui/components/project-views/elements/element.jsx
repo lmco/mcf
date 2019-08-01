@@ -71,7 +71,6 @@ class Element extends Component {
         url: url,
         statusCode: {
           200: (element) => {
-            // TODO do nested AJAX call for cross-ref replacement
             this.handleCrossRefs(element)
             .then(elementChanged => {
               this.setState({ element: elementChanged });
@@ -120,7 +119,6 @@ class Element extends Component {
       }
 
       // Make into an object for a uniqueness
-      // TODO - This can be done more efficiently, but it's ok for now.
       const uniqCrossRefs = {};
       allCrossRefs.forEach(xr => {
         const ref = xr.replace('cf:', '').slice(1, -1);
@@ -143,13 +141,13 @@ class Element extends Component {
         url: `${this.props.url}/elements/?${opts}`,
         statusCode: {
           200: (elements) => {
-            // Keep track of documentation field
+            // Keep track of documentation fields
             // and cross reference text
             let doc = _element.documentation;
             const refs = Object.keys(uniqCrossRefs);
 
-            // Loop over cross refs list and replace each occurance of that
-            // cross-ref in the documentation fiels
+            // Loop over cross refs list and replace each occurrence of that
+            // cross-ref in the documentation fields
             for (let i = 0; i < refs.length; i++) {
               // Get the ref, replacing special characters for use in regex
               const ref = refs[i]
