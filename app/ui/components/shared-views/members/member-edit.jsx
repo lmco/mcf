@@ -149,9 +149,9 @@ class MemberEdit extends Component {
     this.setState({
       message: '',
       results: 'Searching ...'
-    }, () => { this.render(); });
+    });
 
-    let query = this.state.username;
+    let query;
 
     // Disable form submit
     if (typeof e !== 'string') {
@@ -188,10 +188,7 @@ class MemberEdit extends Component {
       });
     })
     .fail(res => {
-      if (res.status === 404) {
-        this.setState({ results: [] });
-      }
-      if (res.status === 400) {
+      if (res.status === 404 || res.status === 400) {
         this.setState({ results: [] });
       }
     });

@@ -65,7 +65,7 @@ class AdvancedSearch extends Component {
 
   toggle() {
     this.setState((prevState) => ({ collapse: !prevState.collapse }));
-    // unhide/hide Search button if toggled
+    // Unhide/hide Search button if toggled
     this.props.toggleSearchBtn();
   }
 
@@ -93,6 +93,7 @@ class AdvancedSearch extends Component {
     // Pre-search state resets
     this.props.getAdvResults([], 'Searching...');
 
+    // Disable form submit
     if (e) {
       e.preventDefault();
     }
@@ -158,6 +159,7 @@ class AdvancedSearch extends Component {
       search: queryStr
     });
 
+    // Setup request to API endpoint with query
     this.setState({
       query: queryStr
     }, () => {
@@ -165,6 +167,7 @@ class AdvancedSearch extends Component {
       const start = new Date();
       $.ajax({
         method: 'GET',
+        // TODO: Discuss paginating search results. Limit to 100 results.
         url: `${url}${this.state.query}&limit=100&minified=true`,
         statusCode: {
           401: () => {
@@ -181,18 +184,21 @@ class AdvancedSearch extends Component {
           results: data,
           message: `Got ${data.length} results in ${elapsed} seconds.`
         }, () => {
+          // Re-render page with search results
           this.props.getAdvResults(this.state.results, this.state.message);
         });
       })
       .fail(res => {
         if (res.status === 404) {
           this.setState({ results: [] });
+          // Re-render page to display no results found
           this.props.getAdvResults([], '');
         }
       });
     });
   }
 
+  // Generate JSX for advanced rows
   createRowUI() {
     const opt = this.props.options;
     const options = opt.map((option, i) => <option key={i} value={option}> {option} </option>);
@@ -207,9 +213,11 @@ class AdvancedSearch extends Component {
   }
 
   componentDidMount() {
+    // Hide Search button if Advanced Search is toggled
     if (this.state.collapse) {
       this.props.toggleSearchBtn();
     }
+    // Perform API call if user has entered search terms into the URL
     if (this.state.query) {
       this.doAdvSearch();
     }
