@@ -44,6 +44,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many organizations. Depending on the
@@ -71,6 +72,18 @@ const jmi = M.require('lib.jmi-conversions');
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
+ * @param {string} [options.name] - Search for orgs with a specific name.
+ * @param {string} [options.createdBy] - Search for orgs with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for orgs with a specific
+ * lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for orgs with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found organization objects
  *
@@ -118,12 +131,32 @@ function find(requestingUser, orgs, options) {
       ? sani.mongo(JSON.parse(JSON.stringify(orgs)))
       : undefined;
 
-    // Initialize and ensure options are valid
-    const validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean'], Organization);
-
     // Define searchQuery
     const searchQuery = { archived: false };
+
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
+
+    // Ensure options are valid
+    if (options) {
+      // Create array of valid search options
+      const validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+
+      // Loop through provided options, look for validSearchOptions
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
+    }
+
     // If not system admin, add permissions check
     if (!reqUser.admin) {
       searchQuery[`permissions.${reqUser._id}`] = 'read';
@@ -152,16 +185,18 @@ function find(requestingUser, orgs, options) {
       // Find the orgs
       Organization.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString).lean()
       .then((foundOrgs) => resolve(foundOrgs))
-      .catch((error) => reject(error));
+      .catch((error) => reject(errors.captureError(error)));
     }
     else {
       Organization.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString)
       .then((foundOrgs) => resolve(foundOrgs))
-      .catch((error) => reject(error));
+      .catch((error) => reject(errors.captureError(error)));
     }
   });
 }
@@ -364,7 +399,7 @@ function create(requestingUser, orgs, options) {
       }
     })
     .then((foundUpdatedOrgs) => resolve(foundUpdatedOrgs))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -692,7 +727,7 @@ function update(requestingUser, orgs, options) {
 
       return resolve(foundUpdatedOrgs);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -743,8 +778,6 @@ function createOrReplace(requestingUser, orgs, options) {
       assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
       assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions'
-        + 'to create or replace orgs.');
       assert.ok(typeof orgs === 'object', 'Orgs parameter is not an object.');
       assert.ok(orgs !== null, 'Orgs parameter cannot be null.');
       // If orgs is an array, ensure each item inside is an object
@@ -761,12 +794,15 @@ function createOrReplace(requestingUser, orgs, options) {
     }
 
     // Sanitize input parameters and function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     const duplicateCheck = {};
     let foundOrgs = [];
     let orgsToLookup = [];
     let createdOrgs = [];
-    const timestamp = Date.now();
+    let isCreated = false;
+    let isDeleted = false;
+    const ts = Date.now();
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs)) {
@@ -814,6 +850,23 @@ function createOrReplace(requestingUser, orgs, options) {
     .then((_foundOrgs) => {
       foundOrgs = _foundOrgs;
 
+      // Check if there are new orgs
+      // Note: if more orgs than found, there must be new orgs
+      if (orgsToLookup.length > foundOrgs.length) {
+        // Requires global admin to create new orgs
+        assert.ok(reqUser.admin === true, 'User does not have permissions'
+          + 'to create or replace orgs.');
+      }
+
+      // Check that the user has admin permissions
+      foundOrgs.forEach((org) => {
+        if (!reqUser.admin && (!org.permissions[reqUser._id]
+          || !org.permissions[reqUser._id].includes('admin'))) {
+          throw new M.PermissionError('User does not have permission to'
+            + ` create or replace the org [${org._id}].`, 'warn');
+        }
+      });
+
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
         fs.mkdirSync(path.join(M.root, 'data'));
@@ -821,7 +874,7 @@ function createOrReplace(requestingUser, orgs, options) {
 
       // Write contents to temporary file
       return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`),
+        fs.writeFile(path.join(M.root, 'data', `PUT-backup-orgs-${ts}.json`),
           JSON.stringify(_foundOrgs), function(err) {
             if (err) rej(err);
             else res();
@@ -834,16 +887,24 @@ function createOrReplace(requestingUser, orgs, options) {
       // Emit the event orgs-deleted
       EventEmitter.emit('orgs-deleted', foundOrgs);
 
+      // Set deleted to true
+      isDeleted = true;
+
       // Create the new orgs
-      return create(requestingUser, orgsToLookup, options);
+      return create(reqUser, orgsToLookup, options);
     })
     .then((_createdOrgs) => {
       createdOrgs = _createdOrgs;
 
+      // Set created to true
+      isCreated = true;
+
       // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`))) {
-        return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', `PUT-backup-orgs-${timestamp}.json`), function(err) {
+      const filePath = path.join(M.root, 'data',
+        `PUT-backup-orgs-${ts}.json`);
+      if (fs.existsSync(filePath)) {
+        return new Promise((res, rej) => {
+          fs.unlink(filePath, function(err) {
             if (err) rej(err);
             else res();
           });
@@ -851,7 +912,33 @@ function createOrReplace(requestingUser, orgs, options) {
       }
     })
     .then(() => resolve(createdOrgs))
-    .catch((error) => reject(error));
+    .catch((error) => new Promise((res) => {
+      // Check if deleted and creation failed
+      if (isDeleted && !isCreated) {
+        // Reinsert original data
+        Organization.insertMany(foundOrgs)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data',
+            `PUT-backup-orgs-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      }
+      else {
+        // Resolve original error
+        return res(error);
+      }
+    }))
+    .then((error) => {
+      // If an error was returned, reject it.
+      if (error) {
+        return reject(errors.captureError(error));
+      }
+    });
   });
 }
 
@@ -969,6 +1056,6 @@ function remove(requestingUser, orgs, options) {
       }
       return resolve(foundOrgs.map(o => o._id));
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }

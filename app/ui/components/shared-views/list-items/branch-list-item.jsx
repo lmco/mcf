@@ -59,16 +59,21 @@ class BranchListItem extends Component {
     return (
       <div key={this.props._key}>
         <div id='branch-list-items' className={classNames}>
-          <span className={archivedClass}>
+          <div className={archivedClass} style={{ overflow: 'hidden' }}>
+            <span>
+              <a id={archivedClass} className='branch-link'
+                 href={this.props.href}>
+                {branch.id}
+              </a>
+            </span>
+          </div>
+          <span className={archivedClass} style={{ overflow: 'hidden' }}>
             {branch.name}
           </span>
-          <div className={archivedClass}>
-            <span>{branch.id}</span>
-          </div>
-          <div className={archivedClass}>
+          <div className={archivedClass} style={{ overflow: 'hidden' }}>
             <span>{branch.source}</span>
           </div>
-           <div className={archivedClass}>
+           <div className={archivedClass} style={{ overflow: 'hidden' }}>
              <span>{date}</span>
            </div>
         </div>

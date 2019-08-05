@@ -29,7 +29,6 @@ let adminUser = null;
 let org = null;
 let proj = null;
 let projID = null;
-let tagID = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -66,10 +65,6 @@ describe(M.getModuleName(module.filename), () => {
       proj = retProj;
       projID = utils.parseID(proj.id).pop();
 
-      return testUtils.createTag(adminUser, org.id, projID);
-    })
-    .then((tag) => {
-      tagID = utils.parseID(tag.id).pop();
       done();
     })
     .catch((error) => {
@@ -100,41 +95,18 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should reject updating a tag', updateTag);
   it('should reject deletion of master branch'
     + ' saying branch cannot be deleted', deleteMasterBranch);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies that a tagged branch can be created.
- */
-function updateTag(done) {
-  const updateObj = {
-    id: tagID,
-    name: 'Tag Update'
-  };
-
-  // Create branch via controller
-  BranchController.update(adminUser, org.id, projID, updateObj)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Tag was successfully updated.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal(`Tags [${tagID}] can not be updated.`);
-    done();
-  });
-}
-
-/**
  * @description Verifies that master branch can not be deleted
  */
 function deleteMasterBranch(done) {
   const branchID = testData.branches[0].id;
 
-  // Attempt to update the element
+  // Attempt to remove the master branch
   BranchController.remove(adminUser, org.id, projID, branchID)
   .then(() => {
     // Should not succeed, force to fail

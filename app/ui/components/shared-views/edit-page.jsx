@@ -96,6 +96,10 @@ class EditPage extends Component {
 
   // Define the submit function
   onSubmit() {
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
+
     // Initialize variables
     let url;
     const data = {
@@ -231,7 +235,7 @@ class EditPage extends Component {
                          checked={this.state.archived}
                          value={this.state.archived || false}
                          onChange={this.handleChange} />
-                  Archived
+                  Archive
                 </Label>
               </FormGroup>
               {/* Button to submit changes */}

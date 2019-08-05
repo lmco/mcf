@@ -65,6 +65,16 @@
     background: $highlight-color-primary;
   }
 
+  .clear-btn {
+    color: #9c9c9c;
+    padding-left: 10px;
+
+    &:hover {
+      color: darken(#9c9c9c, 15);
+      cursor: pointer;
+    }
+  }
+
   .transparent {
     color: transparent;
   }
@@ -77,7 +87,6 @@
 .branch-bar {
   padding: 20px 48px 15px 17px;
   display: flex;
-  justify-content: space-between;
 
   .branches-dropdown {
     display: flex;
@@ -88,14 +97,19 @@
   }
 
   .branch-tag {
+    display: flex;
     padding-left: 10px;
     padding-top: 3px;
 
     .archived-check-box {
-      padding-left: 30px;
+      padding-left: 10px;
       position: sticky;
     }
 
+  }
+
+  .options-btn {
+    padding-left: 10px;
   }
 
   .branch-label {
@@ -104,3 +118,8 @@
     font-size: small;
   }
 }
+
+.options-card {
+  padding: 15px 35px;
+}
+

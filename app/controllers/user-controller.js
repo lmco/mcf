@@ -12,6 +12,7 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the User model that
  * implements controller logic and behavior for Users.
@@ -44,6 +45,7 @@ const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -84,6 +86,9 @@ const utils = M.require('lib.utils');
  * users that were archived by a specific person
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  *
  * @return {Promise} Array of found users' public data objects.
  *
@@ -132,7 +137,7 @@ function find(requestingUser, users, options) {
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean'], User);
+      'fields', 'limit', 'skip', 'lean', 'sort'], User);
 
     // Define searchQuery
     const searchQuery = { archived: false };
@@ -180,6 +185,7 @@ function find(requestingUser, users, options) {
       // Find the users
       User.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString).lean()
       .then((foundUser) => resolve(foundUser))
       .catch((error) => reject(error));
@@ -188,6 +194,7 @@ function find(requestingUser, users, options) {
       // Find the users
       User.find(searchQuery, validOptions.fieldsString,
         { limit: validOptions.limit, skip: validOptions.skip })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString)
       .then((foundUser) => resolve(foundUser))
       .catch((error) => reject(error));
@@ -301,7 +308,7 @@ function create(requestingUser, users, options) {
           assert.ok(validUserKeys.includes(k), `Invalid key [${k}].`);
         });
 
-        // Ensure each user has a username and that its a string
+        // Ensure each user has a username and that it's a string
         assert.ok(user.hasOwnProperty('username'), `User #${index} does not have a username`);
         assert.ok(typeof user.username === 'string', `User #${index}'s username is not a string.`);
         // Check if user with same username is already being created
@@ -339,14 +346,13 @@ function create(requestingUser, users, options) {
         userObj.createdBy = reqUser._id;
         userObj.updatedOn = Date.now();
         userObj.archivedBy = (userObj.archived) ? reqUser._id : null;
+        userObj.hashPassword();
         return userObj;
       });
 
 
       // Create the users
-      // NOTE: .create() is being used here instead of.insertMany() so that the
-      // pre save middleware is called for password validation
-      return User.create(userObjects);
+      return User.insertMany(userObjects);
     })
     .then((_createdUsers) => {
       // Set function-wide createdUsers;
@@ -382,7 +388,7 @@ function create(requestingUser, users, options) {
       }
     })
     .then((foundCreatedUsers) => resolve(foundCreatedUsers))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -583,7 +589,7 @@ function update(requestingUser, users, options) {
           // Set archivedBy if archived field is being changed
           else if (key === 'archived') {
             // User cannot archive or unarchive themselves
-            if (user._id === reqUser._id) {
+            if ((user._id === reqUser._id) && (updateUser[key] !== user.archived)) {
               throw new M.OperationError('User cannot archive or unarchive themselves', 'warn');
             }
 
@@ -633,7 +639,7 @@ function update(requestingUser, users, options) {
 
       return resolve(foundUpdatedUsers);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -708,6 +714,8 @@ function createOrReplace(requestingUser, users, options) {
     let foundUsers = [];
     let usersToLookup = [];
     let createdUsers = [];
+    let isCreated = false;
+    let isDeleted = false;
     const ts = Date.now();
 
     // Check the type of the users parameter
@@ -770,19 +778,25 @@ function createOrReplace(requestingUser, users, options) {
           });
       });
     })
-    .then(() => User.deleteMany({ _id: foundUsers.map(u => u._id) }).lean())
+    .then(() => User.deleteMany({ _id: { $in: foundUsers.map(u => u._id) } }).lean())
     .then(() => {
       // Emit the event users-deleted
       EventEmitter.emit('users-deleted', foundUsers);
+
+      // Set deleted to true
+      isDeleted = true;
 
       // Create the new users
       return create(requestingUser, usersToLookup, options);
     })
     .then((_createdUsers) => {
       createdUsers = _createdUsers;
+      // Set created to true
+      isCreated = true;
 
       // Delete the temporary file.
-      const filePath = path.join(M.root, 'data', `PUT-backup-users-${ts}.json`);
+      const filePath = path.join(M.root, 'data',
+        `PUT-backup-users-${ts}.json`);
       if (fs.existsSync(filePath)) {
         return new Promise(function(res, rej) {
           fs.unlink(filePath, function(err) {
@@ -793,7 +807,33 @@ function createOrReplace(requestingUser, users, options) {
       }
     })
     .then(() => resolve(createdUsers))
-    .catch((error) => reject(error));
+    .catch((error) => new Promise((res) => {
+      // Check if deleted and creation failed
+      if (isDeleted && !isCreated) {
+        // Reinsert original data
+        User.insertMany(foundUsers)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data',
+            `PUT-backup-users-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      }
+      else {
+        // Resolve original error
+        return res(error);
+      }
+    }))
+    .then((error) => {
+      // If an error was returned, reject it.
+      if (error) {
+        return reject(errors.captureError(error));
+      }
+    });
   });
 }
 
@@ -945,7 +985,7 @@ function remove(requestingUser, users, options) {
 
       return resolve(foundUsernames);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -958,7 +998,7 @@ function remove(requestingUser, users, options) {
  * @param {string} query - The text-based query to search the database for.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {boolean} [options.archived] - A parameter that if true, will return
- * search results containing both archived and regular users.
+ * search results containing both archived and nonarchived users.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects.  By default, no fields are populated.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
@@ -969,6 +1009,9 @@ function remove(requestingUser, users, options) {
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  *
  * @return {Promise} An array of found users.
  *
@@ -1003,13 +1046,23 @@ function search(requestingUser, query, options) {
 
     // Validate and set the options
     const validOptions = utils.validateOptions(options, ['archived', 'populate',
-      'limit', 'skip', 'lean'], User);
+      'limit', 'skip', 'lean', 'sort'], User);
 
-    // Find the user
+    // Add text to search query
     searchQuery.$text = { $search: query };
     // If the archived field is true, remove it from the query
     if (validOptions.archived) {
       delete searchQuery.archived;
+    }
+
+    // Add sorting by metadata
+    // If no sorting option was specified ($natural is the default) then remove
+    // $natural. $natural does not work with metadata sorting
+    if (validOptions.sort.$natural) {
+      validOptions.sort = { score: { $meta: 'textScore' } };
+    }
+    else {
+      validOptions.sort.score = { $meta: 'textScore' };
     }
 
     // If the lean option is supplied
@@ -1017,7 +1070,7 @@ function search(requestingUser, query, options) {
       // Search for the user
       User.find(searchQuery, { score: { $meta: 'textScore' } },
         { limit: validOptions.limit, skip: validOptions.skip })
-      .sort({ score: { $meta: 'textScore' } })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString).lean()
       .then((foundUsers) => resolve(foundUsers))
       .catch((error) => reject(error));
@@ -1026,10 +1079,10 @@ function search(requestingUser, query, options) {
       // Search for the user
       User.find(searchQuery, { score: { $meta: 'textScore' } },
         { limit: validOptions.limit, skip: validOptions.skip })
-      .sort({ score: { $meta: 'textScore' } })
+      .sort(validOptions.sort)
       .populate(validOptions.populateString)
       .then((foundUsers) => resolve(foundUsers))
-      .catch((error) => reject(error));
+      .catch((error) => reject(errors.captureError(error)));
     }
   });
 }
@@ -1110,6 +1163,6 @@ function updatePassword(requestingUser, oldPassword, newPassword, confirmPasswor
       return foundUser.save();
     })
     .then((updatedUser) => resolve(updatedUser))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }

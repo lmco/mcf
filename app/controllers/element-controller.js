@@ -47,6 +47,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many elements. Depending on the
@@ -79,6 +80,9 @@ const jmi = M.require('lib.jmi-conversions');
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  * @param {string} [options.parent] - Search for elements with a specific
  * parent.
  * @param {string} [options.source] - Search for elements with a specific
@@ -153,7 +157,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Initialize validOptions
   const validOptions = utils.validateOptions(options, ['archived', 'populate',
-    'subtree', 'fields', 'limit', 'skip', 'lean'], Element);
+    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
   // Ensure options are valid
   if (options) {
@@ -169,7 +173,6 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
         if (typeof options[o] !== 'string') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
-
         // If the search option is an element reference
         if (['parent', 'source', 'target'].includes(o)) {
           // Make value the concatenated ID
@@ -197,7 +200,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the org is not archived
-  if (organization.archived) {
+  if (organization.archived && !validOptions.archived) {
     throw new M.PermissionError(`The organization [${orgID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
@@ -219,7 +222,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the project is not archived
-  if (project.archived) {
+  if (project.archived && !validOptions.archived) {
     throw new M.PermissionError(`The project [${projID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
@@ -234,7 +237,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Verify the branch is not archived
-  if (foundBranch.archived) {
+  if (foundBranch.archived && !validOptions.archived) {
     throw new M.PermissionError(`The branch [${branchID}] is archived.`
       + ' It must first be unarchived before finding elements.', 'warn');
   }
@@ -252,7 +255,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
   else if (((typeof saniElements === 'object' && saniElements !== null)
     || saniElements === undefined)) {
-    // Find all elements in the project
+    // Find all elements in the branch
     elementsToFind = [];
   }
   else {
@@ -272,7 +275,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   const promises = [];
 
-  // If no IDs provided, find all elements in a project
+  // If no IDs provided, find all elements in the branch
   if (elementsToFind.length === 0) {
     // Get the number of elements in the branch
     const elementCount = await Element.countDocuments(searchQuery);
@@ -282,7 +285,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
       // Find the elements
       foundElements = await findHelper(searchQuery, validOptions.fieldsString,
         validOptions.limit, validOptions.skip, validOptions.populateString,
-        validOptions.lean);
+        validOptions.sort, validOptions.lean);
     }
     else {
       // Define batchLimit, batchSkip and numLoops
@@ -308,8 +311,8 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
         }
 
         // Add find operation to array of promises
-        promises.push(findHelper(searchQuery, validOptions.fieldsString,
-          batchLimit, batchSkip, validOptions.populateString, validOptions.lean)
+        promises.push(findHelper(searchQuery, validOptions.fieldsString, batchLimit, batchSkip,
+          validOptions.populateString, validOptions.sort, validOptions.lean)
         .then((elems) => {
           foundElements = foundElements.concat(elems);
         }));
@@ -325,7 +328,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
       // Add find operation to array of promises
       promises.push(findHelper(searchQuery, validOptions.fieldsString,
         validOptions.limit, validOptions.skip, validOptions.populateString,
-        validOptions.lean)
+        validOptions.sort, validOptions.lean)
       .then((elems) => {
         foundElements = foundElements.concat(elems);
       }));
@@ -343,23 +346,26 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
  * @description Find helper function which simplifies the actual Element.find()
  * database call
  *
- * @param {Object} query - THe query to send to the database
+ * @param {Object} query - The query to send to the database
  * @param {string} fields - Fields to include (or not include) in the found objects
  * @param {number} limit - The maximum number of elements to return.
  * @param {number} skip - The number of elements to skip.
  * @param {string} populate - A string containing a space delimited list of
  * fields to populate
+ * @param {Object} sort - An optional argument that enables sorting by different fields
  * @param {boolean} lean - If true, returns raw JSON rather than converting to
  * instances of the Element model.
  */
-async function findHelper(query, fields, limit, skip, populate, lean) {
+async function findHelper(query, fields, limit, skip, populate, sort, lean) {
   if (lean) {
     return Element.find(query, fields, { limit: limit, skip: skip })
+    .sort(sort)
     .populate(populate)
     .lean();
   }
   else {
     return Element.find(query, fields, { limit: limit, skip: skip })
+    .sort(sort)
     .populate(populate);
   }
 }
@@ -865,7 +871,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
       return resolve(populatedElements);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1039,7 +1045,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       // Check the branch is not a tagged branch
       if (foundBranch.tag) {
         throw new M.OperationError(`[${branchID}] is a tag and `
-          + 'does not allow updates to elements.', 'warn');
+          + 'does not allow elements to be updated.', 'warn');
       }
 
       // Check the type of the elements parameter
@@ -1066,10 +1072,19 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         elementsToUpdate = [saniElements];
         // If updating parent, ensure it won't cause a circular reference
         if (saniElements.hasOwnProperty('parent')) {
-          // Turn parent ID into a name-spaced ID
-          saniElements.parent = utils.createID(orgID, projID, branchID, saniElements.parent);
-          // Find if a circular reference exists
-          return moveElementCheck(orgID, projID, branchID, saniElements);
+          // The model element is the only element that can't have a parent
+          if (saniElements.id === 'model') {
+            // Throw an error if the user is trying to give the model a parent
+            if (saniElements.parent !== null) {
+              throw new M.PermissionError('Cannot change root model parent.', 'warn');
+            }
+          }
+          else {
+            // Turn parent ID into a name-spaced ID
+            saniElements.parent = utils.createID(orgID, projID, branchID, saniElements.parent);
+            // Find if a circular reference exists
+            return moveElementCheck(orgID, projID, branchID, saniElements);
+          }
         }
       }
       else {
@@ -1245,6 +1260,15 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
         delete updateElement.id;
         delete updateElement._id;
 
+        // If source/target unchanged, remove from update object
+        if (updateElement.hasOwnProperty('source') && updateElement.source === element.source) {
+          delete updateElement.source;
+        }
+
+        if (updateElement.hasOwnProperty('target') && updateElement.target === element.target) {
+          delete updateElement.target;
+        }
+
         // Error Check: if element is currently archived, it must first be unarchived
         if (element.archived && (updateElement.archived === undefined
           || JSON.parse(updateElement.archived) !== false)) {
@@ -1283,17 +1307,18 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
                 + `[${utils.parseID(updateElement[key]).pop()}] was not found `
                 + `in the project [${utils.parseID(updateElement[key])[1]}].`, 'warn');
             }
-
-            // If no target exists and is not being updated, throw error
-            if (key === 'source' && !(updateElement.target !== undefined || element.target)) {
-              throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
-                + ' target is required if source is provided.', 'warn');
+            // If updating target but no source provided, throw error
+            if ((updateElement.target && !(element.source || updateElement.source))
+              || (updateElement.source === null && updateElement.target !== null)) {
+              throw new M.DataFormatError('If target element is provided, '
+                + 'source element is required.', 'warn');
             }
 
-            // If no source exists and is not being updated, throw error
-            if (key === 'target' && !(updateElement.source !== undefined || element.source)) {
-              throw new M.DataFormatError(`Element [${utils.parseID(element._id).pop()}]`
-                + ' source is required if target is provided.', 'warn');
+            // If updating source but no target provided, throw error
+            if ((updateElement.source && !(element.target || updateElement.target))
+              || (updateElement.target === null && updateElement.source !== null)) {
+              throw new M.DataFormatError('If source element is provided, '
+                + 'target element is required.', 'warn');
             }
           }
 
@@ -1301,7 +1326,7 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
           if (key === 'archived') {
             const elemID = utils.parseID(element._id).pop();
             // Error Check: ensure user cannot archive root elements
-            if (Element.getValidRootElements().includes(elemID)) {
+            if (Element.getValidRootElements().includes(elemID) && updateElement[key]) {
               throw new M.OperationError(
                 `User cannot archive the root element: ${elemID}.`, 'warn'
               );
@@ -1371,14 +1396,15 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
 
       return resolve(foundUpdatedElements);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
 /**
  * @description This function creates or replaces one or many elements. If the
- * element already exists, it is replaced with the provided data. NOTE: This
- * function is reserved for system-wide admins ONLY.
+ * element already exists, it is replaced with the provided data.
+ * NOTE: This function is reserved for user with at least write permissions
+ * on a project or is a system-wide admin.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -1435,8 +1461,6 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
       assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions'
-        + 'to replace elements.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
       assert.ok(typeof branch === 'string', 'Branch ID is not a string.');
@@ -1456,6 +1480,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     }
 
     // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const projID = sani.mongo(projectID);
     const branchID = sani.mongo(branch);
@@ -1465,6 +1490,8 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     let elementsToLookup = [];
     let createdElements = [];
     let foundElementIDs = [];
+    let isCreated = false;
+    let isDeleted = false;
     const ts = Date.now();
 
     // Find the organization
@@ -1487,8 +1514,15 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     .then((foundProject) => {
       // Check that the project was found
       if (!foundProject) {
-        throw new M.NotFoundError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 'warn');
+        throw new M.NotFoundError(`Project [${projID}] not found in the`
+          + ` organization [${orgID}].`, 'warn');
+      }
+
+      // Verify user has write permissions on the project
+      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
+        || !foundProject.permissions[reqUser._id].includes('write'))) {
+        throw new M.PermissionError('User does not have permission to create'
+          + ` or replace elements on the project [${projID}].`, 'warn');
       }
 
       // Ensure the project is not archived
@@ -1625,11 +1659,19 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       // Emit the event elements-deleted
       EventEmitter.emit('elements-deleted', foundElements);
 
+      // Set deleted to true
+      isDeleted = true;
+
       // Create new elements
-      return create(requestingUser, orgID, projID, branchID, elementsToLookup, options);
+      return create(reqUser, orgID, projID, branchID, elementsToLookup, options);
     })
     .then((_createdElements) => {
       createdElements = _createdElements;
+
+      // Set created to true
+      isCreated = true;
+
+      // Create file path to temp data file
       const filePath = path.join(M.root, 'data', orgID, projID, branchID, `PUT-backup-elements-${ts}.json`);
       // Delete the temporary file.
       if (fs.existsSync(filePath)) {
@@ -1665,10 +1707,35 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       if (existingOrgFiles.length === 0) {
         fs.rmdirSync(path.join(M.root, 'data', orgID));
       }
-
       return resolve(createdElements);
     })
-    .catch((error) => reject(error));
+    .catch((error) => new Promise((res) => {
+      // Check if deleted and creation failed
+      if (isDeleted && !isCreated) {
+        // Reinsert original data
+        Element.insertMany(foundElements)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
+            `PUT-backup-elements-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      }
+      else {
+        // Resolve original error
+        return res(error);
+      }
+    }))
+    .then((error) => {
+      // If an error was returned, reject it.
+      if (error) {
+        return reject(errors.captureError(error));
+      }
+    });
   });
 }
 
@@ -1762,6 +1829,12 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
           + ` elements in the organization [${orgID}].`, 'warn');
       }
 
+      // Verify the organization is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before deleting elements.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -1778,6 +1851,12 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
           + ` elements on the project [${projID}].`, 'warn');
       }
 
+      // Verify the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before deleting elements.', 'warn');
+      }
+
       // Find the elements to delete
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
     })
@@ -1785,6 +1864,12 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       // Verify the project was found or exists
       if (foundBranch === null) {
         throw new M.NotFoundError(`The branch [${branchID}] was not found.`, 'warn');
+      }
+
+      // Verify the branch is not archived
+      if (foundBranch.archived) {
+        throw new M.PermissionError(`The branch [${branchID}] is archived.`
+          + ' It must first be unarchived before deleting elements.', 'warn');
       }
 
       // Check the branch is not a tagged branch
@@ -1892,7 +1977,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     })
     // Return unique IDs of elements deleted
     .then(() => resolve(uniqueIDs))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1969,7 +2054,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
 
     Promise.all(promises)
     .then(() => resolve(foundElements))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -2053,7 +2138,7 @@ function moveElementCheck(organizationID, projectID, branch, element) {
     // Call the recursive find function
     findElementParentRecursive(element)
     .then(() => resolve())
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -2081,6 +2166,9 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
  * @param {string} [options.parent] - Search for elements with a specific
  * parent.
  * @param {string} [options.source] - Search for elements with a specific
@@ -2142,7 +2230,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     // TODO: Look at the element key from the model
     // Validate and set the options
     validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'limit', 'skip', 'lean'], Element);
+      'limit', 'skip', 'lean', 'sort'], Element);
 
     // Ensure options are valid
     if (options) {
@@ -2215,11 +2303,11 @@ function search(requestingUser, organizationID, projectID, branch, query, option
           + ' It must first be unarchived before searching elements.', 'warn');
       }
 
-      // Find the elements to delete
+      // Find the branch
       return Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
     })
     .then((foundBranch) => {
-      // Ensure the project was found
+      // Ensure the branch was found
       if (foundBranch === null) {
         throw new M.NotFoundError(`The branch [${branchID}] on the project ${projID} `
           + 'was not found.', 'warn');
@@ -2237,23 +2325,33 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         delete searchQuery.archived;
       }
 
+      // Add sorting by metadata
+      // If no sorting option was specified ($natural is the default) then remove
+      // $natural. $natural does not work with metadata sorting
+      if (validOptions.sort.$natural) {
+        validOptions.sort = { score: { $meta: 'textScore' } };
+      }
+      else {
+        validOptions.sort.score = { $meta: 'textScore' };
+      }
+
       // If the lean option is supplied
       if (validOptions.lean) {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
           { limit: validOptions.limit, skip: validOptions.skip })
-        .sort({ score: { $meta: 'textScore' } })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString).lean();
       }
       else {
         // Search for the elements
         return Element.find(searchQuery, { score: { $meta: 'textScore' } },
           { limit: validOptions.limit, skip: validOptions.skip })
-        .sort({ score: { $meta: 'textScore' } })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString);
       }
     })
     .then((foundElements) => resolve(foundElements))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }

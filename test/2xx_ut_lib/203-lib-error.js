@@ -29,6 +29,7 @@ const errors = M.require('lib.errors');
  */
 describe(M.getModuleName(module.filename), () => {
   it('should test the getStatusCode() function', getStatusCode);
+  it('should create a new custom error with the same stack trace', capturedError);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -54,5 +55,22 @@ function getStatusCode(done) {
   chai.expect(server).to.equal(500);
   chai.expect(database).to.equal(500);
   chai.expect(normal).to.equal(500);
+  done();
+}
+
+/**
+ * @description Tests that the captureError function creates a new custom error and preserves
+ * the stack trace
+ */
+function capturedError(done) {
+  // Create an error
+  const originalError = new Error();
+  // Run the error through the captureError function
+  const newError = errors.captureError(originalError);
+
+  // Expect the captureError function to turn the error into a customError and preserve the stack
+  chai.expect(originalError instanceof errors.CustomError).to.equal(false);
+  chai.expect(newError.stack).to.equal(originalError.stack);
+  chai.expect(newError instanceof errors.CustomError).to.equal(true);
   done();
 }

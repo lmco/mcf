@@ -1,18 +1,18 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.505c-element-mock-specific-tests
+ * @module test.504c-branch-mock-specific-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license LMPI - Lockheed Martin Proprietary Information
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE elements.
+ * GET, POST, PATCH, and DELETE branches.
  */
 
 // NPM modules
@@ -22,8 +22,7 @@ const fs = require('fs');
 const zlib = require('zlib');
 
 // MBEE modules
-const ElementController = M.require('controllers.element-controller');
-const ProjectController = M.require('controllers.project-controller');
+const BranchController = M.require('controllers.branch-controller');
 const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
@@ -36,7 +35,6 @@ let adminUser = null;
 let org = null;
 let proj = null;
 let projID = null;
-const branchID = 'master';
 
 /* --------------------( Main )-------------------- */
 /**
@@ -69,12 +67,13 @@ describe(M.getModuleName(module.filename), () => {
       const projData = testData.projects[0];
 
       // Create project
-      return ProjectController.create(adminUser, org.id, projData);
+      return testUtils.createTestProject(adminUser, org.id, projData);
     })
     .then((retProj) => {
       // Set global project
       proj = retProj;
-      projID = utils.parseID(proj[0].id).pop();
+
+      projID = utils.parseID(proj.id).pop();
       done();
     })
     .catch((error) => {
@@ -106,29 +105,27 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should create elements from an uploaded gzip file', postGzip);
-  it('should put elements from an uploaded gzip file', putGzip);
-  it('should patch elements from an uploaded gzip file', patchGzip);
+  it('should post branches from an uploaded gzip file', postGzip);
+  it('should patch branches from an uploaded gzip file', patchGzip);
 });
 
 /* --------------------( Tests )-------------------- */
 
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to create elements.
+ * the contents can be used to create branches.
  */
 function postGzip(done) {
-  const elementData = testData.elements[0];
+  const branchData = testData.branches[1];
 
   // Create a gzip file for testing
-  const zippedData = zlib.gzipSync(JSON.stringify(elementData));
+  const zippedData = zlib.gzipSync(JSON.stringify(branchData));
   fs.appendFileSync((filepath), zippedData);
 
   // Initialize the request attributes
   const params = {
     orgid: org.id,
-    projectid: projID,
-    branchid: branchID
+    projectid: projID
   };
   const body = {};
   const method = 'POST';
@@ -149,70 +146,14 @@ function postGzip(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const createdElements = JSON.parse(_data);
-    const createdElement = createdElements[0];
+    const createdBranches = JSON.parse(_data);
+    const createdBranch = createdBranches[0];
 
-    // Verify element created properly
-    chai.expect(createdElement.id).to.equal(elementData.id);
-    chai.expect(createdElement.name).to.equal(elementData.name);
-    chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
-    chai.expect(createdElement.project).to.equal(projID);
-
-    // Clear the data used for testing
-    fs.truncateSync(filepath);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // POSTs an element
-  apiController.postElements(req, res);
-}
-
-/**
- * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to create or replace elements.
- */
-function putGzip(done) {
-  const elementData = testData.elements[1];
-
-  // Create a gzip file for testing
-  const zippedData = zlib.gzipSync(JSON.stringify(elementData));
-  fs.appendFileSync((filepath), zippedData);
-
-  // Initialize the request attributes
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    branchid: branchID
-  };
-  const body = {};
-  const method = 'PUT';
-  const query = {};
-  const headers = 'application/gzip';
-
-  // Create a read stream of the zip file and give it request-like attributes
-  const req = testUtils.createReadStreamRequest(adminUser, params, body, method, query,
-    filepath, headers);
-  req.headers['accept-encoding'] = 'gzip';
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verify response body
-    const createdElements = JSON.parse(_data);
-    const createdElement = createdElements[0];
-
-    // Verify element created properly
-    chai.expect(createdElement.id).to.equal(elementData.id);
-    chai.expect(createdElement.name).to.equal(elementData.name);
-    chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
-    chai.expect(createdElement.project).to.equal(projID);
+    // Verify branch created properly
+    chai.expect(createdBranch.id).to.equal(branchData.id);
+    chai.expect(createdBranch.name).to.equal(branchData.name);
+    chai.expect(createdBranch.custom || {}).to.deep.equal(branchData.custom);
+    chai.expect(createdBranch.project).to.equal(projID);
 
     // Clear the data used for testing
     fs.truncateSync(filepath);
@@ -221,29 +162,32 @@ function putGzip(done) {
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
-  // PUTs an element
-  apiController.putElements(req, res);
+  // POSTs a branch
+  apiController.postBranches(req, res);
 }
 
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to update elements.
+ * the contents can be used to update branches.
  */
 function patchGzip(done) {
-  const elementData = testData.elements[2];
+  const branchData = testData.branches[2];
 
-  // Create the element to be patched
-  ElementController.create(adminUser, org.id, projID, branchID, elementData)
+  // Create the branch to be patched
+  BranchController.create(adminUser, org.id, projID, branchData)
   .then(() => {
+    branchData.name = 'updated';
+    branchData.tag = undefined;
+    branchData.source = undefined;
+
     // Create a gzip file for testing
-    const zippedData = zlib.gzipSync(JSON.stringify(elementData));
+    const zippedData = zlib.gzipSync(JSON.stringify(branchData));
     fs.appendFileSync((filepath), zippedData);
 
     // Initialize the request attributes
     const params = {
       orgid: org.id,
-      projectid: projID,
-      branchid: branchID
+      projectid: projID
     };
     const body = {};
     const method = 'POST';
@@ -264,14 +208,14 @@ function patchGzip(done) {
     // Verifies the response data
     res.send = function send(_data) {
       // Verify response body
-      const updatedElements = JSON.parse(_data);
-      const updatedElement = updatedElements[0];
+      const updatedBranches = JSON.parse(_data);
+      const updatedBranch = updatedBranches[0];
 
-      // Verify element updated properly
-      chai.expect(updatedElement.id).to.equal(elementData.id);
-      chai.expect(updatedElement.name).to.equal(elementData.name);
-      chai.expect(updatedElement.custom || {}).to.deep.equal(elementData.custom);
-      chai.expect(updatedElement.project).to.equal(projID);
+      // Verify branch updated properly
+      chai.expect(updatedBranch.id).to.equal(branchData.id);
+      chai.expect(updatedBranch.name).to.equal(branchData.name);
+      chai.expect(updatedBranch.custom || {}).to.deep.equal(branchData.custom);
+      chai.expect(updatedBranch.project).to.equal(projID);
 
       // Clear the data used for testing
       fs.truncateSync(filepath);
@@ -280,7 +224,7 @@ function patchGzip(done) {
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
     };
 
-    // PATCHes an element
-    apiController.patchElements(req, res);
+    // PATCHes a branch
+    apiController.patchBranches(req, res);
   });
 }

@@ -75,6 +75,9 @@ class CreateBranch extends Component {
 
   // Define the submit function
   onSubmit() {
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
     // Initialize variables
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
@@ -122,6 +125,9 @@ class CreateBranch extends Component {
       statusCode: {
         200: (data) => {
           this.setState({ branches: data });
+        },
+        400: (err) => {
+          this.setState({ error: err.responseText });
         },
         401: () => {
           this.setState({ branches: null, tags: null });
@@ -177,6 +183,9 @@ class CreateBranch extends Component {
         idInvalid = true;
         disableSubmit = true;
       }
+    }
+    else {
+      disableSubmit = true;
     }
 
     // Verify custom data is valid

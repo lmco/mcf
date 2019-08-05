@@ -36,12 +36,31 @@ class UserListItem extends Component {
     // Initialize state props
     this.state = {
       user: this.props.user,
+      width: 0,
       error: null
     };
+
+    // Create reference
+    this.ref = React.createRef();
+
+    // Bind component functions
+    this.handleResize = this.handleResize.bind(this);
+  }
+
+  // Define handle resize function
+  handleResize() {
+    // Set the state prop to the client width
+    this.setState({ width: this.ref.current.clientWidth });
   }
 
   componentDidMount() {
     const user = this.props.user;
+    // Create event listener to resize window
+    window.addEventListener('resize', this.handleResize);
+
+    // Set initial size of window
+    this.handleResize();
+
     if ((typeof user !== 'object') && !this.props.label) {
       const url = `/api/users/${this.props.user}`;
 
@@ -68,6 +87,12 @@ class UserListItem extends Component {
       });
     }
   }
+
+  componentWillUnmount() {
+    // Remove event listener on window
+    window.removeEventListener('resize', this.handleResize);
+  }
+
 
   render() {
     // Initialize variables
@@ -191,6 +216,7 @@ class UserListItem extends Component {
     if (user.archived) {
       archivedClass = 'grayed-out';
     }
+
     // Render the organization stat list items
     return (
       <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
@@ -215,7 +241,7 @@ class UserListItem extends Component {
             </React.Fragment>)
           }
         </div>
-        {stats}
+        {(this.state.width > 600) ? stats : ''}
       </div>
     );
   }

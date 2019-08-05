@@ -46,6 +46,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -74,6 +75,20 @@ const jmi = M.require('lib.jmi-conversions');
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
+ * @param {string} [options.name] - Search for projects with a specific name.
+ * @param {string} [options.visibility] - Search for projects with a certain
+ * level of visibility.
+ * @param {string} [options.createdBy] - Search for projects with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for projects with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for projects with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found project objects
  *
@@ -125,12 +140,33 @@ function find(requestingUser, organizationID, projects, options) {
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
-    // Initialize and ensure options are valid
-    const validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean'], Project);
-
     // Define searchQuery
     const searchQuery = { archived: false };
+
+    // Initialize and ensure options are valid
+    const validOptions = utils.validateOptions(options, ['populate', 'archived',
+      'fields', 'limit', 'skip', 'lean', 'sort'], Project);
+
+    // Ensure options are valid
+    if (options) {
+      // Create array of valid search options
+      const validSearchOptions = ['name', 'visibility', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
+
+      // Loop through provided options, look for validSearchOptions
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the search option is a string
+          if (typeof options[o] !== 'string') {
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.mongo(options[o]);
+        }
+      });
+    }
+
     // If not system admin, add permissions check
     if (!reqUser.admin) {
       searchQuery[`permissions.${reqUser._id}`] = 'read';
@@ -187,17 +223,19 @@ function find(requestingUser, organizationID, projects, options) {
         // Find the projects
         return Project.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString).lean();
       }
       else {
         // Find the projects
         return Project.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString);
       }
     })
     .then((finishedProjects) => resolve(finishedProjects))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -531,7 +569,7 @@ function create(requestingUser, organizationID, projects, options) {
       }
     })
     .then((foundCreatedProjects) => resolve(foundCreatedProjects))
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -957,7 +995,7 @@ function update(requestingUser, organizationID, projects, options) {
 
       return resolve(foundUpdatedProjects);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1010,8 +1048,6 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
       // Ensure that requesting user has an _id field
       assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions'
-        + 'to replace projects.');
       assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
       assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
       assert.ok(projects !== null, 'Projects parameter cannot be null.');
@@ -1029,12 +1065,16 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     }
 
     // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const duplicateCheck = {};
     let foundProjects = [];
+    let foundOrganization = [];
     let projectsToLookUp = [];
     let createdProjects = [];
+    let isCreated = false;
+    let isDeleted = false;
     const ts = Date.now();
 
     // Check the type of the projects parameter
@@ -1082,6 +1122,8 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     // Find the organization containing the projects
     Organization.findOne({ _id: orgID }).lean()
     .then((_foundOrganization) => {
+      foundOrganization = _foundOrganization;
+
       // Check if the organization was found
       if (_foundOrganization === null) {
         throw new M.NotFoundError(`The org [${orgID}] was not found.`, 'warn');
@@ -1098,6 +1140,26 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
     })
     .then((_foundProjects) => {
       foundProjects = _foundProjects;
+
+      // Check if new projects are being created
+      if (projectsToLookUp.length > foundProjects.length) {
+        // Ensure the user has at least write access on the organization
+        if (!reqUser.admin && (!foundOrganization.permissions[reqUser._id]
+          || !foundOrganization.permissions[reqUser._id].includes('write'))) {
+          throw new M.PermissionError('User does not have permission to create'
+            + ` projects on the organization [${orgID}].`, 'warn');
+        }
+      }
+
+      // Check that the user has admin permissions
+      foundProjects.forEach((proj) => {
+        if (!reqUser.admin && (!proj.permissions[reqUser._id]
+          || !proj.permissions[reqUser._id].includes('admin'))) {
+          throw new M.PermissionError('User does not have permission to create or '
+            + `replace the project [${utils.parseID(proj._id).pop()}].`, 'warn');
+        }
+      });
+
       // If data directory doesn't exist, create it
       if (!fs.existsSync(path.join(M.root, 'data'))) {
         fs.mkdirSync(path.join(M.root, 'data'));
@@ -1137,23 +1199,33 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       return Branch.deleteMany({ _id: { $in: branchDelObj } }).lean();
     })
     // Delete projects from database
-    .then(() => Project.deleteMany({ _id: foundProjects.map(p => p._id) }).lean())
+    .then(() => Project.deleteMany({ _id: { $in: foundProjects.map(p => p._id) } }).lean())
 
     .then(() => {
       // Emit the event projects-deleted
       EventEmitter.emit('projects-deleted', foundProjects);
 
+      // Set deleted to true
+      isDeleted = true;
+
       // Create the new/replaced projects
-      return create(requestingUser, orgID, projectsToLookUp, options);
+      return create(reqUser, orgID, projectsToLookUp, options);
     })
     .then((_createdProjects) => {
       createdProjects = _createdProjects;
 
+      // Set created to true
+      isCreated = true;
+
+      const filePath = path.join(M.root, 'data',
+        orgID, `PUT-backup-projects-${ts}.json`);
       // Delete the temporary file.
-      if (fs.existsSync(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`))) {
+      if (fs.existsSync(filePath)) {
         return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', orgID, `PUT-backup-projects-${ts}.json`),
-            function(err) { if (err) rej(err); else res(); });
+          fs.unlink(filePath, function(err) {
+            if (err) rej(err);
+            else res();
+          });
         });
       }
     })
@@ -1169,7 +1241,33 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       // Return the newly created projects
       return resolve(createdProjects);
     })
-    .catch((error) => reject(error));
+    .catch((error) => new Promise((res) => {
+      // Check if deleted and creation failed
+      if (isDeleted && !isCreated) {
+        // Reinsert original data
+        Project.insertMany(foundProjects)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data', orgID,
+            `PUT-backup-projects-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      }
+      else {
+        // Resolve original error
+        return res(error);
+      }
+    }))
+    .then((error) => {
+      // If an error was returned, reject it.
+      if (error) {
+        return reject(errors.captureError(error));
+      }
+    });
   });
 }
 
@@ -1266,8 +1364,14 @@ function remove(requestingUser, organizationID, projects, options) {
     .then((foundOrg) => {
       // Verify the organization was found
       if (foundOrg === null) {
-        throw new M.NotFoundError(`The organization [${orgID}] was not found`,
+        throw new M.NotFoundError(`The organization [${orgID}] was not found.`,
           'warn');
+      }
+
+      // Verify the organization is not archived
+      if (foundOrg.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before deleting projects.', 'warn');
       }
 
       // Find the projects to delete
@@ -1305,6 +1409,6 @@ function remove(requestingUser, organizationID, projects, options) {
       }
       return resolve(foundProjects.map(p => p._id));
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
