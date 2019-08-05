@@ -38,6 +38,7 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function finds one or many branches. Depending on the given
@@ -66,6 +67,22 @@ const jmi = M.require('lib.jmi-conversions');
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
+ * @param {boolean} [options.tag] - Search for branches with a specific tag
+ * value.
+ * @param {string} [options.source] - Search for branches with a specific source
+ * branch.
+ * @param {string} [options.name] - Search for branches with a specific name.
+ * @param {string} [options.createdBy] - Search for branches with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for branches with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for branches with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found branch objects
  *
@@ -124,12 +141,13 @@ function find(requestingUser, organizationID, projectID, branches, options) {
 
     // Initialize and ensure options are valid
     const validOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean'], Branch);
+      'fields', 'limit', 'skip', 'lean', 'sort'], Branch);
 
     // Ensure options are valid
     if (options) {
       // Create array of valid search options
-      const validSearchOptions = ['tag', 'source'];
+      const validSearchOptions = ['tag', 'source', 'name', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
 
       // Loop through provided options, look for validSearchOptions
       Object.keys(options).forEach((o) => {
@@ -228,6 +246,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         // Find branches in a project
         return Branch.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString).lean()
         .then((finishedBranches) => resolve(finishedBranches))
         .catch((error) => reject(error));
@@ -235,12 +254,13 @@ function find(requestingUser, organizationID, projectID, branches, options) {
       else {
         return Branch.find(searchQuery, validOptions.fieldsString,
           { limit: validOptions.limit, skip: validOptions.skip })
+        .sort(validOptions.sort)
         .populate(validOptions.populateString)
         .then((finishedBranches) => resolve(finishedBranches))
         .catch((error) => reject(error));
       }
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -256,7 +276,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
  * @param {string} projectID - The ID of the owning project.
  * @param {(Object|Object[])} branches - Either an array of objects containing
  * branch data or a single object containing branch data to create.
- * @param {string} branches.id - The ID of the branch being created.
+ * @param {string} [branches.id] - The ID of the branch being created.
  * @param {string} [branches.name] - The name of the branch.
  * @param {string} [branches.tag] = false - If the branch is a tag, the value
  * should be set to true. This will hinder all create, update, and deletes of
@@ -420,13 +440,15 @@ function create(requestingUser, organizationID, projectID, branches, options) {
           + ' It must first be unarchived before creating branches.', 'warn');
       }
 
-      // Find the branchedFrom to verify existence
-      return Branch.findOne({ _id: utils.createID(orgID, projID, sourceID) }).lean();
+      sourceID = utils.createID(orgID, projID, sourceID);
+
+      // Find the source branch to verify existence
+      return Branch.findOne({ _id: sourceID }).lean();
     })
     .then((foundBranch) => {
       // Check that the branch was found
       if (!foundBranch) {
-        throw new M.NotFoundError(`Branch [${sourceID}] not found in the `
+        throw new M.NotFoundError(`Branch [${utils.parseID(sourceID).pop()}] not found in the `
           + `project [${projID}].`, 'warn');
       }
 
@@ -446,8 +468,6 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         throw new M.OperationError('Branches with the following IDs already exist'
           + ` [${foundBranchIDs.toString()}].`, 'warn');
       }
-
-      sourceID = utils.createID(orgID, projID, sourceID);
 
       // For each object of branch data, create the branch object
       branchObjects = branchesToCreate.map((branchObj) => {
@@ -499,6 +519,8 @@ function create(requestingUser, organizationID, projectID, branches, options) {
           }
 
           // Create the element object
+          // TODO: Evaluate whether it is necessary to recreate the element object
+          // TODO: or modify the old one
           const elemObj = {
             _id: elemID,
             name: e.name,
@@ -567,7 +589,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
     .then((queryResult) => {
       if (queryResult.result.n !== (newBranches.length * elementsCloning.length)) {
         // Not all elements were created
-        M.log.error('Not all elements were cloned from branch.');
+        throw new M.DatabaseError('Not all elements were cloned from branch.', 'error');
       }
 
       // reset created variable
@@ -596,12 +618,12 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         // Delete the branches
         .then(() => Branch.deleteMany({ _id: { $in: arrIDs } }).lean())
         // Reject with error
-        .then(() => reject(error))
-        .catch(() => reject(error));
+        .then(() => reject(errors.captureError(error)))
+        .catch(() => reject(errors.captureError(error)));
       }
       else {
         // Reject with error
-        return reject(error);
+        return reject(errors.captureError(error));
       }
     });
   });
@@ -611,7 +633,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
  * @description This function updates one or many branches. Multiple fields in
  * multiple branches can be updated at once, provided that the fields are
  * allowed to be updated. If a branch is archived, it must first be unarchived before any other
- * updates occur. This function is restricted to admins of projects and system-wide
+ * updates occur. This function is restricted to project writers and system-wide
  * admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
@@ -636,7 +658,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated project objects
+ * @return {Promise} Array of updated branch objects
  *
  * @example
  * update({User}, 'orgID', 'projID' [{Updated Branch 1},
@@ -742,7 +764,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
           + ` branch on the project [${projID}].`, 'warn');
       }
 
-      // Verify the organization is not archived
+      // Verify the project is not archived
       if (foundProject.archived) {
         throw new M.PermissionError(`The project [${projID}] is archived.`
           + ' It must first be unarchived before updating branches.', 'warn');
@@ -802,12 +824,6 @@ function update(requestingUser, organizationID, projectID, branches, options) {
 
       // For each found branch
       foundBranches.forEach((branch) => {
-        // Check the branch is not a tags
-        if (branch.tag) {
-          throw new M.OperationError(`Tags [${utils.parseID(branch._id).pop()}]`
-          + ' can not be updated.', 'warn');
-        }
-
         const updateBranch = jmiType2[branch._id];
         // Remove id and _id field from update object
         delete updateBranch.id;
@@ -892,7 +908,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
 
       return resolve(foundUpdatedBranches);
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -987,6 +1003,12 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
           + ` branches on the organization [${orgID}].`, 'warn');
       }
 
+      // Verify the organization is not archived
+      if (organization.archived) {
+        throw new M.PermissionError(`The organization [${orgID}] is archived.`
+          + ' It must first be unarchived before deleting branches.', 'warn');
+      }
+
       // Find the project
       return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
     })
@@ -1001,6 +1023,12 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
         || !foundProject.permissions[reqUser._id].includes('write'))) {
         throw new M.PermissionError('User does not have permission to delete'
           + ` branches on the project [${projID}].`, 'warn');
+      }
+
+      // Verify the project is not archived
+      if (foundProject.archived) {
+        throw new M.PermissionError(`The project [${projID}] is archived.`
+          + ' It must first be unarchived before deleting branches.', 'warn');
       }
 
       // Find all the branches to delete
@@ -1047,6 +1075,6 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
       }
       return resolve(foundBranches.map(b => b._id));
     })
-    .catch((error) => reject(error));
+    .catch((error) => reject(errors.captureError(error)));
   });
 }

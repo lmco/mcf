@@ -53,8 +53,11 @@ class ElementEdit extends Component {
       type: '',
       parent: null,
       source: null,
+      sourceNamespace: null,
       target: null,
+      targetNamespace: null,
       documentation: '',
+      archived: false,
       custom: {},
       org: null,
       project: null,
@@ -78,7 +81,7 @@ class ElementEdit extends Component {
   getElement() {
     // Initialize variables
     const elementId = this.state.id;
-    const url = `${this.props.url}/elements/${elementId}?minified=true`;
+    const url = `${this.props.url}/elements/${elementId}?minified=true&archived=true`;
 
     // Get element data
     $.ajax({
@@ -93,7 +96,8 @@ class ElementEdit extends Component {
             documentation: element.documentation,
             custom: JSON.stringify(element.custom, null, 2),
             org: element.org,
-            project: element.project
+            project: element.project,
+            archived: element.archived
           });
 
           if (element.parent) {
@@ -105,6 +109,12 @@ class ElementEdit extends Component {
           }
           if (element.target) {
             this.setState({ target: element.target });
+          }
+          if (element.targetNamespace) {
+            this.setState({ targetNamespace: element.targetNamespace });
+          }
+          if (element.sourceNamespace) {
+            this.setState({ sourceNamespace: element.sourceNamespace });
           }
 
           $('textarea[name="custom"]').autoResize();
@@ -135,8 +145,15 @@ class ElementEdit extends Component {
 
   // Define handle change function
   handleChange(event) {
-    // Change the state with new value
-    this.setState({ [event.target.name]: event.target.value });
+    // Verify target being changed
+    if (event.target.name === 'archived') {
+      // Change the archive state to opposite value
+      this.setState(prevState => ({ archived: !prevState.archived }));
+    }
+    else {
+      // Change the state with new value
+      this.setState({ [event.target.name]: event.target.value });
+    }
 
     if (event.target.name === 'custom') {
       // Resize custom data field
@@ -158,29 +175,34 @@ class ElementEdit extends Component {
 
   // Define the submit function
   onSubmit() {
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
+
     // Initialize variables
-    let parentUpdated;
+    let doRefresh;
     const elementId = this.state.id;
     const url = `${this.props.url}/elements/${elementId}?minified=true`;
     const data = {
       name: this.state.name,
       type: this.state.type,
       parent: this.state.parent,
+      archived: this.state.archived,
+      source: this.state.source,
+      target: this.state.target,
       documentation: this.state.documentation,
       custom: JSON.parse(this.state.custom)
     };
 
-    // Check variables are defined
-    if (this.state.target) {
-      data.target = this.state.target;
-    }
-
-    if (this.state.source) {
-      data.source = this.state.source;
-    }
-
     if (this.state.parentUpdate !== this.state.parent) {
-      parentUpdated = true;
+      doRefresh = true;
+    }
+
+    if (this.state.targetNamespace) {
+      data.targetNamespace = this.state.targetNamespace;
+    }
+    if (this.state.sourceNamespace) {
+      data.sourceNamespace = this.state.sourceNamespace;
     }
 
     // Send a patch request to update element data
@@ -191,11 +213,14 @@ class ElementEdit extends Component {
       contentType: 'application/json',
       statusCode: {
         200: () => {
-          if (parentUpdated) {
-            this.props.closeSidePanel(null, true, true);
+          // Verify parent has been updated
+          if (doRefresh) {
+            // Send the parents IDs to be refreshed in element tree
+            const refreshIds = [this.state.parentUpdate, this.state.parent];
+            this.props.closeSidePanel(null, refreshIds);
           }
           else {
-            this.props.closeSidePanel(null, true);
+            this.props.closeSidePanel(null, [elementId]);
           }
         },
         401: (err) => {
@@ -339,7 +364,9 @@ class ElementEdit extends Component {
                     <ElementSelector
                       self={this.state.id}
                       url={this.props.url}
+                      currentSelection={this.state.parent}
                       project={this.props.project}
+                      branch={this.props.branch}
                       selectedHandler={this.parentSelectHandler} />
                   </Col>
                  </FormGroup>)
@@ -362,11 +389,17 @@ class ElementEdit extends Component {
               <Col sm={10} className={'selector-value'}>
                 {this.state.source || 'null'}
                 <ElementSelector
+                  currentSelection={this.state.source}
                   self={this.state.id}
                   url={this.props.url}
                   project={this.props.project}
+                  branch={this.props.branch}
                   selectedHandler={this.sourceSelectHandler} />
               </Col>
+              {(this.state.target && !this.state.source)
+                ? (<div className='warning-label'>*The source needs to be set with the target.</div>)
+                : ''
+              }
             </FormGroup>
             {/* Form section for Element target */}
             <FormGroup row>
@@ -374,10 +407,32 @@ class ElementEdit extends Component {
               <Col sm={10} className={'selector-value'}>
                 {this.state.target || 'null'}
                 <ElementSelector
+                  currentSelection={this.state.target}
                   self={this.state.id}
                   url={this.props.url}
+                  branch={this.props.branch}
                   project={this.props.project}
                   selectedHandler={this.targetSelectHandler} />
+              </Col>
+              {(!this.state.target && this.state.source)
+                ? (<div className='warning-label'>*The target needs to be set with the source.</div>)
+                : ''
+              }
+            </FormGroup>
+            {/* Form section for archiving */}
+            <FormGroup className='bottom-spacing' row>
+              <Label for='archived' sm={2}>
+                <b>Archive</b>
+              </Label>
+              <Col sm={10}>
+                <Label check sm={2}>
+                  <Input type='checkbox'
+                         name='archived'
+                         id='archived'
+                         checked={this.state.archived}
+                         value={this.state.archived || false}
+                         onChange={this.handleChange} />
+                </Label>
               </Col>
             </FormGroup>
             {/* Form section for custom data */}

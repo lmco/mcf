@@ -18,6 +18,7 @@
 // Node modules
 const assert = require('assert');
 const path = require('path');
+const zlib = require('zlib');
 
 // MBEE modules
 const publicData = M.require('lib.get-public-data');
@@ -239,12 +240,17 @@ module.exports.parseOptions = function(options, validOptions) {
  */
 module.exports.validateOptions = function(options, validOptions, model) {
   // Define the object to be returned to the user. Initialize populateString
-  const returnObject = { populateString: '' };
+  const returnObject = { populateString: '', sort: { $natural: 1 } };
+  // Define valid searchOptions for the org model
+  const orgSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+  // Define valid searchOptions for the project model
+  const projectSearchOptions = ['name', 'visibility', 'createdBy',
+    'lastModifiedBy', 'archivedBy'];
+  // Define valid searchOptions for the branch model
+  const branchSearchOptions = ['tag', 'source', 'name', 'createdBy',
+    'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the element model
   const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-    'createdBy', 'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the branch model
-  const branchSearchOptions = ['tag', 'source', 'name',
     'createdBy', 'lastModifiedBy', 'archivedBy'];
   // Define valid searchOptions for the user model
   const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
@@ -272,7 +278,11 @@ module.exports.validateOptions = function(options, validOptions, model) {
       || (model.modelName === 'Branch'
       && (branchSearchOptions.includes(opt) || opt.startsWith('custom.')))
       || (model.modelName === 'User'
-      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
+      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'Project'
+      && (projectSearchOptions.includes(opt) || opt.startsWith('custom.')))
+      || (model.modelName === 'Organization'
+      && (orgSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
       // Ignore iteration of loop
       return;
     }
@@ -390,6 +400,25 @@ module.exports.validateOptions = function(options, validOptions, model) {
       returnObject.skip = val;
     }
 
+    // Handle the sort option
+    if (opt === 'sort') {
+      // Get rid of the default value
+      returnObject.sort = {};
+      // initialize sort order
+      let order = 1;
+      // If the user has specified sorting in reverse order
+      if (val[0] === '-') {
+        order = -1;
+        val = val.slice(1);
+      }
+      // Handle cases where user is looking for _id
+      if (val === 'id' || val === 'username') {
+        val = '_id';
+      }
+      // Return the parsed sort option in the format {sort_field: order}
+      returnObject.sort[val] = order;
+    }
+
     // Handle the lean option
     if (opt === 'lean') {
       // Ensure the value is a boolean
@@ -403,4 +432,36 @@ module.exports.validateOptions = function(options, validOptions, model) {
   });
 
   return returnObject;
+};
+
+/**
+ * @description Handles a data stream containing gzipped data.
+ *
+ * @param {Object} dataStream - The stream object carrying a gzip file
+ *
+ * @return {Promise} A promise containing the unzipped data
+ */
+module.exports.handleGzip = function(dataStream) {
+  // Create the promise to return
+  return new Promise((resolve, reject) => {
+    // We receive the data in chunks so we want to collect the entire file before trying to unzip
+    const chunks = [];
+    dataStream.on('data', (chunk) => {
+      // Hold each chunk in memory
+      chunks.push(chunk);
+    });
+    dataStream.on('end', () => {
+      // Combine the chunks into a single buffer when the stream is done sending
+      const buffer = Buffer.concat(chunks);
+      // Unzip the data
+      zlib.gunzip(buffer, (err, result) => {
+        if (err) {
+          M.log.warn(err.message);
+          return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
+        }
+        // Return the unzipped data
+        return resolve(JSON.parse(result.toString()));
+      });
+    });
+  });
 };

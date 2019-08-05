@@ -56,22 +56,23 @@ class MembersPage extends Component {
     else {
       this.setState({ selectedUser: null });
     }
-    // Set the create modal state
-    this.setState((prevState) => ({ modal: !prevState.modal }));
   }
 
   render() {
     // Initialize variables
     let userperm;
     let users;
+    let title;
 
     if (this.props.org) {
       userperm = this.props.org.permissions;
       users = Object.keys(this.props.org.permissions);
+      title = this.props.org.name;
     }
     else {
       userperm = this.props.project.permissions;
       users = Object.keys(this.props.project.permissions);
+      title = this.props.project.name;
     }
 
     // Loop through project members
@@ -100,41 +101,23 @@ class MembersPage extends Component {
     // Return project member list
     return (
       <React.Fragment>
-        {/* Modal for editing user roles */}
-        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
-          <ModalBody>
-            {(this.props.project && !this.props.org)
-              ? (<MemberEdit project={this.props.project}
-                             selectedUser={this.state.selectedUser}
-                             toggle={this.handleToggle}/>)
-              : (<MemberEdit org={this.props.org}
-                             selectedUser={this.state.selectedUser}
-                             toggle={this.handleToggle}/>)
-            }
-          </ModalBody>
-        </Modal>
         <div id='workspace'>
           <div id='workspace-header' className='workspace-header header-box-depth'>
-            <h2 className='workspace-title'>
-              Members
+            <h2 className='workspace-title workspace-title-padding'>
+              Members of {title}
             </h2>
-            {/* Verify user is admin */}
-            {(!this.props.admin)
-              ? ''
-              : ( // Button to edit user roles
-                <div className='workspace-header-button'>
-                  <Button className='btn'
-                          outline color="secondary"
-                          onClick={this.handleToggle}>
-                    Edit
-                  </Button>
-                </div>
-              )
-            }
           </div>
           <div id='workspace-body' className='extra-padding'>
             <div className='main-workspace table-padding'>
-              <List>
+              <div className='roles-box'>
+                {(this.props.project && !this.props.org)
+                  ? (<MemberEdit project={this.props.project}
+                                 selectedUser={this.state.selectedUser}/>)
+                  : (<MemberEdit org={this.props.org}
+                                 selectedUser={this.state.selectedUser}/>)
+                }
+              </div>
+              <List className='members-box'>
                 <div className='template-header' key='user-info-template'>
                   <UserListItem className='head-info'
                                 label={true}

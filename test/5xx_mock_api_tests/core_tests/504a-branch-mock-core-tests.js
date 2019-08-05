@@ -258,7 +258,7 @@ function getBranch(done) {
     // Verify response body
     const foundBranch = JSON.parse(_data);
 
-    // Verify branch created properly
+    // Verify branch found properly
     chai.expect(foundBranch.id).to.equal(branchData.id);
     chai.expect(foundBranch.name).to.equal(branchData.name);
     chai.expect(foundBranch.custom || {}).to.deep.equal(branchData.custom);
@@ -324,7 +324,7 @@ function getBranches(done) {
     branchData.forEach((branchObj) => {
       const foundBranch = jmi2Branches[branchObj.id];
 
-      // Verify branches created properly
+      // Verify branches found properly
       chai.expect(foundBranch.id).to.equal(branchObj.id);
       chai.expect(foundBranch.name).to.equal(branchObj.name);
       chai.expect(foundBranch.custom || {}).to.deep.equal(branchObj.custom);
@@ -393,7 +393,7 @@ function getAllBranches(done) {
     branchesData.forEach((branchObj) => {
       const foundBranch = jmi2Branches[branchObj.id];
 
-      // Verify branches created properly
+      // Verify branches found properly
       chai.expect(foundBranch.id).to.equal(branchObj.id);
       chai.expect(foundBranch.name).to.equal(branchObj.name);
       chai.expect(foundBranch.custom || {}).to.deep.equal(branchObj.custom);
@@ -430,7 +430,7 @@ function getAllBranches(done) {
  */
 function patchBranch(done) {
   const branchData = testData.branches[1];
-  // Create updated elem object
+  // Create updated branch object
   const updateObj = {
     id: branchData.id,
     name: `${branchData.name}_edit`

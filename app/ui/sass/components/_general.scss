@@ -186,3 +186,9 @@ textarea[name="custom"] {
 .transparent {
   color: transparent;
 }
+
+.warning-label {
+  color: $color-danger;
+  font-size: 10px;
+  padding-left: 20px;
+}

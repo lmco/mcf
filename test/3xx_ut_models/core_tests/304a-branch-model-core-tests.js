@@ -186,15 +186,17 @@ function updateBranch(done) {
  * @description Delete a branch using the branch model
  */
 function deleteBranch(done) {
+  // Create the branch ID to remove
+  const branchID = utils.createID(project._id, testData.branches[0].id);
+
   // Find and delete the branch
-  Branch.findOneAndRemove({
-    _id: utils.createID(project._id, testData.branches[0].id) })
+  Branch.findOneAndRemove({ _id: branchID })
 
   // Attempt to find the branch
-  .then(() => Branch.find())
-  .then((branches) => {
+  .then(() => Branch.findOne({ _id: branchID }))
+  .then((branch) => {
     // Expect no branches to be found
-    chai.expect(branches.length).to.equal(0);
+    chai.expect(branch).to.equal(null);
     done();
   })
   .catch((error) => {

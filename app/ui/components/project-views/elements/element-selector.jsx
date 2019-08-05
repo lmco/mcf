@@ -12,9 +12,8 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description Renders an element selector that has two parts: the selected
- * element and the modal to select an element..
+ * element and the modal to select an element.
  */
-
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
@@ -22,40 +21,54 @@
 import React from 'react';
 
 // MBEE Modules
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import {
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter
+} from 'reactstrap';
 import ElementTree from './element-tree.jsx';
 
+/* eslint-enable no-unused-vars */
 
 class ElementSelector extends React.Component {
 
-  /**
-   *
-   * @param props
-   * @param props.self (optional)
-   */
   constructor(props) {
+    // Initialize parent props
     super(props);
+
+    // Initialize state props
     this.state = {
       modal: false,
       selectedElement: '',
       selectedElementPreview: '',
-      childrenOpen: {},
       error: null
     };
 
+    // Verify currentSelection is in props
+    if (props.currentSelection) {
+      // Set selectedElementPreview to the currentSelection
+      this.state.selectedElementPreview = props.currentSelection;
+    }
+
+    // Bind the functions
     this.toggle = this.toggle.bind(this);
-    this.getRootElement = this.getRootElement.bind(this);
     this.selectElementHandler = this.selectElementHandler.bind(this);
     this.select = this.select.bind(this);
-    this.setChildOpen = this.setChildOpen.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
-  componentDidMount() {
-    this.getRootElement();
+  componentDidUpdate(prevProps) {
+    // Verify if currentSelection prop updated
+    if (prevProps.currentSelection !== this.props.currentSelection) {
+      // Update selectedElementPreview state
+      this.setState({ selectedElementPreview: this.props.currentSelection });
+    }
   }
 
   /**
-   * Toggles the state of the modal.
+   * Toggle the state of the modal.
    */
   toggle() {
     this.setState(prevState => ({
@@ -64,41 +77,12 @@ class ElementSelector extends React.Component {
   }
 
   /**
-   * Gets the current model root element. This is used to render the tree.
-   *
-   * TODO (jk) - the tree currently requires us to do this work whenever we
-   * need it. We should consider creating a tree wrapper to handle this.
-   */
-  getRootElement() {
-    const opts = '?fields=id,name,contains,type&minified=true';
-    const url = `${this.props.url}/elements/model${opts}`;
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (data) => { this.setState({ treeRoot: data }); },
-        401: () => {
-          this.setState({ treeRoot: null });
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        403: (err) => {
-          this.setState({ error: err.responseText });
-        },
-        404: (err) => {
-          this.setState({ error: err.responseText });
-        }
-      }
-    });
-  }
-
-  /**
    * This is the click handler used to select an element.
    */
-  selectElementHandler(id, refreshFunction) {
-    // Cannot select self
+  selectElementHandler(id) {
+    // Verify id is not self
     if (id === this.props.self) {
+      // Display error
       this.setState({
         selectedElementPreview: null,
         selectDisabled: true,
@@ -114,10 +98,6 @@ class ElementSelector extends React.Component {
     });
   }
 
-  setChildOpen(id, state) {
-    this.state.childrenOpen[id] = state;
-  }
-
   /**
    * Confirms and finalizes the element selection. Then closes the modal.
    */
@@ -131,24 +111,22 @@ class ElementSelector extends React.Component {
     this.props.selectedHandler(this.state.selectedElementPreview);
   }
 
+  /**
+   * Resets the selectedElementPreview state
+   */
+  clear() {
+    this.setState({
+      selectedElementPreview: null
+    });
+  }
+
   render() {
-    let tree = '';
-    if (this.state.treeRoot !== null) {
-      tree = <ElementTree id='model'
-                          data={this.state.treeRoot}
-                          project={this.props.project}
-                          parent={null}
-                          isOpen={true}
-                          childrenOpen={this.state.childrenOpen}
-                          setChildOpen={this.setChildOpen}
-                          parentRefresh={this.getRootElement}
-                          clickHandler={this.selectElementHandler}
-                          url={this.props.url}/>;
-    }
-
-
+    // Initialize Variables
     let error = '';
+
+    // Verify error
     if (this.state.error) {
+      // Display error
       error = <span className={'text-danger'}>{this.state.error}</span>;
     }
 
@@ -161,13 +139,21 @@ class ElementSelector extends React.Component {
                className='element-selector-modal element-tree-container'>
           <ModalHeader toggle={this.toggle}>Select an element</ModalHeader>
           <ModalBody>
-            { tree }
+            <ElementTree project={this.props.project}
+                         displayIds={true}
+                         linkElements={false}
+                         branch={this.props.branch}
+                         clickHandler={this.selectElementHandler}/>
           </ModalBody>
-          <ModalFooter>
-            <p>
+          <ModalFooter style={{ overflow: 'hidden' }}>
+            <p style={{ overflow: 'scroll' }}>
               Selected: {this.state.selectedElementPreview}
-              {error}
+              {(this.state.selectedElementPreview)
+                ? <i className='fas fa-times-circle clear-btn' onClick={this.clear}/>
+                : 'null'
+              }
             </p>
+              {error}
             <Button color="primary"
                     disabled={this.state.selectDisabled}
                     onClick={this.select}>Select</Button>

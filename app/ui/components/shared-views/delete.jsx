@@ -136,7 +136,7 @@ class Delete extends Component {
       statusCode: {
         200: () => {
           if (this.props.element) {
-            this.props.closeSidePanel(null, true, true);
+            this.props.closeSidePanel(null, [this.props.element.parent]);
             this.props.toggle();
           }
           else {

@@ -188,6 +188,12 @@ api.route('/version')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -195,6 +201,28 @@ api.route('/version')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: name
+ *         description: Search for orgs with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for orgs created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for orgs last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for orgs archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET orgs, returns public org data.
@@ -873,6 +901,12 @@ api.route('/orgs/:orgid')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -880,6 +914,32 @@ api.route('/orgs/:orgid')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: name
+ *         description: Search for projects with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: visibility
+ *         description: Search for projects with a specific level of visibility.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for projects created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for projects last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for projects archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project's public
@@ -975,6 +1035,12 @@ api.route('/projects')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -982,6 +1048,32 @@ api.route('/projects')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: name
+ *         description: Search for projects with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: visibility
+ *         description: Search for projects with a specific level of visibility.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for projects created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for projects last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for projects archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET projects, returns project's public
@@ -1787,6 +1879,12 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -1794,6 +1892,36 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: tag
+ *         description: Search for branches with a specific tag value.
+ *         in: query
+ *         type: boolean
+ *       - name: source
+ *         description: Search for branches with a specific source branch.
+ *         in: query
+ *         type: string
+ *       - name: name
+ *         description: Search for branches with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for branches created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for branches last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archivedBy
+ *         description: Search for branches archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET branches, returns branches' public
@@ -2446,6 +2574,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -2604,6 +2738,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: format
  *         description: The desired format of the response. If jmi1, the
  *                      elements are returned in an array of element objects. If
@@ -3768,6 +3908,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -4230,6 +4376,12 @@ api.route('/users/whoami')
  *                      negative number.
  *         in: query
  *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      You may also add a negative sign in front of the field
+ *                      to indicate sorting in reverse order.
+ *         in: query
+ *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified

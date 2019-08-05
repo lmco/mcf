@@ -306,6 +306,7 @@ class BranchesTags extends Component {
       branches = displayBranches.map((branch) => (
         <div className='user-info' key={`branch-info-${branch.id}`}>
           <BranchListItem className='branch'
+                          href={`/orgs/${branch.org}/projects/${branch.project}/branches/${branch.id}`}
                           branch={branch}
                           _key={`branch-${branch.id}`}/>
           <div className='controls-container'>
@@ -333,6 +334,7 @@ class BranchesTags extends Component {
       tags = displayTags.map((tag) => (
         <div className='user-info' key={`tag-info-${tag.id}`}>
           <BranchListItem className='branch'
+                          href={`/orgs/${tag.org}/projects/${tag.project}/branches/${tag.id}`}
                           branch={tag}
                           _key={`branch-${tag.id}`}/>
           <div className='controls-container'>

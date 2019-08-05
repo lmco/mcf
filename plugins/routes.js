@@ -24,8 +24,6 @@ const express = require('express');
 const pluginRouter = express.Router();
 
 const protectedFileNames = ['routes.js'];
-const mbeeDependencies = require(`${M.root}/package.json`).dependencies;
-const mbeeDepList = Object.keys(mbeeDependencies);
 
 // Load the plugins
 loadPlugins();
@@ -96,27 +94,22 @@ function loadPlugins() {
     M.log.info(`Loading plugin '${namespace}' ...`);
 
     // Install the dependencies
-    const dependencies = pkg.dependencies;
-    if (dependencies) {
+    if (pkg.dependencies) {
       M.log.verbose('Installing plugin dependencies ...');
-      // Loop through plugin dependencies
-      Object.keys(dependencies).forEach(dep => {
-        // Skip conflicting dependencies
-        if (mbeeDepList.includes(dep)) {
-          return;
-        }
-        // Add dependency to node_modules without erasing existing node_modules
-        // directory
-        const commands = [
-          `pushd ${pluginPath}; yarn install; popd;`
-        ];
-        M.log.verbose(`Installing dependency ${dep} ...`);
-        const stdout = execSync(commands.join('; '));
-        M.log.debug(stdout.toString());
-        M.log.verbose(`${dep} installed.`);
-      });
+      const command = `cd plugins/${namespace}; yarn install`;
+      const stdout = execSync(command);
+      M.log.debug(stdout.toString());
+      M.log.verbose('Dependencies installed.');
     }
 
+    // Run the build script if specified
+    if (pkg.scripts && pkg.scripts.build) {
+      M.log.verbose('Running yarn build...');
+      const command = 'yarn build';
+      const stdout = execSync(command);
+      M.log.debug(stdout.toString());
+      M.log.verbose('Build completed.');
+    }
 
     // Try: creates the plug-in path with the plug-in name
     try {
@@ -154,30 +147,35 @@ function clonePluginFromGitRepo(data) {
   const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
-  // Set deploy key file permissions
-  let deployKeyCmd = '';
-  if (data.hasOwnProperty('deployKey')) {
-    execSync(`chmod 400 ${data.deployKey}`);
-    deployKeyCmd = `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no" `;
+  try {
+    // Set deploy key file permissions
+    let deployKeyCmd = '';
+    if (data.hasOwnProperty('deployKey')) {
+      execSync(`chmod 400 ${data.deployKey}`);
+      deployKeyCmd = `GIT_SSH_COMMAND="ssh -i ${data.deployKey} -oStrictHostKeyChecking=no" `;
+    }
+
+    let version = '';
+    // Clone a specific version
+    if (data.hasOwnProperty('version')) {
+      // Disables a warning about detachedHead
+      execSync('git config --global advice.detachedHead false');
+      version = `--branch ${data.version} `;
+    }
+
+    // Create the git clone command
+    const cmd = `${deployKeyCmd}git clone ${version}${data.source} `
+      + `${path.join(M.root, 'plugins', data.name)}`;
+
+    // Clone the repo
+    M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
+    const stdout2 = execSync(cmd);
+    M.log.verbose(stdout2.toString());
+    M.log.info('Clone complete.');
   }
-
-  let version = '';
-  // Clone a specific version
-  if (data.hasOwnProperty('version')) {
-    // Disables a warning about detachedHead
-    execSync('git config --global advice.detachedHead false');
-    version = `--branch ${data.version} `;
+  catch (error) {
+    M.log.warn(`Failed to clone plugin [${data.name}].`);
   }
-
-  // Create the git clone command
-  const cmd = `${deployKeyCmd}git clone ${version}${data.source} `
-            + `${path.join(M.root, 'plugins', data.name)}`;
-
-  // Clone the repo
-  M.log.info(`Cloning plugin ${data.name} from ${data.source} ...`);
-  const stdout2 = execSync(cmd);
-  M.log.verbose(stdout2.toString());
-  M.log.info('Clone complete.');
 }
 
 /**

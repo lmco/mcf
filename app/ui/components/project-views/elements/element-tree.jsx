@@ -12,7 +12,8 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This renders the element tree in the project's page.
+ * @description This the element tree wrapper, grabbing the
+ *  root model element and then the subtree.
  */
 
 /* Modified ESLint rules for React. */
@@ -20,8 +21,9 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 
+// MBEE Modules
+import ElementSubtree from './element-subtree.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -32,80 +34,49 @@ class ElementTree extends Component {
     // Initialize parent props
     super(props);
 
+    // Initialize state props
     this.state = {
-      id: props.id,
-      isOpen: props.isOpen,
-      data: props.data,
-      children: null,
-      elementWindow: false,
-      isSelected: true,
+      url: '',
+      id: null,
+      treeRoot: null,
+      branch: props.branch,
+      childrenOpen: {},
       error: null
     };
 
-    this.toggleCollapse = this.toggleCollapse.bind(this);
-    this.handleElementToggle = this.handleElementToggle.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.refresh = this.refresh.bind(this);
+    // Bind functions
+    this.getElement = this.getElement.bind(this);
+    this.setChildOpen = this.setChildOpen.bind(this);
   }
 
-  handleElementToggle() {
-    this.setState({ elementWindow: !this.state.elementWindow });
+  /**
+   * Set the open children state and ids to the object
+   */
+  setChildOpen(id, state) {
+    this.state.childrenOpen[id] = state;
   }
 
-  componentDidMount() {
-    // Build URL to get element data
-    const contains = this.state.data.contains;
-    const parent = this.state.data.id;
-    if (contains === null || contains.length === 0) {
-      return;
-    }
+  /**
+   * This is also considered the refresh function for root
+   * element. When an element is deleted or created the
+   * elements will be updated.
+   */
+  getElement() {
+    const orgId = this.props.project.org;
+    const projId = this.props.project.id;
+    const branchId = this.state.branch;
+    const base = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
+    const url = `${base}/elements/model?fields=id,name,contains,type,archived&minified=true&archived=true`;
 
-    const elements = contains.join(',');
-
-    const base = this.props.url;
-    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,archived,type&minified=true&archived=true`;
-    if (url.length > 2047) {
-      url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&archived=true`;
-    }
+    this.setState({ url: base });
 
     $.ajax({
       method: 'GET',
       url: url,
       statusCode: {
-        200: (data) => {
-          const result = data.sort((a, b) => {
-            if (!a.name) {
-              return 1;
-            }
-            else if (!b.name) {
-              return -1;
-            }
-            else {
-              const first = a.name.toLowerCase();
-              const second = b.name.toLowerCase();
-
-              if (first === '__mbee__') {
-                return -1;
-              }
-              else if ((second === '__mbee__') || (first > second)) {
-                return 1;
-              }
-              else {
-                return -1;
-              }
-            }
-          });
-
-          this.setState({ children: result });
-
-          // Verify if the state is displaying the children
-          if (this.props.childrenOpen.hasOwnProperty(this.state.id)) {
-            this.setState({ isOpen: this.props.childrenOpen[this.state.id] });
-          }
-        },
-        401: (err) => {
-          this.setState({ children: null });
-          this.setState({ error: err.responseText });
+        200: (data) => { this.setState({ treeRoot: data }); },
+        401: () => {
+          this.setState({ treeRoot: null });
 
           // Refresh when session expires
           window.location.reload();
@@ -120,241 +91,36 @@ class ElementTree extends Component {
     });
   }
 
-  toggleCollapse() {
-    this.setState((prevState) => {
-      this.props.setChildOpen(this.state.id, !prevState.isOpen);
-      return (
-        { isOpen: !prevState.isOpen }
-      );
-    });
+  componentDidMount() {
+    // Get element information
+    this.getElement();
   }
 
-
-  componentDidUpdate(prevProps, prevStates) {
-    // Verify if component needs to re-render
-    if (this.state.data !== prevStates.data) {
-      this.componentDidMount();
-    }
-  }
-
-  /**
-   * When an element is delete or created, the component
-   * will update.
-   */
-  refresh(isDelete) {
-    // Element is being deleted
-    if (isDelete) {
-      // Call parent refresh
-      this.props.parentRefresh();
-    }
-    else {
-      // Build URL to get element data
-      const base = this.props.url;
-      const url = `${base}/elements/${this.state.id}?minified=true`;
-
-      // Get project data
-      $.ajax({
-        method: 'GET',
-        url: url,
-        statusCode: {
-          200: (data) => {
-            this.setState({ data: data });
-          },
-          401: (err) => {
-            // Throw error and set state
-            this.setState({ error: err.responseText });
-
-            // Refresh when session expires
-            window.location.reload();
-          },
-          404: (err) => {
-            this.setState({ error: err.responseText });
-          }
-        }
-      });
-    }
-  }
-
-  /**
-   * When an element is clicked, parses the ID and calls the passed in
-   * click handler function.
-   */
-  handleClick() {
-    const elementId = this.props.id.replace('tree-', '');
-    this.props.clickHandler(elementId, this.refresh);
-  }
-
-  // Create the element tree list
   render() {
-    // Initialize variables
-    let elementIcon = (
-      <i className={'fas fa-cube'}
-         style={{ color: '#333' }}/>
+    let tree = null;
+    if (this.state.treeRoot !== null) {
+      tree = <ElementSubtree id='model'
+                             url={this.state.url}
+                             data={this.state.treeRoot}
+                             project={this.props.project}
+                             parent={null}
+                             isOpen={true}
+                             archived={this.props.archived}
+                             setRefreshFunctions={this.props.setRefreshFunctions}
+                             displayIds={this.props.displayIds}
+                             childrenOpen={this.state.childrenOpen}
+                             linkElements={this.props.linkElements}
+                             setChildOpen={this.setChildOpen}
+                             parentRefresh={this.getElement}
+                             clickHandler={this.props.clickHandler}/>;
+    }
+
+    // Return element list
+    return (
+        <div id='element-tree-container'>
+          {tree}
+        </div>
     );
-    let expandIcon = 'fa-caret-right transparent';
-    const subtree = [];
-
-    // If the element contains other elements, handle the subtree
-    if (this.state.data !== null
-      && Array.isArray(this.state.data.contains)
-      && this.state.data.contains.length >= 1) {
-      // Icon should be chevron to show subtree is collapsible
-      expandIcon = (this.state.isOpen) ? 'fa-caret-down' : 'fa-caret-right';
-
-      // Create Subtrees
-      if (this.state.children !== null) {
-        for (let i = 0; i < this.state.children.length; i++) {
-          subtree.push(
-            <ElementTree key={`tree-${this.state.children[i].id}`}
-                         id={`${this.state.children[i].id}`}
-                         data={this.state.children[i]}
-                         project={this.props.project}
-                         parent={this.state}
-                         archived={this.props.archived}
-                         parentRefresh={this.refresh}
-                         clickHandler={this.props.clickHandler}
-                         childrenOpen={this.props.childrenOpen}
-                         setChildOpen={this.props.setChildOpen}
-                         isOpen={false}
-                         url={this.props.url}/>
-          );
-        }
-      }
-    }
-
-    // Build the rendered element item
-    let element = '';
-    if (this.state.data !== null) {
-      if (!this.state.data.archived) {
-        // Element should be rendered as the ID initially
-        element = (
-          <span className={'element-id'}>
-           {this.state.data.id}
-        </span>
-        );
-        // If the name is not blank, render the name
-        if (this.state.data.name !== '') {
-          element = (
-            <span>
-            {this.state.data.name}
-              <span className={'element-id'}>({this.state.data.id})</span>
-          </span>
-          );
-        }
-      }
-      else if (this.props.archived && this.state.data.archived) {
-        // Element should be rendered as the ID initially
-        element = (
-          <span className='element-id'>
-           {this.state.data.id}
-          </span>
-        );
-        // If the name is not blank, render the name
-        if (this.state.data.name !== '') {
-          element = (
-            <span className='grayed-out'>
-              {this.state.data.name}
-              <span className='element-id'>({this.state.data.id})</span>
-            </span>
-          );
-        }
-      }
-    }
-
-    // TODO (jk) We should abstract this into a "data types" library or similar.
-    const iconMappings = {
-      Package: {
-        icon: (this.state.isOpen) ? 'folder-open' : 'folder',
-        color: 'lightblue'
-      },
-      package: {
-        icon: (this.state.isOpen) ? 'folder-open' : 'folder',
-        color: 'lightblue'
-      },
-      'uml:Package': {
-        icon: (this.state.isOpen) ? 'folder-open' : 'folder',
-        color: 'lightblue'
-      },
-      Diagram: {
-        icon: 'sitemap',
-        color: 'lightgreen'
-      },
-      diagram: {
-        icon: 'sitemap',
-        color: 'lightgreen'
-      },
-      association: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      Association: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      relationship: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      Relationship: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      Edge: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      edge: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      'uml:Diagram': {
-        icon: 'sitemap',
-        color: 'lightgreen'
-      },
-      'uml:Association': {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      'uml:Slot': {
-        icon: 'circle',
-        color: 'MediumPurple'
-      },
-      'uml:Property': {
-        icon: 'circle',
-        color: 'Gold'
-      }
-    };
-    if (this.state.data !== null
-      && iconMappings.hasOwnProperty(this.state.data.type)) {
-      const icon = iconMappings[this.state.data.type].icon;
-      const color = (this.state.data.archived) ? '#c0c0c0' : iconMappings[this.state.data.type].color;
-      elementIcon = (
-        <i className={`fas fa-${icon}`}
-           style={{ color: color }}/>
-      );
-    }
-
-    if (this.state.data.archived && !this.props.archived) {
-      return null;
-    }
-    else {
-      return (
-        <div id={`tree-${this.props.id}`}
-             className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
-          <i className={`fas ${expandIcon}`}
-             onClick={this.toggleCollapse}>
-          </i>
-          <Link to={`#${this.props.id}`}
-                onClick={this.handleClick}
-                className='element-link'>
-      <span className='element-name'>
-        {elementIcon}
-        {element}
-      </span>
-          </Link>
-          {(this.state.isOpen) ? (<div>{subtree}</div>) : ''}
-        </div>);
-    }
   }
 
 }

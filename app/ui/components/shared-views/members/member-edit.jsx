@@ -42,7 +42,6 @@ class MemberEdit extends Component {
       users: null,
       username: '',
       permissions: '',
-      dropDownOpen: false,
       results: null,
       error: null
     };
@@ -53,6 +52,7 @@ class MemberEdit extends Component {
     this.selectUser = this.selectUser.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.doSearch = this.doSearch.bind(this);
+    this.resetForm = this.resetForm.bind(this);
   }
 
   // Define handle change function
@@ -65,10 +65,27 @@ class MemberEdit extends Component {
     this.setState({ username: event.target.value });
 
     this.doSearch(event.target.value);
+
+    if (event.target.value.length === 0) {
+      this.resetForm();
+    }
   }
 
   selectUser(username) {
     this.setState({ username: username, results: null });
+
+    // Verify if org provided
+    if (this.props.org) {
+      if (this.props.org.permissions.hasOwnProperty(username)) {
+        this.setState({ permissions: this.props.org.permissions[username] });
+      }
+    }
+    else if (this.props.project.permissions.hasOwnProperty(username)) {
+      this.setState({ permissions: this.props.project.permissions[username] });
+    }
+    else {
+      this.setState({ permissions: '' });
+    }
   }
 
   // Define the submit function
@@ -81,6 +98,10 @@ class MemberEdit extends Component {
         [username]: this.state.permissions
       }
     };
+
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
 
     // Verify if org provided
     if (this.props.org) {
@@ -102,6 +123,9 @@ class MemberEdit extends Component {
         200: () => {
           // Update the page to reload to user page
           window.location.reload();
+        },
+        400: (err) => {
+          this.setState({ error: err.responseText });
         },
         401: (err) => {
           this.setState({ error: err.responseText });
@@ -125,9 +149,9 @@ class MemberEdit extends Component {
     this.setState({
       message: '',
       results: 'Searching ...'
-    }, () => { this.render(); });
+    });
 
-    let query = this.state.username;
+    let query;
 
     // Disable form submit
     if (typeof e !== 'string') {
@@ -164,41 +188,61 @@ class MemberEdit extends Component {
       });
     })
     .fail(res => {
-      if (res.status === 404) {
-        this.setState({ results: [] });
-      }
-      if (res.status === 400) {
+      if (res.status === 404 || res.status === 400) {
         this.setState({ results: [] });
       }
     });
+  }
+
+  resetForm() {
+    this.setState({ username: '', permissions: '', results: null });
   }
 
   componentDidMount() {
     if (this.props.selectedUser) {
       const username = this.props.selectedUser.username;
       const permission = this.props.selectedUser.perm;
-      this.setState({ username: username, permission: permission });
+      this.setState({ username: username, permissions: permission });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.selectedUser !== prevProps.selectedUser) {
+      this.componentDidMount();
+    }
+    if ((this.state.results !== prevState.results) && (this.state.username.length === 0)) {
+      this.setState({ results: null });
     }
   }
 
   render() {
     // Initialize variables
     let title;
-    let selectedUser;
-    const permission = this.state.permission;
+    let btnTitle = 'Add';
+    let header = 'Add User';
 
-    if (this.props.selectedUser) {
-      selectedUser = this.props.selectedUser.username;
+    if (this.state.username.length === 0) {
+      header = 'Add User';
+      btnTitle = 'Add';
     }
 
     // Verify if org provided
     if (this.props.org) {
       // Set title to org name
       title = this.props.org.name;
+
+      if (this.props.org.permissions.hasOwnProperty(this.state.username)) {
+        btnTitle = 'Save';
+        header = 'Modify User';
+      }
     }
     else {
       // Set title to project name
       title = this.props.project.name;
+      if (this.props.project.permissions.hasOwnProperty(this.state.username)) {
+        btnTitle = 'Save';
+        header = 'Modify User';
+      }
     }
 
     // Set search results or loading icons ...
@@ -214,13 +258,21 @@ class MemberEdit extends Component {
       );
     }
     else if (Array.isArray(this.state.results)) {
-      searchResults = this.state.results;
+      if (this.state.results.length > 0) {
+        searchResults = this.state.results;
+      }
+      else {
+        searchResults = (
+          <div className='members-dropdown-item' key='no-user'>
+            <span>No matches found.</span>
+          </div>);
+      }
     }
 
     // Render project edit page
     return (
       <div className='extra-padding'>
-        <h2>User Roles</h2>
+        <h2>{header}</h2>
         <hr />
         <div>
           <h3 className='edit-role-title'> {title} </h3>
@@ -231,64 +283,40 @@ class MemberEdit extends Component {
               </UncontrolledAlert>)
           }
           {/* Create form to update user roles */}
-          {(!selectedUser)
-            ? (<div>
-              <Form inline>
-                <Row form>
-                  <Col>
-                    <FormGroup>
-                      <Input type='search'
-                             name='username'
-                             style={{ width: '325px' }}
-                             id='username'
-                             autocomplete='off'
-                             placeholder='Search User...'
-                             value={this.state.username || ''}
-                             onChange={this.userChange}/>
-                    </FormGroup>
-                  </Col>
-                  <Col md={2} sm={4} xs={6} >
-                    <Button className='btn'
-                            outline color="primary"
-                            type='submit'
-                            onClick={this.doSearch}>
-                      Search
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-              {(searchResults.length !== 0)
-                ? (<div className='members-dropdown'>
-                    {searchResults}
-                   </div>)
-                : ''
-              }
-            </div>)
+          <div>
+            <Input type='search'
+                   name='username'
+                   id='username'
+                   autoComplete='off'
+                   placeholder='Search User...'
+                   value={this.state.username || ''}
+                   onChange={this.userChange}/>
+          {(searchResults.length !== 0)
+            ? (<div className='members-dropdown'>
+                {searchResults}
+               </div>)
             : ''
           }
-          <Form style={{ 'padding-top': '10px' }}>
+        </div>
+          <Form style={{ paddingTop: '10px' }}>
             {/* Permissions user updates with */}
             <FormGroup>
-              {(!selectedUser)
-                ? (<Label for="permissions">Permissions</Label>)
-                : (<Label for='username'>Change permissions [{permission}] for {selectedUser}:</Label>)
-              }
-              <Input type="select"
+              <Label for="permissions">Permissions</Label>
+              <Input type='select'
                      name='permissions'
-                     id="permissions"
+                     id='permissions'
                      value={this.state.permissions}
                      onChange={this.handleChange}>
-                <option>Choose one...</option>
-                <option>read</option>
-                <option>write</option>
-                <option>admin</option>
-                <option>REMOVE_ALL</option>
+                  <option>Choose one...</option>
+                  <option>read</option>
+                  <option>write</option>
+                  <option>admin</option>
+                  <option>REMOVE_ALL</option>
               </Input>
             </FormGroup>
           </Form>
           {/* Button to submit changes */}
-          <Button onClick={this.onSubmit}> Submit </Button>{' '}
-          <Button outline color="secondary" onClick={this.props.toggle}>Cancel</Button>
+          <Button onClick={this.onSubmit}> {btnTitle} </Button>
         </div>
       </div>
     );
