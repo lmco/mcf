@@ -519,8 +519,6 @@ function create(requestingUser, organizationID, projectID, branches, options) {
           }
 
           // Create the element object
-          // TODO: Evaluate whether it is necessary to recreate the element object
-          // TODO: or modify the old one
           const elemObj = {
             _id: elemID,
             name: e.name,
