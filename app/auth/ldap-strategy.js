@@ -320,14 +320,13 @@ function ldapSync(ldapUserObj) {
   return new Promise((resolve, reject) => {
     // Store user object function-wide
     let userObject = {};
-    let found = false;
+    let created = false;
 
     // Search for user in database
     User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] })
     .then(foundUser => {
       // If the user was found, update with LDAP info
       if (foundUser) {
-        found = true;
         // User exists, update database with LDAP information
         foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
         foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
@@ -349,7 +348,10 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       });
 
-        // Save ldap user
+      // User was created, set boolean to true
+      created = true;
+
+      // Save ldap user
       return initData.save();
     })
     .then(savedUser => {
@@ -357,8 +359,7 @@ function ldapSync(ldapUserObj) {
       userObject = savedUser;
 
       // If user created, emit users-created
-      // TODO: Fix the logic of this event emitter funky
-      if (!found) {
+      if (created) {
         EventEmitter.emit('users-created', [savedUser]);
       }
 
