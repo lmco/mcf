@@ -2227,7 +2227,6 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     // Initialize valid options
     let validOptions = {};
 
-    // TODO: Look at the element key from the model
     // Validate and set the options
     validOptions = utils.validateOptions(options, ['populate', 'archived',
       'limit', 'skip', 'lean', 'sort'], Element);
