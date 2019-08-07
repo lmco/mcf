@@ -68,10 +68,22 @@ class ProjectListItem extends Component {
   render() {
     // Initialize variables
     const project = this.props.project;
+    let colorClass;
+
+    // Verify if archived
+    if (project.archived) {
+      // Gray-out the name
+      colorClass = 'archived-link';
+    }
+
     const stats = (
       // Create the stat list for the organization
       <StatsList>
-        <Stat title='Users' icon='fas fa-users' value={Object.keys(project.permissions).length} _key={`project-${project.id.split(':').join('-')}-users`} />
+        <Stat title='Users'
+              className={colorClass}
+              icon='fas fa-users'
+              value={Object.keys(project.permissions).length}
+              _key={`project-${project.id.split(':').join('-')}-users`} />
         {(!this.props.divider)
           ? <Stat title='' icon='' value='' _key='empty'/>
           : <Stat divider={this.props.divider} _key={`project-${project.id}-divider`}/>
@@ -83,7 +95,7 @@ class ProjectListItem extends Component {
     return (
       <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
         <div className='list-header'>
-          <a href={this.props.href}>{project.name}</a>
+          <a className={colorClass} href={this.props.href}>{project.name}</a>
         </div>
         {/* Verify width of client, remove stats based on width */}
         {(this.state.width > 600) ? stats : ''}

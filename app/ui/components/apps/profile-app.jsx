@@ -118,18 +118,22 @@ class ProfileApp extends Component {
                          title='Information'
                          icon='fas fa-info'
                          routerLink={routerLink} />
+           {/* Verify it is not a different users profile, do not return */}
+           {/* Org or project page for other user profile */}
+           {/* NOTE: Orgs and projects are split in two ternary operators */}
+            {/* due to abnormal rendering when in a react fragment */}
             {(otherUser !== null)
               ? ''
               : (<SidebarLink id='Organization'
                               title='Organizations'
-                              icon='fas fa-boxes'
+                              icon='fas fa-box'
                               routerLink='/profile/orgs'/>)
             }
             {(otherUser !== null)
               ? ''
               : (<SidebarLink id='Project'
                               title='Projects'
-                              icon='fas fa-box'
+                              icon='fas fa-boxes'
                               routerLink='/profile/projects'/>)
             }
           </Sidebar>
@@ -139,6 +143,7 @@ class ProfileApp extends Component {
               ? <div id='view' className="loading"> {this.state.error || 'Loading information...'}</div>
               : (
                 <Switch>
+                  {/* Verify if user is view their own profile, then return their info  */}
                   {(otherUser === null)
                     ? (<React.Fragment>
                        {/* Route to user home page */}
