@@ -115,7 +115,13 @@ class BranchBar extends Component {
             <option className='branch-opts'
                     key={`opt-${branch.id}`}
                     value={branch.id}>
-              {(branch.name.length > 0) ? branch.name : branch.id}
+              {/* Verify branch has a name */}
+              {(branch.name.length > 0)
+                // Display name and id
+                ? `${branch.name} [${branch.id}]`
+                // Display id
+                : branch.id
+              }
             </option>
           );
         }
@@ -125,7 +131,12 @@ class BranchBar extends Component {
             <option className='branch-opts'
                     key={`opt-${branch.id}`}
                     value={branch.id}>
-              {(branch.name.length > 0) ? branch.name : branch.id}
+              {/* Verify tag has a name */}
+              {(branch.name.length > 0)
+                // Display name and id
+                ? `${branch.name} [${branch.id}]`
+                // Display id
+                : branch.id}
             </option>
           );
         }
