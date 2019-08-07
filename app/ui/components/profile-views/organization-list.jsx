@@ -59,16 +59,28 @@ class OrganizationList extends Component {
   componentDidMount() {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
+      // Verify if error returned
       if (err) {
+        // Set error state
         this.setState({ error: err.responseText });
       }
       else {
+        // Set user data
         this.setState({ user: data });
+        // Initialize url data
+        const base = '/api/orgs';
+        let opt = 'populate=projects&minified=true';
 
-        // Get project data
+        // Verify if admin console
+        if (this.props.adminPage) {
+          // Update options to grab archived data
+          opt = 'populate=projects&archived=true&minified=true';
+        }
+
+        // Get org data
         $.ajax({
           method: 'GET',
-          url: '/api/orgs?populate=projects&minified=true',
+          url: `${base}?${opt}`,
           statusCode: {
             200: (orgs) => {
               // Verify if admin user
@@ -146,7 +158,7 @@ class OrganizationList extends Component {
         <div id='workspace' ref={this.ref}>
           <div id='workspace-header' className='workspace-header header-box-depth'>
             <h2 className='workspace-title workspace-title-padding'>
-              Your Organizations
+              Organizations
             </h2>
               {/* Verify user is an admin */}
               {(!this.state.admin)
