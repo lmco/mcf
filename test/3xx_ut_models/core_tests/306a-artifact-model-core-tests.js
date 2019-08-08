@@ -78,14 +78,14 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove the org created in before()
     testUtils.removeTestOrg()
-      .then(() => db.disconnect())
-      .then(() => done())
-      .catch((error) => {
-        M.log.error(error);
-        // Expect no error
-        chai.expect(error).to.equal(null);
-        done();
-      });
+    .then(() => db.disconnect())
+    .then(() => done())
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
   });
 
   /* Execute the tests */
