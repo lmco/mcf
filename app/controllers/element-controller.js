@@ -1541,7 +1541,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
       utils.validateFind(organization, orgID, 'organization', validatedOptions, null, reqUser, 'read');
 
       // Find the project validate that it was found, not archived, and the user has access
-      const project = await Project.findOne({ _id: utils.createID(orgID, projID)}).lean();
+      const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
       utils.validateFind(project, projID, 'project', validatedOptions, orgID, reqUser, 'write');
 
       // Find the branch and validate that it was found, is not archived, and is not a tag
@@ -1919,12 +1919,12 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       utils.validateFind(organization, orgID, 'organization', validatedOptions, null, reqUser, 'read');
 
       // Find the project validate that it was found, not archived, and the user has access
-      const project = await Project.findOne({ _id: utils.createID(orgID, projID)}).lean();
+      const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
       utils.validateFind(project, projID, 'project', validatedOptions, orgID, reqUser, 'read');
 
       // Find the branch and validate that it was found and is not archived
       const foundBranch = await Branch.findOne({
-        _id: utils.createID(orgID, projID, branchID)}).lean();
+        _id: utils.createID(orgID, projID, branchID) }).lean();
       utils.validateFind(foundBranch, branchID, 'branch', validatedOptions, projID, null, '', true);
 
       searchQuery.$text = { $search: query };

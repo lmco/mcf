@@ -429,28 +429,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
     }
   });
 
-/*  // Ensure search options are valid
-  if (options) {
-
-    // Loop through provided options, look for validSearchOptions
-    Object.keys(options).forEach((o) => {
-      // If the provided option is a valid search option
-      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-        // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
-          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
-        }
-        // If the search option is an element reference
-        if (['parent', 'source', 'target'].includes(o)) {
-          // Make value the concatenated ID
-          options[o] = utils.createID(orgID, projID, branchID, options[o]);
-        }
-        // Add the search option to the searchQuery
-        searchQuery[o] = sani.mongo(options[o]);
-      }
-    });
-  }*/
-
   return validatedOptions;
 };
 
@@ -487,15 +465,21 @@ module.exports.handleGzip = function(dataStream) {
 };
 
 /**
- * @description Handles a data stream containing gzipped data.
+ * @description A function that validates the parameters passed to the controllers
  *
- * @param {Object} requestingUser
- * @param {Object} models
- * @param {Object} options
- * @param {string} branchID
- * @param {Object} models
- * @param {Object} options
- * @param {string} type
+ * @param {Object} requestingUser - The user in the request
+ * @param {Object} models - The objects passed in: elements/branches/projects/orgs
+ * @param {Object} options - The options passed in with the request
+ * @param {string} type - Which model is being used: "Element", "Branch", etc
+ * @param {string} operationType - Customizes the behavior of the function to check
+ * whether to validate the models as strings and arrays of strings or objects and
+ * arrays of objects.  For example, a user may want to find several elements, and
+ * could pass in a query as an array of strings of ids
+ * @param {string} orgID - an optional parameter for the organization ID.  For example
+ * this would not be used in the Org controller but would be in the Project, Branch, and
+ * Element controller.
+ * @param {Object} projID - an optional parameter for the project ID
+ * @param {Object} branchID - an optional parameter for the branch ID
  *
  */
 module.exports.checkParams = function(requestingUser, models, options, type, operationType,
@@ -539,36 +523,16 @@ module.exports.checkParams = function(requestingUser, models, options, type, ope
 };
 
 /**
- * @description Handles a data stream containing gzipped data.
+ * @description Validates that an org/project/branch has been found, is not archived,
+ * and that the user has appropriate permissions for the controller operation.  In the
+ * case of a branch, also checks that the branch is not a tag.
  *
- * @param {Object} elements
- * @param {string} requestingUser
- * @param {string} organizationID
- * @param {string} projectID
- * @param {Object} branch
- *
- * @return {Object} - an object containing the sanitized input parameters
- */
-module.exports.saniBundle = function(elements, requestingUser, organizationID, projectID, branch) {
-  const saniElements = (elements !== undefined)
-    ? sani.mongo(JSON.parse(JSON.stringify(elements)))
-    : undefined;
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branchID = sani.mongo(branch);
-  return { saniElements, reqUser, orgID, projID, branchID };
-};
-
-/**
- * @description Handles a data stream containing gzipped data.
- *
- * @param {Object} model
- * @param {string} modelID
- * @param {string} type
- * @param {string} options
- * @param {string} parentID
- * @param {Object} reqUser
+ * @param {Object} model - The model being validated: org/project/branch
+ * @param {string} modelID - The ID of the model being validated
+ * @param {string} type - The type of model: "Element", "Branch", etc
+ * @param {string} options - The options passed in with the request
+ * @param {string} parentID - The ID of the org/project that the project/branch belongs to
+ * @param {Object} reqUser - The user making the request
  * @param {string} permissionLevel - indicates the read or write permissions
  * of the user
  * @param {Boolean} find - If the user is only trying to find elements, allow
