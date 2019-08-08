@@ -22,6 +22,7 @@ const zlib = require('zlib');
 
 // MBEE modules
 const publicData = M.require('lib.get-public-data');
+const sani = M.require('lib.sanitization');
 
 /**
  * @description Provides time unit conversions.
@@ -239,33 +240,39 @@ module.exports.parseOptions = function(options, validOptions) {
  * controllers.
  */
 module.exports.validateOptions = function(options, validOptions, model) {
-  // Define the object to be returned to the user. Initialize populateString
-  const returnObject = { populateString: '', sort: { $natural: 1 } };
-  // Define valid searchOptions for the org model
-  const orgSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the project model
-  const projectSearchOptions = ['name', 'visibility', 'createdBy',
-    'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the branch model
-  const branchSearchOptions = ['tag', 'source', 'name', 'createdBy',
-    'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the element model
-  const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-    'createdBy', 'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the user model
-  const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
-    'createdBy', 'lastModifiedBy', 'archivedBy'];
-  const requiredElementFields = ['contains', 'sourceOf', 'targetOf'];
+  // Initialize the object to be returned to the user
+  const validatedOptions = { populateString: '', sort: { $natural: 1 } };
 
-  // Add required populate fields to populate string for Element model
-  if (model.modelName === 'Element') {
-    // Set populateString to include require virtuals
-    returnObject.populateString = 'contains sourceOf targetOf ';
+  // Define valid search options depending on the model
+  let validSearchOptions = [];
+  switch (model.modelName) {
+    case 'Organization':
+      validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      break;
+    case 'Project':
+      validSearchOptions = ['name', 'visibility', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      break;
+    case 'Branch':
+      validSearchOptions = ['tag', 'source', 'name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      break;
+    case 'Element':
+      validSearchOptions = ['parent', 'source', 'target', 'type', 'name', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
+      // Set populateString to include require virtuals
+      validatedOptions.populateString = 'contains sourceOf targetOf ';
+      break;
+    case 'User':
+      validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
+      break;
+    default:
+      throw new M.DataFormatError('No model provided', 'warn');
   }
+  const requiredElementFields = ['contains', 'sourceOf', 'targetOf'];
 
   // Check if no options provided
   if (!options) {
-    return returnObject;
+    return validatedOptions;
   }
 
   // For each option provided
@@ -273,16 +280,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     let val = options[opt];
 
     // Special case, ignore these as the controller handles these
-    if ((model.modelName === 'Element'
-      && (elemSearchOptions.includes(opt) || opt.startsWith('custom.')))
-      || (model.modelName === 'Branch'
-      && (branchSearchOptions.includes(opt) || opt.startsWith('custom.')))
-      || (model.modelName === 'User'
-      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))
-      || (model.modelName === 'Project'
-      && (projectSearchOptions.includes(opt) || opt.startsWith('custom.')))
-      || (model.modelName === 'Organization'
-      && (orgSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
+    if (validSearchOptions.includes(opt) || opt.startsWith('custom.')) {
       // Ignore iteration of loop
       return;
     }
@@ -315,7 +313,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         // If the field is not a required virtual on the Element model
         if (!(model.modelName === 'Element' && requiredElementFields.includes(p))) {
           // Add field to populateString
-          returnObject.populateString += `${p} `;
+          validatedOptions.populateString += `${p} `;
         }
       });
     }
@@ -328,7 +326,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the field archived in the returnObject
-      returnObject.archived = val;
+      validatedOptions.archived = val;
     }
 
     // Handle the subtree option
@@ -339,7 +337,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the subtree option in the returnObject
-      returnObject.subtree = val;
+      validatedOptions.subtree = val;
     }
 
     // Handle the fields option
@@ -359,7 +357,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       val = val.filter(field => field !== '-_id');
 
       // Set the fieldsString option in the returnObject
-      returnObject.fieldsString = val.join(' ');
+      validatedOptions.fieldsString = val.join(' ');
 
       // Handle special case for element virtuals
       if (model.modelName === 'Element') {
@@ -368,7 +366,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         // For each virtual not specified in fields
         notSpecifiedVirtuals.forEach((virt) => {
           // Remove the virtual from the populateString
-          returnObject.populateString = returnObject.populateString.replace(`${virt} `, '');
+          validatedOptions.populateString = validatedOptions.populateString.replace(`${virt} `, '');
         });
       }
     }
@@ -381,7 +379,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the limit option in the returnObject
-      returnObject.limit = val;
+      validatedOptions.limit = val;
     }
 
     // Handle the option skip
@@ -397,13 +395,13 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the skip option in the returnObject
-      returnObject.skip = val;
+      validatedOptions.skip = val;
     }
 
     // Handle the sort option
     if (opt === 'sort') {
       // Get rid of the default value
-      returnObject.sort = {};
+      validatedOptions.sort = {};
       // initialize sort order
       let order = 1;
       // If the user has specified sorting in reverse order
@@ -416,7 +414,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         val = '_id';
       }
       // Return the parsed sort option in the format {sort_field: order}
-      returnObject.sort[val] = order;
+      validatedOptions.sort[val] = order;
     }
 
     // Handle the lean option
@@ -427,11 +425,33 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the lean option in the returnObject
-      returnObject.lean = val;
+      validatedOptions.lean = val;
     }
   });
 
-  return returnObject;
+/*  // Ensure search options are valid
+  if (options) {
+
+    // Loop through provided options, look for validSearchOptions
+    Object.keys(options).forEach((o) => {
+      // If the provided option is a valid search option
+      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the search option is a string
+        if (typeof options[o] !== 'string') {
+          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+        }
+        // If the search option is an element reference
+        if (['parent', 'source', 'target'].includes(o)) {
+          // Make value the concatenated ID
+          options[o] = utils.createID(orgID, projID, branchID, options[o]);
+        }
+        // Add the search option to the searchQuery
+        searchQuery[o] = sani.mongo(options[o]);
+      }
+    });
+  }*/
+
+  return validatedOptions;
 };
 
 /**
@@ -464,4 +484,127 @@ module.exports.handleGzip = function(dataStream) {
       });
     });
   });
+};
+
+/**
+ * @description Handles a data stream containing gzipped data.
+ *
+ * @param {Object} requestingUser
+ * @param {Object} models
+ * @param {Object} options
+ * @param {string} branchID
+ * @param {Object} models
+ * @param {Object} options
+ * @param {string} type
+ *
+ */
+module.exports.checkParams = function(requestingUser, models, options, type, operationType,
+  orgID = '', projID = '', branchID = '') {
+  try {
+    assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
+    assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
+    // Ensure that requesting user has an _id field
+    assert.ok(requestingUser._id, 'Requesting user is not populated.');
+    assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
+    assert.ok(typeof projID === 'string', 'Project ID is not a string.');
+    assert.ok(typeof branchID === 'string', 'Branch ID is not a string.');
+
+    const optionsTypes = ['undefined', 'object'];
+    assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+
+    if (operationType === 'find' || operationType === 'strings') {
+      const modelTypes = operationType === 'strings'
+        ? ['object', 'string']
+        : ['undefined', 'object', 'string'];
+      assert.ok(modelTypes.includes(typeof models), `${type} parameter is an invalid type.`);
+      // If models is an object, ensure it's an array of strings
+      if (typeof models === 'object') {
+        assert.ok(Array.isArray(models), `${type} is an object, but not an array.`);
+        assert.ok(models.every(o => typeof o === 'string'), `${type} is not an array of`
+          + ' strings.');
+      }
+    }
+    else if (operationType === 'objects') {
+      assert.ok(typeof models === 'object', `${type} parameter is an invalid type.`);
+      // If models is an object, ensure it's an array of objects
+      if (Array.isArray(models)) {
+        assert.ok(models.every(o => typeof o === 'object'), `${type} is not an array of`
+          + ' objects.');
+      }
+    }
+  }
+  catch (err) {
+    throw new M.DataFormatError(err.message, 'warn');
+  }
+};
+
+/**
+ * @description Handles a data stream containing gzipped data.
+ *
+ * @param {Object} elements
+ * @param {string} requestingUser
+ * @param {string} organizationID
+ * @param {string} projectID
+ * @param {Object} branch
+ *
+ * @return {Object} - an object containing the sanitized input parameters
+ */
+module.exports.saniBundle = function(elements, requestingUser, organizationID, projectID, branch) {
+  const saniElements = (elements !== undefined)
+    ? sani.mongo(JSON.parse(JSON.stringify(elements)))
+    : undefined;
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const branchID = sani.mongo(branch);
+  return { saniElements, reqUser, orgID, projID, branchID };
+};
+
+/**
+ * @description Handles a data stream containing gzipped data.
+ *
+ * @param {Object} model
+ * @param {string} modelID
+ * @param {string} type
+ * @param {string} options
+ * @param {string} parentID
+ * @param {Object} reqUser
+ * @param {string} permissionLevel - indicates the read or write permissions
+ * of the user
+ * @param {Boolean} find - If the user is only trying to find elements, allow
+ * the find operation.  Otherwise, reject because tags can't be modified.
+ *
+ * @return {Object} - an object containing the sanitized input parameters
+ */
+module.exports.validateFind = function(model, modelID, type, options, parentID = null,
+  reqUser = null, permissionLevel = '', find = false) {
+  const parentType = {
+    project: 'organization',
+    branch: 'project'
+  };
+  // Check if the model object was found
+  if (!model) {
+    const errmsg = (parentID !== null && (type === 'project' || type === 'branch'))
+      ? `The ${type} [${modelID}] was not found in ${parentType[type]} [${parentID}].`
+      : `The ${type} [${modelID}] was not found.`;
+    throw new M.NotFoundError(errmsg, 'warn');
+  }
+  // Ensure that the user has at least read permissions on the org/project
+  if (type === 'organization' || type === 'project') {
+    if (!reqUser.admin && (!model.permissions[reqUser._id]
+      || !model.permissions[reqUser._id].includes(permissionLevel))) {
+      throw new M.PermissionError('User does not have permission to'
+        + ` ${permissionLevel} items on the ${type} [${modelID}].`, 'warn');
+    }
+  }
+  // Verify the org/project/branch is not archived
+  if (model.archived && !options.archived) {
+    throw new M.PermissionError(`The ${type} [${modelID}] is archived.`
+      + ' It must first be unarchived before performing this operation.', 'warn');
+  }
+  // If branch, check that is is not a tag
+  if (type === 'branch' && model.tag && !find) {
+    throw new M.OperationError(`[${modelID}] is a tag and `
+      + 'does not allow elements to be created, updated, or deleted.', 'warn');
+  }
 };
