@@ -582,7 +582,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
       // Find the branch and validate that it was found and not archived
       const foundBranch = await helper.findAndValidate(Branch,
-        utils.createID(orgID, projID, branchID),reqUser);
+        utils.createID(orgID, projID, branchID), reqUser);
       // Check that the branch is is not a tag
       if (foundBranch.tag) {
         throw new M.OperationError(`[${branchID}] is a tag and `

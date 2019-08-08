@@ -115,5 +115,3 @@ module.exports.findAndValidate = async function(model, ID, reqUser, archived = f
   // Return the found organization/project/branch
   return result;
 };
-
-
