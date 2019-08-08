@@ -159,6 +159,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   const validOptions = utils.validateOptions(options, ['archived', 'populate',
     'subtree', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
+
   // Ensure options are valid
   if (options) {
     // Create array of valid search options

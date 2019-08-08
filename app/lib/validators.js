@@ -85,6 +85,24 @@ module.exports.branch = {
   id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
 
+/**
+ * @description Regular Expressions to validate artifact data
+ *
+ * id:
+ *   - MUST start with a lowercase letter, number or '_'
+ *   - MUST only include lowercase letters, numbers, '_' or '-'
+ *   - each segment MUST be of length 1 or more
+ *   Examples:
+ *      - orgid:projid:branchid:artifactid [valid]
+ *      - orgid:projid:branchid:my-artifact [valid]
+ *      - orgid:projid:branchid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *      - orgid:projid:branchid:-artifact [invalid - must start with a letter or a number]
+ *      - orgid:projid:branchid:myArtifact [invalid - cannot use uppercase characters]
+ *      - my-artifact [invalid - must contain org, proj, and branch segments]
+ */
+module.exports.artifact = {
+  id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+};
 
 /**
  * @description Regular Expressions to validate element data
