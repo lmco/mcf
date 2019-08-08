@@ -39,6 +39,7 @@ const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
+const helper = M.require('lib.controller-helper');
 
 /**
  * @description This function finds one or many branches. Depending on the given
@@ -105,15 +106,8 @@ function find(requestingUser, organizationID, projectID, branches, options) {
 
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-
+      helper.checkParams(requestingUser, options, organizationID, projectID);
       const branchesTypes = ['undefined', 'object', 'string'];
-      const optionsTypes = ['undefined', 'object'];
       assert.ok(branchesTypes.includes(typeof branches), 'Branches parameter is an invalid type.');
       // If branches is an object, ensure it's an array of strings
       if (typeof branches === 'object') {
@@ -121,7 +115,6 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         assert.ok(branches.every(b => typeof b === 'string'), 'Branches is not an array of'
           + ' strings.');
       }
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
       throw new M.DataFormatError(err.message, 'warn');
@@ -307,12 +300,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      helper.checkParams(requestingUser, options, organizationID, projectID);
       assert.ok(typeof branches === 'object', 'Branches parameter is not an object.');
       assert.ok(branches !== null, 'Branches parameter cannot be null.');
       // If branches is an array, ensure each item inside is an object
@@ -323,8 +311,6 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         assert.ok(branches.every(b => b.source === branches[0].source), 'One or more items in branches source '
           + 'field is not the same.');
       }
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
       throw new M.DataFormatError(err.message, 'warn');
@@ -674,12 +660,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
+      helper.checkParams(requestingUser, options, organizationID, projectID);
       assert.ok(typeof branches === 'object', 'Branches parameter is not an object.');
       assert.ok(branches !== null, 'Branches parameter cannot be null.');
       // If branches is an array, ensure each item inside is an object
@@ -688,8 +669,6 @@ function update(requestingUser, organizationID, projectID, branches, options) {
           + ' object.');
         assert.ok(branches.every(b => b !== null), 'One or more items in branches is null.');
       }
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
       throw new M.DataFormatError(err.message, 'warn');
@@ -938,15 +917,8 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
     try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-
+      helper.checkParams(requestingUser, options, organizationID, projectID);
       const branchesTypes = ['object', 'string'];
-      const optionsTypes = ['undefined', 'object'];
       assert.ok(branchesTypes.includes(typeof branches), 'Branches parameter is an invalid type.');
       // If branches is an object, ensure it's an array of strings
       if (typeof branches === 'object') {
@@ -954,7 +926,6 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
         assert.ok(branches.every(b => typeof b === 'string'), 'Branches is not an array of'
           + ' strings.');
       }
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
     }
     catch (err) {
       throw new M.DataFormatError(err.message, 'warn');
