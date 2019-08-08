@@ -48,6 +48,7 @@ const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
+const helper = M.require('lib.controller-helper');
 
 /**
  * @description This function finds one or many elements. Depending on the
@@ -120,13 +121,24 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Ensure input parameters are correct type
-  utils.checkParams(requestingUser, elements, options, 'Element', 'find',
-    organizationID, projectID, branch);
+  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  const elementTypes = ['undefined', 'object', 'string'];
+  assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
+  // If models is an object, ensure it's an array of strings
+  if (typeof models === 'object') {
+    assert.ok(Array.isArray(elements), 'Element parameter is an object, but not an array.');
+    assert.ok(elements.every(o => typeof o === 'string'), 'Element parameter is not an array of'
+      + ' strings.');
+  }
 
-  // Sanitize input parameters
-  const { saniElements, reqUser, orgID, projID, branchID } = utils.saniBundle(elements,
-    requestingUser, organizationID, projectID, branch);
-
+  // Sanitize input parameters and create function-wide variables
+  const saniElements = (elements !== undefined)
+    ? sani.mongo(JSON.parse(JSON.stringify(elements)))
+    : undefined;
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const branchID = sani.mongo(branch);
   let foundElements = [];
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
@@ -159,17 +171,28 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
     });
   }
 
-  // Find the organization and validate that it was found, not archived, and the user has access
-  const organization = await Org.findOne({ _id: orgID }).lean();
-  utils.validateFind(organization, orgID, 'organization', validatedOptions, null, reqUser, 'read');
+  // Find the organization and validate that it was found and not archived (unless specified)
+  const organization = await helper.findAndValidate(Org, orgID, reqUser, validatedOptions.archived);
+  // Permissions check
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` read items on the org ${orgID}.`, 'warn');
+  }
 
-  // Find the project validate that it was found, not archived, and the user has access
-  const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-  utils.validateFind(project, projID, 'project', validatedOptions, orgID, reqUser, 'read');
+  // Find the project and validate that it was found and not archived (unless specified)
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+    reqUser, validatedOptions.archived);
+  // Permissions check
+  if (!reqUser.admin && (!project.permissions[reqUser._id]
+    || !project.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` read items on the project ${projID}.`, 'warn');
+  }
 
-  // Find the branch and validate that it was found and is not archived
-  const foundBranch = await Branch.findOne({ _id: utils.createID(orgID, projID, branchID) }).lean();
-  utils.validateFind(foundBranch, branchID, 'branch', validatedOptions, projID, null, '', true);
+  // Find the branch and validate that it was found and not archived (unless specified)
+  await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID),
+    reqUser, validatedOptions.archived);
 
   let elementsToFind = [];
 
@@ -360,8 +383,15 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
     try {
       // Ensure input parameters are correct type
-      utils.checkParams(requestingUser, elements, options, 'Element', 'objects',
-        organizationID, projectID, branch);
+      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+      const elementTypes = ['object'];
+      assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
+      // If elements is an array, ensure it's an array of objects
+      if (Array.isArray(elements)) {
+        assert.ok(elements.every(p => typeof p === 'object'), 'One or more items in elements'
+        + ' is not an object');
+        assert.ok(elements.every(p => p !== null), 'One or more items in elements is null.');
+      }
     }
     catch (error) {
       return reject(errors.captureError(error));
@@ -520,13 +550,23 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       return reject(new M.DataFormatError('Cannot create multiple elements with the same ID.', 'warn'));
     }
     try {
-      // Find the organization and validate that it was found, not archived, and the user has access
-      const organization = await Org.findOne({ _id: orgID }).lean();
-      utils.validateFind(organization, orgID, 'organization', validatedOptions, null, reqUser, 'read');
+      // Find the organization and validate that it was found and not archived
+      const organization = await helper.findAndValidate(Org, orgID, reqUser);
+      // Permissions check
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` read items on the org ${orgID}.`, 'warn');
+      }
 
-      // Find the project and validate that it was found, not archived, and the user has access
-      const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-      utils.validateFind(project, projID, 'project', validatedOptions, orgID, reqUser, 'write');
+      // Find the project and validate that it was found and not archived
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+      // Permissions check
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('write'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` create items on the project ${projID}.`, 'warn');
+      }
 
       // Find all referenced projects
       const referencedProjects = await Project.find({ _id: { $in: projectRefs } }).lean();
@@ -540,10 +580,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
         }
       });
 
-      // Find the branch and validate that it was found, is not archived, and is not a tag
-      const foundBranch = await Branch.findOne({
-        _id: utils.createID(orgID, projID, branchID) }).lean();
-      utils.validateFind(foundBranch, branchID, 'branch', validatedOptions, projID);
+      // Find the branch and validate that it was found and not archived
+      const foundBranch = await helper.findAndValidate(Branch,
+        utils.createID(orgID, projID, branchID),reqUser);
+      // Check that the branch is is not a tag
+      if (foundBranch.tag) {
+        throw new M.OperationError(`[${branchID}] is a tag and `
+          + 'does not allow elements to be created, updated, or deleted.', 'warn');
+      }
 
       M.log.debug('create(): Before finding pre-existing elements');
 
@@ -797,8 +841,15 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
   return new Promise(async (resolve, reject) => {
     try {
       // Ensure input parameters are correct type
-      utils.checkParams(requestingUser, elements, options, 'Element', 'objects',
-        organizationID, projectID, branch);
+      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+      const elementTypes = ['object'];
+      assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
+      // If elements is an array, ensure it's an array of objects
+      if (Array.isArray(elements)) {
+        assert.ok(elements.every(p => typeof p === 'object'), 'One or more items in elements'
+          + ' is not an object');
+        assert.ok(elements.every(p => p !== null), 'One or more items in elements is null.');
+      }
     }
     catch (error) {
       return reject(errors.captureError(error));
@@ -826,18 +877,32 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
       'lean'], Element);
 
     try {
-      // Find the organization and validate that it was found, not archived, and the user has access
-      const organization = await Org.findOne({ _id: orgID }).lean();
-      utils.validateFind(organization, orgID, 'organization', validatedOptions, null, reqUser, 'read');
+      // Find the organization and validate that it was found and not archived
+      const organization = await helper.findAndValidate(Org, orgID, reqUser);
+      // Permissions check
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` read items on the org ${orgID}.`, 'warn');
+      }
 
-      // Find the project validate that it was found, not archived, and the user has access
-      const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-      utils.validateFind(project, projID, 'project', validatedOptions, orgID, reqUser, 'write');
+      // Find the project and validate that it was found and not archived
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+      // Permissions check
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('write'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` update items on the project ${projID}.`, 'warn');
+      }
 
-      // Find the branch and validate that it was found, is not archived, and is not a tag
-      const foundBranch = await Branch.findOne({
-        _id: utils.createID(orgID, projID, branchID) }).lean();
-      utils.validateFind(foundBranch, branchID, 'branch', validatedOptions, projID);
+      // Find the branch and validate that it was found and not archived
+      const foundBranch = await helper.findAndValidate(Branch,
+        utils.createID(orgID, projID, branchID), reqUser);
+      // Check that the branch is is not a tag
+      if (foundBranch.tag) {
+        throw new M.OperationError(`[${branchID}] is a tag and `
+          + 'does not allow elements to be created, updated, or deleted.', 'warn');
+      }
 
       const promises = [];
 
@@ -1247,8 +1312,15 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
   return new Promise(async (resolve, reject) => {
     try {
       // Ensure input parameters are correct type
-      utils.checkParams(requestingUser, elements, options, 'Element', 'objects',
-        organizationID, projectID, branch);
+      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+      const elementTypes = ['object'];
+      assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
+      // If elements is an array, ensure it's an array of objects
+      if (Array.isArray(elements)) {
+        assert.ok(elements.every(p => typeof p === 'object'), 'One or more items in elements'
+          + ' is not an object');
+        assert.ok(elements.every(p => p !== null), 'One or more items in elements is null.');
+      }
     }
     catch (error) {
       return reject(errors.captureError(error));
@@ -1269,25 +1341,33 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     let isDeleted = false;
     const ts = Date.now();
 
-    // Initialize and ensure options are valid
-    // Note: validating options here will cause the validation function to be run twice.  However,
-    // if they are invalid, running the check here will save a lot of time
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Element);
-
     try {
-      // Find the organization and validate that it was found, not archived, and the user has access
-      const organization = await Org.findOne({ _id: orgID }).lean();
-      utils.validateFind(organization, orgID, 'organization', validatedOptions, null, reqUser, 'read');
+      // Find the organization and validate that it was found and not archived
+      const organization = await helper.findAndValidate(Org, orgID, reqUser);
+      // Permissions check
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` read items on the org ${orgID}.`, 'warn');
+      }
 
-      // Find the project validate that it was found, not archived, and the user has access
-      const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-      utils.validateFind(project, projID, 'project', validatedOptions, orgID, reqUser, 'write');
+      // Find the project and validate that it was found and not archived
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+      // Permissions check
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('write'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` create or replace items on the project ${projID}.`, 'warn');
+      }
 
-      // Find the branch and validate that it was found, is not archived, and is not a tag
-      const foundBranch = await Branch.findOne({
-        _id: utils.createID(orgID, projID, branchID) }).lean();
-      utils.validateFind(foundBranch, branchID, 'branch', validatedOptions, projID);
+      // Find the branch and validate that it was found and not archived
+      const foundBranch = await helper.findAndValidate(Branch,
+        utils.createID(orgID, projID, branchID), reqUser);
+      // Check that the branch is is not a tag
+      if (foundBranch.tag) {
+        throw new M.OperationError(`[${branchID}] is a tag and `
+          + 'does not allow elements to be created, updated, or deleted.', 'warn');
+      }
 
       // Check the type of the elements parameter
       if (Array.isArray(saniElements)) {
@@ -1504,8 +1584,15 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
 function remove(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
-    utils.checkParams(requestingUser, elements, options, 'Element', 'strings',
-      organizationID, projectID, branch);
+    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    const elementTypes = ['object', 'string'];
+    assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
+    // If models is an object, ensure it's an array of strings
+    if (typeof models === 'object') {
+      assert.ok(Array.isArray(elements), 'Element parameter is an object, but not an array.');
+      assert.ok(elements.every(o => typeof o === 'string'), 'Element parameter is not an array of'
+        + ' strings.');
+    }
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -1516,10 +1603,6 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     let elementsToFind = [];
     let foundIDs = [];
     let uniqueIDs = [];
-
-    // Note: options are currently not being used in this function
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Element);
 
     // Check the type of the elements parameter
     if (Array.isArray(saniElements) && saniElements.length !== 0) {
@@ -1536,19 +1619,32 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
     }
 
     try {
-      // Find the organization and validate that it was found, not archived, and the user has access
-      const organization = await Org.findOne({ _id: orgID }).lean();
-      utils.validateFind(organization, orgID, 'organization', validatedOptions, null, reqUser, 'read');
+      // Find the organization and validate that it was found and not archived
+      const organization = await helper.findAndValidate(Org, orgID, reqUser);
+      // Permissions check
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` read items on the org ${orgID}.`, 'warn');
+      }
 
-      // Find the project validate that it was found, not archived, and the user has access
-      const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-      utils.validateFind(project, projID, 'project', validatedOptions, orgID, reqUser, 'write');
+      // Find the project and validate that it was found and not archived
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+      // Permissions check
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('write'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` remove items on the project ${projID}.`, 'warn');
+      }
 
-      // Find the branch and validate that it was found, is not archived, and is not a tag
-      const foundBranch = await Branch.findOne({
-        _id: utils.createID(orgID, projID, branchID)
-      }).lean();
-      utils.validateFind(foundBranch, branchID, 'branch', validatedOptions, projID);
+      // Find the branch and validate that it was found and not archived
+      const foundBranch = await helper.findAndValidate(Branch,
+        utils.createID(orgID, projID, branchID), reqUser);
+      // Check that the branch is is not a tag
+      if (foundBranch.tag) {
+        throw new M.OperationError(`[${branchID}] is a tag and `
+          + 'does not allow elements to be created, updated, or deleted.', 'warn');
+      }
 
       // Find the elements to delete
       const foundElements = await Element.find({ _id: { $in: elementsToFind } }).lean();
@@ -1870,8 +1966,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
 function search(requestingUser, organizationID, projectID, branch, query, options) {
   return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
-    utils.checkParams(requestingUser, null, options, 'Element', '',
-      organizationID, projectID, branch);
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -1914,18 +2010,29 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     }
 
     try {
-      // Find the organization and validate that it was found, not archived, and the user has access
-      const organization = await Org.findOne({ _id: orgID }).lean();
-      utils.validateFind(organization, orgID, 'organization', validatedOptions, null, reqUser, 'read');
+      // Find the organization and validate that it was found and not archived (unless specified)
+      const organization = await helper.findAndValidate(Org, orgID, reqUser,
+        validatedOptions.archived);
+      // Permissions check
+      if (!reqUser.admin && (!organization.permissions[reqUser._id]
+        || !organization.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` read items on the org ${orgID}.`, 'warn');
+      }
 
-      // Find the project validate that it was found, not archived, and the user has access
-      const project = await Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-      utils.validateFind(project, projID, 'project', validatedOptions, orgID, reqUser, 'read');
+      // Find the project and validate that it was found and not archived (unless specificed)
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser,
+        validatedOptions.archived);
+      // Permissions check
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('read'))) {
+        throw new M.PermissionError('User does not have permission to'
+          + ` read items on the project ${projID}.`, 'warn');
+      }
 
-      // Find the branch and validate that it was found and is not archived
-      const foundBranch = await Branch.findOne({
-        _id: utils.createID(orgID, projID, branchID) }).lean();
-      utils.validateFind(foundBranch, branchID, 'branch', validatedOptions, projID, null, '', true);
+      // Find the branch and validate that it was found and not archived (unless specificed)
+      await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID),
+        reqUser, validatedOptions.archived);
 
       searchQuery.$text = { $search: query };
       // If the archived field is true, remove it from the query
