@@ -97,7 +97,7 @@ const helper = M.require('lib.controller-helper');
  * });
  */
 function find(requestingUser, organizationID, projectID, branches, options) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     // Set options if no branches were provided, but options were
     if (typeof branches === 'object' && branches !== null && !Array.isArray(branches)) {
       options = branches; // eslint-disable-line no-param-reassign
@@ -170,14 +170,10 @@ function find(requestingUser, organizationID, projectID, branches, options) {
       delete searchQuery.archived;
     }
 
-    // Find the organization
-    Org.findOne({ _id: orgID }).lean()
-    .then((organization) => {
-      // Check that the org was found
-      if (!organization) {
-        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
-      }
 
+    try {
+      // Find the org and check that it has been found and is not archived (unless specified)
+      const organization = await helper.findAndValidate(Org, orgID, validOptions.archived);
       // Verify the user has at least read permissions on the organization
       if (!reqUser.admin && (!organization.permissions[reqUser._id]
         || !organization.permissions[reqUser._id].includes('read'))) {
@@ -185,33 +181,14 @@ function find(requestingUser, organizationID, projectID, branches, options) {
           + ` branches on the organization [${orgID}].`, 'warn');
       }
 
-      // Verify the organization is not archived
-      if (organization.archived && !validOptions.archived) {
-        throw new M.PermissionError(`The organization [${orgID}] is archived.`
-          + ' It must first be unarchived before finding branches.', 'warn');
-      }
-
-      // Find the project
-      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-    })
-    .then((project) => {
-      // Check that the project was found
-      if (!project) {
-        throw new M.NotFoundError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 'warn');
-      }
-
-      // Verify the user has read permissions on the project
+      // Find the project and check that it has been found and is not archived (unless specified)
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+        validOptions.archived);
+      // Check permissions
       if (!reqUser.admin && (!project.permissions[reqUser._id]
         || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.PermissionError('User does not have permission to get'
           + ` branches on the project [${projID}].`, 'warn');
-      }
-
-      // Verify the project is not archived
-      if (project.archived && !validOptions.archived) {
-        throw new M.PermissionError(`The project [${projID}] is archived.`
-          + ' It must first be unarchived before finding branches.', 'warn');
       }
 
       // Check the type of the branches parameter
@@ -224,10 +201,11 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         // A single branch id
         searchQuery._id = utils.createID(orgID, projID, saniBranches);
       }
-      else if (((typeof saniBranches === 'object' && saniBranches !== null)
-        || saniBranches === undefined)) {
+      else if ((typeof saniBranches === 'object' && saniBranches !== null)
+        || saniBranches === undefined) {
         // Find branches in the project
-        branchesToFind = [];
+        // this variable is never used
+        // branchesToFind = [];
       }
       else {
         // Invalid parameter, throw an error
@@ -252,8 +230,10 @@ function find(requestingUser, organizationID, projectID, branches, options) {
         .then((finishedBranches) => resolve(finishedBranches))
         .catch((error) => reject(error));
       }
-    })
-    .catch((error) => reject(errors.captureError(error)));
+    }
+    catch (error) {
+      reject(errors.captureError(error));
+    }
   });
 }
 
@@ -297,7 +277,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
  * });
  */
 function create(requestingUser, organizationID, projectID, branches, options) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
     try {
       helper.checkParams(requestingUser, options, organizationID, projectID);
@@ -381,59 +361,32 @@ function create(requestingUser, organizationID, projectID, branches, options) {
       throw new M.DataFormatError(err.message, 'warn');
     }
 
-    // Find the organization
-    Org.findOne({ _id: orgID }).lean()
-    .then((organization) => {
-      // Check that the org was found
-      if (!organization) {
-        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
-      }
-
-      // Verify user has at least read permissions on the org
+    try {
+      // Find the org and check that it has been found and is not archived (unless specified)
+      const organization = await helper.findAndValidate(Org, orgID, validOptions.archived);
+      // Verify the user has at least read permissions on the organization
       if (!reqUser.admin && (!organization.permissions[reqUser._id]
         || !organization.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to create'
+        throw new M.PermissionError('User does not have permission to read'
           + ` branches on the organization [${orgID}].`, 'warn');
       }
 
-      // Verify the organization is not archived
-      if (organization.archived) {
-        throw new M.PermissionError(`The organization [${orgID}] is archived.`
-          + ' It must first be unarchived before creating branches.', 'warn');
-      }
-
-      // Find the project to verify existence and permissions
-      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-    })
-    .then((foundProject) => {
-      // Check that the project was found
-      if (!foundProject) {
-        throw new M.NotFoundError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 'warn');
-      }
-
-      // Verify user has write permissions on the project
-      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
-        || !foundProject.permissions[reqUser._id].includes('write'))) {
+      // Find the project and check that it has been found and is not archived (unless specified)
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+        validOptions.archived);
+      // Check permissions
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('read'))) {
         throw new M.PermissionError('User does not have permission to create'
-          + ' branches on the project '
-          + `[${projID}].`, 'warn');
-      }
-
-      // Verify the project is not archived
-      if (foundProject.archived) {
-        throw new M.PermissionError(`The project [${projID}] is archived.`
-          + ' It must first be unarchived before creating branches.', 'warn');
+          + ` branches on the project [${projID}].`, 'warn');
       }
 
       sourceID = utils.createID(orgID, projID, sourceID);
 
       // Find the source branch to verify existence
-      return Branch.findOne({ _id: sourceID }).lean();
-    })
-    .then((foundBranch) => {
+      const foundSourceBranch = await Branch.findOne({ _id: sourceID }).lean();
       // Check that the branch was found
-      if (!foundBranch) {
+      if (!foundSourceBranch) {
         throw new M.NotFoundError(`Branch [${utils.parseID(sourceID).pop()}] not found in the `
           + `project [${projID}].`, 'warn');
       }
@@ -442,9 +395,8 @@ function create(requestingUser, organizationID, projectID, branches, options) {
       const searchQuery = { _id: { $in: arrIDs } };
 
       // Find any existing, conflicting branches
-      return Branch.find(searchQuery, '_id').lean();
-    })
-    .then((foundBranches) => {
+      const foundBranches = await Branch.find(searchQuery, '_id').lean();
+
       // If there are any foundBranches, there is a conflict
       if (foundBranches.length > 0) {
         // Get arrays of the foundBranches' ids
@@ -471,25 +423,26 @@ function create(requestingUser, organizationID, projectID, branches, options) {
       });
 
       // Create the branches
-      return Branch.insertMany(branchObjects);
-    })
-    .then((createdBranches) => {
+      const createdBranches = await Branch.insertMany(branchObjects);
+
       // Set the branches created to the new branches
       newBranches = createdBranches;
       // Set created to true
       // NOTE: This will only be used if elements do not get created
       created = true;
 
+      // put catch here?
+
       // Find all the elements in the branch we are branching from
-      return Element.find({ branch: sourceID }).lean();
-    })
-    .then((elementsToClone) => {
+      const elementsToClone = await Element.find({ branch: sourceID }).lean();
+
       let elementsToCreate = [];
       // Grabbing all the element ids
       elementsCloning = elementsToClone.map((e) => e._id);
 
+      const promises = [];
       // Loop through all the branches
-      newBranches.forEach((branch) => {
+      promises.push(newBranches.forEach((branch) => {
         // Create the new element objects for each element in the cloned from branch
         elementsToCreate = elementsToCreate.concat(elementsToClone.map((e) => {
           // Grab the element ID and parent ID
@@ -564,15 +517,15 @@ function create(requestingUser, organizationID, projectID, branches, options) {
               elemObj.source = e.target;
             }
           }
-
           // Return the element object
           return elemObj;
         }));
-      });
+      }));
+
+      await Promise.all(promises);
       // Create the new elements
-      return Element.insertMany(elementsToCreate, { rawResult: true });
-    })
-    .then((queryResult) => {
+      const queryResult = await Element.insertMany(elementsToCreate, { rawResult: true });
+
       if (queryResult.result.n !== (newBranches.length * elementsCloning.length)) {
         // Not all elements were created
         throw new M.DatabaseError('Not all elements were cloned from branch.', 'error');
@@ -580,23 +533,25 @@ function create(requestingUser, organizationID, projectID, branches, options) {
 
       // reset created variable
       created = false;
-    })
-    .then(() => {
+
       // Emit the event branches-created
       EventEmitter.emit('branches-created', branchObjects);
 
+      // put catch here
+
+      let foundCreatedBranches;
       // If the lean option is supplied
       if (validOptions.lean) {
-        return Branch.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
-        .populate(validOptions.populateString).lean();
+        foundCreatedBranches = await Branch.find({ _id: { $in: arrIDs } },
+          validOptions.fieldsString).populate(validOptions.populateString).lean();
       }
       else {
-        return Branch.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
-        .populate(validOptions.populateString);
+        foundCreatedBranches = await Branch.find({ _id: { $in: arrIDs } },
+          validOptions.fieldsString).populate(validOptions.populateString);
       }
-    })
-    .then((foundCreatedBranches) => resolve(foundCreatedBranches))
-    .catch((error) => {
+      return resolve(foundCreatedBranches);
+    }
+    catch (error) {
       // Verify if the branches were created
       if (created) {
         // Delete any elements created from branch
@@ -611,7 +566,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
         // Reject with error
         return reject(errors.captureError(error));
       }
-    });
+    }
   });
 }
 
@@ -657,7 +612,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
  * });
  */
 function update(requestingUser, organizationID, projectID, branches, options) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
     try {
       helper.checkParams(requestingUser, options, organizationID, projectID);
@@ -681,7 +636,6 @@ function update(requestingUser, organizationID, projectID, branches, options) {
     const saniBranches = sani.mongo(JSON.parse(JSON.stringify(branches)));
     const duplicateCheck = {};
     let foundBranches = [];
-    let foundProject = {};
     let branchesToUpdate = [];
     let searchQuery = {};
     const arrIDs = [];
@@ -704,52 +658,24 @@ function update(requestingUser, organizationID, projectID, branches, options) {
       throw new M.DataFormatError('Invalid input for updating branches.', 'warn');
     }
 
-    // Find the organization
-    Org.findOne({ _id: orgID }).lean()
-    .then((organization) => {
-      // Check that the org was found
-      if (!organization) {
-        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
-      }
-
+    try {
+      // Find the org and check that it has been found and is not archived (unless specified)
+      const organization = await helper.findAndValidate(Org, orgID, validOptions.archived);
       // Verify the user has at least read permissions on the organization
       if (!reqUser.admin && (!organization.permissions[reqUser._id]
         || !organization.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to update'
+        throw new M.PermissionError('User does not have permission to read'
           + ` branches on the organization [${orgID}].`, 'warn');
       }
-
-      // Verify the organization is not archived
-      if (organization.archived) {
-        throw new M.PermissionError(`The organization [${orgID}] is archived.`
-          + ' It must first be unarchived before updating branches.', 'warn');
-      }
-
-      // Find the project
-      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-    })
-    .then((_foundProject) => {
-      foundProject = _foundProject;
-      // Check that the project was found
-      if (!foundProject) {
-        throw new M.NotFoundError(`Project [${projID}] not found in the `
-          + `organization [${orgID}].`, 'warn');
-      }
-
-      // Verify user has write permissions on the project
-      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
-        || !foundProject.permissions[reqUser._id].includes('write'))) {
+      // Find the project and check that it has been found and is not archived (unless specified)
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+        validOptions.archived);
+      // Check permissions
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('write'))) {
         throw new M.PermissionError('User does not have permission to update'
-          + ` branch on the project [${projID}].`, 'warn');
+          + ` branches on the project [${projID}].`, 'warn');
       }
-
-      // Verify the project is not archived
-      if (foundProject.archived) {
-        throw new M.PermissionError(`The project [${projID}] is archived.`
-          + ' It must first be unarchived before updating branches.', 'warn');
-      }
-    })
-    .then(() => {
       // Create list of ids
       try {
         let index = 1;
@@ -780,10 +706,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
       searchQuery = { _id: { $in: arrIDs } };
 
       // Return when all branches have been found
-      return Branch.find(searchQuery).lean();
-    })
-    .then((_foundBranches) => {
-      foundBranches = _foundBranches;
+      foundBranches = await Branch.find(searchQuery).lean();
 
       // Verify the same number of branches are found as desired
       if (foundBranches.length !== arrIDs.length) {
@@ -868,26 +791,27 @@ function update(requestingUser, organizationID, projectID, branches, options) {
       });
 
       // Update all branches through a bulk write to the database
-      return Branch.bulkWrite(bulkArray);
-    })
-    .then(() => {
+      await Branch.bulkWrite(bulkArray);
+
+      let foundUpdatedBranches;
       // If the lean option is supplied
       if (validOptions.lean) {
-        return Branch.find(searchQuery, validOptions.fieldsString)
+        foundUpdatedBranches = await Branch.find(searchQuery, validOptions.fieldsString)
         .populate(validOptions.populateString).lean();
       }
       else {
-        return Branch.find(searchQuery, validOptions.fieldsString)
+        foundUpdatedBranches = await Branch.find(searchQuery, validOptions.fieldsString)
         .populate(validOptions.populateString);
       }
-    })
-    .then((foundUpdatedBranches) => {
+
       // Emit the event branches-updated
       EventEmitter.emit('branches-updated', foundUpdatedBranches);
 
       return resolve(foundUpdatedBranches);
-    })
-    .catch((error) => reject(errors.captureError(error)));
+    }
+    catch (error) {
+      reject(errors.captureError(error));
+    }
   });
 }
 
@@ -914,7 +838,7 @@ function update(requestingUser, organizationID, projectID, branches, options) {
  * });
  */
 function remove(requestingUser, organizationID, projectID, branches, options) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
     try {
       helper.checkParams(requestingUser, options, organizationID, projectID);
@@ -936,7 +860,6 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
     const projID = sani.mongo(projectID);
     const saniBranches = sani.mongo(JSON.parse(JSON.stringify(branches)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    let foundBranches = [];
     let searchedIDs = [];
 
     // Define searchQuery and ownedQuery
@@ -959,55 +882,27 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
       throw new M.DataFormatError('Invalid input for removing branches.', 'warn');
     }
 
-    // Find the organization
-    Org.findOne({ _id: orgID }).lean()
-    .then((organization) => {
-      // Check that the org was found
-      if (!organization) {
-        throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
-      }
-
-      // Ensure the user has at least read access on the organization
+    try {
+      // Find the org and check that it has been found and is not archived
+      const organization = await helper.findAndValidate(Org, orgID);
+      // Verify the user has at least read permissions on the organization
       if (!reqUser.admin && (!organization.permissions[reqUser._id]
         || !organization.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to delete'
+        throw new M.PermissionError('User does not have permission to get'
           + ` branches on the organization [${orgID}].`, 'warn');
       }
-
-      // Verify the organization is not archived
-      if (organization.archived) {
-        throw new M.PermissionError(`The organization [${orgID}] is archived.`
-          + ' It must first be unarchived before deleting branches.', 'warn');
-      }
-
-      // Find the project
-      return Project.findOne({ _id: utils.createID(orgID, projID) }).lean();
-    })
-    .then((foundProject) => {
-      // Verify the project was found or exists
-      if (foundProject === null) {
-        throw new M.NotFoundError(`The project [${projID}] was not found.`, 'warn');
-      }
-
-      // Verify the requesting user has at least project write permissions
-      if (!reqUser.admin && (!foundProject.permissions[reqUser._id]
-        || !foundProject.permissions[reqUser._id].includes('write'))) {
+      // Find the project and check that it has been found and is not archived
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
+      // Check permissions
+      if (!reqUser.admin && (!project.permissions[reqUser._id]
+        || !project.permissions[reqUser._id].includes('write'))) {
         throw new M.PermissionError('User does not have permission to delete'
           + ` branches on the project [${projID}].`, 'warn');
       }
 
-      // Verify the project is not archived
-      if (foundProject.archived) {
-        throw new M.PermissionError(`The project [${projID}] is archived.`
-          + ' It must first be unarchived before deleting branches.', 'warn');
-      }
-
       // Find all the branches to delete
-      return Branch.find(searchQuery).lean();
-    })
-    .then((_foundBranches) => {
-      // Set the function-wide foundBranches and create ownedQuery
-      foundBranches = _foundBranches;
+      const foundBranches = await Branch.find(searchQuery).lean();
+
       const foundBranchIDs = foundBranches.map(b => b._id);
       ownedQuery.branch = { $in: foundBranchIDs };
 
@@ -1031,11 +926,9 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
       });
 
       // Delete any elements in the branch
-      return Element.deleteMany(ownedQuery).lean();
-    })
-    // Delete all the branches
-    .then(() => Branch.deleteMany(searchQuery).lean())
-    .then((retQuery) => {
+      await Element.deleteMany(ownedQuery).lean();
+      // Delete all the branches
+      const retQuery = await Branch.deleteMany(searchQuery).lean();
       // Emit the event branches-deleted
       EventEmitter.emit('branches-deleted', foundBranches);
 
@@ -1045,7 +938,9 @@ function remove(requestingUser, organizationID, projectID, branches, options) {
           + `deleted [${saniBranches.toString()}].`);
       }
       return resolve(foundBranches.map(b => b._id));
-    })
-    .catch((error) => reject(errors.captureError(error)));
+    }
+    catch (error) {
+      return reject(errors.captureError(error));
+    }
   });
 }
