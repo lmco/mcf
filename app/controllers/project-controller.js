@@ -110,15 +110,20 @@ function find(requestingUser, organizationID, projects, options) {
       projects = undefined; // eslint-disable-line no-param-reassign
     }
 
-    // Ensure input parameters are correct type
-    // If organizationID is null, the user is searching for all projects and it is valid input
-    if (organizationID === null) {
-      helper.checkParams(requestingUser, options, '');
+    try {
+      // Ensure input parameters are correct type
+      // If organizationID is null, the user is searching for all projects and it is valid input
+      if (organizationID === null) {
+        helper.checkParams(requestingUser, options, '');
+      }
+      else {
+        helper.checkParams(requestingUser, options, organizationID);
+      }
+      helper.checkParamsDataType(['undefined', 'object', 'string'], projects, 'Projects');
     }
-    else {
-      helper.checkParams(requestingUser, options, organizationID);
+    catch (error) {
+      return reject(errors.captureError(error));
     }
-    helper.checkParamsDataType(['undefined', 'object', 'string'], projects, 'Projects');
 
     // Sanitize input parameters
     const orgID = sani.mongo(organizationID);
@@ -261,9 +266,14 @@ function find(requestingUser, organizationID, projects, options) {
  */
 function create(requestingUser, organizationID, projects, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID);
-    helper.checkParamsDataType('object', projects, 'Projects');
+    try {
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID);
+      helper.checkParamsDataType('object', projects, 'Projects');
+    }
+    catch (error) {
+      return reject(errors.captureErrors(error));
+    }
 
     // Sanitize input parameters and function-wide variables
     const orgID = sani.mongo(organizationID);
@@ -568,9 +578,14 @@ function create(requestingUser, organizationID, projects, options) {
  */
 function update(requestingUser, organizationID, projects, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID);
-    helper.checkParamsDataType('object', projects, 'Projects');
+    try {
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID);
+      helper.checkParamsDataType('object', projects, 'Projects');
+    }
+    catch (error) {
+      return reject(errors.captureError(error));
+    }
 
     // Sanitize input parameters and create function-wide variables
     const orgID = sani.mongo(organizationID);
@@ -948,19 +963,24 @@ function update(requestingUser, organizationID, projects, options) {
  */
 function createOrReplace(requestingUser, organizationID, projects, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID);
-    helper.checkParamsDataType('object', projects, 'Projects');
+    try {
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID);
+      helper.checkParamsDataType('object', projects, 'Projects');
+    }
+    catch (error) {
+      return reject(errors.captureError(error));
+    }
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
     const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
     const duplicateCheck = {};
+    let foundOrg;
     let foundProjects = [];
     let projectsToLookUp = [];
-    let isCreated = false;
-    let isDeleted = false;
+    let createdProjects;
     const ts = Date.now();
 
     // Check the type of the projects parameter
@@ -1008,7 +1028,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       const searchQuery = { _id: { $in: arrIDs } };
 
       // Find the organization containing the projects, validate that it exists and is not archived
-      const foundOrg = await helper.findAndValidate(Organization, orgID, reqUser);
+      foundOrg = await helper.findAndValidate(Organization, orgID, reqUser);
       // Permissions check
       if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
         || !foundOrg.permissions[reqUser._id].includes('write'))) {
@@ -1079,16 +1099,39 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
 
       // Emit the event projects-deleted
       EventEmitter.emit('projects-deleted', foundProjects);
+    }
+    catch (error) {
+      return reject(errors.captureError(error));
+    }
 
-      // Set deleted to true
-      isDeleted = true;
-
+    // Try block after former project has been deleted but not yet replaced
+    try {
       // Create the new/replaced projects
-      const createdProjects = await create(reqUser, orgID, projectsToLookUp, options);
+      createdProjects = await create(reqUser, orgID, projectsToLookUp, options);
+    }
+    catch (error) {
+      const finalError = await new Promise((res) => {
+        // Reinsert original data
+        Project.insertMany(foundProjects)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data', orgID,
+            `PUT-backup-projects-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        .then(() => res(errors.captureError(error)))
+        .catch((err) => res(err));
+      });
+      // If an error was returned, reject it.
+      if (finalError) {
+        return reject(errors.captureError(finalError));
+      }
+    }
 
-      // Set created to true
-      isCreated = true;
-
+    // Try block after former project has been deleted and replaced
+    try {
       const filePath = path.join(M.root, 'data',
         orgID, `PUT-backup-projects-${ts}.json`);
       // Delete the temporary file.
@@ -1113,33 +1156,7 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
       return resolve(createdProjects);
     }
     catch (error) {
-      return new Promise((res) => {
-        // Check if deleted and creation failed
-        if (isDeleted && !isCreated) {
-          // Reinsert original data
-          Project.insertMany(foundProjects)
-          .then(() => new Promise((resInner, rejInner) => {
-          // Remove the file
-            fs.unlink(path.join(M.root, 'data', orgID,
-              `PUT-backup-projects-${ts}.json`), function(err) {
-              if (err) rejInner(err);
-              else resInner();
-            });
-          }))
-          .then(() => res(errors.captureError(error)))
-          .catch((err) => res(err));
-        }
-        else {
-          // Resolve original error
-          return res(error);
-        }
-      })
-      .then((err) => {
-        // If an error was returned, reject it.
-        if (err) {
-          return reject(errors.captureError(err));
-        }
-      });
+      return reject(errors.captureError(error));
     }
   });
 }
@@ -1169,15 +1186,13 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
  */
 function remove(requestingUser, organizationID, projects, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID);
-    helper.checkParamsDataType(['object', 'string'], projects, 'Projects');
-    // Remove Projects function only: user must be an admin
     try {
-      assert.ok(requestingUser.admin === true, 'User does not have permissions to delete projects.');
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID);
+      helper.checkParamsDataType(['object', 'string'], projects, 'Projects');
     }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
+    catch (error) {
+      return reject(errors.captureError(error));
     }
 
     // Sanitize input parameters and function-wide variables
@@ -1202,20 +1217,25 @@ function remove(requestingUser, organizationID, projects, options) {
     const searchQuery = {};
     const ownedQuery = {};
 
-    // Check the type of the projects parameter
-    if (Array.isArray(saniProjects)) {
-      // An array of project ids, remove all
-      searchedIDs = saniProjects.map(p => utils.createID(orgID, p));
-      searchQuery._id = { $in: searchedIDs };
+    try {
+      // Check the type of the projects parameter
+      if (Array.isArray(saniProjects)) {
+        // An array of project ids, remove all
+        searchedIDs = saniProjects.map(p => utils.createID(orgID, p));
+        searchQuery._id = { $in: searchedIDs };
+      }
+      else if (typeof saniProjects === 'string') {
+        // A single project id, remove one
+        searchedIDs = [utils.createID(orgID, saniProjects)];
+        searchQuery._id = utils.createID(orgID, saniProjects);
+      }
+      else {
+        // Invalid parameter, throw an error
+        throw new M.DataFormatError('Invalid input for removing projects.', 'warn');
+      }
     }
-    else if (typeof saniProjects === 'string') {
-      // A single project id, remove one
-      searchedIDs = [utils.createID(orgID, saniProjects)];
-      searchQuery._id = utils.createID(orgID, saniProjects);
-    }
-    else {
-      // Invalid parameter, throw an error
-      throw new M.DataFormatError('Invalid input for removing projects.', 'warn');
+    catch (error) {
+      return reject(errors.captureError(error));
     }
 
     try {

@@ -374,9 +374,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
   return new Promise(async (resolve, reject) => {
     M.log.debug('create(): Start of function');
 
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    helper.checkParamsDataType('object', elements, 'Elements');
+    try {
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+      helper.checkParamsDataType('object', elements, 'Elements');
+    }
+    catch (error) {
+      return reject(error);
+    }
 
     // Sanitize input parameters and create function-wide variables
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
@@ -395,19 +400,23 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
 
     // Define array to store element data
     let elementsToCreate = [];
-
-    // Check the type of the elements parameter
-    if (Array.isArray(saniElements)) {
-      // elements is an array, create many elements
-      elementsToCreate = saniElements;
+    try {
+      // Check the type of the elements parameter
+      if (Array.isArray(saniElements)) {
+        // elements is an array, create many elements
+        elementsToCreate = saniElements;
+      }
+      else if (typeof saniElements === 'object') {
+        // elements is an object, create a single element
+        elementsToCreate = [saniElements];
+      }
+      else {
+        // elements is not an object or array, throw an error
+        throw new M.DataFormatError('Invalid input for creating elements.', 'warn');
+      }
     }
-    else if (typeof saniElements === 'object') {
-      // elements is an object, create a single element
-      elementsToCreate = [saniElements];
-    }
-    else {
-      // elements is not an object or array, throw an error
-      throw new M.DataFormatError('Invalid input for creating elements.', 'warn');
+    catch (error) {
+      return reject(error);
     }
 
     // Create array of id's for lookup and array of valid keys
@@ -820,9 +829,14 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  */
 function update(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    helper.checkParamsDataType('object', elements, 'Elements');
+    try {
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+      helper.checkParamsDataType('object', elements, 'Elements');
+    }
+    catch (error) {
+      return reject(error);
+    }
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -1279,9 +1293,14 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  */
 function createOrReplace(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    helper.checkParamsDataType('object', elements, 'Elements');
+    try {
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+      helper.checkParamsDataType('object', elements, 'Elements');
+    }
+    catch (error) {
+      return reject(error);
+    }
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -1294,8 +1313,6 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
     let elementsToLookup = [];
     let createdElements = [];
     let foundElementIDs = [];
-    let isCreated = false;
-    let isDeleted = false;
     const ts = Date.now();
 
     try {
@@ -1430,16 +1447,41 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
 
       // Emit the event elements-deleted
       EventEmitter.emit('elements-deleted', foundElements);
+    }
+    catch (error) {
+      return reject(errors.captureError(error));
+    }
 
-      // Set deleted to true
-      isDeleted = true;
-
+    // Try block after elements have been deleted but before being replaced
+    try {
       // Create new elements
       createdElements = await create(reqUser, orgID, projID, branchID, elementsToLookup, options);
+    }
+    catch (error) {
+      const finalError = await new Promise(async (res) => {
+        // Reinsert original data
+        Element.insertMany(foundElements)
+        .then(() => new Promise((resInner, rejInner) => {
+          // Remove the file
+          fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
+            `PUT-backup-elements-${ts}.json`), function(err) {
+            if (err) rejInner(err);
+            else resInner();
+          });
+        }))
+        // Resolve the original error
+        .then(() => res(errors.captureError(error)))
+        // Unless a new error occured
+        .catch((err) => res(err));
+      });
+      // If an error was returned, reject it.
+      if (finalError) {
+        return reject(errors.captureError(finalError));
+      }
+    }
 
-      // Set created to true
-      isCreated = true;
-
+    // Try block after elements have been deleted and replaced
+    try {
       // Create file path to temp data file
       const filePath = path.join(M.root, 'data', orgID, projID, branchID, `PUT-backup-elements-${ts}.json`);
       // Delete the temporary file.
@@ -1478,37 +1520,7 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
       return resolve(createdElements);
     }
     catch (error) {
-      const finalError = await new Promise(async (res) => {
-        // Check if deleted and creation failed
-        if (isDeleted && !isCreated) {
-          // Reinsert original data
-          try {
-            await Element.insertMany(foundElements);
-            await new Promise((resInner, rejInner) => {
-              // Remove the file
-              fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
-                `PUT-backup-elements-${ts}.json`), function(err) {
-                if (err) rejInner(err);
-                else resInner();
-              });
-            });
-            // Resolve the original error
-            res(errors.captureError(error));
-          }
-          catch (err) {
-            // Resolve the new error that occurred when trying to restore the data
-            res(err);
-          }
-        }
-        else {
-          // Resolve original error
-          return res(error);
-        }
-      });
-      // If an error was returned, reject it.
-      if (finalError) {
-        return reject(errors.captureError(finalError));
-      }
+      reject(errors.captureError(error));
     }
   });
 }
@@ -1540,10 +1552,14 @@ function createOrReplace(requestingUser, organizationID, projectID, branch, elem
  */
 function remove(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    helper.checkParamsDataType(['object', 'string'], elements, 'Elements');
-
+    try {
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+      helper.checkParamsDataType(['object', 'string'], elements, 'Elements');
+    }
+    catch (error) {
+      return reject(error);
+    }
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.mongo(organizationID);
@@ -1915,8 +1931,13 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  */
 function search(requestingUser, organizationID, projectID, branch, query, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    try {
+      // Ensure input parameters are correct type
+      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    }
+    catch (error) {
+      return reject(error);
+    }
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
