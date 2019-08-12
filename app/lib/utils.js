@@ -94,9 +94,6 @@ module.exports.createID = function(...args) {
  * @return {string[]} Split uid
  */
 module.exports.parseID = function(uid) {
-  if (!uid.includes(this.ID_DELIMITER)) {
-    throw new M.DataFormatError('Invalid UID.', 'warn');
-  }
   return uid.split(this.ID_DELIMITER);
 };
 
@@ -239,33 +236,45 @@ module.exports.parseOptions = function(options, validOptions) {
  * controllers.
  */
 module.exports.validateOptions = function(options, validOptions, model) {
-  // Define the object to be returned to the user. Initialize populateString
-  const returnObject = { populateString: '', sort: { $natural: 1 } };
-  // Define valid searchOptions for the org model
-  const orgSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the project model
-  const projectSearchOptions = ['name', 'visibility', 'createdBy',
-    'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the branch model
-  const branchSearchOptions = ['tag', 'source', 'name', 'createdBy',
-    'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the element model
-  const elemSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-    'createdBy', 'lastModifiedBy', 'archivedBy'];
-  // Define valid searchOptions for the user model
-  const userSearchOptions = ['fname', 'preferredName', 'lname', 'email',
-    'createdBy', 'lastModifiedBy', 'archivedBy'];
-  const requiredElementFields = ['contains', 'sourceOf', 'targetOf'];
+  // Initialize the object to be returned to the user
+  const validatedOptions = { populateString: '', sort: { $natural: 1 } };
 
-  // Add required populate fields to populate string for Element model
-  if (model.modelName === 'Element') {
-    // Set populateString to include require virtuals
-    returnObject.populateString = 'contains sourceOf targetOf ';
+  // Define valid search options depending on the model
+  let validSearchOptions = [];
+  switch (model.modelName) {
+    case 'Organization':
+      validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      break;
+    case 'Project':
+      validSearchOptions = ['name', 'visibility', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      break;
+    case 'Branch':
+      validSearchOptions = ['tag', 'source', 'name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      break;
+    case 'Element':
+      validSearchOptions = ['parent', 'source', 'target', 'type', 'name', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
+      // Set populateString to include require virtuals
+      validatedOptions.populateString = 'contains sourceOf targetOf ';
+      break;
+    case 'Artifact':
+      validSearchOptions = ['filename', 'contentType', 'name', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
+      // Set populateString to include require virtuals
+      validatedOptions.populateString = 'archivedBy, lastModifiedBy, createdBy, project';
+      break;
+    case 'User':
+      validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
+        'lastModifiedBy', 'archivedBy'];
+      break;
+    default:
+      throw new M.DataFormatError('No model provided', 'warn');
   }
+  const requiredElementFields = ['contains', 'sourceOf', 'targetOf'];
 
   // Check if no options provided
   if (!options) {
-    return returnObject;
+    return validatedOptions;
   }
 
   // For each option provided
@@ -273,16 +282,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
     let val = options[opt];
 
     // Special case, ignore these as the controller handles these
-    if ((model.modelName === 'Element'
-      && (elemSearchOptions.includes(opt) || opt.startsWith('custom.')))
-      || (model.modelName === 'Branch'
-      && (branchSearchOptions.includes(opt) || opt.startsWith('custom.')))
-      || (model.modelName === 'User'
-      && (userSearchOptions.includes(opt) || opt.startsWith('custom.')))
-      || (model.modelName === 'Project'
-      && (projectSearchOptions.includes(opt) || opt.startsWith('custom.')))
-      || (model.modelName === 'Organization'
-      && (orgSearchOptions.includes(opt) || opt.startsWith('custom.')))) {
+    if (validSearchOptions.includes(opt) || opt.startsWith('custom.')) {
       // Ignore iteration of loop
       return;
     }
@@ -315,7 +315,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         // If the field is not a required virtual on the Element model
         if (!(model.modelName === 'Element' && requiredElementFields.includes(p))) {
           // Add field to populateString
-          returnObject.populateString += `${p} `;
+          validatedOptions.populateString += `${p} `;
         }
       });
     }
@@ -328,7 +328,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the field archived in the returnObject
-      returnObject.archived = val;
+      validatedOptions.archived = val;
     }
 
     // Handle the subtree option
@@ -339,7 +339,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the subtree option in the returnObject
-      returnObject.subtree = val;
+      validatedOptions.subtree = val;
     }
 
     // Handle the fields option
@@ -359,7 +359,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       val = val.filter(field => field !== '-_id');
 
       // Set the fieldsString option in the returnObject
-      returnObject.fieldsString = val.join(' ');
+      validatedOptions.fieldsString = val.join(' ');
 
       // Handle special case for element virtuals
       if (model.modelName === 'Element') {
@@ -368,7 +368,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         // For each virtual not specified in fields
         notSpecifiedVirtuals.forEach((virt) => {
           // Remove the virtual from the populateString
-          returnObject.populateString = returnObject.populateString.replace(`${virt} `, '');
+          validatedOptions.populateString = validatedOptions.populateString.replace(`${virt} `, '');
         });
       }
     }
@@ -381,7 +381,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the limit option in the returnObject
-      returnObject.limit = val;
+      validatedOptions.limit = val;
     }
 
     // Handle the option skip
@@ -397,13 +397,13 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the skip option in the returnObject
-      returnObject.skip = val;
+      validatedOptions.skip = val;
     }
 
     // Handle the sort option
     if (opt === 'sort') {
       // Get rid of the default value
-      returnObject.sort = {};
+      validatedOptions.sort = {};
       // initialize sort order
       let order = 1;
       // If the user has specified sorting in reverse order
@@ -416,7 +416,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         val = '_id';
       }
       // Return the parsed sort option in the format {sort_field: order}
-      returnObject.sort[val] = order;
+      validatedOptions.sort[val] = order;
     }
 
     // Handle the lean option
@@ -427,11 +427,11 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
 
       // Set the lean option in the returnObject
-      returnObject.lean = val;
+      validatedOptions.lean = val;
     }
   });
 
-  return returnObject;
+  return validatedOptions;
 };
 
 /**

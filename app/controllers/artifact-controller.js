@@ -62,10 +62,14 @@ const path = require('path');    // Find directory paths
 
 // MBEE modules
 const Artifact = M.require('models.artifact');
+const Branch = M.require('models.branch');
+const Project = M.require('models.project');
+const Org = M.require('models.organization');
 const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
-const ProjController = M.require('controllers.project-controller');
+const helper = M.require('lib.controller-helper');
+
 
 /**
  * @description This function finds an artifact based on artifact full id.
@@ -118,13 +122,11 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
     assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
   }
   catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
+    return reject(errors.captureError(error));
   }
 
   // Sanitize input parameters
-  const saniArtifacts = (artifacts !== undefined)
-    ? sani.mongo(JSON.parse(JSON.stringify(artifacts)))
-    : undefined;
+  const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   const orgID = sani.mongo(organizationID);
   const projID = sani.mongo(projectID);
@@ -133,7 +135,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   let foundArtifacts = [];
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
-  // Initialize validOptions
+  // Initialize and ensure options are valid
   const validOptions = utils.validateOptions(options, ['archived', 'populate',
     'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
 
@@ -282,9 +284,9 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
         // Add find operation to array of promises
         promises.push(findHelper(searchQuery, validOptions.fieldsString, batchLimit, batchSkip,
           validOptions.populateString, validOptions.sort, validOptions.lean)
-          .then((arts) => {
-            foundArtifacts = foundArtifacts.concat(arts);
-          }));
+        .then((arts) => {
+          foundArtifacts = foundArtifacts.concat(arts);
+        }));
       }
     }
   }
@@ -298,9 +300,9 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
       promises.push(findHelper(searchQuery, validOptions.fieldsString,
         validOptions.limit, validOptions.skip, validOptions.populateString,
         validOptions.sort, validOptions.lean)
-        .then((arts) => {
-          foundArtifacts = foundArtifacts.concat(arts);
-        }));
+      .then((arts) => {
+        foundArtifacts = foundArtifacts.concat(arts);
+      }));
     }
   }
 
@@ -380,27 +382,16 @@ async function create(requestingUser, organizationID, projectID, branch, artifac
   M.log.debug('create(): Start of function');
   // Error Check: ensure input parameters are valid
   try {
-    assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-    assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-    // Ensure that requesting user has an _id field
-    assert.ok(requestingUser._id, 'Requesting user is not populated.');
-    assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-    assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-    assert.ok(typeof projectID === 'string', 'Project ID is not a string.');
-    assert.ok(typeof branch === 'string', 'Branch Id is not a string.');
-
-    assert.ok(artifacts !== null, 'Artifacts parameter cannot be null.');
-    // If artifacts is an array, ensure each item inside is an object
-    if (Array.isArray(artifacts)) {
-      assert.ok(artifacts.every(e => typeof e === 'object'), 'Every item in artifacts is not an'
-        + ' object.');
-      assert.ok(artifacts.every(e => e !== null), 'One or more items in artifacts is null.');
-    }
-    const optionsTypes = ['undefined', 'object'];
-    assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    assert.ok(artifacts !== null, 'Artifact parameter cannot be null.');
+    assert.ok(Array.isArray(artifacts) === false, 'Artifact parameter cannot be an array.');
+    // Ensure Artifact is an object
+    assert.ok(artifacts !== 'object', 'Artifact must be an object.');
   }
   catch (error) {
-    throw new M.DataFormatError(error.message, 'warn');
+    throw new M.DataFormatError(error, 'warn');
+    return reject(errors.captureError(error));
   }
 
   // Sanitize input parameters and create function-wide variables
@@ -409,126 +400,281 @@ async function create(requestingUser, organizationID, projectID, branch, artifac
   const orgID = sani.mongo(organizationID);
   const projID = sani.mongo(projectID);
   const branchID = sani.mongo(branch);
-  let artifactObjects = [];
-  const remainingArtifacts = [];
-  let populatedArtifacts = [];
-  const projectRefs = [];
+
+  // Define function-wide variables
+  // Create the full artifact id
+  const artifactFullId = utils.createID(organizationID, projectID, branchID, artifacts.id);
+  let hashedName = '';
 
   // Initialize and ensure options are valid
   const validOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Artifact);
 
-  // Define array to store artifact data
-  let artifactsToCreate = [];
-
-  // Check the type of the artifacts parameter
-  if (Array.isArray(saniArtifacts)) {
-    // artifacts is an array, create many artifacts
-    artifactsToCreate = saniArtifacts;
+  // Find the organization and validate that it was found and not archived
+  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  // Permissions check
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` read items on the org ${orgID}.`, 'warn');
   }
-  else if (typeof saniArtifacts === 'object') {
-    // artifacts is an object, create a single artifact
-    artifactsToCreate = [saniArtifacts];
+
+  // Find the project and validate that it was found and not archived
+  const foundProj = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  // Permissions check
+  if (!reqUser.admin && (!project.permissions[reqUser._id]
+    || !project.permissions[reqUser._id].includes('write'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` create items on the project ${projID}.`, 'warn');
+  }
+
+  // Find the branch and validate that it was found and not archived
+  const foundBranch = await helper.findAndValidate(Branch,
+    utils.createID(orgID, projID, branchID), reqUser);
+  // Check that the branch is is not a tag
+  if (foundBranch.tag) {
+    throw new M.OperationError(`[${branchID}] is a tag and `
+      + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
+  }
+
+  M.log.debug('create(): Before finding pre-existing artifact');
+
+  // Check if the artifact already exists
+  const foundArtifact = await Artifact.find({ _id: artifactFullId }).lean();
+  // Error Check: ensure no artifact were found
+  if (foundArtifact.length > 0) {
+    throw new M.OperationError('Artifact with the following IDs already exist'
+      + ` [${foundArtifact.toString()}].`, 'warn');
+  }
+
+  // Verify artifactBlob defined
+  if (artifactBlob) {
+    // Generate hash
+    hashedName = mbeeCrypto.sha256Hash(artifactBlob);
   }
   else {
-    // artifacts is not an object or array, throw an error
-    throw new M.DataFormatError('Invalid input for creating artifacts.', 'warn');
+    // No artifact binary provided, set null
+    hashedName = null;
   }
 
+  // Define new hash history data
+  const historyData = {
+    hash: hashedName,
+    user: reqUser
+  };
 
-  // Define function-wide variables
-  // Create the full artifact id
-  const artifactFullId = utils.createID(organizationID, projectID, artifacts.id);
-  let createdArtifact = null;
-  let hashedName = '';
+  // Create the new Artifact
+  const artifact = new Artifact({
+    _id: artifactFullId,
+    name: saniArtifacts.name,
+    contentType: saniArtifacts.contentType,
+    project: foundProj._id,
+    branch: foundBranch._id,
+    filename: saniArtifacts.filename,
+    location: saniArtifacts.location,
+    history: historyData,
+    custom: saniArtifacts.custom
+  });
 
-  // Initialize foundProject
-  let foundProj = null;
+  // Save artifact object to the database
+  const savedArtifact = await artifact.save();
 
-  try {
+  return savedArtifact;
+  // // Create the main artifact path
+  // const artifactPath = path.join(M.root, M.config.artifact.path);
+  //
+  // // Check if artifact file exist,
+  // //     NOT Exist - Returns calling addArtifactOS()
+  // //     Exist - Returns resolve Artifact
+  // return (!fs.existsSync(path.join(artifactPath, hashedName.substring(0, 2), hashedName)))
+  //   ? addArtifactOS(hashedName, artifactBlob)
+  //   : resolve(_artifact);
 
-    // Find the organization
-    organization = await Org.findOne({ _id: orgID }).lean()
+}
 
-    // Check that the org was found
-    if (!organization) {
-      throw new M.NotFoundError(`Organization [${orgID}] not found.`, 'warn');
+/**
+ * @description This function returns the artifact binary file.
+ *
+ * @param {User} reqUser - The user object of the requesting user.
+ * @param {String} organizationID - The organization ID.
+ * @param {String} projectID - The project ID.
+ * @param {String} artifactID - The artifact ID.
+ *
+ * @return {Promise} resolve - artifact
+ *                   reject - error
+ @example
+ * getArtifactBlob({User}, 'orgID', 'projectID', 'artifactID')
+ * .then(function(artifact) {
+ *   // Do something with the found artifact binary
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
+  return new Promise((resolve, reject) => {
+    let artifactMeta;
+  findArtifact(reqUser, organizationID, projectID, artifactID)
+    .then((foundArtifact) => {
+      // Artifact metadata found, save it
+      artifactMeta = foundArtifact;
+
+      // Get the Artifact Blob
+      return getArtifactOS(artifactMeta.history[artifactMeta.history.length - 1].hash);
+    })
+    .then((ArtifactBlob) => resolve({ artifactBlob: ArtifactBlob, artifactMeta: artifactMeta }))
+    .catch((error) => {
+      reject(M.CustomError.parseCustomError(error));
+    });
+  });
+}
+
+/**
+ * @description This function adds the artifact blob file to the file system.
+ *
+ * @param {string} hashedName - hash name of the file
+ * @param {Binary} artifactBlob - A binary large object artifact
+ */
+function addArtifactOS(hashedName, artifactBlob) {
+  return new Promise((resolve, reject) => {
+    // Check hashname for null
+    if (hashedName === null) {
+      // Remote link, return resolve
+      return resolve();
     }
+    // Creates main artifact directory if not exist
+    createStorageDirectory()
+      .then(() => {
+        // Create the main artifact path
+        const artifactPath = path.join(M.root, M.config.artifact.path);
+        // Set sub folder path and artifact path
+        // Note: Folder name is the first 2 characters from the generated hash
+        const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
+        const filePath = path.join(folderPath, hashedName);
 
-    // Verify the user has at least read access on the organization
-    if (!reqUser.admin && (!organization.permissions[reqUser._id]
-      || !organization.permissions[reqUser._id].includes('read'))) {
-      throw new M.PermissionError('User does not have permission to create'
-        + ` elements on the organization [${orgID}].`, 'warn');
+        // Check results
+        if (!fs.existsSync(folderPath)) {
+          // Directory does NOT exist, create it
+          // Note: Use sync to ensure directory created before advancing
+          fs.mkdirSync(folderPath, (makeDirectoryError) => {
+            if (makeDirectoryError) {
+              throw M.CustomError.parseCustomError(makeDirectoryError);
+            }
+          });
+        }
+        // Check if file already exist
+        if (!fs.existsSync(filePath)) {
+          try {
+            // Write out artifact file, defaults to 666 permission.
+            fs.writeFileSync(filePath, artifactBlob);
+          }
+          catch (error) {
+            // Error occurred, log it
+            throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
+          }
+          // Return resolve
+          return resolve();
+        }
+        // Return resolve
+        return resolve();
+      })
+      .catch((error) => reject(M.CustomError.parseCustomError(error)));
+  });
+}
+
+/**
+ * @description This function removes the artifact blob file and sub folder
+ * from the file system.
+ *
+ * @param {string} hashedName - hash name of the file
+ */
+function removeArtifactOS(hashedName) {
+  return new Promise((resolve) => {
+    // Check hashname for null
+    if (hashedName === null) {
+      // Remote link, return resolve
+      return resolve();
     }
+    // Create the main artifact path
+    const artifactPath = path.join(M.root, M.config.artifact.path);
+    // Create sub folder path and artifact path
+    // Note: Folder name is the first 2 characters from the generated hash
+    const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
+    const filePath = path.join(folderPath, hashedName);
 
-    // Verify the org is not archived
-    if (organization.archived) {
-      throw new M.PermissionError(`The organization [${orgID}] is archived.`
-        + ' It must first be unarchived before creating elements.', 'warn');
-    }
-
-    // Find the project
-    foundProj = await ProjController.find(reqUser, orgID, projID);
-
-  // Error check: make sure user has write permission on project
-  if (!proj.getPermissions(reqUser).write && !reqUser.admin) {
-    throw new M.CustomError('User does not have permission.', 403, 'warn');
-  }
-
-  // Error check - check if the artifact already exists
-  return findArtifactsQuery({ _id: artifactFullId });
-  })
-  .then((_artifact) => {
-    // Error Check: ensure no artifact were found
-    if (_artifact.length > 0) {
-      throw new M.CustomError('Artifact already exists.', 400, 'warn');
-    }
-
-    // Verify artifactBlob defined
-    if (artifactBlob) {
-      // Generate hash
-      hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-    }
-    else {
-      // No artifact binary provided, set null
-      hashedName = null;
-    }
-
-    // Define new hash history data
-    const historyData = {
-      hash: hashedName,
-      user: reqUser
-    };
-
-    // Create the new Artifact
-    const artifact = new Artifact({
-      _id: artifactFullId,
-      filename: artData.filename,
-      contentType: artData.contentType,
-      history: historyData,
-      project: foundProj,
-      lastModifiedBy: reqUser,
-      createdBy: reqUser
+    // Remove the artifact file
+    // Note: Use sync to ensure file is removed before advancing
+    fs.unlinkSync(filePath, (error) => {
+      // Check directory NOT exist
+      if (error) {
+        throw new M.CustomError(error.message, 500, 'warn');
+      }
     });
 
-    // Save artifact object to the database
-    return artifact.save();
-  })
-  .then((_artifact) => {
-    // Save created artifact
-    createdArtifact = _artifact;
+    // Check if directory is empty
+    fs.readdir(folderPath, function(err, files) {
+      if (err) {
+        M.log.warn(err);
+      }
+      // Check if empty directory
+      if (!files.length) {
+        // Directory empty, remove it
+        fs.rmdir(folderPath, (error) => {
+          // Check directory NOT exist
+          if (error) {
+            throw new M.CustomError(error.message, 500, 'warn');
+          }
+        });
+      }
+    });
+    return resolve();
+  });
+}
 
+/**
+ * @description This function get the artifact blob file
+ * from the file system.
+ *
+ * @param {String} hashedName - hash name of the file
+ */
+function getArtifactOS(hashName) {
+  return new Promise((resolve, reject) => {
+    // Create the main artifact path
+    const artifactPath = path.join(M.root, M.config.artifact.path);
+    // Create sub folder path and artifact path
+    // Note: Folder name is the first 2 characters from the generated hash
+    const folderPath = path.join(artifactPath, hashName.substring(0, 2));
+    const filePath = path.join(folderPath, hashName);
+    try {
+      // Read the artifact file
+      // Note: Use sync to ensure file is read before advancing
+      return resolve(fs.readFileSync(filePath));
+    }
+    catch (err) {
+      return reject(new M.CustomError('Artifact binary not found.', 404, 'warn'));
+    }
+  });
+}
+
+/**
+ * @description This function creates the artifact storage directory if
+ * it doesn't exist.
+ */
+function createStorageDirectory() {
+  return new Promise((resolve) => {
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
 
-    // Check if artifact file exist,
-    //     NOT Exist - Returns calling addArtifactOS()
-    //     Exist - Returns resolve Artifact
-    return (!fs.existsSync(path.join(artifactPath, hashedName.substring(0, 2), hashedName)))
-      ? addArtifactOS(hashedName, artifactBlob)
-      : resolve(_artifact);
-  })
-  .then(() => resolve(createdArtifact))
-  .catch((error) => reject(M.CustomError.parseCustomError(error)));
+    // Check directory NOT exist
+    if (!fs.existsSync(artifactPath)) {
+      // Directory does NOT exist, create it
+      fs.mkdirSync(artifactPath, (error) => {
+        // Check for errors
+        if (error) {
+          throw new M.CustomError(error.message, 500, 'warn');
+        }
+      });
+    }
+    return resolve();
+  });
 }

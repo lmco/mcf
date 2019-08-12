@@ -107,7 +107,8 @@ async function createArtifact() {
     project: project._id,
     branch: branch._id,
     location: testData.artifacts[0].location,
-    history: testData.artifacts[0].history[0]
+    history: testData.artifacts[0].history[0],
+    custom: testData.artifacts[0].custom
   });
 
   try {
