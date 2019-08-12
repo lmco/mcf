@@ -122,14 +122,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-  const elementTypes = ['undefined', 'object', 'string'];
-  assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
-  // If models is an object, ensure it's an array of strings
-  if (typeof models === 'object') {
-    assert.ok(Array.isArray(elements), 'Element parameter is an object, but not an array.');
-    assert.ok(elements.every(o => typeof o === 'string'), 'Element parameter is not an array of'
-      + ' strings.');
-  }
+  helper.checkParamsDataType(['undefined', 'object', 'string'], elements, 'Elements');
 
   // Sanitize input parameters and create function-wide variables
   const saniElements = (elements !== undefined)
@@ -381,21 +374,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
   return new Promise(async (resolve, reject) => {
     M.log.debug('create(): Start of function');
 
-    try {
-      // Ensure input parameters are correct type
-      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-      const elementTypes = ['object'];
-      assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
-      // If elements is an array, ensure it's an array of objects
-      if (Array.isArray(elements)) {
-        assert.ok(elements.every(p => typeof p === 'object'), 'One or more items in elements'
-        + ' is not an object');
-        assert.ok(elements.every(p => p !== null), 'One or more items in elements is null.');
-      }
-    }
-    catch (error) {
-      return reject(errors.captureError(error));
-    }
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    helper.checkParamsDataType('object', elements, 'Elements');
 
     // Sanitize input parameters and create function-wide variables
     const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
@@ -839,21 +820,9 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
  */
 function update(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise(async (resolve, reject) => {
-    try {
-      // Ensure input parameters are correct type
-      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-      const elementTypes = ['object'];
-      assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
-      // If elements is an array, ensure it's an array of objects
-      if (Array.isArray(elements)) {
-        assert.ok(elements.every(p => typeof p === 'object'), 'One or more items in elements'
-          + ' is not an object');
-        assert.ok(elements.every(p => p !== null), 'One or more items in elements is null.');
-      }
-    }
-    catch (error) {
-      return reject(errors.captureError(error));
-    }
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    helper.checkParamsDataType('object', elements, 'Elements');
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -1310,21 +1279,9 @@ function update(requestingUser, organizationID, projectID, branch, elements, opt
  */
 function createOrReplace(requestingUser, organizationID, projectID, branch, elements, options) {
   return new Promise(async (resolve, reject) => {
-    try {
-      // Ensure input parameters are correct type
-      helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-      const elementTypes = ['object'];
-      assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
-      // If elements is an array, ensure it's an array of objects
-      if (Array.isArray(elements)) {
-        assert.ok(elements.every(p => typeof p === 'object'), 'One or more items in elements'
-          + ' is not an object');
-        assert.ok(elements.every(p => p !== null), 'One or more items in elements is null.');
-      }
-    }
-    catch (error) {
-      return reject(errors.captureError(error));
-    }
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    helper.checkParamsDataType('object', elements, 'Elements');
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -1585,14 +1542,7 @@ function remove(requestingUser, organizationID, projectID, branch, elements, opt
   return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    const elementTypes = ['object', 'string'];
-    assert.ok(elementTypes.includes(typeof elements), 'Element parameter is an invalid type.');
-    // If models is an object, ensure it's an array of strings
-    if (typeof models === 'object') {
-      assert.ok(Array.isArray(elements), 'Element parameter is an object, but not an array.');
-      assert.ok(elements.every(o => typeof o === 'string'), 'Element parameter is not an array of'
-        + ' strings.');
-    }
+    helper.checkParamsDataType(['object', 'string'], elements, 'Elements');
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -1965,7 +1915,6 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  */
 function search(requestingUser, organizationID, projectID, branch, query, options) {
   return new Promise(async (resolve, reject) => {
-    // Ensure input parameters are correct type
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID, branch);
 

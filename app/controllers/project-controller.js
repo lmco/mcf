@@ -47,6 +47,7 @@ const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
+const helper = M.require('lib.controller-helper');
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -110,28 +111,8 @@ function find(requestingUser, organizationID, projects, options) {
     }
 
     // Ensure input parameters are correct type
-    try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok((typeof organizationID === 'string') || (organizationID === null),
-        'Organization ID is not a string.');
-
-      const projectTypes = ['undefined', 'object', 'string'];
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(projectTypes.includes(typeof projects), 'Projects parameter is an invalid type.');
-      // If projects is an object, ensure it's an array of strings
-      if (typeof projects === 'object') {
-        assert.ok(Array.isArray(projects), 'Projects is an object, but not an array.');
-        assert.ok(projects.every(p => typeof p === 'string'), 'Projects is not an array of'
-          + ' strings.');
-      }
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    helper.checkParams(requestingUser, options, organizationID);
+    helper.checkParamsDataType(['undefined', 'object', 'string'], projects, 'Projects');
 
     // Sanitize input parameters
     const orgID = sani.mongo(organizationID);
@@ -284,26 +265,8 @@ function find(requestingUser, organizationID, projects, options) {
 function create(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
-    try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
-      assert.ok(projects !== null, 'Projects parameter cannot be null.');
-      // If projects is an array, ensure each item inside is an object
-      if (Array.isArray(projects)) {
-        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in projects is not an'
-          + ' object.');
-        assert.ok(projects.every(p => p !== null), 'One or more items in projects is null.');
-      }
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    helper.checkParams(requestingUser, options, organizationID);
+    helper.checkParamsDataType('object', projects, 'Projects');
 
     // Sanitize input parameters and function-wide variables
     const orgID = sani.mongo(organizationID);
@@ -625,26 +588,8 @@ function create(requestingUser, organizationID, projects, options) {
 function update(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
-    try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
-      assert.ok(projects !== null, 'Projects parameter cannot be null.');
-      // If projects is an array, ensure each item inside is an object
-      if (Array.isArray(projects)) {
-        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in projects is not an'
-          + ' object.');
-        assert.ok(projects.every(p => p !== null), 'One or more items in projects is null.');
-      }
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    helper.checkParams(requestingUser, options, organizationID);
+    helper.checkParamsDataType('object', projects, 'Projects');
 
     // Sanitize input parameters and create function-wide variables
     const orgID = sani.mongo(organizationID);
@@ -1043,26 +988,8 @@ function update(requestingUser, organizationID, projects, options) {
 function createOrReplace(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
-    try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-      assert.ok(typeof projects === 'object', 'Projects parameter is not an object.');
-      assert.ok(projects !== null, 'Projects parameter cannot be null.');
-      // If projects is an array, ensure each item inside is an object
-      if (Array.isArray(projects)) {
-        assert.ok(projects.every(p => typeof p === 'object'), 'Every item in projects is not an'
-          + ' object.');
-        assert.ok(projects.every(p => p !== null), 'One or more items in projects is null.');
-      }
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    helper.checkParams(requestingUser, options, organizationID);
+    helper.checkParamsDataType('object', projects, 'Projects');
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -1297,25 +1224,11 @@ function createOrReplace(requestingUser, organizationID, projects, options) {
 function remove(requestingUser, organizationID, projects, options) {
   return new Promise((resolve, reject) => {
     // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID);
+    helper.checkParamsDataType(['object', 'string'], projects, 'Projects');
+    // Remove Projects function only: user must be an admin
     try {
-      assert.ok(typeof requestingUser === 'object', 'Requesting user is not an object.');
-      assert.ok(requestingUser !== null, 'Requesting user cannot be null.');
-      // Ensure that requesting user has an _id field
-      assert.ok(requestingUser._id, 'Requesting user is not populated.');
-      assert.ok(requestingUser.admin === true, 'User does not have permissions to delete'
-        + ' projects.');
-      assert.ok(typeof organizationID === 'string', 'Organization ID is not a string.');
-
-      const projectTypes = ['object', 'string'];
-      const optionsTypes = ['undefined', 'object'];
-      assert.ok(projectTypes.includes(typeof projects), 'Projects parameter is an invalid type.');
-      // If projects is an object, ensure it's an array of strings
-      if (typeof projects === 'object') {
-        assert.ok(Array.isArray(projects), 'Projects is an object, but not an array.');
-        assert.ok(projects.every(p => typeof p === 'string'), 'Projects is not an array of'
-          + ' strings.');
-      }
-      assert.ok(optionsTypes.includes(typeof options), 'Options parameter is an invalid type.');
+      assert.ok(requestingUser.admin === true, 'User does not have permissions to delete projects.');
     }
     catch (err) {
       throw new M.DataFormatError(err.message, 'warn');
