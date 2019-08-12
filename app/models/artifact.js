@@ -32,7 +32,7 @@ const utils = M.require('lib.utils');
  *
  * @property {string} _id - The artifact's unique ID.
  * @property {string} name - The artifact's name.
- * @property {string} project - A reference to an branch's project.
+ * @property {string} project - A reference to an artifact's project.
  * @property {string} filename - The filename of the artifact.
  * @property {string} contentType - The file type. E.g: 'png', 'dat'
  * @property {Object} history - An array of object, tracks artifact's history.
