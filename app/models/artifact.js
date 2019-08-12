@@ -32,13 +32,15 @@ const utils = M.require('lib.utils');
  *
  * @property {string} _id - The artifact's unique ID.
  * @property {string} name - The artifact's name.
- * @property {string} project - A reference to an branch's project.
+ * @property {string} project - A reference to an artifact's project.
+ * @property {string} branch - A reference to an artifact's branch.
  * @property {string} filename - The filename of the artifact.
  * @property {string} contentType - The file type. E.g: 'png', 'dat'
+ * @property {string} location - location of the artifact blob.
  * @property {Object} history - An array of object, tracks artifact's history.
- * @property {string} hash - [history.hash] Hash string of the stored artifact.
- * @property {User} user - [history.user] User that updated the artifact.
- * @property {Date} updatedOn - [history.updatedOn] Time of update.
+ * @property {string} hash [history.hash] - Hash string of the stored artifact.
+ * @property {string} user [history.user] - User that updated the artifact.
+ * @property {Date} updatedOn [history.updatedOn] - Time of update
  * @property {Object} custom - JSON used to store additional data.
  *
  */
@@ -67,6 +69,12 @@ const ArtifactSchema = new mongoose.Schema({
     type: String,
     ref: 'Project',
     required: true
+  },
+  branch: {
+    type: String,
+    required: true,
+    ref: 'Branch',
+    index: true
   },
   filename: {
     type: String,
