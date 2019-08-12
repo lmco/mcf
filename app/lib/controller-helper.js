@@ -23,8 +23,8 @@ const utils = M.require('lib.utils');
 /**
  * @description A function that validates the parameters passed to the controllers
  *
- * @param {Object} [requestingUser] - The user in the request
- * @param {Object} [options] - The options passed in with the request
+ * @param {Object} requestingUser - The user in the request
+ * @param {Object} options - The options passed in with the request
  * @param {string} [orgID = ''] - an optional parameter for the organization ID.  For example
  * this would not be used in the Org controller but would be in the Project, Branch, and
  * Element controller.
@@ -54,10 +54,10 @@ module.exports.checkParams = function(requestingUser, options, orgID = '', projI
 /**
  * @description A function that validates the parameters passed to the controllers
  *
- * @param {Object} [dataTypes] - The allowed data types for this particular operation
- * @param {Object} [data] - The data to be validated (could be an array of element ids,
+ * @param {Object} dataTypes - The allowed data types for this particular operation
+ * @param {Object} data - The data to be validated (could be an array of element ids,
  * an array of element objects, a single project id, etc)
- * @param {string} [dataName] - The type of model the data is ('element', 'branch', 'project',
+ * @param {string} dataName - The type of model the data is ('element', 'branch', 'project',
  * etc) to be used in error messages
  *
  */
@@ -96,9 +96,9 @@ module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
  * and that the user has appropriate permissions for the controller operation.  In the
  * case of a branch, also checks that the branch is not a tag.
  *
- * @param {Object} [model] - The model being validated: org/project/branch
- * @param {string} [id] - The ID of the model being validated
- * @param {Object} [reqUser] - The user making the request
+ * @param {Object} model - The model being validated: org/project/branch
+ * @param {string} id - The ID of the model being validated
+ * @param {Object} reqUser - The user making the request
  * @param {string} [archived = false] - Specifies whether or not to allow archived results
  *
  * @return {Object} - an object containing the sanitized input parameters
@@ -112,9 +112,8 @@ module.exports.findAndValidate = async function(model, id, reqUser, archived = f
 
   // Check that the model object was found
   if (!result) {
-    M.NotFoundError(`Find query on ${id} failed`, 'warn');
     M.log.debug(`Find query on ${id} failed`);
-    throw new M.NotFoundError(`The ${name} [${utils.parseID(id).pop()}] was not found.`);
+    throw new M.NotFoundError(`The ${name} [${utils.parseID(id).pop()}] was not found.`, 'warn');
   }
 
   // Verify the org/project/branch is not archived
