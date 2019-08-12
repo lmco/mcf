@@ -55,6 +55,7 @@ const utils = M.require('lib.utils');
  * or taken from another source if imported.
  * @property {string} name - The elements non-unique name.
  * @property {string} project - A reference to an element's project.
+ * @property {string} branch - A reference to an element's branch.
  * @property {string} parent - The parent element which contains the element
  * @property {string} source - A reference to the source element if the base
  * element is a relationship. NOTE: If source is provided, target is required.
