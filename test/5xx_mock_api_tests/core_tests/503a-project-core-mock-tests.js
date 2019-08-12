@@ -595,7 +595,7 @@ function getAllProjects(done) {
     });
 
     // Expect the statusCode to be 200
-    //chai.expect(res.statusCode).to.equal(200);
+    chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
