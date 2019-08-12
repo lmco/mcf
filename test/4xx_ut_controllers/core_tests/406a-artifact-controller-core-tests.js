@@ -9,11 +9,7 @@
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description Tests creating, updating and deleting artifacts through the model.
- * Tests the artifact model by performing various actions such as a
- * find, create, updated, archive, and delete. Does NOT test the artifact
- * controller but instead directly manipulates data using mongoose to check
- * the artifact model methods, validators, setters, and getters.
+ * @description This tests the Artifact Controller functionality.
  */
 
 // Node modules
@@ -22,10 +18,7 @@ const fs = require('fs');     // Access the filesystem
 const path = require('path'); // Find directory paths
 
 // MBEE modules
-const Artifact = M.require('models.artifact');
-const Org = M.require('models.organization');
-const Project = M.require('models.project');
-const Branch = M.require('models.branch');
+const ArtifactController = M.require('controllers.artifact-controller');
 const db = M.require('lib.db');
 const mbeeCrypto = M.require('lib.crypto');
 const utils = M.require('lib.utils');
@@ -33,11 +26,13 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
-let artifactPNG = null;
+let artifactBlob = null;
+let artifactHash = null;
+let adminUser = null;
 let org = null;
+let orgID = null;
 let project = null;
-let projID = null;
-let branch = null;
+let projectID = null;
 let branchID = null;
 
 /* --------------------( Main )-------------------- */
@@ -51,125 +46,92 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests
    */
-  before((done) => {
-    db.connect()
-    .then(() => {
-      // Create the organization model object
-      const newOrg = new Org({
-        _id: testData.orgs[0].id,
-        name: testData.orgs[0].name
-      });
+  before(async () => {
+    try {
+      // Coonnect to the database
+      await db.connect();
 
-      // Save the organization model object to the database
-      return newOrg.save();
-    })
-    .then((retOrg) => {
-      // Update organization for test data
-      org = retOrg;
+      adminUser = await testUtils.createTestAdmin();
+      // Create the organization model object
+      org = await testUtils.createTestOrg(adminUser);
+      orgID = org._id;
 
       // Create the project model object
-      const newProject = new Project({
-        _id: utils.createID(org._id, testData.projects[1].id),
-        name: testData.projects[1].name,
-        org: org._id
-      });
+      project = await testUtils.createTestProject(adminUser, org.id);
+      projectID = utils.parseID(project.id).pop();
+      branchID = testData.branches[0].id;
 
-      // Save the project model object to the database
-      return newProject.save();
-    })
-    .then((retProj) => {
-      // Update project for test data
-      project = retProj;
-      projID = utils.parseID(project.id).pop();
-      // Create the branch model object
-      const newBranch = new Branch({
-        _id: utils.createID(org.id, projID, testData.branches[0].id),
-        name: testData.branches[0].name,
-        project: project._id
-      });
+      // Get png test file
+      const imgPath = path.join(
+        M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+      );
 
-      // Save the project model object to the database
-      return newBranch.save();
-    })
-    .then((retBranch) => {
-      // Update branch for test data
-      branch = retBranch;
-      branchID = utils.parseID(branch.id).pop();
-
-      done();
-    })
-    .catch((error) => {
+      // Get the test file
+      artifactBlob = await fs.readFileSync(imgPath);
+      artifactHash = mbeeCrypto.sha256Hash(artifactBlob);
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: runs after all tests
    */
-  after((done) => {
-    // Remove the org created in before()
-    testUtils.removeTestOrg()
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      // Remove the org created in before()
+      await testUtils.removeTestOrg();
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute the tests */
-  it('should upload an artifact', uploadArtifact);
-  it('should find an artifact', findArtifact);
-  it('should update an artifact file', updateArtifact);
-  it('should delete an artifact', deleteArtifact);
+  it('should create an artifact', createArtifact);
+  // it('should find an artifact', findArtifact);
+  // it('should update an artifact file', updateArtifact);
+  // it('should delete an artifact', deleteArtifact);
+
+
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an artifact via model and save it to the database.
+ * @description Creates an artifact via controller.
  */
-async function uploadArtifact() {
-  // Create the full artifact ID
-  const artifactID = testData.artifacts[0].id;
-
-  // Upload new artifact
-  const artifact = new Artifact();
-  artifact._id = utils.createID(org.id, projID, branchID, artifactID);
-  artifact.filename = testData.artifacts[0].filename;
-  artifact.contentType = path.extname(testData.artifacts[0].filename);
-  artifact.project = utils.createID(org.id, projID);
-  artifact.organization = org;
-
-  // Get png test file
-  const imgPath = path.join(
-    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
-  );
-
-  // Get the test file
-  artifactPNG = await fs.readFileSync(imgPath);
-  artifact.hash = mbeeCrypto.sha256Hash(artifactPNG);
-
+async function createArtifact() {
+  const artData = {
+    id: testData.artifacts[0].id,
+    filename: testData.artifacts[0].filename,
+    contentType: path.extname(testData.artifacts[0].filename),
+    project: project._id,
+    branch: branchID,
+    location: testData.artifacts[0].location,
+    history: testData.artifacts[0].history[0]
+  }
   try {
-    // Save user object to the database
-    const createArtifact = await artifact.save();
-    chai.expect(createArtifact.id).to.equal(
-      utils.createID(branch._id, testData.artifacts[0].id)
-    );
-    chai.expect(createArtifact.project).to.equal(project._id);
-    chai.expect(createArtifact.filename).to.equal(
-      testData.artifacts[0].filename
-    );
+    const createdArtifact = await ArtifactController.create(adminUser, org.id,
+      projectID, branchID, artifactBlob, artData);
+
+    //console.log(createdArtifact);
+
   }
   catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
   }
+
+
+
+
 }
 
 /**
@@ -221,11 +183,11 @@ async function updateArtifact() {
  */
 async function deleteArtifact() {
   try {
-    const art_query = { _id: utils.createID(branch._id, testData.artifacts[0].id) }
+    const query = {_id: utils.createID(branch._id, testData.artifacts[0].id)}
     // Find and delete the artifact
-    await Artifact.findOneAndRemove(art_query);
+    await Artifact.findOneAndRemove(query);
 
-    const deletedArtifact = await Artifact.find(art_query);
+    const deletedArtifact = await Artifact.find(query);
     chai.expect(deletedArtifact.length).to.equal(0);
   }
   catch (error) {
