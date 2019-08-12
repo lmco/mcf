@@ -11,13 +11,13 @@
  *
  * @description Tests creating, updating and deleting artifacts through the model.
  * Tests the artifact model by performing various actions such as a
- * find, create, updated, archive, and delete. Does NOT test the artifact
+ * find, create, updated, and delete. Does NOT test the artifact
  * controller but instead directly manipulates data using mongoose to check
  * the artifact model methods, validators, setters, and getters.
  */
 
-// Node modules
-const chai = require('chai'); // Test framework
+// NPM modules
+const chai = require('chai');
 const path = require('path'); // Find directory paths
 
 // MBEE modules
@@ -75,21 +75,19 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: runs after all tests
    */
-  after((done) => {
-    // Remove the org created in before()
-    testUtils.removeTestOrg()
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after( async() => {
+    try {
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute the tests */
-  it('should upload an artifact', createArtifact);
+  it('should create an artifact', createArtifact);
   it('should find an artifact', findArtifact);
   it('should update an artifact file', updateArtifact);
   it('should delete an artifact', deleteArtifact);
@@ -110,12 +108,13 @@ async function createArtifact() {
     filename: testData.artifacts[0].filename,
     contentType: path.extname(testData.artifacts[0].filename),
     project: project._id,
+    branch: branch._id,
     location: testData.artifacts[0].location,
     history: testData.artifacts[0].history[0]
   });
 
   try {
-    // Save user object to the database
+    // Save artifact object to the database
     const createdArtifact = await artifact.save();
     chai.expect(createdArtifact.id).to.equal(
       utils.createID(branch._id, testData.artifacts[0].id)
@@ -127,6 +126,7 @@ async function createArtifact() {
       path.extname(testData.artifacts[0].filename)
     );
     chai.expect(createdArtifact.project).to.equal(project._id);
+    chai.expect(createdArtifact.branch).to.equal(branch._id);
     chai.expect(createdArtifact.location).to.equal(testData.artifacts[0].location);
     chai.expect(createdArtifact.history[0].hash).to.equal(
       testData.artifacts[0].history[0].hash
@@ -190,6 +190,7 @@ async function updateArtifact() {
       path.extname(testData.artifacts[0].filename)
     );
     chai.expect(updatedArtifact.project).to.equal(project._id);
+    chai.expect(updatedArtifact.branch).to.equal(branch._id);
     chai.expect(updatedArtifact.location).to.equal(testData.artifacts[0].location);
     chai.expect(updatedArtifact.history[0].hash).to.equal(
       testData.artifacts[0].history[0].hash
