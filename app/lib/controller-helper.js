@@ -44,7 +44,7 @@ module.exports.checkParams = function(requestingUser, options, orgID = '', projI
 
     const optionsTypes = ['undefined', 'object'];
     assert.ok(optionsTypes.includes(typeof options), 'Options parameter cannot be of'
-    + `type ${typeof options}.`);
+      + ` type ${typeof options}.`);
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
@@ -64,7 +64,7 @@ module.exports.checkParams = function(requestingUser, options, orgID = '', projI
 module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
   try {
     assert.ok(dataTypes.includes(typeof data), `${dataName} parameter cannot be of type`
-    + `${typeof data}.`);
+      + ` ${typeof data}.`);
     // if the data is an object, ensure it's either an array of strings or objects
     if (typeof data === 'object') {
       // Ensure the data is not null
