@@ -106,7 +106,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
 
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID);
-    helper.checkParamsDataType(['undefined', 'object', 'string'],branches,'Branches');
+    helper.checkParamsDataType(['undefined', 'object', 'string'], branches, 'Branches');
 
     // Sanitize input parameters
     const saniBranches = (branches !== undefined)
@@ -272,7 +272,7 @@ function create(requestingUser, organizationID, projectID, branches, options) {
     // Specific to create branch function: sources must all be the same
     try {
       if (Array.isArray(branches)) {
-        assert.ok(branches.every(b => b.source === b[0].source), 'One or more items in branches source '
+        assert.ok(branches.every(b => b.source === branches[0].source), 'One or more items in branches source '
           + 'field is not the same.');
       }
     }
