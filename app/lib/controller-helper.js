@@ -83,11 +83,6 @@ module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
         assert.ok(data.every(o => typeof o === 'object'), `Every item in ${dataName} is not`
           + ' an object.');
         assert.ok(data.every(o => o !== null), `One or more items in ${dataName} is null.`);
-        // Specific case for branches
-        if (dataName === 'Branches') {
-          assert.ok(data.every(o => o.source === o[0].source), 'One or more items in branches source '
-            + 'field is not the same.');
-        }
       }
     }
   }
