@@ -106,8 +106,7 @@ function find(requestingUser, organizationID, projectID, branches, options) {
 
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID);
-    const branchesTypes = ['undefined', 'object', 'string'];
-    helper.checkParamsDataType(branchesTypes,branches,'Branches');
+    helper.checkParamsDataType(['undefined', 'object', 'string'],branches,'Branches');
 
     // Sanitize input parameters
     const saniBranches = (branches !== undefined)
@@ -269,7 +268,17 @@ function create(requestingUser, organizationID, projectID, branches, options) {
   return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID);
-    helper.checkParamsDataType('object',branches, 'Branches');
+    helper.checkParamsDataType('object', branches, 'Branches');
+    // Specific to create branch function: sources must all be the same
+    try {
+      if (Array.isArray(branches)) {
+        assert.ok(branches.every(b => b.source === b[0].source), 'One or more items in branches source '
+          + 'field is not the same.');
+      }
+    }
+    catch (error) {
+      throw new M.DataFormatError(error.message, 'warn');
+    }
 
     // Sanitize input parameters and create function-wide variables
     const saniBranches = sani.mongo(JSON.parse(JSON.stringify(branches)));
