@@ -105,20 +105,9 @@ function find(requestingUser, organizationID, projectID, branches, options) {
     }
 
     // Ensure input parameters are correct type
-    try {
-      helper.checkParams(requestingUser, options, organizationID, projectID);
-      const branchesTypes = ['undefined', 'object', 'string'];
-      assert.ok(branchesTypes.includes(typeof branches), 'Branches parameter is an invalid type.');
-      // If branches is an object, ensure it's an array of strings
-      if (typeof branches === 'object') {
-        assert.ok(Array.isArray(branches), 'Branches is an object, but not an array.');
-        assert.ok(branches.every(b => typeof b === 'string'), 'Branches is not an array of'
-          + ' strings.');
-      }
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    helper.checkParams(requestingUser, options, organizationID, projectID);
+    const branchesTypes = ['undefined', 'object', 'string'];
+    helper.checkParamsDataType(branchesTypes,branches,'Branches');
 
     // Sanitize input parameters
     const saniBranches = (branches !== undefined)
@@ -279,22 +268,9 @@ function find(requestingUser, organizationID, projectID, branches, options) {
 function create(requestingUser, organizationID, projectID, branches, options) {
   return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
-    try {
-      helper.checkParams(requestingUser, options, organizationID, projectID);
-      assert.ok(typeof branches === 'object', 'Branches parameter is not an object.');
-      assert.ok(branches !== null, 'Branches parameter cannot be null.');
-      // If branches is an array, ensure each item inside is an object
-      if (Array.isArray(branches)) {
-        assert.ok(branches.every(b => typeof b === 'object'), 'Every item in branches is not an'
-          + ' object.');
-        assert.ok(branches.every(b => b !== null), 'One or more items in branches is null.');
-        assert.ok(branches.every(b => b.source === branches[0].source), 'One or more items in branches source '
-          + 'field is not the same.');
-      }
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    helper.checkParams(requestingUser, options, organizationID, projectID);
+    helper.checkParamsDataType('object',branches, 'Branches');
+
     // Sanitize input parameters and create function-wide variables
     const saniBranches = sani.mongo(JSON.parse(JSON.stringify(branches)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -614,20 +590,8 @@ function create(requestingUser, organizationID, projectID, branches, options) {
 function update(requestingUser, organizationID, projectID, branches, options) {
   return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
-    try {
-      helper.checkParams(requestingUser, options, organizationID, projectID);
-      assert.ok(typeof branches === 'object', 'Branches parameter is not an object.');
-      assert.ok(branches !== null, 'Branches parameter cannot be null.');
-      // If branches is an array, ensure each item inside is an object
-      if (Array.isArray(branches)) {
-        assert.ok(branches.every(b => typeof b === 'object'), 'Every item in branches is not an'
-          + ' object.');
-        assert.ok(branches.every(b => b !== null), 'One or more items in branches is null.');
-      }
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    helper.checkParams(requestingUser, options, organizationID, projectID);
+    helper.checkParamsDataType('object', branches, 'Branches');
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -840,20 +804,8 @@ function update(requestingUser, organizationID, projectID, branches, options) {
 function remove(requestingUser, organizationID, projectID, branches, options) {
   return new Promise(async (resolve, reject) => {
     // Ensure input parameters are correct type
-    try {
-      helper.checkParams(requestingUser, options, organizationID, projectID);
-      const branchesTypes = ['object', 'string'];
-      assert.ok(branchesTypes.includes(typeof branches), 'Branches parameter is an invalid type.');
-      // If branches is an object, ensure it's an array of strings
-      if (typeof branches === 'object') {
-        assert.ok(Array.isArray(branches), 'Branches is an object, but not an array.');
-        assert.ok(branches.every(b => typeof b === 'string'), 'Branches is not an array of'
-          + ' strings.');
-      }
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    helper.checkParams(requestingUser, options, organizationID, projectID);
+    helper.checkParamsDataType(['object', 'string'], branches, 'Branches');
 
     // Sanitize input parameters and function-wide variables
     const orgID = sani.mongo(organizationID);
