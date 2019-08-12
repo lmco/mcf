@@ -61,23 +61,28 @@ module.exports.checkParams = function(requestingUser, options, orgID = '', projI
  *
  */
 module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
-  assert.ok(dataTypes.includes(typeof data), `${dataName} parameter is an invalid type.`);
-  // if the data is an object, ensure it's either an array of strings or objects
-  if (typeof data === 'object') {
-    // If strings are allowed, it can only be an array of strings
-    if (dataTypes.includes('string')) {
-      // Ensure it's an array
-      assert.ok(Array.isArray(data), `${dataName} is an object, but not an array.`);
-      // Ensure it's an array of strings
-      assert.ok(data.every(o => typeof o === 'string'), `${dataName} is not an array of`
-        + ' strings.');
+  try {
+    assert.ok(dataTypes.includes(typeof data), `${dataName} parameter is an invalid type.`);
+    // if the data is an object, ensure it's either an array of strings or objects
+    if (typeof data === 'object') {
+      // If strings are allowed, it can only be an array of strings
+      if (dataTypes.includes('string')) {
+        // Ensure it's an array
+        assert.ok(Array.isArray(data), `${dataName} is an object, but not an array.`);
+        // Ensure it's an array of strings
+        assert.ok(data.every(o => typeof o === 'string'), `${dataName} is not an array of`
+          + ' strings.');
+      }
+      // Else if it's an array and only objects are allowed:
+      else if (Array.isArray(data)) {
+        // Ensure it's an array of objects
+        assert.ok(data.every(o => typeof o === 'object'), `${dataName} is not an array of`
+          + ' objects.');
+      }
     }
-    // Else if it's an array and only objects are allowed:
-    else if (Array.isArray(data)) {
-      // Ensure it's an array of objects
-      assert.ok(data.every(o => typeof o === 'object'), `${dataName} is not an array of`
-        + ' objects.');
-    }
+  }
+  catch (error) {
+    throw new M.DataFormatError(error.message, 'warn');
   }
 };
 

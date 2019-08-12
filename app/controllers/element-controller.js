@@ -772,7 +772,7 @@ function create(requestingUser, organizationID, projectID, branch, elements, opt
       return resolve(populatedElements);
     }
     catch (error) {
-      reject(errors.captureError(error));
+      return reject(errors.captureError(error));
     }
   });
 }

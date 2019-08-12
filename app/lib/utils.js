@@ -94,9 +94,6 @@ module.exports.createID = function(...args) {
  * @return {string[]} Split uid
  */
 module.exports.parseID = function(uid) {
-  if (!uid.includes(this.ID_DELIMITER)) {
-    throw new M.DataFormatError('Invalid UID.', 'warn');
-  }
   return uid.split(this.ID_DELIMITER);
 };
 
