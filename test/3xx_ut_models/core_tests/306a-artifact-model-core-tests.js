@@ -75,7 +75,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: runs after all tests
    */
-  after( async() => {
+  after(async () => {
     try {
       await db.disconnect();
     }
