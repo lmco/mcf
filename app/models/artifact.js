@@ -36,9 +36,9 @@ const utils = M.require('lib.utils');
  * @property {string} filename - The filename of the artifact.
  * @property {string} contentType - The file type. E.g: 'png', 'dat'
  * @property {Object} history - An array of object, tracks artifact's history.
- * @property {string} hash - [history.hash] Hash string of the stored artifact.
- * @property {User} user - [history.user] User that updated the artifact.
- * @property {Date} updatedOn - [history.updatedOn] Time of update.
+ * @property {string} hash [history.hash] - Hash string of the stored artifact.
+ * @property {string} user [history.user] - User that updated the artifact.
+ * @property {Date} updatedOn [history.updatedOn] - Time of update.
  * @property {Object} custom - JSON used to store additional data.
  *
  */
