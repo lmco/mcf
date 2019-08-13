@@ -916,7 +916,6 @@ async function remove(requestingUser, orgs, options) {
 
   // Sanitize input parameters and function-wide variables
   const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
-  let foundOrgs = [];
   let searchedIDs = [];
 
   // Define searchQuery and ownedQuery
@@ -940,7 +939,7 @@ async function remove(requestingUser, orgs, options) {
   }
 
   // Find the orgs to delete
-  foundOrgs = await Organization.find(searchQuery).lean();
+  const foundOrgs = await Organization.find(searchQuery).lean();
 
   const foundOrgIDs = foundOrgs.map(o => o._id);
   const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
