@@ -182,7 +182,7 @@ async function find(requestingUser, organizationID, projects, options) {
   // If the user specifies an organization
   if (organizationID !== null) {
     // Find the organization, validate that it exists and is not archived (unless specfified)
-    const foundOrg = await helper.findAndValidate(Organization, orgID, reqUser,
+    const foundOrg = await helper.findAndValidate(Organization, orgID,
       validOptions.archived);
     // Permissions check
     if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
@@ -327,7 +327,7 @@ async function create(requestingUser, organizationID, projects, options) {
   const searchQuery = { _id: { $in: arrIDs } };
 
   // Find the organization, validate that it exists and is not archived
-  const foundOrg = await helper.findAndValidate(Organization, orgID, reqUser);
+  const foundOrg = await helper.findAndValidate(Organization, orgID);
   // Permissions check
   if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
     || !foundOrg.permissions[reqUser._id].includes('write'))) {
@@ -620,7 +620,7 @@ async function update(requestingUser, organizationID, projects, options) {
   const searchQuery = { _id: { $in: arrIDs } };
 
   // Find the organization containing the projects, validate that it exists and is not archived
-  const foundOrg = await helper.findAndValidate(Organization, orgID, reqUser);
+  const foundOrg = await helper.findAndValidate(Organization, orgID);
   // Permissions check
   if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
     || !foundOrg.permissions[reqUser._id].includes('read'))) {
@@ -984,7 +984,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
   const searchQuery = { _id: { $in: arrIDs } };
 
   // Find the organization containing the projects, validate that it exists and is not archived
-  const foundOrg = await helper.findAndValidate(Organization, orgID, reqUser);
+  const foundOrg = await helper.findAndValidate(Organization, orgID);
   // Permissions check
   if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
     || !foundOrg.permissions[reqUser._id].includes('write'))) {
@@ -1170,7 +1170,7 @@ async function remove(requestingUser, organizationID, projects, options) {
   }
 
   // Find the organization, validate that it was found and not archived
-  const foundOrg = await helper.findAndValidate(Organization, orgID, reqUser);
+  const foundOrg = await helper.findAndValidate(Organization, orgID);
   // Permissions check
   if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
     || !foundOrg.permissions[reqUser._id].includes('admin'))) {

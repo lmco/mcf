@@ -165,7 +165,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, reqUser, validatedOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -175,7 +175,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Find the project and validate that it was found and not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    reqUser, validatedOptions.archived);
+    validatedOptions.archived);
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -185,7 +185,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Find the branch and validate that it was found and not archived (unless specified)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID),
-    reqUser, validatedOptions.archived);
+    validatedOptions.archived);
 
   let elementsToFind = [];
 
@@ -531,7 +531,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const organization = await helper.findAndValidate(Org, orgID);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -540,7 +540,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -561,8 +561,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   });
 
   // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
+  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID));
   // Check that the branch is is not a tag
   if (foundBranch.tag) {
     throw new M.OperationError(`[${branchID}] is a tag and `
@@ -840,7 +839,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
 
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const organization = await helper.findAndValidate(Org, orgID);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -849,7 +848,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -859,7 +858,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
 
   // Find the branch and validate that it was found and not archived
   const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
+    utils.createID(orgID, projID, branchID));
   // Check that the branch is is not a tag
   if (foundBranch.tag) {
     throw new M.OperationError(`[${branchID}] is a tag and `
@@ -1285,7 +1284,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   const ts = Date.now();
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const organization = await helper.findAndValidate(Org, orgID);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1294,7 +1293,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   }
 
   // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -1303,8 +1302,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   }
 
   // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
+  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID));
   // Check that the branch is is not a tag
   if (foundBranch.tag) {
     throw new M.OperationError(`[${branchID}] is a tag and `
@@ -1540,7 +1538,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
 
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const organization = await helper.findAndValidate(Org, orgID);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1549,7 +1547,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -1558,8 +1556,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
+  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID));
   // Check that the branch is is not a tag
   if (foundBranch.tag) {
     throw new M.OperationError(`[${branchID}] is a tag and `
@@ -1930,8 +1927,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
     try {
       // Find the organization and validate that it was found and not archived (unless specified)
-      const organization = await helper.findAndValidate(Org, orgID, reqUser,
-        validatedOptions.archived);
+      const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
       // Permissions check
       if (!reqUser.admin && (!organization.permissions[reqUser._id]
         || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1940,7 +1936,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       }
 
       // Find the project and validate that it was found and not archived (unless specificed)
-      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser,
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
         validatedOptions.archived);
       // Permissions check
       if (!reqUser.admin && (!project.permissions[reqUser._id]
@@ -1951,7 +1947,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
       // Find the branch and validate that it was found and not archived (unless specificed)
       await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID),
-        reqUser, validatedOptions.archived);
+        validatedOptions.archived);
 
       searchQuery.$text = { $search: query };
       // If the archived field is true, remove it from the query

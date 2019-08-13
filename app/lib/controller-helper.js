@@ -98,12 +98,11 @@ module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
  *
  * @param {Object} model - The model being validated: org/project/branch
  * @param {string} id - The ID of the model being validated
- * @param {Object} reqUser - The user making the request
  * @param {string} [archived = false] - Specifies whether or not to allow archived results
  *
  * @return {Object} - an object containing the sanitized input parameters
  */
-module.exports.findAndValidate = async function(model, id, reqUser, archived = false) {
+module.exports.findAndValidate = async function(model, id, archived = false) {
   // Perform the find operation on the model
   const query = { _id: id };
   const result = await model.findOne(query).lean();
