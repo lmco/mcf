@@ -396,11 +396,11 @@ async function create(requestingUser, organizationID, projects, options) {
     return projObj;
   });
 
-  // Create the projects
-  promises.push(Project.insertMany(projObjects));
-
   // Return when all promises are complete
   await Promise.all(promises);
+
+  // Create the projects
+  await Project.insertMany(projObjects);
 
   // Emit the event projects-created
   EventEmitter.emit('projects-created', projObjects);
@@ -1135,24 +1135,19 @@ async function remove(requestingUser, organizationID, projects, options) {
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID);
   helper.checkParamsDataType(['object', 'string'], projects, 'Projects');
-
+  // Remove project function only: must be an admin
+  try {
+    assert.ok(requestingUser.admin, 'User does not have permissions to delete projects.');
+  }
+  catch (err) {
+    throw new M.DataFormatError(err.message, 'warn');
+  }
 
   // Sanitize input parameters and function-wide variables
   const orgID = sani.mongo(organizationID);
   const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   let searchedIDs = [];
-
-  // Ensure parameters are valid
-  try {
-    // Ensure that requesting user has an _id field
-    assert.ok(reqUser.hasOwnProperty('_id'), 'Requesting user is not populated.');
-    assert.ok(reqUser.admin, 'User does not have permissions to delete projects.');
-    assert.ok(typeof orgID === 'string', 'Organization ID is not a string.');
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
 
   // Define searchQuery and ownedQuery
   const searchQuery = {};
