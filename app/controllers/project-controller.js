@@ -1058,29 +1058,34 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
 
   // Try block after former project has been deleted but not yet replaced
+  // If creation of new projects fails, the old projects will be restored
   try {
     // Create the new/replaced projects
     createdProjects = await create(reqUser, orgID, projectsToLookUp, options);
   }
   catch (error) {
-    const finalError = await new Promise((res) => {
+    const finalError = await new Promise(async (res) => {
       // Reinsert original data
-      Project.insertMany(foundProjects)
-      .then(() => new Promise((resInner, rejInner) => {
-        // Remove the file
-        fs.unlink(path.join(M.root, 'data', orgID,
-          `PUT-backup-projects-${ts}.json`), function(err) {
-          if (err) rejInner(err);
-          else resInner();
+      try {
+        await Project.insertMany(foundProjects);
+        await new Promise(async (resInner) => {
+          // Remove the backup file
+          await fs.unlink(path.join(M.root, 'data', orgID,
+            `PUT-backup-projects-${ts}.json`), function(err) {
+            if (err) throw err;
+            else resInner();
+          });
         });
-      }))
-      .then(() => res(errors.captureError(error)))
-      .catch((err) => res(err));
+        // Restoration succeeded; pass the original error
+        res(error);
+      }
+      catch (err) {
+        // Pass a new error that occurred while trying to restore projects
+        res(err);
+      }
     });
-    // If an error was returned, reject it.
-    if (finalError) {
-      throw new M.DatabaseError(finalError.message, 'warn');
-    }
+    // Throw whichever error was passed
+    throw errors.captureError(finalError);
   }
 
   // Code block after former project has been deleted and replaced

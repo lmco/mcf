@@ -1280,7 +1280,6 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   let foundElements = [];
   let elementsToLookup = [];
   let createdElements = [];
-  let foundElementIDs = [];
   const ts = Date.now();
 
   // Find the organization and validate that it was found and not archived
@@ -1367,7 +1366,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   // Return when all elements have been found
   await Promise.all(promises);
 
-  foundElementIDs = await foundElements.map(e => e._id);
+  const foundElementIDs = await foundElements.map(e => e._id);
 
   // Error Check: ensure user cannot replace root element
   foundElementIDs.forEach((id) => {
@@ -1416,31 +1415,34 @@ async function createOrReplace(requestingUser, organizationID, projectID,
 
 
   // Try block after elements have been deleted but before being replaced
+  // If element creation fails, the old elements will be restored
   try {
     // Create new elements
     createdElements = await create(reqUser, orgID, projID, branchID, elementsToLookup, options);
   }
   catch (error) {
-    const finalError = await new Promise((res) => {
+    const finalError = await new Promise(async (res) => {
       // Reinsert original data
-      Element.insertMany(foundElements)
-      .then(() => new Promise((resInner, rejInner) => {
-        // Remove the file
-        fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
-          `PUT-backup-elements-${ts}.json`), function(err) {
-          if (err) rejInner(err);
-          else resInner();
+      try {
+        await Element.insertMany(foundElements);
+        await new Promise(async (resInner) => {
+          // Remove the backup file
+          await fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
+            `PUT-backup-elements-${ts}.json`), function(err) {
+            if (err) throw err;
+            else resInner();
+          });
         });
-      }))
-      // Resolve the original error
-      .then(() => res(errors.captureError(error)))
-      // Unless a new error occured
-      .catch((err) => res(err));
+        // Restoration succeeded; pass the original error
+        res(error);
+      }
+      catch (err) {
+        // Pass the new error that occurred while trying to restore elements
+        res(err);
+      }
     });
-    // Throw the error
-    if (finalError) {
-      throw new M.DatabaseError(finalError.message, 'warn');
-    }
+    // Throw whichever error was passed
+    throw errors.captureError(finalError);
   }
 
   // Code block after elements have been deleted and replaced
