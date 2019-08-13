@@ -27,10 +27,8 @@ const utils = M.require('lib.utils');
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let artifactBlob = null;
-let artifactHash = null;
 let adminUser = null;
 let org = null;
-let orgID = null;
 let project = null;
 let projectID = null;
 let branchID = null;
@@ -54,7 +52,6 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = await testUtils.createTestAdmin();
       // Create the organization model object
       org = await testUtils.createTestOrg(adminUser);
-      orgID = org._id;
 
       // Create the project model object
       project = await testUtils.createTestProject(adminUser, org.id);
@@ -98,8 +95,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should find an artifact', findArtifact);
   // it('should update an artifact file', updateArtifact);
   // it('should delete an artifact', deleteArtifact);
-
-
 });
 
 /* --------------------( Tests )-------------------- */
@@ -114,7 +109,7 @@ async function createArtifact() {
     project: project._id,
     branch: branchID,
     location: testData.artifacts[0].location
-  }
+  };
   try {
     const createdArtifact = await ArtifactController.create(adminUser, org.id,
       projectID, branchID, artifactBlob, artData);
@@ -129,13 +124,14 @@ async function createArtifact() {
     );
     chai.expect(createdArtifact[0].project).to.equal(project._id);
     chai.expect(createdArtifact[0].branch).to.equal(
-      utils.createID(org.id, projectID, branchID));
+      utils.createID(org.id, projectID, branchID)
+    );
     chai.expect(createdArtifact[0].location).to.equal(testData.artifacts[0].location);
     chai.expect(createdArtifact[0].history[0].hash).to.equal(
-      testData.artifacts[0].history[0].hash);
+      testData.artifacts[0].history[0].hash
+    );
     chai.expect(createdArtifact[0].history[0].user).to.equal(adminUser.id);
     chai.expect(createdArtifact[0].history[0].updatedOn).to.not.equal(null);
-
   }
   catch (error) {
     M.log.error(error);
@@ -166,10 +162,12 @@ async function findArtifact() {
     );
     chai.expect(foundArtifact[0].project).to.equal(project._id);
     chai.expect(foundArtifact[0].branch).to.equal(
-      utils.createID(org.id, projectID, branchID));
+      utils.createID(org.id, projectID, branchID)
+    );
     chai.expect(foundArtifact[0].location).to.equal(testData.artifacts[0].location);
     chai.expect(foundArtifact[0].history[0].hash).to.equal(
-      testData.artifacts[0].history[0].hash);
+      testData.artifacts[0].history[0].hash
+    );
     chai.expect(foundArtifact[0].history[0].user).to.equal(adminUser.id);
     chai.expect(foundArtifact[0].history[0].updatedOn).to.not.equal(null);
   }
