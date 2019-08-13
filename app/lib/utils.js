@@ -260,8 +260,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
     case 'Artifact':
       validSearchOptions = ['filename', 'contentType', 'name', 'createdBy',
         'lastModifiedBy', 'archivedBy'];
-      // Set populateString to include require virtuals
-      validatedOptions.populateString = 'archivedBy, lastModifiedBy, createdBy, project';
       break;
     case 'User':
       validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
