@@ -40,7 +40,7 @@ const utils = M.require('lib.utils');
  * @property {Object} history - An array of object, tracks artifact's history.
  * @property {string} hash [history.hash] - Hash string of the stored artifact.
  * @property {string} user [history.user] - User that updated the artifact.
- * @property {Date} updatedOn [history.updatedOn] - Time of update
+ * @property {Date} updatedOn [history.updatedOn] - Time of update.
  * @property {Object} custom - JSON used to store additional data.
  *
  */
