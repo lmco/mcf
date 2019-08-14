@@ -96,6 +96,12 @@ class ElementTree extends Component {
     this.getElement();
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.project !== this.props.project) {
+      this.getElement();
+    }
+  }
+
   render() {
     let tree = null;
     if (this.state.treeRoot !== null) {
