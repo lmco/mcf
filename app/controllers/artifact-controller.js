@@ -5,13 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI
- *
- * LMPI WARNING: This file is Lockheed Martin Proprietary Information.
- * It is not approved for public release or redistribution.
- *
- * EXPORT CONTROL WARNING: This software may be subject to applicable export
- * control laws. Contact legal and export compliance prior to distribution.
+ * @license LMPI - Lockheed Martin Proprietary Information
  *
  * @owner Phillip Lee <phillip.lee@lmco.com>
  *
@@ -41,17 +35,8 @@
 module.exports = {
   find,
   create,
-  update
-  /*
+  update,
   remove
-
-  createArtifact,
-  removeArtifact,
-  updateArtifact,
-  findArtifact,
-  findArtifacts,
-  getArtifactBlob
-  */
 
 };
 
@@ -79,9 +64,36 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {string} organizationID - The organization ID for the org the project belongs to.
  * @param {string} projectID - The project ID of the Project which is being searched for.
  * @param {string} branch - The branch ID
- * @param {string} artifacts - The artifact object.
- * @param {Boolean} archived - A boolean value indicating whether to also search
- *                             for archived artifacts.
+ * @param {{(string|string[])}} artifacts - The artifacts to find. Can either be
+ * an array of artifact ids, a single artifact id, or not provided, which defaults
+ * to every artifact in a project being found.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
+ * @param {boolean} [options.archived = false] - If true, find results will include
+ * archived objects.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
+ * @param {string} [options.createdBy] - Search for artifacts with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for artifacts with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for artifacts with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
  * @return {Promise} Array of found artifact objects
  *
@@ -148,7 +160,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
     throw new M.PermissionError('User does not have permission to get'
-      + ` artifact on the organization [${orgID}].`, 'warn');
+      + ` artifacts on the organization [${orgID}].`, 'warn');
   }
 
   // Find the project
@@ -159,7 +171,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
     throw new M.PermissionError('User does not have permission to get'
-      + ` artifact on the project [${utils.parseID(project._id).pop()}].`, 'warn');
+      + ` artifacts on the project [${utils.parseID(project._id).pop()}].`, 'warn');
   }
 
   // Find the branch, validate it was found and not archived
@@ -235,6 +247,8 @@ async function findHelper(query, fields, limit, skip, populate, sort, lean) {
  * @param {string} branch - The ID of the branch to add artifacts to.
  * @param {(Object|Object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to create.
+ * @param {{(string|string[])}} artifacts - An array of objects or
+ * a single object containing artifact data.
  * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  * @param {string} artifacts.id - The ID of the artifact being created.
  * @param {string} [artifacts.name] - The name of the artifact.
@@ -341,23 +355,23 @@ async function create(requestingUser, organizationID, projectID, branch,
   // Check that each art has an id, and add to arrIDs
   try {
     let index = 1;
-    artsToCreate.forEach((art) => {
+    artsToCreate.forEach((artifact) => {
       // Ensure keys are valid
-      Object.keys(art).forEach((k) => {
+      Object.keys(artifact).forEach((k) => {
         assert.ok(validArtKeys.includes(k), `Invalid key [${k}].`);
       });
 
       // Ensure each art has an id and that its a string
-      assert.ok(art.hasOwnProperty('id'), `Art #${index} does not have an id.`);
-      assert.ok(typeof art.id === 'string', `Art #${index}'s id is not a string.`);
+      assert.ok(artifact.hasOwnProperty('id'), `Art #${index} does not have an id.`);
+      assert.ok(typeof artifact.id === 'string', `Art #${index}'s id is not a string.`);
       // Check if art with same ID is already being created
-      assert.ok(!arrIDs.includes(art.id), 'Multiple arts with the same ID '
-        + `[${art.id}] cannot be created.`);
+      assert.ok(!arrIDs.includes(artifact.id), 'Multiple arts with the same ID '
+        + `[${artifact.id}] cannot be created.`);
 
-      art.id = utils.createID(orgID, projID, branchID, art.id);
+      artifact.id = utils.createID(orgID, projID, branchID, artifact.id);
       // Set the _id equal to the id
-      art._id = art.id;
-      arrIDs.push(art.id);
+      artifact._id = artifact.id;
+      arrIDs.push(artifact.id);
       index++;
     });
   }
@@ -370,9 +384,9 @@ async function create(requestingUser, organizationID, projectID, branch,
 
   // Check if the artifact already exists
   const existingArtifact = await Artifact.find(searchQuery).lean();
-  // Error Check: ensure no artifact were found
+  // Ensure no artifact were found
   if (existingArtifact.length > 0) {
-    throw new M.OperationError('Artifact with the following IDs already exist'
+    throw new M.OperationError('Artifacts with the following IDs already exist'
       + ` [${existingArtifact.toString()}].`, 'warn');
   }
 
@@ -498,7 +512,7 @@ async function update(requestingUser, organizationID, projectID, branch,
     'lean'], Artifact);
 
   // Define array to store org data
-  let artsToupdate = [];
+  let artsToUpdate = [];
   const arrIDs = [];
   const validArtKeys = ['id', 'name', 'project', 'branch', 'filename', 'contentType',
     'location', 'custom', 'history'];
@@ -506,11 +520,11 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Check parameter type
   if (Array.isArray(saniArtifacts)) {
     // artifacts is an array, update many artifacts
-    artsToupdate = saniArtifacts;
+    artsToUpdate = saniArtifacts;
   }
   else if (typeof saniArtifacts === 'object') {
     // artifacts is an object, update a single org
-    artsToupdate = [saniArtifacts];
+    artsToUpdate = [saniArtifacts];
   }
   else {
     // artifact is not an object or array, throw an error
@@ -550,7 +564,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Check that each art has an id, and add to arrIDs
   try {
     let index = 1;
-    artsToupdate.forEach((art) => {
+    artsToUpdate.forEach((art) => {
       // Ensure keys are valid
       Object.keys(art).forEach((k) => {
         assert.ok(validArtKeys.includes(k), `Invalid key [${k}].`);
@@ -588,7 +602,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   }
 
   // Convert artsToupdate to JMI type 2
-  const jmiType2 = jmi.convertJMI(1, 2, artsToupdate);
+  const jmiType2 = jmi.convertJMI(1, 2, artsToUpdate);
   const bulkArray = []
   // Get array of editable parameters
   const validFields = Artifact.getValidUpdateFields();
@@ -599,16 +613,16 @@ async function update(requestingUser, organizationID, projectID, branch,
     // Update the artifact
     bulkArray.push({
       updateOne: {
-        filter: {_id: art._id},
+        filter: { _id: art._id },
         update: updateArtifact
       }
     });
   })
-  console.log("bulkArray: ", bulkArray);
   await Artifact.bulkWrite(bulkArray);
 
-  const artifactFullId = utils.createID(organizationID,
-    projectID, branchID, artifacts.id);
+  // Emit the event artifacts-updated
+  EventEmitter.emit('artifacts-updated', artsToUpdate);
+
   let hashedName = '';
 
   // Verify artifactBlob defined
@@ -627,6 +641,7 @@ async function update(requestingUser, organizationID, projectID, branch,
 
   const fullPath = path.join(artifactPath,
     hashedName.substring(0, 2), hashedName);
+
   // Check if artifact file exist
   if (!fs.existsSync(fullPath)) {
     await addArtifactOS(hashedName, artifactBlob);
@@ -637,33 +652,6 @@ async function update(requestingUser, organizationID, projectID, branch,
     hash: hashedName,
     user: reqUser
   };
-  //
-  // artifactObjects = artsToupdate.map((u) => {
-  //   // Create the new Artifact
-  //   const artUpdate = Artifact(u) {
-  //     _id: artifactFullId,
-  //     name: saniArtifacts.name,
-  //     contentType: saniArtifacts.contentType,
-  //     project: foundProj._id,
-  //     branch: foundBranch._id,
-  //     filename: saniArtifacts.filename,
-  //     location: saniArtifacts.location,
-  //     history: historyData,
-  //     custom: saniArtifacts.custom
-  //   };
-  // });
-  //
-  //
-  // artUpdate.lastModifiedBy = reqUser._id;
-  // artUpdate.createdBy = reqUser._id;
-  // artUpdate.updatedOn = Date.now();
-  // artUpdate.archivedBy = (saniArtifacts.archived) ? reqUser._id : null;
-
-  // Save artifact object to the database
-  // const savedArtifact = await Artifact.insertMany([artObjects]);
-
-  // Emit the event artifacts-updated
-  EventEmitter.emit('artifacts-updated', updatedArtifact);
 
   let foundArtifacts = null;
   // If the lean option is supplied
@@ -677,6 +665,173 @@ async function update(requestingUser, organizationID, projectID, branch,
   }
 
   return foundArtifacts;
+}
+
+/**
+ * @description This function removes one or many artifacts.
+ * Returns the IDs of the deleted artifacts.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to remove artifacts from.
+ * @param {(string|string[])} artifacts - The artifacts to remove. Can either be
+ * an array of artifact ids or a single artifact id.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * Currently there are no supported options.
+ *
+ * @return {Promise} Array of deleted artifact ids
+ *
+ * @example
+ * remove({User}, 'orgID', 'projID', 'branch', ['art1', 'art2'])
+ * .then(function(artifacts) {
+ *   // Do something with the deleted artifacts
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+async function remove(requestingUser, organizationID, projectID, branch, artifacts, options) {
+  // Ensure input parameters are correct type
+  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParamsDataType(['object', 'string'], artifacts, 'Artifacts');
+
+  // Sanitize input parameters and create function-wide variables
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const branchID = sani.mongo(branch);
+  const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
+  let artifactsToFind = [];
+  let uniqueIDs = [];
+
+  // Check the type of the artifacts parameter
+  if (Array.isArray(saniArtifacts) && saniArtifacts.length !== 0) {
+    // An array of artifact ids, remove all
+    artifactsToFind = saniArtifacts.map(e => utils.createID(orgID, projID, branchID, e));
+  }
+  else if (typeof saniArtifacts === 'string') {
+    // A single artifact id, remove one
+    artifactsToFind = [utils.createID(orgID, projID, branchID, saniArtifacts)];
+  }
+  else {
+    // Invalid parameter, throw an error
+    throw new M.DataFormatError('Invalid input for removing artifacts.', 'warn');
+  }
+
+
+  // Find the organization and validate that it was found and not archived
+  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  // Permissions check
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` read items on the org ${orgID}.`, 'warn');
+  }
+
+  // Find the project and validate that it was found and not archived
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  // Permissions check
+  if (!reqUser.admin && (!project.permissions[reqUser._id]
+    || !project.permissions[reqUser._id].includes('write'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` remove items on the project ${projID}.`, 'warn');
+  }
+
+  // Find the branch and validate that it was found and not archived
+  const foundBranch = await helper.findAndValidate(Branch,
+    utils.createID(orgID, projID, branchID), reqUser);
+  // Check that the branch is is not a tag
+  if (foundBranch.tag) {
+    throw new M.OperationError(`[${branchID}] is a tag and `
+      + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
+  }
+
+  // Find the artifacts to delete
+  const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } }).lean();
+  const foundArtifactIDs = await foundArtifacts.map(e => e._id);
+
+  // Check if all artifacts were found
+  const notFoundIDs = artifactsToFind.filter(e => !foundArtifactIDs.includes(e));
+  // Some artifacts not found, throw an error
+  if (notFoundIDs.length > 0) {
+    throw new M.NotFoundError('The following artifacts were not found: '
+      + `[${notFoundIDs.map(e => utils.parseID(e).pop())}].`, 'warn');
+  }
+
+  // Find all artifact IDs and their subtree IDs
+  const foundIDs = await findArtifactTree(orgID, projID, branchID, artifactsToFind);
+
+  const promises = [];
+
+  // Split elements into batches of 50000 or less
+  for (let i = 0; i < foundIDs.length / 50000; i++) {
+    const batchIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
+    // Delete batch
+    promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
+  }
+  // Return when all deletes have completed
+  await Promise.all(promises);
+
+  const uniqueIDsObj = {};
+  // Parse foundIDs and only return unique ones
+  foundIDs.forEach((id) => {
+    if (!uniqueIDsObj[id]) {
+      uniqueIDsObj[id] = id;
+    }
+  });
+
+  uniqueIDs = Object.keys(uniqueIDsObj);
+
+  // TODO: Change the emitter to return elements rather than ids
+  // Emit the event elements-deleted
+  EventEmitter.emit('elements-deleted', uniqueIDs);
+
+  // Create query to find all relationships which point to deleted elements
+  const relQuery = {
+    $or: [
+      { source: { $in: uniqueIDs } },
+      { target: { $in: uniqueIDs } }
+    ]
+  };
+
+  // Find all relationships which are now broken
+  const relationships = await Element.find(relQuery).lean();
+  const bulkArray = [];
+  const promises2 = [];
+
+  // For each relationship
+  promises2.push(relationships.forEach((rel) => {
+    // If the source no longer exists, set it to the undefined element
+    if (uniqueIDs.includes(rel.source)) {
+      // Reset source to the undefined element
+      rel.source = utils.createID(rel.branch, 'undefined');
+    }
+
+    // If the target no longer exists, set it to the undefined element
+    if (uniqueIDs.includes(rel.target)) {
+      // Reset target to the undefined element
+      rel.target = utils.createID(rel.branch, 'undefined');
+    }
+
+    bulkArray.push({
+      updateOne: {
+        filter: { _id: rel._id },
+        update: rel
+      }
+    });
+  }));
+
+  await Promise.all(promises2);
+
+  // If there are relationships to update, make a bulkWrite() call
+  if (bulkArray.length > 0) {
+    // Save relationship changes to database
+    await Element.bulkWrite(bulkArray);
+  }
+
+  // Return unique IDs of elements deleted
+  return (uniqueIDs);
 }
 
 /**

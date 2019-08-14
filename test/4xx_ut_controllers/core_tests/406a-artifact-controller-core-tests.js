@@ -92,8 +92,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  //it('should create an artifact', createArtifact);
-  //it('should find an artifact', findArtifact);
+  it('should create an artifact', createArtifact);
+  it('should find an artifact', findArtifact);
   it('should update an artifact file', updateArtifact);
   // it('should delete an artifact', deleteArtifact);
 });
