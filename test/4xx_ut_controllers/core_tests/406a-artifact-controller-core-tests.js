@@ -93,7 +93,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should create an artifact', createArtifact);
   it('should find an artifact', findArtifact);
-  // it('should update an artifact file', updateArtifact);
+  it('should update an artifact file', updateArtifact);
   // it('should delete an artifact', deleteArtifact);
 });
 
@@ -178,46 +178,53 @@ async function findArtifact() {
   }
 }
 
-// /**
-//  * @description Finds an existing artifact and updates it.
-//  */
-// async function updateArtifact() {
-//   try {
-//     // Find the artifact previously uploaded.
-//     const artifactToUpdate = await Artifact.find(
-//       { _id: utils.createID(branchID, testData.artifacts[0].id) });
-//
-//     // Check if artifact found
-//     chai.expect(artifactToUpdate.length).to.equal(1);
-//
-//     // Update the filename
-//     artifactToUpdate[0].filename = testData.artifacts[2].filename;
-//     // Save the updated artifact
-//     const artifact = await artifactToUpdate[0].save();
-//     chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
-//   }
-//   catch (error) {
-//     M.log.error(error);
-//     // Expect no error
-//     chai.expect(error).to.equal(null);
-//   }
-// }
-//
-// /**
-//  * @description Finds and deletes an artifact.
-//  */
-// async function deleteArtifact() {
-//   try {
-//     const query = {_id: utils.createID(branchID, testData.artifacts[0].id)}
-//     // Find and delete the artifact
-//     await Artifact.findOneAndRemove(query);
-//
-//     const deletedArtifact = await Artifact.find(query);
-//     chai.expect(deletedArtifact.length).to.equal(0);
-//   }
-//   catch (error) {
-//     M.log.error(error);
-//     // Expect no error
-//     chai.expect(error).to.equal(null);
-//   }
-// }
+/**
+ * @description Finds an existing artifact and updates it.
+ */
+async function updateArtifact() {
+  const artData = {
+    id: testData.artifacts[0].id,
+    filename: testData.artifacts[0].filename,
+    contentType: path.extname(testData.artifacts[0].filename),
+    project: project._id,
+    branch: branchID,
+    location: testData.artifacts[0].location
+  };
+  try {
+    const updatedArtifact = await ArtifactController.create(adminUser, org.id,
+      projectID, branchID, artifactBlob, artData);
+
+    // Check if artifact found
+    chai.expect(artifactToUpdate.length).to.equal(1);
+
+    // Update the filename
+    artifactToUpdate[0].filename = testData.artifacts[2].filename;
+    // Save the updated artifact
+    const artifact = await artifactToUpdate[0].save();
+    chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+  }
+}
+
+/**
+ * @description Finds and deletes an artifact.
+ */
+async function deleteArtifact() {
+  try {
+    const query = {_id: utils.createID(branchID, testData.artifacts[0].id)}
+    // Find and delete the artifact
+    await Artifact.findOneAndRemove(query);
+
+    const deletedArtifact = await Artifact.find(query);
+    chai.expect(deletedArtifact.length).to.equal(0);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+  }
+}

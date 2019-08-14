@@ -40,9 +40,9 @@
 // circular references between controllers.
 module.exports = {
   find,
-  create
+  create,
+  update
   /*
-  update,
   remove
 
   createArtifact,
@@ -73,20 +73,20 @@ const helper = M.require('lib.controller-helper');
 
 
 /**
- * @description This function finds an artifact based on artifact full id.
+ * @description This function finds an artifact based on artifact id.
  *
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the project belongs to.
  * @param {string} projectID - The project ID of the Project which is being searched for.
  * @param {string} branch - The branch ID
- * @param {string} artifacts - The Artifact object.
+ * @param {string} artifacts - The artifact object.
  * @param {Boolean} archived - A boolean value indicating whether to also search
  *                             for archived artifacts.
  *
  * @return {Promise} Array of found artifact objects
  *
  * @example
- * find({User}, 'orgID', 'projID', ['artifact1', 'artifact2'], { populate: 'project' })
+ * find({User}, 'orgID', 'projID', 'branchID' ['artifact1', 'artifact2'], { populate: 'project' })
  * .then(function(artifacts) {
  *   // Do something with the found artifacts
  * })
@@ -125,6 +125,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   const projID = sani.mongo(projectID);
   const branchID = sani.mongo(branch);
 
+  // Initialize search query
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
   // Initialize and ensure options are valid
@@ -275,7 +276,7 @@ async function findHelper(query, fields, limit, skip, populate, sort, lean) {
  * @return {Promise} Array of created artifact objects
  *
  * @example
- * create({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art1}, ...], { populate: ['parent'] })
+ * create({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['filename'] })
  * .then(function(artifacts) {
  *   // Do something with the newly created artifacts
  * })
@@ -305,11 +306,6 @@ async function create(requestingUser, organizationID, projectID, branch,
   const orgID = sani.mongo(organizationID);
   const projID = sani.mongo(projectID);
   const branchID = sani.mongo(branch);
-
-  // Define function-wide variables
-  // Create the full artifact id
-  const artifactFullId = utils.createID(organizationID, projectID, branchID, artifacts.id);
-  let hashedName = '';
 
   // Initialize and ensure options are valid
   const validOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -379,19 +375,11 @@ async function create(requestingUser, organizationID, projectID, branch,
       // Check if art with same ID is already being created
       assert.ok(!arrIDs.includes(art.id), 'Multiple arts with the same ID '
         + `[${art.id}] cannot be created.`);
+
       art.id = utils.createID(orgID, projID, branchID, art.id);
-      arrIDs.push(art.id);
       // Set the _id equal to the id
       art._id = art.id;
-
-      // If user not setting permissions, add the field
-      if (!art.hasOwnProperty('permissions')) {
-        art.permissions = {};
-      }
-
-      // Add requesting user as admin on org
-      art.permissions[reqUser._id] = 'admin';
-
+      arrIDs.push(art.id);
       index++;
     });
   }
@@ -409,6 +397,249 @@ async function create(requestingUser, organizationID, projectID, branch,
     throw new M.OperationError('Artifact with the following IDs already exist'
       + ` [${existingArtifact.toString()}].`, 'warn');
   }
+
+  let hashedName = '';
+  // Verify artifactBlob defined
+  if (artifactBlob) {
+    // Generate hash
+    hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+  }
+  else {
+    // No artifact binary provided, set null
+    hashedName = null;
+  }
+
+  // Create the main artifact path
+  const artifactPath = path.join(M.root, M.config.artifact.path);
+
+  const fullPath = path.join(artifactPath,
+    hashedName.substring(0, 2), hashedName);
+  // Check if artifact file exist
+  if (!fs.existsSync(fullPath)) {
+    await addArtifactOS(hashedName, artifactBlob);
+  }
+
+  // Define new hash history data
+  const historyData = {
+    hash: hashedName,
+    user: reqUser
+  };
+  let artifactFullId = utils.createID(organizationID, projectID, branchID, artifacts.id);
+  // Create the new Artifact
+  const artObjects = new Artifact({
+    _id: artifactFullId,
+    name: saniArtifacts.name,
+    contentType: saniArtifacts.contentType,
+    project: foundProj._id,
+    branch: foundBranch._id,
+    filename: saniArtifacts.filename,
+    location: saniArtifacts.location,
+    history: historyData,
+    custom: saniArtifacts.custom
+  });
+
+  artObjects.lastModifiedBy = reqUser._id;
+  artObjects.createdBy = reqUser._id;
+  artObjects.updatedOn = Date.now();
+  artObjects.archivedBy = (saniArtifacts.archived) ? reqUser._id : null;
+
+  // Save artifact object to the database
+  const createdArtifact = await Artifact.insertMany([artObjects]);
+
+  // Emit the event artifacts-created
+  EventEmitter.emit('artifacts-created', createdArtifact);
+
+  let foundArtifacts = null;
+  // If the lean option is supplied
+  if (validOptions.lean) {
+    foundArtifacts = await Artifact.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
+    .populate(validOptions.populateString).lean();
+  }
+  else {
+    foundArtifacts = await Artifact.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
+    .populate(validOptions.populateString);
+  }
+
+  return foundArtifacts;
+}
+
+/**
+ * @description This function updates an Artifact.
+ *
+ * @param {User} requestingUser - The object containing the requesting user.
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to add artifacts to.
+ * @param {Buffer} artifactBlob - Buffer containing the artifact blob
+ * @param {(Object|Object[])} artifacts - Either an array of objects containing
+ * artifact data or a single object containing artifact data to update.
+ * @param {string} artifacts.id - The ID of the artifact being updated.
+ * @param {string} [artifacts.name] - The name of the artifact.
+ * @param {string} [artifacts.filename] - The filename of the artifact.
+ * @param {string} [artifacts.contentType] - File type.
+ * @param {string} [artifacts.history] - Artifact history.
+ * @param {Object} [artifacts.custom] - Any additional key/value pairs for an
+ * object. Must be proper JSON form.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
+ *
+ * @return {Promise} Array of updated artifact objects
+ *
+ * @example
+ * update({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['filename'] })
+ * .then(function(artifacts) {
+ *   // Do something with the newly updated artifacts
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+async function update(requestingUser, organizationID, projectID, branch,
+                      artifactBlob, artifacts, options) {
+  M.log.debug('update(): Start of function');
+  // Error Check: ensure input parameters are valid
+  try {
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    assert.ok(artifacts !== null, 'Artifact parameter cannot be null.');
+    assert.ok(Array.isArray(artifacts) === false, 'Artifact parameter cannot be an array.');
+    // Ensure Artifact is an object
+    assert.ok(artifacts !== 'object', 'Artifact must be an object.');
+  }
+  catch (error) {
+    throw new M.DataFormatError(error, 'warn');
+  }
+
+  // Sanitize input parameters and create function-wide variables
+  const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const branchID = sani.mongo(branch);
+
+  // Initialize and ensure options are valid
+  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+    'lean'], Artifact);
+
+  // Define array to store org data
+  let artsToupdate = [];
+  const arrIDs = [];
+  const validArtKeys = ['id', 'name', 'project', 'branch', 'filename', 'contentType',
+    'location', 'custom', 'history'];
+
+  // Check parameter type
+  if (Array.isArray(saniArtifacts)) {
+    // artifacts is an array, update many artifacts
+    artsToupdate = saniArtifacts;
+  }
+  else if (typeof saniArtifacts === 'object') {
+    // artifacts is an object, update a single org
+    artsToupdate = [saniArtifacts];
+  }
+  else {
+    // artifact is not an object or array, throw an error
+    throw new M.DataFormatError('Invalid input for creating artifacts.', 'warn');
+  }
+
+  // Find organization, validate found and not archived
+  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  // Permissions check
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` read items on the org ${orgID}.`, 'warn');
+  }
+
+  // Find project, validate found and not archived
+  const foundProj = await helper.findAndValidate(Project,
+    utils.createID(orgID, projID), reqUser);
+  // Permissions check
+  if (!reqUser.admin && (!foundProj.permissions[reqUser._id]
+    || !foundProj.permissions[reqUser._id].includes('write'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` update items on the project ${projID}.`, 'warn');
+  }
+
+  // Find the branch and validate that it was found and not archived
+  const foundBranch = await helper.findAndValidate(Branch,
+    utils.createID(orgID, projID, branchID), reqUser);
+  // Check that the branch is is not a tag
+  if (foundBranch.tag) {
+    throw new M.OperationError(`[${branchID}] is a tag and `
+      + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
+  }
+
+  M.log.debug('update(): Before finding pre-existing artifact');
+
+  // Check that each art has an id, and add to arrIDs
+  try {
+    let index = 1;
+    artsToupdate.forEach((art) => {
+      // Ensure keys are valid
+      Object.keys(art).forEach((k) => {
+        assert.ok(validArtKeys.includes(k), `Invalid key [${k}].`);
+      });
+
+      // Ensure each art has an id and that its a string
+      assert.ok(art.hasOwnProperty('id'), `Art #${index} does not have an id.`);
+      assert.ok(typeof art.id === 'string', `Art #${index}'s id is not a string.`);
+      // Check if art with same ID is already being updated
+      assert.ok(!arrIDs.includes(art.id), 'Multiple arts with the same ID '
+        + `[${art.id}] cannot be updated.`);
+      art.id = utils.createID(orgID, projID, branchID, art.id);
+      arrIDs.push(art.id);
+      // Set the _id equal to the id
+      art._id = art.id;
+
+      index++;
+    });
+  }
+  catch (err) {
+    throw new M.DataFormatError(err.message, 'warn');
+  }
+
+  // Create searchQuery to search for any existing, conflicting arts
+  const searchQuery = { _id: { $in: arrIDs } };
+
+  // Check if the artifact already exists
+  const foundArtifact = await Artifact.find(searchQuery).lean();
+  // Verify the same number of artifacts are found as desired
+  if (foundArtifact.length !== arrIDs.length) {
+    const foundIDs = foundArtifact.map(u => u._id);
+    const notFound = arrIDs.filter(u => !foundIDs.includes(u));
+    throw new M.NotFoundError(
+      `The following artifacts were not found: [${notFound.toString()}].`, 'warn'
+    );
+  }
+
+  // Convert artsToupdate to JMI type 2
+  const jmiType2 = jmi.convertJMI(1, 2, artsToupdate);
+  const bulkArray = []
+  // Get array of editable parameters
+  const validFields = Artifact.getValidUpdateFields();
+
+  // For each artifact found
+  foundArtifact.forEach((art) => {
+    const updateArtifact = jmiType2[art._id];
+    // Update the artifact
+    bulkArray.push({
+      updateOne: {
+        filter: { _id: artifact._id },
+        update: updateArtifact
+      }
+  });
+
+  await Artifact.bulkWrite(bulkArray);
+
+  const artifactFullId = utils.createID(organizationID,
+    projectID, branchID, artifacts.id);
+  let hashedName = '';
 
   // Verify artifactBlob defined
   if (artifactBlob) {
@@ -437,29 +668,32 @@ async function create(requestingUser, organizationID, projectID, branch,
     user: reqUser
   };
 
-  // Create the new Artifact
-  const artObjects = new Artifact({
-    _id: artifactFullId,
-    name: saniArtifacts.name,
-    contentType: saniArtifacts.contentType,
-    project: foundProj._id,
-    branch: foundBranch._id,
-    filename: saniArtifacts.filename,
-    location: saniArtifacts.location,
-    history: historyData,
-    custom: saniArtifacts.custom
+  artifactObjects = artsToupdate.map((u) => {
+    // Create the new Artifact
+    const artUpdate = Artifact(u) {
+      _id: artifactFullId,
+      name: saniArtifacts.name,
+      contentType: saniArtifacts.contentType,
+      project: foundProj._id,
+      branch: foundBranch._id,
+      filename: saniArtifacts.filename,
+      location: saniArtifacts.location,
+      history: historyData,
+      custom: saniArtifacts.custom
+    };
   });
 
-  artObjects.lastModifiedBy = reqUser._id;
-  artObjects.createdBy = reqUser._id;
-  artObjects.updatedOn = Date.now();
-  artObjects.archivedBy = (saniArtifacts.archived) ? reqUser._id : null;
+
+  artUpdate.lastModifiedBy = reqUser._id;
+  artUpdate.createdBy = reqUser._id;
+  artUpdate.updatedOn = Date.now();
+  artUpdate.archivedBy = (saniArtifacts.archived) ? reqUser._id : null;
 
   // Save artifact object to the database
   const savedArtifact = await Artifact.insertMany([artObjects]);
 
-  // Emit the event artifacts-created
-  EventEmitter.emit('artifacts-created', savedArtifact);
+  // Emit the event artifacts-updated
+  EventEmitter.emit('artifacts-updated', savedArtifact);
 
   let foundArtifacts = null;
   // If the lean option is supplied

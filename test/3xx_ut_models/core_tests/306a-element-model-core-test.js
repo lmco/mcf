@@ -75,7 +75,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: runs after all tests
    */
-  after((done) => {
+  after(async () => {
     // Remove the org created in before()
     testUtils.removeTestOrg()
     .then(() => db.disconnect())
@@ -84,7 +84,6 @@ describe(M.getModuleName(module.filename), () => {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
     });
   });
 
@@ -110,6 +109,7 @@ async function createArtifact() {
     filename: testData.artifacts[0].filename,
     contentType: path.extname(testData.artifacts[0].filename),
     project: project._id,
+    branch: branch._id,
     location: testData.artifacts[0].location,
     history: testData.artifacts[0].history[0]
   });
