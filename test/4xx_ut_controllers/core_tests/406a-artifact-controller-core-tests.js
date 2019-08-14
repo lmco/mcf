@@ -27,6 +27,7 @@ const utils = M.require('lib.utils');
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let artifactBlob = null;
+let artifactHash = null;
 let adminUser = null;
 let org = null;
 let project = null;
@@ -91,8 +92,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create an artifact', createArtifact);
-  it('should find an artifact', findArtifact);
+  //it('should create an artifact', createArtifact);
+  //it('should find an artifact', findArtifact);
   it('should update an artifact file', updateArtifact);
   // it('should delete an artifact', deleteArtifact);
 });
@@ -112,7 +113,7 @@ async function createArtifact() {
   };
   try {
     const createdArtifact = await ArtifactController.create(adminUser, org.id,
-      projectID, branchID, artifactBlob, artData);
+      projectID, branchID, artData, artifactBlob);
     chai.expect(createdArtifact[0].id).to.equal(
       utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
     );
@@ -184,24 +185,22 @@ async function findArtifact() {
 async function updateArtifact() {
   const artData = {
     id: testData.artifacts[0].id,
-    filename: testData.artifacts[0].filename,
+    filename: testData.artifacts[1].filename,
+    name: testData.artifacts[0].name,
     contentType: path.extname(testData.artifacts[0].filename),
     project: project._id,
     branch: branchID,
     location: testData.artifacts[0].location
   };
   try {
-    const updatedArtifact = await ArtifactController.create(adminUser, org.id,
-      projectID, branchID, artifactBlob, artData);
-
+    const updatedArtifact = await ArtifactController.update(adminUser, org.id,
+      projectID, branchID, artData, artifactBlob);
+    console.log(updatedArtifact)
     // Check if artifact found
-    chai.expect(artifactToUpdate.length).to.equal(1);
+    chai.expect(updatedArtifact.length).to.equal(1);
 
     // Update the filename
-    artifactToUpdate[0].filename = testData.artifacts[2].filename;
-    // Save the updated artifact
-    const artifact = await artifactToUpdate[0].save();
-    chai.expect(artifact.filename).to.equal(testData.artifacts[2].filename);
+    updatedArtifact[0].filename = testData.artifacts[1].filename;
   }
   catch (error) {
     M.log.error(error);

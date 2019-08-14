@@ -70,7 +70,7 @@ const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const helper = M.require('lib.controller-helper');
-
+const jmi = M.require('lib.jmi-conversions');
 
 /**
  * @description This function finds an artifact based on artifact id.
@@ -101,22 +101,9 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
     artifacts = undefined; // eslint-disable-line no-param-reassign
   }
 
-  // Error Check: ensure input parameters are valid
-  try {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    const artifactTypes = ['undefined', 'object', 'string'];
-    assert.ok(artifactTypes.includes(typeof artifacts), 'Artifacts parameter is an invalid type.');
-
-    // If artifact is an array, ensure it's an array of strings
-    if (Array.isArray(artifacts)) {
-      assert.ok(artifacts.every(b => typeof b === 'string'), 'Artifacts is not an array of'
-        + ' strings.');
-    }
-  }
-  catch (error) {
-    throw new M.DataFormatError(error, 'warn');
-  }
+  // Ensure input parameters are correct type
+  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParamsDataType(['undefined', 'object', 'string'], artifacts, 'Artifacts');
 
   // Sanitize input parameters
   const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
@@ -161,7 +148,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
     throw new M.PermissionError('User does not have permission to get'
-      + ` elements on the organization [${orgID}].`, 'warn');
+      + ` artifact on the organization [${orgID}].`, 'warn');
   }
 
   // Find the project
@@ -185,38 +172,30 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
     delete searchQuery.archived;
   }
 
-  // Check the type of the elements parameter
+  // Check the type of the artifact parameter
   if (Array.isArray(saniArtifacts)) {
     // An array of artifact ids, find all
     searchQuery._id = saniArtifacts.map(a => utils.createID(orgID, projID, branchID, a));
   }
-  else if (typeof saniArtifactss === 'string') {
+  else if (typeof saniArtifacts === 'string') {
     // A single artifact id
     searchQuery._id = saniArtifacts;
   }
-  else if (((typeof saniArtifactss === 'object' && saniArtifacts !== null)
+  else if (!((typeof saniArtifacts === 'object' && saniArtifacts !== null)
     || saniArtifacts === undefined)) {
-    // Find all artifacts in the branch
-    searchQuery._id = [];
-  }
-  else {
     // Invalid parameter, throw an error
     throw new M.DataFormatError('Invalid input for finding artifacts.', 'warn');
   }
 
-  let foundArtifacts = null;
   try {
     // Find the artifacts
-    foundArtifacts = await findHelper(searchQuery, validatedOptions.fieldsString,
+    return await findHelper(searchQuery, validatedOptions.fieldsString,
       validatedOptions.limit, validatedOptions.skip, validatedOptions.populateString,
       validatedOptions.sort, validatedOptions.lean);
   }
   catch (error) {
-    throw new M.DatabaseError('Could not find artifacts.', 'warn');
+    throw new M.DatabaseError(error.message, 'warn');
   }
-
-  // Return the found elements
-  return foundArtifacts;
 }
 
 /**
@@ -254,9 +233,9 @@ async function findHelper(query, fields, limit, skip, populate, sort, lean) {
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to add artifacts to.
- * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  * @param {(Object|Object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to create.
+ * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  * @param {string} artifacts.id - The ID of the artifact being created.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
@@ -285,20 +264,19 @@ async function findHelper(query, fields, limit, skip, populate, sort, lean) {
  * });
  */
 async function create(requestingUser, organizationID, projectID, branch,
-  artifactBlob, artifacts, options) {
+  artifacts, artifactBlob, options) {
+  // Set options if no artifactBlob were provided, but options were
+  if (!Buffer.isBuffer(artifactBlob) === true && typeof artifacts === 'object'
+    && artifacts !== null && !Array.isArray(artifacts)) {
+    options = artifactBlob;   // eslint-disable-line no-param-reassign
+    artifactBlob = undefined; // eslint-disable-line no-param-reassign
+  }
   M.log.debug('create(): Start of function');
-  // Error Check: ensure input parameters are valid
-  try {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    assert.ok(artifacts !== null, 'Artifact parameter cannot be null.');
-    assert.ok(Array.isArray(artifacts) === false, 'Artifact parameter cannot be an array.');
-    // Ensure Artifact is an object
-    assert.ok(artifacts !== 'object', 'Artifact must be an object.');
-  }
-  catch (error) {
-    throw new M.DataFormatError(error, 'warn');
-  }
+
+  // Ensure input parameters are correct type
+  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParamsDataType('object', artifacts, 'Artifacts');
+  // helper.checkParamsDataType('object', artifactBlob, 'Artifacts'); // TODO: Twice?
 
   // Sanitize input parameters and create function-wide variables
   const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
@@ -332,10 +310,10 @@ async function create(requestingUser, organizationID, projectID, branch,
   }
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const foundOrg = await helper.findAndValidate(Org, orgID, reqUser);
   // Permissions check
-  if (!reqUser.admin && (!organization.permissions[reqUser._id]
-    || !organization.permissions[reqUser._id].includes('read'))) {
+  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
+    || !foundOrg.permissions[reqUser._id].includes('read'))) {
     throw new M.PermissionError('User does not have permission to'
       + ` read items on the org ${orgID}.`, 'warn');
   }
@@ -424,7 +402,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     hash: hashedName,
     user: reqUser
   };
-  let artifactFullId = utils.createID(organizationID, projectID, branchID, artifacts.id);
+  const artifactFullId = utils.createID(organizationID, projectID, branchID, artifacts.id);
   // Create the new Artifact
   const artObjects = new Artifact({
     _id: artifactFullId,
@@ -470,9 +448,9 @@ async function create(requestingUser, organizationID, projectID, branch,
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to add artifacts to.
- * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  * @param {(Object|Object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to update.
+ * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  * @param {string} artifacts.id - The ID of the artifact being updated.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
@@ -501,20 +479,12 @@ async function create(requestingUser, organizationID, projectID, branch,
  * });
  */
 async function update(requestingUser, organizationID, projectID, branch,
-                      artifactBlob, artifacts, options) {
+  artifacts, artifactBlob, options) {
   M.log.debug('update(): Start of function');
-  // Error Check: ensure input parameters are valid
-  try {
-    // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    assert.ok(artifacts !== null, 'Artifact parameter cannot be null.');
-    assert.ok(Array.isArray(artifacts) === false, 'Artifact parameter cannot be an array.');
-    // Ensure Artifact is an object
-    assert.ok(artifacts !== 'object', 'Artifact must be an object.');
-  }
-  catch (error) {
-    throw new M.DataFormatError(error, 'warn');
-  }
+
+  // Ensure input parameters are correct type
+  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParamsDataType('object', artifacts, 'Artifacts');
 
   // Sanitize input parameters and create function-wide variables
   const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
@@ -596,7 +566,6 @@ async function update(requestingUser, organizationID, projectID, branch,
       arrIDs.push(art.id);
       // Set the _id equal to the id
       art._id = art.id;
-
       index++;
     });
   }
@@ -630,11 +599,12 @@ async function update(requestingUser, organizationID, projectID, branch,
     // Update the artifact
     bulkArray.push({
       updateOne: {
-        filter: { _id: artifact._id },
+        filter: {_id: art._id},
         update: updateArtifact
       }
-  });
-
+    });
+  })
+  console.log("bulkArray: ", bulkArray);
   await Artifact.bulkWrite(bulkArray);
 
   const artifactFullId = utils.createID(organizationID,
@@ -667,33 +637,33 @@ async function update(requestingUser, organizationID, projectID, branch,
     hash: hashedName,
     user: reqUser
   };
-
-  artifactObjects = artsToupdate.map((u) => {
-    // Create the new Artifact
-    const artUpdate = Artifact(u) {
-      _id: artifactFullId,
-      name: saniArtifacts.name,
-      contentType: saniArtifacts.contentType,
-      project: foundProj._id,
-      branch: foundBranch._id,
-      filename: saniArtifacts.filename,
-      location: saniArtifacts.location,
-      history: historyData,
-      custom: saniArtifacts.custom
-    };
-  });
-
-
-  artUpdate.lastModifiedBy = reqUser._id;
-  artUpdate.createdBy = reqUser._id;
-  artUpdate.updatedOn = Date.now();
-  artUpdate.archivedBy = (saniArtifacts.archived) ? reqUser._id : null;
+  //
+  // artifactObjects = artsToupdate.map((u) => {
+  //   // Create the new Artifact
+  //   const artUpdate = Artifact(u) {
+  //     _id: artifactFullId,
+  //     name: saniArtifacts.name,
+  //     contentType: saniArtifacts.contentType,
+  //     project: foundProj._id,
+  //     branch: foundBranch._id,
+  //     filename: saniArtifacts.filename,
+  //     location: saniArtifacts.location,
+  //     history: historyData,
+  //     custom: saniArtifacts.custom
+  //   };
+  // });
+  //
+  //
+  // artUpdate.lastModifiedBy = reqUser._id;
+  // artUpdate.createdBy = reqUser._id;
+  // artUpdate.updatedOn = Date.now();
+  // artUpdate.archivedBy = (saniArtifacts.archived) ? reqUser._id : null;
 
   // Save artifact object to the database
-  const savedArtifact = await Artifact.insertMany([artObjects]);
+  // const savedArtifact = await Artifact.insertMany([artObjects]);
 
   // Emit the event artifacts-updated
-  EventEmitter.emit('artifacts-updated', savedArtifact);
+  EventEmitter.emit('artifacts-updated', updatedArtifact);
 
   let foundArtifacts = null;
   // If the lean option is supplied
