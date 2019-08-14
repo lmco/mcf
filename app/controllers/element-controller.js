@@ -823,10 +823,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
   const branchID = sani.mongo(branch);
   const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
   let foundElements = [];
-  // let foundProject = {};
   let elementsToUpdate = [];
-  let searchQuery = {};
-  let sourceTargetQuery = {};
   const duplicateCheck = {};
   let foundUpdatedElements = [];
   const arrIDs = [];
@@ -939,6 +936,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
       // If the element a sourceNamespace section, ensure it contains the proper fields
       if (elem.hasOwnProperty('sourceNamespace')) {
         assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+        assert.ok(typeof elem.source === 'string', `Element #${index}'s source is not a string.`);
 
         // Ensure the object contains an org, project and branch field
         assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
@@ -980,6 +978,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
       // If the element a targetNamespace section, ensure it contains the proper fields
       if (elem.hasOwnProperty('targetNamespace')) {
         assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+        assert.ok(typeof elem.target === 'string', `Element #${index}'s target is not a string.`);
 
         // Ensure the object contains an org, project and branch field
         assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
@@ -1031,8 +1030,8 @@ async function update(requestingUser, organizationID, projectID, branch, element
   });
 
   const promises2 = [];
-  searchQuery = { branch: utils.createID(orgID, projID, branchID) };
-  sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
+  const searchQuery = { branch: utils.createID(orgID, projID, branchID) };
+  const sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
 
   // Find elements in batches
   for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
