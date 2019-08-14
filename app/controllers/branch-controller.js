@@ -186,13 +186,8 @@ async function find(requestingUser, organizationID, projectID, branches, options
     // A single branch id
     searchQuery._id = utils.createID(orgID, projID, saniBranches);
   }
-  else if ((typeof saniBranches === 'object' && saniBranches !== null)
-    || saniBranches === undefined) {
-    // Find branches in the project
-    // this variable is never used
-    // branchesToFind = [];
-  }
-  else {
+  else if (!((typeof saniBranches === 'object' && saniBranches !== null)
+    || saniBranches === undefined)) {
     // Invalid parameter, throw an error
     throw new M.DataFormatError('Invalid input for finding branches.', 'warn');
   }
