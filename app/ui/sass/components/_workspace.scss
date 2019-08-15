@@ -153,19 +153,9 @@
   }
 }
 
-.list {
-  a {
-    color: black;
-    text-decoration: none;
-  }
-  hr {
-    border-color: darkgrey;
-    margin: 0;
-  }
-}
-
-.guideline {
-  border-left: 1px solid #eee;
+// TODO (ld): Important is not best practice, but only way to get to work
+.archived-link {
+  color: #c0c0c0 !important;
 }
 
 .list-item {
@@ -176,6 +166,21 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.list {
+  a {
+    text-decoration: none;
+    color: black;
+  }
+  hr {
+    border-color: darkgrey;
+    margin: 0;
+  }
+}
+
+.guideline {
+  border-left: 1px solid #eee;
 }
 
 .element-item {

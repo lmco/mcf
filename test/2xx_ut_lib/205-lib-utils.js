@@ -31,7 +31,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should create a valid uid', validUID);
   it('should try to create a uid from invalid parameters and fail', invalidUID);
   it('should parse a valid uid', parseValidUID);
-  it('should try to parse an invalid uid and fail', parseInvalidUID);
   it('should parse a valid uid and get the second element', parseValidUIDSecondElement);
   it('should title-case a valid word', validTitleCase);
   it('should NOT title-case an invalid word', invalidTitleCase);
@@ -85,21 +84,6 @@ function parseValidUID(done) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  }
-}
-
-/**
- * @description Parse an invalid uid. Expected error.
- */
-function parseInvalidUID(done) {
-  try {
-    utils.parseID('not a valid uid');
-    chai.assert(true === false);
-    done();
-  }
-  catch (error) {
-    chai.expect(error.message).to.equal('Invalid UID.');
     done();
   }
 }

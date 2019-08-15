@@ -123,3 +123,34 @@
   padding: 15px 35px;
 }
 
+.element-selector {
+  display: inline;
+  margin-left: 10px;
+
+  i.fas:hover {
+    color: lighten(#333333, 25%);
+  }
+}
+
+.element-selector-modal {
+  .modal-footer {
+    p {
+      width: 100%;
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+  }
+}
+
+.element-selector-project {
+  padding: 4px;
+  display: flex;
+
+  .project-label {
+    padding: 6px;
+    font-weight: 600;
+    font-size: small;
+  }
+}

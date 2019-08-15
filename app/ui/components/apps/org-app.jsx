@@ -59,17 +59,30 @@ class OrgApp extends Component {
   componentDidMount() {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
+      // Verify if error returned
       if (err) {
+        // Set error state
         this.setState({ error: err.responseText });
       }
       else {
+        // Set user data
         this.setState({ user: data });
-        // Get project data
+        // Initialize options
+        let opt = 'populate=projects&minified=true';
+
+        // Verify if admin user
+        if (data.admin) {
+          // Update options to grab archived data
+          opt = 'populate=projects&minified=true&archived=true';
+        }
+
+        // Get org data
         $.ajax({
           method: 'GET',
-          url: `/api/orgs/${this.props.match.params.orgid}?populate=projects&minified=true`,
+          url: `/api/orgs/${this.props.match.params.orgid}?${opt}`,
           statusCode: {
             200: (org) => {
+              // Set states
               this.setMountedComponentStates(data, org);
             },
             401: (error) => {

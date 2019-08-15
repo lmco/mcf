@@ -313,7 +313,7 @@ function createInTag(done) {
   .catch((error) => {
     // Ensure error message is correct
     chai.expect(error.message).to.equal(`[${tagID}] is a tag and does`
-      + ' not allow elements to be created.');
+      + ' not allow elements to be created, updated, or deleted.');
     done();
   });
 }
@@ -339,7 +339,7 @@ function updateInTag(done) {
   .catch((error) => {
     // Ensure error message is correct
     chai.expect(error.message).to.equal(`[${tagID}] is a tag and `
-      + 'does not allow elements to be updated.');
+      + 'does not allow elements to be created, updated, or deleted.');
     done();
   });
 }
@@ -358,7 +358,7 @@ function deleteInTag(done) {
   .catch((error) => {
     // Ensure error message is correct
     chai.expect(error.message).to.equal(`[${tagID}] is a tag and`
-      + ' does not allow elements to be deleted.');
+      + ' does not allow elements to be created, updated, or deleted.');
     done();
   });
 }
