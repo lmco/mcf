@@ -781,6 +781,8 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   const foundArtifactIDs = await foundArtifacts.map(e => e._id);
   const artifactHistoryArr = await foundArtifacts.map(e => e.history);
 
+  await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
+
   // TODO: Verify if artifact needs this
   const uniqueIDsObj = {};
 
@@ -803,8 +805,6 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
       }
     });
   });
-
-  await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
 
   // TODO: Change the emitter to return artifacts rather than ids
   // Emit the event artifacts-deleted
