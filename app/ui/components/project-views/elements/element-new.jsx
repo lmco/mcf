@@ -53,7 +53,9 @@ class ElementNew extends Component {
       type: '',
       parent: this.props.parent,
       target: null,
+      targetNamespace: null,
       source: null,
+      sourceNamespace: null,
       custom: null,
       org: null,
       project: null,
@@ -99,6 +101,15 @@ class ElementNew extends Component {
       data.target = this.state.target;
     }
 
+    // Verify if there is a targetNamespace and target
+    if (this.state.targetNamespace && this.state.target) {
+      data.targetNamespace = this.state.targetNamespace;
+    }
+    // Verify if there is a sourceNamespace and source
+    if (this.state.sourceNamespace && this.state.source) {
+      data.sourceNamespace = this.state.sourceNamespace;
+    }
+
     const url = `${this.props.url}/elements/${data.id}`;
 
     $.ajax({
@@ -135,7 +146,19 @@ class ElementNew extends Component {
    * This function is called when the ElementSelector for the source field
    * changes.
    */
-  sourceSelectHandler(_id) {
+  sourceSelectHandler(_id, project) {
+    // Verify if project was provided
+    if (project) {
+      // Set the sourceNamespace field
+      this.setState({
+        sourceNamespace: {
+          org: project.org,
+          project: project.id,
+          branch: 'master'
+        }
+      });
+    }
+
     this.setState({ source: _id });
   }
 
@@ -143,7 +166,19 @@ class ElementNew extends Component {
    * This function is called when the ElementSelector for the target field
    * changes.
    */
-  targetSelectHandler(_id) {
+  targetSelectHandler(_id, project) {
+    // Verify if project was provided
+    if (project) {
+      // Set the targetNamespace field
+      this.setState({
+        targetNamespace: {
+          org: project.org,
+          project: project.id,
+          branch: 'master'
+        }
+      });
+    }
+
     this.setState({ target: _id });
   }
 
@@ -225,6 +260,7 @@ class ElementNew extends Component {
               <div id="parent" className={'selector-value'}>
                 {this.state.parent || 'Select an element.'}
                 <ElementSelector
+                  parent={true}
                   currentSelection={this.state.parent}
                   url={this.props.url}
                   branch={this.props.branch}
