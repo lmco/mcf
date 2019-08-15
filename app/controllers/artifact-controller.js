@@ -53,6 +53,7 @@ const Org = M.require('models.organization');
 const EventEmitter = M.require('lib.events');
 const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
+const validators = M.require('lib.validators');
 const utils = M.require('lib.utils');
 const helper = M.require('lib.controller-helper');
 const jmi = M.require('lib.jmi-conversions');
@@ -247,8 +248,6 @@ async function findHelper(query, fields, limit, skip, populate, sort, lean) {
  * @param {string} branch - The ID of the branch to add artifacts to.
  * @param {(Object|Object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to create.
- * @param {{(string|string[])}} artifacts - An array of objects or
- * a single object containing artifact data.
  * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  * @param {string} artifacts.id - The ID of the artifact being created.
  * @param {string} [artifacts.name] - The name of the artifact.
@@ -514,8 +513,10 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Define array to store org data
   let artsToUpdate = [];
   const arrIDs = [];
-  const validArtKeys = ['id', 'name', 'project', 'branch', 'filename', 'contentType',
-    'location', 'custom', 'history'];
+  //const validArtKeys = ['id', 'name', 'project', 'branch', 'filename', 'contentType',
+  //  'location', 'custom', 'history'];
+  const validArtKeys = ['id', 'filename', 'contentType', 'name', 'custom',
+    'archived', 'location']; // TODO: are these just valid fields
 
   // Check parameter type
   if (Array.isArray(saniArtifacts)) {
@@ -603,28 +604,12 @@ async function update(requestingUser, organizationID, projectID, branch,
 
   // Convert artsToupdate to JMI type 2
   const jmiType2 = jmi.convertJMI(1, 2, artsToUpdate);
-  const bulkArray = []
+  const bulkArray = [];
   // Get array of editable parameters
   const validFields = Artifact.getValidUpdateFields();
 
-  // For each artifact found
-  foundArtifact.forEach((art) => {
-    const updateArtifact = jmiType2[art._id];
-    // Update the artifact
-    bulkArray.push({
-      updateOne: {
-        filter: { _id: art._id },
-        update: updateArtifact
-      }
-    });
-  })
-  await Artifact.bulkWrite(bulkArray);
-
-  // Emit the event artifacts-updated
-  EventEmitter.emit('artifacts-updated', artsToUpdate);
 
   let hashedName = '';
-
   // Verify artifactBlob defined
   if (artifactBlob) {
     // Generate hash
@@ -634,6 +619,51 @@ async function update(requestingUser, organizationID, projectID, branch,
     // No artifact binary provided, set null
     hashedName = null;
   }
+
+  // For each artifact found
+  foundArtifact.forEach((art) => {
+    const updateArtifact = jmiType2[art._id];
+    delete updateArtifact.id;
+    delete updateArtifact._id;
+
+    // Error Check: if artifact currently archived, they must first be unarchived
+    if (art.archived && (updateArtifact.archived === undefined
+      || JSON.parse(updateArtifact.archived) !== false)) {
+      throw new M.OperationError(`Artifact [${art._id}] is archived. `
+        + 'Archived objects cannot be modified.', 'warn');
+    }
+
+    // For each key in the updated object
+    Object.keys(updateArtifact).forEach((key) => {
+      // Check if the field is valid to update
+      if (!validFields.includes(key)) {
+        throw new M.OperationError(`Artifact property [${key}] cannot `
+          + 'be changed.', 'warn');
+      }
+
+      // Get validator for field if one exists
+      if (validators.user.hasOwnProperty(key)) {
+        // If validation fails, throw error
+        if (!RegExp(validators.user[key]).test(updateArtifact[key])) {
+          throw new M.DataFormatError(
+            `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
+          );
+        }
+      }
+    });
+
+    // Update the artifact
+    bulkArray.push({
+      updateOne: {
+        filter: { _id: art._id },
+        update: updateArtifact
+      }
+    });
+  });
+  await Artifact.bulkWrite(bulkArray);
+
+  // Emit the event artifacts-updated
+  EventEmitter.emit('artifacts-updated', artsToUpdate);
 
   // Create the main artifact path
   const artifactPath = path.join(M.root, M.config.artifact.path);
@@ -719,7 +749,6 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
     throw new M.DataFormatError('Invalid input for removing artifacts.', 'warn');
   }
 
-
   // Find the organization and validate that it was found and not archived
   const organization = await helper.findAndValidate(Org, orgID, reqUser);
   // Permissions check
@@ -751,31 +780,11 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } }).lean();
   const foundArtifactIDs = await foundArtifacts.map(e => e._id);
 
-  // Check if all artifacts were found
-  const notFoundIDs = artifactsToFind.filter(e => !foundArtifactIDs.includes(e));
-  // Some artifacts not found, throw an error
-  if (notFoundIDs.length > 0) {
-    throw new M.NotFoundError('The following artifacts were not found: '
-      + `[${notFoundIDs.map(e => utils.parseID(e).pop())}].`, 'warn');
-  }
-
-  // Find all artifact IDs and their subtree IDs
-  const foundIDs = await findArtifactTree(orgID, projID, branchID, artifactsToFind);
-
-  const promises = [];
-
-  // Split elements into batches of 50000 or less
-  for (let i = 0; i < foundIDs.length / 50000; i++) {
-    const batchIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
-    // Delete batch
-    promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
-  }
-  // Return when all deletes have completed
-  await Promise.all(promises);
+  await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
 
   const uniqueIDsObj = {};
   // Parse foundIDs and only return unique ones
-  foundIDs.forEach((id) => {
+  foundArtifactIDs.forEach((id) => {
     if (!uniqueIDsObj[id]) {
       uniqueIDsObj[id] = id;
     }
@@ -783,52 +792,9 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
 
   uniqueIDs = Object.keys(uniqueIDsObj);
 
-  // TODO: Change the emitter to return elements rather than ids
-  // Emit the event elements-deleted
-  EventEmitter.emit('elements-deleted', uniqueIDs);
-
-  // Create query to find all relationships which point to deleted elements
-  const relQuery = {
-    $or: [
-      { source: { $in: uniqueIDs } },
-      { target: { $in: uniqueIDs } }
-    ]
-  };
-
-  // Find all relationships which are now broken
-  const relationships = await Element.find(relQuery).lean();
-  const bulkArray = [];
-  const promises2 = [];
-
-  // For each relationship
-  promises2.push(relationships.forEach((rel) => {
-    // If the source no longer exists, set it to the undefined element
-    if (uniqueIDs.includes(rel.source)) {
-      // Reset source to the undefined element
-      rel.source = utils.createID(rel.branch, 'undefined');
-    }
-
-    // If the target no longer exists, set it to the undefined element
-    if (uniqueIDs.includes(rel.target)) {
-      // Reset target to the undefined element
-      rel.target = utils.createID(rel.branch, 'undefined');
-    }
-
-    bulkArray.push({
-      updateOne: {
-        filter: { _id: rel._id },
-        update: rel
-      }
-    });
-  }));
-
-  await Promise.all(promises2);
-
-  // If there are relationships to update, make a bulkWrite() call
-  if (bulkArray.length > 0) {
-    // Save relationship changes to database
-    await Element.bulkWrite(bulkArray);
-  }
+  // TODO: Change the emitter to return artifacts rather than ids
+  // Emit the event artifacts-deleted
+  EventEmitter.emit('Artifact-deleted', uniqueIDs);
 
   // Return unique IDs of elements deleted
   return (uniqueIDs);

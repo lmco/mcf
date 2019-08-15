@@ -95,7 +95,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should create an artifact', createArtifact);
   it('should find an artifact', findArtifact);
   it('should update an artifact file', updateArtifact);
-  // it('should delete an artifact', deleteArtifact);
+  it('should delete an artifact', deleteArtifact);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -105,6 +105,7 @@ describe(M.getModuleName(module.filename), () => {
 async function createArtifact() {
   const artData = {
     id: testData.artifacts[0].id,
+    name: testData.artifacts[0].name,
     filename: testData.artifacts[0].filename,
     contentType: path.extname(testData.artifacts[0].filename),
     project: project._id,
@@ -155,6 +156,9 @@ async function findArtifact() {
     chai.expect(foundArtifact[0].id).to.equal(
       utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
     );
+    chai.expect(foundArtifact[0].name).to.equal(
+      testData.artifacts[0].name
+    );
     chai.expect(foundArtifact[0].filename).to.equal(
       testData.artifacts[0].filename
     );
@@ -185,22 +189,42 @@ async function findArtifact() {
 async function updateArtifact() {
   const artData = {
     id: testData.artifacts[0].id,
-    filename: testData.artifacts[1].filename,
-    name: testData.artifacts[0].name,
-    contentType: path.extname(testData.artifacts[0].filename),
-    project: project._id,
-    branch: branchID,
-    location: testData.artifacts[0].location
+    filename: testData.artifacts[2].filename,
+    name: testData.artifacts[2].name,
+    contentType: path.extname(testData.artifacts[2].filename),
+    location: testData.artifacts[2].location,
+    archived: false,
+    custom: {}
+
   };
   try {
     const updatedArtifact = await ArtifactController.update(adminUser, org.id,
       projectID, branchID, artData, artifactBlob);
-    console.log(updatedArtifact)
+
     // Check if artifact found
     chai.expect(updatedArtifact.length).to.equal(1);
-
-    // Update the filename
-    updatedArtifact[0].filename = testData.artifacts[1].filename;
+    chai.expect(updatedArtifact[0].id).to.equal(
+      utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
+    );
+    chai.expect(updatedArtifact[0].name).to.equal(
+      testData.artifacts[2].name
+    );
+    chai.expect(updatedArtifact[0].filename).to.equal(
+      testData.artifacts[2].filename
+    );
+    chai.expect(updatedArtifact[0].contentType).to.equal(
+      path.extname(testData.artifacts[2].filename)
+    );
+    chai.expect(updatedArtifact[0].project).to.equal(project._id);
+    chai.expect(updatedArtifact[0].branch).to.equal(
+      utils.createID(org.id, projectID, branchID)
+    );
+    chai.expect(updatedArtifact[0].location).to.equal(testData.artifacts[2].location);
+    chai.expect(updatedArtifact[0].history[0].hash).to.equal(
+      testData.artifacts[0].history[0].hash
+    );
+    chai.expect(updatedArtifact[0].history[0].user).to.equal(adminUser.id);
+    chai.expect(updatedArtifact[0].history[0].updatedOn).to.not.equal(null);
   }
   catch (error) {
     M.log.error(error);
@@ -214,12 +238,18 @@ async function updateArtifact() {
  */
 async function deleteArtifact() {
   try {
-    const query = {_id: utils.createID(branchID, testData.artifacts[0].id)}
+    const artifactID = testData.artifacts[0].id;
     // Find and delete the artifact
-    await Artifact.findOneAndRemove(query);
+    const deletedArtifact = await ArtifactController.remove(adminUser,
+      org.id, projectID, branchID, artifactID);
 
-    const deletedArtifact = await Artifact.find(query);
-    chai.expect(deletedArtifact.length).to.equal(0);
+    // Check that 1 artifact was deleted
+    chai.expect(deletedArtifact.length).to.equal(1);
+
+    const foundArtifact = await ArtifactController.find(adminUser, org.id,
+      projectID, branchID, [artifactID]);
+
+    chai.expect(foundArtifact.length).to.equal(0);
   }
   catch (error) {
     M.log.error(error);
