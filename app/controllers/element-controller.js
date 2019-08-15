@@ -210,7 +210,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // If wanting to find subtree, find subtree ids
   if (validatedOptions.subtree) {
-    elementsToFind = await findElementTree(orgID, projID, branchID, artifactsToFind);
+    elementsToFind = await findElementTree(orgID, projID, branchID, elementsToFind);
   }
 
   // If the archived field is true, remove it from the query
@@ -221,7 +221,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   const promises = [];
 
   // If no IDs provided, find all elements in the branch
-  if (artifactsToFind.length === 0) {
+  if (elementsToFind.length === 0) {
     // Get the number of elements in the branch
     const elementCount = await Element.countDocuments(searchQuery);
 
@@ -267,9 +267,9 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
   else {
     // Find elements in batches
-    for (let i = 0; i < artifactsToFind.length / 50000; i++) {
+    for (let i = 0; i < elementsToFind.length / 50000; i++) {
       // Split elementIDs list into batches of 50000
-      searchQuery._id = artifactsToFind.slice(i * 50000, i * 50000 + 50000);
+      searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
 
       // Add find operation to array of promises
       promises.push(findHelper(searchQuery, validatedOptions.fieldsString,
@@ -626,7 +626,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
       }
       else {
         // Add elements parent to list of elements to search for in DB
-        artifactsToFind.push(element.$parent);
+        elementsToFind.push(element.$parent);
         remainingElements.push(element);
       }
     }
@@ -640,7 +640,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
       }
       else {
         // Add elements source to list of elements to search for in DB
-        artifactsToFind.push(element.$source);
+        elementsToFind.push(element.$source);
         remainingElements.push(element);
       }
     }
@@ -654,14 +654,14 @@ async function create(requestingUser, organizationID, projectID, branch, element
       }
       else {
         // Add elements target to list of elements to search for in DB
-        artifactsToFind.push(element.$target);
+        elementsToFind.push(element.$target);
         remainingElements.push(element);
       }
     }
   });
 
   // Create query for finding elements
-  const findExtraElementsQuery = { _id: { $in: artifactsToFind } };
+  const findExtraElementsQuery = { _id: { $in: elementsToFind } };
 
   M.log.debug('create(): Before finding extra elements');
 
@@ -1567,11 +1567,11 @@ async function remove(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the elements to delete
-  const foundElements = await Element.find({ _id: { $in: artifactsToFind } }).lean();
+  const foundElements = await Element.find({ _id: { $in: elementsToFind } }).lean();
   const foundElementIDs = await foundElements.map(e => e._id);
 
   // Check if all elements were found
-  const notFoundIDs = artifactsToFind.filter(e => !foundElementIDs.includes(e));
+  const notFoundIDs = elementsToFind.filter(e => !foundElementIDs.includes(e));
   // Some elements not found, throw an error
   if (notFoundIDs.length > 0) {
     throw new M.NotFoundError('The following elements were not found: '
@@ -1579,7 +1579,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find all element IDs and their subtree IDs
-  const foundIDs = await findElementTree(orgID, projID, branchID, artifactsToFind);
+  const foundIDs = await findElementTree(orgID, projID, branchID, elementsToFind);
 
   const promises = [];
   // Error Check: ensure user cannot delete root elements

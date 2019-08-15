@@ -389,11 +389,18 @@ async function create(requestingUser, organizationID, projectID, branch,
       + ` [${existingArtifact.toString()}].`, 'warn');
   }
 
-  let artObjects = artsToCreate.map(async (artObj) => {
+  const artPromises = artsToCreate.map(async (a) => {
+    const artObj = new Artifact(a);
     // Verify artifactBlob defined
-    if (artifactBlob) {
+    if (typeof artifactBlob !== 'undefined') {
       // Generate hash
       const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+
+      // Create the main artifact path
+      const artifactPath = path.join(M.root, M.config.artifact.path);
+
+      const fullPath = path.join(artifactPath,
+        hashedName.substring(0, 2), hashedName);
 
       // Check if artifact file exist
       if (!fs.existsSync(fullPath)) {
@@ -410,40 +417,17 @@ async function create(requestingUser, organizationID, projectID, branch,
     }
 
     artObj.id = utils.createID(organizationID, projectID, branchID, artifacts.id);
-    artObj.name = artsToCreate.name;
-    artObj.contentType = artsToCreate.contentType;
     artObj.project = foundProj._id;
     artObj.branch = foundBranch._id;
-    artObj.filename = artsToCreate.filename;
-    artObj.location = artsToCreate.location;
-    artObj.custom = artsToCreate.custom;
-    artObjects.lastModifiedBy = reqUser._id;
-    artObjects.createdBy = reqUser._id;
-    artObjects.updatedOn = Date.now();
-    artObjects.archivedBy = (artsToCreate.archived) ? reqUser._id : null;
-      return artObj
-    });
-
-
+    artObj.lastModifiedBy = reqUser._id;
+    artObj.createdBy = reqUser._id;
+    artObj.updatedOn = Date.now();
+    artObj.archivedBy = (artsToCreate.archived) ? reqUser._id : null;
+    return artObj;
   });
-  // Create the main artifact path
-  const artifactPath = path.join(M.root, M.config.artifact.path);
-
-  const fullPath = path.join(artifactPath,
-    hashedName.substring(0, 2), hashedName);
-  // Check if artifact file exist
-  if (!fs.existsSync(fullPath)) {
-    await addArtifactOS(hashedName, artifactBlob);
-  }
-
-  // Define new hash history data
-  const historyData = {
-    hash: hashedName,
-    user: reqUser
-  };
-
+  const artObjects = await Promise.all(artPromises);
   // Save artifact object to the database
-  const createdArtifact = await Artifact.insertMany([artObjects]);
+  const createdArtifact = await Artifact.insertMany(artObjects);
 
   // Emit the event artifacts-created
   EventEmitter.emit('artifacts-created', createdArtifact);
@@ -620,29 +604,6 @@ async function update(requestingUser, organizationID, projectID, branch,
     delete updateArtifact.id;
     delete updateArtifact._id;
 
-    // Check artifactBlob defined
-    if (artifactBlob) {
-      const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-
-      // Create the main artifact path
-      const artifactPath = path.join(M.root, M.config.artifact.path);
-
-      const fullPath = path.join(artifactPath,
-        hashedName.substring(0, 2), hashedName);
-
-      // Check if artifact file exist
-      if (!fs.existsSync(fullPath)) {
-        await addArtifactOS(hashedName, artifactBlob);
-      }
-
-      // Define new hash history entry
-      const historyEntry = {
-        hash: hashedName,
-        user: reqUser
-      };
-      updateArtifact.history.push(historyEntry);
-    }
-
     // Error Check: if artifact currently archived, they must first be unarchived
     if (art.archived && (updateArtifact.archived === undefined
       || JSON.parse(updateArtifact.archived) !== false)) {
@@ -665,9 +626,35 @@ async function update(requestingUser, organizationID, projectID, branch,
           throw new M.DataFormatError(
             `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
           );
-        }x``
+        }
       }
     });
+
+    // Verify artifactBlob defined
+    if (typeof artifactBlob !== 'undefined') {
+      const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+
+      // Create the main artifact path
+      const artifactPath = path.join(M.root, M.config.artifact.path);
+
+      const fullPath = path.join(artifactPath,
+        hashedName.substring(0, 2), hashedName);
+
+      // Check if artifact file exist
+      if (!fs.existsSync(fullPath)) {
+        await addArtifactOS(hashedName, artifactBlob);
+      }
+
+      // Define new hash history entry
+      const historyEntry = {
+        hash: hashedName,
+        user: reqUser
+      };
+
+      const prevHistory = art.history;
+      prevHistory.push(historyEntry);
+      updateArtifact.history = prevHistory;
+    }
 
     // Update the artifact
     bulkArray.push({
@@ -778,7 +765,7 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } }).lean();
   const foundArtifactIDs = await foundArtifacts.map(e => e._id);
 
-  await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
+  //await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
 
   // TODO: Verify if artifact needs this
   const uniqueIDsObj = {};
@@ -798,14 +785,14 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   foundArtifactIDs.forEach((eachArtifact) => {
     // Check no db record linked to this artifact
     arrPromises.push(Artifact.find({ 'history.hash': eachArtifact.hash })
-      .then((remainingArtifacts) => {
-        // Check last artifact with this hash
-        if (remainingArtifacts.length === 1) {
-          // Last hash record, remove artifact from storage
-          removeArtifactOS(eachArtifact.hash);
-        }
-      })
-      .catch((error) => reject(M.CustomError.parseCustomError(error))));
+    .then((remainingArtifacts) => {
+      // Check last artifact with this hash
+      if (remainingArtifacts.length === 1) {
+        // Last hash record, remove artifact from storage
+        removeArtifactOS(eachArtifact.hash);
+      }
+    })
+    .catch((error) => reject(M.CustomError.parseCustomError(error))));
   });
   await Promise.all(arrPromises);
 
