@@ -389,17 +389,43 @@ async function create(requestingUser, organizationID, projectID, branch,
       + ` [${existingArtifact.toString()}].`, 'warn');
   }
 
-  let hashedName = '';
-  // Verify artifactBlob defined
-  if (artifactBlob) {
-    // Generate hash
-    hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-  }
-  else {
-    // No artifact binary provided, set null
-    hashedName = null;
-  }
+  let artObjects = artsToCreate.map(async (artObj) => {
+    // Verify artifactBlob defined
+    if (artifactBlob) {
+      // Generate hash
+      const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
+      // Check if artifact file exist
+      if (!fs.existsSync(fullPath)) {
+        await addArtifactOS(hashedName, artifactBlob);
+
+        // Define new hash history entry
+        const historyEntry = {
+          hash: hashedName,
+          user: reqUser
+        };
+
+        artObj.history = [historyEntry];
+      }
+    }
+
+    artObj.id = utils.createID(organizationID, projectID, branchID, artifacts.id);
+    artObj.name = artsToCreate.name;
+    artObj.contentType = artsToCreate.contentType;
+    artObj.project = foundProj._id;
+    artObj.branch = foundBranch._id;
+    artObj.filename = artsToCreate.filename;
+    artObj.location = artsToCreate.location;
+    artObj.custom = artsToCreate.custom;
+    artObjects.lastModifiedBy = reqUser._id;
+    artObjects.createdBy = reqUser._id;
+    artObjects.updatedOn = Date.now();
+    artObjects.archivedBy = (artsToCreate.archived) ? reqUser._id : null;
+      return artObj
+    });
+
+
+  });
   // Create the main artifact path
   const artifactPath = path.join(M.root, M.config.artifact.path);
 
@@ -415,24 +441,6 @@ async function create(requestingUser, organizationID, projectID, branch,
     hash: hashedName,
     user: reqUser
   };
-  const artifactFullId = utils.createID(organizationID, projectID, branchID, artifacts.id);
-  // Create the new Artifact
-  const artObjects = new Artifact({
-    _id: artifactFullId,
-    name: saniArtifacts.name,
-    contentType: saniArtifacts.contentType,
-    project: foundProj._id,
-    branch: foundBranch._id,
-    filename: saniArtifacts.filename,
-    location: saniArtifacts.location,
-    history: historyData,
-    custom: saniArtifacts.custom
-  });
-
-  artObjects.lastModifiedBy = reqUser._id;
-  artObjects.createdBy = reqUser._id;
-  artObjects.updatedOn = Date.now();
-  artObjects.archivedBy = (saniArtifacts.archived) ? reqUser._id : null;
 
   // Save artifact object to the database
   const createdArtifact = await Artifact.insertMany([artObjects]);
@@ -513,10 +521,8 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Define array to store org data
   let artsToUpdate = [];
   const arrIDs = [];
-  //const validArtKeys = ['id', 'name', 'project', 'branch', 'filename', 'contentType',
-  //  'location', 'custom', 'history'];
   const validArtKeys = ['id', 'filename', 'contentType', 'name', 'custom',
-    'archived', 'location']; // TODO: are these just valid fields
+    'archived', 'location'];
 
   // Check parameter type
   if (Array.isArray(saniArtifacts)) {
@@ -529,7 +535,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   }
   else {
     // artifact is not an object or array, throw an error
-    throw new M.DataFormatError('Invalid input for creating artifacts.', 'warn');
+    throw new M.DataFormatError('Invalid input for updating artifacts.', 'warn');
   }
 
   // Find organization, validate found and not archived
@@ -538,7 +544,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
     throw new M.PermissionError('User does not have permission to'
-      + ` read items on the org ${orgID}.`, 'warn');
+      + ` update items on the org ${orgID}.`, 'warn');
   }
 
   // Find project, validate found and not archived
@@ -562,7 +568,7 @@ async function update(requestingUser, organizationID, projectID, branch,
 
   M.log.debug('update(): Before finding pre-existing artifact');
 
-  // Check that each art has an id, and add to arrIDs
+  // Check that each artifact has an id, and add to arrIDs
   try {
     let index = 1;
     artsToUpdate.forEach((art) => {
@@ -572,10 +578,10 @@ async function update(requestingUser, organizationID, projectID, branch,
       });
 
       // Ensure each art has an id and that its a string
-      assert.ok(art.hasOwnProperty('id'), `Art #${index} does not have an id.`);
-      assert.ok(typeof art.id === 'string', `Art #${index}'s id is not a string.`);
+      assert.ok(art.hasOwnProperty('id'), `Artifact #${index} does not have an id.`);
+      assert.ok(typeof art.id === 'string', `Artifact #${index}'s id is not a string.`);
       // Check if art with same ID is already being updated
-      assert.ok(!arrIDs.includes(art.id), 'Multiple arts with the same ID '
+      assert.ok(!arrIDs.includes(art.id), 'Multiple artifacts with the same ID '
         + `[${art.id}] cannot be updated.`);
       art.id = utils.createID(orgID, projID, branchID, art.id);
       arrIDs.push(art.id);
@@ -608,23 +614,34 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Get array of editable parameters
   const validFields = Artifact.getValidUpdateFields();
 
-
-  let hashedName = '';
-  // Verify artifactBlob defined
-  if (artifactBlob) {
-    // Generate hash
-    hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-  }
-  else {
-    // No artifact binary provided, set null
-    hashedName = null;
-  }
-
   // For each artifact found
-  foundArtifact.forEach((art) => {
+  foundArtifact.forEach(async (art) => {
     const updateArtifact = jmiType2[art._id];
     delete updateArtifact.id;
     delete updateArtifact._id;
+
+    // Check artifactBlob defined
+    if (artifactBlob) {
+      const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+
+      // Create the main artifact path
+      const artifactPath = path.join(M.root, M.config.artifact.path);
+
+      const fullPath = path.join(artifactPath,
+        hashedName.substring(0, 2), hashedName);
+
+      // Check if artifact file exist
+      if (!fs.existsSync(fullPath)) {
+        await addArtifactOS(hashedName, artifactBlob);
+      }
+
+      // Define new hash history entry
+      const historyEntry = {
+        hash: hashedName,
+        user: reqUser
+      };
+      updateArtifact.history.push(historyEntry);
+    }
 
     // Error Check: if artifact currently archived, they must first be unarchived
     if (art.archived && (updateArtifact.archived === undefined
@@ -642,13 +659,13 @@ async function update(requestingUser, organizationID, projectID, branch,
       }
 
       // Get validator for field if one exists
-      if (validators.user.hasOwnProperty(key)) {
+      if (validators.artifact.hasOwnProperty(key)) {
         // If validation fails, throw error
-        if (!RegExp(validators.user[key]).test(updateArtifact[key])) {
+        if (!RegExp(validators.artifact[key]).test(updateArtifact[key])) {
           throw new M.DataFormatError(
             `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
           );
-        }
+        }x``
       }
     });
 
@@ -664,24 +681,6 @@ async function update(requestingUser, organizationID, projectID, branch,
 
   // Emit the event artifacts-updated
   EventEmitter.emit('artifacts-updated', artsToUpdate);
-
-  // Create the main artifact path
-  const artifactPath = path.join(M.root, M.config.artifact.path);
-
-
-  const fullPath = path.join(artifactPath,
-    hashedName.substring(0, 2), hashedName);
-
-  // Check if artifact file exist
-  if (!fs.existsSync(fullPath)) {
-    await addArtifactOS(hashedName, artifactBlob);
-  }
-
-  // Define new hash history data
-  const historyData = {
-    hash: hashedName,
-    user: reqUser
-  };
 
   let foundArtifacts = null;
   // If the lean option is supplied
@@ -733,7 +732,6 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   const branchID = sani.mongo(branch);
   const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
   let artifactsToFind = [];
-  let uniqueIDs = [];
 
   // Check the type of the artifacts parameter
   if (Array.isArray(saniArtifacts) && saniArtifacts.length !== 0) {
@@ -755,7 +753,7 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
     throw new M.PermissionError('User does not have permission to'
-      + ` read items on the org ${orgID}.`, 'warn');
+      + ` remove items on the org ${orgID}.`, 'warn');
   }
 
   // Find the project and validate that it was found and not archived
@@ -782,6 +780,7 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
 
   await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
 
+  // TODO: Verify if artifact needs this
   const uniqueIDsObj = {};
   // Parse foundIDs and only return unique ones
   foundArtifactIDs.forEach((id) => {
@@ -791,6 +790,24 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   });
 
   uniqueIDs = Object.keys(uniqueIDsObj);
+
+  // Create array of promises
+  const arrPromises = [];
+
+  // Loop through artifact history
+  foundArtifactIDs.forEach((eachArtifact) => {
+    // Check no db record linked to this artifact
+    arrPromises.push(Artifact.find({ 'history.hash': eachArtifact.hash })
+      .then((remainingArtifacts) => {
+        // Check last artifact with this hash
+        if (remainingArtifacts.length === 1) {
+          // Last hash record, remove artifact from storage
+          removeArtifactOS(eachArtifact.hash);
+        }
+      })
+      .catch((error) => reject(M.CustomError.parseCustomError(error))));
+  });
+  await Promise.all(arrPromises);
 
   // TODO: Change the emitter to return artifacts rather than ids
   // Emit the event artifacts-deleted
