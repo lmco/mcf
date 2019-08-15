@@ -92,9 +92,9 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  //it('should create an artifact', createArtifact);
-  //it('should find an artifact', findArtifact);
-  //it('should update an artifact file', updateArtifact);
+  it('should create an artifact', createArtifact);
+  it('should find an artifact', findArtifact);
+  it('should update an artifact file', updateArtifact);
   it('should delete an artifact', deleteArtifact);
 });
 
@@ -193,8 +193,7 @@ async function updateArtifact() {
   );
 
   // Get the test file
-  artifactBlob2 = await fs.readFileSync(imgPath);
-  artifactHash2 = mbeeCrypto.sha256Hash(artifactBlob);
+  const artifactBlob2 = await fs.readFileSync(imgPath);
 
   const artData = {
     id: testData.artifacts[0].id,

@@ -392,6 +392,7 @@ async function create(requestingUser, organizationID, projectID, branch,
   const artPromises = artsToCreate.map(async (a) => {
     const artObj = new Artifact(a);
     // Verify artifactBlob defined
+    // TODO: Move out
     if (typeof artifactBlob !== 'undefined') {
       // Generate hash
       const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
@@ -416,15 +417,15 @@ async function create(requestingUser, organizationID, projectID, branch,
       }
     }
 
-    artObj.id = utils.createID(organizationID, projectID, branchID, artifacts.id);
     artObj.project = foundProj._id;
     artObj.branch = foundBranch._id;
     artObj.lastModifiedBy = reqUser._id;
     artObj.createdBy = reqUser._id;
     artObj.updatedOn = Date.now();
-    artObj.archivedBy = (artsToCreate.archived) ? reqUser._id : null;
+    artObj.archivedBy = (a.archived) ? reqUser._id : null;
     return artObj;
   });
+  // TODO: Remove after
   const artObjects = await Promise.all(artPromises);
   // Save artifact object to the database
   const createdArtifact = await Artifact.insertMany(artObjects);
@@ -485,6 +486,7 @@ async function create(requestingUser, organizationID, projectID, branch,
  */
 async function update(requestingUser, organizationID, projectID, branch,
   artifacts, artifactBlob, options) {
+  // TODO: Batch not supported Create, update.
   M.log.debug('update(): Start of function');
 
   // Ensure input parameters are correct type
@@ -598,6 +600,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Get array of editable parameters
   const validFields = Artifact.getValidUpdateFields();
 
+  console.log('foundArtifact: ', foundArtifact)
   // For each artifact found
   foundArtifact.forEach(async (art) => {
     const updateArtifact = jmiType2[art._id];
@@ -630,6 +633,7 @@ async function update(requestingUser, organizationID, projectID, branch,
       }
     });
 
+    // TODO: Pull out of loop
     // Verify artifactBlob defined
     if (typeof artifactBlob !== 'undefined') {
       const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
@@ -655,7 +659,7 @@ async function update(requestingUser, organizationID, projectID, branch,
       prevHistory.push(historyEntry);
       updateArtifact.history = prevHistory;
     }
-
+    console.log('updateArtifact: ', updateArtifact)
     // Update the artifact
     bulkArray.push({
       updateOne: {
@@ -664,6 +668,7 @@ async function update(requestingUser, organizationID, projectID, branch,
       }
     });
   });
+  console.log('bulkArray: ' , bulkArray)
   await Artifact.bulkWrite(bulkArray);
 
   // Emit the event artifacts-updated
@@ -764,37 +769,32 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   // Find the artifacts to delete
   const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } }).lean();
   const foundArtifactIDs = await foundArtifacts.map(e => e._id);
-
-  //await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
+  const artifactHistoryArr = await foundArtifacts.map(e => e.history);
 
   // TODO: Verify if artifact needs this
   const uniqueIDsObj = {};
+
   // Parse foundIDs and only return unique ones
   foundArtifactIDs.forEach((id) => {
     if (!uniqueIDsObj[id]) {
       uniqueIDsObj[id] = id;
     }
   });
-
   uniqueIDs = Object.keys(uniqueIDsObj);
 
-  // Create array of promises
-  const arrPromises = [];
-
   // Loop through artifact history
-  foundArtifactIDs.forEach((eachArtifact) => {
-    // Check no db record linked to this artifact
-    arrPromises.push(Artifact.find({ 'history.hash': eachArtifact.hash })
-    .then((remainingArtifacts) => {
+  artifactHistoryArr.forEach((a) => {
+    a.forEach(async (history) =>{
+      const foundArtHistory = await Artifact.find({ 'history.hash': history.hash });
       // Check last artifact with this hash
-      if (remainingArtifacts.length === 1) {
+      if (foundArtHistory.length === 1) {
         // Last hash record, remove artifact from storage
-        removeArtifactOS(eachArtifact.hash);
+        removeArtifactOS(history.hash);
       }
-    })
-    .catch((error) => reject(M.CustomError.parseCustomError(error))));
+    });
   });
-  await Promise.all(arrPromises);
+
+  await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
 
   // TODO: Change the emitter to return artifacts rather than ids
   // Emit the event artifacts-deleted
