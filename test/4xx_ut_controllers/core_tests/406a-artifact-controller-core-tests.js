@@ -20,14 +20,11 @@ const path = require('path'); // Find directory paths
 // MBEE modules
 const ArtifactController = M.require('controllers.artifact-controller');
 const db = M.require('lib.db');
-const mbeeCrypto = M.require('lib.crypto');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
-let artifactBlob = null;
-let artifactHash = null;
 let adminUser = null;
 let org = null;
 let project = null;
@@ -58,15 +55,6 @@ describe(M.getModuleName(module.filename), () => {
       project = await testUtils.createTestProject(adminUser, org.id);
       projectID = utils.parseID(project.id).pop();
       branchID = testData.branches[0].id;
-
-      // Get png test file
-      const imgPath = path.join(
-        M.root, testData.artifacts[0].location, testData.artifacts[0].filename
-      );
-
-      // Get the test file
-      artifactBlob = await fs.readFileSync(imgPath);
-      artifactHash = mbeeCrypto.sha256Hash(artifactBlob);
     }
     catch (error) {
       M.log.error(error);
@@ -103,6 +91,13 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates an artifact via controller.
  */
 async function createArtifact() {
+  // Get png test file
+  const imgPath = path.join(
+    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+  );
+
+  // Get the test file
+  const artifactBlob1 = await fs.readFileSync(imgPath);
   const artData = {
     id: testData.artifacts[0].id,
     name: testData.artifacts[0].name,
@@ -114,7 +109,7 @@ async function createArtifact() {
   };
   try {
     const createdArtifact = await ArtifactController.create(adminUser, org.id,
-      projectID, branchID, artData, artifactBlob);
+      projectID, branchID, artData, artifactBlob1);
     chai.expect(createdArtifact[0].id).to.equal(
       utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
     );

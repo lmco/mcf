@@ -26,7 +26,7 @@
  * Examples of metadata are artifact IDs, user, and filename.
  *
  * Artifact Blob: The actual binary file. This controller stores blobs on the
- * filesystem utilizing the fs library.
+ * filesystem utilizing fs library.
  */
 
 // Expose artifact controller functions
@@ -286,6 +286,12 @@ async function create(requestingUser, organizationID, projectID, branch,
   }
   M.log.debug('create(): Start of function');
 
+  try {
+    assert.ok(!Array.isArray(artifacts), 'Artifact create batching not supported.');
+  }
+  catch (error) {
+    throw new M.DataFormatError(error.message, 'warn');
+  }
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);
   helper.checkParamsDataType('object', artifacts, 'Artifacts');
@@ -486,8 +492,14 @@ async function create(requestingUser, organizationID, projectID, branch,
  */
 async function update(requestingUser, organizationID, projectID, branch,
   artifacts, artifactBlob, options) {
-  // TODO: Batch not supported Create, update.
   M.log.debug('update(): Start of function');
+
+  try {
+    assert.ok(!Array.isArray(artifacts), 'Artifact update batching not supported.');
+  }
+  catch (error) {
+    throw new M.DataFormatError(error.message, 'warn');
+  }
 
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);
@@ -597,10 +609,33 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Convert artsToupdate to JMI type 2
   const jmiType2 = jmi.convertJMI(1, 2, artsToUpdate);
   const bulkArray = [];
+  let newHistoryEntry = null;
   // Get array of editable parameters
   const validFields = Artifact.getValidUpdateFields();
 
-  console.log('foundArtifact: ', foundArtifact)
+
+  // Verify artifactBlob defined
+  if (typeof artifactBlob !== 'undefined') {
+    const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+
+    // Create the main artifact path
+    const artifactPath = path.join(M.root, M.config.artifact.path);
+
+    const fullPath = path.join(artifactPath,
+      hashedName.substring(0, 2), hashedName);
+
+    // Check if artifact file exist
+    if (!fs.existsSync(fullPath)) {
+      await addArtifactOS(hashedName, artifactBlob);
+    }
+
+    // Define new hash history entry
+    newHistoryEntry = {
+      hash: hashedName,
+      user: reqUser
+    };
+  }
+
   // For each artifact found
   foundArtifact.forEach(async (art) => {
     const updateArtifact = jmiType2[art._id];
@@ -632,34 +667,10 @@ async function update(requestingUser, organizationID, projectID, branch,
         }
       }
     });
+    const prevHistory = art.history;
+    prevHistory.push(newHistoryEntry);
+    updateArtifact.history = prevHistory;
 
-    // TODO: Pull out of loop
-    // Verify artifactBlob defined
-    if (typeof artifactBlob !== 'undefined') {
-      const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-
-      // Create the main artifact path
-      const artifactPath = path.join(M.root, M.config.artifact.path);
-
-      const fullPath = path.join(artifactPath,
-        hashedName.substring(0, 2), hashedName);
-
-      // Check if artifact file exist
-      if (!fs.existsSync(fullPath)) {
-        await addArtifactOS(hashedName, artifactBlob);
-      }
-
-      // Define new hash history entry
-      const historyEntry = {
-        hash: hashedName,
-        user: reqUser
-      };
-
-      const prevHistory = art.history;
-      prevHistory.push(historyEntry);
-      updateArtifact.history = prevHistory;
-    }
-    console.log('updateArtifact: ', updateArtifact)
     // Update the artifact
     bulkArray.push({
       updateOne: {
@@ -668,7 +679,6 @@ async function update(requestingUser, organizationID, projectID, branch,
       }
     });
   });
-  console.log('bulkArray: ' , bulkArray)
   await Artifact.bulkWrite(bulkArray);
 
   // Emit the event artifacts-updated
@@ -780,11 +790,11 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
       uniqueIDsObj[id] = id;
     }
   });
-  uniqueIDs = Object.keys(uniqueIDsObj);
+  const uniqueIDs = Object.keys(uniqueIDsObj);
 
   // Loop through artifact history
   artifactHistoryArr.forEach((a) => {
-    a.forEach(async (history) =>{
+    a.forEach(async (history) => {
       const foundArtHistory = await Artifact.find({ 'history.hash': history.hash });
       // Check last artifact with this hash
       if (foundArtHistory.length === 1) {
@@ -823,29 +833,29 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
  *   M.log.error(error);
  * });
  */
-function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
-  return new Promise((resolve, reject) => {
-    let artifactMeta;
-    findArtifact(reqUser, organizationID, projectID, artifactID)
-    .then((foundArtifact) => {
-      // Artifact metadata found, save it
-      artifactMeta = foundArtifact;
-
-      // Get the Artifact Blob
-      return getArtifactOS(artifactMeta.history[artifactMeta.history.length - 1].hash);
-    })
-    .then((ArtifactBlob) => resolve({ artifactBlob: ArtifactBlob, artifactMeta: artifactMeta }))
-    .catch((error) => {
-      reject(M.CustomError.parseCustomError(error));
-    });
-  });
-}
+// function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
+//   return new Promise((resolve, reject) => {
+//     let artifactMeta;
+//     findArtifact(reqUser, organizationID, projectID, artifactID)
+//     .then((foundArtifact) => {
+//       // Artifact metadata found, save it
+//       artifactMeta = foundArtifact;
+//
+//       // Get the Artifact Blob
+//       return getArtifactOS(artifactMeta.history[artifactMeta.history.length - 1].hash);
+//     })
+//     .then((ArtifactBlob) => resolve({ artifactBlob: ArtifactBlob, artifactMeta: artifactMeta }))
+//     .catch((error) => {
+//       reject(M.CustomError.parseCustomError(error));
+//     });
+//   });
+// }
 
 /**
  * @description This function adds the artifact blob file to the file system.
  *
  * @param {string} hashedName - hash name of the file
- * @param {Binary} artifactBlob - A binary large object artifact
+ * @param {Buffer} artifactBlob - A binary large object artifact
  */
 function addArtifactOS(hashedName, artifactBlob) {
   return new Promise((resolve, reject) => {
@@ -949,24 +959,24 @@ function removeArtifactOS(hashedName) {
  *
  * @param {String} hashedName - hash name of the file
  */
-function getArtifactOS(hashName) {
-  return new Promise((resolve, reject) => {
-    // Create the main artifact path
-    const artifactPath = path.join(M.root, M.config.artifact.path);
-    // Create sub folder path and artifact path
-    // Note: Folder name is the first 2 characters from the generated hash
-    const folderPath = path.join(artifactPath, hashName.substring(0, 2));
-    const filePath = path.join(folderPath, hashName);
-    try {
-      // Read the artifact file
-      // Note: Use sync to ensure file is read before advancing
-      return resolve(fs.readFileSync(filePath));
-    }
-    catch (err) {
-      return reject(new M.CustomError('Artifact binary not found.', 404, 'warn'));
-    }
-  });
-}
+// function getArtifactOS(hashName) {
+//   return new Promise((resolve, reject) => {
+//     // Create the main artifact path
+//     const artifactPath = path.join(M.root, M.config.artifact.path);
+//     // Create sub folder path and artifact path
+//     // Note: Folder name is the first 2 characters from the generated hash
+//     const folderPath = path.join(artifactPath, hashName.substring(0, 2));
+//     const filePath = path.join(folderPath, hashName);
+//     try {
+//       // Read the artifact file
+//       // Note: Use sync to ensure file is read before advancing
+//       return resolve(fs.readFileSync(filePath));
+//     }
+//     catch (err) {
+//       return reject(new M.CustomError('Artifact binary not found.', 404, 'warn'));
+//     }
+//   });
+// }
 
 /**
  * @description This function creates the artifact storage directory if
