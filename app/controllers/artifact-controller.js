@@ -311,6 +311,7 @@ async function create(requestingUser, organizationID, projectID, branch,
   // Define array to store org data
   let artsToCreate = [];
   const arrIDs = [];
+  let newHistoryEntry = null;
   const validArtKeys = ['id', 'name', 'project', 'branch', 'filename', 'contentType',
     'location', 'custom', 'history'];
 
@@ -395,34 +396,32 @@ async function create(requestingUser, organizationID, projectID, branch,
       + ` [${existingArtifact.toString()}].`, 'warn');
   }
 
+  // Verify artifactBlob defined
+  if (typeof artifactBlob !== 'undefined') {
+    // Generate hash
+    const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+
+    // Create the main artifact path
+    const artifactPath = path.join(M.root, M.config.artifact.path);
+
+    const fullPath = path.join(artifactPath,
+      hashedName.substring(0, 2), hashedName);
+
+    // Check if artifact file exist
+    if (!fs.existsSync(fullPath)) {
+      await addArtifactOS(hashedName, artifactBlob);
+
+      // Define new hash history entry
+      newHistoryEntry = {
+        hash: hashedName,
+        user: reqUser
+      };
+    }
+  }
+
   const artPromises = artsToCreate.map(async (a) => {
     const artObj = new Artifact(a);
-    // Verify artifactBlob defined
-    // TODO: Move out
-    if (typeof artifactBlob !== 'undefined') {
-      // Generate hash
-      const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-
-      // Create the main artifact path
-      const artifactPath = path.join(M.root, M.config.artifact.path);
-
-      const fullPath = path.join(artifactPath,
-        hashedName.substring(0, 2), hashedName);
-
-      // Check if artifact file exist
-      if (!fs.existsSync(fullPath)) {
-        await addArtifactOS(hashedName, artifactBlob);
-
-        // Define new hash history entry
-        const historyEntry = {
-          hash: hashedName,
-          user: reqUser
-        };
-
-        artObj.history = [historyEntry];
-      }
-    }
-
+    artObj.history = [newHistoryEntry];
     artObj.project = foundProj._id;
     artObj.branch = foundBranch._id;
     artObj.lastModifiedBy = reqUser._id;
@@ -637,7 +636,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   }
 
   // For each artifact found
-  foundArtifact.forEach(async (art) => {
+  foundArtifact.forEach((art) => {
     const updateArtifact = jmiType2[art._id];
     delete updateArtifact.id;
     delete updateArtifact._id;
@@ -797,12 +796,7 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   // Loop through artifact history
   artifactHistoryArr.forEach((a) => {
     a.forEach(async (history) => {
-      const foundArtHistory = await Artifact.find({ 'history.hash': history.hash });
-      // Check last artifact with this hash
-      if (foundArtHistory.length === 1) {
-        // Last hash record, remove artifact from storage
-        removeArtifactOS(history.hash);
-      }
+      removeArtifactOS(history.hash);
     });
   });
 
