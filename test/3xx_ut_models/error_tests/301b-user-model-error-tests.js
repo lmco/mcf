@@ -60,6 +60,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should reject when a username is too short', usernameTooShort);
   it('should reject when a username is too long', usernameTooLong);
+  it('should reject with an invalid username', usernameInvalid);
   it('should reject when a first name is too long', fnameTooLong);
   it('should reject when a last name is too long', lnameTooLong);
   it('should reject when a preferred name is too long', preferredNameTooLong);
