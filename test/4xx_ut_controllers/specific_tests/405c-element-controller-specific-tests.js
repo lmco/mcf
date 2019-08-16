@@ -129,7 +129,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should delete an element which is part of a relationship', deleteRelElement);
   it('should populate allowed fields when finding an element', optionPopulateFind);
   it('should find an archived element when the option archived is provided', optionArchivedFind);
-  it('should find an element and it\'s subtree when the option subtree '
+  it('should find an element and its subtree when the option subtree '
     + 'is provided', optionSubtreeFind);
   it('should return an element with only the specific fields specified from'
     + ' find()', optionFieldsFind);
@@ -163,6 +163,7 @@ describe(M.getModuleName(module.filename), () => {
     + 'object from search()', optionLeanSearch);
   it('should sort find results', optionSortFind);
   it('should sort search results', optionSortSearch);
+  it('should return every parent up to root with the rootpath option', optionRootpath);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -1458,6 +1459,35 @@ function optionSortSearch(done) {
     M.log.error(error.message);
     // Expect no error
     chai.expect(error.message).to.equal(null);
+    done();
+  });
+}
+
+/**
+ * @description Validates that findElement function can return every parent up to root
+ */
+function optionRootpath(done) {
+  const testElems = [{
+    id: 'testelem00',
+    name: 'a',
+    parent: 'model'
+  },
+  {
+    id: 'testelem01',
+    name: 'b',
+    parent: 'testelem00'
+  }];
+  // create option
+  const option = { rootpath: true };
+
+  ElementController.create(adminUser, org.id, projIDs[0], branchID, testElems)
+  .then((createdElements) => {
+    chai.expect(createdElements.length).to.equal(2);
+
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID, testElems[1], option);
+  })
+  .then((foundElements) => {
+    chai.expect(foundElements.length).to.equal(2);
     done();
   });
 }
