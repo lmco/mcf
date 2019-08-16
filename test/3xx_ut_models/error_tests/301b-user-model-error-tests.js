@@ -24,6 +24,7 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const customValidators = M.config.validators || {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -129,6 +130,43 @@ function usernameTooLong(done) {
       // Ensure error message is correct
       chai.expect(error.message).to.equal('User validation failed: _id: '
         + 'Too many characters in username');
+      done();
+    }
+  });
+}
+
+/**
+ * @description Attempts to create a user with an invalid username.
+ */
+function usernameInvalid(done) {
+  if (customValidators.hasOwnProperty('user_username')) {
+    M.log.verbose('Skipping valid username test due to custom validator.');
+    this.skip();
+  }
+
+  const userData = Object.assign({}, testData.users[0]);
+
+  // Change username to be invalid
+  userData._id = 'Inva3l!d_UserN&me';
+
+  // Create user object
+  const userObject = new User(userData);
+
+  // Save user
+  userObject.save()
+  .then(() => {
+    // Should not succeed, force to fail
+    chai.assert.fail(true, false, 'User created successfully.');
+  })
+  .catch((error) => {
+    // If user created successfully, fail the test
+    if (error.message === 'User created successfully.') {
+      done(error);
+    }
+    else {
+      // Ensure error message is correct
+      chai.expect(error.message).to.equal('User validation failed: _id: Path '
+        + `\`_id\` is invalid (${userData._id}).`);
       done();
     }
   });
