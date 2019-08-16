@@ -35,7 +35,6 @@ function ListItem(props) {
     // Verify router link provided
   if (props.routerLink) {
     // Create a navLink item
-    // TODO (jk->ld) - The return statement wasn't here before, is this expected?
     return (<NavLink exact to={props.routerLink}> {listItem} </NavLink>);
   }
   // Verify href provided

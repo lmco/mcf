@@ -1894,7 +1894,6 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
     let foundElements = [];
 
-    // TODO: Look at the element key from the model
     // Validate and set the options
     const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
       'limit', 'skip', 'lean', 'sort'], Element);

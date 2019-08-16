@@ -120,7 +120,6 @@ UserSchema.virtual('username')
 UserSchema.plugin(extensions);
 
 /* ---------------------------( User Middleware )---------------------------- */
-// TODO: Consider adding UserSchema.validateUserData() function
 /**
  * @description Run our pre-defined setters on save.
  * @memberOf UserSchema
