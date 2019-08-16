@@ -137,7 +137,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Validate the provided options
   const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
-    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
 
   // Ensure search options are valid
   if (options) {
@@ -213,6 +213,10 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
     elementsToFind = await findElementTree(orgID, projID, branchID, elementsToFind);
   }
 
+  if (validatedOptions.rootpath) {
+    elementsToFind = await findElementRootPath(orgID, projID, branchID, elementsToFind);
+  }
+  console.log(elementsToFind)
   // If the archived field is true, remove it from the query
   if (validatedOptions.archived) {
     delete searchQuery.archived;
@@ -1680,7 +1684,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
  *   M.log.error(error);
  * });
  */
-function findElementTree(organizationID, projectID, branch, elementIDs) {
+async function findElementTree(organizationID, projectID, branch, elementIDs) {
   // Ensure elementIDs is an array
   if (!Array.isArray(elementIDs)) {
     throw new M.DataFormatError('ElementIDs array is not an array.', 'warn');
@@ -1696,44 +1700,46 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
 
   // Define nested helper function
   function findElementTreeHelper(ids) {
-    return new Promise((resolve, reject) => {
-      // Find all elements whose parent is in the list of given ids
-      Element.find({ parent: { $in: ids } }, '_id').lean()
-      .then(elements => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Find all elements whose parent is in the list of given ids
+        const elements = await Element.find({ parent: { $in: ids } }, '_id').lean();
         // Get a list of element ids
         const foundIDs = elements.map(e => e._id);
         // Add these elements to the global list of found elements
         foundElements = foundElements.concat(foundIDs);
-
         // If no elements were found, exit the recursive function
         if (foundIDs.length === 0) {
           return '';
         }
-
         // Recursively find the sub-children of the found elements in batches of 50000 or less
         for (let i = 0; i < foundIDs.length / 50000; i++) {
           const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
           return findElementTreeHelper(tmpIDs);
         }
-      })
-      .then(() => resolve())
-      .catch((error) => reject(error));
+      }
+      catch (error) {
+        reject(error);
+      }
+      resolve();
     });
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const promises = [];
-
-    // If initial batch of ids is greater than 50000, split up in batches
-    for (let i = 0; i < foundElements.length / 50000; i++) {
-      const tmpIDs = foundElements.slice(i * 50000, i * 50000 + 50000);
-      // Find elements subtree
-      promises.push(findElementTreeHelper(tmpIDs));
+    try {
+      // If initial batch of ids is greater than 50000, split up in batches
+      for (let i = 0; i < foundElements.length / 50000; i++) {
+        const tmpIDs = foundElements.slice(i * 50000, i * 50000 + 50000);
+        // Find elements subtree
+        promises.push(findElementTreeHelper(tmpIDs));
+      }
+      await Promise.all(promises);
     }
-
-    Promise.all(promises)
-    .then(() => resolve(foundElements))
-    .catch((error) => reject(errors.captureError(error)));
+    catch (error) {
+      reject(errors.captureError(error));
+    }
+    resolve(foundElements);
   });
 }
 
@@ -1986,4 +1992,51 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       return reject(errors.captureError(error));
     }
   });
+}
+
+async function findElementRootPath(organizationID, projectID, branch, elementID) {
+  // Ensure elementID is a single id
+  if (elementID.length !== 1) {
+    throw new M.DataFormatError('Can only use the rootpath option on a single element', 'warn');
+  }
+
+  // Initialize return object
+  let foundElements = [];
+
+  // Define nested helper function
+  async function findElementTreeHelper(searchID) {
+    try {
+      // Find the parent of the element
+      const parent = await Element.findOne({ _id: searchID }, { _id: 1, parent: 1 }).lean();
+      // Ensure the parent was found
+      if (!parent) {
+        throw new M.DataFormatError('Element or parent not found', 'warn');
+      }
+      // Get the parent id
+      const parentID = parent._id;
+      // If it's a circular reference, don't get lost in the sauce
+      if (foundElements.includes(parentID)) {
+        throw new M.DataFormatError('Circular element parent reference', 'warn');
+      }
+      else {
+        // Add the parent to the list of elements
+        foundElements = foundElements.concat(parentID);
+      }
+      // If the parent is root, exit the recursive function
+      if (utils.parseID(parentID).pop() === 'model') {
+        return '';
+      }
+      else {
+        // Recursively Find the parent of the parent
+        return findElementTreeHelper(parent.parent);
+      }
+    }
+    catch (error) {
+      throw errors.captureError(error);
+    }
+  }
+
+  await findElementTreeHelper(elementID);
+
+  return foundElements;
 }

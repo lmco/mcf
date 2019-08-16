@@ -423,6 +423,11 @@ module.exports.validateOptions = function(options, validOptions, model) {
       // Set the lean option in the returnObject
       validatedOptions.lean = val;
     }
+
+    // Handle the rootpath option
+    if (opt === 'rootpath') {
+      validatedOptions.rootpath = val;
+    }
   });
 
   return validatedOptions;
