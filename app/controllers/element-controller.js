@@ -73,6 +73,8 @@ const helper = M.require('lib.controller-helper');
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.rootpath] - An option to specify finding the parent,
+ * grandparent, etc of the query element all the way up to the root element.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
@@ -1684,7 +1686,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
  *   M.log.error(error);
  * });
  */
-async function findElementTree(organizationID, projectID, branch, elementIDs) {
+function findElementTree(organizationID, projectID, branch, elementIDs) {
   // Ensure elementIDs is an array
   if (!Array.isArray(elementIDs)) {
     throw new M.DataFormatError('ElementIDs array is not an array.', 'warn');
@@ -1700,46 +1702,44 @@ async function findElementTree(organizationID, projectID, branch, elementIDs) {
 
   // Define nested helper function
   function findElementTreeHelper(ids) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        // Find all elements whose parent is in the list of given ids
-        const elements = await Element.find({ parent: { $in: ids } }, '_id').lean();
+    return new Promise((resolve, reject) => {
+      // Find all elements whose parent is in the list of given ids
+      Element.find({ parent: { $in: ids } }, '_id').lean()
+      .then(elements => {
         // Get a list of element ids
         const foundIDs = elements.map(e => e._id);
         // Add these elements to the global list of found elements
         foundElements = foundElements.concat(foundIDs);
+
         // If no elements were found, exit the recursive function
         if (foundIDs.length === 0) {
           return '';
         }
+
         // Recursively find the sub-children of the found elements in batches of 50000 or less
         for (let i = 0; i < foundIDs.length / 50000; i++) {
           const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
           return findElementTreeHelper(tmpIDs);
         }
-      }
-      catch (error) {
-        reject(error);
-      }
-      resolve();
+      })
+      .then(() => resolve())
+      .catch((error) => reject(error));
     });
   }
 
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const promises = [];
-    try {
-      // If initial batch of ids is greater than 50000, split up in batches
-      for (let i = 0; i < foundElements.length / 50000; i++) {
-        const tmpIDs = foundElements.slice(i * 50000, i * 50000 + 50000);
-        // Find elements subtree
-        promises.push(findElementTreeHelper(tmpIDs));
-      }
-      await Promise.all(promises);
+
+    // If initial batch of ids is greater than 50000, split up in batches
+    for (let i = 0; i < foundElements.length / 50000; i++) {
+      const tmpIDs = foundElements.slice(i * 50000, i * 50000 + 50000);
+      // Find elements subtree
+      promises.push(findElementTreeHelper(tmpIDs));
     }
-    catch (error) {
-      reject(errors.captureError(error));
-    }
-    resolve(foundElements);
+
+    Promise.all(promises)
+    .then(() => resolve(foundElements))
+    .catch((error) => reject(errors.captureError(error)));
   });
 }
 
@@ -1994,6 +1994,26 @@ function search(requestingUser, organizationID, projectID, branch, query, option
   });
 }
 
+/**
+ * @description A non-exposed helper function which finds the parent of given
+ * element up to and including the root element
+ *
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string[]} elementID - The elements whose parents are being found.
+ *
+ * @return {string} Array of found element ids
+ *
+ * @example
+ * findElementTree('orgID', 'projID', 'branch', 'elem1')
+ * .then(function(elementIDs) {
+ *   // Do something with the found element IDs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
 async function findElementRootPath(organizationID, projectID, branch, elementID) {
   // Ensure elementID is a single id
   if (elementID.length !== 1) {

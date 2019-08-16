@@ -1482,12 +1482,23 @@ function optionRootpath(done) {
 
   ElementController.create(adminUser, org.id, projIDs[0], branchID, testElems)
   .then((createdElements) => {
+    // Expect the create function to work properly
     chai.expect(createdElements.length).to.equal(2);
 
-    return ElementController.find(adminUser, org.id, projIDs[0], branchID, testElems[1], option);
+    // Return a search on the furthest nested element with the rootpath option
+    return ElementController.find(adminUser, org.id, projIDs[0], branchID, testElems[1].id, option);
   })
   .then((foundElements) => {
-    chai.expect(foundElements.length).to.equal(2);
+    // Expect to find 3 elements
+    chai.expect(foundElements.length).to.equal(3);
+
+    const foundIDs = foundElements.map(e => utils.parseID(e.id).pop());
+    // Expect to find the model element and two test elements
+    chai.expect(foundIDs).to.include('model');
+    chai.expect(foundIDs).to.include(testElems[0].id);
+    chai.expect(foundIDs).to.include(testElems[1].id);
+
+    // Expect to find the test elements
     done();
   });
 }
