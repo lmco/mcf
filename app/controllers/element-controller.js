@@ -216,7 +216,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   if (validatedOptions.rootpath) {
     elementsToFind = await findElementRootPath(orgID, projID, branchID, elementsToFind);
   }
-  console.log(elementsToFind)
+
   // If the archived field is true, remove it from the query
   if (validatedOptions.archived) {
     delete searchQuery.archived;
