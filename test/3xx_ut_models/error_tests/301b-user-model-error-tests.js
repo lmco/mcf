@@ -24,6 +24,7 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const customValidators = M.config.validators || {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -60,12 +61,17 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should reject when a username is too short', usernameTooShort);
   it('should reject when a username is too long', usernameTooLong);
+  it('should reject with an invalid username', usernameInvalid);
   it('should reject when a first name is too long', fnameTooLong);
+  it('should reject with an invalid first name', fnameInvalid);
   it('should reject when a last name is too long', lnameTooLong);
+  it('should reject with an invalid last name', lnameInvalid);
   it('should reject when a preferred name is too long', preferredNameTooLong);
+  it('should reject with an invalid preferred name', preferredNameInvalid);
   it('should reject if the admin field is not a boolean', adminNotBoolean);
   it('should reject if the provider field is not a string', providerNotString);
   it('should reject if no username (_id) is provided', usernameNotProvided);
+  it('should reject with an invalid email', emailInvalid);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -134,6 +140,38 @@ function usernameTooLong(done) {
 }
 
 /**
+ * @description Attempts to create a user with an invalid username.
+ */
+async function usernameInvalid() {
+  if (customValidators.hasOwnProperty('user_username')) {
+    M.log.verbose('Skipping valid username test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const userData = Object.assign({}, testData.users[0]);
+
+  // Change username to be invalid
+  userData._id = 'Inva3l!d_UserN&me';
+
+  // Create user object
+  const userObject = new User(userData);
+
+  // Save user
+  try {
+    await userObject.save();
+
+    // Should not succeed, force to fail
+    chai.assert.fail(true, false, 'User created successfully.');
+  }
+  catch (error) {
+    // Ensure error message is correct
+    chai.expect(error.message).to.equal('User validation failed: _id: Path '
+      + `\`_id\` is invalid (${userData._id}).`);
+  }
+}
+
+/**
  * @description Attempts to create a user with a first name that is too long.
  */
 function fnameTooLong(done) {
@@ -165,6 +203,40 @@ function fnameTooLong(done) {
     }
   });
 }
+
+/**
+ * @description Attempts to create a user with an invalid first name.
+ */
+async function fnameInvalid() {
+  if (customValidators.hasOwnProperty('user_fname')) {
+    M.log.verbose('Skipping valid first name test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const userData = Object.assign({}, testData.users[0]);
+  userData._id = userData.username;
+
+  // Change first name to be invalid
+  userData.fname = 'Inva3l!d_FirstN&me';
+
+  // Create user object
+  const userObject = new User(userData);
+
+  // Save user
+  try {
+    await userObject.save();
+
+    // Should not succeed, force to fail
+    chai.assert.fail(true, false, 'User created successfully.');
+  }
+  catch (error) {
+    // Ensure error message is correct
+    chai.expect(error.message).to.equal('User validation failed: fname: Path '
+      + `\`fname\` is invalid (${userData.fname}).`);
+  }
+}
+
 
 /**
  * @description Attempts to create a user with a last name that is too long.
@@ -200,6 +272,40 @@ function lnameTooLong(done) {
 }
 
 /**
+ * @description Attempts to create a user with an invalid last name.
+ */
+async function lnameInvalid() {
+  if (customValidators.hasOwnProperty('user_lname')) {
+    M.log.verbose('Skipping valid last name test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const userData = Object.assign({}, testData.users[0]);
+  userData._id = userData.username;
+
+  // Change last name to be invalid
+  userData.lname = 'Inva3l!d_LastN&me';
+
+  // Create user object
+  const userObject = new User(userData);
+
+  // Save user
+  try {
+    await userObject.save();
+
+    // Should not succeed, force to fail
+    chai.assert.fail(true, false, 'User created successfully.');
+  }
+  catch (error) {
+    // Ensure error message is correct
+    chai.expect(error.message).to.equal('User validation failed: lname: Path '
+      + `\`lname\` is invalid (${userData.lname}).`);
+  }
+}
+
+
+/**
  * @description Attempts to create a user with a preferred name that's too long.
  */
 function preferredNameTooLong(done) {
@@ -231,6 +337,40 @@ function preferredNameTooLong(done) {
     }
   });
 }
+
+/**
+ * @description Attempts to create a user with an invalid preferred name.
+ */
+async function preferredNameInvalid() {
+  if (customValidators.hasOwnProperty('user_fname')) {
+    M.log.verbose('Skipping valid preferred name test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const userData = Object.assign({}, testData.users[0]);
+  userData._id = userData.username;
+
+  // Change preferred name to be invalid
+  userData.preferredName = 'Inva3l!d_PreferredN&me';
+
+  // Create user object
+  const userObject = new User(userData);
+
+  // Save user
+  try {
+    await userObject.save();
+
+    // Should not succeed, force to fail
+    chai.assert.fail(true, false, 'User created successfully.');
+  }
+  catch (error) {
+    // Ensure error message is correct
+    chai.expect(error.message).to.equal('User validation failed: preferredName:'
+      + ` Path \`preferredName\` is invalid (${userData.preferredName}).`);
+  }
+}
+
 
 /**
  * @description Attempts to create a user with an admin that's not a boolean.
@@ -325,4 +465,37 @@ function usernameNotProvided(done) {
       done();
     }
   });
+}
+
+/**
+ * @description Attempts to create a user with an invalid email.
+ */
+async function emailInvalid() {
+  if (customValidators.hasOwnProperty('user_email')) {
+    M.log.verbose('Skipping valid email test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const userData = Object.assign({}, testData.users[0]);
+  userData._id = userData.username;
+
+  // Change email to be invalid
+  userData.email = 'invalid_email';
+
+  // Create user object
+  const userObject = new User(userData);
+
+  // Save user
+  try {
+    await userObject.save();
+
+    // Should not succeed, force to fail
+    chai.assert.fail(true, false, 'User created successfully.');
+  }
+  catch (error) {
+    // Ensure error message is correct
+    chai.expect(error.message).to.equal('User validation failed: email: Path '
+      + `\`email\` is invalid (${userData.email}).`);
+  }
 }
