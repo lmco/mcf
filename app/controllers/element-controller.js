@@ -216,7 +216,11 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   if (validatedOptions.rootpath) {
-    elementsToFind = await findElementRootPath(orgID, projID, branchID, elementsToFind);
+    if (elementsToFind.length > 1) {
+      throw new M.DataFormatError('Can only perform root path search on a single element', 'warn');
+    }
+    const elementToFind = elementsToFind[0];
+    elementsToFind = await findElementRootPath(orgID, projID, branchID, elementToFind);
   }
 
   // If the archived field is true, remove it from the query
@@ -2000,12 +2004,12 @@ function search(requestingUser, organizationID, projectID, branch, query, option
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to find elements from.
- * @param {string} elementID - The elements whose parents are being found.
+ * @param {string} elementID - The element whose parents are being found.
  *
  * @return {string} Array of found element ids
  *
  * @example
- * findElementTree('orgID', 'projID', 'branch', 'elem1')
+ * findElementRootPath('orgID', 'projID', 'branch', 'elem1')
  * .then(function(elementIDs) {
  *   // Do something with the found element IDs
  * })
@@ -2014,11 +2018,6 @@ function search(requestingUser, organizationID, projectID, branch, query, option
  * });
  */
 async function findElementRootPath(organizationID, projectID, branch, elementID) {
-  // Ensure elementID is a single id
-  if (elementID.length !== 1) {
-    throw new M.DataFormatError('Can only use the rootpath option on a single element', 'warn');
-  }
-
   // Initialize return object
   let foundElements = [];
 
