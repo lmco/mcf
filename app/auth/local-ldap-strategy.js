@@ -106,14 +106,7 @@ function handleBasicAuth(req, res, username, password) {
  *   })
  */
 async function handleTokenAuth(req, res, _token) {
-  let user;
-  try {
-    user = await LocalStrategy.handleTokenAuth(req, res, _token);
-  }
-  catch (handleTokenAuthErr) {
-    throw handleTokenAuthErr;
-  }
-  return user;
+  return LocalStrategy.handleTokenAuth(req, res, _token);
 }
 
 /**
