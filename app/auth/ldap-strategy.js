@@ -60,29 +60,28 @@ const ldapConfig = M.config.auth.ldap;
  *     console.log(err);
  *   })
  */
-function handleBasicAuth(req, res, username, password) {
-  // Return a promise
-  return new Promise((resolve, reject) => {
-    // Define LDAP client handler
-    let ldapClient = null;
-
+async function handleBasicAuth(req, res, username, password) {
+  // Initialize return object
+  let syncedUser;
+  try {
     // Connect to database
-    ldapConnect()
-    .then(_ldapClient => {
-      ldapClient = _ldapClient;
+    const ldapClient = await ldapConnect();
 
-      // Search for user
-      return ldapSearch(ldapClient, username);
-    })
+    // Search for user
+    const foundUser = await ldapSearch(ldapClient, username);
 
     // Authenticate user
-    .then(foundUser => ldapAuth(ldapClient, foundUser, password))
+    const authUser = await ldapAuth(ldapClient, foundUser, password);
+
     // Sync user with local database
-    .then(authUser => ldapSync(authUser))
-    // Return authenticated user object
-    .then(syncedUser => resolve(syncedUser))
-    .catch(ldapConnectErr => reject(ldapConnectErr));
-  });
+    syncedUser = await ldapSync(authUser);
+  }
+  catch (error) {
+    throw error;
+  }
+
+  // Return authenticated user object
+  return syncedUser;
 }
 
 /**
@@ -104,12 +103,17 @@ function handleBasicAuth(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-function handleTokenAuth(req, res, token) {
-  return new Promise((resolve, reject) => {
-    LocalStrategy.handleTokenAuth(req, res, token)
-    .then(user => resolve(user))
-    .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
-  });
+async function handleTokenAuth(req, res, token) {
+  // initialize return object
+  let user;
+  try {
+    user = await LocalStrategy.handleTokenAuth(req, res, token);
+  }
+  catch (error) {
+    throw error;
+  }
+  // Return user object
+  return user;
 }
 
 /**
@@ -131,66 +135,65 @@ function doLogin(req, res, next) {
  *
  * @returns {Promise} An LDAP client object
  */
-function ldapConnect() {
+async function ldapConnect() {
   M.log.debug('Attempting to bind to the LDAP server.');
-  // define and return promise
-  return new Promise((resolve, reject) => {
-    // Initialize arrCaCerts to hold LDAP server certificates
-    const arrCaCerts = [];
 
-    let ldapCA = ldapConfig.ca;
-    // If the CA contents is a string, make it an array
-    if (typeof ldapCA === 'string') {
-      ldapCA = [ldapCA];
+  // Initialize arrCaCerts to hold LDAP server certificates
+  const arrCaCerts = [];
+
+  let ldapCA = ldapConfig.ca;
+  // If the CA contents is a string, make it an array
+  if (typeof ldapCA === 'string') {
+    ldapCA = [ldapCA];
+  }
+  // If no CA is provided.
+  else if (typeof ldapCA === 'undefined') {
+    ldapCA = [];
+  }
+
+  // Now if it's not an array, fail
+  if (!Array.isArray(ldapCA)) {
+    M.log.error('Failed to load LDAP CA certificates (invalid type)');
+    throw new M.ServerError('An error occurred.', 'error');
+  }
+
+  // If any items in the array are not strings, fail
+  if (!ldapCA.every(c => typeof c === 'string')) {
+    M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
+    throw new M.ServerError('An error occurred.', 'error');
+  }
+
+  M.log.verbose('Reading LDAP server CAs ...');
+
+  // Loop  number of certificates in config file
+  for (let i = 0; i < ldapCA.length; i++) {
+    // Extract certificate filename from config file
+    const certName = ldapCA[i];
+    // Extract certificate file content
+    const file = fs.readFileSync(path.join(M.root, certName));
+    // Push file content to arrCaCert
+    arrCaCerts.push(file);
+  }
+  M.log.verbose('LDAP server CAs loaded.');
+
+  // Create ldapClient object with url, credentials, and certificates
+  const ldapClient = ldap.createClient({
+    url: `${ldapConfig.url}:${ldapConfig.port}`,
+    tlsOptions: {
+      ca: arrCaCerts
     }
-    // If no CA is provided.
-    else if (typeof ldapCA === 'undefined') {
-      ldapCA = [];
-    }
-
-    // Now if it's not an array, fail
-    if (!Array.isArray(ldapCA)) {
-      M.log.error('Failed to load LDAP CA certificates (invalid type)');
-      return reject(new M.ServerError('An error occurred.', 'error'));
-    }
-
-    // If any items in the array are not strings, fail
-    if (!ldapCA.every(c => typeof c === 'string')) {
-      M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
-      return reject(new M.ServerError('An error occurred.', 'error'));
-    }
-
-    M.log.verbose('Reading LDAP server CAs ...');
-
-    // Loop  number of certificates in config file
-    for (let i = 0; i < ldapCA.length; i++) {
-      // Extract certificate filename from config file
-      const certName = ldapCA[i];
-      // Extract certificate file content
-      const file = fs.readFileSync(path.join(M.root, certName));
-      // Push file content to arrCaCert
-      arrCaCerts.push(file);
-    }
-    M.log.verbose('LDAP server CAs loaded.');
-
-    // Create ldapClient object with url, credentials, and certificates
-    const ldapClient = ldap.createClient({
-      url: `${ldapConfig.url}:${ldapConfig.port}`,
-      tlsOptions: {
-        ca: arrCaCerts
-      }
-    });
-    // Bind ldapClient object to LDAP server
-    ldapClient.bind(ldapConfig.bind_dn, ldapConfig.bind_dn_pass, (bindErr) => {
-      // Check if LDAP server bind fails
+  });
+  // Bind ldapClient object to LDAP server
+  const boundLdapClient = await ldapClient.bind(ldapConfig.bind_dn, ldapConfig.bind_dn_pass,
+    (bindErr) => {
+    // Check if LDAP server bind fails
       if (bindErr) {
         // LDAP serve bind failed, reject bind error
-        return reject(bindErr);
+        throw bindErr;
       }
-      // LDAP serve bind successful, resolve ldapClient object
-      return resolve(ldapClient);
     });
-  });
+  // LDAP serve bind successful, resolve ldapClient object
+  return boundLdapClient;
 }
 
 /**
@@ -314,30 +317,26 @@ function ldapAuth(ldapClient, user, password) {
  *
  * @returns {Promise} Synchronized user model object
  */
-function ldapSync(ldapUserObj) {
+async function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
-  // Define and return promise
-  return new Promise((resolve, reject) => {
-    // Store user object function-wide
-    let userObject = {};
-    let created = false;
 
+  let userObject;
+  try {
     // Search for user in database
-    User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] })
-    .then(foundUser => {
-      // If the user was found, update with LDAP info
-      if (foundUser) {
-        // User exists, update database with LDAP information
-        foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
-        foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
-        foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
-        foundUser.email = ldapUserObj[ldapConfig.attributes.email];
+    const foundUser = await User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] });
+    // If the user was found, update with LDAP info
+    if (foundUser) {
+      // User exists, update database with LDAP information
+      foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
+      foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
+      foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
+      foundUser.email = ldapUserObj[ldapConfig.attributes.email];
 
-        // Save updated user to database
-        return foundUser.save();
-      }
+      // Save updated user to database
+      userObject = await foundUser.save();
+    }
+    else {
       // User not found, create a new one
-
       // Initialize userData with LDAP information
       const initData = new User({
         _id: ldapUserObj[ldapConfig.attributes.username],
@@ -348,39 +347,31 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       });
 
-      // User was created, set boolean to true
-      created = true;
-
       // Save ldap user
-      return initData.save();
-    })
-    .then(savedUser => {
-      // Save user to function-wide variable
-      userObject = savedUser;
+      userObject = await initData.save();
 
       // If user created, emit users-created
-      if (created) {
-        EventEmitter.emit('users-created', [savedUser]);
-      }
+      EventEmitter.emit('users-created', [userObject])
+    }
 
-      // Find the default org
-      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
-    })
-    .then((defaultOrg) => {
-      // Add the user to the default org
-      defaultOrg.permissions[userObject._id] = ['read', 'write'];
+    // Find the default org
+    const defaultOrg = Organization.findOne({ _id: M.config.server.defaultOrganizationId });
 
-      // Mark permissions as modified, required for 'mixed' fields
-      defaultOrg.markModified('permissions');
+    // Add the user to the default org
+    defaultOrg.permissions[userObject._id] = ['read', 'write'];
 
-      // Save the updated default org
-      return defaultOrg.save();
-    })
-    // Return the new user
-    .then(() => resolve(userObject))
-    // Save failed, reject error
-    .catch(saveErr => reject(saveErr));
-  });
+    // Mark permissions as modified, required for 'mixed' fields
+    defaultOrg.markModified('permissions');
+
+    // Save the updated default org
+    await defaultOrg.save();
+  }
+  catch (saveErr) {
+    throw saveErr;
+  }
+
+  // Return the new user
+  return userObject;
 }
 
 /**

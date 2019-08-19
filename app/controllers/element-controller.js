@@ -1050,7 +1050,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
     }));
   }
 
-  // Return when all elements have been found
+  // Continue when all elements have been found
   await Promise.all(promises2);
 
   // Verify the same number of elements are found as desired
@@ -1700,33 +1700,32 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
   }
 
   // Define nested helper function
-  function findElementTreeHelper(ids) {
-    return new Promise((resolve, reject) => {
+  async function findElementTreeHelper(ids) {
+    try {
       // Find all elements whose parent is in the list of given ids
-      Element.find({ parent: { $in: ids } }, '_id').lean()
-      .then(elements => {
-        // Get a list of element ids
-        const foundIDs = elements.map(e => e._id);
-        // Add these elements to the global list of found elements
-        foundElements = foundElements.concat(foundIDs);
+      const elements = await Element.find({ parent: { $in: ids } }, '_id').lean();
+      // Get a list of element ids
+      const foundIDs = elements.map(e => e._id);
+      // Add these elements to the global list of found elements
+      foundElements = foundElements.concat(foundIDs);
 
-        // If no elements were found, exit the recursive function
-        if (foundIDs.length === 0) {
-          return '';
-        }
+      // If no elements were found, exit the recursive function
+      if (foundIDs.length === 0) {
+        return '';
+      }
 
-        // Recursively find the sub-children of the found elements in batches of 50000 or less
-        for (let i = 0; i < foundIDs.length / 50000; i++) {
-          const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
-          return findElementTreeHelper(tmpIDs);
-        }
-      })
-      .then(() => resolve())
-      .catch((error) => reject(error));
-    });
+      // Recursively find the sub-children of the found elements in batches of 50000 or less
+      for (let i = 0; i < foundIDs.length / 50000; i++) {
+        const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
+        return findElementTreeHelper(tmpIDs);
+      }
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const promises = [];
 
     // If initial batch of ids is greater than 50000, split up in batches
@@ -1736,9 +1735,13 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
       promises.push(findElementTreeHelper(tmpIDs));
     }
 
-    Promise.all(promises)
-    .then(() => resolve(foundElements))
-    .catch((error) => reject(errors.captureError(error)));
+    try {
+      await Promise.all(promises);
+    }
+    catch (error) {
+      reject(errors.captureError(error));
+    }
+    resolve(foundElements);
   });
 }
 
@@ -1763,67 +1766,62 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
  *   M.log.error(error);
  * });
  */
-function moveElementCheck(organizationID, projectID, branch, element) {
-  return new Promise((resolve, reject) => {
-    // Create the name-spaced ID
-    const elementID = utils.createID(organizationID, projectID, branch, element.id);
+async function moveElementCheck(organizationID, projectID, branch, element) {
+  // Create the name-spaced ID
+  const elementID = utils.createID(organizationID, projectID, branch, element.id);
 
-    // Error Check: ensure elements parent is not self
-    if (element.parent === elementID) {
-      throw new M.OperationError('Elements parent cannot be self.', 'warn');
+  // Error Check: ensure elements parent is not self
+  if (element.parent === elementID) {
+    throw new M.OperationError('Elements parent cannot be self.', 'warn');
+  }
+
+  // Error Check: ensure the root elements are not being moved
+  if (Element.getValidRootElements().includes(element.id)) {
+    const parent = utils.parseID(element.parent).pop();
+    if (element.id === 'model'
+      || (element.id === '__mbee__' && parent !== 'model')
+      || (element.id === 'holding_bin' && parent !== '__mbee__')
+      || (element.id === 'undefined' && parent !== '__mbee__')) {
+      throw new M.OperationError(
+        `Cannot move the root element: ${element.id}.`, 'warn'
+      );
+    }
+  }
+
+  // Define nested helper function
+  async function findElementParentRecursive(e) {
+    const foundElement = await Element.findOne({ _id: e.parent }).lean();
+    // If foundElement is null, reject with error
+    if (!foundElement) {
+      throw new M.NotFoundError('Parent element '
+        + `[${utils.parseID(e.parent).pop()}] not found.`, 'warn');
     }
 
-    // Error Check: ensure the root elements are not being moved
-    if (Element.getValidRootElements().includes(element.id)) {
-      const parent = utils.parseID(element.parent).pop();
-      if (element.id === 'model'
-        || (element.id === '__mbee__' && parent !== 'model')
-        || (element.id === 'holding_bin' && parent !== '__mbee__')
-        || (element.id === 'undefined' && parent !== '__mbee__')) {
-        throw new M.OperationError(
-          `Cannot move the root element: ${element.id}.`, 'warn'
-        );
-      }
+    // If element.parent is root, resolve... there is no conflict
+    if (foundElement.parent === null
+      || utils.parseID(foundElement.parent).pop() === 'model') {
+      return '';
     }
 
-    // Define nested helper function
-    function findElementParentRecursive(e) {
-      return new Promise((res, rej) => {
-        Element.findOne({ _id: e.parent }).lean()
-        .then((foundElement) => {
-          // If foundElement is null, reject with error
-          if (!foundElement) {
-            throw new M.NotFoundError('Parent element '
-              + `[${utils.parseID(e.parent).pop()}] not found.`, 'warn');
-          }
-
-          // If element.parent is root, resolve... there is no conflict
-          if (foundElement.parent === null
-            || utils.parseID(foundElement.parent).pop() === 'model') {
-            return '';
-          }
-
-          // If elementID is equal to foundElement.id, a circular reference would
-          // exist, reject with an error
-          if (elementID === foundElement.id) {
-            throw new M.OperationError('A circular reference would exist in'
-              + ' the model, element cannot be moved.', 'warn');
-          }
-          else {
-            // Find the parents parent
-            return findElementParentRecursive(foundElement);
-          }
-        })
-        .then(() => resolve())
-        .catch((error) => rej(error));
-      });
+    // If elementID is equal to foundElement.id, a circular reference would
+    // exist, reject with an error
+    if (elementID === foundElement.id) {
+      throw new M.OperationError('A circular reference would exist in'
+        + ' the model, element cannot be moved.', 'warn');
     }
+    else {
+      // Find the parents parent
+      return findElementParentRecursive(foundElement);
+    }
+  }
 
+  try {
     // Call the recursive find function
-    findElementParentRecursive(element)
-    .then(() => resolve())
-    .catch((error) => reject(errors.captureError(error)));
-  });
+    await findElementParentRecursive(element);
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**

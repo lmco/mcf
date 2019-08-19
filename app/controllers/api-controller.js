@@ -250,7 +250,7 @@ function version(req, res) {
  * NOTE: All users are members of the 'default' org, should always have
  * access to at least this organization.
  */
-function getOrgs(req, res) {
+async function getOrgs(req, res) {
   // Define options and ids
   // Note: Undefined if not set
   let ids;
@@ -323,10 +323,10 @@ function getOrgs(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Get all organizations the requesting user has access to
-  // NOTE: find() sanitizes arrOrgID.
-  OrgController.find(req.user, ids, options)
-  .then((orgs) => {
+  try {
+    // Get all organizations the requesting user has access to
+    // NOTE: find() sanitizes arrOrgID.
+    const orgs = await OrgController.find(req.user, ids, options);
     // Verify orgs array is not empty
     if (orgs.length === 0) {
       throw new M.NotFoundError('No orgs found.', 'warn');
@@ -342,9 +342,11 @@ function getOrgs(req, res) {
 
     // Return 200: OK and public org data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -412,10 +414,10 @@ async function postOrgs(req, res) {
     orgData = req.body;
   }
 
-  // Create organizations from org data
-  // NOTE: create() sanitizes orgData
-  OrgController.create(req.user, orgData, options)
-  .then((orgs) => {
+  try {
+    // Create organizations from org data
+    // NOTE: create() sanitizes orgData
+    const orgs = await OrgController.create(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -426,9 +428,11 @@ async function postOrgs(req, res) {
 
     // Return 200: OK and created orgs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -497,10 +501,10 @@ async function putOrgs(req, res) {
     orgData = req.body;
   }
 
-  // Create or replace organizations in org data
-  // NOTE: createOrReplace() sanitizes orgData
-  OrgController.createOrReplace(req.user, orgData, options)
-  .then((orgs) => {
+  try {
+    // Create or replace organizations in org data
+    // NOTE: createOrReplace() sanitizes orgData
+    const orgs = await OrgController.createOrReplace(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -511,9 +515,11 @@ async function putOrgs(req, res) {
 
     // Return 200: OK and created/replaced orgs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -581,10 +587,10 @@ async function patchOrgs(req, res) {
     orgData = req.body;
   }
 
-  // Update the specified orgs
-  // NOTE: update() sanitizes orgData
-  OrgController.update(req.user, orgData, options)
-  .then((orgs) => {
+  try {
+    // Update the specified orgs
+    // NOTE: update() sanitizes orgData
+    const orgs = await OrgController.update(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -595,9 +601,11 @@ async function patchOrgs(req, res) {
 
     // Return 200: OK and the updated orgs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -612,7 +620,7 @@ async function patchOrgs(req, res) {
  *
  * @return {Object} Response object with array of deleted org IDs.
  */
-function deleteOrgs(req, res) {
+async function deleteOrgs(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -651,17 +659,19 @@ function deleteOrgs(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified orgs
-  OrgController.remove(req.user, req.body, options)
-  // Return 200: OK and the deleted org IDs
-  .then((orgIDs) => {
+  try {
+    // Remove the specified orgs
+    const orgIDs = await OrgController.remove(req.user, req.body, options);
+    // Return 200: OK and the deleted org IDs
     // Format JSON
     const json = formatJSON(orgIDs, minified);
 
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -674,7 +684,7 @@ function deleteOrgs(req, res) {
  *
  * @return {Object} Response object with org's public data
  */
-function getOrg(req, res) {
+async function getOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -714,10 +724,10 @@ function getOrg(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find the org from it's id
-  // NOTE: find() sanitizes req.params.orgid
-  OrgController.find(req.user, req.params.orgid, options)
-  .then((orgs) => {
+  try {
+    // Find the org from it's id
+    // NOTE: find() sanitizes req.params.orgid
+    const orgs = await OrgController.find(req.user, req.params.orgid, options);
     // If no orgs found, return 404 error
     if (orgs.length === 0) {
       throw new M.NotFoundError(
@@ -735,9 +745,11 @@ function getOrg(req, res) {
 
     // Return a 200: OK and the org's public data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -751,7 +763,7 @@ function getOrg(req, res) {
  *
  * @return {Object} Response object with org's public data
  */
-function postOrg(req, res) {
+async function postOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -807,10 +819,10 @@ function postOrg(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create the organization with provided parameters
-  // NOTE: create() sanitizes req.body
-  OrgController.create(req.user, req.body, options)
-  .then((orgs) => {
+  try {
+    // Create the organization with provided parameters
+    // NOTE: create() sanitizes req.body
+    const orgs = await OrgController.create(req.user, req.body, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -821,9 +833,11 @@ function postOrg(req, res) {
 
     // Return 200: OK and created org
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -837,7 +851,7 @@ function postOrg(req, res) {
  *
  * @return {Object} Response object with org's public data
  */
-function putOrg(req, res) {
+async function putOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -893,10 +907,10 @@ function putOrg(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create or replace the organization with provided parameters
-  // NOTE: createOrReplace() sanitizes req.body
-  OrgController.createOrReplace(req.user, req.body, options)
-  .then((orgs) => {
+  try {
+    // Create or replace the organization with provided parameters
+    // NOTE: createOrReplace() sanitizes req.body
+    const orgs = await OrgController.createOrReplace(req.user, req.body, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -907,9 +921,11 @@ function putOrg(req, res) {
 
     // Return 200: OK and created org
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -922,7 +938,7 @@ function putOrg(req, res) {
  *
  * @return {Object} Response object with updated org
  */
-function patchOrg(req, res) {
+async function patchOrg(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -978,10 +994,10 @@ function patchOrg(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Update the specified organization
-  // NOTE: update() sanitizes req.body
-  OrgController.update(req.user, req.body, options)
-  .then((orgs) => {
+  try {
+    // Update the specified organization
+    // NOTE: update() sanitizes req.body
+    const orgs = await OrgController.update(req.user, req.body, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -992,9 +1008,11 @@ function patchOrg(req, res) {
 
     // Return 200: OK and the updated org
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1009,7 +1027,7 @@ function patchOrg(req, res) {
  *
  * @return {Object} Response object with deleted org ID.
  */
-function deleteOrg(req, res, next) {
+async function deleteOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1049,10 +1067,10 @@ function deleteOrg(req, res, next) {
     delete options.minified;
   }
 
-  // Remove the specified organization
-  // NOTE: remove() sanitizes req.params.orgid
-  OrgController.remove(req.user, req.params.orgid, options)
-  .then((orgIDs) => {
+  try {
+    // Remove the specified organization
+    // NOTE: remove() sanitizes req.params.orgid
+    const orgIDs = await OrgController.remove(req.user, req.params.orgid, options);
     const orgID = orgIDs[0];
 
     // Format JSON
@@ -1060,9 +1078,11 @@ function deleteOrg(req, res, next) {
 
     // Return 200: OK and the deleted org IDs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /* -----------------------( Project API Endpoints )-------------------------- */
@@ -1076,7 +1096,7 @@ function deleteOrg(req, res, next) {
  *
  * @return {Object} Response object with projects' public data
  */
-function getAllProjects(req, res) {
+async function getAllProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1134,9 +1154,9 @@ function getAllProjects(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Get all projects the requesting user has access to
-  ProjectController.find(req.user, null, undefined, options)
-  .then((projects) => {
+  try {
+    // Get all projects the requesting user has access to
+    const projects = await ProjectController.find(req.user, null, undefined, options);
     // Verify project array is not empty
     if (projects.length === 0) {
       throw new M.NotFoundError('No projects found.', 'warn');
@@ -1151,9 +1171,11 @@ function getAllProjects(req, res) {
 
     // Return 200: OK and public project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1167,7 +1189,7 @@ function getAllProjects(req, res) {
  *
  * @return {Object} Response object with projects' public data
  */
-function getProjects(req, res) {
+async function getProjects(req, res) {
   // Define options and ids
   // Note: Undefined if not set
   let ids;
@@ -1242,10 +1264,11 @@ function getProjects(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Get all projects the requesting user has access to in a specified org
-  // NOTE: find() sanitizes req.params.orgid and ids
-  ProjectController.find(req.user, req.params.orgid, ids, options)
-  .then((projects) => {
+  try {
+    // Get all projects the requesting user has access to in a specified org
+    // NOTE: find() sanitizes req.params.orgid and ids
+    const projects = await ProjectController.find(req.user, req.params.orgid, ids, options);
+
     // Verify project array is not empty
     if (projects.length === 0) {
       throw new M.NotFoundError('No projects found.', 'warn');
@@ -1260,9 +1283,11 @@ function getProjects(req, res) {
 
     // Return 200: OK and public project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1330,10 +1355,11 @@ async function postProjects(req, res) {
     projectData = req.body;
   }
 
-  // Create the specified projects
-  // NOTE: create() sanitizes req.params.orgid and projectData
-  ProjectController.create(req.user, req.params.orgid, projectData, options)
-  .then((projects) => {
+  try {
+    // Create the specified projects
+    // NOTE: create() sanitizes req.params.orgid and projectData
+    const projects = await ProjectController.create(req.user, req.params.orgid, projectData,
+      options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1343,9 +1369,11 @@ async function postProjects(req, res) {
 
     // Return 200: OK and created project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1414,10 +1442,11 @@ async function putProjects(req, res) {
     projectData = req.body;
   }
 
-  // Create or replace the specified projects
-  // NOTE: createOrReplace() sanitizes req.params.orgid and projectData
-  ProjectController.createOrReplace(req.user, req.params.orgid, projectData, options)
-  .then((projects) => {
+  try {
+    // Create or replace the specified projects
+    // NOTE: createOrReplace() sanitizes req.params.orgid and projectData
+    const projects = await ProjectController.createOrReplace(req.user, req.params.orgid,
+      projectData, options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1427,9 +1456,11 @@ async function putProjects(req, res) {
 
     // Return 200: OK and created/replaced project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1497,10 +1528,11 @@ async function patchProjects(req, res) {
     projectData = req.body;
   }
 
-  // Update the specified projects
-  // NOTE: update() sanitizes req.params.orgid projectData
-  ProjectController.update(req.user, req.params.orgid, projectData, options)
-  .then((projects) => {
+  try {
+    // Update the specified projects
+    // NOTE: update() sanitizes req.params.orgid projectData
+    const projects = await ProjectController.update(req.user, req.params.orgid,
+      projectData, options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1510,9 +1542,11 @@ async function patchProjects(req, res) {
 
     // Return 200: OK and updated project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1527,7 +1561,7 @@ async function patchProjects(req, res) {
  *
  * @return {Object} Response object with deleted project IDs.
  */
-function deleteProjects(req, res) {
+async function deleteProjects(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1566,9 +1600,10 @@ function deleteProjects(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified projects
-  ProjectController.remove(req.user, req.params.orgid, req.body, options)
-  .then((projectIDs) => {
+  try {
+    // Remove the specified projects
+    const projectIDs = await ProjectController.remove(req.user, req.params.orgid,
+      req.body, options);
     const parsedIDs = projectIDs.map(p => utils.parseID(p).pop());
 
     // Format JSON
@@ -1576,9 +1611,11 @@ function deleteProjects(req, res) {
 
     // Return 200: OK and the deleted project IDs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1591,7 +1628,7 @@ function deleteProjects(req, res) {
  *
  * @return {Object} Response object with project's public data
  */
-function getProject(req, res) {
+async function getProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1631,10 +1668,11 @@ function getProject(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find the project
-  // NOTE: find() sanitizes req.params.projectid and req.params.orgid
-  ProjectController.find(req.user, req.params.orgid, req.params.projectid, options)
-  .then((projects) => {
+  try {
+    // Find the project
+    // NOTE: find() sanitizes req.params.projectid and req.params.orgid
+    const projects = await ProjectController.find(req.user, req.params.orgid,
+      req.params.projectid, options);
     // If no projects found, return 404 error
     if (projects.length === 0) {
       throw new M.NotFoundError(
@@ -1651,9 +1689,11 @@ function getProject(req, res) {
 
     // Return 200: OK and public project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1667,7 +1707,7 @@ function getProject(req, res) {
  *
  * @return {Object} Response object with created project.
  */
-function postProject(req, res) {
+async function postProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1723,10 +1763,10 @@ function postProject(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create project with provided parameters
-  // NOTE: create() sanitizes req.params.orgid and req.body
-  ProjectController.create(req.user, req.params.orgid, req.body, options)
-  .then((projects) => {
+  try {
+    // Create project with provided parameters
+    // NOTE: create() sanitizes req.params.orgid and req.body
+    const projects = await ProjectController.create(req.user, req.params.orgid, req.body, options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1736,9 +1776,11 @@ function postProject(req, res) {
 
     // Return 200: OK and created project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1752,7 +1794,7 @@ function postProject(req, res) {
  *
  * @return {Object} Response object with created project.
  */
-function putProject(req, res) {
+async function putProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1808,10 +1850,11 @@ function putProject(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create or replace project with provided parameters
-  // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
-  ProjectController.createOrReplace(req.user, req.params.orgid, req.body, options)
-  .then((projects) => {
+  try {
+    // Create or replace project with provided parameters
+    // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
+    const projects = await ProjectController.createOrReplace(req.user, req.params.orgid,
+      req.body, options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1821,9 +1864,11 @@ function putProject(req, res) {
 
     // Return 200: OK and created/replaced project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1836,7 +1881,7 @@ function putProject(req, res) {
  *
  * @return {Object} Response object with updated project.
  */
-function patchProject(req, res) {
+async function patchProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1892,10 +1937,11 @@ function patchProject(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Update the specified project
-  // NOTE: update() sanitizes req.params.orgid and req.body
-  ProjectController.update(req.user, req.params.orgid, req.body, options)
-  .then((projects) => {
+  try {
+    // Update the specified project
+    // NOTE: update() sanitizes req.params.orgid and req.body
+    const projects = await ProjectController.update(req.user, req.params.orgid,
+      req.body, options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1905,9 +1951,11 @@ function patchProject(req, res) {
 
     // Return 200: OK and updated project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1921,7 +1969,7 @@ function patchProject(req, res) {
  *
  * @return {Object} Response object with deleted project ID.
  */
-function deleteProject(req, res) {
+async function deleteProject(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1961,10 +2009,11 @@ function deleteProject(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified project
-  // NOTE: remove() sanitizes req.params.orgid and req.params.projectid
-  ProjectController.remove(req.user, req.params.orgid, req.params.projectid, options)
-  .then((projectIDs) => {
+  try {
+    // Remove the specified project
+    // NOTE: remove() sanitizes req.params.orgid and req.params.projectid
+    const projectIDs = await ProjectController.remove(req.user, req.params.orgid,
+      req.params.projectid, options);
     const parsedIDs = utils.parseID(projectIDs[0]).pop();
 
     // Format JSON
@@ -1972,9 +2021,11 @@ function deleteProject(req, res) {
 
     // Return 200: OK and the deleted project ID
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /* -----------------------( User API Endpoints )------------------------------*/
@@ -1988,7 +2039,7 @@ function deleteProject(req, res) {
  *
  * @return {Object} Response object with users' public data
  */
-function getUsers(req, res) {
+async function getUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2057,10 +2108,10 @@ function getUsers(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Get Users
-  // NOTE: find() sanitizes req.usernames
-  UserController.find(req.user, usernames, options)
-  .then((users) => {
+  try {
+    // Get Users
+    // NOTE: find() sanitizes req.usernames
+    const users = await UserController.find(req.user, usernames, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2070,9 +2121,11 @@ function getUsers(req, res) {
 
     // Return 200: OK and public user data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2141,10 +2194,10 @@ async function postUsers(req, res) {
     userData = req.body;
   }
 
-  // Create users
-  // NOTE: create() sanitizes userData
-  UserController.create(req.user, userData, options)
-  .then((users) => {
+  try {
+    // Create users
+    // NOTE: create() sanitizes userData
+    const users = await UserController.create(req.user, userData, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2154,9 +2207,11 @@ async function postUsers(req, res) {
 
     // Return 200: OK and public user data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2225,10 +2280,10 @@ async function putUsers(req, res) {
     userData = req.body;
   }
 
-  // Create or replace users
-  // NOTE: createOrReplace() sanitizes userData
-  UserController.createOrReplace(req.user, userData, options)
-  .then((users) => {
+  try {
+    // Create or replace users
+    // NOTE: createOrReplace() sanitizes userData
+    const users = await UserController.createOrReplace(req.user, userData, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2238,9 +2293,11 @@ async function putUsers(req, res) {
 
     // Return 200: OK and public user data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2309,10 +2366,10 @@ async function patchUsers(req, res) {
     userData = req.body;
   }
 
-  // Update the specified users
-  // NOTE: update() sanitizes userData
-  UserController.update(req.user, userData, options)
-  .then((users) => {
+  try {
+    // Update the specified users
+    // NOTE: update() sanitizes userData
+    const users = await UserController.update(req.user, userData, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2322,9 +2379,11 @@ async function patchUsers(req, res) {
 
     // Return 200: OK and the updated users
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2339,7 +2398,7 @@ async function patchUsers(req, res) {
  *
  * @return {Object} Response object with usernames
  */
-function deleteUsers(req, res) {
+async function deleteUsers(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2373,18 +2432,20 @@ function deleteUsers(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified users
-  // NOTE: remove() sanitizes req.body
-  UserController.remove(req.user, req.body, options)
-  .then((usernames) => {
+  try {
+    // Remove the specified users
+    // NOTE: remove() sanitizes req.body
+    const usernames = await UserController.remove(req.user, req.body, options);
     // Format JSON
     const json = formatJSON(usernames, minified);
 
     // Return 200: OK and deleted usernames
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2397,7 +2458,7 @@ function deleteUsers(req, res) {
  *
  * @return {Object} Response object with user's public data
  */
-function getUser(req, res) {
+async function getUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2437,10 +2498,10 @@ function getUser(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find the member from it's username
-  // NOTE: find() sanitizes req.params.username
-  UserController.find(req.user, req.params.username, options)
-  .then((users) => {
+  try {
+    // Find the member from it's username
+    // NOTE: find() sanitizes req.params.username
+    const users = await UserController.find(req.user, req.params.username, options);
     // If no user found, return 404 error
     if (users.length === 0) {
       throw new M.NotFoundError(
@@ -2457,9 +2518,11 @@ function getUser(req, res) {
 
     // Return a 200: OK and the user's public data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2473,7 +2536,7 @@ function getUser(req, res) {
  *
  * @return {Object} Response object with created user
  */
-function postUser(req, res) {
+async function postUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2529,10 +2592,10 @@ function postUser(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create user with provided parameters
-  // NOTE: create() sanitizes req.body
-  UserController.create(req.user, req.body, options)
-  .then((users) => {
+  try {
+    // Create user with provided parameters
+    // NOTE: create() sanitizes req.body
+    const users = await UserController.create(req.user, req.body, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2542,9 +2605,11 @@ function postUser(req, res) {
 
     // Return 200: OK and created user
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2558,7 +2623,7 @@ function postUser(req, res) {
  *
  * @return {Object} Response object with created user
  */
-function putUser(req, res) {
+async function putUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2614,10 +2679,10 @@ function putUser(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Creates or replaces a user with provided parameters
-  // NOTE: createOrReplace() sanitizes req.body
-  UserController.createOrReplace(req.user, req.body, options)
-  .then((users) => {
+  try {
+    // Creates or replaces a user with provided parameters
+    // NOTE: createOrReplace() sanitizes req.body
+    const users = await UserController.createOrReplace(req.user, req.body, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2627,9 +2692,11 @@ function putUser(req, res) {
 
     // Return 200: OK and created/replaced user
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2643,7 +2710,7 @@ function putUser(req, res) {
  *
  * @return {Object} Response object with updated user
  */
-function patchUser(req, res) {
+async function patchUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2699,10 +2766,10 @@ function patchUser(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Update the specified user
-  // NOTE: update() sanitizes req.body
-  UserController.update(req.user, req.body, options)
-  .then((users) => {
+  try {
+    // Update the specified user
+    // NOTE: update() sanitizes req.body
+    const users = await UserController.update(req.user, req.body, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2712,8 +2779,11 @@ function patchUser(req, res) {
 
     // Return 200: OK and updated user
     return returnResponse(req, res, json, 200);
-  })
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2727,7 +2797,7 @@ function patchUser(req, res) {
  *
  * @return {Object} Response object with deleted username
  */
-function deleteUser(req, res) {
+async function deleteUser(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2767,10 +2837,10 @@ function deleteUser(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified user
-  // NOTE: remove() sanitizes req.params.username
-  UserController.remove(req.user, req.params.username, options)
-  .then((usernames) => {
+  try {
+    // Remove the specified user
+    // NOTE: remove() sanitizes req.params.username
+    const usernames = await UserController.remove(req.user, req.params.username, options);
     const username = usernames[0];
 
     // Format JSON
@@ -2778,9 +2848,11 @@ function deleteUser(req, res) {
 
     // Return 200: OK and the deleted username
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2793,7 +2865,7 @@ function deleteUser(req, res) {
  *
  * @return {Object} Response object with user's public data
  */
-function whoami(req, res) {
+async function whoami(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2848,7 +2920,7 @@ function whoami(req, res) {
  *
  * @return {Object} Response object with found users
  */
-function searchUsers(req, res) {
+async function searchUsers(req, res) {
   // Define options and query
   // Note: Undefined if not set
   let options;
@@ -2898,10 +2970,10 @@ function searchUsers(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find users
-  // NOTE: search() sanitizes input params
-  UserController.search(req.user, query, options)
-  .then((users) => {
+  try {
+    // Find users
+    // NOTE: search() sanitizes input params
+    const users = await UserController.search(req.user, query, options);
     // Verify users public data array is not empty
     if (users.length === 0) {
       throw new M.NotFoundError('No users found.', 'warn');
@@ -2916,9 +2988,11 @@ function searchUsers(req, res) {
 
     // Return a 200: OK and public user data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2931,7 +3005,7 @@ function searchUsers(req, res) {
  *
  * @return {Object} Response object with updated user public data.
  */
-function patchPassword(req, res) {
+async function patchPassword(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2989,10 +3063,10 @@ function patchPassword(req, res) {
     delete options.minified;
   }
 
-  // Update the password
-  UserController.updatePassword(req.user, req.body.oldPassword,
-    req.body.password, req.body.confirmPassword)
-  .then((user) => {
+  try {
+    // Update the password
+    const user = await UserController.updatePassword(req.user, req.body.oldPassword,
+      req.body.password, req.body.confirmPassword);
     const publicUserData = sani.html(
       publicData.getPublicData(user, 'user', options)
     );
@@ -3002,9 +3076,11 @@ function patchPassword(req, res) {
 
     // Returns 200: OK and the updated user's public data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /* -----------------------( Elements API Endpoints )------------------------- */
@@ -3018,7 +3094,7 @@ function patchPassword(req, res) {
  *
  * @return {Object} Response object with elements' public data
  */
-function getElements(req, res) {
+async function getElements(req, res) {
   // Define options and ids
   // Note: Undefined if not set
   let elemIDs;
@@ -3111,11 +3187,11 @@ function getElements(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find elements
-  // NOTE: find() sanitizes input params
-  ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, elemIDs, options)
-  .then((elements) => {
+  try {
+    // Find elements
+    // NOTE: find() sanitizes input params
+    const elements = await ElementController.find(req.user, req.params.orgid, req.params.projectid,
+      req.params.branchid, elemIDs, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3160,9 +3236,11 @@ function getElements(req, res) {
 
     // Return a 200: OK and public element data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3231,11 +3309,11 @@ async function postElements(req, res) {
     elementData = req.body;
   }
 
-  // Create the specified elements
-  // NOTE: create() sanitizes input params
-  ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, elementData, options)
-  .then((elements) => {
+  try {
+    // Create the specified elements
+    // NOTE: create() sanitizes input params
+    const elements = await ElementController.create(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3245,9 +3323,11 @@ async function postElements(req, res) {
 
     // Return 200: OK and the new elements
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3316,11 +3396,11 @@ async function putElements(req, res) {
     elementData = req.body;
   }
 
-  // Create or replace the specified elements
-  // NOTE: createOrReplace() sanitizes input params
-  ElementController.createOrReplace(req.user, req.params.orgid,
-    req.params.projectid, req.params.branchid, elementData, options)
-  .then((elements) => {
+  try {
+    // Create or replace the specified elements
+    // NOTE: createOrReplace() sanitizes input params
+    const elements = await ElementController.createOrReplace(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3330,9 +3410,11 @@ async function putElements(req, res) {
 
     // Return 200: OK and the new/replaced elements
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3400,11 +3482,11 @@ async function patchElements(req, res) {
     elementData = req.body;
   }
 
-  // Update the specified elements
-  // NOTE: update() sanitizes input params
-  ElementController.update(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, elementData, options)
-  .then((elements) => {
+  try {
+    // Update the specified elements
+    // NOTE: update() sanitizes input params
+    const elements = await ElementController.update(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3414,9 +3496,11 @@ async function patchElements(req, res) {
 
     // Return 200: OK and the updated elements
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3429,7 +3513,7 @@ async function patchElements(req, res) {
  * @param {Object} res - Response express object
  * @return {Object} Response object with element ids.
  */
-function deleteElements(req, res) {
+async function deleteElements(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3463,11 +3547,11 @@ function deleteElements(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified elements
-  // NOTE: remove() sanitizes input params
-  ElementController.remove(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, req.body, options)
-  .then((elements) => {
+  try {
+    // Remove the specified elements
+    // NOTE: remove() sanitizes input params
+    const elements = await ElementController.remove(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body, options);
     const parsedIDs = elements.map(e => utils.parseID(e).pop());
 
     // Format JSON
@@ -3475,9 +3559,11 @@ function deleteElements(req, res) {
 
     // Return 200: OK and the deleted element ids
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3490,7 +3576,7 @@ function deleteElements(req, res) {
  *
  * @return {Object} Response object with elements
  */
-function searchElements(req, res) {
+async function searchElements(req, res) {
   // Define options and query
   // Note: Undefined if not set
   let options;
@@ -3558,11 +3644,11 @@ function searchElements(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find elements
-  // NOTE: search() sanitizes input params
-  ElementController.search(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, query, options)
-  .then((elements) => {
+  try {
+    // Find elements
+    // NOTE: search() sanitizes input params
+    const elements = await ElementController.search(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, query, options);
     // Verify elements public data array is not empty
     if (elements.length === 0) {
       throw new M.NotFoundError('No elements found.', 'warn');
@@ -3577,9 +3663,11 @@ function searchElements(req, res) {
 
     // Return a 200: OK and public element data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3592,7 +3680,7 @@ function searchElements(req, res) {
  *
  * @return {Object} Response object with element's public data
  */
-function getElement(req, res) {
+async function getElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3634,11 +3722,11 @@ function getElement(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find the element
-  // NOTE: find() sanitizes input params
-  ElementController.find(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, req.params.elementid, options)
-  .then((elements) => {
+  try {
+    // Find the element
+    // NOTE: find() sanitizes input params
+    const elements = await ElementController.find(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.elementid, options);
     // If no element found, return 404 error
     if (elements.length === 0) {
       throw new M.NotFoundError(
@@ -3660,9 +3748,11 @@ function getElement(req, res) {
 
     // Return 200: OK and the elements
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3675,7 +3765,7 @@ function getElement(req, res) {
  *
  * @return {Object} Response object with created element
  */
-function postElement(req, res) {
+async function postElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3731,11 +3821,11 @@ function postElement(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create element with provided parameters
-  // NOTE: create() sanitizes input params
-  ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, req.body, options)
-  .then((elements) => {
+  try {
+    // Create element with provided parameters
+    // NOTE: create() sanitizes input params
+    const elements = await ElementController.create(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3745,9 +3835,11 @@ function postElement(req, res) {
 
     // Return 200: OK and the created element
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3761,7 +3853,7 @@ function postElement(req, res) {
  *
  * @return {Object} Response object with created/replaced element
  */
-function putElement(req, res) {
+async function putElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3817,11 +3909,11 @@ function putElement(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create or replace element with provided parameters
-  // NOTE: createOrReplace() sanitizes input params
-  ElementController.createOrReplace(req.user, req.params.orgid,
-    req.params.projectid, req.params.branchid, req.body, options)
-  .then((elements) => {
+  try {
+    // Create or replace element with provided parameters
+    // NOTE: createOrReplace() sanitizes input params
+    const elements = await ElementController.createOrReplace(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3831,9 +3923,11 @@ function putElement(req, res) {
 
     // Return 200: OK and the created/replaced element
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3846,7 +3940,7 @@ function putElement(req, res) {
  *
  * @return {Object} Response object with updated element
  */
-function patchElement(req, res) {
+async function patchElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3902,11 +3996,11 @@ function patchElement(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Updates the specified element
-  // NOTE: update() sanitizes input params
-  ElementController.update(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, req.body, options)
-  .then((elements) => {
+  try {
+    // Updates the specified element
+    // NOTE: update() sanitizes input params
+    const elements = await ElementController.update(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3916,9 +4010,11 @@ function patchElement(req, res) {
 
     // Return 200: OK and the updated element
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3931,7 +4027,7 @@ function patchElement(req, res) {
  *
  * @return {Object} Response object with deleted element id.
  */
-function deleteElement(req, res) {
+async function deleteElement(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3971,11 +4067,11 @@ function deleteElement(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified element
-  // NOTE: remove() sanitizes input params
-  ElementController.remove(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, [req.params.elementid], options)
-  .then((element) => {
+  try {
+    // Remove the specified element
+    // NOTE: remove() sanitizes input params
+    const element = await ElementController.remove(req.user, req.params.orgid, req.params.projectid,
+      req.params.branchid, [req.params.elementid], options);
     const parsedID = utils.parseID(element[0]).pop();
 
     // Format JSON
@@ -3983,8 +4079,11 @@ function deleteElement(req, res) {
 
     // Return 200: OK and deleted element ID
     return returnResponse(req, res, json, 200);
-  })
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /* -----------------------( Branches API Endpoints )------------------------- */
@@ -3998,7 +4097,7 @@ function deleteElement(req, res) {
  *
  * @return {Object} Response object with branches' public data
  */
-function getBranches(req, res) {
+async function getBranches(req, res) {
   // Define options and ids
   // Note: Undefined if not set
   let branchIDs;
@@ -4073,11 +4172,11 @@ function getBranches(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find branches
-  // NOTE: find() sanitizes input params
-  BranchController.find(req.user, req.params.orgid, req.params.projectid,
-    branchIDs, options)
-  .then((branches) => {
+  try {
+    // Find branches
+    // NOTE: find() sanitizes input params
+    const branches = await BranchController.find(req.user, req.params.orgid, req.params.projectid,
+      branchIDs, options);
     const branchesPublicData = sani.html(
       branches.map(b => publicData.getPublicData(b, 'branch', options))
     );
@@ -4087,16 +4186,16 @@ function getBranches(req, res) {
       throw new M.NotFoundError('No branches found.', 'warn');
     }
 
-    const retData = branchesPublicData;
-
     // Format JSON
-    const json = formatJSON(retData, minified);
+    const json = formatJSON(branchesPublicData, minified);
 
     // Return a 200: OK and public branch data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4164,11 +4263,11 @@ async function postBranches(req, res) {
     branchData = req.body;
   }
 
-  // Create the specified branches
-  // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and branchData
-  BranchController.create(req.user, req.params.orgid, req.params.projectid,
-    branchData, options)
-  .then((branches) => {
+  try {
+    // Create the specified branches
+    // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and branchData
+    const branches = await BranchController.create(req.user, req.params.orgid, req.params.projectid,
+      branchData, options);
     const publicBranchData = sani.html(
       branches.map(b => publicData.getPublicData(b, 'branch', options))
     );
@@ -4178,9 +4277,11 @@ async function postBranches(req, res) {
 
     // Return 200: OK and created branch data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4248,11 +4349,11 @@ async function patchBranches(req, res) {
     branchData = req.body;
   }
 
-  // Update the specified branches
-  // NOTE: update() sanitizes input params
-  BranchController.update(req.user, req.params.orgid, req.params.projectid,
-    branchData, options)
-  .then((branches) => {
+  try {
+    // Update the specified branches
+    // NOTE: update() sanitizes input params
+    const branches = await BranchController.update(req.user, req.params.orgid, req.params.projectid,
+      branchData, options);
     const branchesPublicData = sani.html(
       branches.map(b => publicData.getPublicData(b, 'branch', options))
     );
@@ -4262,9 +4363,11 @@ async function patchBranches(req, res) {
 
     // Return 200: OK and the updated branches
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4278,7 +4381,7 @@ async function patchBranches(req, res) {
  *
  * @return {Object} Response object with deleted branch IDs.
  */
-function deleteBranches(req, res) {
+async function deleteBranches(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4317,10 +4420,10 @@ function deleteBranches(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified branches
-  BranchController.remove(req.user, req.params.orgid, req.params.projectid,
-    req.body, options)
-  .then((branchIDs) => {
+  try {
+    // Remove the specified branches
+    const branchIDs = await BranchController.remove(req.user, req.params.orgid,
+      req.params.projectid, req.body, options);
     const parsedIDs = branchIDs.map(p => utils.parseID(p).pop());
 
     // Format JSON
@@ -4328,9 +4431,11 @@ function deleteBranches(req, res) {
 
     // Return 200: OK and the deleted branch IDs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4343,7 +4448,7 @@ function deleteBranches(req, res) {
  *
  * @return {Object} Response object with branch's public data
  */
-function getBranch(req, res) {
+async function getBranch(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4383,11 +4488,11 @@ function getBranch(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find the branch
-  // NOTE: find() sanitizes req.params.branchid, req.params.projectid and req.params.orgid
-  BranchController.find(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, options)
-  .then((branch) => {
+  try {
+    // Find the branch
+    // NOTE: find() sanitizes req.params.branchid, req.params.projectid and req.params.orgid
+    const branch = await BranchController.find(req.user, req.params.orgid, req.params.projectid,
+      req.params.branchid, options);
     // If no branch found, return 404 error
     if (branch.length === 0) {
       throw new M.NotFoundError(
@@ -4404,9 +4509,11 @@ function getBranch(req, res) {
 
     // Return 200: OK and public branch data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4419,7 +4526,7 @@ function getBranch(req, res) {
  *
  * @return {Object} Response object with created branch
  */
-function postBranch(req, res) {
+async function postBranch(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4475,11 +4582,11 @@ function postBranch(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Create branch with provided parameters
-  // NOTE: create() sanitizes input params
-  BranchController.create(req.user, req.params.orgid, req.params.projectid,
-    req.body, options)
-  .then((branch) => {
+  try {
+    // Create branch with provided parameters
+    // NOTE: create() sanitizes input params
+    const branch = await BranchController.create(req.user, req.params.orgid, req.params.projectid,
+      req.body, options);
     const branchesPublicData = sani.html(
       branch.map(b => publicData.getPublicData(b, 'branch', options))
     );
@@ -4489,9 +4596,11 @@ function postBranch(req, res) {
 
     // Return 200: OK and the created branch
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4504,7 +4613,7 @@ function postBranch(req, res) {
  *
  * @return {Object} Response object with updated branch
  */
-function patchBranch(req, res) {
+async function patchBranch(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4560,11 +4669,11 @@ function patchBranch(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Updates the specified branch
-  // NOTE: update() sanitizes input params
-  BranchController.update(req.user, req.params.orgid, req.params.projectid,
-    req.body, options)
-  .then((branch) => {
+  try {
+    // Updates the specified branch
+    // NOTE: update() sanitizes input params
+    const branch = await BranchController.update(req.user, req.params.orgid, req.params.projectid,
+      req.body, options);
     const branchPublicData = sani.html(
       branch.map(b => publicData.getPublicData(b, 'branch', options))
     );
@@ -4574,9 +4683,11 @@ function patchBranch(req, res) {
 
     // Return 200: OK and the updated branch
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4590,7 +4701,7 @@ function patchBranch(req, res) {
  *
  * @return {Object} Response object with deleted branch ID.
  */
-function deleteBranch(req, res) {
+async function deleteBranch(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4630,11 +4741,11 @@ function deleteBranch(req, res) {
     delete options.minified;
   }
 
-  // Remove the specified branch
-  // NOTE: remove() sanitizes params
-  BranchController.remove(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, options)
-  .then((branchID) => {
+  try {
+    // Remove the specified branch
+    // NOTE: remove() sanitizes params
+    const branchID = await BranchController.remove(req.user, req.params.orgid, req.params.projectid,
+      req.params.branchid, options);
     const parsedIDs = utils.parseID(branchID[0]).pop();
 
     // Format JSON
@@ -4642,9 +4753,11 @@ function deleteBranch(req, res) {
 
     // Return 200: OK and the deleted branch ID
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**

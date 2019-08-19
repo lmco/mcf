@@ -48,7 +48,7 @@ function handleBasicAuth(req, res, username, password) {
       _id: username,
       archived: false
     })
-    .exec((findUserErr, users) => {
+    .exec(async (findUserErr, users) => {
       // Check for errors
       if (findUserErr) {
         return reject(findUserErr);
@@ -56,17 +56,25 @@ function handleBasicAuth(req, res, username, password) {
       // If user found and their provider is local,
       // do local authentication
       if (users.length === 1 && users[0].provider === 'local') {
-        LocalStrategy.handleBasicAuth(req, res, username, password)
-        .then(localUser => resolve(localUser))
-        .catch(localErr => reject(localErr));
+        try {
+          const localUser = await LocalStrategy.handleBasicAuth(req, res, username, password);
+          return resolve(localUser);
+        }
+        catch (localErr) {
+          return reject(localErr);
+        }
       }
 
       // User is not found locally or is found and provider is LDAP
       // try LDAP authentication
       else if (users.length === 0 || (users.length === 1 && users[0].provider === 'ldap')) {
-        LDAPStrategy.handleBasicAuth(req, res, username, password)
-        .then(ldapUser => resolve(ldapUser))
-        .catch(ldapErr => reject(ldapErr));
+        try {
+          const ldapUser = await LDAPStrategy.handleBasicAuth(req, res, username, password);
+          return resolve(ldapUser);
+        }
+        catch (ldapErr) {
+          return reject(ldapErr);
+        }
       }
       else {
         // More than 1 user found or provider not set to ldap/local
@@ -97,12 +105,15 @@ function handleBasicAuth(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-function handleTokenAuth(req, res, _token) {
-  return new Promise((resolve, reject) => {
-    LocalStrategy.handleTokenAuth(req, res, _token)
-    .then(user => resolve(user))
-    .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
-  });
+async function handleTokenAuth(req, res, _token) {
+  let user;
+  try {
+    user = await LocalStrategy.handleTokenAuth(req, res, _token);
+  }
+  catch (handleTokenAuthErr) {
+    throw handleTokenAuthErr;
+  }
+  return user;
 }
 
 /**
