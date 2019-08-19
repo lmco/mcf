@@ -157,6 +157,10 @@ class ElementSubtree extends Component {
     if (this.state.data !== prevStates.data) {
       this.componentDidMount();
     }
+    if (this.props.data.contains.length !== prevProps.data.contains.length) {
+      this.setState({ data: this.props.data });
+      this.componentDidMount();
+    }
   }
 
   /**

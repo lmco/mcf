@@ -128,7 +128,6 @@ function doLogin(req, res, next) {
  *
  * @returns {boolean} If password is correctly validated
  */
-// TODO: Consider changing name of function, since it also validates provider field.
 function validatePassword(password, provider) {
   // Use the appropriate provider rules
   switch (provider) {

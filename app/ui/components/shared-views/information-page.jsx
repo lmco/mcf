@@ -100,12 +100,20 @@ class InformationPage extends Component {
 
     // Populate relevant fields
     if (this.props.org) {
-      name = this.props.org.name;
       id = this.props.org.id;
       custom = this.props.org.custom;
+      const archived = (<Badge color='secondary' style={{ marginLeft: '10px' }}>Archived</Badge>);
+      // Verify if archived org, then place badge on information page next to name
+      name = (this.props.org.archived)
+        ? (<div> {this.props.org.name} {archived} </div>)
+        : (<div> {this.props.org.name} </div>);
     }
     else if (this.props.project) {
-      name = this.props.project.name;
+      const archived = (<Badge color='secondary' style={{ marginLeft: '10px' }}>Archived</Badge>);
+      // Verify if archived project, then place badge on information page next to name
+      name = (this.props.project.archived)
+        ? (<div> {this.props.project.name} {' '} {archived} </div>)
+        : (<div> {this.props.project.name} </div>);
       id = this.props.project.id;
       orgid = this.props.project.org;
       visibility = this.props.project.visibility;
@@ -164,7 +172,7 @@ class InformationPage extends Component {
               <table className='table-width'>
                 <tbody>
                   {(!this.props.branch)
-                    ? ''
+                    ? <tr/>
                     : (<tr>
                         <th style={{ display: 'flex', justifyContent: 'flex-start' }}>
                           <Button close

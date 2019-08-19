@@ -85,7 +85,6 @@ module.exports.branch = {
   id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
 };
 
-
 /**
  * @description Regular Expressions to validate element data
  *

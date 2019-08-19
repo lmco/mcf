@@ -152,7 +152,7 @@ class EditPage extends Component {
       title = 'Organization';
     }
     else if (this.props.branch) {
-      title = ` [${this.props.branch.id}] Branch`;
+      title = `[${this.props.branch.id}] Branch`;
     }
     else {
       title = 'Project';

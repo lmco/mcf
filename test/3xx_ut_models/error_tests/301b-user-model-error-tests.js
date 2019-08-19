@@ -57,9 +57,6 @@ describe(M.getModuleName(module.filename), () => {
     });
   });
 
-  // TODO: Create test Auth Module to test error case in pre('save')
-  // TODO: Figure out how to and if we want to test fields with custom validators.
-
   /* Execute the tests */
   it('should reject when a username is too short', usernameTooShort);
   it('should reject when a username is too long', usernameTooLong);

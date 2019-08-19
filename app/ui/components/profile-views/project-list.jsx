@@ -62,16 +62,28 @@ class ProjectList extends Component {
   componentDidMount() {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
+      // Verify if error
       if (err) {
+        // Set error state
         this.setState({ error: err.responseText });
       }
       else {
+        // Set user data
         this.setState({ user: data });
+        // Initialize url data
+        const base = '/api/orgs';
+        let opt = 'populate=projects&minified=true';
+
+        // Verify if admin console
+        if (this.props.adminPage) {
+          // Update url to retrieve archived data
+          opt = 'populate=projects&archived=true&minified=true';
+        }
 
         // Get project data
         $.ajax({
           method: 'GET',
-          url: '/api/orgs?populate=projects&minified=true',
+          url: `${base}?${opt}`,
           statusCode: {
             200: (orgs) => {
               this.setMountedComponentStates(data, orgs);
@@ -101,23 +113,26 @@ class ProjectList extends Component {
     // Handle initial size of window
     this.handleResize();
 
-    // Loop through orgs
-    orgs.forEach((org) => {
-      // Initialize variables
-      const perm = org.permissions[user.username];
+    // Verify not admin console
+    if (!this.props.adminPage) {
+      // Loop through orgs
+      orgs.forEach((org) => {
+        // Initialize variables
+        const perm = org.permissions[user.username];
 
-      // Verify if user has write or admin permissions
-      if ((perm === 'write') || (perm === 'admin')) {
-        // Push the org to the org permissions
-        writePermOrgs.push(org);
+        // Verify if user has write or admin permissions
+        if ((perm === 'write') || (perm === 'admin')) {
+          // Push the org to the org permissions
+          writePermOrgs.push(org);
+        }
+      });
+
+      // Verify there are orgs
+      if (writePermOrgs.length > 0) {
+        // Set write states
+        this.setState({ write: true });
+        this.setState({ writePermOrgs: writePermOrgs });
       }
-    });
-
-    // Verify there are orgs
-    if (writePermOrgs.length > 0) {
-      // Set write states
-      this.setState({ write: true });
-      this.setState({ writePermOrgs: writePermOrgs });
     }
 
     // Verify user is admin
@@ -161,11 +176,23 @@ class ProjectList extends Component {
       const orgId = org.id;
       const projects = org.projects;
       const permProjects = [];
+      // Verify there are projects in the org
+      if (projects.length < 1) {
+        // If there are not projects skip the org view
+        // rendering
+        return;
+      }
 
-      if (!this.props.admin) {
+      // Verify user is not a global admin
+      if (!this.state.admin) {
+        // Initialize data
         const username = this.props.user.username;
+
+        // Loop through projects grabbed
         projects.forEach(project => {
+          // Verify user has permissions on each project
           if (project.permissions[username]) {
+            // Push the projects to the viewable projects
             permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                key={`proj-key-${project.id}`}
                                                project={project}
@@ -174,6 +201,7 @@ class ProjectList extends Component {
         });
       }
       else {
+        // Push all projects to the viewable projects
         projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
                                                                       key={`proj-key-${project.id}`}
                                                                       project={project}
@@ -227,7 +255,7 @@ class ProjectList extends Component {
         {/* Display the list of project-views */}
         <div id='workspace' ref={this.ref}>
           <div id='workspace-header' className='workspace-header header-box-depth'>
-            <h2 className='workspace-title'>Your Projects</h2>
+            <h2 className='workspace-title'>Projects</h2>
             <div className='workspace-header-button'>
               {/* Verify user has write permission */}
               {(!this.state.write)

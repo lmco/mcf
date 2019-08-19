@@ -59,15 +59,27 @@ class ProjectApp extends Component {
 
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
+      // Verify if error returned
       if (err) {
+        // Set error state
         this.setState({ error: err.responseText });
       }
       else {
+        // Set user data
         this.setState({ user: data });
+        // Initialize options
+        let opt = 'minified=true';
+
+        // Verify if admin
+        if (data.admin) {
+          // Update options to return archived data
+          opt = 'minified=true&archived=true';
+        }
+
         // Get project data
         $.ajax({
           method: 'GET',
-          url: `${url}?minified=true`,
+          url: `${url}?${opt}`,
           statusCode: {
             200: (project) => {
               // Initialize variables
@@ -176,6 +188,7 @@ class ProjectApp extends Component {
                          title='Information'
                          icon='fas fa-info'
                          routerLink={`${this.props.match.url}/info`}/>
+            {/* Verify plugins provided, display route in sidebar */}
             {(!displayPlugins)
               ? ''
               : (plugins)

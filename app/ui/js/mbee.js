@@ -16,9 +16,6 @@ $.fn.extend({
  * to get the user information and store it in session storage.
  *
  * Takes a callback as input that will passed an error, and the user data.
- *
- * TODO - Is there a default option for the ajax statusCode for handling an
- * unexpected return status?
  */
 // eslint-disable-next-line no-unused-vars
 function mbeeWhoAmI(callback) {
