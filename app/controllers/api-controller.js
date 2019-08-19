@@ -3502,6 +3502,7 @@ function searchElements(req, res) {
     populate: 'array',
     archived: 'boolean',
     limit: 'number',
+    fields: 'array',
     skip: 'number',
     sort: 'string',
     q: 'string',
@@ -3544,7 +3545,7 @@ function searchElements(req, res) {
   }
 
   // Check options for q (query)
-  if (options.q) {
+  if (options.hasOwnProperty('q')) {
     query = options.q;
     delete options.q;
   }
