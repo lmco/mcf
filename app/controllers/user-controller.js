@@ -339,13 +339,14 @@ async function create(requestingUser, users, options) {
 
     // Mark the default orgs permissions as modified
     defaultOrg.markModified('permissions');
+
+    // Save the updated default org
+    await defaultOrg.save();
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
   }
 
-  // Save the updated default org
-  await defaultOrg.save();
   let foundCreatedUsers;
   try {
     // If the lean option is supplied
@@ -490,8 +491,9 @@ async function update(requestingUser, users, options) {
   // Get array of editable parameters
   const validFields = User.getValidUpdateFields();
 
+  const promises = [];
   // For each found user
-  foundUsers.forEach((user) => {
+  promises.push(foundUsers.forEach((user) => {
     const updateUser = jmiType2[user._id];
     // Remove username and _id field from update object
     delete updateUser.username;
@@ -567,7 +569,9 @@ async function update(requestingUser, users, options) {
         update: updateUser
       }
     });
-  });
+  }));
+
+  await Promise.all(promises);
 
   // Update all users through a bulk write to the database
   await User.bulkWrite(bulkArray);
@@ -703,13 +707,13 @@ async function createOrReplace(requestingUser, users, options) {
   }
 
   // Write contents to temporary file
-  await new Promise(function(res, rej) {
-    fs.writeFile(path.join(M.root, 'data', `PUT-backup-users-${ts}.json`),
-      JSON.stringify(foundUsers), function(err) {
-        if (err) rej(err);
-        else res();
-      });
-  });
+  try {
+    fs.writeFileSync(path.join(M.root, 'data', `PUT-backup-users-${ts}.json`),
+      JSON.stringify(foundUsers));
+  }
+  catch (err) {
+    throw errors.captureError(err);
+  }
 
   await User.deleteMany({ _id: { $in: foundUsers.map(u => u._id) } }).lean();
 
@@ -727,25 +731,22 @@ async function createOrReplace(requestingUser, users, options) {
       // Reinsert original data
       try {
         await User.insertMany(foundUsers);
-        await new Promise((resInner, rejInner) => {
-          // remove the file
-          fs.unlink(path.join(M.root, 'data',
-            `PUT-backup-users-${ts}.json`), function(err) {
-            if (err) rejInner(err);
-            else resInner();
-          });
-        });
+        fs.unlinkSync(path.join(M.root, 'data',
+          `PUT-backup-users-${ts}.json`));
+
         // Restoration succeeded; pass the original error
         res(error);
       }
-      catch (err) {
+      catch (restoreError) {
         // Pass the new error that occurred while trying to restore old users
-        res(err);
+        res(restoreError);
       }
     });
     // Throw whichever error was passed
     throw errors.captureError(finalError);
   }
+
+  EventEmitter.emit('users-created', createdUsers);
 
   // Delete the temporary file.
   const filePath = path.join(M.root, 'data',
@@ -798,7 +799,6 @@ async function remove(requestingUser, users, options) {
   // Sanitize input parameters and create function-wide variables
   const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  let foundUsers = [];
   let foundUsernames = [];
   let searchedUsernames = [];
 
@@ -823,7 +823,7 @@ async function remove(requestingUser, users, options) {
   }
 
   // Find the users to delete
-  foundUsers = await User.find(searchQuery);
+  const foundUsers = await User.find(searchQuery);
 
   foundUsernames = foundUsers.map(u => u._id);
 

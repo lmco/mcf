@@ -1429,20 +1429,15 @@ async function createOrReplace(requestingUser, organizationID, projectID,
       // Reinsert original data
       try {
         await Element.insertMany(foundElements);
-        await new Promise(async (resInner) => {
-          // Remove the backup file
-          await fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
-            `PUT-backup-elements-${ts}.json`), function(err) {
-            if (err) throw err;
-            else resInner();
-          });
-        });
+        fs.unlinkSync(path.join(M.root, 'data', orgID, projID, branchID,
+          `PUT-backup-elements-${ts}.json`));
+
         // Restoration succeeded; pass the original error
         res(error);
       }
-      catch (err) {
+      catch (restoreErr) {
         // Pass the new error that occurred while trying to restore elements
-        res(err);
+        res(restoreErr);
       }
     });
     // Throw whichever error was passed
@@ -1455,12 +1450,12 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   const filePath = path.join(M.root, 'data', orgID, projID, branchID, `PUT-backup-elements-${ts}.json`);
   // Delete the temporary file.
   if (fs.existsSync(filePath)) {
-    await new Promise(function(res, rej) {
-      fs.unlink(filePath, function(err) {
-        if (err) rej(err);
-        else res();
-      });
-    });
+    try {
+      fs.unlinkSync(filePath);
+    }
+    catch (err) {
+      throw errors.captureError(err);
+    }
   }
 
   // Read all of the files in the branch directory

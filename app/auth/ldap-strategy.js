@@ -135,65 +135,66 @@ function doLogin(req, res, next) {
  *
  * @returns {Promise} An LDAP client object
  */
-async function ldapConnect() {
+function ldapConnect() {
   M.log.debug('Attempting to bind to the LDAP server.');
+  // define and return promise
+  return new Promise((resolve, reject) => {
+    // Initialize arrCaCerts to hold LDAP server certificates
+    const arrCaCerts = [];
 
-  // Initialize arrCaCerts to hold LDAP server certificates
-  const arrCaCerts = [];
-
-  let ldapCA = ldapConfig.ca;
-  // If the CA contents is a string, make it an array
-  if (typeof ldapCA === 'string') {
-    ldapCA = [ldapCA];
-  }
-  // If no CA is provided.
-  else if (typeof ldapCA === 'undefined') {
-    ldapCA = [];
-  }
-
-  // Now if it's not an array, fail
-  if (!Array.isArray(ldapCA)) {
-    M.log.error('Failed to load LDAP CA certificates (invalid type)');
-    throw new M.ServerError('An error occurred.', 'error');
-  }
-
-  // If any items in the array are not strings, fail
-  if (!ldapCA.every(c => typeof c === 'string')) {
-    M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
-    throw new M.ServerError('An error occurred.', 'error');
-  }
-
-  M.log.verbose('Reading LDAP server CAs ...');
-
-  // Loop  number of certificates in config file
-  for (let i = 0; i < ldapCA.length; i++) {
-    // Extract certificate filename from config file
-    const certName = ldapCA[i];
-    // Extract certificate file content
-    const file = fs.readFileSync(path.join(M.root, certName));
-    // Push file content to arrCaCert
-    arrCaCerts.push(file);
-  }
-  M.log.verbose('LDAP server CAs loaded.');
-
-  // Create ldapClient object with url, credentials, and certificates
-  const ldapClient = ldap.createClient({
-    url: `${ldapConfig.url}:${ldapConfig.port}`,
-    tlsOptions: {
-      ca: arrCaCerts
+    let ldapCA = ldapConfig.ca;
+    // If the CA contents is a string, make it an array
+    if (typeof ldapCA === 'string') {
+      ldapCA = [ldapCA];
     }
-  });
-  // Bind ldapClient object to LDAP server
-  const boundLdapClient = await ldapClient.bind(ldapConfig.bind_dn, ldapConfig.bind_dn_pass,
-    (bindErr) => {
-    // Check if LDAP server bind fails
-      if (bindErr) {
-        // LDAP serve bind failed, reject bind error
-        throw bindErr;
+    // If no CA is provided.
+    else if (typeof ldapCA === 'undefined') {
+      ldapCA = [];
+    }
+
+    // Now if it's not an array, fail
+    if (!Array.isArray(ldapCA)) {
+      M.log.error('Failed to load LDAP CA certificates (invalid type)');
+      return reject(new M.ServerError('An error occurred.', 'error'));
+    }
+
+    // If any items in the array are not strings, fail
+    if (!ldapCA.every(c => typeof c === 'string')) {
+      M.log.error('Failed to load LDAP CA certificates (invalid type in array)');
+      return reject(new M.ServerError('An error occurred.', 'error'));
+    }
+
+    M.log.verbose('Reading LDAP server CAs ...');
+
+    // Loop  number of certificates in config file
+    for (let i = 0; i < ldapCA.length; i++) {
+      // Extract certificate filename from config file
+      const certName = ldapCA[i];
+      // Extract certificate file content
+      const file = fs.readFileSync(path.join(M.root, certName));
+      // Push file content to arrCaCert
+      arrCaCerts.push(file);
+    }
+    M.log.verbose('LDAP server CAs loaded.');
+
+    // Create ldapClient object with url, credentials, and certificates
+    const ldapClient = ldap.createClient({
+      url: `${ldapConfig.url}:${ldapConfig.port}`,
+      tlsOptions: {
+        ca: arrCaCerts
       }
     });
-  // LDAP serve bind successful, resolve ldapClient object
-  return boundLdapClient;
+    // Bind ldapClient object to LDAP server
+    ldapClient.bind(ldapConfig.bind_dn, ldapConfig.bind_dn_pass, (bindErr) => {
+      // Check if LDAP server bind fails
+      if (bindErr) {
+        // LDAP serve bind failed, reject bind error
+        return reject(bindErr);
+      }
+      // LDAP serve bind successful, resolve ldapClient object
+      return resolve(ldapClient);
+    });
+  });
 }
 
 /**
@@ -351,11 +352,17 @@ async function ldapSync(ldapUserObj) {
       userObject = await initData.save();
 
       // If user created, emit users-created
-      EventEmitter.emit('users-created', [userObject])
+      EventEmitter.emit('users-created', [userObject]);
     }
 
-    // Find the default org
-    const defaultOrg = Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+    let defaultOrg;
+    try {
+      // Find the default org
+      defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+    }
+    catch (error) {
+      throw new M.DatabaseError('Default org not found', 'warn');
+    }
 
     // Add the user to the default org
     defaultOrg.permissions[userObject._id] = ['read', 'write'];
