@@ -70,7 +70,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject with an invalid preferred name', preferredNameInvalid);
   it('should reject if the admin field is not a boolean', adminNotBoolean);
   it('should reject if the provider field is not a string', providerNotString);
-  it('should reject with an invalid provider', providerInvalid);
   it('should reject if no username (_id) is provided', usernameNotProvided);
   it('should reject with an invalid email', emailInvalid);
 });
@@ -438,39 +437,6 @@ function providerNotString(done) {
     }
   });
 }
-
-/**
- * @description Attempts to create a user with an invalid provider.
- */
-async function providerInvalid() {
-  if (customValidators.hasOwnProperty('user_provider')) {
-    M.log.verbose('Skipping valid provider test due to an existing custom'
-      + ' validator.');
-    this.skip();
-  }
-
-  const userData = Object.assign({}, testData.users[0]);
-  userData._id = userData.username;
-
-  // Change provider to be invalid
-  userData.provider = 'invalid_provider';
-
-  // Create user object
-  const userObject = new User(userData);
-
-  // Save user
-  try {
-    await userObject.save();
-
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'User created successfully.');
-  }
-  catch (error) {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal(`Unknown provider: ${userData.provider}`);
-  }
-}
-
 
 /**
  * @description Attempts to create a user with no username.
