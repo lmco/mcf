@@ -63,6 +63,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject when a username is too long', usernameTooLong);
   it('should reject with an invalid username', usernameInvalid);
   it('should reject when a first name is too long', fnameTooLong);
+  it('should reject with an invalid first name', fnameInvalid);
   it('should reject when a last name is too long', lnameTooLong);
   it('should reject when a preferred name is too long', preferredNameTooLong);
   it('should reject if the admin field is not a boolean', adminNotBoolean);
@@ -138,9 +139,10 @@ function usernameTooLong(done) {
 /**
  * @description Attempts to create a user with an invalid username.
  */
-function usernameInvalid(done) {
+async function usernameInvalid() {
   if (customValidators.hasOwnProperty('user_username')) {
-    M.log.verbose('Skipping valid username test due to custom validator.');
+    M.log.verbose('Skipping valid username test due to an existing custom'
+      + ' validator.');
     this.skip();
   }
 
@@ -153,23 +155,17 @@ function usernameInvalid(done) {
   const userObject = new User(userData);
 
   // Save user
-  userObject.save()
-  .then(() => {
+  try {
+    await userObject.save();
+
     // Should not succeed, force to fail
     chai.assert.fail(true, false, 'User created successfully.');
-  })
-  .catch((error) => {
-    // If user created successfully, fail the test
-    if (error.message === 'User created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('User validation failed: _id: Path '
-        + `\`_id\` is invalid (${userData._id}).`);
-      done();
-    }
-  });
+  }
+  catch (error) {
+    // Ensure error message is correct
+    chai.expect(error.message).to.equal('User validation failed: _id: Path '
+      + `\`_id\` is invalid (${userData._id}).`);
+  }
 }
 
 /**
@@ -204,6 +200,40 @@ function fnameTooLong(done) {
     }
   });
 }
+
+/**
+ * @description Attempts to create a user with an invalid first name.
+ */
+async function fnameInvalid() {
+  if (customValidators.hasOwnProperty('user_fname')) {
+    M.log.verbose('Skipping valid first name test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const userData = Object.assign({}, testData.users[0]);
+  userData._id = userData.username;
+
+  // Change username to be invalid
+  userData.fname = 'Inva3l!d_FirstN&me';
+
+  // Create user object
+  const userObject = new User(userData);
+
+  // Save user
+  try {
+    await userObject.save();
+
+    // Should not succeed, force to fail
+    chai.assert.fail(true, false, 'User created successfully.');
+  }
+  catch (error) {
+    // Ensure error message is correct
+    chai.expect(error.message).to.equal('User validation failed: fname: Path '
+      + `\`fname\` is invalid (${userData.fname}).`);
+  }
+}
+
 
 /**
  * @description Attempts to create a user with a last name that is too long.
