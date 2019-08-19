@@ -389,7 +389,6 @@ async function create(requestingUser, organizationID, projectID, branch, element
   const orgID = sani.mongo(organizationID);
   const projID = sani.mongo(projectID);
   const branchID = sani.mongo(branch);
-  let elementObjects = [];
   const remainingElements = [];
   let populatedElements = [];
   const projectRefs = [];
@@ -596,7 +595,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   await Promise.all(promises);
 
   // For each object of element data, create the element object
-  elementObjects = elementsToCreate.map((elemObj) => {
+  const elementObjects = elementsToCreate.map((elemObj) => {
     // Set the project, lastModifiedBy and createdBy
     elemObj.project = utils.createID(orgID, projID);
     elemObj.branch = utils.createID(orgID, projID, branchID);
@@ -2001,7 +2000,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to find elements from.
- * @param {string[]} elementID - The elements whose parents are being found.
+ * @param {string} elementID - The elements whose parents are being found.
  *
  * @return {string} Array of found element ids
  *

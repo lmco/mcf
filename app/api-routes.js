@@ -3356,7 +3356,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *       - name: rootpath
  *         description: An option to specify finding the parent, grandparent, etc
  *                      of the query element all the way up to the root element.
-*          in: query
+ *         in: query
  *         type: boolean
  *         default: false
  *     responses:
