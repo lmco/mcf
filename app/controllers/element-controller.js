@@ -73,6 +73,8 @@ const helper = M.require('lib.controller-helper');
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.rootpath] - An option to specify finding the parent,
+ * grandparent, etc of the query element all the way up to the root element.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
@@ -137,7 +139,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Validate the provided options
   const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
-    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
 
   // Ensure search options are valid
   if (options) {
@@ -211,6 +213,14 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   // If wanting to find subtree, find subtree ids
   if (validatedOptions.subtree) {
     elementsToFind = await findElementTree(orgID, projID, branchID, elementsToFind);
+  }
+
+  if (validatedOptions.rootpath) {
+    if (elementsToFind.length > 1) {
+      throw new M.DataFormatError('Can only perform root path search on a single element', 'warn');
+    }
+    const elementToFind = elementsToFind[0];
+    elementsToFind = await findElementRootPath(orgID, projID, branchID, elementToFind);
   }
 
   // If the archived field is true, remove it from the query
@@ -383,7 +393,6 @@ async function create(requestingUser, organizationID, projectID, branch, element
   const orgID = sani.mongo(organizationID);
   const projID = sani.mongo(projectID);
   const branchID = sani.mongo(branch);
-  let elementObjects = [];
   const remainingElements = [];
   let populatedElements = [];
   const projectRefs = [];
@@ -590,7 +599,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   await Promise.all(promises);
 
   // For each object of element data, create the element object
-  elementObjects = elementsToCreate.map((elemObj) => {
+  const elementObjects = elementsToCreate.map((elemObj) => {
     // Set the project, lastModifiedBy and createdBy
     elemObj.project = utils.createID(orgID, projID);
     elemObj.branch = utils.createID(orgID, projID, branchID);
@@ -2002,4 +2011,66 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       return reject(errors.captureError(error));
     }
   });
+}
+
+/**
+ * @description A non-exposed helper function which finds the parent of given
+ * element up to and including the root element
+ *
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string} elementID - The element whose parents are being found.
+ *
+ * @return {string} Array of found element ids
+ *
+ * @example
+ * findElementRootPath('orgID', 'projID', 'branch', 'elem1')
+ * .then(function(elementIDs) {
+ *   // Do something with the found element IDs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+async function findElementRootPath(organizationID, projectID, branch, elementID) {
+  // Initialize return object
+  let foundElements = [];
+
+  // Define nested helper function
+  async function findElementTreeHelper(searchID) {
+    try {
+      // Find the parent of the element
+      const parent = await Element.findOne({ _id: searchID }, { _id: 1, parent: 1 }).lean();
+      // Ensure the parent was found
+      if (!parent) {
+        throw new M.DataFormatError('Element or parent not found', 'warn');
+      }
+      // Get the parent id
+      const parentID = parent._id;
+      // If it's a circular reference, don't get lost in the sauce
+      if (foundElements.includes(parentID)) {
+        throw new M.DataFormatError('Circular element parent reference', 'warn');
+      }
+      else {
+        // Add the parent to the list of elements
+        foundElements = foundElements.concat(parentID);
+      }
+      // If the parent is root, exit the recursive function
+      if (utils.parseID(parentID).pop() === 'model') {
+        return '';
+      }
+      else {
+        // Recursively Find the parent of the parent
+        return findElementTreeHelper(parent.parent);
+      }
+    }
+    catch (error) {
+      throw errors.captureError(error);
+    }
+  }
+
+  await findElementTreeHelper(elementID);
+
+  return foundElements;
 }

@@ -3605,7 +3605,8 @@ function getElement(req, res) {
     archived: 'boolean',
     subtree: 'boolean',
     fields: 'array',
-    minified: 'boolean'
+    minified: 'boolean',
+    rootpath: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -3651,7 +3652,7 @@ function getElement(req, res) {
     );
 
     // If the subtree option was not provided, return only the first element
-    if (!options.subtree) {
+    if (!options.subtree && !options.rootpath) {
       elementsPublicData = elementsPublicData[0];
     }
 
