@@ -11,7 +11,25 @@
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description Defines the organization data model.
+ * @description <p>Defines the organization data model. Organizations are the
+ * highest level of hierarchy in MBEE. Organizations contain multiple projects,
+ * have their own set of permissions, and have the ability to store custom
+ * meta-data.</p>
+ *
+ * <h4>Permissions</h4>
+ * Permissions are stored in a single object, where keys are user's usernames
+ * and values are arrays containing the permissions a specific user has.
+ * Permissions in MBEE are cascading, meaning if a user has write permissions
+ * then they also have read.
+ *
+ * <ul>
+ *   <li><b>read</b>: The user can retrieve the organization and see its data.</li>
+ *   <li><b>write</b>: The user can retrieve the organization and create
+ *   projects. When a user creates a project, they become an admin on that
+ *   project.</li>
+ *   <li><b>admin</b>: The user can retrieve the organization, create projects,
+ *   modify the organization and update/remove user permissions.
+ *
  */
 
 // NPM modules
