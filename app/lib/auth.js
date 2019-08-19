@@ -114,7 +114,7 @@ async function authenticate(req, res, next) {
       }
       try {
         // Handle Basic Authentication
-        const user = await AuthModule.handleBasicAuth(req, res, username, password)
+        const user = await AuthModule.handleBasicAuth(req, res, username, password);
         // Successfully authenticated basic auth!
         M.log.info(`Authenticated [${user.username}] via Basic Auth`);
 
@@ -244,7 +244,7 @@ async function authenticate(req, res, next) {
 
     try {
       // Handle Basic Authentication
-      const user = await AuthModule.handleBasicAuth(req, res, username, password)
+      const user = await AuthModule.handleBasicAuth(req, res, username, password);
       // Successfully authenticate credentials!
       M.log.info(`Authenticated [${user.username}] via Form Input`);
 

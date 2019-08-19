@@ -104,7 +104,6 @@ async function handleBasicAuth(req, res, username, password) {
  *   })
  */
 async function handleTokenAuth(req, res, token) {
-  // initialize return object
   let user;
   try {
     user = await LocalStrategy.handleTokenAuth(req, res, token);
@@ -112,7 +111,6 @@ async function handleTokenAuth(req, res, token) {
   catch (error) {
     throw error;
   }
-  // Return user object
   return user;
 }
 
@@ -322,9 +320,16 @@ async function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
 
   let userObject;
+  let foundUser;
   try {
     // Search for user in database
-    const foundUser = await User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] });
+    foundUser = await User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] });
+  }
+  catch (error) {
+    throw new M.DatabaseError('Search query on user failed', 'warn');
+  }
+
+  try {
     // If the user was found, update with LDAP info
     if (foundUser) {
       // User exists, update database with LDAP information
@@ -350,20 +355,24 @@ async function ldapSync(ldapUserObj) {
 
       // Save ldap user
       userObject = await initData.save();
-
-      // If user created, emit users-created
-      EventEmitter.emit('users-created', [userObject]);
     }
+  }
+  catch (error) {
+    throw new M.DatabaseError('Could not save user data to database', 'warn');
+  }
+  // If user created, emit users-created
+  EventEmitter.emit('users-created', [userObject]);
 
-    let defaultOrg;
-    try {
-      // Find the default org
-      defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
-    }
-    catch (error) {
-      throw new M.DatabaseError('Default org not found', 'warn');
-    }
+  let defaultOrg;
+  try {
+    // Find the default org
+    defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+  }
+  catch (error) {
+    throw new M.DatabaseError('Default org not found', 'warn');
+  }
 
+  try {
     // Add the user to the default org
     defaultOrg.permissions[userObject._id] = ['read', 'write'];
 
@@ -374,7 +383,7 @@ async function ldapSync(ldapUserObj) {
     await defaultOrg.save();
   }
   catch (saveErr) {
-    throw saveErr;
+    throw new M.DatabaseError('Could not save new user permissions to database', 'warn');
   }
 
   // Return the new user
