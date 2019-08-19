@@ -70,7 +70,6 @@ const ProjectSchema = new mongoose.Schema({
         return _org;
       }
       // Check value NOT equal to db value
-      // TODO: NOt a user friendly error, find a better way to fail. Possibly pre('validate') hook?
       if (_org !== this.org) {
         // Immutable field, return error
         throw new M.OperationError('Assigned org cannot be changed.', 'warn');

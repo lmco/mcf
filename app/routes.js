@@ -81,9 +81,32 @@ router.route('/')
 );
 
 /**
- * @description This renders the admin console for admins ONLY.
+ * @description This renders the admin console to view user management
+ * page for admins ONLY.
  **/
 router.route('/admin')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.adminConsole
+);
+
+/**
+ * @description This renders the admin console to view all organizations
+ * for admins ONLY.
+ **/
+router.route('/admin/orgs')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.adminConsole
+);
+
+/**
+ * @description This renders the admin console to view all projects
+ * for admins ONLY.
+ **/
+router.route('/admin/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
