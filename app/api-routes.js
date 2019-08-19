@@ -2562,6 +2562,16 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
+ *         in: query
+ *         type: string
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.

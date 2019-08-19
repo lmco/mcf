@@ -1837,6 +1837,9 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived = false] - If true, find results will include
  * archived objects.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
@@ -1896,7 +1899,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
     // Validate and set the options
     const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
-      'limit', 'skip', 'lean', 'sort'], Element);
+      'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
     // Ensure options are valid
     if (options) {
@@ -1965,18 +1968,31 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         validatedOptions.sort.score = { $meta: 'textScore' };
       }
 
+      let projections = {};
+
+      // Check if filters are selected
+      if (validatedOptions.fieldsString) {
+        projections = helper.parseFieldsString(validatedOptions.fieldsString);
+      }
+
+      projections.score = {};
+      projections.score.$meta = 'textScore';
+
       // If the lean option is supplied
       if (validatedOptions.lean) {
         // Search for the elements
-        foundElements = await Element.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: validatedOptions.limit, skip: validatedOptions.skip })
+        foundElements = await Element.find(searchQuery, projections)
+        .skip(validatedOptions.skip)
+        .limit(validatedOptions.limit)
         .sort(validatedOptions.sort)
-        .populate(validatedOptions.populateString).lean();
+        .populate(validatedOptions.populateString)
+        .lean();
       }
       else {
         // Search for the elements
-        foundElements = await Element.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: validatedOptions.limit, skip: validatedOptions.skip })
+        foundElements = await Element.find(searchQuery, projections)
+        .skip(validatedOptions.skip)
+        .limit(validatedOptions.limit)
         .sort(validatedOptions.sort)
         .populate(validatedOptions.populateString);
       }
