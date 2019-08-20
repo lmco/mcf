@@ -94,7 +94,7 @@ module.exports.createTestAdmin = async function() {
 
   try {
     // Check any admin exist
-    const foundUser = await User.findOne({ _id: testData.adminUser.username })
+    const foundUser = await User.findOne({ _id: testData.adminUser.username });
     // Check user found
     if (foundUser !== null) {
       // User found, return it
@@ -225,7 +225,7 @@ module.exports.removeTestOrg = async function() {
     // Delete elements
     await Element.deleteMany(ownedQuery);
     // Delete any branches in the org
-    await  Branch.deleteMany(ownedQuery);
+    await Branch.deleteMany(ownedQuery);
     // Delete any projects in the org
     await Project.deleteMany({ org: testData.orgs[0].id });
     // Delete the orgs
