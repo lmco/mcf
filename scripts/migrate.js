@@ -32,13 +32,13 @@ async function migrate(args) {
     await db.connect();
     await libMigrate.migrate(args);
     await db.disconnect();
+    process.exit(0);
   }
   catch (error) {
     M.log.critical(error);
-    db.disconnect();
+    await db.disconnect();
     process.exit(1);
   }
-  process.exit(0);
 }
 
 module.exports = migrate;

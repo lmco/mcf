@@ -126,16 +126,11 @@ function initApp() {
 
 // Create default organization if it does not exist
 async function createDefaultOrganization() {
-  // Initialize createdOrg
-  let createdOrg = false;
-  // Initialize userIDs
-  let userIDs = null;
-
   try {
     // Find all users
     const users = await User.find({});
     // Set userIDs to the _id of the users array
-    userIDs = users.map(u => u._id);
+    const userIDs = users.map(u => u._id);
 
     // Find the default organization
     const org = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
@@ -156,8 +151,6 @@ async function createDefaultOrganization() {
       await org.save();
     }
     else {
-      // Set createdOrg to true
-      createdOrg = true;
       // Default organization does NOT exist, create it and add all active users
       // to permissions list
       const defaultOrg = new Organization({
@@ -172,15 +165,12 @@ async function createDefaultOrganization() {
 
       // Save new default organization
       await defaultOrg.save();
+
+      M.log.info('Default Organization Created');
     }
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
-  }
-
-  // Resolve on success of saved organization
-  if (createdOrg) {
-    M.log.info('Default Organization Created');
   }
 }
 

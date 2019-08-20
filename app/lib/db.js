@@ -19,6 +19,9 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 
+// MBEE modules
+const errors = M.require('lib.errors');
+
 /**
  * @description Create connection to database.
  *
@@ -86,6 +89,6 @@ module.exports.disconnect = async function() {
   }
   catch (error) {
     M.log.critical(error);
-    throw new M.DatabaseError('Database connection failed to close', 'critical');
+    throw errors.captureError(error);
   }
 };
