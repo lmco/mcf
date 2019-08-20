@@ -61,8 +61,6 @@ const ldapConfig = M.config.auth.ldap;
  *   })
  */
 async function handleBasicAuth(req, res, username, password) {
-  // Initialize return object
-  let syncedUser;
   try {
     // Connect to database
     const ldapClient = await ldapConnect();
@@ -73,15 +71,12 @@ async function handleBasicAuth(req, res, username, password) {
     // Authenticate user
     const authUser = await ldapAuth(ldapClient, foundUser, password);
 
-    // Sync user with local database
-    syncedUser = await ldapSync(authUser);
+    // Sync user with local database; return authenticated user object
+    return await ldapSync(authUser);
   }
   catch (error) {
     throw error;
   }
-
-  // Return authenticated user object
-  return syncedUser;
 }
 
 /**
@@ -351,6 +346,7 @@ async function ldapSync(ldapUserObj) {
     }
   }
   catch (error) {
+    M.log.error(error.message);
     throw new M.DatabaseError('Could not save user data to database', 'warn');
   }
   // If user created, emit users-created
@@ -362,7 +358,7 @@ async function ldapSync(ldapUserObj) {
     defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
   }
   catch (error) {
-    throw new M.DatabaseError('Default org not found', 'warn');
+    throw new M.DatabaseError('Query operation on default organization failed', 'warn');
   }
 
   try {
@@ -376,6 +372,7 @@ async function ldapSync(ldapUserObj) {
     await defaultOrg.save();
   }
   catch (saveErr) {
+    M.log.error(saveErr.message);
     throw new M.DatabaseError('Could not save new user permissions to database', 'warn');
   }
 
