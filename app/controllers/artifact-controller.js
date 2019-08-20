@@ -396,10 +396,11 @@ async function create(requestingUser, organizationID, projectID, branch,
       + ` [${existingArtifact.toString()}].`, 'warn');
   }
 
+  let hashedName = null;
   // Verify artifactBlob defined
   if (typeof artifactBlob !== 'undefined') {
     // Generate hash
-    const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+    hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
@@ -413,14 +414,15 @@ async function create(requestingUser, organizationID, projectID, branch,
 
       // Define new hash history entry
       newHistoryEntry = {
-        hash: hashedName,
-        user: reqUser
+        user: reqUser,
+        updatedOn: Date.now()
       };
     }
   }
 
   const artPromises = artsToCreate.map(async (a) => {
     const artObj = new Artifact(a);
+    artObj.hash = hashedName;
     artObj.history = [newHistoryEntry];
     artObj.project = foundProj._id;
     artObj.branch = foundBranch._id;
@@ -430,7 +432,6 @@ async function create(requestingUser, organizationID, projectID, branch,
     artObj.archivedBy = (a.archived) ? reqUser._id : null;
     return artObj;
   });
-  // TODO: Remove after
   const artObjects = await Promise.all(artPromises);
   // Save artifact object to the database
   const createdArtifact = await Artifact.insertMany(artObjects);
@@ -492,7 +493,6 @@ async function create(requestingUser, organizationID, projectID, branch,
 async function update(requestingUser, organizationID, projectID, branch,
   artifacts, artifactBlob, options) {
   M.log.debug('update(): Start of function');
-
   try {
     assert.ok(!Array.isArray(artifacts), 'Artifact update batching not supported.');
   }
@@ -612,10 +612,10 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Get array of editable parameters
   const validFields = Artifact.getValidUpdateFields();
 
-
+  let hashedName = null;
   // Verify artifactBlob defined
   if (typeof artifactBlob !== 'undefined') {
-    const hashedName = mbeeCrypto.sha256Hash(artifactBlob);
+    hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
     // Create the main artifact path
     const artifactPath = path.join(M.root, M.config.artifact.path);
@@ -778,7 +778,6 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   // Find the artifacts to delete
   const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } }).lean();
   const foundArtifactIDs = await foundArtifacts.map(e => e._id);
-  const artifactHistoryArr = await foundArtifacts.map(e => e.history);
 
   await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
 
@@ -794,10 +793,8 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   const uniqueIDs = Object.keys(uniqueIDsObj);
 
   // Loop through artifact history
-  artifactHistoryArr.forEach((a) => {
-    a.forEach(async (history) => {
-      removeArtifactOS(history.hash);
-    });
+  foundArtifacts.forEach((a) => {
+    removeArtifactOS(a.hash);
   });
 
   // TODO: Change the emitter to return artifacts rather than ids

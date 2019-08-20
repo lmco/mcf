@@ -21,6 +21,8 @@
 // NPM modules
 const mongoose = require('mongoose');
 const chai = require('chai');
+const { execSync } = require('child_process');
+const path = require('path');
 
 // MBEE modules
 const Element = M.require('models.element');
@@ -65,6 +67,7 @@ describe(M.getModuleName(module.filename), function() {
    */
   it('clean database', cleanDB);
   it('should create the default org if it doesn\'t exist', createDefaultOrg);
+  it('should clear artifact storage folder', clearArtifactStorage);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -89,7 +92,6 @@ function cleanDB(done) {
     done();
   });
 }
-
 
 /**
  * @description Creates the default org if it doesn't already exist
@@ -118,4 +120,14 @@ function createDefaultOrg(done) {
     chai.expect(error.message).to.equal(null);
     done();
   });
+}
+
+/**
+ * @description Clears the local artifact storage folder
+ */
+function clearArtifactStorage(done) {
+  const artifactPath = path.join(M.root, M.config.artifact.path);
+  // Remove artifacts
+  execSync(`rm -rf ${artifactPath}/*`);
+  done();
 }

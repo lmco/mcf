@@ -123,10 +123,10 @@ async function createArtifact() {
     chai.expect(createdArtifact[0].branch).to.equal(
       utils.createID(org.id, projectID, branchID)
     );
-    chai.expect(createdArtifact[0].location).to.equal(testData.artifacts[0].location);
-    chai.expect(createdArtifact[0].history[0].hash).to.equal(
-      testData.artifacts[0].history[0].hash
+    chai.expect(createdArtifact[0].location).to.equal(
+      testData.artifacts[0].location
     );
+    chai.expect(createdArtifact[0].hash).to.equal(testData.artifacts[0].hash);
     chai.expect(createdArtifact[0].history[0].user).to.equal(adminUser.id);
     chai.expect(createdArtifact[0].history[0].updatedOn).to.not.equal(null);
   }
@@ -164,9 +164,11 @@ async function findArtifact() {
     chai.expect(foundArtifact[0].branch).to.equal(
       utils.createID(org.id, projectID, branchID)
     );
-    chai.expect(foundArtifact[0].history);
-    chai.expect(foundArtifact[0].history[0].hash).to.equal(
-      testData.artifacts[0].history[0].hash
+    chai.expect(foundArtifact[0].location).to.equal(
+      testData.artifacts[0].location
+    );
+    chai.expect(foundArtifact[0].hash).to.equal(
+      testData.artifacts[0].hash
     );
     chai.expect(foundArtifact[0].history[0].user).to.equal(adminUser.id);
     chai.expect(foundArtifact[0].history[0].updatedOn).to.not.equal(null);
@@ -223,9 +225,7 @@ async function updateArtifact() {
       utils.createID(org.id, projectID, branchID)
     );
     chai.expect(updatedArtifact[0].location).to.equal(testData.artifacts[2].location);
-    chai.expect(updatedArtifact[0].history[1].hash).to.equal(
-      testData.artifacts[2].history[0].hash
-    );
+    chai.expect(updatedArtifact[0].hash).to.equal(testData.artifacts[0].hash);
     chai.expect(updatedArtifact[0].history[0].user).to.equal(adminUser.id);
     chai.expect(updatedArtifact[0].history[0].updatedOn).to.not.equal(null);
   }
