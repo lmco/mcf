@@ -32,7 +32,7 @@ function ListItem(props) {
         </div>
   );
 
-    // Verify router link provided
+  // Verify router link provided
   if (props.routerLink) {
     // Create a navLink item
     return (<NavLink exact to={props.routerLink}> {listItem} </NavLink>);

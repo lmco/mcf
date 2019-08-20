@@ -34,7 +34,7 @@ import OrgProjects from '../org-views/organization-projects.jsx';
 // Define component
 class OrgApp extends Component {
 
-/* eslint-enable no-unused-vars */
+  /* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props
