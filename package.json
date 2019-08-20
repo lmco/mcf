@@ -47,10 +47,10 @@
     "popper.js": "^1.14.7",
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
-    "react-router-dom": "^4.3.1",
-    "reactstrap": "^7.1.0",
+    "react-router-dom": "^5.0.1",
+    "reactstrap": "^8.0.1",
     "swagger-ui-express": "^4.0.7",
-    "webpack": "^4.29.5"
+    "webpack": "^4.39.2"
   },
   "scripts": {
     "build": "node mbee build",
