@@ -44,7 +44,7 @@ module.exports.checkParams = function(requestingUser, options, orgID = '', projI
 
     const optionsTypes = ['undefined', 'object'];
     assert.ok(optionsTypes.includes(typeof options), 'Options parameter cannot be of'
-      + `type ${typeof options}.`);
+      + ` type ${typeof options}.`);
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
@@ -64,7 +64,7 @@ module.exports.checkParams = function(requestingUser, options, orgID = '', projI
 module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
   try {
     assert.ok(dataTypes.includes(typeof data), `${dataName} parameter cannot be of type`
-      + `${typeof data}.`);
+      + ` ${typeof data}.`);
     // if the data is an object, ensure it's either an array of strings or objects
     if (typeof data === 'object') {
       // Ensure the data is not null
@@ -98,12 +98,11 @@ module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
  *
  * @param {Object} model - The model being validated: org/project/branch
  * @param {string} id - The ID of the model being validated
- * @param {Object} reqUser - The user making the request
  * @param {string} [archived = false] - Specifies whether or not to allow archived results
  *
  * @return {Object} - an object containing the sanitized input parameters
  */
-module.exports.findAndValidate = async function(model, id, reqUser, archived = false) {
+module.exports.findAndValidate = async function(model, id, archived = false) {
   // Perform the find operation on the model
   const query = { _id: id };
   const result = await model.findOne(query).lean();

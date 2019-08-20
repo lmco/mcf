@@ -172,7 +172,7 @@ class InformationPage extends Component {
               <table className='table-width'>
                 <tbody>
                   {(!this.props.branch)
-                    ? ''
+                    ? <tr/>
                     : (<tr>
                         <th style={{ display: 'flex', justifyContent: 'flex-start' }}>
                           <Button close

@@ -238,7 +238,6 @@ async function create(requestingUser, orgs, options) {
   // Sanitize input parameters
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
-  let orgObjects = [];
 
   // Initialize and ensure options are valid
   const validOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -321,7 +320,7 @@ async function create(requestingUser, orgs, options) {
   // Create array of usernames
   const foundUsernames = foundUsers.map(u => u._id);
   // For each object of org data, create the org object
-  orgObjects = orgsToCreate.map((o) => {
+  const orgObjects = orgsToCreate.map((o) => {
     const orgObj = new Organization(o);
     // Set permissions
     Object.keys(orgObj.permissions).forEach((u) => {
@@ -836,6 +835,7 @@ async function createOrReplace(requestingUser, orgs, options) {
   EventEmitter.emit('orgs-deleted', foundOrgs);
 
   // Code block after original orgs have been deleted but before they have been replaced
+  // If creation of new orgs fails, it will restore the previous orgs
   try {
     // Create the new orgs
     createdOrgs = await create(reqUser, orgsToLookup, options);
@@ -845,24 +845,24 @@ async function createOrReplace(requestingUser, orgs, options) {
       // Reinsert original data
       try {
         await Organization.insertMany(foundOrgs);
-        await new Promise(async (resInner, rejInner) => {
-          // Remove the file
+        await new Promise(async (resInner) => {
+          // Remove the backup file
           await fs.unlink(path.join(M.root, 'data',
             `PUT-backup-orgs-${ts}.json`), function(err) {
-            if (err) rejInner(err);
+            if (err) throw err;
             else resInner();
           });
         });
+        // Restoration succeeded; pass the original error
         res(error);
       }
       catch (err) {
+        // Pass the new error that occurred while trying to restore orgs
         res(err);
       }
     });
-    // If an error was returned, reject it.
-    if (finalError) {
-      throw errors.captureError(finalError);
-    }
+    // Throw whichever error was passed
+    throw errors.captureError(finalError);
   }
 
   // Delete the temporary file.
@@ -916,7 +916,6 @@ async function remove(requestingUser, orgs, options) {
 
   // Sanitize input parameters and function-wide variables
   const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
-  let foundOrgs = [];
   let searchedIDs = [];
 
   // Define searchQuery and ownedQuery
@@ -940,7 +939,7 @@ async function remove(requestingUser, orgs, options) {
   }
 
   // Find the orgs to delete
-  foundOrgs = await Organization.find(searchQuery).lean();
+  const foundOrgs = await Organization.find(searchQuery).lean();
 
   const foundOrgIDs = foundOrgs.map(o => o._id);
   const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));

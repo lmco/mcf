@@ -165,7 +165,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, reqUser, validatedOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -175,7 +175,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Find the project and validate that it was found and not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    reqUser, validatedOptions.archived);
+    validatedOptions.archived);
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -185,7 +185,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Find the branch and validate that it was found and not archived (unless specified)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID),
-    reqUser, validatedOptions.archived);
+    validatedOptions.archived);
 
   let elementsToFind = [];
 
@@ -531,7 +531,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const organization = await helper.findAndValidate(Org, orgID);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -540,7 +540,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -561,8 +561,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   });
 
   // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
+  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID));
   // Check that the branch is is not a tag
   if (foundBranch.tag) {
     throw new M.OperationError(`[${branchID}] is a tag and `
@@ -824,10 +823,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
   const branchID = sani.mongo(branch);
   const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
   let foundElements = [];
-  // let foundProject = {};
   let elementsToUpdate = [];
-  let searchQuery = {};
-  let sourceTargetQuery = {};
   const duplicateCheck = {};
   let foundUpdatedElements = [];
   const arrIDs = [];
@@ -840,7 +836,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
 
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const organization = await helper.findAndValidate(Org, orgID);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -849,7 +845,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -859,7 +855,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
 
   // Find the branch and validate that it was found and not archived
   const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
+    utils.createID(orgID, projID, branchID));
   // Check that the branch is is not a tag
   if (foundBranch.tag) {
     throw new M.OperationError(`[${branchID}] is a tag and `
@@ -940,6 +936,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
       // If the element a sourceNamespace section, ensure it contains the proper fields
       if (elem.hasOwnProperty('sourceNamespace')) {
         assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+        assert.ok(typeof elem.source === 'string', `Element #${index}'s source is not a string.`);
 
         // Ensure the object contains an org, project and branch field
         assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
@@ -981,6 +978,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
       // If the element a targetNamespace section, ensure it contains the proper fields
       if (elem.hasOwnProperty('targetNamespace')) {
         assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+        assert.ok(typeof elem.target === 'string', `Element #${index}'s target is not a string.`);
 
         // Ensure the object contains an org, project and branch field
         assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
@@ -1032,8 +1030,8 @@ async function update(requestingUser, organizationID, projectID, branch, element
   });
 
   const promises2 = [];
-  searchQuery = { branch: utils.createID(orgID, projID, branchID) };
-  sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
+  const searchQuery = { branch: utils.createID(orgID, projID, branchID) };
+  const sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
 
   // Find elements in batches
   for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
@@ -1281,11 +1279,10 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   let foundElements = [];
   let elementsToLookup = [];
   let createdElements = [];
-  let foundElementIDs = [];
   const ts = Date.now();
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const organization = await helper.findAndValidate(Org, orgID);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1294,7 +1291,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   }
 
   // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -1303,8 +1300,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   }
 
   // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
+  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID));
   // Check that the branch is is not a tag
   if (foundBranch.tag) {
     throw new M.OperationError(`[${branchID}] is a tag and `
@@ -1369,7 +1365,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   // Return when all elements have been found
   await Promise.all(promises);
 
-  foundElementIDs = await foundElements.map(e => e._id);
+  const foundElementIDs = await foundElements.map(e => e._id);
 
   // Error Check: ensure user cannot replace root element
   foundElementIDs.forEach((id) => {
@@ -1418,31 +1414,34 @@ async function createOrReplace(requestingUser, organizationID, projectID,
 
 
   // Try block after elements have been deleted but before being replaced
+  // If element creation fails, the old elements will be restored
   try {
     // Create new elements
     createdElements = await create(reqUser, orgID, projID, branchID, elementsToLookup, options);
   }
   catch (error) {
-    const finalError = await new Promise((res) => {
+    const finalError = await new Promise(async (res) => {
       // Reinsert original data
-      Element.insertMany(foundElements)
-      .then(() => new Promise((resInner, rejInner) => {
-        // Remove the file
-        fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
-          `PUT-backup-elements-${ts}.json`), function(err) {
-          if (err) rejInner(err);
-          else resInner();
+      try {
+        await Element.insertMany(foundElements);
+        await new Promise(async (resInner) => {
+          // Remove the backup file
+          await fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
+            `PUT-backup-elements-${ts}.json`), function(err) {
+            if (err) throw err;
+            else resInner();
+          });
         });
-      }))
-      // Resolve the original error
-      .then(() => res(errors.captureError(error)))
-      // Unless a new error occured
-      .catch((err) => res(err));
+        // Restoration succeeded; pass the original error
+        res(error);
+      }
+      catch (err) {
+        // Pass the new error that occurred while trying to restore elements
+        res(err);
+      }
     });
-    // Throw the error
-    if (finalError) {
-      throw new M.DatabaseError(finalError.message, 'warn');
-    }
+    // Throw whichever error was passed
+    throw errors.captureError(finalError);
   }
 
   // Code block after elements have been deleted and replaced
@@ -1540,7 +1539,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
 
 
   // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID, reqUser);
+  const organization = await helper.findAndValidate(Org, orgID);
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1549,7 +1548,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -1558,8 +1557,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
   }
 
   // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
+  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID));
   // Check that the branch is is not a tag
   if (foundBranch.tag) {
     throw new M.OperationError(`[${branchID}] is a tag and `
@@ -1930,8 +1928,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
     try {
       // Find the organization and validate that it was found and not archived (unless specified)
-      const organization = await helper.findAndValidate(Org, orgID, reqUser,
-        validatedOptions.archived);
+      const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
       // Permissions check
       if (!reqUser.admin && (!organization.permissions[reqUser._id]
         || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1940,7 +1937,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       }
 
       // Find the project and validate that it was found and not archived (unless specificed)
-      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser,
+      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
         validatedOptions.archived);
       // Permissions check
       if (!reqUser.admin && (!project.permissions[reqUser._id]
@@ -1951,7 +1948,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
       // Find the branch and validate that it was found and not archived (unless specificed)
       await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID),
-        reqUser, validatedOptions.archived);
+        validatedOptions.archived);
 
       searchQuery.$text = { $search: query };
       // If the archived field is true, remove it from the query
