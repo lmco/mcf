@@ -35,6 +35,7 @@ const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -60,29 +61,23 @@ const ldapConfig = M.config.auth.ldap;
  *     console.log(err);
  *   })
  */
-function handleBasicAuth(req, res, username, password) {
-  // Return a promise
-  return new Promise((resolve, reject) => {
-    // Define LDAP client handler
-    let ldapClient = null;
-
+async function handleBasicAuth(req, res, username, password) {
+  try {
     // Connect to database
-    ldapConnect()
-    .then(_ldapClient => {
-      ldapClient = _ldapClient;
+    const ldapClient = await ldapConnect();
 
-      // Search for user
-      return ldapSearch(ldapClient, username);
-    })
+    // Search for user
+    const foundUser = await ldapSearch(ldapClient, username);
 
     // Authenticate user
-    .then(foundUser => ldapAuth(ldapClient, foundUser, password))
-    // Sync user with local database
-    .then(authUser => ldapSync(authUser))
-    // Return authenticated user object
-    .then(syncedUser => resolve(syncedUser))
-    .catch(ldapConnectErr => reject(ldapConnectErr));
-  });
+    const authUser = await ldapAuth(ldapClient, foundUser, password);
+
+    // Sync user with local database; return authenticated user object
+    return await ldapSync(authUser);
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**
@@ -104,12 +99,8 @@ function handleBasicAuth(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-function handleTokenAuth(req, res, token) {
-  return new Promise((resolve, reject) => {
-    LocalStrategy.handleTokenAuth(req, res, token)
-    .then(user => resolve(user))
-    .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
-  });
+async function handleTokenAuth(req, res, token) {
+  return LocalStrategy.handleTokenAuth(req, res, token);
 }
 
 /**
@@ -314,30 +305,33 @@ function ldapAuth(ldapClient, user, password) {
  *
  * @returns {Promise} Synchronized user model object
  */
-function ldapSync(ldapUserObj) {
+async function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
-  // Define and return promise
-  return new Promise((resolve, reject) => {
-    // Store user object function-wide
-    let userObject = {};
-    let created = false;
 
+  let userObject;
+  let foundUser;
+  try {
     // Search for user in database
-    User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] })
-    .then(foundUser => {
-      // If the user was found, update with LDAP info
-      if (foundUser) {
-        // User exists, update database with LDAP information
-        foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
-        foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
-        foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
-        foundUser.email = ldapUserObj[ldapConfig.attributes.email];
+    foundUser = await User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] });
+  }
+  catch (error) {
+    throw new M.DatabaseError('Search query on user failed', 'warn');
+  }
 
-        // Save updated user to database
-        return foundUser.save();
-      }
+  try {
+    // If the user was found, update with LDAP info
+    if (foundUser) {
+      // User exists, update database with LDAP information
+      foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
+      foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
+      foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
+      foundUser.email = ldapUserObj[ldapConfig.attributes.email];
+
+      // Save updated user to database
+      userObject = await foundUser.save();
+    }
+    else {
       // User not found, create a new one
-
       // Initialize userData with LDAP information
       const initData = new User({
         _id: ldapUserObj[ldapConfig.attributes.username],
@@ -348,39 +342,43 @@ function ldapSync(ldapUserObj) {
         provider: 'ldap'
       });
 
-      // User was created, set boolean to true
-      created = true;
-
       // Save ldap user
-      return initData.save();
-    })
-    .then(savedUser => {
-      // Save user to function-wide variable
-      userObject = savedUser;
+      userObject = await initData.save();
+    }
+  }
+  catch (error) {
+    M.log.error(error.message);
+    throw new M.DatabaseError('Could not save user data to database', 'warn');
+  }
+  // If user created, emit users-created
+  EventEmitter.emit('users-created', [userObject]);
 
-      // If user created, emit users-created
-      if (created) {
-        EventEmitter.emit('users-created', [savedUser]);
-      }
+  let defaultOrg;
+  try {
+    // Find the default org
+    defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+  }
+  catch (error) {
+    throw new M.DatabaseError('Query operation on default organization failed', 'warn');
+  }
 
-      // Find the default org
-      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
-    })
-    .then((defaultOrg) => {
-      // Add the user to the default org
-      defaultOrg.permissions[userObject._id] = ['read', 'write'];
+  try {
+    // Add the user to the default org
+    defaultOrg.permissions[userObject._id] = ['read', 'write'];
 
-      // Mark permissions as modified, required for 'mixed' fields
-      defaultOrg.markModified('permissions');
+    // Mark permissions as modified, required for 'mixed' fields
+    defaultOrg.markModified('permissions');
 
-      // Save the updated default org
-      return defaultOrg.save();
-    })
-    // Return the new user
-    .then(() => resolve(userObject))
-    // Save failed, reject error
-    .catch(saveErr => reject(saveErr));
-  });
+    // Save the updated default org
+    await defaultOrg.save();
+  }
+  catch (saveErr) {
+    M.log.error(saveErr.message);
+    throw new M.DatabaseError('Could not save new user permissions to database', 'warn');
+  }
+
+  // Return the new user
+  return userObject;
 }
 
 /**

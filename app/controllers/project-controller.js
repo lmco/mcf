@@ -1068,20 +1068,15 @@ async function createOrReplace(requestingUser, organizationID, projects, options
       // Reinsert original data
       try {
         await Project.insertMany(foundProjects);
-        await new Promise(async (resInner) => {
-          // Remove the backup file
-          await fs.unlink(path.join(M.root, 'data', orgID,
-            `PUT-backup-projects-${ts}.json`), function(err) {
-            if (err) throw err;
-            else resInner();
-          });
-        });
+        fs.unlinkSync(path.join(M.root, 'data', orgID,
+          `PUT-backup-projects-${ts}.json`));
+
         // Restoration succeeded; pass the original error
         res(error);
       }
-      catch (err) {
+      catch (restoreErr) {
         // Pass a new error that occurred while trying to restore projects
-        res(err);
+        res(restoreErr);
       }
     });
     // Throw whichever error was passed
@@ -1093,12 +1088,12 @@ async function createOrReplace(requestingUser, organizationID, projects, options
     orgID, `PUT-backup-projects-${ts}.json`);
   // Delete the temporary file.
   if (fs.existsSync(filePath)) {
-    await new Promise(function(res, rej) {
-      fs.unlink(filePath, function(err) {
-        if (err) rej(err);
-        else res();
-      });
-    });
+    try {
+      fs.unlinkSync(filePath);
+    }
+    catch (err) {
+      throw errors.captureError(err);
+    }
   }
 
   // Read all of the files in the org directory
