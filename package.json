@@ -21,7 +21,7 @@
     "ldapjs": "^1.0.2",
     "mongoose": "^5.4.14",
     "request": "^2.86.0",
-    "swagger-jsdoc": "^1.9.7",
+    "swagger-jsdoc": "^3.4.0",
     "winston": "^3.2.1",
     "yarn": "^1.13.0"
   },
