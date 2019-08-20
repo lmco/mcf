@@ -452,7 +452,7 @@ async function create(requestingUser, organizationID, projects, options) {
     archivedBy: (p.archived) ? reqUser._id : null
   }));
 
-    // Create a holding bin element for each project
+  // Create a holding bin element for each project
   const elemHoldingBinObj = projObjects.map((p) => new Element({
     _id: utils.createID(p._id, 'master', 'holding_bin'),
     name: 'holding bin',
