@@ -33,7 +33,7 @@
     "babel-preset-react": "^6.24.1",
     "bootstrap": "^4.3.1",
     "chai": "^4.1.2",
-    "eslint": "^4.19.1",
+    "eslint": "^6.2.1",
     "gulp": "^4.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-markdown": "^3.0.0",
