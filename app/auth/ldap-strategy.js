@@ -35,6 +35,7 @@ const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -75,7 +76,7 @@ async function handleBasicAuth(req, res, username, password) {
     return await ldapSync(authUser);
   }
   catch (error) {
-    throw error;
+    throw errors.captureError(error);
   }
 }
 
