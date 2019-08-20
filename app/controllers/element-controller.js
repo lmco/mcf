@@ -73,6 +73,8 @@ const helper = M.require('lib.controller-helper');
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.rootpath] - An option to specify finding the parent,
+ * grandparent, etc of the query element all the way up to the root element.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
@@ -137,7 +139,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Validate the provided options
   const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
-    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
 
   // Ensure search options are valid
   if (options) {
@@ -211,6 +213,14 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   // If wanting to find subtree, find subtree ids
   if (validatedOptions.subtree) {
     elementsToFind = await findElementTree(orgID, projID, branchID, elementsToFind);
+  }
+
+  if (validatedOptions.rootpath) {
+    if (elementsToFind.length > 1) {
+      throw new M.DataFormatError('Can only perform root path search on a single element', 'warn');
+    }
+    const elementToFind = elementsToFind[0];
+    elementsToFind = await findElementRootPath(orgID, projID, branchID, elementToFind);
   }
 
   // If the archived field is true, remove it from the query
@@ -383,7 +393,6 @@ async function create(requestingUser, organizationID, projectID, branch, element
   const orgID = sani.mongo(organizationID);
   const projID = sani.mongo(projectID);
   const branchID = sani.mongo(branch);
-  let elementObjects = [];
   const remainingElements = [];
   let populatedElements = [];
   const projectRefs = [];
@@ -590,7 +599,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
   await Promise.all(promises);
 
   // For each object of element data, create the element object
-  elementObjects = elementsToCreate.map((elemObj) => {
+  const elementObjects = elementsToCreate.map((elemObj) => {
     // Set the project, lastModifiedBy and createdBy
     elemObj.project = utils.createID(orgID, projID);
     elemObj.branch = utils.createID(orgID, projID, branchID);
@@ -1045,7 +1054,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
     }));
   }
 
-  // Return when all elements have been found
+  // Continue when all elements have been found
   await Promise.all(promises2);
 
   // Verify the same number of elements are found as desired
@@ -1424,20 +1433,15 @@ async function createOrReplace(requestingUser, organizationID, projectID,
       // Reinsert original data
       try {
         await Element.insertMany(foundElements);
-        await new Promise(async (resInner) => {
-          // Remove the backup file
-          await fs.unlink(path.join(M.root, 'data', orgID, projID, branchID,
-            `PUT-backup-elements-${ts}.json`), function(err) {
-            if (err) throw err;
-            else resInner();
-          });
-        });
+        fs.unlinkSync(path.join(M.root, 'data', orgID, projID, branchID,
+          `PUT-backup-elements-${ts}.json`));
+
         // Restoration succeeded; pass the original error
         res(error);
       }
-      catch (err) {
+      catch (restoreErr) {
         // Pass the new error that occurred while trying to restore elements
-        res(err);
+        res(restoreErr);
       }
     });
     // Throw whichever error was passed
@@ -1450,12 +1454,12 @@ async function createOrReplace(requestingUser, organizationID, projectID,
   const filePath = path.join(M.root, 'data', orgID, projID, branchID, `PUT-backup-elements-${ts}.json`);
   // Delete the temporary file.
   if (fs.existsSync(filePath)) {
-    await new Promise(function(res, rej) {
-      fs.unlink(filePath, function(err) {
-        if (err) rej(err);
-        else res();
-      });
-    });
+    try {
+      fs.unlinkSync(filePath);
+    }
+    catch (err) {
+      throw errors.captureError(err);
+    }
   }
 
   // Read all of the files in the branch directory
@@ -1695,33 +1699,32 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
   }
 
   // Define nested helper function
-  function findElementTreeHelper(ids) {
-    return new Promise((resolve, reject) => {
+  async function findElementTreeHelper(ids) {
+    try {
       // Find all elements whose parent is in the list of given ids
-      Element.find({ parent: { $in: ids } }, '_id').lean()
-      .then(elements => {
-        // Get a list of element ids
-        const foundIDs = elements.map(e => e._id);
-        // Add these elements to the global list of found elements
-        foundElements = foundElements.concat(foundIDs);
+      const elements = await Element.find({ parent: { $in: ids } }, '_id').lean();
+      // Get a list of element ids
+      const foundIDs = elements.map(e => e._id);
+      // Add these elements to the global list of found elements
+      foundElements = foundElements.concat(foundIDs);
 
-        // If no elements were found, exit the recursive function
-        if (foundIDs.length === 0) {
-          return '';
-        }
+      // If no elements were found, exit the recursive function
+      if (foundIDs.length === 0) {
+        return '';
+      }
 
-        // Recursively find the sub-children of the found elements in batches of 50000 or less
-        for (let i = 0; i < foundIDs.length / 50000; i++) {
-          const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
-          return findElementTreeHelper(tmpIDs);
-        }
-      })
-      .then(() => resolve())
-      .catch((error) => reject(error));
-    });
+      // Recursively find the sub-children of the found elements in batches of 50000 or less
+      for (let i = 0; i < foundIDs.length / 50000; i++) {
+        const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
+        return findElementTreeHelper(tmpIDs);
+      }
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const promises = [];
 
     // If initial batch of ids is greater than 50000, split up in batches
@@ -1731,9 +1734,13 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
       promises.push(findElementTreeHelper(tmpIDs));
     }
 
-    Promise.all(promises)
-    .then(() => resolve(foundElements))
-    .catch((error) => reject(errors.captureError(error)));
+    try {
+      await Promise.all(promises);
+    }
+    catch (error) {
+      reject(errors.captureError(error));
+    }
+    resolve(foundElements);
   });
 }
 
@@ -1758,67 +1765,62 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
  *   M.log.error(error);
  * });
  */
-function moveElementCheck(organizationID, projectID, branch, element) {
-  return new Promise((resolve, reject) => {
-    // Create the name-spaced ID
-    const elementID = utils.createID(organizationID, projectID, branch, element.id);
+async function moveElementCheck(organizationID, projectID, branch, element) {
+  // Create the name-spaced ID
+  const elementID = utils.createID(organizationID, projectID, branch, element.id);
 
-    // Error Check: ensure elements parent is not self
-    if (element.parent === elementID) {
-      throw new M.OperationError('Elements parent cannot be self.', 'warn');
+  // Error Check: ensure elements parent is not self
+  if (element.parent === elementID) {
+    throw new M.OperationError('Elements parent cannot be self.', 'warn');
+  }
+
+  // Error Check: ensure the root elements are not being moved
+  if (Element.getValidRootElements().includes(element.id)) {
+    const parent = utils.parseID(element.parent).pop();
+    if (element.id === 'model'
+      || (element.id === '__mbee__' && parent !== 'model')
+      || (element.id === 'holding_bin' && parent !== '__mbee__')
+      || (element.id === 'undefined' && parent !== '__mbee__')) {
+      throw new M.OperationError(
+        `Cannot move the root element: ${element.id}.`, 'warn'
+      );
+    }
+  }
+
+  // Define nested helper function
+  async function findElementParentRecursive(e) {
+    const foundElement = await Element.findOne({ _id: e.parent }).lean();
+    // If foundElement is null, reject with error
+    if (!foundElement) {
+      throw new M.NotFoundError('Parent element '
+        + `[${utils.parseID(e.parent).pop()}] not found.`, 'warn');
     }
 
-    // Error Check: ensure the root elements are not being moved
-    if (Element.getValidRootElements().includes(element.id)) {
-      const parent = utils.parseID(element.parent).pop();
-      if (element.id === 'model'
-        || (element.id === '__mbee__' && parent !== 'model')
-        || (element.id === 'holding_bin' && parent !== '__mbee__')
-        || (element.id === 'undefined' && parent !== '__mbee__')) {
-        throw new M.OperationError(
-          `Cannot move the root element: ${element.id}.`, 'warn'
-        );
-      }
+    // If element.parent is root, resolve... there is no conflict
+    if (foundElement.parent === null
+      || utils.parseID(foundElement.parent).pop() === 'model') {
+      return '';
     }
 
-    // Define nested helper function
-    function findElementParentRecursive(e) {
-      return new Promise((res, rej) => {
-        Element.findOne({ _id: e.parent }).lean()
-        .then((foundElement) => {
-          // If foundElement is null, reject with error
-          if (!foundElement) {
-            throw new M.NotFoundError('Parent element '
-              + `[${utils.parseID(e.parent).pop()}] not found.`, 'warn');
-          }
-
-          // If element.parent is root, resolve... there is no conflict
-          if (foundElement.parent === null
-            || utils.parseID(foundElement.parent).pop() === 'model') {
-            return '';
-          }
-
-          // If elementID is equal to foundElement.id, a circular reference would
-          // exist, reject with an error
-          if (elementID === foundElement.id) {
-            throw new M.OperationError('A circular reference would exist in'
-              + ' the model, element cannot be moved.', 'warn');
-          }
-          else {
-            // Find the parents parent
-            return findElementParentRecursive(foundElement);
-          }
-        })
-        .then(() => resolve())
-        .catch((error) => rej(error));
-      });
+    // If elementID is equal to foundElement.id, a circular reference would
+    // exist, reject with an error
+    if (elementID === foundElement.id) {
+      throw new M.OperationError('A circular reference would exist in'
+        + ' the model, element cannot be moved.', 'warn');
     }
+    else {
+      // Find the parents parent
+      return findElementParentRecursive(foundElement);
+    }
+  }
 
+  try {
     // Call the recursive find function
-    findElementParentRecursive(element)
-    .then(() => resolve())
-    .catch((error) => reject(errors.captureError(error)));
-  });
+    await findElementParentRecursive(element);
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**
@@ -1837,6 +1839,9 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived = false] - If true, find results will include
  * archived objects.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
@@ -1896,7 +1901,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
     // Validate and set the options
     const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
-      'limit', 'skip', 'lean', 'sort'], Element);
+      'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
     // Ensure options are valid
     if (options) {
@@ -1965,18 +1970,31 @@ function search(requestingUser, organizationID, projectID, branch, query, option
         validatedOptions.sort.score = { $meta: 'textScore' };
       }
 
+      let projections = {};
+
+      // Check if filters are selected
+      if (validatedOptions.fieldsString) {
+        projections = helper.parseFieldsString(validatedOptions.fieldsString);
+      }
+
+      projections.score = {};
+      projections.score.$meta = 'textScore';
+
       // If the lean option is supplied
       if (validatedOptions.lean) {
         // Search for the elements
-        foundElements = await Element.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: validatedOptions.limit, skip: validatedOptions.skip })
+        foundElements = await Element.find(searchQuery, projections)
+        .skip(validatedOptions.skip)
+        .limit(validatedOptions.limit)
         .sort(validatedOptions.sort)
-        .populate(validatedOptions.populateString).lean();
+        .populate(validatedOptions.populateString)
+        .lean();
       }
       else {
         // Search for the elements
-        foundElements = await Element.find(searchQuery, { score: { $meta: 'textScore' } },
-          { limit: validatedOptions.limit, skip: validatedOptions.skip })
+        foundElements = await Element.find(searchQuery, projections)
+        .skip(validatedOptions.skip)
+        .limit(validatedOptions.limit)
         .sort(validatedOptions.sort)
         .populate(validatedOptions.populateString);
       }
@@ -1986,4 +2004,66 @@ function search(requestingUser, organizationID, projectID, branch, query, option
       return reject(errors.captureError(error));
     }
   });
+}
+
+/**
+ * @description A non-exposed helper function which finds the parent of given
+ * element up to and including the root element
+ *
+ * @param {string} organizationID - The ID of the owning organization.
+ * @param {string} projectID - The ID of the owning project.
+ * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string} elementID - The element whose parents are being found.
+ *
+ * @return {string} Array of found element ids
+ *
+ * @example
+ * findElementRootPath('orgID', 'projID', 'branch', 'elem1')
+ * .then(function(elementIDs) {
+ *   // Do something with the found element IDs
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ */
+async function findElementRootPath(organizationID, projectID, branch, elementID) {
+  // Initialize return object
+  let foundElements = [];
+
+  // Define nested helper function
+  async function findElementTreeHelper(searchID) {
+    try {
+      // Find the parent of the element
+      const parent = await Element.findOne({ _id: searchID }, { _id: 1, parent: 1 }).lean();
+      // Ensure the parent was found
+      if (!parent) {
+        throw new M.DataFormatError('Element or parent not found', 'warn');
+      }
+      // Get the parent id
+      const parentID = parent._id;
+      // If it's a circular reference, don't get lost in the sauce
+      if (foundElements.includes(parentID)) {
+        throw new M.DataFormatError('Circular element parent reference', 'warn');
+      }
+      else {
+        // Add the parent to the list of elements
+        foundElements = foundElements.concat(parentID);
+      }
+      // If the parent is root, exit the recursive function
+      if (utils.parseID(parentID).pop() === 'model') {
+        return '';
+      }
+      else {
+        // Recursively Find the parent of the parent
+        return findElementTreeHelper(parent.parent);
+      }
+    }
+    catch (error) {
+      throw errors.captureError(error);
+    }
+  }
+
+  await findElementTreeHelper(elementID);
+
+  return foundElements;
 }

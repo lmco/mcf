@@ -331,9 +331,23 @@ module.exports.validateOptions = function(options, validOptions, model) {
       if (typeof options.subtree !== 'boolean') {
         throw new M.DataFormatError('The option \'subtree\' is not a boolean.', 'warn');
       }
+      // Ensure subtree and rootpath are not both enabled at the same time
+      if (options.rootpath) {
+        throw new M.DataFormatError('Options \'subtree\' and \'rootpath\' cannot be'
+        + ' applied simultaneously', 'warn');
+      }
 
       // Set the subtree option in the returnObject
       validatedOptions.subtree = val;
+    }
+
+    // Handle the rootpath option
+    if (opt === 'rootpath') {
+      // Ensure value is a boolean
+      if (typeof options.rootpath !== 'boolean') {
+        throw new M.DataFormatError('The option \'rootpath\' is not a boolean.', 'warn');
+      }
+      validatedOptions.rootpath = val;
     }
 
     // Handle the fields option
