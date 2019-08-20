@@ -11,16 +11,17 @@
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description <p>Defines the organization data model. Organizations are the
+ * @description
+ * <p>Defines the organization data model. Organizations are the
  * highest level of hierarchy in MBEE. Organizations contain multiple projects,
  * have their own set of permissions, and have the ability to store custom
  * meta-data.</p>
  *
  * <h4>Permissions</h4>
- * Permissions are stored in a single object, where keys are user's usernames
+ * <p>Permissions are stored in a single object, where keys are user's usernames
  * and values are arrays containing the permissions a specific user has.
  * Permissions in MBEE are cascading, meaning if a user has write permissions
- * then they also have read.
+ * then they also have read.</p>
  *
  * <ul>
  *   <li><b>read</b>: The user can retrieve the organization and see its data.</li>
@@ -28,7 +29,13 @@
  *   projects. When a user creates a project, they become an admin on that
  *   project.</li>
  *   <li><b>admin</b>: The user can retrieve the organization, create projects,
- *   modify the organization and update/remove user permissions.
+ *   modify the organization and update/remove user permissions.</li>
+ * </ul>
+ *
+ * <h4>Custom Data</h4>
+ * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
+ * is stored in an object, and can contain any valid JSON the user desires.
+ * Only organization admins can update the custom data.</p>
  *
  */
 
