@@ -170,55 +170,61 @@ async function build(_args) {
   }
 
   try {
-    // Transpile React components
-    if (args.includes('--all') || args.includes('--react')) {
-      // Set default mode
-      let mode = 'production';
+    await new Promise((resolve, reject) => {
+      // Transpile React components
+      if (args.includes('--all') || args.includes('--react')) {
+        // Set default mode
+        let mode = 'production';
 
-      // Verify if mode provided
-      if (M.config.server.ui.mode) {
-        // Set config mode
-        mode = M.config.server.ui.mode;
-      }
+        // Verify if mode provided
+        if (M.config.server.ui.mode) {
+          // Set config mode
+          mode = M.config.server.ui.mode;
+        }
 
-      M.log.info(`  + Transpiling react in ${mode} mode...`);
-      await webpack({
-        mode: mode,
-        entry: {
-          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
-          'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
-          'org-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'org-app.jsx'),
-          'project-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'project-app.jsx'),
-          'profile-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'profile-app.jsx'),
-          'admin-console-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'admin-console-app.jsx')
-        },
-        output: {
-          path: path.join(M.root, 'build', 'public', 'js'),
-          filename: '[name].js'
-        },
-        devServer: {
-          historyApiFallback: true
-        },
-        module: {
-          rules: [
-            {
-              test: /\.jsx?$/,
-              loader: 'babel-loader',
-              exclude: /node_modules/,
-              options: {
-                presets: ['babel-preset-env', 'babel-preset-react']
+        M.log.info(`  + Transpiling react in ${mode} mode...`);
+        webpack({
+          mode: mode,
+          entry: {
+            navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
+            'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
+            'org-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'org-app.jsx'),
+            'project-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'project-app.jsx'),
+            'profile-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'profile-app.jsx'),
+            'admin-console-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'admin-console-app.jsx')
+          },
+          output: {
+            path: path.join(M.root, 'build', 'public', 'js'),
+            filename: '[name].js'
+          },
+          devServer: {
+            historyApiFallback: true
+          },
+          module: {
+            rules: [
+              {
+                test: /\.jsx?$/,
+                loader: 'babel-loader',
+                exclude: /node_modules/,
+                options: {
+                  presets: ['babel-preset-env', 'babel-preset-react']
+                }
               }
-            }
-          ]
-        }
-      }, (err, stats) => {
-        if (err || stats.hasErrors()) {
-          // eslint-disable-next-line no-console
-          console.log(stats.compilation.errors);
-          throw err;
-        }
-      });
-    }
+            ]
+          }
+        }, (err, stats) => {
+          if (err || stats.hasErrors()) {
+            // eslint-disable-next-line no-console
+            console.log(stats.compilation.errors);
+            return reject();
+          }
+          return resolve();
+        });
+      }
+      else {
+        return resolve();
+      }
+    });
   }
   catch (err) {
     M.log.warn('React build FAILED');
