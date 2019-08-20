@@ -345,7 +345,7 @@ async function getOrgs(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -431,7 +431,7 @@ async function postOrgs(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -518,7 +518,7 @@ async function putOrgs(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -604,7 +604,7 @@ async function patchOrgs(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -670,7 +670,7 @@ async function deleteOrgs(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -748,7 +748,7 @@ async function getOrg(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -836,7 +836,7 @@ async function postOrg(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -924,7 +924,7 @@ async function putOrg(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1011,7 +1011,7 @@ async function patchOrg(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1081,7 +1081,7 @@ async function deleteOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1174,7 +1174,7 @@ async function getAllProjects(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1286,7 +1286,7 @@ async function getProjects(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1372,7 +1372,7 @@ async function postProjects(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1459,7 +1459,7 @@ async function putProjects(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1545,7 +1545,7 @@ async function patchProjects(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1614,7 +1614,7 @@ async function deleteProjects(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1692,7 +1692,7 @@ async function getProject(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1779,7 +1779,7 @@ async function postProject(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1867,7 +1867,7 @@ async function putProject(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1954,7 +1954,7 @@ async function patchProject(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2024,7 +2024,7 @@ async function deleteProject(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2124,7 +2124,7 @@ async function getUsers(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2210,7 +2210,7 @@ async function postUsers(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2296,7 +2296,7 @@ async function putUsers(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2382,7 +2382,7 @@ async function patchUsers(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2444,7 +2444,7 @@ async function deleteUsers(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2521,7 +2521,7 @@ async function getUser(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2608,7 +2608,7 @@ async function postUser(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2695,7 +2695,7 @@ async function putUser(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2782,7 +2782,7 @@ async function patchUser(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2851,7 +2851,7 @@ async function deleteUser(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2991,7 +2991,7 @@ async function searchUsers(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3079,7 +3079,7 @@ async function patchPassword(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3239,7 +3239,7 @@ async function getElements(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3326,7 +3326,7 @@ async function postElements(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3413,7 +3413,7 @@ async function putElements(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3499,7 +3499,7 @@ async function patchElements(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3562,7 +3562,7 @@ async function deleteElements(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3666,7 +3666,7 @@ async function searchElements(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3751,7 +3751,7 @@ async function getElement(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3838,7 +3838,7 @@ async function postElement(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3926,7 +3926,7 @@ async function putElement(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4013,7 +4013,7 @@ async function patchElement(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4082,7 +4082,7 @@ async function deleteElement(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4194,7 +4194,7 @@ async function getBranches(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4280,7 +4280,7 @@ async function postBranches(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4366,7 +4366,7 @@ async function patchBranches(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4434,7 +4434,7 @@ async function deleteBranches(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4512,7 +4512,7 @@ async function getBranch(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4599,7 +4599,7 @@ async function postBranch(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4686,7 +4686,7 @@ async function patchBranch(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4756,7 +4756,7 @@ async function deleteBranch(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
