@@ -426,7 +426,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
 
   M.log.debug('create(): Before element validation');
 
-  // Check that each element has an id and set the parent if null
+  // Validate the element id, parent, source, target, and namespace fields
   try {
     let index = 1;
     elementsToCreate.forEach((elem) => {
@@ -436,92 +436,18 @@ async function create(requestingUser, organizationID, projectID, branch, element
       });
 
       // Ensure each element has an id and that it's a string
-      assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
-      assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
-      elem.id = utils.createID(orgID, projID, branchID, elem.id);
-      arrIDs.push(elem.id);
-      elem._id = elem.id;
-
+      elementIDCheck(elem, index, orgID, projID, branchID, arrIDs);
       // Set the element parent if null
-      if (!elem.hasOwnProperty('parent') || elem.parent === null || elem.parent === '') {
-        elem.parent = 'model';
-      }
-      assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
-      elem.parent = utils.createID(orgID, projID, branchID, elem.parent);
-      assert.ok(elem.parent !== elem._id, 'Elements parent cannot be self.');
-
-      // If element has a source, ensure it has a target
-      if (elem.hasOwnProperty('source')) {
-        assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
-        assert.ok(typeof elem.target === 'string',
-          `Element #${index}'s target is not a string.`);
-        elem.source = utils.createID(orgID, projID, branchID, elem.source);
-      }
-
-      // If element has a target, ensure it has a source
-      if (elem.hasOwnProperty('target')) {
-        assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
-        assert.ok(typeof elem.source === 'string',
-          `Element #${index}'s source is not a string.`);
-        elem.target = utils.createID(orgID, projID, branchID, elem.target);
-      }
-
-      // If the element a sourceNamespace section, ensure it contains the proper fields
+      elementParentCheck(elem, index, orgID, projID, branchID);
+      // If element has a source, ensure it has a target and vice versa
+      sourceAndTargetValidator(elem, index, orgID, projID, branchID);
+      // If the element a source- or target- Namespace, ensure it contains the proper fields
       if (elem.hasOwnProperty('sourceNamespace')) {
-        assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
-
-        // Ensure the object contains an org, project and branch field
-        assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
-          + ` #${index}'s sourceNamespace is missing an org.`);
-        assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
-          + ` #${index}'s sourceNamespace is missing a project.`);
-        assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
-          + ` #${index}'s sourceNamespace is missing a branch.`);
-
-        // Ensure the sourceNamespace org is the same org or default org
-        const validOrgs = [orgID, M.config.server.defaultOrganizationId];
-        assert.ok(validOrgs.includes(elem.sourceNamespace.org), 'Element '
-          + `#${index}'s source cannot reference elements outside its org `
-          + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
-
-        // Add project id to projectRefs array. Later we verify these projects
-        // exist and have a visibility of 'internal'.
-        projectRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
-
-        // Change element source to referenced project's id
-        const tmpSource = utils.parseID(elem.source).pop();
-        elem.source = utils.createID(elem.sourceNamespace.org,
-          elem.sourceNamespace.project, elem.sourceNamespace.branch, tmpSource);
+        sourceNamespaceValidator(elem, index, orgID, projectRefs);
       }
-
-      // If the element a targetNamespace section, ensure it contains the proper fields
       if (elem.hasOwnProperty('targetNamespace')) {
-        assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
-
-        // Ensure the object contains an org, project and branch field
-        assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
-          + ` #${index}'s targetNamespace is missing an org.`);
-        assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
-          + ` #${index}'s targetNamespace is missing a project.`);
-        assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
-          + ` #${index}'s targetNamespace is missing a branch.`);
-
-        // Ensure the targetNamespace org is the same org or default org
-        const validOrgs = [orgID, M.config.server.defaultOrganizationId];
-        assert.ok(validOrgs.includes(elem.targetNamespace.org), 'Element '
-          + `#${index}'s target cannot reference elements outside its org `
-          + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
-
-        // Add project id to projectRefs array. Later we verify these projects
-        // exist and have a visibility of 'internal'.
-        projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
-
-        // Change element target to referenced project's id
-        const tmpTarget = utils.parseID(elem.target).pop();
-        elem.target = utils.createID(elem.targetNamespace.org,
-          elem.targetNamespace.project, elem.targetNamespace.branch, tmpTarget);
+        targetNamespaceValidator(elem, index, orgID, projectRefs);
       }
-
       index++;
     });
   }
@@ -837,7 +763,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
   let foundUpdatedElements = [];
   const arrIDs = [];
   const sourceTargetIDs = [];
-  const projRefs = [];
+  const projectRefs = [];
 
   // Initialize and ensure options are valid
   const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -921,20 +847,17 @@ async function update(requestingUser, organizationID, projectID, branch, element
   try {
     let index = 1;
     elementsToUpdate.forEach((elem) => {
-      // Ensure each element has an id and that its a string
-      assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
-      assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
-      elem.id = utils.createID(orgID, projID, branchID, elem.id);
+      // Ensure each element has an id and that it's a string
+      elementIDCheck(elem, index, orgID, projID, branchID, arrIDs);
       // If a duplicate ID, throw an error
       if (duplicateCheck[elem.id]) {
+        arrIDs.pop();
         throw new M.DataFormatError('Multiple objects with the same ID '
           + `[${elem.id}] exist in the update.`, 'warn');
       }
       else {
         duplicateCheck[elem.id] = elem.id;
       }
-      arrIDs.push(elem.id);
-      elem._id = elem.id;
 
       // If updating source, add ID to sourceTargetIDs
       if (elem.source) {
@@ -942,40 +865,12 @@ async function update(requestingUser, organizationID, projectID, branch, element
         sourceTargetIDs.push(elem.source);
       }
 
-      // If the element a sourceNamespace section, ensure it contains the proper fields
       if (elem.hasOwnProperty('sourceNamespace')) {
-        assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
-        assert.ok(typeof elem.source === 'string', `Element #${index}'s source is not a string.`);
-
-        // Ensure the object contains an org, project and branch field
-        assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
-          + ` #${index}'s sourceNamespace is missing an org.`);
-        assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
-          + ` #${index}'s sourceNamespace is missing a project.`);
-        assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
-          + ` #${index}'s sourceNamespace is missing a branch.`);
-
-        // Ensure the sourceNamespace org is the same org or default org
-        const validOrgs = [orgID, M.config.server.defaultOrganizationId];
-        assert.ok(validOrgs.includes(elem.sourceNamespace.org), 'Element '
-          + `#${index}'s source cannot reference elements outside its org `
-          + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
-
-        // Reset the elem source with new project
-        const tmpSource = utils.parseID(elem.source).pop();
-        elem.source = utils.createID(elem.sourceNamespace.org,
-          elem.sourceNamespace.project, branchID, tmpSource);
-
-        // Add project id to projectRefs array. Later we verify these projects
-        // exist and have a visibility of 'internal'.
-        projRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
-
+        // If the element a sourceNamespace section, ensure it contains the proper fields
+        sourceNamespaceValidator(elem, index, orgID, projectRefs);
         // Remove the last source which has the wrong project
         sourceTargetIDs.pop();
         sourceTargetIDs.push(elem.source);
-
-        // Delete sourceNamespace, it does not get stored in the database
-        delete elem.sourceNamespace;
       }
 
       // If updating target, add ID to sourceTargetIDs
@@ -986,38 +881,10 @@ async function update(requestingUser, organizationID, projectID, branch, element
 
       // If the element a targetNamespace section, ensure it contains the proper fields
       if (elem.hasOwnProperty('targetNamespace')) {
-        assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
-        assert.ok(typeof elem.target === 'string', `Element #${index}'s target is not a string.`);
-
-        // Ensure the object contains an org, project and branch field
-        assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
-          + ` #${index}'s targetNamespace is missing an org.`);
-        assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
-          + ` #${index}'s targetNamespace is missing a project.`);
-        assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
-          + ` #${index}'s targetNamespace is missing a branch.`);
-
-        // Ensure the targetNamespace org is the same org or default org
-        const validOrgs = [orgID, M.config.server.defaultOrganizationId];
-        assert.ok(validOrgs.includes(elem.targetNamespace.org), 'Element '
-          + `#${index}'s target cannot reference elements outside its org `
-          + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
-
-        // Reset the elem target with new project
-        const tmpTarget = utils.parseID(elem.target).pop();
-        elem.target = utils.createID(elem.targetNamespace.org,
-          elem.targetNamespace.project, branchID, tmpTarget);
-
-        // Add project id to projectRefs array. Later we verify these projects
-        // exist and have a visibility of 'internal'.
-        projRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
-
+        targetNamespaceValidator(elem, index, orgID, projectRefs);
         // Remove the last target which has the wrong project
         sourceTargetIDs.pop();
         sourceTargetIDs.push(elem.target);
-
-        // Delete targetNamespace, it does not get stored in the database
-        delete elem.targetNamespace;
       }
 
       index++;
@@ -1027,7 +894,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
     throw new M.DataFormatError(err.message, 'warn');
   }
 
-  const referencedProjects2 = await Project.find({ _id: { $in: projRefs } }).lean();
+  const referencedProjects2 = await Project.find({ _id: { $in: projectRefs } }).lean();
 
   // Verify each project reference has a visibility of 'internal'
   referencedProjects2.forEach((proj) => {
@@ -2066,4 +1933,103 @@ async function findElementRootPath(organizationID, projectID, branch, elementID)
   await findElementTreeHelper(elementID);
 
   return foundElements;
+}
+
+
+function sourceNamespaceValidator(elem, index, orgID, projectRefs) {
+  assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+  assert.ok(typeof elem.source === 'string', `Element #${index}'s source is not a string.`);
+
+  // Ensure the object contains an org, project and branch field
+  assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
+    + ` #${index}'s sourceNamespace is missing an org.`);
+  assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
+    + ` #${index}'s sourceNamespace is missing a project.`);
+  assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
+    + ` #${index}'s sourceNamespace is missing a branch.`);
+
+  // Ensure the sourceNamespace org is the same org or default org
+  const validOrgs = [orgID, M.config.server.defaultOrganizationId];
+  assert.ok(validOrgs.includes(elem.sourceNamespace.org), 'Element '
+    + `#${index}'s source cannot reference elements outside its org `
+    + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
+
+  // Add project id to projectRefs array. Later we verify these projects
+  // exist and have a visibility of 'internal'.
+  projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
+
+  // Change element source to referenced project's id
+  const tmpSource = utils.parseID(elem.source).pop();
+  elem.source = utils.createID(elem.sourceNamespace.org,
+    elem.sourceNamespace.project, elem.sourceNamespace.branch, tmpSource);
+
+  // Delete sourceNamespace, it does not get stored in the database
+  delete elem.sourceNamespace;
+}
+
+function targetNamespaceValidator(elem, index, orgID, projectRefs) {
+  assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+  assert.ok(typeof elem.source === 'string', `Element #${index}'s target is not a string.`);
+
+  // Ensure the object contains an org, project and branch field
+  assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
+    + ` #${index}'s targetNamespace is missing an org.`);
+  assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
+    + ` #${index}'s targetNamespace is missing a project.`);
+  assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
+    + ` #${index}'s targetNamespace is missing a branch.`);
+
+  // Ensure the targetNamespace org is the same org or default org
+  const validOrgs = [orgID, M.config.server.defaultOrganizationId];
+  assert.ok(validOrgs.includes(elem.targetNamespace.org), 'Element '
+    + `#${index}'s target cannot reference elements outside its org `
+    + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
+
+  // Add project id to projectRefs array. Later we verify these projects
+  // exist and have a visibility of 'internal'.
+  projectRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
+
+  // Change element target to referenced project's id
+  const tmpTarget = utils.parseID(elem.target).pop();
+  elem.target = utils.createID(elem.targetNamespace.org,
+    elem.targetNamespace.project, elem.targetNamespace.branch, tmpTarget);
+
+  // Delete targetNamespace, it does not get stored in the database
+  delete elem.targetNamespace;
+}
+
+function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
+  // If element has a source, ensure it has a target
+  if (elem.hasOwnProperty('source')) {
+    assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+    assert.ok(typeof elem.target === 'string',
+      `Element #${index}'s target is not a string.`);
+    elem.source = utils.createID(orgID, projID, branchID, elem.source);
+  }
+
+  // If element has a target, ensure it has a source
+  if (elem.hasOwnProperty('target')) {
+    assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+    assert.ok(typeof elem.source === 'string',
+      `Element #${index}'s source is not a string.`);
+    elem.target = utils.createID(orgID, projID, branchID, elem.target);
+  }
+}
+
+function elementParentCheck(elem, index, orgID, projID, branchID) {
+  if (!elem.hasOwnProperty('parent') || elem.parent === null || elem.parent === '') {
+    elem.parent = 'model';
+  }
+  assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
+  elem.parent = utils.createID(orgID, projID, branchID, elem.parent);
+  assert.ok(elem.parent !== elem._id, 'Elements parent cannot be self.');
+}
+
+function elementIDCheck(elem, index, orgID, projID, branchID, arrIDs) {
+  // Ensure each element has an id and that it's a string
+  assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
+  assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
+  elem.id = utils.createID(orgID, projID, branchID, elem.id);
+  arrIDs.push(elem.id);
+  elem._id = elem.id;
 }
