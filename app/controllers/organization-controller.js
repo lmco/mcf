@@ -845,20 +845,15 @@ async function createOrReplace(requestingUser, orgs, options) {
       // Reinsert original data
       try {
         await Organization.insertMany(foundOrgs);
-        await new Promise(async (resInner) => {
-          // Remove the backup file
-          await fs.unlink(path.join(M.root, 'data',
-            `PUT-backup-orgs-${ts}.json`), function(err) {
-            if (err) throw err;
-            else resInner();
-          });
-        });
+        fs.unlinkSync(path.join(M.root, 'data',
+          `PUT-backup-orgs-${ts}.json`));
+
         // Restoration succeeded; pass the original error
         res(error);
       }
-      catch (err) {
+      catch (restoreErr) {
         // Pass the new error that occurred while trying to restore orgs
-        res(err);
+        res(restoreErr);
       }
     });
     // Throw whichever error was passed
@@ -869,12 +864,12 @@ async function createOrReplace(requestingUser, orgs, options) {
   const filePath = path.join(M.root, 'data',
     `PUT-backup-orgs-${ts}.json`);
   if (fs.existsSync(filePath)) {
-    await new Promise((res, rej) => {
-      fs.unlink(filePath, function(err) {
-        if (err) rej(err);
-        else res();
-      });
-    });
+    try {
+      fs.unlinkSync(filePath);
+    }
+    catch (err) {
+      throw errors.captureError(err);
+    }
   }
 
   return createdOrgs;

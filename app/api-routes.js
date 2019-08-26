@@ -4868,7 +4868,7 @@ api.route('/users/:username/password')
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  Middleware.disableUserAPI,
+  Middleware.disableUserPatchPassword,
   APIController.patchPassword
 );
 

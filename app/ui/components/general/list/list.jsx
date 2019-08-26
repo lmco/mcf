@@ -30,7 +30,7 @@ function List(props) {
             {child}
         </React.Fragment>);
 
-    // Initializes the classes
+  // Initializes the classes
   let appliedClasses = 'list';
 
   // Verify class name provided
