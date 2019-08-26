@@ -10,9 +10,10 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description
- * <p>Defines the organization data model. Organizations are the
+ * <p>This module defines the organization data model. Organizations are the
  * highest level of hierarchy in MBEE. Organizations contain multiple projects,
  * have their own set of permissions, and have the ability to store custom
  * meta-data.</p>
