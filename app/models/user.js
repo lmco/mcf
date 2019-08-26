@@ -12,7 +12,12 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description Defines the user data model.
+ * @description
+ * <p>This module defines the user data model. Users are the main operators of
+ * MBEE and can be granted certain permission levels on organizations and
+ * projects. Users can be set as system-wide admins by setting the admin field
+ * to true, can be created using different providers, and can store custom
+ * meta-data.</p>
  */
 
 // Node Modules
