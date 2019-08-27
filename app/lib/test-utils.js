@@ -40,19 +40,20 @@ delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json')
  * @description Helper function to create test non-admin user in
  * MBEE tests.
  */
-module.exports.createNonAdminUser = async function() {
-  // Define new user
-  let newUser = null;
+module.exports.createNonAdminUser = function() {
+  return new Promise((resolve, reject) => {
+    // Define new user
+    let newUser = null;
 
-  try {
     // Check any admin exist
-    const foundUser = await User.findOne({ _id: testData.users[1].username });
-    // Check user found
-    if (foundUser !== null) {
-      // User found, return it
-      newUser = foundUser;
-    }
-    else {
+    User.findOne({ _id: testData.users[1].username })
+    .then((foundUser) => {
+      // Check user found
+      if (foundUser !== null) {
+        // User found, return it
+        return resolve(foundUser);
+      }
+
       // Create user
       const user = new User({
         _id: testData.users[1].username,
@@ -63,44 +64,47 @@ module.exports.createNonAdminUser = async function() {
       });
 
       // Save user object to the database
-      newUser = await user.save();
-    }
+      return user.save();
+    })
+    .then((user) => {
+      // Set new user
+      newUser = user;
 
-    // Find the default organization
-    const orgs = await Organization.find({ _id: M.config.server.defaultOrganizationId });
+      // Find the default organization
+      return Organization.find({ _id: M.config.server.defaultOrganizationId });
+    })
+    .then((orgs) => {
+      // Add user to default org read/write permissions
+      orgs[0].permissions[newUser._id] = ['read', 'write'];
 
-    // Add user to default org read/write permissions
-    orgs[0].permissions[newUser._id] = ['read', 'write'];
+      orgs[0].markModified('permissions');
 
-    orgs[0].markModified('permissions');
-
-    // Save the updated org
-    await orgs[0].save();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-
-  return newUser;
+      // Save the updated org
+      return orgs[0].save();
+    })
+    .then(() => resolve(newUser))
+    .catch((error) => reject(error));
+  });
 };
 
 /**
  * @description Helper function to create test admin user in
  * MBEE tests.
  */
-module.exports.createTestAdmin = async function() {
-  // Define new user
-  let newAdminUser = null;
+module.exports.createTestAdmin = function() {
+  return new Promise((resolve, reject) => {
+    // Define new user
+    let newAdminUser = null;
 
-  try {
     // Check any admin exist
-    const foundUser = await User.findOne({ _id: testData.adminUser.username });
-    // Check user found
-    if (foundUser !== null) {
-      // User found, return it
-      newAdminUser = foundUser;
-    }
-    else {
+    User.findOne({ _id: testData.adminUser.username })
+    .then((foundUser) => {
+      // Check user found
+      if (foundUser !== null) {
+        // User found, return it
+        return resolve(foundUser);
+      }
+
       // Create user
       const user = new User({
         _id: testData.adminUser.username,
@@ -110,223 +114,219 @@ module.exports.createTestAdmin = async function() {
       });
 
       // Save user object to the database
-      newAdminUser = await user.save();
-    }
+      return user.save();
+    })
+    .then((user) => {
+      // Set new admin user
+      newAdminUser = user;
 
-    // Find the default organization
-    const orgs = await Organization.find({ _id: M.config.server.defaultOrganizationId });
+      // Find the default organization
+      return Organization.find({ _id: M.config.server.defaultOrganizationId });
+    })
+    .then((orgs) => {
+      // Add user to default org read/write permissions
+      orgs[0].permissions[newAdminUser._id] = ['read', 'write'];
 
-    // Add user to default org read/write permissions
-    orgs[0].permissions[newAdminUser._id] = ['read', 'write'];
+      orgs[0].markModified('permissions');
 
-    orgs[0].markModified('permissions');
-
-    // Save the updated org
-    await orgs[0].save();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-
-  return newAdminUser;
+      // Save the updated org
+      return orgs[0].save();
+    })
+    .then(() => resolve(newAdminUser))
+    .catch((error) => reject(error));
+  });
 };
 
 /**
  * @description Helper function to delete test user in
  * MBEE tests.
  */
-module.exports.removeNonAdminUser = async function() {
-  // Define user id
-  let userToDelete = null;
+module.exports.removeNonAdminUser = function() {
+  return new Promise((resolve, reject) => {
+    // Define user id
+    let userToDelete = null;
 
-  try {
     // Find admin user
-    const foundUser = await User.findOne({ _id: testData.users[1].username });
-    // Save user and remove user
-    userToDelete = foundUser;
-    await foundUser.remove();
-
-    const orgs = await Organization.find({ _id: M.config.server.defaultOrganizationId });
-
-    // Remove user from permissions list in each project
-    delete orgs[0].permissions[userToDelete._id];
-
-    orgs[0].markModified('permissions');
-    await orgs[0].save();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-  return userToDelete.username;
+    User.findOne({ _id: testData.users[1].username })
+    .then((foundUser) => {
+      // Save user and remove user
+      userToDelete = foundUser;
+      return foundUser.remove();
+    })
+    .then(() => Organization.find({ _id: M.config.server.defaultOrganizationId }))
+    .then((orgs) => {
+      // Remove user from permissions list in each project
+      delete orgs[0].permissions[userToDelete._id];
+      orgs[0].markModified('permissions');
+      return orgs[0].save();
+    })
+    .then(() => resolve(userToDelete.username))
+    .catch((error) => reject(error));
+  });
 };
 
 /**
  * @description Helper function to delete test admin user in
  * MBEE tests.
  */
-module.exports.removeTestAdmin = async function() {
-  // Define user id
-  let userToDelete = null;
+module.exports.removeTestAdmin = function() {
+  return new Promise((resolve, reject) => {
+    // Define user id
+    let userToDelete = null;
 
-  try {
     // Find admin user
-    const foundUser = await User.findOne({ _id: testData.adminUser.username });
-    // Save user and remove user
-    userToDelete = foundUser;
-    await foundUser.remove();
-
-    const orgs = await Organization.find({ _id: M.config.server.defaultOrganizationId });
-
-    // Remove user from permissions list in each project
-    delete orgs[0].permissions[userToDelete._id];
-
-    orgs[0].markModified('permissions');
-    await orgs[0].save();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-  return userToDelete.username;
+    User.findOne({ _id: testData.adminUser.username })
+    .then((foundUser) => {
+      // Save user and remove user
+      userToDelete = foundUser;
+      return foundUser.remove();
+    })
+    .then(() => Organization.find({ _id: M.config.server.defaultOrganizationId }))
+    .then((orgs) => {
+      // Remove user from permissions list in each project
+      delete orgs[0].permissions[userToDelete._id];
+      orgs[0].markModified('permissions');
+      return orgs[0].save();
+    })
+    .then(() => resolve(userToDelete.username))
+    .catch((error) => reject(error));
+  });
 };
 
 /**
  * @description Helper function to create organization in
  * MBEE tests.
  */
-module.exports.createTestOrg = async function(adminUser) {
-  // Create the new organization
-  const newOrg = new Organization({
-    _id: testData.orgs[0].id,
-    name: testData.orgs[0].name,
-    custom: null
-  });
-  newOrg.permissions[adminUser._id] = ['read', 'write', 'admin'];
+module.exports.createTestOrg = function(adminUser) {
+  return new Promise((resolve, reject) => {
+    // Create the new organization
+    const newOrg = new Organization({
+      _id: testData.orgs[0].id,
+      name: testData.orgs[0].name,
+      custom: null
+    });
+    newOrg.permissions[adminUser._id] = ['read', 'write', 'admin'];
 
-  let _newOrg;
-  try {
-    _newOrg = await newOrg.save();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-  return _newOrg;
+    newOrg.save()
+    .then((_newOrg) => resolve(_newOrg))
+    .catch((error) => reject(error));
+  });
 };
 
 /**
  * @description Helper function to remove organization in
  * MBEE tests.
  */
-module.exports.removeTestOrg = async function() {
-  // Create query for deleting items in the orgs
-  const ownedQuery = { _id: { $regex: `^${testData.orgs[0].id}${utils.ID_DELIMITER}` } };
+module.exports.removeTestOrg = function() {
+  return new Promise((resolve, reject) => {
+    // Create query for deleting items in the orgs
+    const ownedQuery = { _id: { $regex: `^${testData.orgs[0].id}${utils.ID_DELIMITER}` } };
 
-  let org;
-  try {
     // Delete elements
-    await Element.deleteMany(ownedQuery);
+    Element.deleteMany(ownedQuery)
     // Delete any branches in the org
-    await Branch.deleteMany(ownedQuery);
+    .then(() => Branch.deleteMany(ownedQuery))
     // Delete any projects in the org
-    await Project.deleteMany({ org: testData.orgs[0].id });
+    .then(() => Project.deleteMany({ org: testData.orgs[0].id }))
     // Delete the orgs
-    org = await Organization.deleteMany({ _id: testData.orgs[0].id });
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-
-  return org;
+    .then(() => Organization.deleteMany({ _id: testData.orgs[0].id }))
+    .then((org) => resolve(org))
+    .catch((error) => reject(error));
+  });
 };
 
 /**
  * @description Helper function to create project in MBEE tests
  */
-module.exports.createTestProject = async function(adminUser, orgID) {
-  let createdProject = {};
-  // Create the new project
-  const newProject = new Project({
-    _id: utils.createID(orgID, testData.projects[0].id),
-    org: orgID,
-    name: testData.projects[0].name,
-    createdBy: adminUser._id,
-    custom: null
+module.exports.createTestProject = function(adminUser, orgID) {
+  return new Promise((resolve, reject) => {
+    let createdProject = {};
+    // Create the new project
+    const newProject = new Project({
+      _id: utils.createID(orgID, testData.projects[0].id),
+      org: orgID,
+      name: testData.projects[0].name,
+      createdBy: adminUser._id,
+      custom: null
+    });
+    newProject.permissions[adminUser._id] = ['read', 'write', 'admin'];
+
+    newProject.save()
+    .then((_newProj) => {
+      createdProject = _newProj;
+
+      const newBranch = new Branch({
+        _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id),
+        project: _newProj._id,
+        createdBy: adminUser._id,
+        name: testData.branches[0].name,
+        source: null
+      });
+
+      return newBranch.save();
+    })
+    .then((_newBranch) => {
+      const newElement = new Element({
+        _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id, 'model'),
+        project: createdProject._id,
+        branch: _newBranch._id,
+        createdBy: adminUser._id,
+        name: 'Model'
+      });
+
+      return newElement.save();
+    })
+    .then(() => resolve(createdProject))
+    .catch((error) => reject(error));
   });
-  newProject.permissions[adminUser._id] = ['read', 'write', 'admin'];
-
-  try {
-    createdProject = await newProject.save();
-
-    const newBranch = new Branch({
-      _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id),
-      project: createdProject._id,
-      createdBy: adminUser._id,
-      name: testData.branches[0].name,
-      source: null
-    });
-
-    const _newBranch = await newBranch.save();
-
-    const newElement = new Element({
-      _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id, 'model'),
-      project: createdProject._id,
-      branch: _newBranch._id,
-      createdBy: adminUser._id,
-      name: 'Model'
-    });
-
-    await newElement.save();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-  return createdProject;
 };
 
 /**
  * @description Helper function to create a tag in MBEE tests
  */
-module.exports.createTag = async function(adminUser, orgID, projID) {
-  // Create a new tag
-  let createdTag;
-  const newTag = new Branch({
-    _id: utils.createID(orgID, projID, 'tag'),
-    project: projID,
-    createdBy: adminUser._id,
-    name: 'Tagged Branch',
-    tag: true,
-    source: utils.createID(orgID, projID, 'master')
+module.exports.createTag = function(adminUser, orgID, projID) {
+  return new Promise((resolve, reject) => {
+    // Create a new tag
+    let createdTag;
+    const newTag = new Branch({
+      _id: utils.createID(orgID, projID, 'tag'),
+      project: projID,
+      createdBy: adminUser._id,
+      name: 'Tagged Branch',
+      tag: true,
+      source: utils.createID(orgID, projID, 'master')
+    });
+
+    return newTag.save()
+    .then((_newBranch) => {
+      createdTag = _newBranch;
+
+      // Create a root element for tag
+      const newElement = new Element({
+        _id: utils.createID(_newBranch._id, 'model'),
+        project: utils.createID(orgID, projID),
+        branch: _newBranch._id,
+        createdBy: adminUser._id,
+        name: 'Model'
+      });
+
+      return newElement.save();
+    })
+    .then(() => {
+      // Create a non root element in the tag
+      const newElement = new Element({
+        _id: utils.createID(createdTag._id, testData.elements[1].id),
+        project: utils.createID(orgID, projID),
+        branch: createdTag._id,
+        createdBy: adminUser._id,
+        name: 'Model'
+      });
+
+      return newElement.save();
+    })
+    .then(() => resolve(createdTag))
+    .catch((error) => reject(error));
   });
-
-  try {
-    createdTag = await newTag.save();
-
-    // Create a root element for tag
-    const newElement = new Element({
-      _id: utils.createID(createdTag._id, 'model'),
-      project: utils.createID(orgID, projID),
-      branch: createdTag._id,
-      createdBy: adminUser._id,
-      name: 'Model'
-    });
-
-    await newElement.save();
-
-    // Create a non root element in the tag
-    const newElement2 = new Element({
-      _id: utils.createID(createdTag._id, testData.elements[1].id),
-      project: utils.createID(orgID, projID),
-      branch: createdTag._id,
-      createdBy: adminUser._id,
-      name: 'Model'
-    });
-
-    await newElement2.save();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-
-  return createdTag;
 };
 
 /**
