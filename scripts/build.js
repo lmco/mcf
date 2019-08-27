@@ -182,33 +182,32 @@ function build(_args) {
         mode = M.config.server.ui.mode;
       }
 
-        M.log.info(`  + Transpiling react in ${mode} mode...`);
-        webpack({
-          mode: mode,
-          entry: {
-            navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
-            'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
-            'org-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'org-app.jsx'),
-            'project-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'project-app.jsx'),
-            'profile-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'profile-app.jsx'),
-            'admin-console-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'admin-console-app.jsx')
-          },
-          output: {
-            path: path.join(M.root, 'build', 'public', 'js'),
-            filename: '[name].js'
-          },
-          devServer: {
-            historyApiFallback: true
-          },
-          module: {
-            rules: [
-              {
-                test: /\.jsx?$/,
-                loader: 'babel-loader',
-                exclude: /node_modules/,
-                options: {
-                  presets: ['@babel/preset-env', '@babel/preset-react']
-                }
+      M.log.info(`  + Transpiling react in ${mode} mode...`);
+      webpack({
+        mode: mode,
+        entry: {
+          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
+          'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
+          'org-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'org-app.jsx'),
+          'project-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'project-app.jsx'),
+          'profile-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'profile-app.jsx'),
+          'admin-console-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'admin-console-app.jsx')
+        },
+        output: {
+          path: path.join(M.root, 'build', 'public', 'js'),
+          filename: '[name].js'
+        },
+        devServer: {
+          historyApiFallback: true
+        },
+        module: {
+          rules: [
+            {
+              test: /\.jsx?$/,
+              loader: 'babel-loader',
+              exclude: /node_modules/,
+              options: {
+                presets: ['@babel/preset-env', '@babel/preset-react']
               }
             }
           ]
