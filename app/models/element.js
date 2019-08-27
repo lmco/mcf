@@ -150,24 +150,42 @@ const ElementSchema = new mongoose.Schema({
     ref: 'Element',
     default: null,
     index: true,
-    validate: {
+    validate: [{
       validator: function(v) {
         return RegExp(validators.element.id).test(v) || (v === null);
       },
       message: props => `${props.value} is not a valid source ID.`
-    }
+    }, {
+      validator: function(v) {
+        // If source is provided
+        if (v) {
+          // Reject if target is null
+          return this.target;
+        }
+      },
+      message: props => 'Target is required if source is provided.'
+    }]
   },
   target: {
     type: String,
     ref: 'Element',
     default: null,
     index: true,
-    validate: {
+    validate: [{
       validator: function(v) {
         return RegExp(validators.element.id).test(v) || (v === null);
       },
       message: props => `${props.value} is not a valid target ID.`
-    }
+    }, {
+      validator: function(v) {
+        // If target is provided
+        if (v) {
+          // Reject if source is null
+          return this.source;
+        }
+      },
+      message: props => 'Source is required if target is provided.'
+    }]
   },
   documentation: {
     type: String,

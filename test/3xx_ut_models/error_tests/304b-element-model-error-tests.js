@@ -76,7 +76,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject if a branch is invalid', branchInvalid);
   it('should reject if a parent is invalid', parentInvalid);
   it('should reject if a source is invalid', sourceInvalid);
+  it('should reject if a source is provided with no target', sourceWithNoTarget);
   it('should reject if a target is invalid', targetInvalid);
+  it('should reject if a target is provided with no source', targetWithNoSource);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -361,6 +363,29 @@ async function sourceInvalid() {
 }
 
 /**
+ * @description Attempts to create an element with a valid source but no target.
+ */
+async function sourceWithNoTarget() {
+  const elemData = Object.assign({}, testData.elements[0]);
+  elemData._id = `org:proj:branch:${elemData.id}`;
+  elemData.project = 'org:proj';
+  elemData.branch = 'org:proj:branch';
+  elemData.parent = 'org:proj:branch:model';
+  elemData.source = 'org:proj:branch:model';
+
+  // Set target to null
+  elemData.target = null;
+
+  // Create element object
+  const elemObject = new Element(elemData);
+
+  // Expect save() to fail with specific error message
+  await elemObject.save().should.eventually.be.rejectedWith(
+    'Element validation failed: source: Target is required if source is provided.'
+  );
+}
+
+/**
  * @description Attempts to create an element with an invalid target.
  */
 async function targetInvalid() {
@@ -385,5 +410,28 @@ async function targetInvalid() {
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith(
     `Element validation failed: target: ${elemData.target} is not a valid target ID.`
+  );
+}
+
+/**
+ * @description Attempts to create an element with a valid target but no source.
+ */
+async function targetWithNoSource() {
+  const elemData = Object.assign({}, testData.elements[0]);
+  elemData._id = `org:proj:branch:${elemData.id}`;
+  elemData.project = 'org:proj';
+  elemData.branch = 'org:proj:branch';
+  elemData.parent = 'org:proj:branch:model';
+  elemData.target = 'org:proj:branch:model';
+
+  // Set source to null
+  elemData.source = null;
+
+  // Create element object
+  const elemObject = new Element(elemData);
+
+  // Expect save() to fail with specific error message
+  await elemObject.save().should.eventually.be.rejectedWith(
+    'Element validation failed: target: Source is required if target is provided.'
   );
 }
