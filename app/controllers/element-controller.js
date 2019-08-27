@@ -138,8 +138,8 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
   // Validate the provided options
-  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
-    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
+  const validatedOptions = utils.validateOptions(options, ['archived', 'includeArchived',
+    'populate', 'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
 
   // Ensure search options are valid
   if (options) {
@@ -1900,8 +1900,8 @@ function search(requestingUser, organizationID, projectID, branch, query, option
     let foundElements = [];
 
     // Validate and set the options
-    const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
-      'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+    const validatedOptions = utils.validateOptions(options, ['archived', 'includeArchived',
+      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
     // Ensure options are valid
     if (options) {

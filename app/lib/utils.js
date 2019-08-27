@@ -325,6 +325,17 @@ module.exports.validateOptions = function(options, validOptions, model) {
       validatedOptions.archived = val;
     }
 
+    // Handle the includeArchived option
+    if (opt === 'includeArchived') {
+      // Ensure value is a boolean
+      if (typeof val !== 'boolean') {
+        throw new M.DataFormatError('The option \'includeArchived\' is not a boolean.', 'warn');
+      }
+
+      // Set the field includeArchived in the returnObject
+      validatedOptions.includeArchived = val;
+    }
+
     // Handle the subtree option
     if (opt === 'subtree') {
       // Ensure value is a boolean
@@ -438,6 +449,11 @@ module.exports.validateOptions = function(options, validOptions, model) {
       validatedOptions.lean = val;
     }
   });
+
+  // Handle potentially conflicting archived options
+  if (validatedOptions.archived !== undefined && validatedOptions.includeArchived !== undefined) {
+    delete validatedOptions.includeArchived;
+  }
 
   return validatedOptions;
 };
