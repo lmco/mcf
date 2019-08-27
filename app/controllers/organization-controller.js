@@ -118,8 +118,8 @@ async function find(requestingUser, orgs, options) {
   const searchQuery = { archived: false };
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
+  const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
+    'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
 
   // Ensure options are valid
   if (options) {
@@ -144,9 +144,13 @@ async function find(requestingUser, orgs, options) {
   if (!reqUser.admin) {
     searchQuery[`permissions.${reqUser._id}`] = 'read';
   }
-  // If the archived field is true, remove it from the query
-  if (validOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   // Check the type of the orgs parameter
@@ -166,19 +170,19 @@ async function find(requestingUser, orgs, options) {
   let foundOrgs;
   try {
     // If the lean option is supplied
-    if (validOptions.lean) {
+    if (validatedOptions.lean) {
       // Find the orgs
-      foundOrgs = await Organization.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString).lean();
+      foundOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString,
+        { limit: validatedOptions.limit, skip: validatedOptions.skip })
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString).lean();
       return foundOrgs;
     }
     else {
-      foundOrgs = await Organization.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString);
+      foundOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString,
+        { limit: validatedOptions.limit, skip: validatedOptions.skip })
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString);
       return foundOrgs;
     }
   }
@@ -240,7 +244,7 @@ async function create(requestingUser, orgs, options) {
   const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Organization);
 
   // Define array to store org data
@@ -362,14 +366,14 @@ async function create(requestingUser, orgs, options) {
   let foundUpdatedOrgs;
   try {
     // If the lean option is supplied
-    if (validOptions.lean) {
+    if (validatedOptions.lean) {
       foundUpdatedOrgs = await Organization.find({ _id: { $in: arrIDs } },
-        validOptions.fieldsString).populate(validOptions.populateString).lean();
+        validatedOptions.fieldsString).populate(validatedOptions.populateString).lean();
       return foundUpdatedOrgs;
     }
     else {
       foundUpdatedOrgs = await Organization.find({ _id: { $in: arrIDs } },
-        validOptions.fieldsString).populate(validOptions.populateString);
+        validatedOptions.fieldsString).populate(validatedOptions.populateString);
       return foundUpdatedOrgs;
     }
   }
@@ -440,7 +444,7 @@ async function update(requestingUser, orgs, options) {
   let updatingPermissions = false;
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Organization);
 
   // Check the type of the orgs parameter
@@ -677,13 +681,13 @@ async function update(requestingUser, orgs, options) {
   let foundUpdatedOrgs;
   try {
     // If the lean option is supplied
-    if (validOptions.lean) {
-      foundUpdatedOrgs = await Organization.find(searchQuery, validOptions.fieldsString)
-      .populate(validOptions.populateString).lean();
+    if (validatedOptions.lean) {
+      foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString)
+      .populate(validatedOptions.populateString).lean();
     }
     else {
-      foundUpdatedOrgs = await Organization.find(searchQuery, validOptions.fieldsString)
-      .populate(validOptions.populateString);
+      foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString)
+      .populate(validatedOptions.populateString);
     }
   }
   catch (error) {

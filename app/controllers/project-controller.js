@@ -130,8 +130,8 @@ async function find(requestingUser, organizationID, projects, options) {
   const searchQuery = { archived: false };
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Project);
+  const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
+    'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Project);
 
   // Ensure options are valid
   if (options) {
@@ -157,9 +157,13 @@ async function find(requestingUser, organizationID, projects, options) {
   if (!reqUser.admin) {
     searchQuery[`permissions.${reqUser._id}`] = 'read';
   }
-  // If the archived field is true, remove it from the query
-  if (validOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
   if (orgID !== null) {
     searchQuery.org = orgID;
@@ -183,7 +187,7 @@ async function find(requestingUser, organizationID, projects, options) {
   if (organizationID !== null) {
     // Find the organization, validate that it exists and is not archived (unless specfified)
     const foundOrg = await helper.findAndValidate(Organization, orgID,
-      validOptions.archived);
+      (validatedOptions.archived || validatedOptions.includeArchived));
     // Permissions check
     if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
       || !foundOrg.permissions[reqUser._id].includes('read'))) {
@@ -193,19 +197,19 @@ async function find(requestingUser, organizationID, projects, options) {
   }
   let finishedProjects;
   // If the lean option is supplied
-  if (validOptions.lean) {
+  if (validatedOptions.lean) {
     // Find the projects
-    finishedProjects = await Project.find(searchQuery, validOptions.fieldsString,
-      { limit: validOptions.limit, skip: validOptions.skip })
-    .sort(validOptions.sort)
-    .populate(validOptions.populateString).lean();
+    finishedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit, skip: validatedOptions.skip })
+    .sort(validatedOptions.sort)
+    .populate(validatedOptions.populateString).lean();
   }
   else {
     // Find the projects
-    finishedProjects = await Project.find(searchQuery, validOptions.fieldsString,
-      { limit: validOptions.limit, skip: validOptions.skip })
-    .sort(validOptions.sort)
-    .populate(validOptions.populateString);
+    finishedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit, skip: validatedOptions.skip })
+    .sort(validatedOptions.sort)
+    .populate(validatedOptions.populateString);
   }
   return finishedProjects;
 }
@@ -264,7 +268,7 @@ async function create(requestingUser, organizationID, projects, options) {
   let projObjects = [];
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Project);
 
   // Define array to store project data
@@ -491,13 +495,13 @@ async function create(requestingUser, organizationID, projects, options) {
 
   let foundCreatedProjects;
   // If the lean option is supplied
-  if (validOptions.lean) {
+  if (validatedOptions.lean) {
     foundCreatedProjects = await Project.find({ _id: { $in: arrIDs } },
-      validOptions.fieldsString).populate(validOptions.populateString).lean();
+      validatedOptions.fieldsString).populate(validatedOptions.populateString).lean();
   }
   else {
     foundCreatedProjects = await Project.find({ _id: { $in: arrIDs } },
-      validOptions.fieldsString).populate(validOptions.populateString);
+      validatedOptions.fieldsString).populate(validatedOptions.populateString);
   }
 
   return foundCreatedProjects;
@@ -568,7 +572,7 @@ async function update(requestingUser, organizationID, projects, options) {
   let updatingPermissions = false;
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Project);
 
   // Check the type of the projects parameter
@@ -869,13 +873,13 @@ async function update(requestingUser, organizationID, projects, options) {
 
   let foundUpdatedProjects;
   // If the lean option is supplied
-  if (validOptions.lean) {
-    foundUpdatedProjects = await Project.find(searchQuery, validOptions.fieldsString)
-    .populate(validOptions.populateString).lean();
+  if (validatedOptions.lean) {
+    foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean();
   }
   else {
-    foundUpdatedProjects = await Project.find(searchQuery, validOptions.fieldsString)
-    .populate(validOptions.populateString);
+    foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString);
   }
 
   // Emit the event projects-updated

@@ -167,7 +167,8 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   }
 
   // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID,
+    (validatedOptions.archived || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -177,7 +178,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Find the project and validate that it was found and not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    validatedOptions.archived);
+    (validatedOptions.archived || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -187,7 +188,7 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
 
   // Find the branch and validate that it was found and not archived (unless specified)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID),
-    validatedOptions.archived);
+    (validatedOptions.archived || validatedOptions.includeArchived));
 
   let elementsToFind = [];
 
@@ -223,9 +224,13 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
     elementsToFind = await findElementRootPath(orgID, projID, branchID, elementToFind);
   }
 
-  // If the archived field is true, remove it from the query
-  if (validatedOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   const promises = [];
@@ -1932,7 +1937,8 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
     try {
       // Find the organization and validate that it was found and not archived (unless specified)
-      const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
+      const organization = await helper.findAndValidate(Org, orgID,
+        (validatedOptions.archived || validatedOptions.includeArchived));
       // Permissions check
       if (!reqUser.admin && (!organization.permissions[reqUser._id]
         || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1942,7 +1948,7 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
       // Find the project and validate that it was found and not archived (unless specificed)
       const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-        validatedOptions.archived);
+        (validatedOptions.archived || validatedOptions.includeArchived));
       // Permissions check
       if (!reqUser.admin && (!project.permissions[reqUser._id]
         || !project.permissions[reqUser._id].includes('read'))) {
@@ -1952,12 +1958,16 @@ function search(requestingUser, organizationID, projectID, branch, query, option
 
       // Find the branch and validate that it was found and not archived (unless specificed)
       await helper.findAndValidate(Branch, utils.createID(orgID, projID, branchID),
-        validatedOptions.archived);
+        (validatedOptions.archived || validatedOptions.includeArchived));
 
       searchQuery.$text = { $search: query };
-      // If the archived field is true, remove it from the query
-      if (validatedOptions.archived) {
+      // If the includeArchived field is true, remove archived from the query; return everything
+      if (validatedOptions.includeArchived) {
         delete searchQuery.archived;
+      }
+      // If the archived field is true, query only for archived elements
+      if (validatedOptions.archived) {
+        searchQuery.archived = true;
       }
 
       // Add sorting by metadata
