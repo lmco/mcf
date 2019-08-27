@@ -40,9 +40,9 @@
  * is not used internally in MBEE.</p>
  *
  * <h4>Documentation</h4>
- * <p>The documentation field allows users to store notes about a certain
- * element. The documentation field is included with the name in a "text" index,
- * and can be searched through using a MongoDB text search.</p>
+ * <p>The documentation field allows users to store arbitrary text about a
+ * certain element. The documentation field is included with the name in a
+ * "text" index, and can be searched through using a MongoDB text search.</p>
  *
  * <h4>Virtuals</h4>
  * <p>Elements support three virtuals: contains, sourceOf and targetOf. These
