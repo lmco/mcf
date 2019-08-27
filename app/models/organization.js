@@ -84,7 +84,26 @@ const OrganizationSchema = new mongoose.Schema({
   },
   permissions: {
     type: mongoose.Schema.Types.Mixed,
-    default: {}
+    default: {},
+    validate: {
+      validator: function(v) {
+        let bool = true;
+        // If the permissions object is not a JSON object, reject
+        if (typeof v !== 'object' || Array.isArray(v) || v === null) {
+          bool = false;
+        }
+
+        // Check that each every key/value pair's value is an array of strings
+        Object.values(v).forEach((val) => {
+          if (!Array.isArray(val) || !val.every(s => typeof s === 'string')) {
+            bool = false;
+          }
+        });
+
+        return bool;
+      },
+      message: props => 'The organization permissions object is not properly formatted.'
+    }
   },
   custom: {
     type: mongoose.Schema.Types.Mixed,
