@@ -113,31 +113,61 @@ const ElementSchema = new mongoose.Schema({
   project: {
     type: String,
     required: true,
-    ref: 'Project'
+    ref: 'Project',
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.project.id).test(v);
+      },
+      message: props => `${props.value} is not a valid project ID.`
+    }
   },
   branch: {
     type: String,
     required: true,
     ref: 'Branch',
-    index: true
+    index: true,
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.branch.id).test(v);
+      },
+      message: props => `${props.value} is not a valid branch ID.`
+    }
   },
   parent: {
     type: String,
     ref: 'Element',
     default: null,
-    index: true
+    index: true,
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.element.id).test(v) || (v === null);
+      },
+      message: props => `${props.value} is not a valid parent ID.`
+    }
   },
   source: {
     type: String,
     ref: 'Element',
     default: null,
-    index: true
+    index: true,
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.element.id).test(v) || (v === null);
+      },
+      message: props => `${props.value} is not a valid source ID.`
+    }
   },
   target: {
     type: String,
     ref: 'Element',
     default: null,
-    index: true
+    index: true,
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.element.id).test(v) || (v === null);
+      },
+      message: props => `${props.value} is not a valid target ID.`
+    }
   },
   documentation: {
     type: String,
