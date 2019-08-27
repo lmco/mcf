@@ -26,19 +26,17 @@ const db = M.require('lib.db');
  *
  * @param {string[]} args - The user provided command line arguments.
  */
-async function migrate(args) {
-  try {
-    // Connect to the database
-    await db.connect();
-    await libMigrate.migrate(args);
-    await db.disconnect();
-    process.exit(0);
-  }
-  catch (error) {
+function migrate(args) {
+  // Connect to the database
+  db.connect()
+  .then(() => libMigrate.migrate(args))
+  .then(() => db.disconnect())
+  .then(() => process.exit(0))
+  .catch((error) => {
     M.log.critical(error);
-    await db.disconnect();
+    db.disconnect();
     process.exit(1);
-  }
+  });
 }
 
 module.exports = migrate;

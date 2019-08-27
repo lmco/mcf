@@ -55,7 +55,7 @@ const validators = M.require('lib.validators');
  *
  * If NO arguments given, defaults to `--all`
  */
-async function build(_args) {
+function build(_args) {
   M.log.info('Building MBEE ...');
 
   // Assign parameters to args. If no parameters, default to '--all'
@@ -169,18 +169,18 @@ async function build(_args) {
     .pipe(gulp.dest('build/fm'));
   }
 
-  try {
-    await new Promise((resolve, reject) => {
-      // Transpile React components
-      if (args.includes('--all') || args.includes('--react')) {
-        // Set default mode
-        let mode = 'production';
+  // Returning a promise to make synchronous
+  return new Promise((resolve, reject) => {
+    // Transpile React components
+    if (args.includes('--all') || args.includes('--react')) {
+      // Set default mode
+      let mode = 'production';
 
-        // Verify if mode provided
-        if (M.config.server.ui.mode) {
-          // Set config mode
-          mode = M.config.server.ui.mode;
-        }
+      // Verify if mode provided
+      if (M.config.server.ui.mode) {
+        // Set config mode
+        mode = M.config.server.ui.mode;
+      }
 
         M.log.info(`  + Transpiling react in ${mode} mode...`);
         webpack({
@@ -210,26 +210,29 @@ async function build(_args) {
                   presets: ['@babel/preset-env', '@babel/preset-react']
                 }
               }
-            ]
-          }
-        }, (err, stats) => {
-          if (err || stats.hasErrors()) {
-            // eslint-disable-next-line no-console
-            console.log(stats.compilation.errors);
-            return reject();
-          }
-          return resolve();
-        });
-      }
-      else {
+            }
+          ]
+        }
+      }, (err, stats) => {
+        if (err || stats.hasErrors()) {
+          // eslint-disable-next-line no-console
+          console.log(stats.compilation.errors);
+          return reject();
+        }
         return resolve();
-      }
-    });
-  }
-  catch (err) {
+      });
+    }
+    else {
+      return resolve();
+    }
+  })
+  .then(() => {
+    M.log.info('Build Complete.');
+  })
+  .catch(() => {
     M.log.warn('React build FAILED');
-  }
-  M.log.info('Build Complete.');
+    M.log.info('Build Complete.');
+  });
 }
 
 module.exports = build;
