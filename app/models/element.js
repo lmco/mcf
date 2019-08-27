@@ -13,27 +13,50 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description
- * <p>Defines the element data model. Using
- * <a href="http://mongoosejs.com/docs/discriminators.html">
- * Mongoose discriminators</a>, different 'types' of elements are defined such
- * that each inherit the base schema from the generic 'Element'.</p>
+ * <p>This module defines the element data model. Elements are the core of MBEE
+ * and are the individual components of a model. Elements are stored under
+ * branches, which are stored in projects. Elements have many unique fields
+ * including a reference the the element's parent, a reference to a source and
+ * target, a type, and a documentation section. Elements also have three virtual
+ * fields which are not stored in the database and can optionally be calculated
+ * and returned post-find. Elements also have the ability to store custom
+ * meta-data.</p>
  *
- * <p>The following element types are defined: Block, Relationship, and Package.
- * </p>
+ * <h4>Parent</h4>
+ * <p>The parent field stores the concatenated id of the current element's
+ * parent. This is a required field, and the only element which should not have
+ * a parent is the root model element, whose parent value is null.</p>
  *
- * <p><b>Block</b> does not extend the Element schema other
- * than adding the 'type' of 'Block'.</p>
+ * <h4>Source and Target</h4>
+ * <p>Both source and target store concatenated ids of other elements which they
+ * reference. When creating relationship types in a model, the source and target
+ * should be populated. If an element is not a relationship type, the source
+ * and target will default to null. Both source and target are required
+ * together, one cannot provide only a source or only a target.</p>
  *
- * <p><b>Relationship</b> adds 'source' and 'target' fields that reference
- * other elements, allowing relationships to represent a link between other
- * elements.</p>
+ * <h4>Type</h4>
+ * <p>The type field allows users to store an arbitrary type of an element. Some
+ * types are mapped to specific icons in the UI, but apart from that the type
+ * is not used internally in MBEE.</p>
  *
- * <p><b>Package</b> adds a 'contains' field which references other elements,
- * allowing packages to be used to structure the model.</p>
+ * <h4>Documentation</h4>
+ * <p>The documentation field allows users to store arbitrary text about a
+ * certain element. The documentation field is included with the name in a
+ * "text" index, and can be searched through using a MongoDB text search.</p>
  *
- * <p>A project will have one root element whose "parent" field will
- * be null. All other elements will have a parent that should be a package (
- * either the root package or some other package in the hierarchy).</p>
+ * <h4>Virtuals</h4>
+ * <p>Elements support three virtuals: contains, sourceOf and targetOf. These
+ * fields are not stored in the database, and are rather calculated after an
+ * element has been found. Contains returns an array of elements whose parent
+ * field is equal to the current element's id and sourceOf and targetOf return
+ * arrays of elements whose source/target field is the current element's id.
+ * Virtuals <b>MUST</b> be populated in the find operation to be returned.</p>
+ *
+ * <h4>Custom Data</h4>
+ * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
+ * is stored in an object, and can contain any valid JSON the user desires.
+ * Only users with write and admin permissions on the project can update the
+ * element's custom data.</p>
  */
 
 // NPM modules
