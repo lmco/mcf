@@ -16,6 +16,12 @@
 
 // Node modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+// Initialize chai should function, used for expecting promise rejections
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Org = M.require('models.organization');
@@ -62,6 +68,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject when an org ID is too long', idTooLong);
   it('should reject if no id (_id) is provided', idNotProvided);
   it('should reject if no name is provided', nameNotProvided);
+  it('should reject if the permissions object in invalid', permissionsInvalid);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -189,4 +196,26 @@ function nameNotProvided(done) {
       done();
     }
   });
+}
+
+/**
+ * @description Attempts to create an org with an invalid permissions object.
+ */
+async function permissionsInvalid() {
+  const orgData = Object.assign({}, testData.orgs[0]);
+  orgData._id = orgData.id;
+
+  // Set invalid permissions
+  orgData.permissions = {
+    invalid: 'permissions'
+  };
+
+  // Create org object
+  const orgObject = new Org(orgData);
+
+  // Expect save() to fail with specific error message
+  await orgObject.save().should.eventually.be.rejectedWith(
+    'Organization validation failed: permissions: The organization permissions '
+    + 'object is not properly formatted.'
+  );
 }

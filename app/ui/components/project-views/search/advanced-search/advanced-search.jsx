@@ -19,10 +19,26 @@
 
 // React Modules
 import React, { Component } from 'react';
-import { Button, Card, CardBody, Col, Collapse, Form, InputGroup } from 'reactstrap';
+import {
+  Button,
+  Card,
+  CardBody,
+  Row,
+  Col,
+  Collapse,
+  DropdownMenu,
+  DropdownToggle,
+  Form,
+  FormGroup,
+  Input,
+  InputGroup,
+  Label,
+  UncontrolledButtonDropdown
+} from 'reactstrap';
 
 // Import MBEE Modules
 import AdvancedRow from './advanced-row.jsx';
+import AdvancedFilter from './advanced-filter.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -31,41 +47,78 @@ class AdvancedSearch extends Component {
   constructor(props) {
     super(props);
 
-    // Parse the get parameters
     const rows = [];
-    const getParamsRaw = this.props.location.search.slice(1);
-    if (getParamsRaw.length > 0) {
-      getParamsRaw.split('&').forEach(keyValuePair => {
-        const [param, value] = keyValuePair.split('=');
-        if (param !== 'q' && param !== 'query') {
-          // Convert API params to option values
-          let criteria = param.split(/(?=[A-Z])/).join(' ');
-          criteria = criteria.charAt(0).toUpperCase() + criteria.slice(1);
+    const params = this.props.location.search.slice(1) || null;
+    const filters = {
+      archivedBy: false,
+      archivedOn: false,
+      branch: false,
+      createdBy: false,
+      createdOn: false,
+      custom: false,
+      documentation: false,
+      lastModifiedBy: false,
+      name: false,
+      org: false,
+      parent: false,
+      project: false,
+      source: false,
+      target: false,
+      type: false,
+      updatedOn: false
+    };
+
+    // Parse URL parameters
+    if (params) {
+      params.split('&').forEach(pair => {
+        const [param, value] = pair.split('=');
+        // Update element filter checkbox values for specified fields
+        if (param === 'fields') {
+          // Decode commas in fields
+          const fields = decodeURIComponent(value).split(',');
+          // Update selected fields to true
+          fields.forEach(field => {
+            filters[field] = true;
+          });
+        }
+        else if (param !== 'q') {
+          // Add the parameter to rows to be rendered.
           rows.push({
-            criteria: criteria,
+            // eslint-disable-next-line no-undef
+            criteria: convertCase(param, 'proper'),
             value: decodeURIComponent(value)
           });
         }
       });
     }
 
+    // Set rows default value if there are no URL parameters.
+    if (Object.keys(rows).length === 0) {
+      // Get the first option passed from the Parent Component.
+      // eslint-disable-next-line no-undef
+      const option = convertCase(this.props.options[0], 'api');
+      rows[option] = '';
+    }
+
     this.state = {
       rows: (rows.length === 0) ? [{ criteria: this.props.options[0], value: '' }] : rows,
-      query: getParamsRaw || '',
+      query: params || '',
       results: null,
       message: '',
-      collapse: (rows.length > 0) || false
+      collapse: (rows.length > 0) || false,
+      currentFilters: filters
     };
 
     this.toggle = this.toggle.bind(this);
     this.addRow = this.addRow.bind(this);
     this.removeRow = this.removeRow.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.filterSelected = this.filterSelected.bind(this);
   }
 
+  // Unhide/hide Search button if toggled
   toggle() {
     this.setState((prevState) => ({ collapse: !prevState.collapse }));
-    // Unhide/hide Search button if toggled
     this.props.toggleSearchBtn();
   }
 
@@ -88,7 +141,15 @@ class AdvancedSearch extends Component {
     this.setState({ rows: rows });
   }
 
-  // Build query string
+  // Update state for selected filter checkbox
+  filterSelected(i, event) {
+    const filter = event.target.name;
+    const currentFilters = this.state.currentFilters;
+    currentFilters[filter] = !this.state.currentFilters[filter];
+    this.setState({ currentFilters: currentFilters });
+  }
+
+  // Generate query string and display corresponding results
   doAdvSearch(e) {
     // Pre-search state resets
     this.props.getAdvResults([], 'Searching...');
@@ -153,6 +214,16 @@ class AdvancedSearch extends Component {
       return;
     }
 
+    // Create array of selected/checked filters
+    const filters = this.state.currentFilters;
+    const selectedFilters = Object.keys(filters).filter(field => (filters[field]));
+
+    // If filters are selected, add them to query string
+    if (selectedFilters.length > 0) {
+      // Append to query string
+      queryStr = `${queryStr}&fields=${selectedFilters.join()}`;
+    }
+
     // Append search to URL
     this.props.history.push({
       pathname: this.props.location.pathname,
@@ -204,12 +275,38 @@ class AdvancedSearch extends Component {
     const options = opt.map((option, i) => <option key={i} value={option}> {option} </option>);
     return this.state.rows.map((row, id) => (
       <AdvancedRow idx={id} key={id}
-              criteria={row.criteria || opt[0]}
-              val={row.value}
-              options={ options }
-              handleChange={this.handleChange}
-              deleteRow={this.removeRow}/>
+                   criteria={row.criteria || opt[0]}
+                   val={row.value}
+                   options={ options }
+                   handleChange={this.handleChange}
+                   deleteRow={this.removeRow}/>
     ));
+  }
+
+  // Generate JSX for element filter options
+  createFilters() {
+    // Get current filters
+    const currentFilters = this.state.currentFilters;
+    // Array for advanced filter components;
+    const filters = [];
+
+    // Iterate through filters and build components
+    Object.keys(currentFilters).forEach((filter, id) => {
+      // Build filter checkbox component
+      filters.push(
+        <AdvancedFilter key={`adv-option-key-${id}`}
+                      idx={id}
+                      filter={filter}
+                      /* eslint-disable-next-line no-undef */
+                      display={convertCase(filter, 'proper')}
+                      checked={currentFilters[filter]}
+                      filterSelected={this.filterSelected}
+
+        />
+      );
+    });
+
+    return filters;
   }
 
   componentDidMount() {
@@ -224,10 +321,17 @@ class AdvancedSearch extends Component {
   }
 
   render() {
+    const rows = this.state.rows;
+    const options = this.props.options;
+
     // Limit adding rows to number of options.
-    const btnAddRow = (this.state.rows.length < this.props.options.length)
+    const btnAddRow = (Object.keys(rows).length < options.length)
       ? <Button id='btn-add-adv-row' type='button' onClick={this.addRow.bind(this)}>+ Add Row</Button>
       : null;
+
+    // Create array of Advanced Filter components
+    const filterCols = this.createFilters();
+
     return (
       <div className='adv-search'>
         <Button id='btn-adv-search-toggle'
@@ -235,11 +339,48 @@ class AdvancedSearch extends Component {
                 Advanced
         </Button>
         <Collapse isOpen={this.state.collapse}>
-          <Col className='adv-col' md={10}>
+          <Col className='adv-col' sm={10}>
             <Card id='adv-card'>
               <CardBody id='adv-card-body'>
-                <h5 id='frm-adv-label'>Advanced Search</h5>
+                { /* Advanced Search Header Label and Element Filter */ }
+                <FormGroup row id='adv-search-header' >
+                  <h5 id='frm-adv-label'>Advanced Search</h5>
+                  <div id='adv-filter-btn'>
+                    <UncontrolledButtonDropdown>
+                      <DropdownToggle close
+                                      id='adv-filter-toggle'
+                                      aria-label='Filter Results'
+                                      size='sm'>
+                        <span>
+                          <i className='fas fa-ellipsis-v' style={{ fontSize: '15px' }}/>
+                        </span>
+                      </DropdownToggle>
+                      <DropdownMenu right className='multi-column' id='filter-menu' sm={12}>
+                        { /* Create checkbox options for element filters */ }
+                        { /* Divide elements into columns of '6, 5, 6' filters */ }
+                        <Row>
+                          <Label id='adv-filter-label' style={{ fontSize: '14px' }}>
+                            Element Filters
+                          </Label>
+                        </Row>
+                        <hr id='adv-filter-separator' />
+                        <Row id='adv-filter-frm'>
+                            <Col sm={4} className='adv-filter-col'>
+                              { filterCols.slice(0, 6) }
+                            </Col>
+                            <Col sm={4} className='adv-filter-col'>
+                              { filterCols.slice(6, 11) }
+                            </Col>
+                            <Col sm={4} className='adv-filter-col'>
+                              { filterCols.slice(11, 16) }
+                            </Col>
+                        </Row>
+                      </DropdownMenu>
+                    </UncontrolledButtonDropdown>
+                  </div>
+                </FormGroup>
                 <hr id='adv-separator' />
+                { /* Input Rows for Search Criteria */ }
                 <Form id='adv-search-form'>
                   { this.createRowUI() }
                   <InputGroup id='adv-btns-grp' className='adv-search-row'>
@@ -250,7 +391,7 @@ class AdvancedSearch extends Component {
                             outline color='primary'
                             type='submit'
                             onClick={this.doAdvSearch.bind(this)}>
-                            Advanced Search
+                            Search
                     </Button>
                   </InputGroup>
                 </Form>
