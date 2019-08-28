@@ -138,21 +138,25 @@ async function find(requestingUser, organizationID, projectID, branchID, element
   const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
   // Validate the provided options
-  const validatedOptions = utils.validateOptions(options, ['archived', 'includeArchived',
+  const validatedOptions = utils.validateOptions(options, ['includeArchived',
     'populate', 'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
 
   // Ensure search options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archivedBy'];
+      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // If the search option is an element reference
@@ -1899,21 +1903,25 @@ async function search(requestingUser, organizationID, projectID, branchID, query
   let foundElements = [];
 
   // Validate and set the options
-  const validatedOptions = utils.validateOptions(options, ['archived', 'includeArchived',
+  const validatedOptions = utils.validateOptions(options, ['includeArchived',
     'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archivedBy'];
+      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
 

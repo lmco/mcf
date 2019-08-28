@@ -119,7 +119,7 @@ async function find(requestingUser, users, options) {
     : undefined;
 
   // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
+  const validatedOptions = utils.validateOptions(options, ['populate',
     'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], User);
 
   // Define searchQuery
@@ -137,14 +137,18 @@ async function find(requestingUser, users, options) {
   if (options) {
     // List of valid search options
     const validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
-      'lastModifiedBy', 'archivedBy'];
+      'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Check each option for valid search queries
     Object.keys(options).forEach((o) => {
       // If the search option is valid
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // Add the search option to the searchQuery
@@ -955,7 +959,7 @@ async function search(requestingUser, query, options) {
   const searchQuery = { archived: false };
 
   // Validate and set the options
-  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
+  const validatedOptions = utils.validateOptions(options, ['populate',
     'limit', 'skip', 'lean', 'sort'], User);
 
   // Add text to search query
@@ -963,10 +967,6 @@ async function search(requestingUser, query, options) {
   // If the includeArchived field is true, remove archived from the query; return everything
   if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
-  }
-  // If the archived field is true, query only for archived elements
-  if (validatedOptions.archived) {
-    searchQuery.archived = true;
   }
 
   // Add sorting by metadata

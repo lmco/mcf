@@ -120,24 +120,24 @@ async function find(requestingUser, organizationID, projectID, branches, options
   const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
   // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
+  const validatedOptions = utils.validateOptions(options, ['populate',
     'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Branch);
 
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['tag', 'source', 'name', 'createdBy',
-      'lastModifiedBy', 'archivedBy'];
+      'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
         // Ensure the search option is a string
-        if ((o === 'tag') && typeof options[o] !== 'boolean') {
+        if ((o === 'tag' || o === 'archived') && typeof options[o] !== 'boolean') {
           throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
         }
-        else if ((typeof options[o] !== 'string') && (o !== 'tag')) {
+        else if ((typeof options[o] !== 'string') && (o !== 'tag' && o !== 'archived')) {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
 
