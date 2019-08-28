@@ -4773,7 +4773,8 @@ async function deleteBranch(req, res) {
 /**
  * GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
  *
- * @description Gets an artifact by its artifact.id, project.id, and org.id.
+ * @description Gets an artifact by its artifact.id, project.id, branch.id and
+ * artifact.id.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
