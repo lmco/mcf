@@ -11,6 +11,7 @@
   "private": true,
   "dependencies": {
     "body-parser": "^1.18.3",
+    "chai-as-promised": "^7.1.1",
     "compression": "^1.7.3",
     "connect-mongo": "^3.0.0",
     "ejs": "^2.5.7",

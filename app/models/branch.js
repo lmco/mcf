@@ -86,7 +86,13 @@ const BranchSchema = new mongoose.Schema({
     type: String,
     ref: 'Project',
     required: true,
-    index: true
+    index: true,
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.project.id).test(v);
+      },
+      message: props => `${props.value} is not a valid project ID.`
+    }
   },
   name: {
     type: String,
@@ -95,7 +101,13 @@ const BranchSchema = new mongoose.Schema({
   source: {
     type: String,
     ref: 'Branch',
-    default: null
+    default: null,
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.branch.id).test(v) || (v === null);
+      },
+      message: props => `${props.value} is not a valid source ID.`
+    }
   },
   tag: {
     type: mongoose.Schema.Types.Boolean,

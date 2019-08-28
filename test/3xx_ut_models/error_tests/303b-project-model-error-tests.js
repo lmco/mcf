@@ -16,6 +16,12 @@
 
 // Node modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+// Initialize chai should function, used for expecting promise rejections
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Project = M.require('models.project');
@@ -24,6 +30,7 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const customValidators = M.config.validators || {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -62,7 +69,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject when a project ID is too long', idTooLong);
   it('should reject if no id (_id) is provided', idNotProvided);
   it('should reject if no org is provided', orgNotProvided);
+  it('should reject if the org is invalid', orgInvalid);
   it('should reject if no name is provided', nameNotProvided);
+  it('should reject if the permissions object in invalid', permissionsInvalid);
+  it('should reject if the visibility is invalid', visibilityInvalid);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -194,6 +204,29 @@ function orgNotProvided(done) {
 }
 
 /**
+ * @description Attempts to create a project with an invalid org.
+ */
+async function orgInvalid() {
+  if (customValidators.hasOwnProperty('id')) {
+    M.log.verbose('Skipping valid project org test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const projData = Object.assign({}, testData.projects[0]);
+  projData._id = `org:${projData.id}`;
+  projData.org = 'INVALID';
+
+  // Create project object
+  const projObject = new Project(projData);
+
+  // Expect save() to fail with specific error message
+  await projObject.save().should.eventually.be.rejectedWith(
+    `Project validation failed: org: ${projData.org} is not a valid org ID.`
+  );
+}
+
+/**
  * @description Attempts to create a project with no name.
  */
 function nameNotProvided(done) {
@@ -225,4 +258,48 @@ function nameNotProvided(done) {
       done();
     }
   });
+}
+
+/**
+ * @description Attempts to create a project with an invalid permissions object.
+ */
+async function permissionsInvalid() {
+  const projData = Object.assign({}, testData.projects[0]);
+  projData._id = `org:${projData.id}`;
+  projData.org = 'org';
+
+  // Set invalid permissions
+  projData.permissions = {
+    invalid: 'permissions'
+  };
+
+  // Create project object
+  const projObject = new Project(projData);
+
+  // Expect save() to fail with specific error message
+  await projObject.save().should.eventually.be.rejectedWith(
+    'Project validation failed: permissions: The project permissions object is '
+    + 'not properly formatted.'
+  );
+}
+
+/**
+ * @description Attempts to create a project with an invalid visibility.
+ */
+async function visibilityInvalid() {
+  const projData = Object.assign({}, testData.projects[0]);
+  projData._id = `org:${projData.id}`;
+  projData.org = 'org';
+
+  // Set invalid visibility
+  projData.visibility = 'public';
+
+  // Create project object
+  const projObject = new Project(projData);
+
+  // Expect save() to fail with specific error message
+  await projObject.save().should.eventually.be.rejectedWith(
+    `Project validation failed: visibility: \`${projData.visibility}\` is not a`
+    + ' valid enum value for path `visibility`.'
+  );
 }

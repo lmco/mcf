@@ -102,19 +102,11 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     ref: 'Organization',
     required: true,
-    set: function(_org) {
-      // Check value undefined
-      if (typeof this.org === 'undefined') {
-        // Return value to set it
-        return _org;
-      }
-      // Check value NOT equal to db value
-      if (_org !== this.org) {
-        // Immutable field, return error
-        throw new M.OperationError('Assigned org cannot be changed.', 'warn');
-      }
-      // No change, return the value
-      return this.org;
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.org.id).test(v);
+      },
+      message: props => `${props.value} is not a valid org ID.`
     }
   },
   name: {
@@ -123,7 +115,26 @@ const ProjectSchema = new mongoose.Schema({
   },
   permissions: {
     type: mongoose.Schema.Types.Mixed,
-    default: {}
+    default: {},
+    validate: {
+      validator: function(v) {
+        let bool = true;
+        // If the permissions object is not a JSON object, reject
+        if (typeof v !== 'object' || Array.isArray(v) || v === null) {
+          bool = false;
+        }
+
+        // Check that each every key/value pair's value is an array of strings
+        Object.values(v).forEach((val) => {
+          if (!Array.isArray(val) || !val.every(s => typeof s === 'string')) {
+            bool = false;
+          }
+        });
+
+        return bool;
+      },
+      message: props => 'The project permissions object is not properly formatted.'
+    }
   },
   custom: {
     type: mongoose.Schema.Types.Mixed,
@@ -131,7 +142,8 @@ const ProjectSchema = new mongoose.Schema({
   },
   visibility: {
     type: String,
-    default: 'private'
+    default: 'private',
+    enum: ['private', 'internal']
   }
 });
 
