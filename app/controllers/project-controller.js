@@ -199,23 +199,17 @@ async function find(requestingUser, organizationID, projects, options) {
         + ` projects on the organization [${orgID}].`, 'warn');
     }
   }
-  let finishedProjects;
-  // If the lean option is supplied
-  if (validatedOptions.lean) {
+
+  try {
     // Find the projects
-    finishedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,
+    return await Project.find(searchQuery, validatedOptions.fieldsString,
       { limit: validatedOptions.limit, skip: validatedOptions.skip })
     .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString).lean();
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
   }
-  else {
-    // Find the projects
-    finishedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,
-      { limit: validatedOptions.limit, skip: validatedOptions.skip })
-    .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString);
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
   }
-  return finishedProjects;
 }
 
 /**
@@ -497,18 +491,14 @@ async function create(requestingUser, organizationID, projects, options) {
   // Create the elements
   await Element.insertMany(conCatElemObj);
 
-  let foundCreatedProjects;
-  // If the lean option is supplied
-  if (validatedOptions.lean) {
-    foundCreatedProjects = await Project.find({ _id: { $in: arrIDs } },
-      validatedOptions.fieldsString).populate(validatedOptions.populateString).lean();
+  try {
+    return await Project.find({ _id: { $in: arrIDs } },
+      validatedOptions.fieldsString).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
-  else {
-    foundCreatedProjects = await Project.find({ _id: { $in: arrIDs } },
-      validatedOptions.fieldsString).populate(validatedOptions.populateString);
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
   }
-
-  return foundCreatedProjects;
 }
 
 /**
@@ -875,21 +865,16 @@ async function update(requestingUser, organizationID, projects, options) {
     return Element.bulkWrite(bulkArray2);
   }
 
-  let foundUpdatedProjects;
-  // If the lean option is supplied
-  if (validatedOptions.lean) {
-    foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString).lean();
+  try {
+    const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    // Emit the event projects-updated
+    EventEmitter.emit('projects-updated', foundUpdatedProjects);
+    return foundUpdatedProjects;
   }
-  else {
-    foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString);
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
   }
-
-  // Emit the event projects-updated
-  EventEmitter.emit('projects-updated', foundUpdatedProjects);
-
-  return foundUpdatedProjects;
 }
 
 /**

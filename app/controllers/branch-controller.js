@@ -197,25 +197,16 @@ async function find(requestingUser, organizationID, projectID, branches, options
     throw new M.DataFormatError('Invalid input for finding branches.', 'warn');
   }
 
-  let finishedBranches;
   try {
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      // Find branches in a project
-      finishedBranches = await Branch.find(searchQuery, validatedOptions.fieldsString,
-        { limit: validatedOptions.limit, skip: validatedOptions.skip })
-      .sort(validatedOptions.sort).populate(validatedOptions.populateString).lean();
-    }
-    else {
-      finishedBranches = await Branch.find(searchQuery, validatedOptions.fieldsString,
-        { limit: validatedOptions.limit, skip: validatedOptions.skip })
-      .sort(validatedOptions.sort).populate(validatedOptions.populateString);
-    }
+    // Find branches in a project
+    return await Branch.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit, skip: validatedOptions.skip })
+    .sort(validatedOptions.sort).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
   }
-  return finishedBranches;
 }
 
 
@@ -525,24 +516,15 @@ async function create(requestingUser, organizationID, projectID, branches, optio
   // Emit the event branches-created
   EventEmitter.emit('branches-created', branchObjects);
 
-  let foundCreatedBranches;
   try {
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      foundCreatedBranches = await Branch.find({ _id: { $in: arrIDs } },
-        validatedOptions.fieldsString).populate(validatedOptions.populateString).lean();
-    }
-    else {
-      foundCreatedBranches = await Branch.find({ _id: { $in: arrIDs } },
-        validatedOptions.fieldsString).populate(validatedOptions.populateString);
-    }
+    return await Branch.find({ _id: { $in: arrIDs } },
+      validatedOptions.fieldsString).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     // Reject with error
     throw new M.DatabaseError(error.message, 'warn');
   }
-
-  return foundCreatedBranches;
 }
 
 /**
@@ -753,26 +735,16 @@ async function update(requestingUser, organizationID, projectID, branches, optio
   // Update all branches through a bulk write to the database
   await Branch.bulkWrite(bulkArray);
 
-  let foundUpdatedBranches;
   try {
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      foundUpdatedBranches = await Branch.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString).lean();
-    }
-    else {
-      foundUpdatedBranches = await Branch.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString);
-    }
+    const foundUpdatedBranches = await Branch.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    // Emit the event branches-updated
+    EventEmitter.emit('branches-updated', foundUpdatedBranches);
+    return foundUpdatedBranches;
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
   }
-
-  // Emit the event branches-updated
-  EventEmitter.emit('branches-updated', foundUpdatedBranches);
-
-  return foundUpdatedBranches;
 }
 
 /**

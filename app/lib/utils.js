@@ -441,11 +441,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
     }
   });
 
-/*  // Handle potentially conflicting archived options
-  if (validatedOptions.archived !== undefined && validatedOptions.includeArchived !== undefined) {
-    delete validatedOptions.includeArchived;
-  }*/
-
   return validatedOptions;
 };
 

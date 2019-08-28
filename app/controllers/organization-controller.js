@@ -172,24 +172,12 @@ async function find(requestingUser, orgs, options) {
     throw new M.DataFormatError('Invalid input for finding organizations.', 'warn');
   }
 
-  let foundOrgs;
   try {
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      // Find the orgs
-      foundOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString,
-        { limit: validatedOptions.limit, skip: validatedOptions.skip })
-      .sort(validatedOptions.sort)
-      .populate(validatedOptions.populateString).lean();
-      return foundOrgs;
-    }
-    else {
-      foundOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString,
-        { limit: validatedOptions.limit, skip: validatedOptions.skip })
-      .sort(validatedOptions.sort)
-      .populate(validatedOptions.populateString);
-      return foundOrgs;
-    }
+    // Find the orgs
+    return await Organization.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit, skip: validatedOptions.skip })
+    .sort(validatedOptions.sort)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -368,19 +356,10 @@ async function create(requestingUser, orgs, options) {
   // Emit the event orgs-created
   EventEmitter.emit('orgs-created', orgObjects);
 
-  let foundUpdatedOrgs;
   try {
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      foundUpdatedOrgs = await Organization.find({ _id: { $in: arrIDs } },
-        validatedOptions.fieldsString).populate(validatedOptions.populateString).lean();
-      return foundUpdatedOrgs;
-    }
-    else {
-      foundUpdatedOrgs = await Organization.find({ _id: { $in: arrIDs } },
-        validatedOptions.fieldsString).populate(validatedOptions.populateString);
-      return foundUpdatedOrgs;
-    }
+    return await Organization.find({ _id: { $in: arrIDs } },
+      validatedOptions.fieldsString).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -683,26 +662,16 @@ async function update(requestingUser, orgs, options) {
   // Update all orgs through a bulk write to the database
   await Organization.bulkWrite(bulkArray);
 
-  let foundUpdatedOrgs;
   try {
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString).lean();
-    }
-    else {
-      foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString);
-    }
+    const foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    // Emit the event orgs-updated
+    EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
+    return foundUpdatedOrgs;
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
   }
-
-  // Emit the event orgs-updated
-  EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
-
-  return foundUpdatedOrgs;
 }
 
 /**

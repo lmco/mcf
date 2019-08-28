@@ -3119,6 +3119,7 @@ async function getElements(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
+    lean: 'boolean',
     sort: 'string',
     ids: 'array',
     format: 'string',

@@ -962,6 +962,30 @@ async function search(requestingUser, query, options) {
   const validatedOptions = utils.validateOptions(options, ['populate',
     'limit', 'skip', 'lean', 'sort'], User);
 
+  // Ensure search options are valid
+  if (options) {
+    // List of valid search options
+    const validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
+      'lastModifiedBy', 'archived', 'archivedBy'];
+
+    // Check each option for valid search queries
+    Object.keys(options).forEach((o) => {
+      // If the search option is valid
+      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
+        // Ensure the search option is a string
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
+          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+        }
+        // Add the search option to the searchQuery
+        searchQuery[o] = sani.mongo(options[o]);
+      }
+    });
+  }
+
   // Add text to search query
   searchQuery.$text = { $search: query };
   // If the includeArchived field is true, remove archived from the query; return everything
