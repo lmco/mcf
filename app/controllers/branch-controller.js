@@ -163,7 +163,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
 
   // Find the org and check that it has been found and is not archived (unless specified)
   const organization = await helper.findAndValidate(Org, orgID,
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Verify the user has at least read permissions on the organization
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -173,7 +173,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
 
   // Find the project and check that it has been found and is not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Check permissions
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -602,7 +602,7 @@ async function update(requestingUser, organizationID, projectID, branches, optio
 
   // Find the org and check that it has been found and is not archived (unless specified)
   const organization = await helper.findAndValidate(Org, orgID,
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Verify the user has at least read permissions on the organization
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -611,7 +611,7 @@ async function update(requestingUser, organizationID, projectID, branches, optio
   }
   // Find the project and check that it has been found and is not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Check permissions
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {

@@ -191,7 +191,7 @@ async function find(requestingUser, organizationID, projects, options) {
   if (organizationID !== null) {
     // Find the organization, validate that it exists and is not archived (unless specfified)
     const foundOrg = await helper.findAndValidate(Organization, orgID,
-      (validatedOptions.archived || validatedOptions.includeArchived));
+      ((options && options.archived) || validatedOptions.includeArchived));
     // Permissions check
     if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
       || !foundOrg.permissions[reqUser._id].includes('read'))) {

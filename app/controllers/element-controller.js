@@ -172,7 +172,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Find the organization and validate that it was found and not archived (unless specified)
   const organization = await helper.findAndValidate(Org, orgID,
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -182,7 +182,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Find the project and validate that it was found and not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -192,7 +192,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Find the branch and validate that it was found and not archived (unless specified)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
 
   let elementsToFind = [];
 
@@ -1902,7 +1902,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
   // Find the organization and validate that it was found and not archived (unless specified)
   const organization = await helper.findAndValidate(Org, orgID,
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1912,7 +1912,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
   // Find the project and validate that it was found and not archived (unless specificed)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -1922,7 +1922,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
   // Find the branch and validate that it was found and not archived (unless specificed)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-    (validatedOptions.archived || validatedOptions.includeArchived));
+    ((options && options.archived) || validatedOptions.includeArchived));
 
   searchQuery.$text = { $search: query };
   // If the includeArchived field is true, remove archived from the query; return everything
