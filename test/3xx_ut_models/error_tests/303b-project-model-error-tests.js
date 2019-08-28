@@ -30,6 +30,7 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const customValidators = M.config.validators || {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -206,6 +207,12 @@ function orgNotProvided(done) {
  * @description Attempts to create a project with an invalid org.
  */
 async function orgInvalid() {
+  if (customValidators.hasOwnProperty('id')) {
+    M.log.verbose('Skipping valid project org test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
   const projData = Object.assign({}, testData.projects[0]);
   projData._id = `org:${projData.id}`;
   projData.org = 'INVALID';
