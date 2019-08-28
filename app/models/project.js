@@ -10,8 +10,47 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description Defines the project data model.
+ * @description
+ * <p>This module defines the project data model. Projects contain branches,
+ * which in turn contain elements. Every project should have at least a master
+ * branch, which stores the main copy of the model. Projects also have their own
+ * permissions, a visibility level, and have the ability to store custom
+ * meta-data.</p>
+ *
+ * <h4>Permissions</h4>
+ * <p>Permissions are stored in a single object, where keys are user's usernames
+ * and values are arrays containing the permissions a specific user has.
+ * Permissions in MBEE are cascading, meaning if a user has write permissions
+ * then they also have read.</p>
+ *
+ * <ul>
+ *   <li><b>read</b>: The user can retrieve the project and see its data. The
+ *   user is able to view the model on all branches.</li>
+ *   <li><b>write</b>: The user can create, update and delete elements. They can
+ *   also create, update and delete branches/tags.
+ *   <li><b>admin</b>: The user can update/delete the project and update/remove
+ *   user permissions on the project.
+ * </ul>
+ *
+ * <h4>Visibility</h4>
+ * <p>The project visibility is a field which allows for projects to be
+ * referenced by other projects. The default visibility is private, meaning that
+ * only users who have at least read permissions on the project can view the
+ * model. The other option for visibility is "internal". If a project's
+ * visibility is internal, any users in the organization can view the model.</p>
+ *
+ * <p>The biggest benefit to setting a project's visibility to internal is that
+ * other model in the organization can create relationships which point to
+ * element in the internal project's model. Projects can only point to elements
+ * on internal projects in their own organization or the "default"
+ * organization.</p>
+ *
+ * <h4>Custom Data</h4>
+ * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
+ * is stored in an object, and can contain any valid JSON the user desires.
+ * Only project admins can update the custom data.</p>
  */
 
 // NPM modules

@@ -12,7 +12,33 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description Defines the user data model.
+ * @description
+ * <p>This module defines the user data model. Users are the main operators of
+ * MBEE and can be granted certain permission levels on organizations and
+ * projects. Users can be set as system-wide admins by setting the admin field
+ * to true, can be created using different providers, and can store custom
+ * meta-data.</p>
+ *
+ * <h4>Admin</h4>
+ * <p>The admin field is a boolean which defaults to false. If true, the user
+ * is a system-wide admin and has permission to do basically anything. Admins
+ * have the special ability create/delete users and organizations, which normal
+ * users cannot do. This permissions should be given out carefully, and only
+ * system-wide admins can grant admin permissions.</p>
+ *
+ * <h4>Provider</h4>
+ * <p>The provider field accepts a string and defaults to the string 'local'.
+ * This field is used to allow users from different providers to be created and
+ * handled differently. Based on the provider field, different authentication
+ * strategies can handle login in different ways, and even validate passwords
+ * differently. Currently the supported options are 'local' and 'ldap', which
+ * are used by the local-ldap-strategy. Other provider options can be used when
+ * different authentication strategies are created.</p>
+ *
+ * <h4>Custom Data</h4>
+ * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
+ * is stored in an object, and can contain any valid JSON the user desires.
+ * Users can update their own custom data.</p>
  */
 
 // Node Modules
