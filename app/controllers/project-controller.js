@@ -63,7 +63,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
@@ -86,6 +86,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for projects with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived projects.  If false,
+ * only returns unarchived projects.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for projects with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use

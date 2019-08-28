@@ -60,7 +60,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
@@ -83,6 +83,8 @@ const helper = M.require('lib.controller-helper');
  * users that were created by a specific person
  * @param {string} [options.lastModifiedBy] - A string that will search for matches for
  * users that were last modified by a specific person
+ * @param {string} [options.archived] - Search only for archived users.  If false,
+ * only returns unarchived users.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - A string that will search for matches for
  * users that were archived by a specific person
  * @param {boolean} [options.lean = false] - A boolean value that if true
@@ -960,7 +962,7 @@ async function search(requestingUser, query, options) {
 
   // Validate and set the options
   const validatedOptions = utils.validateOptions(options, ['populate',
-    'limit', 'skip', 'lean', 'sort'], User);
+    'limit', 'skip', 'lean', 'sort', 'includeArchived'], User);
 
   // Ensure search options are valid
   if (options) {

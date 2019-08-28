@@ -66,7 +66,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {boolean} [options.subtree = false] - If true, all elements in the subtree of
  * the found elements will also be returned.
@@ -98,6 +98,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for elements with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived elements.  If false,
+ * only returns unarchived elements.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -1810,7 +1812,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
@@ -1838,6 +1840,8 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for elements with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived elements.  If false,
+ * only returns unarchived elements.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use

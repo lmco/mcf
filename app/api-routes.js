@@ -162,9 +162,9 @@ api.route('/version')
  *                      projects]
  *         in: query
  *         type: string
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
- *                      through.
+ *                      through.  Overridden by the archived search option
  *         in: query
  *         type: boolean
  *       - name: fields
@@ -213,6 +213,11 @@ api.route('/version')
  *         description: Search for orgs last modified by a specific user.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived orgs.  If false, only returns
+ *                      unarchived orgs.  Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: Search for orgs archived by a specific user.
  *         in: query
@@ -538,7 +543,7 @@ api.route('/orgs')
  *         in: query
  *         type: string
  *         required: false
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
  *                      through.
  *         in: query
@@ -1009,9 +1014,9 @@ api.route('/projects')
  *                      org]
  *         in: query
  *         type: string
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
- *                      through.
+ *                      through. Overridden by the archived search option.
  *         in: query
  *         type: boolean
  *       - name: fields
@@ -1064,6 +1069,11 @@ api.route('/projects')
  *         description: Search for projects last modified by a specific user.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived projects.  If false, only returns
+ *                      unarchived projects.  Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: Search for projects archived by a specific user.
  *         in: query
@@ -1439,7 +1449,7 @@ api.route('/orgs/:orgid/projects')
  *         in: query
  *         type: string
  *         required: false
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
  *                      through.
  *         in: query
@@ -1853,9 +1863,9 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      project, source]
  *         in: query
  *         type: string
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
- *                      through.
+ *                      through. Overridden by the archived search option
  *         in: query
  *         type: boolean
  *       - name: fields
@@ -1912,6 +1922,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Search for branches last modified by a specific user.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived branches.  If false, only returns
+ *                      unarchived branches.  Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: Search for branches archived by a specific user.
  *         in: query
@@ -2225,7 +2240,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
  *         in: query
  *         type: string
  *         required: false
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
  *                      through.
  *         in: query
@@ -2557,9 +2572,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *         in: query
  *         type: string
  *         required: false
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
- *                      through.
+ *                      through. Overridden by the archived search option
  *         in: query
  *         type: boolean
  *       - name: fields
@@ -2625,6 +2640,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *         description: Search for elements last modified by a specific user.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived elements.  If false, only returns
+ *                      unarchived elements.  Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: Search for elements archived by a specific user.
  *         in: query
@@ -2716,9 +2736,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         in: query
  *         type: string
  *         required: false
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
- *                      through.
+ *                      through. Overridden by the archived search option
  *         in: query
  *         type: boolean
  *       - name: subtree
@@ -2799,6 +2819,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Search for elements last modified by a specific user.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived elements. If false, only returns
+ *                      unarchived elements. Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: Search for elements archived by a specific user.
  *         in: query
@@ -3335,7 +3360,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         in: query
  *         type: string
  *         required: false
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
  *                      through.
  *         in: query
@@ -3897,9 +3922,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: string
  *         required: false
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived users will be also be searched
- *                      through.
+ *                      through. Overridden by the archived search option
  *         in: query
  *         type: boolean
  *       - name: fields
@@ -3967,6 +3992,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      were last modified by a specific person.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived users.  If false, only returns
+ *                      unarchived users.  Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: A search parameter that will attempt to find users that
  *                      were archived by a specific person.
@@ -4369,8 +4399,9 @@ api.route('/users/whoami')
  *         description: The desired text to be searched for.
  *         in: query
  *         type: string
- *       - name: archived
- *         description: Flag to include archived users in search results.
+ *       - name: includeArchived
+ *         description: Flag to include archived users in search results. Overridden
+ *                      by the archived search option
  *         in: query
  *         type: boolean
  *         required: false
