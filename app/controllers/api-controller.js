@@ -4882,6 +4882,12 @@ async function postArtifact(req, res) {
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      const error = new M.ServerError('Artifact upload failed.');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
     // Attempt to parse query options
     try {
       // Extract options from request query
@@ -4912,7 +4918,6 @@ async function postArtifact(req, res) {
     req.body.filename = req.file.originalname;
     req.body.contentType = req.file.mimetype;
 
-
     // If artifact ID was provided in the body, ensure it matches artifact ID in params
     if (Object.prototype.hasOwnProperty.call('id') && (req.params.artifactid !== req.body.id)) {
       const error = new M.DataFormatError(
@@ -4920,6 +4925,9 @@ async function postArtifact(req, res) {
       );
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
+
+    // Set the artifact ID in the body equal req.params.orgid
+    req.body.id = req.params.artifactid;
 
     // Create artifact with provided parameters
     // NOTE: create() sanitizes input params
@@ -4969,8 +4977,9 @@ async function patchArtifact(req, res) {
 
     // Sanity Check: there should always be a user in the request
     if (!req.user) {
-      const error = new M.CustomError('Request Failed.', 500, 'critical');
-      return res.status(error.status).send(error);
+      M.log.critical('No requesting user available.');
+      const error = new M.ServerError('Request Failed');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
     // Attempt to parse query options
@@ -4980,16 +4989,7 @@ async function patchArtifact(req, res) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return res.status(error.status).send(error);
-    }
-
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading.
-      res.status(500).send(err);
-    }
-    else if (err) {
-      // An unknown error occurred when uploading.
-      res.status(500).send(err);
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
     // Check options for minified
@@ -5009,10 +5009,26 @@ async function patchArtifact(req, res) {
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
-    // Check if id NOT in body
-    if (!req.hasOwnProperty('id')) {
-      req.body.id = req.params.artifactid;
+    // Singular api: should not accept arrays
+    if (Array.isArray(req.body)) {
+      const error = new M.DataFormatError('Input cannot be an array', 'warn');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
+
+    // Sanitize body
+    req.body = JSON.parse(JSON.stringify(req.body));
+
+    // If an ID was provided in the body, ensure it matches the ID in params
+    if (req.hasOwnProperty('body') && req.body.hasOwnProperty('id')
+      && (req.body.id !== req.params.artifactid)) {
+      const error = new M.DataFormatError(
+        'Artifact ID in the body does not match ID in the params.', 'warn'
+      );
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    // Set the artifact ID in the body equal req.params.orgid
+    req.body.id = req.params.artifactid;
 
     try {
       // Update the specified artifact
