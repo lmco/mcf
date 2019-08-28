@@ -238,9 +238,12 @@ async function find(requestingUser, organizationID, projectID, branchID, element
     // If options.limit is defined an is less that 50k or count is less than 50k, find normally
     if ((validatedOptions.limit > 0 && validatedOptions.limit < 50000) || elementCount < 50000) {
       // Find the elements
-      foundElements = await findHelper(searchQuery, validatedOptions.fieldsString,
-        validatedOptions.limit, validatedOptions.skip, validatedOptions.populateString,
-        validatedOptions.sort, validatedOptions.lean);
+      foundElements = await Element.find(searchQuery, validatedOptions.fieldsString)
+      .skip(validatedOptions.skip)
+      .limit(validatedOptions.limit)
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString)
+      .lean(validatedOptions.lean);
     }
     else {
       // Define batchLimit, batchSkip and numLoops
@@ -267,11 +270,17 @@ async function find(requestingUser, organizationID, projectID, branchID, element
         }
 
         // Add find operation to array of promises
-        promises.push(findHelper(searchQuery, validatedOptions.fieldsString, batchLimit, batchSkip,
-          validatedOptions.populateString, validatedOptions.sort, validatedOptions.lean)
-        .then((elems) => {
-          foundElements = foundElements.concat(elems);
-        }));
+        promises.push(
+          Element.find(searchQuery, validatedOptions.fieldsString)
+          .skip(batchSkip)
+          .limit(batchLimit)
+          .sort(validatedOptions.sort)
+          .populate(validatedOptions.populateString)
+          .lean(validatedOptions.lean)
+          .then((elems) => {
+            foundElements = foundElements.concat(elems);
+          })
+        );
       }
     }
   }
@@ -282,12 +291,17 @@ async function find(requestingUser, organizationID, projectID, branchID, element
       searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
 
       // Add find operation to array of promises
-      promises.push(findHelper(searchQuery, validatedOptions.fieldsString,
-        validatedOptions.limit, validatedOptions.skip, validatedOptions.populateString,
-        validatedOptions.sort, validatedOptions.lean)
-      .then((elems) => {
-        foundElements = foundElements.concat(elems);
-      }));
+      promises.push(
+        Element.find(searchQuery, validatedOptions.fieldsString)
+        .skip(validatedOptions.skip)
+        .limit(validatedOptions.limit)
+        .sort(validatedOptions.sort)
+        .populate(validatedOptions.populateString)
+        .lean(validatedOptions.lean)
+        .then((elems) => {
+          foundElements = foundElements.concat(elems);
+        })
+      );
     }
   }
 
@@ -296,34 +310,6 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Return the found elements
   return foundElements;
-}
-
-/**
- * @description Find helper function which simplifies the actual Element.find()
- * database call
- *
- * @param {Object} query - The query to send to the database
- * @param {string} fields - Fields to include (or not include) in the found objects
- * @param {number} limit - The maximum number of elements to return.
- * @param {number} skip - The number of elements to skip.
- * @param {string} populate - A string containing a space delimited list of
- * fields to populate
- * @param {Object} sort - An optional argument that enables sorting by different fields
- * @param {boolean} lean - If true, returns raw JSON rather than converting to
- * instances of the Element model.
- */
-async function findHelper(query, fields, limit, skip, populate, sort, lean) {
-  if (lean) {
-    return Element.find(query, fields, { limit: limit, skip: skip })
-    .sort(sort)
-    .populate(populate)
-    .lean();
-  }
-  else {
-    return Element.find(query, fields, { limit: limit, skip: skip })
-    .sort(sort)
-    .populate(populate);
-  }
 }
 
 /**
@@ -730,23 +716,12 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     // Split elementIDs list into batches of 50000
     const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      // Add find operation to promises array
-      promises.push(Element.find(tmpQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString).lean()
-      .then((_foundElements) => {
-        populatedElements = populatedElements.concat(_foundElements);
-      }));
-    }
-    else {
-      // Add find operation to promises array
-      promises.push(Element.find(tmpQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString)
-      .then((_foundElements) => {
-        populatedElements = populatedElements.concat(_foundElements);
-      }));
-    }
+    // Add find operation to promises array
+    promises.push(Element.find(tmpQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean)
+    .then((_foundElements) => {
+      populatedElements = populatedElements.concat(_foundElements);
+    }));
   }
 
   // Return when all elements have been found
@@ -1191,23 +1166,12 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     // Split arrIDs list into batches of 50000
     searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      // Add find operation to promises array
-      promises3.push(Element.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString).lean()
-      .then((_foundElements) => {
-        foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
-      }));
-    }
-    else {
-      // Add find operation to promises array
-      promises3.push(Element.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString)
-      .then((_foundElements) => {
-        foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
-      }));
-    }
+    // Add find operation to promises array
+    promises3.push(Element.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean)
+    .then((_foundElements) => {
+      foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+    }));
   }
 
   // Return when all elements have been found
@@ -1891,7 +1855,6 @@ async function search(requestingUser, organizationID, projectID, branchID, query
   const projID = sani.mongo(projectID);
   const branID = sani.mongo(branchID);
   const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
-  let foundElements = [];
 
   // Validate and set the options
   const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
@@ -1975,25 +1938,13 @@ async function search(requestingUser, organizationID, projectID, branchID, query
   projections.score.$meta = 'textScore';
 
   try {
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      // Search for the elements
-      foundElements = await Element.find(searchQuery, projections)
-      .skip(validatedOptions.skip)
-      .limit(validatedOptions.limit)
-      .sort(validatedOptions.sort)
-      .populate(validatedOptions.populateString)
-      .lean();
-    }
-    else {
-      // Search for the elements
-      foundElements = await Element.find(searchQuery, projections)
-      .skip(validatedOptions.skip)
-      .limit(validatedOptions.limit)
-      .sort(validatedOptions.sort)
-      .populate(validatedOptions.populateString);
-    }
-    return foundElements;
+    // Search for the elements
+    return await Element.find(searchQuery, projections)
+    .skip(validatedOptions.skip)
+    .limit(validatedOptions.limit)
+    .sort(validatedOptions.sort)
+    .populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
