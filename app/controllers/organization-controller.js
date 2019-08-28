@@ -163,24 +163,12 @@ async function find(requestingUser, orgs, options) {
     throw new M.DataFormatError('Invalid input for finding organizations.', 'warn');
   }
 
-  let foundOrgs;
   try {
-    // If the lean option is supplied
-    if (validOptions.lean) {
-      // Find the orgs
-      foundOrgs = await Organization.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString).lean();
-      return foundOrgs;
-    }
-    else {
-      foundOrgs = await Organization.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString);
-      return foundOrgs;
-    }
+    // Find the orgs
+    return await Organization.find(searchQuery, validOptions.fieldsString,
+      { limit: validOptions.limit, skip: validOptions.skip })
+    .sort(validOptions.sort)
+    .populate(validOptions.populateString).lean(validOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -359,19 +347,10 @@ async function create(requestingUser, orgs, options) {
   // Emit the event orgs-created
   EventEmitter.emit('orgs-created', orgObjects);
 
-  let foundUpdatedOrgs;
   try {
-    // If the lean option is supplied
-    if (validOptions.lean) {
-      foundUpdatedOrgs = await Organization.find({ _id: { $in: arrIDs } },
-        validOptions.fieldsString).populate(validOptions.populateString).lean();
-      return foundUpdatedOrgs;
-    }
-    else {
-      foundUpdatedOrgs = await Organization.find({ _id: { $in: arrIDs } },
-        validOptions.fieldsString).populate(validOptions.populateString);
-      return foundUpdatedOrgs;
-    }
+    return await Organization.find({ _id: { $in: arrIDs } },
+      validOptions.fieldsString).populate(validOptions.populateString)
+    .lean(validOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -674,26 +653,16 @@ async function update(requestingUser, orgs, options) {
   // Update all orgs through a bulk write to the database
   await Organization.bulkWrite(bulkArray);
 
-  let foundUpdatedOrgs;
   try {
-    // If the lean option is supplied
-    if (validOptions.lean) {
-      foundUpdatedOrgs = await Organization.find(searchQuery, validOptions.fieldsString)
-      .populate(validOptions.populateString).lean();
-    }
-    else {
-      foundUpdatedOrgs = await Organization.find(searchQuery, validOptions.fieldsString)
-      .populate(validOptions.populateString);
-    }
+    const foundUpdatedOrgs = await Organization.find(searchQuery, validOptions.fieldsString)
+    .populate(validOptions.populateString).lean(validOptions.lean);
+    // Emit the event orgs-updated
+    EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
+    return foundUpdatedOrgs;
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
   }
-
-  // Emit the event orgs-updated
-  EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
-
-  return foundUpdatedOrgs;
 }
 
 /**
