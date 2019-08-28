@@ -38,10 +38,11 @@
 
 #search {
   overflow-y: scroll;
+  height: 100%;
 }
 
 .search-form {
-  padding: 80px 80px 1px;
+  padding: 0px 80px 1px;
 
   .form-row {
     width: 100%;
@@ -84,6 +85,10 @@
   }
 }
 
+#search-branch-bar {
+  padding: 80px 80px 0px 60px;
+}
+
 /******************************************************************************
 /*                       Adv Search Form Styling                              *
 /******************************************************************************/
@@ -107,13 +112,9 @@
 }
 
 #frm-adv-label {
-  padding: 5px 0px 0px 14px;
+  padding: 7px 0px 0px 14px;
   margin: 0px;
   font-size: 0.9rem;
-}
-
-#btn-grp-adv-filter {
-  margin: 0px 10px 0px 10px;
 }
 
 #adv-separator {
@@ -183,4 +184,49 @@
   font-size: 0.875rem;
   margin: 0 auto;
   width: 200px;
+}
+
+#adv-search-header{
+  margin: 0px;
+  display: flex;
+}
+
+#adv-filter-btn {
+  margin-left: auto;
+  margin-right: 25px;
+}
+
+/******************************************************************************
+/*                       Adv Filter Form Styling                              *
+/******************************************************************************/
+
+#btn-grp-adv-filter {
+  margin: 0px 10px 0px 10px;
+}
+
+#filter-menu {
+  width: 475px !important;
+  overflow: visible;
+}
+
+#adv-filter-toggle {
+  outline: none !important;
+}
+
+#adv-filter-separator {
+  border-top: 1px solid rgba(0,0,0,0.125);
+  margin: 4px 15px;
+}
+
+.adv-elem-filters {
+  margin-top: 8px;
+}
+
+#adv-filter-frm {
+  margin: 0px;
+  padding-left: 40px;
+}
+
+#adv-filter-label {
+  margin: auto;
 }

@@ -11,7 +11,14 @@
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description Defines the artifact data model.
+ * @description
+ * <p>This module defines the artifact data model. Artifacts are objects stored
+ * in the database, which point to files stored in another location. Multiple
+ * artifact objects can point to the same file, as artifacts are stored on a per
+ * branch basis. Artifacts also store a history, which details who and when a
+ * user changed the artifact file (not the database object/meta-data).</p>
+ *
+ * TODO: Phill update this model with changes after completion of artifacts.
  */
 
 // NPM modules

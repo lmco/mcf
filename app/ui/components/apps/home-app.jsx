@@ -32,7 +32,7 @@ import Delete from '../shared-views/delete.jsx';
 // Define HomePage Component
 class HomeApp extends Component {
 
-/* eslint-enable no-unused-vars */
+  /* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props

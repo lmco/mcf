@@ -45,7 +45,7 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  * @param {Object} res - Express response object
  * @param {function} next - Callback to express authentication
  */
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   // Extract authorization metadata
   const authorization = req.headers.authorization;
   let username = null;
@@ -112,19 +112,16 @@ function authenticate(req, res, next) {
           ? res.status(401).send(error.message)
           : res.redirect('back');
       }
-      // Handle Basic Authentication
-      AuthModule.handleBasicAuth(req, res, username, password)
-      .then(user => {
+      try {
+        // Handle Basic Authentication
+        const user = await AuthModule.handleBasicAuth(req, res, username, password);
         // Successfully authenticated basic auth!
         M.log.info(`Authenticated [${user.username}] via Basic Auth`);
 
         // Set user req object
         req.user = user;
-
-        // Move to the next function
-        next();
-      })
-      .catch(err => {
+      }
+      catch (err) {
         // Log the error
         M.log.error(err.stack);
         error = new M.AuthorizationError('Invalid username or password.', 'warn');
@@ -139,7 +136,10 @@ function authenticate(req, res, next) {
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send(error.message)
           : res.redirect(`/login?next=${req.originalUrl}`);
-      });
+      }
+
+      // Move to the next function
+      next();
     }
 
     /**********************************************************************
@@ -156,19 +156,16 @@ function authenticate(req, res, next) {
       // Convert token to string
       const token = Buffer.from(parts[1], 'utf8').toString();
 
-      // Handle Token Authentication
-      AuthModule.handleTokenAuth(req, res, token)
-      .then(user => {
+      try {
+        // Handle Token Authentication
+        const user = await AuthModule.handleTokenAuth(req, res, token);
         // Successfully authenticated token auth!
         M.log.info(`Authenticated [${user.username}] via Token Auth`);
 
         // Set user req object
         req.user = user;
-
-        // Move to the next function
-        next();
-      })
-      .catch(err => {
+      }
+      catch (err) {
         if (err.message === 'Invalid username or password.') {
           req.flash('loginError', err.message);
         }
@@ -179,8 +176,12 @@ function authenticate(req, res, next) {
         return (req.originalUrl.startsWith('/api'))
           ? res.status(401).send('Invalid username or password.')
           : res.redirect(`/login?next=${req.originalUrl}`);
-      });
+      }
+
+      // Move to the next function
+      next();
     }
+
     // Other authorization header
     else {
       // return proper error for API route or redirect for UI
@@ -201,19 +202,16 @@ function authenticate(req, res, next) {
     M.log.verbose('Authenticating user via Session Token Auth...');
     const token = req.session.token;
 
-    // Handle Token Authentication
-    AuthModule.handleTokenAuth(req, res, token)
-    .then(user => {
+    try {
+      // Handle Token Authentication
+      const user = await AuthModule.handleTokenAuth(req, res, token);
       // Successfully authenticated token session!
       M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
 
       // Set user req object
       req.user = user;
-
-      // Move to the next function
-      next();
-    })
-    .catch(err => {
+    }
+    catch (err) {
       // log the error
       M.log.warn(err.stack);
       req.flash('loginError', 'Session Expired');
@@ -222,7 +220,10 @@ function authenticate(req, res, next) {
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Session Expired')
         : res.redirect(`/login?next=${req.originalUrl}`);
-    });
+    }
+
+    // Move to the next function
+    next();
   }
 
   /**********************************************************************
@@ -241,19 +242,16 @@ function authenticate(req, res, next) {
     username = sani.sanitize(req.body.username);
     password = req.body.password;
 
-    // Handle Basic Authentication
-    AuthModule.handleBasicAuth(req, res, username, password)
-    .then(user => {
+    try {
+      // Handle Basic Authentication
+      const user = await AuthModule.handleBasicAuth(req, res, username, password);
       // Successfully authenticate credentials!
       M.log.info(`Authenticated [${user.username}] via Form Input`);
 
       // Set user req object
       req.user = user;
-
-      // Move to the next function. Explicitly set error to null.
-      next(null);
-    })
-    .catch(err => {
+    }
+    catch (err) {
       M.log.error(err.stack);
       req.flash('loginError', 'Invalid username or password.');
 
@@ -262,7 +260,10 @@ function authenticate(req, res, next) {
       return (req.originalUrl.startsWith('/api'))
         ? res.status(401).send('Invalid username or password.')
         : res.redirect('back');
-    });
+    }
+
+    // Move to the next function. Explicitly set error to null.
+    next(null);
   }
 
   // Verify if credentials are empty or null

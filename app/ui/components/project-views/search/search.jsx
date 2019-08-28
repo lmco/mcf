@@ -33,6 +33,7 @@ import {
 // MBEE Modules
 import SearchResults from './search-results.jsx';
 import AdvancedSearch from './advanced-search/advanced-search.jsx';
+import BranchBar from '../branches/branch-bar.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -164,45 +165,50 @@ class Search extends Component {
 
     return (
       <div id='view'>
-            <div id={'search'}>
-                <Form id={'search-form'} className={'search-form'} inline>
-                    <Row form>
-                        <Col md={10} sm={8} xs={6}>
-                            <FormGroup id={'search-input-form-group'} className={'mb-2 mr-sm-2 mb-sm-0'}>
-                                <Input type="text"
-                                       name="query"
-                                       id="query"
-                                       placeholder="Search"
-                                       value={this.state.query || ''}
-                                       onChange={this.onChange}
-                                       />
-                            </FormGroup>
-                        </Col>
-                        <Col md={2} sm={4} xs={6} >
-                            <Button className='btn'
-                                    outline color="primary"
-                                    type='submit'
-                                    style={ style }
-                                    onClick={this.doSearch}>
-                                Search
-                            </Button>
-                        </Col>
-                    </Row>
-                </Form>
-                <AdvancedSearch query={this.state.query || ''}
-                                getAdvResults={this.getAdvResults}
-                                toggleSearchBtn={this.toggleSearchBtn}
-                                options={ options }
-                                {...this.props}/>
-                <div>
-                  <div style={{ marginLeft: '40px', fontSize: '12px' }}>
-                    {this.state.message}
-                  </div>
-                </div>
-                <div>
-                  {searchResults}
-                </div>
+        <div id={'search'}>
+          <div id='search-branch-bar'>
+            <BranchBar project={this.props.project}
+                       branchid={this.props.match.params.branchid}
+                       searchForm={true}/>
+          </div>
+          <Form id={'search-form'} className={'search-form'} inline>
+            <Row form>
+              <Col md={10} sm={8} xs={6}>
+                <FormGroup id={'search-input-form-group'} className={'mb-2 mr-sm-2 mb-sm-0'}>
+                  <Input type="text"
+                         name="query"
+                         id="query"
+                         placeholder="Search"
+                         value={this.state.query || ''}
+                         onChange={this.onChange}
+                         />
+                </FormGroup>
+              </Col>
+              <Col md={2} sm={4} xs={6} >
+                <Button className='btn'
+                        outline color="primary"
+                        type='submit'
+                        style={ style }
+                        onClick={this.doSearch}>
+                    Search
+                </Button>
+              </Col>
+            </Row>
+          </Form>
+            <AdvancedSearch query={this.state.query || ''}
+                            getAdvResults={this.getAdvResults}
+                            toggleSearchBtn={this.toggleSearchBtn}
+                            options={ options }
+                            {...this.props}/>
+            <div>
+              <div style={{ marginLeft: '40px', fontSize: '12px' }}>
+                {this.state.message}
+              </div>
             </div>
+            <div>
+              {searchResults}
+            </div>
+        </div>
       </div>
     );
   }

@@ -290,7 +290,7 @@ module.exports.createTag = function(adminUser, orgID, projID) {
     let createdTag;
     const newTag = new Branch({
       _id: utils.createID(orgID, projID, 'tag'),
-      project: projID,
+      project: utils.createID(orgID, projID),
       createdBy: adminUser._id,
       name: 'Tagged Branch',
       tag: true,

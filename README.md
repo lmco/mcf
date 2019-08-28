@@ -52,7 +52,6 @@ Included documentation:
 ## Reporting Vulnerabilities and Bugs
 
 <!-- START LMPI -->
-// TODO - Verify we can get on email and send an email
 
 If an issue is identified in MBEE, please email
 [mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com). If

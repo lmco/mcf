@@ -2562,6 +2562,16 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *                      through.
  *         in: query
  *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the username field is returned. To specifically
+ *                      NOT include a field, include a '-' in front of the field
+ *                      (-name). [admin, archived, archivedBy, archivedOn,
+ *                      createdBy, createdOn, custom, email, fname,
+ *                      lastModifiedBy, lname, username, preferredName,
+ *                      updatedOn]
+ *         in: query
+ *         type: string
  *       - name: limit
  *         description: The maximum number of objects to return. A limit of 0 is
  *                      equivalent to setting no limit.
@@ -3350,6 +3360,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
  *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *       - name: rootpath
+ *         description: An option to specify finding the parent, grandparent, etc
+ *                      of the query element all the way up to the root element.
  *         in: query
  *         type: boolean
  *         default: false
@@ -4852,7 +4868,7 @@ api.route('/users/:username/password')
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  Middleware.disableUserAPI,
+  Middleware.disableUserPatchPassword,
   APIController.patchPassword
 );
 

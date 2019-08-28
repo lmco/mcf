@@ -32,7 +32,7 @@ import ProjectList from '../profile-views/project-list.jsx';
 // Define component
 class ProfileApp extends Component {
 
-/* eslint-enable no-unused-vars */
+  /* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props
