@@ -1886,134 +1886,127 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  *   M.log.error(error);
  * });
  */
-function search(requestingUser, organizationID, projectID, branchID, query, options) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // Ensure input parameters are correct type
-      helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-    }
-    catch (error) {
-      return reject(error);
-    }
+async function search(requestingUser, organizationID, projectID, branchID, query, options) {
+  // Ensure input parameters are correct type
+  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
 
-    // Sanitize input parameters and create function-wide variables
-    const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branID = sani.mongo(branchID);
-    const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
-    let foundElements = [];
+  // Sanitize input parameters and create function-wide variables
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const branID = sani.mongo(branchID);
+  const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
+  let foundElements = [];
 
-    // Validate and set the options
-    const validatedOptions = utils.validateOptions(options, ['archived', 'includeArchived',
-      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+  // Validate and set the options
+  const validatedOptions = utils.validateOptions(options, ['archived', 'includeArchived',
+    'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
-    // Ensure options are valid
-    if (options) {
-      // Create array of valid search options
-      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-        'createdBy', 'lastModifiedBy', 'archivedBy'];
+  // Ensure options are valid
+  if (options) {
+    // Create array of valid search options
+    const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+      'createdBy', 'lastModifiedBy', 'archivedBy'];
 
-      // Loop through provided options
-      Object.keys(options).forEach((o) => {
-        // If the provided option is a valid search option
-        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-          // Ensure the search option is a string
-          if (typeof options[o] !== 'string') {
-            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
-          }
-
-          // If the search option is an element reference
-          if (['parent', 'source', 'target'].includes(o)) {
-            // Make value the concatenated ID
-            options[o] = utils.createID(orgID, projID, branID, options[o]);
-          }
-
-          // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+    // Loop through provided options
+    Object.keys(options).forEach((o) => {
+      // If the provided option is a valid search option
+      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the search option is a string
+        if (typeof options[o] !== 'string') {
+          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
-      });
+
+        // If the search option is an element reference
+        if (['parent', 'source', 'target'].includes(o)) {
+          // Make value the concatenated ID
+          options[o] = utils.createID(orgID, projID, branID, options[o]);
+        }
+
+        // Add the search option to the searchQuery
+        searchQuery[o] = sani.mongo(options[o]);
+      }
+    });
+  }
+
+  // Find the organization and validate that it was found and not archived (unless specified)
+  const organization = await helper.findAndValidate(Org, orgID,
+    (validatedOptions.archived || validatedOptions.includeArchived));
+  // Permissions check
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` read items on the org ${orgID}.`, 'warn');
+  }
+
+  // Find the project and validate that it was found and not archived (unless specificed)
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+    (validatedOptions.archived || validatedOptions.includeArchived));
+  // Permissions check
+  if (!reqUser.admin && (!project.permissions[reqUser._id]
+    || !project.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` read items on the project ${projID}.`, 'warn');
+  }
+
+  // Find the branch and validate that it was found and not archived (unless specificed)
+  await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
+    (validatedOptions.archived || validatedOptions.includeArchived));
+
+  searchQuery.$text = { $search: query };
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
+    delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
+  }
+
+  // Add sorting by metadata
+  // If no sorting option was specified ($natural is the default) then remove
+  // $natural. $natural does not work with metadata sorting
+  if (validatedOptions.sort.$natural) {
+    validatedOptions.sort = { score: { $meta: 'textScore' } };
+  }
+  else {
+    validatedOptions.sort.score = { $meta: 'textScore' };
+  }
+
+  let projections = {};
+
+  // Check if filters are selected
+  if (validatedOptions.fieldsString) {
+    projections = helper.parseFieldsString(validatedOptions.fieldsString);
+  }
+
+  projections.score = {};
+  projections.score.$meta = 'textScore';
+
+  try {
+    // If the lean option is supplied
+    if (validatedOptions.lean) {
+      // Search for the elements
+      foundElements = await Element.find(searchQuery, projections)
+      .skip(validatedOptions.skip)
+      .limit(validatedOptions.limit)
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString)
+      .lean();
     }
-
-    try {
-      // Find the organization and validate that it was found and not archived (unless specified)
-      const organization = await helper.findAndValidate(Org, orgID,
-        (validatedOptions.archived || validatedOptions.includeArchived));
-      // Permissions check
-      if (!reqUser.admin && (!organization.permissions[reqUser._id]
-        || !organization.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to'
-          + ` read items on the org ${orgID}.`, 'warn');
-      }
-
-      // Find the project and validate that it was found and not archived (unless specificed)
-      const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-        (validatedOptions.archived || validatedOptions.includeArchived));
-      // Permissions check
-      if (!reqUser.admin && (!project.permissions[reqUser._id]
-        || !project.permissions[reqUser._id].includes('read'))) {
-        throw new M.PermissionError('User does not have permission to'
-          + ` read items on the project ${projID}.`, 'warn');
-      }
-
-      // Find the branch and validate that it was found and not archived (unless specificed)
-      await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-        (validatedOptions.archived || validatedOptions.includeArchived));
-
-      searchQuery.$text = { $search: query };
-      // If the includeArchived field is true, remove archived from the query; return everything
-      if (validatedOptions.includeArchived) {
-        delete searchQuery.archived;
-      }
-      // If the archived field is true, query only for archived elements
-      if (validatedOptions.archived) {
-        searchQuery.archived = true;
-      }
-
-      // Add sorting by metadata
-      // If no sorting option was specified ($natural is the default) then remove
-      // $natural. $natural does not work with metadata sorting
-      if (validatedOptions.sort.$natural) {
-        validatedOptions.sort = { score: { $meta: 'textScore' } };
-      }
-      else {
-        validatedOptions.sort.score = { $meta: 'textScore' };
-      }
-
-      let projections = {};
-
-      // Check if filters are selected
-      if (validatedOptions.fieldsString) {
-        projections = helper.parseFieldsString(validatedOptions.fieldsString);
-      }
-
-      projections.score = {};
-      projections.score.$meta = 'textScore';
-
-      // If the lean option is supplied
-      if (validatedOptions.lean) {
-        // Search for the elements
-        foundElements = await Element.find(searchQuery, projections)
-        .skip(validatedOptions.skip)
-        .limit(validatedOptions.limit)
-        .sort(validatedOptions.sort)
-        .populate(validatedOptions.populateString)
-        .lean();
-      }
-      else {
-        // Search for the elements
-        foundElements = await Element.find(searchQuery, projections)
-        .skip(validatedOptions.skip)
-        .limit(validatedOptions.limit)
-        .sort(validatedOptions.sort)
-        .populate(validatedOptions.populateString);
-      }
-      return resolve(foundElements);
+    else {
+      // Search for the elements
+      foundElements = await Element.find(searchQuery, projections)
+      .skip(validatedOptions.skip)
+      .limit(validatedOptions.limit)
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString);
     }
-    catch (error) {
-      return reject(errors.captureError(error));
-    }
-  });
+    return foundElements;
+  }
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
+  }
 }
 
 /**
