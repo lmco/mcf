@@ -127,7 +127,7 @@ ArtifactSchema.plugin(extensions);
  */
 ArtifactSchema.methods.getValidUpdateFields = function() {
   return ['filename', 'contentType', 'name', 'custom',
-    'archived'];
+    'archived', 'location'];
 };
 ArtifactSchema.statics.getValidUpdateFields = function() {
   return ArtifactSchema.methods.getValidUpdateFields();
