@@ -117,7 +117,6 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);
   helper.checkParamsDataType(['undefined', 'object', 'string'], artifacts, 'Artifacts');
-
   // Sanitize input parameters
   const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -192,7 +191,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   }
   else if (typeof saniArtifacts === 'string') {
     // A single artifact id
-    searchQuery._id = saniArtifacts;
+    searchQuery._id = utils.createID(orgID, projID, branchID, saniArtifacts);
   }
   else if (!((typeof saniArtifacts === 'object' && saniArtifacts !== null)
     || saniArtifacts === undefined)) {
@@ -521,6 +520,8 @@ async function update(requestingUser, organizationID, projectID, branch,
   const validArtKeys = ['id', 'filename', 'contentType', 'name', 'custom',
     'archived', 'location'];
 
+  console.log('saniArtifacts: ', saniArtifacts)
+  console.log('artifactBlob: ', artifactBlob)
   // Check parameter type
   if (Array.isArray(saniArtifacts)) {
     // artifacts is an array, update many artifacts
@@ -534,7 +535,6 @@ async function update(requestingUser, organizationID, projectID, branch,
     // artifact is not an object or array, throw an error
     throw new M.DataFormatError('Invalid input for updating artifacts.', 'warn');
   }
-
   // Find organization, validate found and not archived
   const organization = await helper.findAndValidate(Org, orgID, reqUser);
   // Permissions check
@@ -614,7 +614,7 @@ async function update(requestingUser, organizationID, projectID, branch,
 
   let hashedName = null;
   // Verify artifactBlob defined
-  if (typeof artifactBlob !== 'undefined') {
+  if (typeof artifactBlob !== 'undefined' && Buffer.isBuffer(artifactBlob) === true) {
     hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
     // Create the main artifact path
@@ -630,8 +630,8 @@ async function update(requestingUser, organizationID, projectID, branch,
 
     // Define new hash history entry
     newHistoryEntry = {
-      hash: hashedName,
-      user: reqUser
+      user: reqUser,
+      updatedOn: Date.now()
     };
   }
 
@@ -668,7 +668,9 @@ async function update(requestingUser, organizationID, projectID, branch,
     });
     const prevHistory = art.history;
     prevHistory.push(newHistoryEntry);
+    // Update artifact history
     updateArtifact.history = prevHistory;
+    updateArtifact.hash = hashedName;
 
     // Update the artifact
     bulkArray.push({
@@ -778,7 +780,6 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   // Find the artifacts to delete
   const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } }).lean();
   const foundArtifactIDs = await foundArtifacts.map(e => e._id);
-
   await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
 
   // TODO: Verify if artifact needs this

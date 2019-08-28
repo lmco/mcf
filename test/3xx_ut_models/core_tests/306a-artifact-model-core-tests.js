@@ -99,10 +99,12 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates an artifact via model and save it to the database.
  */
 async function createArtifact() {
+  const artData = testData.artifacts[0];
+
   // Create new artifact
   const artifact = new Artifact({
-    _id: utils.createID(branch._id, testData.artifacts[0].id),
-    filename: testData.artifacts[0].filename,
+    _id: utils.createID(branch._id, artData.id),
+    filename: artData.filename,
     contentType: path.extname(testData.artifacts[0].filename),
     project: project._id,
     branch: branch._id,

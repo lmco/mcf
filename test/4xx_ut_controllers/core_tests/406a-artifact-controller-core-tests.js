@@ -92,12 +92,12 @@ describe(M.getModuleName(module.filename), () => {
  */
 async function createArtifact() {
   // Get png test file
-  const imgPath = path.join(
+  const artifactPath = path.join(
     M.root, testData.artifacts[0].location, testData.artifacts[0].filename
   );
 
   // Get the test file
-  const artifactBlob1 = await fs.readFileSync(imgPath);
+  const artifactBlob1 = await fs.readFileSync(artifactPath);
   const artData = {
     id: testData.artifacts[0].id,
     name: testData.artifacts[0].name,
@@ -185,12 +185,12 @@ async function findArtifact() {
  */
 async function updateArtifact() {
   // Get png test file
-  const imgPath = path.join(
+  const artifactPath = path.join(
     M.root, testData.artifacts[2].location, testData.artifacts[2].filename
   );
 
   // Get the test file
-  const artifactBlob2 = await fs.readFileSync(imgPath);
+  const artifactBlob2 = await fs.readFileSync(artifactPath);
 
   const artData = {
     id: testData.artifacts[0].id,
@@ -225,7 +225,7 @@ async function updateArtifact() {
       utils.createID(org.id, projectID, branchID)
     );
     chai.expect(updatedArtifact[0].location).to.equal(testData.artifacts[2].location);
-    chai.expect(updatedArtifact[0].hash).to.equal(testData.artifacts[0].hash);
+    chai.expect(updatedArtifact[0].hash).to.equal(testData.artifacts[2].hash);
     chai.expect(updatedArtifact[0].history[0].user).to.equal(adminUser.id);
     chai.expect(updatedArtifact[0].history[0].updatedOn).to.not.equal(null);
   }

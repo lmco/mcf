@@ -4512,6 +4512,7 @@ function postBranch(req, res) {
  * @return {Object} Response object with updated branch
  */
 function patchBranch(req, res) {
+  console.log('req: ', req);
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4665,7 +4666,7 @@ function deleteBranch(req, res) {
  *
  * @return {Object} Response object with found artifact
  */
-function getArtifact(req, res) {
+async function getArtifact(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4705,27 +4706,33 @@ function getArtifact(req, res) {
   // Set the lean option to true for better performance
   options.lean = true;
 
-  // Find the artifact from it's artifact.id, project.id, and org.id
-  // NOTE: find() sanitizes input params
-  ArtifactController.find(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, options)
-  .then((artifact) => {
-    // If no projects found, return 404 error
-    if (projects.length === 0) {
+  try {
+    // Find the artifact from it's artifact.id, project.id, and org.id
+    // NOTE: find() sanitizes input params
+    const artifact = await ArtifactController.find(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.artifactid, options);
+
+    // If no artifact found, return 404 error
+    if (artifact.length === 0) {
       throw new M.NotFoundError(
-        `Project [${req.params.projectid}] not found.`, 'warn'
+        `Artifact [${req.params.artifactid}] not found.`, 'warn'
       );
     }
 
-    // Return a 200: OK and the artifact
-    res.header('Content-Type', 'application/json');
+    const publicArtifactData = sani.html(
+      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+    );
 
-    const publicData = artifact.getPublicData();
-    // Return 200: OK and the created branch
+    // Format JSON
+    const json = formatJSON(publicArtifactData[0], minified);
+
+    // Return 200: OK and public artifact data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4741,6 +4748,9 @@ function getArtifact(req, res) {
  */
 async function postArtifact(req, res) {
   await upload(req, res, async function(err) {
+    console.log('req: ', req);
+    console.log('req.body: ', req.body);
+    console.log('req.body.name: ', req.body.name);
     // Define options
     // Note: Undefined if not set
     let options;
@@ -4794,7 +4804,8 @@ async function postArtifact(req, res) {
     // If artifact ID was provided in the body, ensure it matches artifact ID in params
     if (Object.prototype.hasOwnProperty.call('id') && (req.params.artifactid !== req.body.id)) {
       const error = new M.DataFormatError(
-        'Artifact ID in the body does not match ID in the params.', 'warn');
+        'Artifact ID in the body does not match ID in the params.', 'warn'
+      );
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
@@ -4804,7 +4815,7 @@ async function postArtifact(req, res) {
       const artifact = await ArtifactController.create(req.user, req.params.orgid,
         req.params.projectid, req.params.branchid, req.body,
         req.file.buffer, options);
-      //console.log(publicData.getPublicData(artifact[0], 'artifact', options))
+
       const artifactsPublicData = sani.html(
         artifact.map(a => publicData.getPublicData(a, 'artifact', options))
       );
@@ -4813,7 +4824,6 @@ async function postArtifact(req, res) {
       return returnResponse(req, res, json, 200);
     }
     catch (error) {
-      console.log(error);
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   });
@@ -4831,29 +4841,19 @@ async function postArtifact(req, res) {
  *
  * @return {Object} Response object with updated artifact
  */
-function patchArtifact(req, res) {
-  upload(req, res, function(err) {
+async function patchArtifact(req, res) {
+  await upload(req, res, async function(err) {
     // Define options
     // Note: Undefined if not set
     let options;
+    let minified = false;
 
     // Define valid option and its parsed type
     const validOptions = {
-      populate: 'array'
+      populate: 'array',
+      fields: 'array',
+      minified: 'boolean'
     };
-
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading.
-      res.status(500).send(err);
-    }
-    else if (err) {
-      // An unknown error occurred when uploading.
-      res.status(500).send(err);
-    }
-
-    // Extract file meta data
-    req.body.filename = req.file.originalname;
-    req.body.contentType = req.file.mimetype;
 
     // Sanity Check: there should always be a user in the request
     if (!req.user) {
@@ -4871,17 +4871,57 @@ function patchArtifact(req, res) {
       return res.status(error.status).send(error);
     }
 
-    // Update the specified artifact
-    // NOTE: update() sanitizes input params
-    ArtifactController.update(req.user, req.params.orgid,
-      req.params.projectid, req.params.artifactid, req.body, req.file.buffer, options)
-    .then((artifact) => {
-      // Return 200: OK and the updated artifact
-      res.header('Content-Type', 'application/json');
-      return res.status(200).send(formatJSON(artifact.getPublicData()));
-    })
-    // If an error was thrown, return it and its status
-    .catch((error) => res.status(error.status || 500).send(error));
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      res.status(500).send(err);
+    }
+    else if (err) {
+      // An unknown error occurred when uploading.
+      res.status(500).send(err);
+    }
+
+    // Check options for minified
+    if (options.hasOwnProperty('minified')) {
+      minified = options.minified;
+      delete options.minified;
+    }
+
+    // Set the lean option to true for better performance
+    options.lean = true;
+
+    let buffer = null;
+    // Check file is defined
+    if (req.hasOwnProperty('file')) {
+      if (req.file.hasOwnProperty('originalname')) {
+        req.body.filename = req.file.originalname;
+      }
+      if (req.file.hasOwnProperty('mimetype')) {
+        req.body.filename = req.file.originalname;
+      }
+      if (req.file.hasOwnProperty('buffer')) {
+        buffer = req.file.buffer;
+      }
+    }
+
+    try {
+      // Update the specified artifact
+      // NOTE: update() sanitizes input params
+      const artifact = await ArtifactController.update(req.user, req.params.orgid,
+        req.params.projectid, req.params.branchid, req.body, buffer, options);
+
+      const artifactsPublicData = sani.html(
+        artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+      );
+
+      // Format JSON
+      const json = formatJSON(artifactsPublicData[0], minified);
+      return returnResponse(req, res, json, 200);
+    }
+    catch (error) {
+      console.log(error)
+      // If an error was thrown, return it and its status
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
   });
 }
 
@@ -4897,18 +4937,22 @@ function patchArtifact(req, res) {
  *
  * @return {Object} Response object with success boolean
  */
-function deleteArtifact(req, res) {
+async function deleteArtifact(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
+  let minified = false;
 
   // Define valid option and its parsed type
-  const validOptions = {};
+  const validOptions = {
+    minified: 'boolean'
+  };
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
-    const error = new M.CustomError('Request Failed.', 500, 'critical');
-    return res.status(error.status).send(error);
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -4921,16 +4965,27 @@ function deleteArtifact(req, res) {
     return res.status(error.status).send(error);
   }
 
-  // Remove the specified artifact
-  // NOTE: remove() sanitizes input params
-  ArtifactController.remove(req.user, req.params.orgid,
-    req.params.projectid, req.params.artifactid, options)
-  .then((success) => {
-    res.header('Content-Type', 'application/json');
-    // Return 200: OK and success
-    return res.status(200).send(formatJSON(success));
-  })
-  .catch((error) => res.status(error.status || 500).send(error));
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+  try {
+    // Remove the specified artifact
+    // NOTE: remove() sanitizes input params
+    const artIDs = await ArtifactController.remove(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.artifactid, options)
+    const parsedIDs = artIDs.map(a => utils.parseID(a).pop());
+
+    // Format JSON
+    const json = formatJSON(parsedIDs[0], minified);
+
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    returnResponse(req, res, error.message, errors.getStatusCode(error))
+  }
 }
 
 /**

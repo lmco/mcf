@@ -214,6 +214,7 @@
       "name": "logo image",
       "filename": "logo.png",
       "location": "/test/test_files/",
+      "contentType": "image/png",
       "hash": "93501d3846512c99e0d52b330419ce7d2e2e566603d278daa493a6e4ec4d5073",
       "history": [{
         "user": "admin"
@@ -227,6 +228,7 @@
       "name": "concept image",
       "filename": "mbee-concept.png",
       "location": "/test/test_files/",
+      "contentType": "image/png",
       "hash": "38dd57892405fe1a8eb7445a076a4f49f1912198705d3f9bf73adf9d02323cb3",
       "history": [{
         "user": "admin"
@@ -240,6 +242,7 @@
       "name": "hello world text",
       "filename": "text.txt",
       "location": "/test/test_files/",
+      "contentType": "txt",
       "hash": "03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340",
       "history": [{
         "user": "admin"
