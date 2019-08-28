@@ -180,7 +180,7 @@ function getArtifactPublicData(artifact, options) {
       return returnObj;
     }
   }
-  //console.log('data: ', data)
+  // console.log('data: ', data)
   return data;
 }
 

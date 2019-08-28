@@ -77,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
     try {
       // Remove the org created in before()
       await testUtils.removeTestOrg();
-      await testUtils.removeTestAdmin()
+      await testUtils.removeTestAdmin();
       await db.disconnect();
     }
     catch (error) {
@@ -203,13 +203,8 @@ function getArtifact(done) {
 function patchArtifact(done) {
   // Get update artifact data
   const artData = testData.artifacts[0];
-  const artUpdateData = testData.artifacts[1]
   artData.project = projID;
   artData.branch = branchID;
-
-  const artifactPath = path.join(
-    M.root, artUpdateData.location, artUpdateData.filename
-  );
 
   const options = {
     method: 'PATCH',
@@ -217,13 +212,7 @@ function patchArtifact(done) {
     headers: testUtils.getHeaders('multipart/form-data'),
     formData: {
       id: artData.id,
-      file: {
-        value: fs.createReadStream(artifactPath),
-        options: {
-          filename: artifactPath,
-          contentType: null
-        }
-      }
+      contentType: 'edited_type'
     }
   };
 
@@ -240,8 +229,8 @@ function patchArtifact(done) {
     chai.expect(createdArtifact.branch).to.equal(branchID);
     chai.expect(createdArtifact.project).to.equal(projID);
     chai.expect(createdArtifact.org).to.equal(org.id);
-    chai.expect(createdArtifact.contentType).to.equal(artData.contentType);
-    chai.expect(createdArtifact.hash).to.equal(artUpdateData.hash);
+    chai.expect(createdArtifact.contentType).to.equal('edited_type');
+    chai.expect(createdArtifact.hash).to.equal(artData.hash);
 
     // Verify additional properties
     chai.expect(createdArtifact.createdBy).to.equal(adminUser.username);

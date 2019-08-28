@@ -181,17 +181,9 @@ async function findArtifact() {
 }
 
 /**
- * @description Finds an existing artifact and updates it.
+ * @description Finds an existing artifact and updates its metadata.
  */
 async function updateArtifact() {
-  // Get png test file
-  const artifactPath = path.join(
-    M.root, testData.artifacts[2].location, testData.artifacts[2].filename
-  );
-
-  // Get the test file
-  const artifactBlob2 = await fs.readFileSync(artifactPath);
-
   const artData = {
     id: testData.artifacts[0].id,
     filename: testData.artifacts[2].filename,
@@ -204,7 +196,7 @@ async function updateArtifact() {
   };
   try {
     const updatedArtifact = await ArtifactController.update(adminUser, org.id,
-      projectID, branchID, artData, artifactBlob2);
+      projectID, branchID, artData);
 
     // Check if artifact found
     chai.expect(updatedArtifact.length).to.equal(1);
@@ -225,7 +217,7 @@ async function updateArtifact() {
       utils.createID(org.id, projectID, branchID)
     );
     chai.expect(updatedArtifact[0].location).to.equal(testData.artifacts[2].location);
-    chai.expect(updatedArtifact[0].hash).to.equal(testData.artifacts[2].hash);
+    chai.expect(updatedArtifact[0].hash).to.equal(testData.artifacts[0].hash);
     chai.expect(updatedArtifact[0].history[0].user).to.equal(adminUser.id);
     chai.expect(updatedArtifact[0].history[0].updatedOn).to.not.equal(null);
   }

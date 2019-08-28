@@ -4512,7 +4512,6 @@ function postBranch(req, res) {
  * @return {Object} Response object with updated branch
  */
 function patchBranch(req, res) {
-  console.log('req: ', req);
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4748,9 +4747,6 @@ async function getArtifact(req, res) {
  */
 async function postArtifact(req, res) {
   await upload(req, res, async function(err) {
-    console.log('req: ', req);
-    console.log('req.body: ', req.body);
-    console.log('req.body.name: ', req.body.name);
     // Define options
     // Note: Undefined if not set
     let options;
@@ -4889,25 +4885,24 @@ async function patchArtifact(req, res) {
     // Set the lean option to true for better performance
     options.lean = true;
 
-    let buffer = null;
     // Check file is defined
     if (req.hasOwnProperty('file')) {
-      if (req.file.hasOwnProperty('originalname')) {
-        req.body.filename = req.file.originalname;
-      }
-      if (req.file.hasOwnProperty('mimetype')) {
-        req.body.filename = req.file.originalname;
-      }
-      if (req.file.hasOwnProperty('buffer')) {
-        buffer = req.file.buffer;
-      }
+      const error = new M.DataFormatError(
+        'Cannot update artifact blob. Use create/replace.', 'warn'
+      );
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    // Check if id NOT in body
+    if (!req.hasOwnProperty('id')) {
+      req.body.id = req.params.artifactid;
     }
 
     try {
       // Update the specified artifact
       // NOTE: update() sanitizes input params
       const artifact = await ArtifactController.update(req.user, req.params.orgid,
-        req.params.projectid, req.params.branchid, req.body, buffer, options);
+        req.params.projectid, req.params.branchid, req.body, options);
 
       const artifactsPublicData = sani.html(
         artifact.map(a => publicData.getPublicData(a, 'artifact', options))
@@ -4918,7 +4913,6 @@ async function patchArtifact(req, res) {
       return returnResponse(req, res, json, 200);
     }
     catch (error) {
-      console.log(error)
       // If an error was thrown, return it and its status
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
@@ -4974,7 +4968,7 @@ async function deleteArtifact(req, res) {
     // Remove the specified artifact
     // NOTE: remove() sanitizes input params
     const artIDs = await ArtifactController.remove(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, req.params.artifactid, options)
+      req.params.projectid, req.params.branchid, req.params.artifactid, options);
     const parsedIDs = artIDs.map(a => utils.parseID(a).pop());
 
     // Format JSON
@@ -4984,7 +4978,7 @@ async function deleteArtifact(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error))
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 

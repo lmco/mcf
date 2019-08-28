@@ -76,7 +76,7 @@ describe(M.getModuleName(module.filename), () => {
     try {
       // Remove the org created in before()
       await testUtils.removeTestOrg();
-      await testUtils.removeTestAdmin()
+      await testUtils.removeTestAdmin();
       await db.disconnect();
     }
     catch (error) {
@@ -166,8 +166,8 @@ async function postArtifact() {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50); TODO: address this
+    // Ensure the response was logged correctly TODO: address this
+    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs an artifact
@@ -242,32 +242,18 @@ async function getArtifact() {
  */
 async function patchArtifact() {
   const artData = testData.artifacts[0];
-  const artUpdateData = testData.artifacts[1];
-  const artifactPath = path.join(
-    M.root, artUpdateData.location, artUpdateData.filename
-  );
-  await fs.readFileSync(artifactPath)
-
-  // // Create updated elem object
-  // const updateObj = {
-  //   id: artData.id,
-  //   name: `${artData.name}_edit`
-  // };
-
   const params = {
     orgid: org.id,
     projectid: projID,
     branchid: branchID,
     artifactid: testData.artifacts[0].id
   };
-  const method = 'PATCH';
-  const req = testUtils.createRequest(adminUser, params, {}, method);
 
-  req.file = {
-    originalname: artData.filename,
-    mimetype: artData.contentType,
-    buffer: await fs.readFileSync(artifactPath)
+  const formData = {
+    contentType: 'edited_type'
   };
+  const method = 'PATCH';
+  const req = testUtils.createRequest(adminUser, params, formData, method);
 
   // Set response as empty object
   const res = {};
@@ -282,12 +268,12 @@ async function patchArtifact() {
 
     // Verify artifact created properly
     chai.expect(updatedArtifact.id).to.equal(artData.id);
-    chai.expect(updatedArtifact.name).to.equal(`${artData.name}_edit`);
+    chai.expect(updatedArtifact.name).to.equal(artData.name);
     chai.expect(updatedArtifact.project).to.equal(projID);
     chai.expect(updatedArtifact.branch).to.equal(branchID);
     chai.expect(updatedArtifact.org).to.equal(org.id);
     chai.expect(updatedArtifact.location).to.equal(artData.location);
-    chai.expect(updatedArtifact.contentType).to.equal(artData.contentType);
+    chai.expect(updatedArtifact.contentType).to.equal('edited_type');
     chai.expect(updatedArtifact.hash).to.equal(artData.hash);
     chai.expect(updatedArtifact.custom || {}).to.deep.equal(
       artData.custom
@@ -308,7 +294,7 @@ async function patchArtifact() {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    //setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs an artifact
@@ -346,7 +332,7 @@ async function deleteArtifact() {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    //setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs an artifact

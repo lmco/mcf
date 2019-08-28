@@ -453,7 +453,7 @@ async function create(requestingUser, organizationID, projectID, branch,
 }
 
 /**
- * @description This function updates an Artifact.
+ * @description This function updates an Artifact metadata.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -461,7 +461,6 @@ async function create(requestingUser, organizationID, projectID, branch,
  * @param {string} branch - The ID of the branch to add artifacts to.
  * @param {(Object|Object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to update.
- * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  * @param {string} artifacts.id - The ID of the artifact being updated.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
@@ -490,7 +489,7 @@ async function create(requestingUser, organizationID, projectID, branch,
  * });
  */
 async function update(requestingUser, organizationID, projectID, branch,
-  artifacts, artifactBlob, options) {
+  artifacts, options) {
   M.log.debug('update(): Start of function');
   try {
     assert.ok(!Array.isArray(artifacts), 'Artifact update batching not supported.');
@@ -520,8 +519,6 @@ async function update(requestingUser, organizationID, projectID, branch,
   const validArtKeys = ['id', 'filename', 'contentType', 'name', 'custom',
     'archived', 'location'];
 
-  console.log('saniArtifacts: ', saniArtifacts)
-  console.log('artifactBlob: ', artifactBlob)
   // Check parameter type
   if (Array.isArray(saniArtifacts)) {
     // artifacts is an array, update many artifacts
@@ -608,32 +605,9 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Convert artsToupdate to JMI type 2
   const jmiType2 = jmi.convertJMI(1, 2, artsToUpdate);
   const bulkArray = [];
-  let newHistoryEntry = null;
+
   // Get array of editable parameters
   const validFields = Artifact.getValidUpdateFields();
-
-  let hashedName = null;
-  // Verify artifactBlob defined
-  if (typeof artifactBlob !== 'undefined' && Buffer.isBuffer(artifactBlob) === true) {
-    hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-
-    // Create the main artifact path
-    const artifactPath = path.join(M.root, M.config.artifact.path);
-
-    const fullPath = path.join(artifactPath,
-      hashedName.substring(0, 2), hashedName);
-
-    // Check if artifact file exist
-    if (!fs.existsSync(fullPath)) {
-      await addArtifactOS(hashedName, artifactBlob);
-    }
-
-    // Define new hash history entry
-    newHistoryEntry = {
-      user: reqUser,
-      updatedOn: Date.now()
-    };
-  }
 
   // For each artifact found
   foundArtifact.forEach((art) => {
@@ -666,11 +640,6 @@ async function update(requestingUser, organizationID, projectID, branch,
         }
       }
     });
-    const prevHistory = art.history;
-    prevHistory.push(newHistoryEntry);
-    // Update artifact history
-    updateArtifact.history = prevHistory;
-    updateArtifact.hash = hashedName;
 
     // Update the artifact
     bulkArray.push({
