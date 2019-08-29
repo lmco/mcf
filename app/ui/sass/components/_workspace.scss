@@ -135,6 +135,36 @@
   }
 }
 
+/******************************************************************************
+/*                                  Expand/Collapse                           *
+/******************************************************************************/
+
+@mixin btn-light-header {
+  padding: 0px;
+  margin-left: 5px;
+  font-size: 0.9rem;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none !important;
+  color: $color-primary;
+}
+
+#btn-expand, #btn-collapse {
+  @include btn-light-header;
+
+  &:focus, &:active, &:hover, &:visited {
+    @include btn-light-header;
+    font-weight: 600;
+  }
+}
+
+#grp-expand-collapse {
+  margin-top: 5px;
+  margin-left: 35px;
+  margin-bottom: -20px;
+}
+
 
 /******************************************************************************
 /*                  List and List Item Component Styling                      *
