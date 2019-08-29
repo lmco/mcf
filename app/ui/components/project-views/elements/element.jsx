@@ -64,7 +64,7 @@ class Element extends Component {
 
     if (elementId) {
       // Initalize variables
-      const url = `${this.props.url}/elements/${elementId}?minified=true&archived=true`;
+      const url = `${this.props.url}/elements/${elementId}?minified=true&includeArchived=true`;
       // Get project data
       $.ajax({
         method: 'GET',

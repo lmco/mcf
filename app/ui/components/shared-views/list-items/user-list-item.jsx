@@ -67,7 +67,7 @@ class UserListItem extends Component {
       // Get project data
       $.ajax({
         method: 'GET',
-        url: `${url}?minified=true&archived=true`,
+        url: `${url}?minified=true&includeArchived=true`,
         statusCode: {
           200: (userInfo) => {
             // Set states
