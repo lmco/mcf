@@ -243,23 +243,24 @@ module.exports.validateOptions = function(options, validOptions, model) {
   let validSearchOptions = [];
   switch (model.modelName) {
     case 'Organization':
-      validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
       break;
     case 'Project':
-      validSearchOptions = ['name', 'visibility', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      validSearchOptions = ['name', 'visibility', 'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
       break;
     case 'Branch':
-      validSearchOptions = ['tag', 'source', 'name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      validSearchOptions = ['tag', 'source', 'name', 'createdBy', 'lastModifiedBy', 'archived',
+        'archivedBy'];
       break;
     case 'Element':
       validSearchOptions = ['parent', 'source', 'target', 'type', 'name', 'createdBy',
-        'lastModifiedBy', 'archivedBy'];
+        'lastModifiedBy', 'archived', 'archivedBy'];
       // Set populateString to include require virtuals
       validatedOptions.populateString = 'contains sourceOf targetOf ';
       break;
     case 'User':
       validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
-        'lastModifiedBy', 'archivedBy'];
+        'lastModifiedBy', 'archived', 'archivedBy'];
       break;
     default:
       throw new M.DataFormatError('No model provided', 'warn');
@@ -314,15 +315,16 @@ module.exports.validateOptions = function(options, validOptions, model) {
       });
     }
 
-    // Handle the archived option
-    if (opt === 'archived') {
+    // Handle the includeArchived option
+    if (opt === 'includeArchived') {
       // Ensure value is a boolean
       if (typeof val !== 'boolean') {
-        throw new M.DataFormatError('The option \'archived\' is not a boolean.', 'warn');
+        throw new M.DataFormatError('The option \'includeArchived\' is not a boolean.', 'warn');
       }
-
-      // Set the field archived in the returnObject
-      validatedOptions.archived = val;
+      // Only set this option if the user is not also specifying 'archived' in the search
+      if (!Object.keys(options).includes('archived')) {
+        validatedOptions.includeArchived = val;
+      }
     }
 
     // Handle the subtree option

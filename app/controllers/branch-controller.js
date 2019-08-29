@@ -55,7 +55,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
@@ -80,6 +80,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for branches with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived branches.  If false,
+ * only returns unarchived branches.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for branches with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -120,24 +122,24 @@ async function find(requestingUser, organizationID, projectID, branches, options
   const searchQuery = { project: utils.createID(orgID, projID), archived: false };
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Branch);
+  const validatedOptions = utils.validateOptions(options, ['populate',
+    'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Branch);
 
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['tag', 'source', 'name', 'createdBy',
-      'lastModifiedBy', 'archivedBy'];
+      'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
         // Ensure the search option is a string
-        if ((o === 'tag') && typeof options[o] !== 'boolean') {
+        if ((o === 'tag' || o === 'archived') && typeof options[o] !== 'boolean') {
           throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
         }
-        else if ((typeof options[o] !== 'string') && (o !== 'tag')) {
+        else if ((typeof options[o] !== 'string') && (o !== 'tag' && o !== 'archived')) {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
 
@@ -152,13 +154,18 @@ async function find(requestingUser, organizationID, projectID, branches, options
     });
   }
 
-  // If the archived field is true, remove it from the query
-  if (validOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   // Find the org and check that it has been found and is not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, validOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID,
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Verify the user has at least read permissions on the organization
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -168,7 +175,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
 
   // Find the project and check that it has been found and is not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    validOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Check permissions
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -194,10 +201,10 @@ async function find(requestingUser, organizationID, projectID, branches, options
 
   try {
     // Find branches in a project
-    return await Branch.find(searchQuery, validOptions.fieldsString,
-      { limit: validOptions.limit, skip: validOptions.skip })
-    .sort(validOptions.sort).populate(validOptions.populateString)
-    .lean(validOptions.lean);
+    return await Branch.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit, skip: validatedOptions.skip })
+    .sort(validatedOptions.sort).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -263,12 +270,11 @@ async function create(requestingUser, organizationID, projectID, branches, optio
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   const orgID = sani.mongo(organizationID);
   const projID = sani.mongo(projectID);
-  let branchObjects = [];
   let newBranches = [];
   let elementsCloning;
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Branch);
 
   // Define array to store branch data
@@ -324,8 +330,8 @@ async function create(requestingUser, organizationID, projectID, branches, optio
   }
 
 
-  // Find the org and check that it has been found and is not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, validOptions.archived);
+  // Find the org and check that it has been found and is not archived
+  const organization = await helper.findAndValidate(Org, orgID);
   // Verify the user has at least read permissions on the organization
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -333,9 +339,8 @@ async function create(requestingUser, organizationID, projectID, branches, optio
       + ` branches on the organization [${orgID}].`, 'warn');
   }
 
-  // Find the project and check that it has been found and is not archived (unless specified)
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    validOptions.archived);
+  // Find the project and check that it has been found and is not archived
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
   // Check permissions
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -370,7 +375,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
   }
 
   // For each object of branch data, create the branch object
-  branchObjects = branchesToCreate.map((branchObj) => {
+  const branchObjects = branchesToCreate.map((branchObj) => {
     // Set the branch object variables
     branchObj.project = utils.createID(orgID, projID);
     branchObj.source = sourceID;
@@ -515,8 +520,8 @@ async function create(requestingUser, organizationID, projectID, branches, optio
 
   try {
     return await Branch.find({ _id: { $in: arrIDs } },
-      validOptions.fieldsString).populate(validOptions.populateString)
-    .lean(validOptions.lean);
+      validatedOptions.fieldsString).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     // Reject with error
@@ -581,7 +586,7 @@ async function update(requestingUser, organizationID, projectID, branches, optio
   const bulkArray = [];
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Branch);
 
   // Check the type of the branches parameter
@@ -598,7 +603,8 @@ async function update(requestingUser, organizationID, projectID, branches, optio
   }
 
   // Find the org and check that it has been found and is not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, validOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID,
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Verify the user has at least read permissions on the organization
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -607,7 +613,7 @@ async function update(requestingUser, organizationID, projectID, branches, optio
   }
   // Find the project and check that it has been found and is not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    validOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Check permissions
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('write'))) {
@@ -732,8 +738,8 @@ async function update(requestingUser, organizationID, projectID, branches, optio
   await Branch.bulkWrite(bulkArray);
 
   try {
-    const foundUpdatedBranches = await Branch.find(searchQuery, validOptions.fieldsString)
-    .populate(validOptions.populateString).lean(validOptions.lean);
+    const foundUpdatedBranches = await Branch.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
     // Emit the event branches-updated
     EventEmitter.emit('branches-updated', foundUpdatedBranches);
     return foundUpdatedBranches;

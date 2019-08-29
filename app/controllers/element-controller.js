@@ -66,7 +66,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {boolean} [options.subtree = false] - If true, all elements in the subtree of
  * the found elements will also be returned.
@@ -98,6 +98,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for elements with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived elements.  If false,
+ * only returns unarchived elements.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -138,21 +140,25 @@ async function find(requestingUser, organizationID, projectID, branchID, element
   const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
   // Validate the provided options
-  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
-    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
+  const validatedOptions = utils.validateOptions(options, ['includeArchived',
+    'populate', 'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
 
   // Ensure search options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archivedBy'];
+      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // If the search option is an element reference
@@ -167,7 +173,8 @@ async function find(requestingUser, organizationID, projectID, branchID, element
   }
 
   // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID,
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -177,7 +184,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Find the project and validate that it was found and not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    validatedOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -187,7 +194,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Find the branch and validate that it was found and not archived (unless specified)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-    validatedOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
 
   let elementsToFind = [];
 
@@ -223,9 +230,13 @@ async function find(requestingUser, organizationID, projectID, branchID, element
     elementsToFind = await findElementRootPath(orgID, projID, branID, elementToFind);
   }
 
-  // If the archived field is true, remove it from the query
-  if (validatedOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   const promises = [];
@@ -1801,7 +1812,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
@@ -1829,6 +1840,8 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for elements with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived elements.  If false,
+ * only returns unarchived elements.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -1857,21 +1870,25 @@ async function search(requestingUser, organizationID, projectID, branchID, query
   const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
   // Validate and set the options
-  const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+  const validatedOptions = utils.validateOptions(options, ['includeArchived',
+    'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archivedBy'];
+      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
 
@@ -1887,9 +1904,9 @@ async function search(requestingUser, organizationID, projectID, branchID, query
     });
   }
 
-
   // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID,
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1899,7 +1916,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
   // Find the project and validate that it was found and not archived (unless specificed)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    validatedOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -1909,12 +1926,16 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
   // Find the branch and validate that it was found and not archived (unless specificed)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-    validatedOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
 
   searchQuery.$text = { $search: query };
-  // If the archived field is true, remove it from the query
-  if (validatedOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   // Add sorting by metadata

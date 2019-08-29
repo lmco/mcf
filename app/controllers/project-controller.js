@@ -63,7 +63,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
@@ -86,6 +86,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for projects with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived projects.  If false,
+ * only returns unarchived projects.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for projects with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -130,21 +132,25 @@ async function find(requestingUser, organizationID, projects, options) {
   const searchQuery = { archived: false };
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Project);
+  const validatedOptions = utils.validateOptions(options, ['populate',
+    'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Project);
 
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['name', 'visibility', 'createdBy',
-      'lastModifiedBy', 'archivedBy'];
+      'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // Add the search option to the searchQuery
@@ -157,9 +163,13 @@ async function find(requestingUser, organizationID, projects, options) {
   if (!reqUser.admin) {
     searchQuery[`permissions.${reqUser._id}`] = 'read';
   }
-  // If the archived field is true, remove it from the query
-  if (validOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
   if (orgID !== null) {
     searchQuery.org = orgID;
@@ -183,7 +193,7 @@ async function find(requestingUser, organizationID, projects, options) {
   if (organizationID !== null) {
     // Find the organization, validate that it exists and is not archived (unless specfified)
     const foundOrg = await helper.findAndValidate(Organization, orgID,
-      validOptions.archived);
+      ((options && options.archived) || validatedOptions.includeArchived));
     // Permissions check
     if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
       || !foundOrg.permissions[reqUser._id].includes('read'))) {
@@ -194,10 +204,10 @@ async function find(requestingUser, organizationID, projects, options) {
 
   try {
     // Find the projects
-    return await Project.find(searchQuery, validOptions.fieldsString,
-      { limit: validOptions.limit, skip: validOptions.skip })
-    .sort(validOptions.sort)
-    .populate(validOptions.populateString).lean(validOptions.lean);
+    return await Project.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit, skip: validatedOptions.skip })
+    .sort(validatedOptions.sort)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -258,7 +268,7 @@ async function create(requestingUser, organizationID, projects, options) {
   let projObjects = [];
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Project);
 
   // Define array to store project data
@@ -485,8 +495,8 @@ async function create(requestingUser, organizationID, projects, options) {
 
   try {
     return await Project.find({ _id: { $in: arrIDs } },
-      validOptions.fieldsString).populate(validOptions.populateString)
-    .lean(validOptions.lean);
+      validatedOptions.fieldsString).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -558,7 +568,7 @@ async function update(requestingUser, organizationID, projects, options) {
   let updatingPermissions = false;
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Project);
 
   // Check the type of the projects parameter
@@ -858,8 +868,8 @@ async function update(requestingUser, organizationID, projects, options) {
   }
 
   try {
-    const foundUpdatedProjects = await Project.find(searchQuery, validOptions.fieldsString)
-    .populate(validOptions.populateString).lean(validOptions.lean);
+    const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
     // Emit the event projects-updated
     EventEmitter.emit('projects-updated', foundUpdatedProjects);
     return foundUpdatedProjects;
