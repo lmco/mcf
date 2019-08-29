@@ -7,74 +7,37 @@
  *
  * @license LMPI - Lockheed Martin Proprietary Information
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner James Eckstein <james.eckstein@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author James Eckstein <james.eckstein@lmco.com>
  *
- * @description This renders the search page.
+ * @description This renders the search result columns for the results table.
  */
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-import React, { Component } from 'react';
+import React from 'react';
 
 /* eslint-enable no-unused-vars */
 
-class SearchResult extends Component {
+function SearchResult(props) {
+  const cols = [];
 
-  constructor(props) {
-    // Initialize parent props
-    super(props);
+  props.keys.forEach((key, index) => {
+    // Check if element has value defined for respective key
+    const currentValue = (typeof props.data[key] === 'undefined') ? '' : props.data[key].toString();
+    // Convert Custom data to string
+    const displayValue = (key === 'custom') ? JSON.stringify(props.data[key]) : currentValue;
 
-    this.state = {
-      collapsed: true
-    };
-
-    // Bind component functions
-    this.toggleCollapse = this.toggleCollapse.bind(this);
-  }
-
-  toggleCollapse() {
-    this.setState({ collapsed: !this.state.collapsed });
-  }
-
-
-  render() {
-    const iconClass = (this.state.collapsed) ? 'fa-chevron-right' : 'fa-chevron-down';
-    const icon = (<i className={`fas ${iconClass}`}
-                         onClick={this.toggleCollapse}/>);
-
-    const element = this.props.data;
-
-    let htmlResult = JSON.stringify(element, null, 4);
-    htmlResult = htmlResult.replace(/\n/g, '<br/>');
-    htmlResult = htmlResult.replace(/ /g, '&nbsp;');
-
-    /* NOTE:
-         *
-         *  This isn't really that dangerous since we sanitize all
-         *  input on the server side.
-         *
-         *  ~jdk
-         */
-    const rawJSONData = (
-            <div id={`result-raw-${element.id}`} className="search-result-raw">
-                <div dangerouslySetInnerHTML={{ __html: htmlResult }}/>
-            </div>
+    cols.push(
+      <td key={`row-${index}`}>{displayValue}</td>
     );
-    return (
-            <div className={'search-result'} key={`element-${element.id}`}>
-                <div className={'search-result-header'}>
-                    {icon}
-                    <span>{element.name} <small>({element.id})</small></span>
-                </div>
-                {(this.state.collapsed) ? '' : rawJSONData}
-            </div>
-    );
-  }
+  });
 
+  return cols;
 }
+
 
 // Export component
 export default SearchResult;
