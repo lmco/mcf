@@ -81,7 +81,7 @@ class AdvancedSearch extends Component {
             filters[field] = true;
           });
         }
-        else if (param !== 'q') {
+        else if (param !== 'q' && param !== 'query') {
           // Add the parameter to rows to be rendered.
           rows.push({
             // eslint-disable-next-line no-undef
@@ -104,7 +104,6 @@ class AdvancedSearch extends Component {
       rows: (rows.length === 0) ? [{ criteria: this.props.options[0], value: '' }] : rows,
       query: params || '',
       results: null,
-      message: '',
       collapse: (rows.length > 0) || false,
       currentFilters: filters
     };
@@ -116,7 +115,7 @@ class AdvancedSearch extends Component {
     this.filterSelected = this.filterSelected.bind(this);
   }
 
-  // Unhide/hide Search button if toggled
+  // show/hide Search button if toggled
   toggle() {
     this.setState((prevState) => ({ collapse: !prevState.collapse }));
     this.props.toggleSearchBtn();
@@ -234,12 +233,10 @@ class AdvancedSearch extends Component {
     this.setState({
       query: queryStr
     }, () => {
-      // Do ajax request
-      const start = new Date();
       $.ajax({
         method: 'GET',
-        // TODO: Discuss paginating search results. Limit to 100 results.
-        url: `${url}${this.state.query}&limit=100&minified=true`,
+        // Limit to 11 results per page
+        url: `${url}${this.state.query}&limit=11&minified=true`,
         statusCode: {
           401: () => {
             // Refresh when session expires
@@ -248,15 +245,12 @@ class AdvancedSearch extends Component {
         }
       })
       .done(data => {
-        const end = new Date();
-        const elapsed = (end - start) / 1000;
-
         this.setState({
-          results: data,
-          message: `Got ${data.length} results in ${elapsed} seconds.`
+          results: data
         }, () => {
           // Re-render page with search results
-          this.props.getAdvResults(this.state.results, this.state.message);
+          const apiUrl = `${url}${this.state.query}&limit=11&minified=true`;
+          this.props.getAdvResults(this.state.results, this.state.message, apiUrl);
         });
       })
       .fail(res => {
@@ -333,7 +327,7 @@ class AdvancedSearch extends Component {
     const filterCols = this.createFilters();
 
     return (
-      <div className='adv-search'>
+      <div className='search-container'>
         <Button id='btn-adv-search-toggle'
                 onClick={this.toggle}>
                 Advanced
