@@ -1558,28 +1558,8 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
   // Find all element IDs and their subtree IDs
   const foundIDs = await findElementTree(orgID, projID, branID, elementsToFind);
 
-  const promises = [];
-  // Error Check: ensure user cannot delete root elements
-  foundIDs.forEach((id) => {
-    const elemID = utils.parseID(id).pop();
-    if (Element.getValidRootElements().includes(elemID)) {
-      throw new M.OperationError(
-        `User cannot delete root element: ${elemID}.`, 'warn'
-      );
-    }
-  });
-
-  // Split elements into batches of 50000 or less
-  for (let i = 0; i < foundIDs.length / 50000; i++) {
-    const batchIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
-    // Delete batch
-    promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
-  }
-  // Return when all deletes have completed
-  await Promise.all(promises);
-
   const uniqueIDsObj = {};
-  // Parse foundIDs and only return unique ones
+  // Parse foundIDs and only delete unique ones
   foundIDs.forEach((id) => {
     if (!uniqueIDsObj[id]) {
       uniqueIDsObj[id] = id;
@@ -1588,9 +1568,45 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
 
   uniqueIDs = Object.keys(uniqueIDsObj);
 
-  // TODO: Change the emitter to return elements rather than ids
+  let promises = [];
+  // Error Check: ensure user cannot delete root elements
+  uniqueIDs.forEach((id) => {
+    const elemID = utils.parseID(id).pop();
+    if (Element.getValidRootElements().includes(elemID)) {
+      throw new M.OperationError(
+        `User cannot delete root element: ${elemID}.`, 'warn'
+      );
+    }
+  });
+
+  M.log.debug(`Attempting to delete ${uniqueIDs.length} on the branch ${foundBranch._id}.`);
+  let elementsToDelete = [];
+  // Find all elements to delete in batches of 50K or less
+  for (let i = 0; i < uniqueIDs.length / 50000; i++) {
+    const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
+    // Find batch
+    promises.push(
+      Element.find({ _id: { $in: batchIDs } }).lean()
+      .then((e) => {
+        elementsToDelete = elementsToDelete.concat(e);
+      })
+    );
+  }
+  // Return when all deletes have completed
+  await Promise.all(promises);
+
+  promises = [];
+  // Split elements into batches of 50000 or less
+  for (let i = 0; i < uniqueIDs.length / 50000; i++) {
+    const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
+    // Delete batch
+    promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
+  }
+  // Return when all deletes have completed
+  await Promise.all(promises);
+
   // Emit the event elements-deleted
-  EventEmitter.emit('elements-deleted', uniqueIDs);
+  EventEmitter.emit('elements-deleted', elementsToDelete);
 
   // Create query to find all relationships which point to deleted elements
   const relQuery = {
@@ -1603,10 +1619,10 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
   // Find all relationships which are now broken
   const relationships = await Element.find(relQuery).lean();
   const bulkArray = [];
-  const promises2 = [];
+  promises = [];
 
   // For each relationship
-  promises2.push(relationships.forEach((rel) => {
+  promises.push(relationships.forEach((rel) => {
     // If the source no longer exists, set it to the undefined element
     if (uniqueIDs.includes(rel.source)) {
       // Reset source to the undefined element
@@ -1627,7 +1643,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     });
   }));
 
-  await Promise.all(promises2);
+  await Promise.all(promises);
 
   // If there are relationships to update, make a bulkWrite() call
   if (bulkArray.length > 0) {
@@ -1636,7 +1652,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
   }
 
   // Return unique IDs of elements deleted
-  return (uniqueIDs);
+  return uniqueIDs;
 }
 
 /**
