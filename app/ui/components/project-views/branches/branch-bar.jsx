@@ -52,7 +52,11 @@ class BranchBar extends Component {
     if (event.target.value !== null) {
       const orgId = this.props.project.org;
       const projId = this.props.project.id;
-      const newUrl = `/orgs/${orgId}/projects/${projId}/branches/${event.target.value}/elements`;
+      let newUrl = `/orgs/${orgId}/projects/${projId}/branches/${event.target.value}`;
+
+      // Update URL endpoint if component is on the Search page
+      newUrl = (this.props.searchForm) ? `${newUrl}/search` : `${newUrl}/elements`;
+
       // Reload the place with new branch
       window.location.replace(newUrl);
     }
@@ -63,7 +67,7 @@ class BranchBar extends Component {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches`;
-    const url = `${base}?archived=true&minified=true`;
+    const url = `${base}?includeArchived=true&minified=true`;
 
     // Grab all branches
     $.ajax({

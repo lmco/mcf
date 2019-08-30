@@ -115,10 +115,9 @@ class Search extends Component {
     const url = `/api/orgs/${oid}/projects/${pid}/branches/${bid}/elements/search`;
 
     // Do ajax request
-    const start = new Date();
     $.ajax({
       method: 'GET',
-      url: `${url}?q=${this.state.query}&limit=100&minified=true`,
+      url: `${url}?q=${this.state.query}&limit=11&minified=true`,
       statusCode: {
         401: () => {
           // Refresh when session expires
@@ -127,12 +126,9 @@ class Search extends Component {
       }
     })
     .done(data => {
-      const end = new Date();
-      const elapsed = (end - start) / 1000;
-
       this.setState({
         results: data,
-        message: `Got ${data.length} results in ${elapsed} seconds.`
+        apiUrl: `${url}?q=${this.state.query}&limit=11&minified=true`
       });
     })
     .fail(res => {
@@ -159,7 +155,11 @@ class Search extends Component {
       );
     }
     else if (Array.isArray(this.state.results)) {
-      searchResults = (<SearchResults results={this.state.results}/>);
+      searchResults = (<SearchResults results={this.state.results}
+                                      page={this.state.page}
+                                      apiUrl={this.state.apiUrl}
+                                      handlePageChange={this.handlePageChange}
+                                      {...this.props}/>);
     }
 
     return (
@@ -203,6 +203,7 @@ class Search extends Component {
                   {searchResults}
                 </div>
             </div>
+        </div>
       </div>
     );
   }

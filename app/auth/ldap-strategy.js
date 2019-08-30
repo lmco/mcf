@@ -35,6 +35,7 @@ const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
+const errors = M.require('lib.errors');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -60,29 +61,23 @@ const ldapConfig = M.config.auth.ldap;
  *     console.log(err);
  *   })
  */
-function handleBasicAuth(req, res, username, password) {
-  // Return a promise
-  return new Promise((resolve, reject) => {
-    // Define LDAP client handler
-    let ldapClient = null;
-
+async function handleBasicAuth(req, res, username, password) {
+  try {
     // Connect to database
-    ldapConnect()
-    .then(_ldapClient => {
-      ldapClient = _ldapClient;
+    const ldapClient = await ldapConnect();
 
-      // Search for user
-      return ldapSearch(ldapClient, username);
-    })
+    // Search for user
+    const foundUser = await ldapSearch(ldapClient, username);
 
     // Authenticate user
-    .then(foundUser => ldapAuth(ldapClient, foundUser, password))
-    // Sync user with local database
-    .then(authUser => ldapSync(authUser))
-    // Return authenticated user object
-    .then(syncedUser => resolve(syncedUser))
-    .catch(ldapConnectErr => reject(ldapConnectErr));
-  });
+    const authUser = await ldapAuth(ldapClient, foundUser, password);
+
+    // Sync user with local database; return authenticated user object
+    return await ldapSync(authUser);
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**
@@ -104,12 +99,8 @@ function handleBasicAuth(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-function handleTokenAuth(req, res, token) {
-  return new Promise((resolve, reject) => {
-    LocalStrategy.handleTokenAuth(req, res, token)
-    .then(user => resolve(user))
-    .catch(handleTokenAuthErr => reject(handleTokenAuthErr));
-  });
+async function handleTokenAuth(req, res, token) {
+  return LocalStrategy.handleTokenAuth(req, res, token);
 }
 
 /**
@@ -314,7 +305,7 @@ function ldapAuth(ldapClient, user, password) {
  *
  * @returns {Promise} Synchronized user model object
  */
-function ldapSync(ldapUserObj) {
+async function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');
   // Define and return promise
   return new Promise((resolve, reject) => {
@@ -322,6 +313,9 @@ function ldapSync(ldapUserObj) {
     let userObject = {};
     let created = false;
 
+  let userObject;
+  let foundUser;
+  try {
     // Search for user in database
     User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] })
     .then(foundUser => {
@@ -337,7 +331,6 @@ function ldapSync(ldapUserObj) {
         return foundUser.save();
       }
       // User not found, create a new one
-
       // Initialize userData with LDAP information
       const initData = new User({
         _id: ldapUserObj[ldapConfig.attributes.username],

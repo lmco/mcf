@@ -74,3 +74,24 @@ module.exports.disableUserAPI = function disableUserAPI(req, res, next) {
   }
   next();
 };
+
+/**
+ * @description Disables the user patchPassword API endpoint
+ *
+ * @param {Object} req - Request object from express
+ * @param {Object} res - Response object from express
+ * @param {function} next - Callback to express authentication flow.
+ */
+// eslint-disable-next-line consistent-return
+module.exports.disableUserPatchPassword = function disableUserPatchPassword(req, res, next) {
+  // Check if the value in the config is explicitly set to false
+  if (M.config.server.api.userAPI.patchPassword === false) {
+    // Create error message 'PATCH <url> is disabled'
+    const message = `PATCH ${req.originalUrl} is disabled.`;
+    // Create custom error 403 Forbidden
+    const error = new M.OperationError(message, 'error');
+    // Return error to user
+    return res.status(403).send(error.message);
+  }
+  next();
+};

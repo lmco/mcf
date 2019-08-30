@@ -51,7 +51,7 @@ function SidebarLink(props) {
     </div>
   );
 
-    // Returns the sidebar item as NavLink or href
+  // Returns the sidebar item as NavLink or href
   return (props.routerLink)
     ? <NavLink exact to={props.routerLink}> {sidebarItem} </NavLink>
     : <a href={props.href} target={newTab} onClick={props.onClick}> {sidebarItem} </a>;

@@ -36,7 +36,7 @@ import BranchesTags from '../project-views/branches/branches-tags.jsx';
 // Define component
 class ProjectApp extends Component {
 
-/* eslint-enable no-unused-vars */
+  /* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props

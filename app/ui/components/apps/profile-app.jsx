@@ -32,7 +32,7 @@ import ProjectList from '../profile-views/project-list.jsx';
 // Define component
 class ProfileApp extends Component {
 
-/* eslint-enable no-unused-vars */
+  /* eslint-enable no-unused-vars */
 
   constructor(props) {
     // Initialize parent props
@@ -60,7 +60,7 @@ class ProfileApp extends Component {
           const url = `/api/users/${username}`;
           $.ajax({
             method: 'GET',
-            url: `${url}?minified=true&archived=true`,
+            url: `${url}?minified=true&includeArchived=true`,
             statusCode: {
               200: (otherUser) => {
                 // Set states

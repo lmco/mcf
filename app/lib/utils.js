@@ -314,11 +314,15 @@ module.exports.validateOptions = function(options, validOptions, model) {
       });
     }
 
-    // Handle the archived option
-    if (opt === 'archived') {
+    // Handle the includeArchived option
+    if (opt === 'includeArchived') {
       // Ensure value is a boolean
       if (typeof val !== 'boolean') {
-        throw new M.DataFormatError('The option \'archived\' is not a boolean.', 'warn');
+        throw new M.DataFormatError('The option \'includeArchived\' is not a boolean.', 'warn');
+      }
+      // Only set this option if the user is not also specifying 'archived' in the search
+      if (!Object.keys(options).includes('archived')) {
+        validatedOptions.includeArchived = val;
       }
 
       // Set the field archived in the returnObject
@@ -330,6 +334,11 @@ module.exports.validateOptions = function(options, validOptions, model) {
       // Ensure value is a boolean
       if (typeof options.subtree !== 'boolean') {
         throw new M.DataFormatError('The option \'subtree\' is not a boolean.', 'warn');
+      }
+      // Ensure subtree and rootpath are not both enabled at the same time
+      if (options.rootpath) {
+        throw new M.DataFormatError('Options \'subtree\' and \'rootpath\' cannot be'
+        + ' applied simultaneously', 'warn');
       }
 
       // Set the subtree option in the returnObject

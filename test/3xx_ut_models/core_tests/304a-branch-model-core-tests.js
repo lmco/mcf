@@ -66,7 +66,7 @@ describe(M.getModuleName(module.filename), () => {
         org: org._id
       });
 
-        // Save the project model object to the database
+      // Save the project model object to the database
       return newProject.save();
     })
     .then((retProj) => {

@@ -59,20 +59,22 @@ const helper = M.require('lib.controller-helper');
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to find.
+ * @param {string} branchID - The ID of the branch to find.
  * @param {(string|string[])} [elements] - The elements to find. Can either be
  * an array of element ids, a single element id, or not provided, which defaults
  * to every element in a project being found.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {boolean} [options.subtree = false] - If true, all elements in the subtree of
  * the found elements will also be returned.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
+ * @param {boolean} [options.rootpath] - An option to specify finding the parent,
+ * grandparent, etc of the query element all the way up to the root element.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
@@ -96,6 +98,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for elements with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived elements.  If false,
+ * only returns unarchived elements.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -112,7 +116,7 @@ const helper = M.require('lib.controller-helper');
  *   M.log.error(error);
  * });
  */
-async function find(requestingUser, organizationID, projectID, branch, elements, options) {
+async function find(requestingUser, organizationID, projectID, branchID, elements, options) {
   // Set options if no elements were provided, but options were
   if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
     // Note: assumes input param elements is input option param
@@ -131,9 +135,9 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   const orgID = sani.mongo(organizationID);
   const projID = sani.mongo(projectID);
-  const branchID = sani.mongo(branch);
+  const branID = sani.mongo(branchID);
   let foundElements = [];
-  const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
+  const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
   // Validate the provided options
   const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
@@ -143,20 +147,24 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archivedBy'];
+      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // If the search option is an element reference
         if (['parent', 'source', 'target'].includes(o)) {
           // Make value the concatenated ID
-          options[o] = utils.createID(orgID, projID, branchID, options[o]);
+          options[o] = utils.createID(orgID, projID, branID, options[o]);
         }
         // Add the search option to the searchQuery
         searchQuery[o] = sani.mongo(options[o]);
@@ -192,11 +200,11 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   // Check the type of the elements parameter
   if (Array.isArray(saniElements)) {
     // An array of element ids, find all
-    elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branchID, e));
+    elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branID, e));
   }
   else if (typeof saniElements === 'string') {
     // A single element id
-    elementsToFind = [utils.createID(orgID, projID, branchID, saniElements)];
+    elementsToFind = [utils.createID(orgID, projID, branID, saniElements)];
   }
   else if (((typeof saniElements === 'object' && saniElements !== null)
     || saniElements === undefined)) {
@@ -216,6 +224,10 @@ async function find(requestingUser, organizationID, projectID, branch, elements,
   // If the archived field is true, remove it from the query
   if (validatedOptions.archived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   const promises = [];
@@ -326,7 +338,7 @@ async function findHelper(query, fields, limit, skip, populate, sort, lean) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to add elements to.
+ * @param {string} branchID - The ID of the branch to add elements to.
  * @param {(Object|Object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
  * @param {string} elements.id - The ID of the element being created.
@@ -765,7 +777,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to update elements on.
+ * @param {string} branchID - The ID of the branch to update elements on.
  * @param {(Object|Object[])} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
  * @param {string} elements.id - The ID of the element being updated. Field
@@ -1136,6 +1148,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
             + 'target element is required.', 'warn');
         }
       }
+    });
 
       // Set archivedBy if archived field is being changed
       if (key === 'archived') {
@@ -1219,7 +1232,7 @@ async function update(requestingUser, organizationID, projectID, branch, element
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to add elements to.
+ * @param {string} branchID - The ID of the branch to add elements to.
  * @param {(Object|Object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create/replace.
  * @param {string} elements.id - The ID of the element being created/replaced.
@@ -1492,7 +1505,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to remove elements from.
+ * @param {string} branchID - The ID of the branch to remove elements from.
  * @param {(string|string[])} elements - The elements to remove. Can either be
  * an array of element ids or a single element id.
  * @param {Object} [options] - A parameter that provides supported options.
@@ -1666,7 +1679,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
  *
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
  * @return {Promise} Array of found element ids
@@ -1680,7 +1693,7 @@ async function remove(requestingUser, organizationID, projectID, branch, element
  *   M.log.error(error);
  * });
  */
-function findElementTree(organizationID, projectID, branch, elementIDs) {
+function findElementTree(organizationID, projectID, branchID, elementIDs) {
   // Ensure elementIDs is an array
   if (!Array.isArray(elementIDs)) {
     throw new M.DataFormatError('ElementIDs array is not an array.', 'warn');
@@ -1691,37 +1704,36 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
 
   // If no elements provided, find all elements in project
   if (foundElements.length === 0) {
-    foundElements = [utils.createID(organizationID, projectID, branch, 'model')];
+    foundElements = [utils.createID(organizationID, projectID, branchID, 'model')];
   }
 
   // Define nested helper function
-  function findElementTreeHelper(ids) {
-    return new Promise((resolve, reject) => {
+  async function findElementTreeHelper(ids) {
+    try {
       // Find all elements whose parent is in the list of given ids
-      Element.find({ parent: { $in: ids } }, '_id').lean()
-      .then(elements => {
-        // Get a list of element ids
-        const foundIDs = elements.map(e => e._id);
-        // Add these elements to the global list of found elements
-        foundElements = foundElements.concat(foundIDs);
+      const elements = await Element.find({ parent: { $in: ids } }, '_id').lean();
+      // Get a list of element ids
+      const foundIDs = elements.map(e => e._id);
+      // Add these elements to the global list of found elements
+      foundElements = foundElements.concat(foundIDs);
 
-        // If no elements were found, exit the recursive function
-        if (foundIDs.length === 0) {
-          return '';
-        }
+      // If no elements were found, exit the recursive function
+      if (foundIDs.length === 0) {
+        return '';
+      }
 
-        // Recursively find the sub-children of the found elements in batches of 50000 or less
-        for (let i = 0; i < foundIDs.length / 50000; i++) {
-          const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
-          return findElementTreeHelper(tmpIDs);
-        }
-      })
-      .then(() => resolve())
-      .catch((error) => reject(error));
-    });
+      // Recursively find the sub-children of the found elements in batches of 50000 or less
+      for (let i = 0; i < foundIDs.length / 50000; i++) {
+        const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
+        return findElementTreeHelper(tmpIDs);
+      }
+    }
+    catch (error) {
+      throw error;
+    }
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const promises = [];
 
     // If initial batch of ids is greater than 50000, split up in batches
@@ -1743,7 +1755,7 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
  *
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string} branchID - The ID of the branch to find elements from.
  * @param {Object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *
@@ -1758,62 +1770,56 @@ function findElementTree(organizationID, projectID, branch, elementIDs) {
  *   M.log.error(error);
  * });
  */
-function moveElementCheck(organizationID, projectID, branch, element) {
-  return new Promise((resolve, reject) => {
-    // Create the name-spaced ID
-    const elementID = utils.createID(organizationID, projectID, branch, element.id);
+async function moveElementCheck(organizationID, projectID, branchID, element) {
+  // Create the name-spaced ID
+  const elementID = utils.createID(organizationID, projectID, branchID, element.id);
 
-    // Error Check: ensure elements parent is not self
-    if (element.parent === elementID) {
-      throw new M.OperationError('Elements parent cannot be self.', 'warn');
+  // Error Check: ensure elements parent is not self
+  if (element.parent === elementID) {
+    throw new M.OperationError('Elements parent cannot be self.', 'warn');
+  }
+
+  // Error Check: ensure the root elements are not being moved
+  if (Element.getValidRootElements().includes(element.id)) {
+    const parent = utils.parseID(element.parent).pop();
+    if (element.id === 'model'
+      || (element.id === '__mbee__' && parent !== 'model')
+      || (element.id === 'holding_bin' && parent !== '__mbee__')
+      || (element.id === 'undefined' && parent !== '__mbee__')) {
+      throw new M.OperationError(
+        `Cannot move the root element: ${element.id}.`, 'warn'
+      );
+    }
+  }
+
+  // Define nested helper function
+  async function findElementParentRecursive(e) {
+    const foundElement = await Element.findOne({ _id: e.parent }).lean();
+    // If foundElement is null, reject with error
+    if (!foundElement) {
+      throw new M.NotFoundError('Parent element '
+        + `[${utils.parseID(e.parent).pop()}] not found.`, 'warn');
     }
 
-    // Error Check: ensure the root elements are not being moved
-    if (Element.getValidRootElements().includes(element.id)) {
-      const parent = utils.parseID(element.parent).pop();
-      if (element.id === 'model'
-        || (element.id === '__mbee__' && parent !== 'model')
-        || (element.id === 'holding_bin' && parent !== '__mbee__')
-        || (element.id === 'undefined' && parent !== '__mbee__')) {
-        throw new M.OperationError(
-          `Cannot move the root element: ${element.id}.`, 'warn'
-        );
-      }
+    // If element.parent is root, resolve... there is no conflict
+    if (foundElement.parent === null
+      || utils.parseID(foundElement.parent).pop() === 'model') {
+      return '';
     }
 
-    // Define nested helper function
-    function findElementParentRecursive(e) {
-      return new Promise((res, rej) => {
-        Element.findOne({ _id: e.parent }).lean()
-        .then((foundElement) => {
-          // If foundElement is null, reject with error
-          if (!foundElement) {
-            throw new M.NotFoundError('Parent element '
-              + `[${utils.parseID(e.parent).pop()}] not found.`, 'warn');
-          }
-
-          // If element.parent is root, resolve... there is no conflict
-          if (foundElement.parent === null
-            || utils.parseID(foundElement.parent).pop() === 'model') {
-            return '';
-          }
-
-          // If elementID is equal to foundElement.id, a circular reference would
-          // exist, reject with an error
-          if (elementID === foundElement.id) {
-            throw new M.OperationError('A circular reference would exist in'
-              + ' the model, element cannot be moved.', 'warn');
-          }
-          else {
-            // Find the parents parent
-            return findElementParentRecursive(foundElement);
-          }
-        })
-        .then(() => resolve())
-        .catch((error) => rej(error));
-      });
+    // If elementID is equal to foundElement.id, a circular reference would
+    // exist, reject with an error
+    if (elementID === foundElement.id) {
+      throw new M.OperationError('A circular reference would exist in'
+        + ' the model, element cannot be moved.', 'warn');
     }
+    else {
+      // Find the parents parent
+      return findElementParentRecursive(foundElement);
+    }
+  }
 
+  try {
     // Call the recursive find function
     findElementParentRecursive(element)
     .then(() => resolve())
@@ -1830,13 +1836,16 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to find elements from.
+ * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string} query - The text-based query to search the database for.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
@@ -1860,6 +1869,8 @@ function moveElementCheck(organizationID, projectID, branch, element) {
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for elements with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived elements.  If false,
+ * only returns unarchived elements.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -1922,8 +1933,6 @@ function search(requestingUser, organizationID, projectID, branch, query, option
           // Add the search option to the searchQuery
           searchQuery[o] = sani.mongo(options[o]);
         }
-      });
-    }
 
     try {
       // Find the organization and validate that it was found and not archived (unless specified)
