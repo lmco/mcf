@@ -3944,8 +3944,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                  project to create an artifact.
  *     produces:
  *       - application/json
- *     content:
- *      multipart/form-data:
+ *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the specified
  *                      project.
@@ -3967,6 +3966,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: path
  *         required: true
  *         type: string
+ *     content:
+ *      multipart/form-data:
+ *        encoding:
+ *          file:
+ *            contentType: application/octet-stream
+ *        schema:
  *       - name: body
  *         description: The object containing the new artifact data.
  *         in: body
