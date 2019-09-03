@@ -54,34 +54,33 @@ const utils = M.require('lib.utils');
  *     console.log(err);
  *   })
  */
-function handleBasicAuth(req, res, username, password) {
-  return new Promise((resolve, reject) => {
-    User.findOne({
-      _id: username,
-      archived: false
-    }, (findUserErr, user) => {
-      // Check for errors
-      if (findUserErr) {
-        return reject(findUserErr);
-      }
-      // Check for empty user
-      if (!user) {
-        return reject(new M.NotFoundError(`User ${username} not found.`, 'warn'));
-      }
-      // User exist
-      // Compute the password hash on given password
-      user.verifyPassword(password)
-      .then(result => {
-        // Check password is valid
-        if (!result) {
-          return reject(new M.AuthorizationError('Invalid password.', 'warn'));
-        }
-        // Authenticated, return user
-        return resolve(user);
-      })
-      .catch(verifyErr => reject(verifyErr));
-    });
-  });
+async function handleBasicAuth(req, res, username, password) {
+  let user;
+  try {
+    user = await User.findOne({ _id: username, archived: false });
+  }
+  catch (findUserErr) {
+    throw new M.DatabaseError(findUserErr.message, 'warn');
+  }
+  // Check for empty user
+  if (!user) {
+    throw new M.NotFoundError(`User ${username} not found.`, 'warn');
+  }
+
+  let result = null;
+  try {
+    // Compute the password hash on given password
+    result = await user.verifyPassword(password);
+  }
+  catch (verifyErr) {
+    throw M.ServerError(verifyErr.message, 'warn');
+  }
+  // Check password is valid
+  if (!result) {
+    throw new M.AuthorizationError('Invalid password.', 'warn');
+  }
+  // Authenticated, return user
+  return user;
 }
 
 /**
@@ -103,47 +102,47 @@ function handleBasicAuth(req, res, username, password) {
  *     console.log(err);
  *   })
  */
-function handleTokenAuth(req, res, token) {
-  return new Promise((resolve, reject) => {
-    // Define and initialize token
-    let decryptedToken = null;
-    try {
-      // Decrypt the token
-      decryptedToken = mbeeCrypto.inspectToken(token);
-    }
-    // If NOT decrypted, not valid and the
-    // user is not authorized
-    catch (decryptErr) {
-      return reject(decryptErr);
-    }
+async function handleTokenAuth(req, res, token) {
+  // Define and initialize token
+  let decryptedToken = null;
+  try {
+    // Decrypt the token
+    decryptedToken = mbeeCrypto.inspectToken(token);
+  }
+  // If NOT decrypted, not valid and the
+  // user is not authorized
+  catch (decryptErr) {
+    throw new M.AuthorizationError(decryptErr.message, 'warn');
+  }
 
-    // Ensure token not expired
-    if (Date.now() < Date.parse(decryptedToken.expires)) {
-      // Not expired, find user
-      User.findOne({
+  // Ensure token not expired
+  if (Date.now() < Date.parse(decryptedToken.expires)) {
+    let user = null;
+    // Not expired, find user
+    try {
+      user = await User.findOne({
         _id: sani.sanitize(decryptedToken.username),
         archivedOn: null
-      }, (findUserTokenErr, user) => {
-        if (findUserTokenErr) {
-          return reject(findUserTokenErr);
-        }
-        // A valid session was found in the request but the user no longer exists
-        if (!user) {
-          // Logout user
-          req.user = null;
-          req.session.destroy();
-          // Return error
-          return reject(new M.NotFoundError('No user found.', 'warn'));
-        }
-        // return User object if authentication was successful
-        return resolve(user);
       });
     }
-    // If token is expired user is unauthorized
-    else {
-      return reject(new M.AuthorizationError('Token is expired or session is invalid.', 'warn'));
+    catch (findUserTokenErr) {
+      throw new M.AuthorizationError(findUserTokenErr.message, 'warn');
     }
-  });
+    // A valid session was found in the request but the user no longer exists
+    if (!user) {
+      // Logout user
+      req.user = null;
+      req.session.destroy();
+      // Return error
+      throw new M.NotFoundError('No user found.', 'warn');
+    }
+    // return User object if authentication was successful
+    return user;
+  }
+  // If token is expired user is unauthorized
+  else {
+    throw new M.AuthorizationError('Token is expired or session is invalid.', 'warn');
+  }
 }
 
 /**

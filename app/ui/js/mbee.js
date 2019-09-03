@@ -61,3 +61,38 @@ function mbeeWhoAmI(callback) {
     }
   });
 }
+
+/**
+ * @description Given an API parameter string, converts to Proper Case. Conversely, given a Proper
+ *              Case string will convert to an API parameter string.
+ * e.g. createdBy -> Created By, lastModifiedBy -> Last Modified By
+ *
+ * @param {string} param - API parameter string.
+ * @param {string} caseType - Case to convert to. e.g 'Proper Case' vs 'API Parameter Format'
+ *
+ * @return {string} - Converted case string.
+ */
+// eslint-disable-next-line no-unused-vars
+function convertCase(param, caseType) {
+  // Check if param is not a string
+  if (typeof param !== 'string' || typeof caseType !== 'string') {
+    // Cannot convert case, return param
+    return param;
+  }
+
+  let convertedCase = '';
+
+  if (caseType === 'proper') {
+    // Convert API params to option values
+    convertedCase = param.split(/(?=[A-Z])/).join(' ');
+    convertedCase = convertedCase.charAt(0).toUpperCase() + convertedCase.slice(1);
+  }
+  else if (caseType === 'api') {
+    // Remove spaces fom string
+    convertedCase = param.split(' ').join('');
+    // Convert first character to lower case
+    convertedCase = convertedCase.charAt(0).toLowerCase() + convertedCase.slice(1);
+  }
+
+  return convertedCase;
+}

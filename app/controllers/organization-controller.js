@@ -60,7 +60,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
@@ -81,6 +81,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for orgs with a specific
  * lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived orgs.  If false,
+ * only returns unarchived orgs.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for orgs with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -118,20 +120,25 @@ async function find(requestingUser, orgs, options) {
   const searchQuery = { archived: false };
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
+  const validatedOptions = utils.validateOptions(options, ['populate',
+    'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
 
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
-    const validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+    const validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archived',
+      'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // Add the search option to the searchQuery
@@ -144,9 +151,13 @@ async function find(requestingUser, orgs, options) {
   if (!reqUser.admin) {
     searchQuery[`permissions.${reqUser._id}`] = 'read';
   }
-  // If the archived field is true, remove it from the query
-  if (validOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   // Check the type of the orgs parameter
@@ -163,24 +174,12 @@ async function find(requestingUser, orgs, options) {
     throw new M.DataFormatError('Invalid input for finding organizations.', 'warn');
   }
 
-  let foundOrgs;
   try {
-    // If the lean option is supplied
-    if (validOptions.lean) {
-      // Find the orgs
-      foundOrgs = await Organization.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString).lean();
-      return foundOrgs;
-    }
-    else {
-      foundOrgs = await Organization.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString);
-      return foundOrgs;
-    }
+    // Find the orgs
+    return await Organization.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit, skip: validatedOptions.skip })
+    .sort(validatedOptions.sort)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -240,7 +239,7 @@ async function create(requestingUser, orgs, options) {
   const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Organization);
 
   // Define array to store org data
@@ -359,19 +358,10 @@ async function create(requestingUser, orgs, options) {
   // Emit the event orgs-created
   EventEmitter.emit('orgs-created', orgObjects);
 
-  let foundUpdatedOrgs;
   try {
-    // If the lean option is supplied
-    if (validOptions.lean) {
-      foundUpdatedOrgs = await Organization.find({ _id: { $in: arrIDs } },
-        validOptions.fieldsString).populate(validOptions.populateString).lean();
-      return foundUpdatedOrgs;
-    }
-    else {
-      foundUpdatedOrgs = await Organization.find({ _id: { $in: arrIDs } },
-        validOptions.fieldsString).populate(validOptions.populateString);
-      return foundUpdatedOrgs;
-    }
+    return await Organization.find({ _id: { $in: arrIDs } },
+      validatedOptions.fieldsString).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -440,7 +430,7 @@ async function update(requestingUser, orgs, options) {
   let updatingPermissions = false;
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Organization);
 
   // Check the type of the orgs parameter
@@ -674,26 +664,16 @@ async function update(requestingUser, orgs, options) {
   // Update all orgs through a bulk write to the database
   await Organization.bulkWrite(bulkArray);
 
-  let foundUpdatedOrgs;
   try {
-    // If the lean option is supplied
-    if (validOptions.lean) {
-      foundUpdatedOrgs = await Organization.find(searchQuery, validOptions.fieldsString)
-      .populate(validOptions.populateString).lean();
-    }
-    else {
-      foundUpdatedOrgs = await Organization.find(searchQuery, validOptions.fieldsString)
-      .populate(validOptions.populateString);
-    }
+    const foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    // Emit the event orgs-updated
+    EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
+    return foundUpdatedOrgs;
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
   }
-
-  // Emit the event orgs-updated
-  EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
-
-  return foundUpdatedOrgs;
 }
 
 /**
@@ -845,20 +825,15 @@ async function createOrReplace(requestingUser, orgs, options) {
       // Reinsert original data
       try {
         await Organization.insertMany(foundOrgs);
-        await new Promise(async (resInner) => {
-          // Remove the backup file
-          await fs.unlink(path.join(M.root, 'data',
-            `PUT-backup-orgs-${ts}.json`), function(err) {
-            if (err) throw err;
-            else resInner();
-          });
-        });
+        fs.unlinkSync(path.join(M.root, 'data',
+          `PUT-backup-orgs-${ts}.json`));
+
         // Restoration succeeded; pass the original error
         res(error);
       }
-      catch (err) {
+      catch (restoreErr) {
         // Pass the new error that occurred while trying to restore orgs
-        res(err);
+        res(restoreErr);
       }
     });
     // Throw whichever error was passed
@@ -869,12 +844,12 @@ async function createOrReplace(requestingUser, orgs, options) {
   const filePath = path.join(M.root, 'data',
     `PUT-backup-orgs-${ts}.json`);
   if (fs.existsSync(filePath)) {
-    await new Promise((res, rej) => {
-      fs.unlink(filePath, function(err) {
-        if (err) rej(err);
-        else res();
-      });
-    });
+    try {
+      fs.unlinkSync(filePath);
+    }
+    catch (err) {
+      throw errors.captureError(err);
+    }
   }
 
   return createdOrgs;

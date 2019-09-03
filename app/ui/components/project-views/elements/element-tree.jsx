@@ -66,7 +66,7 @@ class ElementTree extends Component {
     const projId = this.props.project.id;
     const branchId = this.state.branch;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
-    const url = `${base}/elements/model?fields=id,name,contains,type,archived&minified=true&archived=true`;
+    const url = `${base}/elements/model?fields=id,name,contains,type,archived&minified=true&includeArchived=true`;
 
     this.setState({ url: base });
 

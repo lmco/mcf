@@ -73,11 +73,11 @@ class ElementSubtree extends Component {
     }
     const elements = contains.join(',');
     const base = this.props.url;
-    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,archived,type&minified=true&archived=true`;
+    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
     // Provide different url
     // If length is too long
     if (url.length > 2047) {
-      url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&archived=true`;
+      url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
     }
 
     // Get children
@@ -170,7 +170,7 @@ class ElementSubtree extends Component {
   refresh() {
     // Build URL to get element data
     const base = this.props.url;
-    const url = `${base}/elements/${this.state.id}?minified=true&archived=true`;
+    const url = `${base}/elements/${this.state.id}?minified=true&includeArchived=true`;
 
     // Get element data
     $.ajax({

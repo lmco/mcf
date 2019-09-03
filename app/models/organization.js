@@ -10,8 +10,34 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description Defines the organization data model.
+ * @description
+ * <p>This module defines the organization data model. Organizations are the
+ * highest level of hierarchy in MBEE. Organizations contain multiple projects,
+ * have their own set of permissions, and have the ability to store custom
+ * meta-data.</p>
+ *
+ * <h4>Permissions</h4>
+ * <p>Permissions are stored in a single object, where keys are user's usernames
+ * and values are arrays containing the permissions a specific user has.
+ * Permissions in MBEE are cascading, meaning if a user has write permissions
+ * then they also have read.</p>
+ *
+ * <ul>
+ *   <li><b>read</b>: The user can retrieve the organization and see its data.</li>
+ *   <li><b>write</b>: The user can retrieve the organization and create
+ *   projects. When a user creates a project, they become an admin on that
+ *   project.</li>
+ *   <li><b>admin</b>: The user can retrieve the organization, create projects,
+ *   modify the organization and update/remove user permissions.</li>
+ * </ul>
+ *
+ * <h4>Custom Data</h4>
+ * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
+ * is stored in an object, and can contain any valid JSON the user desires.
+ * Only organization admins can update the custom data.</p>
+ *
  */
 
 // NPM modules
@@ -58,7 +84,26 @@ const OrganizationSchema = new mongoose.Schema({
   },
   permissions: {
     type: mongoose.Schema.Types.Mixed,
-    default: {}
+    default: {},
+    validate: {
+      validator: function(v) {
+        let bool = true;
+        // If the permissions object is not a JSON object, reject
+        if (typeof v !== 'object' || Array.isArray(v) || v === null) {
+          bool = false;
+        }
+
+        // Check that each every key/value pair's value is an array of strings
+        Object.values(v).forEach((val) => {
+          if (!Array.isArray(val) || !val.every(s => typeof s === 'string')) {
+            bool = false;
+          }
+        });
+
+        return bool;
+      },
+      message: props => 'The organization permissions object is not properly formatted.'
+    }
   },
   custom: {
     type: mongoose.Schema.Types.Mixed,

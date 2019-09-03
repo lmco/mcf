@@ -16,6 +16,12 @@
 
 // Node modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+// Initialize chai should function, used for expecting promise rejections
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Branch = M.require('models.branch');
@@ -24,6 +30,7 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const customValidators = M.config.validators || {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -64,6 +71,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject when a branch ID is too long', idTooLong);
   it('should reject if no id (_id) is provided', idNotProvided);
   it('should reject if no project is provided', projectNotProvided);
+  it('should reject if the project is invalid', projectInvalid);
+  it('should reject if the source is invalid', sourceInvalid);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -195,4 +204,55 @@ function projectNotProvided(done) {
       done();
     }
   });
+}
+
+/**
+ * @description Attempts to create a branch with an invalid project.
+ */
+async function projectInvalid() {
+  if (customValidators.hasOwnProperty('id')) {
+    M.log.verbose('Skipping valid branch project test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const branchData = Object.assign({}, testData.branches[0]);
+  branchData._id = `org:proj:${branchData.id}`;
+
+  // Set invalid project
+  branchData.project = 'invalid_project';
+
+  // Create branch object
+  const branchObject = new Branch(branchData);
+
+  // Expect save() to fail with specific error message
+  await branchObject.save().should.eventually.be.rejectedWith(
+    `Branch validation failed: project: ${branchData.project} is not a valid project ID.`
+  );
+}
+
+/**
+ * @description Attempts to create a branch with an invalid source.
+ */
+async function sourceInvalid() {
+  if (customValidators.hasOwnProperty('id')) {
+    M.log.verbose('Skipping valid branch source test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+
+  const branchData = Object.assign({}, testData.branches[0]);
+  branchData._id = `org:proj:${branchData.id}`;
+  branchData.project = 'org:proj';
+
+  // Set invalid source
+  branchData.source = 'invalid_source';
+
+  // Create branch object
+  const branchObject = new Branch(branchData);
+
+  // Expect save() to fail with specific error message
+  await branchObject.save().should.eventually.be.rejectedWith(
+    `Branch validation failed: source: ${branchData.source} is not a valid source ID.`
+  );
 }
