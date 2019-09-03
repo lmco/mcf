@@ -30,12 +30,13 @@ const path = require('path');
 const ldap = require('ldapjs');
 
 // MBEE modules
-const LocalStrategy = M.require('auth.local-strategy');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const errors = M.require('lib.errors');
+const mbeeCrypto = M.require('lib.crypto');
+const utils = M.require('lib.utils');
 
 // Allocate LDAP configuration variable for convenience
 const ldapConfig = M.config.auth.ldap;
@@ -81,17 +82,17 @@ async function handleBasicAuth(req, res, username, password) {
 }
 
 /**
- * @description Authenticates user with passed in token.
- * Implements handleTokenAuth() provided by the Local Strategy.
+ * @description This function implements handleTokenAuth() in lib/auth.js.
+ * Authenticates user with passed in token.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
- * @param {string} token - Token user authentication token, encrypted
+ * @param {string} token - User authentication token, encrypted
  *
  * @returns {Promise} Local user object
  *
  * @example
- * AuthController.handleTokenAuth(req, res, token)
+ * AuthController.handleTokenAuth(req, res, _token)
  *   .then(user => {
  *   // do something with authenticated user
  *   })
@@ -100,19 +101,74 @@ async function handleBasicAuth(req, res, username, password) {
  *   })
  */
 async function handleTokenAuth(req, res, token) {
-  return LocalStrategy.handleTokenAuth(req, res, token);
+  // Define and initialize token
+  let decryptedToken = null;
+  try {
+    // Decrypt the token
+    decryptedToken = mbeeCrypto.inspectToken(token);
+  }
+  // If NOT decrypted, not valid and the
+  // user is not authorized
+  catch (decryptErr) {
+    throw decryptErr;
+  }
+
+  // Ensure token not expired
+  if (Date.now() < Date.parse(decryptedToken.expires)) {
+    let user = null;
+    // Not expired, find user
+    try {
+      user = await User.findOne({
+        _id: sani.sanitize(decryptedToken.username),
+        archivedOn: null
+      });
+    }
+    catch (findUserTokenErr) {
+      throw findUserTokenErr;
+    }
+    // A valid session was found in the request but the user no longer exists
+    if (!user) {
+      // Logout user
+      req.user = null;
+      req.session.destroy();
+      // Return error
+      throw new M.NotFoundError('No user found.', 'warn');
+    }
+    // return User object if authentication was successful
+    return user;
+  }
+  // If token is expired user is unauthorized
+  else {
+    throw new M.AuthorizationError('Token is expired or session is invalid.', 'warn');
+  }
 }
 
 /**
- * @description  This function generates the session token for user login.
- * Implements the Local Strategy doLogin function.
+ * @description This function implements doLogin() in lib/auth.js.
+ * This function generates the session token for user login.
+ * Upon successful login, generate token and set to session
  *
  * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {function} next - Callback to continue express authentication
+ * @param {Object} res - response express object
+ * @param {function} next - Callback to express authentication
  */
 function doLogin(req, res, next) {
-  LocalStrategy.doLogin(req, res, next);
+  // Compute token expiration time
+  const timeDelta = M.config.auth.token.expires
+    * utils.timeConversions[M.config.auth.token.units];
+
+  // Generate the token
+  const token = mbeeCrypto.generateToken({
+    type: 'user',
+    username: req.user.username,
+    created: (new Date(Date.now())),
+    expires: (new Date(Date.now() + timeDelta))
+  });
+  // Set the session token
+  req.session.token = token;
+  M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
+  // Callback
+  next();
 }
 
 /* ------------------------( LDAP Helper Functions )--------------------------*/
