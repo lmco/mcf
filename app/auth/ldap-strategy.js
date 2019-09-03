@@ -107,8 +107,8 @@ async function handleTokenAuth(req, res, token) {
     // Decrypt the token
     decryptedToken = mbeeCrypto.inspectToken(token);
   }
-    // If NOT decrypted, not valid and the
-    // user is not authorized
+  // If NOT decrypted, not valid and the
+  // user is not authorized
   catch (decryptErr) {
     throw decryptErr;
   }
