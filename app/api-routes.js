@@ -3889,7 +3889,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid:
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}:
  *   get:
  *     tags:
  *       - artifacts
@@ -3961,6 +3961,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *       500:
  *         description: Internal Server Error, Failed to GET artifact due to
  *                      server side issue.
+ *
  *   post:
  *     tags:
  *       - artifacts
@@ -3991,30 +3992,26 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: path
  *         required: true
  *         type: string
- *     content:
- *      multipart/form-data:
- *        encoding:
- *          file:
- *            contentType: application/octet-stream
- *        schema:
- *        - name: body
- *        description: The object containing the new artifact data.
- *         in: body
+ *       - name: file
+ *         in: formData
+ *         description: file to upload
+ *         required: true
+ *         type: file
+ *       - name: name
+ *         in: formData
+ *         description: Artifact name.
  *         required: false
- *         schema:
- *           type: object
- *           properties:
- *             id:
- *               type: string
- *               description: The ID of the artifact. If provided, it must
- *                      match the artifact ID provided in the path.
- *             name:
- *               type: string
- *             contentType:
- *               type: string
- *               default: ''
- *             custom:
- *               type: object
+ *         type: string
+ *       - name: location
+ *         in: formData
+ *         description: Artifact location.
+ *         required: false
+ *         type: string
+ *       - name: custom
+ *         in: formData
+ *         description: Artifact custom data.
+ *         required: false
+ *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -4094,6 +4091,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *           properties:
  *             name:
  *               type: string
+ *               description: Name of Artifact.
+ *             location:
+ *               type: string
+ *               description: Storage location of Artifact.
  *             custom:
  *               type: object
  *               description: NOTE when updating the custom data, the object
