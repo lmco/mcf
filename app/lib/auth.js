@@ -124,11 +124,12 @@ async function authenticate(req, res, next) {
       catch (err) {
         // Log the error
         M.log.error(err.stack);
-        error = new M.AuthorizationError('Invalid username or password.', 'warn');
         if (err.message === 'Invalid username or password.') {
+          error = new M.AuthorizationError('Invalid username or password.', 'warn');
           req.flash('loginError', err.message);
         }
         else {
+          error = new M.ServerError('Internal Server Error', 'warn');
           req.flash('loginError', 'Internal Server Error');
         }
 

@@ -171,6 +171,8 @@ function ldapConnect() {
         ca: arrCaCerts
       }
     });
+    // Handle any errors in connecting to LDAP server
+    ldapClient.on('error', (error) => reject(error));
     // Bind ldapClient object to LDAP server
     ldapClient.bind(ldapConfig.bind_dn, ldapConfig.bind_dn_pass, (bindErr) => {
       // Check if LDAP server bind fails
