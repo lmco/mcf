@@ -38,7 +38,6 @@ class OrgList extends Component {
 
     // Initialize state props
     this.state = {
-      showProjs: false,
       width: null,
       modalProjCreate: false,
       modalOrgDelete: false,
@@ -57,7 +56,7 @@ class OrgList extends Component {
   // Define org toggle functionality
   handleShowProjsToggle() {
     // Set the state to opposite of its initial state
-    this.setState({ showProjs: !this.state.showProjs });
+    this.props.onExpandChange(this.props.org.id, !this.props.showProjs);
   }
 
   // Define toggle function
@@ -97,7 +96,7 @@ class OrgList extends Component {
     let icon;
     let projects;
 
-    if (this.state.showProjs) {
+    if (this.props.showProjs) {
       icon = 'fas fa-angle-down';
     }
     else {
@@ -154,7 +153,7 @@ class OrgList extends Component {
             : ''
           }
         </div>
-        {(!this.state.showProjs)
+        {(!this.props.showProjs)
           ? ''
           : (<List>
               {projects}

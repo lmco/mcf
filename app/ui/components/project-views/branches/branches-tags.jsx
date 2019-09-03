@@ -100,16 +100,16 @@ class BranchesTags extends Component {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const page = Number(differentPage) || Number(this.state.pages.branch);
-    let opts = 'archived=true&tag=false&minified=true&limit=6';
+    let opts = 'includeArchived=true&tag=false&minified=true&limit=6';
     const base = `/api/orgs/${orgId}/projects/${projId}/branches`;
     // Verify needed get request options
     if ((retrieving === 'next') || differentPage) {
       const skipNum = (page * 6) - 1;
-      opts = `archived=true&tag=false&minified=true&limit=6&skip=${skipNum}`;
+      opts = `includeArchived=true&tag=false&minified=true&limit=6&skip=${skipNum}`;
     }
     else if ((retrieving === 'back') && (page !== 2)) {
       const skipNum = ((page - 1) * 6) - 6;
-      opts = `archived=true&tag=false&minified=true&limit=6&skip=${skipNum}`;
+      opts = `includeArchived=true&tag=false&minified=true&limit=6&skip=${skipNum}`;
     }
 
     const url = `${base}?${opts}`;
@@ -158,16 +158,16 @@ class BranchesTags extends Component {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const page = Number(differentPage) || Number(this.state.pages.tag);
-    let opts = 'archived=true&tag=true&minified=true&limit=6';
+    let opts = 'includeArchived=true&tag=true&minified=true&limit=6';
     const base = `/api/orgs/${orgId}/projects/${projId}/branches`;
     // Verify needed get request options
     if ((retrieving === 'next') || differentPage) {
       const skipNum = (page * 6) - 1;
-      opts = `archived=true&tag=true&minified=true&limit=6&skip=${skipNum}`;
+      opts = `includeArchived=true&tag=true&minified=true&limit=6&skip=${skipNum}`;
     }
     else if ((retrieving === 'back') && (page !== 2)) {
       const skipNum = ((page - 1) * 6) - 6;
-      opts = `archived=true&tag=true&minified=true&limit=6&skip=${skipNum}`;
+      opts = `includeArchived=true&tag=true&minified=true&limit=6&skip=${skipNum}`;
     }
 
     const url = `${base}?${opts}`;
