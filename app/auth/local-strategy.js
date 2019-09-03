@@ -112,7 +112,7 @@ async function handleTokenAuth(req, res, token) {
   // If NOT decrypted, not valid and the
   // user is not authorized
   catch (decryptErr) {
-    throw decryptErr;
+    throw new M.AuthorizationError(decryptErr.message, 'warn');
   }
 
   // Ensure token not expired
@@ -126,7 +126,7 @@ async function handleTokenAuth(req, res, token) {
       });
     }
     catch (findUserTokenErr) {
-      throw findUserTokenErr;
+      throw new M.AuthorizationError(findUserTokenErr.message, 'warn');
     }
     // A valid session was found in the request but the user no longer exists
     if (!user) {
