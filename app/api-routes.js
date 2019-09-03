@@ -4092,6 +4092,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *             name:
  *               type: string
  *               description: Name of Artifact.
+ *             filename:
+ *               type: string
+ *               description: Filename of Artifact.
+ *             contentType:
+ *               type: string
+ *               description: Content Type of Artifact.
  *             location:
  *               type: string
  *               description: Storage location of Artifact.

@@ -76,8 +76,8 @@ describe(M.getModuleName(module.filename), () => {
   after(async () => {
     try {
       // Remove the org created in before()
-      // await testUtils.removeTestOrg();
-      // await testUtils.removeTestAdmin();
+      await testUtils.removeTestOrg();
+      await testUtils.removeTestAdmin();
       await db.disconnect();
     }
     catch (error) {
