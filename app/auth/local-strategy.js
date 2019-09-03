@@ -60,7 +60,7 @@ async function handleBasicAuth(req, res, username, password) {
     user = await User.findOne({ _id: username, archived: false });
   }
   catch (findUserErr) {
-    throw findUserErr;
+    throw new M.DatabaseError(findUserErr.message, 'warn');
   }
   // Check for empty user
   if (!user) {
@@ -73,7 +73,7 @@ async function handleBasicAuth(req, res, username, password) {
     result = await user.verifyPassword(password);
   }
   catch (verifyErr) {
-    throw verifyErr;
+    throw new M.ServerError(verifyErr.message, 'warn');
   }
   // Check password is valid
   if (!result) {
@@ -112,7 +112,7 @@ async function handleTokenAuth(req, res, token) {
   // If NOT decrypted, not valid and the
   // user is not authorized
   catch (decryptErr) {
-    throw decryptErr;
+    throw new M.AuthorizationError(decryptErr.message, 'warn');
   }
 
   // Ensure token not expired
@@ -126,7 +126,7 @@ async function handleTokenAuth(req, res, token) {
       });
     }
     catch (findUserTokenErr) {
-      throw findUserTokenErr;
+      throw new M.AuthorizationError(findUserTokenErr.message, 'warn');
     }
     // A valid session was found in the request but the user no longer exists
     if (!user) {
