@@ -1,17 +1,46 @@
 /**
-* Classification: UNCLASSIFIED
-*
-* @module models.branch
-*
-* @copyright Copyright (C) 2018, Lockheed Martin Corporation
-*
-* @license LMPI - Lockheed Martin Proprietary Information
-*
-* @author Josh Kaplan <joshua.d.kaplan@lmco.com>
-* @author Leah De Laurell <leah.p.delaurell@lmco.com>
-*
-* @description Defines the branch data model.
-*/
+ * Classification: UNCLASSIFIED
+ *
+ * @module models.branch
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ *
+ * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description
+ * <p>This module defines the branch data model. Branches contain elements which
+ * make up a model. Every branch should at least contain 4 elements. The root
+ * "model" element contains an "__mbee__" package, which contains an "undefined"
+ * element and "holding_bin". Every element that gets created is placed under
+ * the root model element unless otherwise specified. Branches contain two
+ * unique fields, a reference to the source branch and a boolean field denoting
+ * if the branch is a tag. Branches also have the ability to store custom
+ * meta-data.</p>
+ *
+ * <h4>Source</h4>
+ * <p>The source field is a reference to the branch which the current branch was
+ * branched from. The value stored in this field should be a concatenated id in
+ * the form org:project:branch. By default, the master branch has a source of
+ * null.</p>
+ *
+ * <h4>Tag</h4>
+ * <p>The tag field is a boolean which is false by default. If true, the branch
+ * becomes a tag and no new elements can be created for that branch and no
+ * elements can be updated or deleted. Tags are designed to be read-only
+ * moments in the model and allow for quick retrieval of the model at a certain
+ * point in time.</p>
+ *
+ * <h4>Custom Data</h4>
+ * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
+ * is stored in an object, and can contain any valid JSON the user desires.
+ * Only users with write and admin permissions on the project can update the
+ * branch's custom data.</p>
+ */
 
 // NPM modules
 const mongoose = require('mongoose');
@@ -57,7 +86,13 @@ const BranchSchema = new mongoose.Schema({
     type: String,
     ref: 'Project',
     required: true,
-    index: true
+    index: true,
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.project.id).test(v);
+      },
+      message: props => `${props.value} is not a valid project ID.`
+    }
   },
   name: {
     type: String,
@@ -66,7 +101,13 @@ const BranchSchema = new mongoose.Schema({
   source: {
     type: String,
     ref: 'Branch',
-    default: null
+    default: null,
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.branch.id).test(v) || (v === null);
+      },
+      message: props => `${props.value} is not a valid source ID.`
+    }
   },
   tag: {
     type: mongoose.Schema.Types.Boolean,

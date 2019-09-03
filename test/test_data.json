@@ -208,41 +208,6 @@
       "custom": {}
     }
   ],
-  "artifacts": [
-    {
-      "id": "artifact00",
-      "filename": "logo.png",
-      "location": "/test/test_files/",
-      "history": [
-        {
-          "hash": "93501d3846512c99e0d52b330419ce7d2e2e566603d278daa493a6e4ec4d5073",
-          "user": "admin"
-        }
-      ]
-    },
-    {
-      "id": "artifact01",
-      "filename": "logo.png",
-      "location": "/test/test_files/",
-      "history": [
-        {
-          "hash": "93501d3846512c99e0d52b330419ce7d2e2e566603d278daa493a6e4ec4d5073",
-          "user": "admin"
-        }
-      ]
-    },
-    {
-      "id": "artifact01",
-      "filename": "mbee-concept.png",
-      "location": "/test/test_files/",
-      "history": [
-        {
-          "hash": "93501d3846512c99e0d52b330419ce7d2e2e566603d278daa493a6e4ec4d5073",
-          "user": "admin"
-        }
-      ]
-    }
-  ],
   "jmi1": [
     { "id": "1",
       "parent": null,

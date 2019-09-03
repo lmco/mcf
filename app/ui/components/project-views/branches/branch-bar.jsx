@@ -52,7 +52,11 @@ class BranchBar extends Component {
     if (event.target.value !== null) {
       const orgId = this.props.project.org;
       const projId = this.props.project.id;
-      const newUrl = `/orgs/${orgId}/projects/${projId}/branches/${event.target.value}/elements`;
+      let newUrl = `/orgs/${orgId}/projects/${projId}/branches/${event.target.value}`;
+
+      // Update URL endpoint if component is on the Search page
+      newUrl = (this.props.searchForm) ? `${newUrl}/search` : `${newUrl}/elements`;
+
       // Reload the place with new branch
       window.location.replace(newUrl);
     }
@@ -63,7 +67,7 @@ class BranchBar extends Component {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches`;
-    const url = `${base}?archived=true&minified=true`;
+    const url = `${base}?includeArchived=true&minified=true`;
 
     // Grab all branches
     $.ajax({
@@ -182,47 +186,51 @@ class BranchBar extends Component {
                 : (<Badge color='secondary'>Archived</Badge>)
               }
             </div>
-            <div className='options-btn'>
-              <UncontrolledButtonDropdown>
-                <DropdownToggle close
-                                id='toggler'
-                                aria-label='Filter'
-                                className='model-dropdown-btn'
-                                size='sm'>
+            { /* Hide Options on Search Form */ }
+            {(this.props.searchForm)
+              ? ''
+              : <div className='options-btn'>
+                <UncontrolledButtonDropdown>
+                  <DropdownToggle close
+                                  id='toggler'
+                                  aria-label='Filter'
+                                  className='model-dropdown-btn'
+                                  size='sm'>
                   <span>
                     <i className='fas fa-ellipsis-v' style={{ fontSize: '15px' }}/>
                   </span>
-                </DropdownToggle>
-                <DropdownMenu className='options-card'>
-                  <div>
-                    <Label check className='minimize'>
-                      <Input type='checkbox'
-                             name='archived'
-                             id='archived'
-                             checked={this.props.archived}
-                             value={this.state.archived}
-                             onChange={this.props.displayArchElems} />
-                      <div style={{ paddingTop: '3px' }}>
-                        Include archived
-                      </div>
-                    </Label>
-                  </div>
-                  <div>
-                    <Label check className='minimize'>
-                      <Input type='checkbox'
-                             name='archived'
-                             id='archived'
-                             checked={this.props.displayIds}
-                             value={this.props.displayIds}
-                             onChange={this.props.toggleIds} />
-                      <div style={{ paddingTop: '3px' }}>
-                        Toggle IDs
-                      </div>
-                    </Label>
-                  </div>
-                </DropdownMenu>
-              </UncontrolledButtonDropdown>
-            </div>
+                  </DropdownToggle>
+                  <DropdownMenu className='options-card'>
+                    <div>
+                      <Label check className='minimize'>
+                        <Input type='checkbox'
+                               name='archived'
+                               id='archived'
+                               checked={this.props.archived}
+                               value={this.state.archived}
+                               onChange={this.props.displayArchElems}/>
+                        <div style={{ paddingTop: '3px' }}>
+                          Include archived
+                        </div>
+                      </Label>
+                    </div>
+                    <div>
+                      <Label check className='minimize'>
+                        <Input type='checkbox'
+                               name='archived'
+                               id='archived'
+                               checked={this.props.displayIds}
+                               value={this.props.displayIds}
+                               onChange={this.props.toggleIds}/>
+                        <div style={{ paddingTop: '3px' }}>
+                          Toggle IDs
+                        </div>
+                      </Label>
+                    </div>
+                  </DropdownMenu>
+                </UncontrolledButtonDropdown>
+              </div>
+            }
           </div>
         </div>
       </React.Fragment>

@@ -243,23 +243,24 @@ module.exports.validateOptions = function(options, validOptions, model) {
   let validSearchOptions = [];
   switch (model.modelName) {
     case 'Organization':
-      validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
       break;
     case 'Project':
-      validSearchOptions = ['name', 'visibility', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      validSearchOptions = ['name', 'visibility', 'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
       break;
     case 'Branch':
-      validSearchOptions = ['tag', 'source', 'name', 'createdBy', 'lastModifiedBy', 'archivedBy'];
+      validSearchOptions = ['tag', 'source', 'name', 'createdBy', 'lastModifiedBy', 'archived',
+        'archivedBy'];
       break;
     case 'Element':
       validSearchOptions = ['parent', 'source', 'target', 'type', 'name', 'createdBy',
-        'lastModifiedBy', 'archivedBy'];
+        'lastModifiedBy', 'archived', 'archivedBy'];
       // Set populateString to include require virtuals
       validatedOptions.populateString = 'contains sourceOf targetOf ';
       break;
     case 'User':
       validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
-        'lastModifiedBy', 'archivedBy'];
+        'lastModifiedBy', 'archived', 'archivedBy'];
       break;
     default:
       throw new M.DataFormatError('No model provided', 'warn');
@@ -314,15 +315,16 @@ module.exports.validateOptions = function(options, validOptions, model) {
       });
     }
 
-    // Handle the archived option
-    if (opt === 'archived') {
+    // Handle the includeArchived option
+    if (opt === 'includeArchived') {
       // Ensure value is a boolean
       if (typeof val !== 'boolean') {
-        throw new M.DataFormatError('The option \'archived\' is not a boolean.', 'warn');
+        throw new M.DataFormatError('The option \'includeArchived\' is not a boolean.', 'warn');
       }
-
-      // Set the field archived in the returnObject
-      validatedOptions.archived = val;
+      // Only set this option if the user is not also specifying 'archived' in the search
+      if (!Object.keys(options).includes('archived')) {
+        validatedOptions.includeArchived = val;
+      }
     }
 
     // Handle the subtree option
@@ -331,9 +333,23 @@ module.exports.validateOptions = function(options, validOptions, model) {
       if (typeof options.subtree !== 'boolean') {
         throw new M.DataFormatError('The option \'subtree\' is not a boolean.', 'warn');
       }
+      // Ensure subtree and rootpath are not both enabled at the same time
+      if (options.rootpath) {
+        throw new M.DataFormatError('Options \'subtree\' and \'rootpath\' cannot be'
+        + ' applied simultaneously', 'warn');
+      }
 
       // Set the subtree option in the returnObject
       validatedOptions.subtree = val;
+    }
+
+    // Handle the rootpath option
+    if (opt === 'rootpath') {
+      // Ensure value is a boolean
+      if (typeof options.rootpath !== 'boolean') {
+        throw new M.DataFormatError('The option \'rootpath\' is not a boolean.', 'warn');
+      }
+      validatedOptions.rootpath = val;
     }
 
     // Handle the fields option
@@ -413,25 +429,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
       validatedOptions.sort[val] = order;
     }
 
-    // Handle the sort option
-    if (opt === 'sort') {
-      // Get rid of the default value
-      returnObject.sort = {};
-      // initialize sort order
-      let order = 1;
-      // If the user has specified sorting in reverse order
-      if (val[0] === '-') {
-        order = -1;
-        val = val.slice(1);
-      }
-      // Handle cases where user is looking for _id
-      if (val === 'id' || val === 'username') {
-        val = '_id';
-      }
-      // Return the parsed sort option in the format {sort_field: order}
-      returnObject.sort[val] = order;
-    }
-
     // Handle the lean option
     if (opt === 'lean') {
       // Ensure the value is a boolean
@@ -445,38 +442,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
   });
 
   return validatedOptions;
-};
-
-/**
- * @description Handles a data stream containing gzipped data.
- *
- * @param {Object} dataStream - The stream object carrying a gzip file
- *
- * @return {Promise} A promise containing the unzipped data
- */
-module.exports.handleGzip = function(dataStream) {
-  // Create the promise to return
-  return new Promise((resolve, reject) => {
-    // We receive the data in chunks so we want to collect the entire file before trying to unzip
-    const chunks = [];
-    dataStream.on('data', (chunk) => {
-      // Hold each chunk in memory
-      chunks.push(chunk);
-    });
-    dataStream.on('end', () => {
-      // Combine the chunks into a single buffer when the stream is done sending
-      const buffer = Buffer.concat(chunks);
-      // Unzip the data
-      zlib.gunzip(buffer, (err, result) => {
-        if (err) {
-          M.log.warn(err.message);
-          return reject(new M.DataFormatError('Could not unzip the provided file', 'warn'));
-        }
-        // Return the unzipped data
-        return resolve(JSON.parse(result.toString()));
-      });
-    });
-  });
 };
 
 /**
