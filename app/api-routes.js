@@ -3997,8 +3997,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *          file:
  *            contentType: application/octet-stream
  *        schema:
- *       - name: body
- *         description: The object containing the new artifact data.
+ *        - name: body
+ *        description: The object containing the new artifact data.
  *         in: body
  *         required: false
  *         schema:
