@@ -125,13 +125,12 @@ async function authenticate(req, res, next) {
         // Log the error
         M.log.error(err.stack);
         if (err.message === 'Invalid username or password.') {
-          error = new M.AuthorizationError('Invalid username or password.', 'warn');
-          req.flash('loginError', err.message);
+          error = new M.AuthorizationError(err.message, 'warn');
         }
         else {
           error = new M.ServerError('Internal Server Error', 'warn');
-          req.flash('loginError', 'Internal Server Error');
         }
+        req.flash('loginError', error.message);
 
         // return proper error for API route or redirect for UI
         return (req.originalUrl.startsWith('/api'))
