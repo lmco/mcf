@@ -442,7 +442,7 @@ async function create(requestingUser, organizationID, projectID, branch, element
       // If element has a source, ensure it has a target and vice versa
       sourceAndTargetValidator(elem, index, orgID, projID, branchID);
       // If the element a source- or target- Namespace, ensure it contains the proper fields
-      sourceTargetNamespaceValidator(elem, index, orgID, projectRefs);
+      sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs);
       index++;
     });
   }
@@ -864,8 +864,8 @@ async function update(requestingUser, organizationID, projectID, branch, element
         elem.target = utils.createID(orgID, projID, branchID, elem.target);
         sourceTargetIDs.push(elem.target);
       }
-      // If the element a source- or target- Namespace, ensure it contains the proper fields
-      sourceTargetNamespaceValidator(elem, index, orgID, projectRefs, sourceTargetIDs);
+      // If the element has a source- or target- Namespace, ensure it contains the proper fields
+      sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs, sourceTargetIDs);
       index++;
     });
   }
@@ -1914,8 +1914,18 @@ async function findElementRootPath(organizationID, projectID, branch, elementID)
   return foundElements;
 }
 
-
-function sourceTargetNamespaceValidator(elem, index, orgID, projectRefs, sourceTargetIDs = null) {
+/**
+ * @description A non-exposed helper function that validates the sourceNamespace and/or
+ * targetNamespace to ensure that
+ *
+ * @param {object} elem - The element object to validate
+ * @param {number} index - The index of the iteration
+ * @param {string} orgID - The id of the organization the element is being posted to or updated on
+ * @param {object} projectRefs - A running list of references to other projects on the same org
+ * @param {object} sourceTargetIDs - A list of source and target IDs to be queried for to ensure
+ * that they exist before being updated
+ */
+function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs, sourceTargetIDs = null) {
   if (elem.hasOwnProperty('sourceNamespace')) {
     assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
     assert.ok(typeof elem.source === 'string', `Element #${index}'s source is not a string.`);
@@ -1933,6 +1943,10 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projectRefs, sourceT
     assert.ok(validOrgs.includes(elem.sourceNamespace.org), 'Element '
       + `#${index}'s source cannot reference elements outside its org `
       + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
+
+    if (elem.sourceNamespace.org === orgID && elem.sourceNamespace.project === projID) {
+      throw new M.DataFormatError('Source Namespace cannot reference the same project.', 'warn');
+    }
 
     // Add project id to projectRefs array. Later we verify these projects
     // exist and have a visibility of 'internal'.
@@ -1971,6 +1985,10 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projectRefs, sourceT
       + `#${index}'s target cannot reference elements outside its org `
       + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
 
+    if (elem.targetNamespace.org === orgID && elem.targetNamespace.project === projID) {
+      throw new M.DataFormatError('Target Namespace cannot reference the same project.', 'warn');
+    }
+
     // Add project id to projectRefs array. Later we verify these projects
     // exist and have a visibility of 'internal'.
     projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
@@ -1991,6 +2009,15 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projectRefs, sourceT
   }
 }
 
+/**
+ * @description A non-exposed helper function that validates the setting of a source and target
+ *
+ * @param {object} elem - The element object to validate
+ * @param {number} index - The index of the iteration
+ * @param {string} orgID - The id of the organization the element is being posted to
+ * @param {string} projID - The id of the project the element is being posted to
+ * @param {string} branchID - The id of the branch the element is being posted to
+ */
 function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
   // If element has a source, ensure it has a target
   if (elem.hasOwnProperty('source')) {
@@ -2009,6 +2036,15 @@ function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
   }
 }
 
+/**
+ * @description A non-exposed helper function that validates the parent of an element being created
+ *
+ * @param {object} elem - The element object to validate
+ * @param {number} index - The index of the iteration
+ * @param {string} orgID - The id of the organization the element is being posted to
+ * @param {string} projID - The id of the project the element is being posted to
+ * @param {string} branchID - The id of the branch the element is being posted to
+ */
 function elementParentCheck(elem, index, orgID, projID, branchID) {
   if (!elem.hasOwnProperty('parent') || elem.parent === null || elem.parent === '') {
     elem.parent = 'model';
@@ -2018,6 +2054,16 @@ function elementParentCheck(elem, index, orgID, projID, branchID) {
   assert.ok(elem.parent !== elem._id, 'Elements parent cannot be self.');
 }
 
+/**
+ * @description A non-exposed helper function that validates the id of an element being created
+ *
+ * @param {object} elem - The element object to validate
+ * @param {number} index - The index of the iteration
+ * @param {string} orgID - The id of the organization the element is being posted to
+ * @param {string} projID - The id of the project the element is being posted to
+ * @param {string} branchID - The id of the branch the element is being posted to
+ * @param {object} arrIDs - An array of element ids being created
+ */
 function elementIDCheck(elem, index, orgID, projID, branchID, arrIDs) {
   // Ensure each element has an id and that it's a string
   assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
