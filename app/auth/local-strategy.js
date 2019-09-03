@@ -60,7 +60,7 @@ async function handleBasicAuth(req, res, username, password) {
     user = await User.findOne({ _id: username, archived: false });
   }
   catch (findUserErr) {
-    throw findUserErr;
+    throw new M.DatabaseError(findUserErr.message, 'warn');
   }
   // Check for empty user
   if (!user) {
@@ -73,7 +73,7 @@ async function handleBasicAuth(req, res, username, password) {
     result = await user.verifyPassword(password);
   }
   catch (verifyErr) {
-    throw verifyErr;
+    throw new M.ServerError(verifyErr.message, 'warn');
   }
   // Check password is valid
   if (!result) {
