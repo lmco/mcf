@@ -484,9 +484,9 @@ function optionArchivedFind(done) {
 function optionSubtreeFind(done) {
   // Get the ID of the element to find
   const elemID = utils.parseID(elements[2]._id).pop();
-  // Create the options object. Search for archived:true since one child element
+  // Create the options object. Search for includeArchived:true since one child element
   // was archived in a previous test
-  const options = { subtree: true, archived: true };
+  const options = { subtree: true, includeArchived: true };
 
   // Find the element and its subtree
   ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options)

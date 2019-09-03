@@ -66,7 +66,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {boolean} [options.subtree = false] - If true, all elements in the subtree of
  * the found elements will also be returned.
@@ -98,6 +98,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for elements with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived elements.  If false,
+ * only returns unarchived elements.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -138,21 +140,25 @@ async function find(requestingUser, organizationID, projectID, branchID, element
   const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
   // Validate the provided options
-  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
-    'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
+  const validatedOptions = utils.validateOptions(options, ['includeArchived',
+    'populate', 'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
 
   // Ensure search options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archivedBy'];
+      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // If the search option is an element reference
@@ -167,7 +173,8 @@ async function find(requestingUser, organizationID, projectID, branchID, element
   }
 
   // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID,
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -177,7 +184,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Find the project and validate that it was found and not archived (unless specified)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    validatedOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -187,7 +194,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Find the branch and validate that it was found and not archived (unless specified)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-    validatedOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
 
   let elementsToFind = [];
 
@@ -223,9 +230,13 @@ async function find(requestingUser, organizationID, projectID, branchID, element
     elementsToFind = await findElementRootPath(orgID, projID, branID, elementToFind);
   }
 
-  // If the archived field is true, remove it from the query
-  if (validatedOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   const promises = [];
@@ -238,9 +249,12 @@ async function find(requestingUser, organizationID, projectID, branchID, element
     // If options.limit is defined an is less that 50k or count is less than 50k, find normally
     if ((validatedOptions.limit > 0 && validatedOptions.limit < 50000) || elementCount < 50000) {
       // Find the elements
-      foundElements = await findHelper(searchQuery, validatedOptions.fieldsString,
-        validatedOptions.limit, validatedOptions.skip, validatedOptions.populateString,
-        validatedOptions.sort, validatedOptions.lean);
+      foundElements = await Element.find(searchQuery, validatedOptions.fieldsString)
+      .skip(validatedOptions.skip)
+      .limit(validatedOptions.limit)
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString)
+      .lean(validatedOptions.lean);
     }
     else {
       // Define batchLimit, batchSkip and numLoops
@@ -267,11 +281,17 @@ async function find(requestingUser, organizationID, projectID, branchID, element
         }
 
         // Add find operation to array of promises
-        promises.push(findHelper(searchQuery, validatedOptions.fieldsString, batchLimit, batchSkip,
-          validatedOptions.populateString, validatedOptions.sort, validatedOptions.lean)
-        .then((elems) => {
-          foundElements = foundElements.concat(elems);
-        }));
+        promises.push(
+          Element.find(searchQuery, validatedOptions.fieldsString)
+          .skip(batchSkip)
+          .limit(batchLimit)
+          .sort(validatedOptions.sort)
+          .populate(validatedOptions.populateString)
+          .lean(validatedOptions.lean)
+          .then((elems) => {
+            foundElements = foundElements.concat(elems);
+          })
+        );
       }
     }
   }
@@ -282,12 +302,17 @@ async function find(requestingUser, organizationID, projectID, branchID, element
       searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
 
       // Add find operation to array of promises
-      promises.push(findHelper(searchQuery, validatedOptions.fieldsString,
-        validatedOptions.limit, validatedOptions.skip, validatedOptions.populateString,
-        validatedOptions.sort, validatedOptions.lean)
-      .then((elems) => {
-        foundElements = foundElements.concat(elems);
-      }));
+      promises.push(
+        Element.find(searchQuery, validatedOptions.fieldsString)
+        .skip(validatedOptions.skip)
+        .limit(validatedOptions.limit)
+        .sort(validatedOptions.sort)
+        .populate(validatedOptions.populateString)
+        .lean(validatedOptions.lean)
+        .then((elems) => {
+          foundElements = foundElements.concat(elems);
+        })
+      );
     }
   }
 
@@ -296,34 +321,6 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
   // Return the found elements
   return foundElements;
-}
-
-/**
- * @description Find helper function which simplifies the actual Element.find()
- * database call
- *
- * @param {Object} query - The query to send to the database
- * @param {string} fields - Fields to include (or not include) in the found objects
- * @param {number} limit - The maximum number of elements to return.
- * @param {number} skip - The number of elements to skip.
- * @param {string} populate - A string containing a space delimited list of
- * fields to populate
- * @param {Object} sort - An optional argument that enables sorting by different fields
- * @param {boolean} lean - If true, returns raw JSON rather than converting to
- * instances of the Element model.
- */
-async function findHelper(query, fields, limit, skip, populate, sort, lean) {
-  if (lean) {
-    return Element.find(query, fields, { limit: limit, skip: skip })
-    .sort(sort)
-    .populate(populate)
-    .lean();
-  }
-  else {
-    return Element.find(query, fields, { limit: limit, skip: skip })
-    .sort(sort)
-    .populate(populate);
-  }
 }
 
 /**
@@ -730,23 +727,12 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     // Split elementIDs list into batches of 50000
     const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      // Add find operation to promises array
-      promises.push(Element.find(tmpQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString).lean()
-      .then((_foundElements) => {
-        populatedElements = populatedElements.concat(_foundElements);
-      }));
-    }
-    else {
-      // Add find operation to promises array
-      promises.push(Element.find(tmpQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString)
-      .then((_foundElements) => {
-        populatedElements = populatedElements.concat(_foundElements);
-      }));
-    }
+    // Add find operation to promises array
+    promises.push(Element.find(tmpQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean)
+    .then((_foundElements) => {
+      populatedElements = populatedElements.concat(_foundElements);
+    }));
   }
 
   // Return when all elements have been found
@@ -1191,23 +1177,12 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     // Split arrIDs list into batches of 50000
     searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      // Add find operation to promises array
-      promises3.push(Element.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString).lean()
-      .then((_foundElements) => {
-        foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
-      }));
-    }
-    else {
-      // Add find operation to promises array
-      promises3.push(Element.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString)
-      .then((_foundElements) => {
-        foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
-      }));
-    }
+    // Add find operation to promises array
+    promises3.push(Element.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean)
+    .then((_foundElements) => {
+      foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+    }));
   }
 
   // Return when all elements have been found
@@ -1583,28 +1558,8 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
   // Find all element IDs and their subtree IDs
   const foundIDs = await findElementTree(orgID, projID, branID, elementsToFind);
 
-  const promises = [];
-  // Error Check: ensure user cannot delete root elements
-  foundIDs.forEach((id) => {
-    const elemID = utils.parseID(id).pop();
-    if (Element.getValidRootElements().includes(elemID)) {
-      throw new M.OperationError(
-        `User cannot delete root element: ${elemID}.`, 'warn'
-      );
-    }
-  });
-
-  // Split elements into batches of 50000 or less
-  for (let i = 0; i < foundIDs.length / 50000; i++) {
-    const batchIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
-    // Delete batch
-    promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
-  }
-  // Return when all deletes have completed
-  await Promise.all(promises);
-
   const uniqueIDsObj = {};
-  // Parse foundIDs and only return unique ones
+  // Parse foundIDs and only delete unique ones
   foundIDs.forEach((id) => {
     if (!uniqueIDsObj[id]) {
       uniqueIDsObj[id] = id;
@@ -1613,9 +1568,45 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
 
   uniqueIDs = Object.keys(uniqueIDsObj);
 
-  // TODO: Change the emitter to return elements rather than ids
+  let promises = [];
+  // Error Check: ensure user cannot delete root elements
+  uniqueIDs.forEach((id) => {
+    const elemID = utils.parseID(id).pop();
+    if (Element.getValidRootElements().includes(elemID)) {
+      throw new M.OperationError(
+        `User cannot delete root element: ${elemID}.`, 'warn'
+      );
+    }
+  });
+
+  M.log.debug(`Attempting to delete ${uniqueIDs.length} on the branch ${foundBranch._id}.`);
+  let elementsToDelete = [];
+  // Find all elements to delete in batches of 50K or less
+  for (let i = 0; i < uniqueIDs.length / 50000; i++) {
+    const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
+    // Find batch
+    promises.push(
+      Element.find({ _id: { $in: batchIDs } }).lean()
+      .then((e) => {
+        elementsToDelete = elementsToDelete.concat(e);
+      })
+    );
+  }
+  // Return when all deletes have completed
+  await Promise.all(promises);
+
+  promises = [];
+  // Split elements into batches of 50000 or less
+  for (let i = 0; i < uniqueIDs.length / 50000; i++) {
+    const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
+    // Delete batch
+    promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
+  }
+  // Return when all deletes have completed
+  await Promise.all(promises);
+
   // Emit the event elements-deleted
-  EventEmitter.emit('elements-deleted', uniqueIDs);
+  EventEmitter.emit('elements-deleted', elementsToDelete);
 
   // Create query to find all relationships which point to deleted elements
   const relQuery = {
@@ -1628,10 +1619,10 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
   // Find all relationships which are now broken
   const relationships = await Element.find(relQuery).lean();
   const bulkArray = [];
-  const promises2 = [];
+  promises = [];
 
   // For each relationship
-  promises2.push(relationships.forEach((rel) => {
+  promises.push(relationships.forEach((rel) => {
     // If the source no longer exists, set it to the undefined element
     if (uniqueIDs.includes(rel.source)) {
       // Reset source to the undefined element
@@ -1652,7 +1643,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     });
   }));
 
-  await Promise.all(promises2);
+  await Promise.all(promises);
 
   // If there are relationships to update, make a bulkWrite() call
   if (bulkArray.length > 0) {
@@ -1661,7 +1652,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
   }
 
   // Return unique IDs of elements deleted
-  return (uniqueIDs);
+  return uniqueIDs;
 }
 
 /**
@@ -1837,7 +1828,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
@@ -1865,6 +1856,8 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for elements with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived elements.  If false,
+ * only returns unarchived elements.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -1891,24 +1884,27 @@ async function search(requestingUser, organizationID, projectID, branchID, query
   const projID = sani.mongo(projectID);
   const branID = sani.mongo(branchID);
   const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
-  let foundElements = [];
 
   // Validate and set the options
-  const validatedOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+  const validatedOptions = utils.validateOptions(options, ['includeArchived',
+    'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
 
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archivedBy'];
+      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
 
@@ -1924,9 +1920,9 @@ async function search(requestingUser, organizationID, projectID, branchID, query
     });
   }
 
-
   // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID, validatedOptions.archived);
+  const organization = await helper.findAndValidate(Org, orgID,
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!organization.permissions[reqUser._id]
     || !organization.permissions[reqUser._id].includes('read'))) {
@@ -1936,7 +1932,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
   // Find the project and validate that it was found and not archived (unless specificed)
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    validatedOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
   // Permissions check
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
@@ -1946,12 +1942,16 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
   // Find the branch and validate that it was found and not archived (unless specificed)
   await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-    validatedOptions.archived);
+    ((options && options.archived) || validatedOptions.includeArchived));
 
   searchQuery.$text = { $search: query };
-  // If the archived field is true, remove it from the query
-  if (validatedOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   // Add sorting by metadata
@@ -1975,25 +1975,13 @@ async function search(requestingUser, organizationID, projectID, branchID, query
   projections.score.$meta = 'textScore';
 
   try {
-    // If the lean option is supplied
-    if (validatedOptions.lean) {
-      // Search for the elements
-      foundElements = await Element.find(searchQuery, projections)
-      .skip(validatedOptions.skip)
-      .limit(validatedOptions.limit)
-      .sort(validatedOptions.sort)
-      .populate(validatedOptions.populateString)
-      .lean();
-    }
-    else {
-      // Search for the elements
-      foundElements = await Element.find(searchQuery, projections)
-      .skip(validatedOptions.skip)
-      .limit(validatedOptions.limit)
-      .sort(validatedOptions.sort)
-      .populate(validatedOptions.populateString);
-    }
-    return foundElements;
+    // Search for the elements
+    return await Element.find(searchQuery, projections)
+    .skip(validatedOptions.skip)
+    .limit(validatedOptions.limit)
+    .sort(validatedOptions.sort)
+    .populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');

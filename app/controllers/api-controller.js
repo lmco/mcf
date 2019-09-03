@@ -269,6 +269,7 @@ async function getOrgs(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
     skip: 'number',
@@ -702,6 +703,7 @@ async function getOrg(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
   };
@@ -1114,6 +1116,7 @@ async function getAllProjects(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
     skip: 'number',
@@ -1208,6 +1211,7 @@ async function getProjects(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
     skip: 'number',
@@ -1646,6 +1650,7 @@ async function getProject(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
   };
@@ -2057,6 +2062,7 @@ async function getUsers(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
     skip: 'number',
@@ -2476,6 +2482,7 @@ async function getUser(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
   };
@@ -2938,6 +2945,7 @@ async function searchUsers(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     archived: 'boolean',
+    includeArchived: 'boolean',
     limit: 'number',
     skip: 'number',
     sort: 'string',
@@ -3114,10 +3122,12 @@ async function getElements(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     subtree: 'boolean',
     fields: 'array',
     limit: 'number',
     skip: 'number',
+    lean: 'boolean',
     sort: 'string',
     ids: 'array',
     format: 'string',
@@ -3595,6 +3605,7 @@ async function searchElements(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     limit: 'number',
     fields: 'array',
     skip: 'number',
@@ -3699,6 +3710,7 @@ async function getElement(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     subtree: 'boolean',
     fields: 'array',
     minified: 'boolean',
@@ -4117,6 +4129,7 @@ async function getBranches(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
     skip: 'number',
@@ -4467,6 +4480,7 @@ async function getBranch(req, res) {
   const validOptions = {
     populate: 'array',
     archived: 'boolean',
+    includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
   };

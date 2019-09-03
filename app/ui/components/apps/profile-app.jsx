@@ -60,7 +60,7 @@ class ProfileApp extends Component {
           const url = `/api/users/${username}`;
           $.ajax({
             method: 'GET',
-            url: `${url}?minified=true&archived=true`,
+            url: `${url}?minified=true&includeArchived=true`,
             statusCode: {
               200: (otherUser) => {
                 // Set states
