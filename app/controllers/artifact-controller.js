@@ -201,8 +201,6 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   try {
     // Find the artifacts
     return await Artifact.find(searchQuery, validatedOptions.fieldsString)
-      .skip(batchSkip)
-      .limit(batchLimit)
       .sort(validatedOptions.sort)
       .populate(validatedOptions.populateString)
       .lean(validatedOptions.lean)
@@ -402,7 +400,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     artObj.archivedBy = (a.archived) ? reqUser._id : null;
     return artObj;
   });
-  const artObjects = Promise.all(artPromises);
+  const artObjects = await Promise.all(artPromises);
   // Save artifact object to the database
   const createdArtifact = await Artifact.insertMany(artObjects);
 

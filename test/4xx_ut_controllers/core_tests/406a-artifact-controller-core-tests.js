@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module  test.306a-artifact-model-tests
+ * @module  test.406a-artifact-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -44,7 +44,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(async () => {
     try {
-      // Coonnect to the database
+      // Connect to the database
       await db.connect();
 
       adminUser = await testUtils.createTestAdmin();
