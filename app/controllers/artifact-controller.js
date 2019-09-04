@@ -390,7 +390,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     }
   }
 
-  const artPromises = artsToCreate.map( (a) => {
+  const artObjects = artsToCreate.map( (a) => {
     const artObj = new Artifact(a);
     artObj.hash = hashedName;
     artObj.history = [newHistoryEntry];
@@ -402,7 +402,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     artObj.archivedBy = (a.archived) ? reqUser._id : null;
     return artObj;
   });
-  const artObjects = await Promise.all(artPromises);
+
   // Save artifact object to the database
   const createdArtifact = await Artifact.insertMany(artObjects);
 

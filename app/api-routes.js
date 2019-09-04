@@ -3924,7 +3924,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: query
  *         type: string
  *         required: false
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
  *                      through.
  *         in: query
@@ -4105,7 +4105,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *               type: object
  *               description: NOTE when updating the custom data, the object
  *                            is completely replaced.
- *             archived:
+ *             includeArchived:
  *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
