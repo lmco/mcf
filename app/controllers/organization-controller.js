@@ -46,6 +46,7 @@ const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-helper');
+const permissions = M.require('lib.permissions');
 
 /**
  * @description This function finds one or many organizations. Depending on the
@@ -228,7 +229,7 @@ async function create(requestingUser, orgs, options) {
   helper.checkParamsDataType('object', orgs, 'Orgs');
   // Create or remove orgs function only: must be admin
   try {
-    assert.ok(requestingUser.admin === true, 'User does not have permissions to create orgs.');
+    assert.ok(permissions.createOrg(requestingUser) === true, 'User does not have permissions to create orgs.');
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
@@ -491,8 +492,7 @@ async function update(requestingUser, orgs, options) {
 
   // Check that the user has admin permissions
   foundOrgs.forEach((org) => {
-    if (!reqUser.admin && (!org.permissions[reqUser._id]
-      || !org.permissions[reqUser._id].includes('admin'))) {
+    if (!permissions.updateOrg(reqUser, org)) {
       throw new M.PermissionError('User does not have permission to update'
         + ` the org [${org._id}].`, 'warn');
     }
@@ -678,8 +678,7 @@ async function update(requestingUser, orgs, options) {
 
 /**
  * @description This function creates one or many orgs. If orgs with matching
- * ids already exist, this function updates those orgs. This function is
- * restricted to system-wide admins ONLY.
+ * ids already exist, this function updates those orgs.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} orgs - Either an array of objects containing
@@ -777,14 +776,13 @@ async function createOrReplace(requestingUser, orgs, options) {
   // Note: if more orgs than found, there must be new orgs
   if (orgsToLookup.length > foundOrgs.length) {
     // Requires global admin to create new orgs
-    assert.ok(reqUser.admin === true, 'User does not have permissions'
+    assert.ok(permissions.createOrg(reqUser) === true, 'User does not have permissions'
       + 'to create or replace orgs.');
   }
 
   // Check that the user has admin permissions
   foundOrgs.forEach((org) => {
-    if (!reqUser.admin && (!org.permissions[reqUser._id]
-      || !org.permissions[reqUser._id].includes('admin'))) {
+    if (!permissions.updateOrg(reqUser, org)) {
       throw new M.PermissionError('User does not have permission to'
         + ` create or replace the org [${org._id}].`, 'warn');
     }
@@ -881,9 +879,10 @@ async function remove(requestingUser, orgs, options) {
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options);
   helper.checkParamsDataType(['object', 'string'], orgs, 'Orgs');
+
   // Only for create or remove orgs: must be an admin
   try {
-    assert.ok(requestingUser.admin === true, 'User does not have permissions to delete orgs.');
+    assert.ok(permissions.deleteOrg(requestingUser) === true, 'User does not have permissions to delete orgs.');
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
