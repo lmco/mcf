@@ -94,11 +94,12 @@ const ArtifactSchema = new mongoose.Schema({
   location: {
     type: String
   },
+  hash: {
+    type: String,
+    required: true
+  },
   history: [{
-    hash: {
-      type: String,
-      required: true
-    },
+    _id: false,
     user: {
       type: String,
       ref: 'User',
@@ -106,7 +107,7 @@ const ArtifactSchema = new mongoose.Schema({
     },
     updatedOn: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
       required: true
     }
   }],

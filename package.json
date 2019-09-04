@@ -21,6 +21,7 @@
     "express-session": "^1.15.6",
     "ldapjs": "^1.0.2",
     "mongoose": "^5.4.14",
+    "multer": "^1.4.2",
     "request": "^2.86.0",
     "swagger-jsdoc": "^3.4.0",
     "swagger-ui-express": "2.0.15",

@@ -72,6 +72,9 @@ const NotFoundError = class NotFoundError extends CustomError {};
 const ServerError = class ServerError extends CustomError {};
 const DatabaseError = class DatabaseError extends CustomError {};
 
+// 501
+const NotImplementedError = class NotImplementedError extends CustomError {};
+
 /**
  * @description Returns an HTTP status code depending on what error is passed in.
  *
@@ -95,6 +98,7 @@ function getStatusCode(error) {
     case 'BrewingError': return 418;
     case 'ServerError': return 500;
     case 'DatabaseError': return 500;
+    case 'NotImplementedError': return 501;
     default: return 500;
   }
 }
@@ -133,5 +137,6 @@ module.exports = {
   PermissionError,
   NotFoundError,
   ServerError,
-  DatabaseError
+  DatabaseError,
+  NotImplementedError
 };
