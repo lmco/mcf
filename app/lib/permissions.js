@@ -237,6 +237,7 @@ function updateProject(user, org, project) {
   if (!project.permissions.hasOwnProperty(user.username)) {
     return false;
   }
+
   return project.permissions[user.username].includes('admin');
 }
 
@@ -361,5 +362,15 @@ function updateElement(user, org, project, branch) {
  * action.
  */
 function deleteElement(user, org, project, branch) {
-  return user.admin;
+  // Admin's can create projects
+  if (user.admin) {
+    return true;
+  }
+
+  // If the visibility is not set to "internal" (i.e. it is "private")
+  // user must have read permissions on project
+  if (!project.permissions.hasOwnProperty(user.username)) {
+    return false;
+  }
+  return project.permissions[user.username].includes('write');
 }

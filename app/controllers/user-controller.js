@@ -47,6 +47,7 @@ const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-helper');
+const permissions = M.require('lib.permissions');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -245,7 +246,7 @@ async function create(requestingUser, users, options) {
   helper.checkParamsDataType('object', users, 'Users');
   // For create user only: requesting user must be admin
   try {
-    assert.ok(requestingUser.admin === true, 'User does not have permissions to create users.');
+    assert.ok(permissions.createUser(requestingUser) === true, 'User does not have permissions to create users.');
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
@@ -477,6 +478,7 @@ async function update(requestingUser, users, options) {
   }
 
   // Ensure user cannot update others, unless sys-admin
+  // TODO: Consider updating logic to permissions library
   if (!reqUser.admin && (arrUsernames.length > 1 || arrUsernames[0] !== reqUser.username)) {
     throw new M.PermissionError('Cannot update other users unless admin.', 'warn');
   }
@@ -654,7 +656,7 @@ async function createOrReplace(requestingUser, users, options) {
   helper.checkParamsDataType('object', users, 'Users');
   // createOrReplace function: requesting user must be admin
   try {
-    assert.ok(requestingUser.admin === true, 'User does not have permissions'
+    assert.ok(permissions.createUser(requestingUser) === true, 'User does not have permissions'
       + 'to replace users.');
   }
   catch (err) {
@@ -800,7 +802,7 @@ async function remove(requestingUser, users, options) {
   helper.checkParams(requestingUser, options);
   helper.checkParamsDataType(['object', 'string'], users, 'Users');
   try {
-    assert.ok(requestingUser.admin === true, 'User does not have permissions to delete users.');
+    assert.ok(permissions.deleteUser(requestingUser) === true, 'User does not have permissions to delete users.');
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
