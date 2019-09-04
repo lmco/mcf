@@ -180,6 +180,9 @@ if (installComplete) {
     },
     DatabaseError: {
       value: M.require('lib.errors').DatabaseError
+    },
+    NotImplementedError: {
+      value: M.require('lib.errors').NotImplementedError
     }
   });
 }

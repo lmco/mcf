@@ -259,12 +259,10 @@ async function create(requestingUser, organizationID, projectID, branch,
   }
   M.log.debug('create(): Start of function');
 
-  try {
-    assert.ok(!Array.isArray(artifacts), 'Artifact create batching not supported.');
+  if (Array.isArray(artifacts)){
+    throw new M.NotImplementedError('Batch creation of artifact not implemented.', 'warn');
   }
-  catch (error) {
-    throw new M.DataFormatError(error.message, 'warn');
-  }
+
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);
   helper.checkParamsDataType('object', artifacts, 'Artifacts');
@@ -404,7 +402,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     artObj.archivedBy = (a.archived) ? reqUser._id : null;
     return artObj;
   });
-  const artObjects = await Promise.all(artPromises);
+  const artObjects = Promise.all(artPromises);
   // Save artifact object to the database
   const createdArtifact = await Artifact.insertMany(artObjects);
 
