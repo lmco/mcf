@@ -65,7 +65,7 @@ const jmi = M.require('lib.jmi-conversions');
  * @param {string} organizationID - The organization ID for the org the project belongs to.
  * @param {string} projectID - The project ID of the Project which is being searched for.
  * @param {string} branch - The branch ID
- * @param {{(string|string[])}} artifacts - The artifacts to find. Can either be
+ * @param {(string|string[])} artifacts - The artifacts to find. Can either be
  * an array of artifact ids, a single artifact id, or not provided, which defaults
  * to every artifact in a project being found.
  * @param {Object} [options] - A parameter that provides supported options.
@@ -73,9 +73,8 @@ const jmi = M.require('lib.jmi-conversions');
  * of the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived = false] - If true, find results will include
  * archived objects.
- * @param {string[]} [options.fields] - An array of fields to return. By default
- * includes the _id, id, and contains. To NOT include a field, provide a '-' in
- * front.
+ * @param {string[]} [options.fields] - An array of fields to return. To NOT include
+ * a field, provide a '-' in front.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
  * number of documents to be returned to the user. A limit of 0 is equivalent to
  * setting no limit.
@@ -99,7 +98,7 @@ const jmi = M.require('lib.jmi-conversions');
  * @return {Promise} Array of found artifact objects
  *
  * @example
- * find({User}, 'orgID', 'projID', 'branchID' ['artifact1', 'artifact2'], { populate: 'project' })
+ * find({User}, 'orgID', 'projID', 'branchID', ['artifact1', 'artifact2'], { populate: 'project' })
  * .then(function(artifacts) {
  *   // Do something with the found artifacts
  * })
@@ -171,7 +170,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   if (!reqUser.admin && (!project.permissions[reqUser._id]
     || !project.permissions[reqUser._id].includes('read'))) {
     throw new M.PermissionError('User does not have permission to get'
-      + ` artifacts on the project [${utils.parseID(project._id).pop()}].`, 'warn');
+      + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
   }
 
   // Find the branch, validate it was found and not archived
@@ -201,40 +200,15 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
 
   try {
     // Find the artifacts
-    return await findHelper(searchQuery, validatedOptions.fieldsString,
-      validatedOptions.limit, validatedOptions.skip, validatedOptions.populateString,
-      validatedOptions.sort, validatedOptions.lean);
+    return await Artifact.find(searchQuery, validatedOptions.fieldsString)
+      .skip(batchSkip)
+      .limit(batchLimit)
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString)
+      .lean(validatedOptions.lean)
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
-  }
-}
-
-/**
- * @description Find helper function which simplifies the actual Artifact.find()
- * database call
- *
- * @param {Object} query - The query to send to the database
- * @param {string} fields - Fields to include (or not include) in the found objects
- * @param {number} limit - The maximum number of artifacts to return.
- * @param {number} skip - The number of artifacts to skip.
- * @param {string} populate - A string containing a space delimited list of
- * fields to populate
- * @param {Object} sort - An optional argument that enables sorting by different fields
- * @param {boolean} lean - If true, returns raw JSON rather than converting to
- * instances of the Artifact model.
- */
-async function findHelper(query, fields, limit, skip, populate, sort, lean) {
-  if (lean) {
-    return Artifact.find(query, fields, { limit: limit, skip: skip })
-    .sort(sort)
-    .populate(populate)
-    .lean();
-  }
-  else {
-    return Artifact.find(query, fields, { limit: limit, skip: skip })
-    .sort(sort)
-    .populate(populate);
   }
 }
 
@@ -258,8 +232,8 @@ async function findHelper(query, fields, limit, skip, populate, sort, lean) {
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {string[]} [options.fields] - An array of fields to return. By default
- * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * @param {string[]} [options.fields] - An array of fields to return.
+ * To NOT include a field, provide a '-' in
  * front.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
@@ -294,7 +268,6 @@ async function create(requestingUser, organizationID, projectID, branch,
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);
   helper.checkParamsDataType('object', artifacts, 'Artifacts');
-  // helper.checkParamsDataType('object', artifactBlob, 'Artifacts'); // TODO: Twice?
 
   // Sanitize input parameters and create function-wide variables
   const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
@@ -367,8 +340,8 @@ async function create(requestingUser, organizationID, projectID, branch,
       });
 
       // Ensure each art has an id and that its a string
-      assert.ok(artifact.hasOwnProperty('id'), `Art #${index} does not have an id.`);
-      assert.ok(typeof artifact.id === 'string', `Art #${index}'s id is not a string.`);
+      assert.ok(artifact.hasOwnProperty('id'), `Artifact #${index} does not have an id.`);
+      assert.ok(typeof artifact.id === 'string', `Artifact #${index}'s id is not a string.`);
       // Check if art with same ID is already being created
       assert.ok(!arrIDs.includes(artifact.id), 'Multiple arts with the same ID '
         + `[${artifact.id}] cannot be created.`);
@@ -419,7 +392,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     }
   }
 
-  const artPromises = artsToCreate.map(async (a) => {
+  const artPromises = artsToCreate.map( (a) => {
     const artObj = new Artifact(a);
     artObj.hash = hashedName;
     artObj.history = [newHistoryEntry];
@@ -471,8 +444,8 @@ async function create(requestingUser, organizationID, projectID, branch,
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {string[]} [options.fields] - An array of fields to return. By default
- * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * @param {string[]} [options.fields] - An array of fields to return.
+ * To NOT include a field, provide a '-' in
  * front.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
@@ -750,8 +723,6 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } }).lean();
   const foundArtifactIDs = await foundArtifacts.map(e => e._id);
   await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
-
-  // TODO: Verify if artifact needs this
   const uniqueIDsObj = {};
 
   // Parse foundIDs and only return unique ones
