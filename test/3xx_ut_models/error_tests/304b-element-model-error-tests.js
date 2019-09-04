@@ -85,7 +85,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Attempts to create an element with an id that is too short.
  */
-function idTooShort(done) {
+async function idTooShort() {
   const elemData = Object.assign({}, testData.elements[0]);
   elemData.project = 'org:proj';
   elemData.branch = 'org:proj:branch';
@@ -97,30 +97,15 @@ function idTooShort(done) {
   // Create element object
   const elemObject = new Element(elemData);
 
-  // Save element
-  elemObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element created successfully.');
-  })
-  .catch((error) => {
-    // If element created successfully, fail the test
-    if (error.message === 'Element created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Element validation failed: _id: '
-        + 'Too few characters in ID');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
+    + 'Too few characters in ID');
 }
 
 /**
  * @description Attempts to create an element with an id that is too long.
  */
-function idTooLong(done) {
+async function idTooLong() {
   const elemData = Object.assign({}, testData.elements[0]);
   elemData.project = 'org:proj';
   elemData.branch = 'org:proj:branch';
@@ -137,30 +122,15 @@ function idTooLong(done) {
   // Create element object
   const elemObject = new Element(elemData);
 
-  // Save element
-  elemObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element created successfully.');
-  })
-  .catch((error) => {
-    // If element created successfully, fail the test
-    if (error.message === 'Element created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Element validation failed: _id: '
-        + 'Too many characters in ID');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
+    + 'Too many characters in ID');
 }
 
 /**
  * @description Attempts to create an element with no id.
  */
-function idNotProvided(done) {
+async function idNotProvided() {
   const elemData = Object.assign({}, testData.elements[0]);
   elemData.project = 'org:proj';
   elemData.branch = 'org:proj:branch';
@@ -169,30 +139,15 @@ function idNotProvided(done) {
   // Create element object
   const elemObject = new Element(elemData);
 
-  // Save element
-  elemObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element created successfully.');
-  })
-  .catch((error) => {
-    // If element created successfully, fail the test
-    if (error.message === 'Element created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Element validation failed: _id: '
-        + 'Path `_id` is required.');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
+    + 'Path `_id` is required.');
 }
 
 /**
  * @description Attempts to create an element with no project.
  */
-function projectNotProvided(done) {
+async function projectNotProvided() {
   const elemData = Object.assign({}, testData.elements[0]);
   elemData._id = `org:proj:branch:${elemData.id}`;
   elemData.branch = 'org:proj:branch';
@@ -201,24 +156,9 @@ function projectNotProvided(done) {
   // Create element object
   const elemObject = new Element(elemData);
 
-  // Save element
-  elemObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element created successfully.');
-  })
-  .catch((error) => {
-    // If element created successfully, fail the test
-    if (error.message === 'Element created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Element validation failed: project: '
-        + 'Path `project` is required.');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: project: '
+    + 'Path `project` is required.');
 }
 
 /**
@@ -251,7 +191,7 @@ async function projectInvalid() {
 /**
  * @description Attempts to create an element with no project.
  */
-function branchNotProvided(done) {
+async function branchNotProvided() {
   const elemData = Object.assign({}, testData.elements[0]);
   elemData._id = `org:proj:branch:${elemData.id}`;
   elemData.project = 'org:proj';
@@ -260,24 +200,9 @@ function branchNotProvided(done) {
   // Create element object
   const elemObject = new Element(elemData);
 
-  // Save element
-  elemObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Element created successfully.');
-  })
-  .catch((error) => {
-    // If element created successfully, fail the test
-    if (error.message === 'Element created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Element validation failed: branch: '
-        + 'Path `branch` is required.');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: branch: '
+    + 'Path `branch` is required.');
 }
 
 /**

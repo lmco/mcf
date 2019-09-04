@@ -79,7 +79,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Attempts to create a branch with an id that is too short.
  */
-function idTooShort(done) {
+async function idTooShort() {
   const branchData = Object.assign({}, testData.branches[0]);
   branchData.project = 'org:proj';
   branchData.branch = 'org:proj:branch';
@@ -90,30 +90,15 @@ function idTooShort(done) {
   // Create branch object
   const branchObject = new Branch(branchData);
 
-  // Save branch
-  branchObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Branch created successfully.');
-  })
-  .catch((error) => {
-    // If branch created successfully, fail the test
-    if (error.message === 'Branch created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Branch validation failed: _id: '
-        + 'Too few characters in ID');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
+    + 'Too few characters in ID');
 }
 
 /**
  * @description Attempts to create a branch with an id that is too long.
  */
-function idTooLong(done) {
+async function idTooLong() {
   const branchData = Object.assign({}, testData.branches[0]);
   branchData.project = 'org:proj';
 
@@ -126,84 +111,39 @@ function idTooLong(done) {
   // Create branch object
   const branchObject = new Branch(branchData);
 
-  // Save branch
-  branchObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Branch created successfully.');
-  })
-  .catch((error) => {
-    // If branch created successfully, fail the test
-    if (error.message === 'Branch created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Branch validation failed: _id: '
-        + 'Too many characters in ID');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
+    + 'Too many characters in ID');
 }
 
 /**
  * @description Attempts to create a branch with no id.
  */
-function idNotProvided(done) {
+async function idNotProvided() {
   const branchData = Object.assign({}, testData.branches[0]);
   branchData.project = 'org:proj';
 
   // Create branch object
   const branchObject = new Branch(branchData);
 
-  // Save branch
-  branchObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Branch created successfully.');
-  })
-  .catch((error) => {
-    // If branch created successfully, fail the test
-    if (error.message === 'Branch created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Branch validation failed: _id: '
-        + 'Path `_id` is required.');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
+    + 'Path `_id` is required.');
 }
 
 /**
  * @description Attempts to create a branch with no project.
  */
-function projectNotProvided(done) {
+async function projectNotProvided() {
   const branchData = Object.assign({}, testData.branches[0]);
   branchData._id = `org:proj:${branchData.id}`;
 
   // Create branch object
   const branchObject = new Branch(branchData);
 
-  // Save branch
-  branchObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Branch created successfully.');
-  })
-  .catch((error) => {
-    // If branch created successfully, fail the test
-    if (error.message === 'Branch created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Branch validation failed: project: '
-        + 'Path `project` is required.');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: project: '
+    + 'Path `project` is required.');
 }
 
 /**

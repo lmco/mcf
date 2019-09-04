@@ -79,7 +79,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Attempts to create a project with an id that is too short.
  */
-function idTooShort(done) {
+async function idTooShort() {
   const projData = Object.assign({}, testData.projects[0]);
   projData.org = 'org';
 
@@ -89,30 +89,15 @@ function idTooShort(done) {
   // Create project object
   const projObject = new Project(projData);
 
-  // Save project
-  projObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Project created successfully.');
-  })
-  .catch((error) => {
-    // If project created successfully, fail the test
-    if (error.message === 'Project created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Project validation failed: _id: '
-        + 'Too few characters in ID');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
+    + 'Too few characters in ID');
 }
 
 /**
  * @description Attempts to create a project with an id that is too long.
  */
-function idTooLong(done) {
+async function idTooLong() {
   const projData = Object.assign({}, testData.projects[0]);
   projData.org = 'org';
 
@@ -123,84 +108,39 @@ function idTooLong(done) {
   // Create project object
   const projObject = new Project(projData);
 
-  // Save project
-  projObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Project created successfully.');
-  })
-  .catch((error) => {
-    // If project created successfully, fail the test
-    if (error.message === 'Project created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Project validation failed: _id: '
-        + 'Too many characters in ID');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
+    + 'Too many characters in ID');
 }
 
 /**
  * @description Attempts to create a project with no id.
  */
-function idNotProvided(done) {
+async function idNotProvided() {
   const projData = Object.assign({}, testData.projects[0]);
   projData.org = 'org';
 
   // Create project object
   const projObject = new Project(projData);
 
-  // Save project
-  projObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Project created successfully.');
-  })
-  .catch((error) => {
-    // If project created successfully, fail the test
-    if (error.message === 'Project created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Project validation failed: _id: '
-        + 'Path `_id` is required.');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
+    + 'Path `_id` is required.');
 }
 
 /**
  * @description Attempts to create a project with no org.
  */
-function orgNotProvided(done) {
+async function orgNotProvided() {
   const projData = Object.assign({}, testData.projects[0]);
   projData._id = `org:${projData.id}`;
 
   // Create project object
   const projObject = new Project(projData);
 
-  // Save project
-  projObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Project created successfully.');
-  })
-  .catch((error) => {
-    // If project created successfully, fail the test
-    if (error.message === 'Project created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Project validation failed: org: '
-        + 'Path `org` is required.');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: org: '
+    + 'Path `org` is required.');
 }
 
 /**
@@ -229,7 +169,7 @@ async function orgInvalid() {
 /**
  * @description Attempts to create a project with no name.
  */
-function nameNotProvided(done) {
+async function nameNotProvided() {
   const projData = Object.assign({}, testData.projects[0]);
   projData._id = `org:${projData.id}`;
   projData.org = 'org';
@@ -240,24 +180,9 @@ function nameNotProvided(done) {
   // Create project object
   const projObject = new Project(projData);
 
-  // Save project
-  projObject.save()
-  .then(() => {
-    // Should not succeed, force to fail
-    chai.assert.fail(true, false, 'Project created successfully.');
-  })
-  .catch((error) => {
-    // If project created successfully, fail the test
-    if (error.message === 'Project created successfully.') {
-      done(error);
-    }
-    else {
-      // Ensure error message is correct
-      chai.expect(error.message).to.equal('Project validation failed: '
-        + 'name: Path `name` is required.');
-      done();
-    }
-  });
+  // Expect save() to fail with specific error message
+  projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
+    + 'name: Path `name` is required.');
 }
 
 /**
