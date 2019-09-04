@@ -466,7 +466,7 @@ module.exports.readCaFile = function() {
  * @param {Object} res - The response object.
  * @param {function} done - The callback function to mark the end of the test.
  */
-module.exports.testResponseLogging = function(responseLength, req, res, done) {
+module.exports.testResponseLogging = async function(responseLength, req, res) {
   // Get the log file path
   const filePath = path.join(M.root, 'logs', M.config.log.file);
 
@@ -484,6 +484,4 @@ module.exports.testResponseLogging = function(responseLength, req, res, done) {
   chai.expect(content[4]).to.equal(`${req.originalUrl}"`);
   chai.expect(content[5]).to.equal(res.statusCode.toString());
   chai.expect(content[6]).to.equal(responseLength.toString());
-
-  done();
 };

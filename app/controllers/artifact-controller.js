@@ -202,6 +202,8 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
     // Find the artifacts
     return await Artifact.find(searchQuery, validatedOptions.fieldsString)
       .sort(validatedOptions.sort)
+      .skip(validatedOptions.skip)
+      .limit(validatedOptions.limit)
       .populate(validatedOptions.populateString)
       .lean(validatedOptions.lean)
   }

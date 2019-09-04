@@ -4785,7 +4785,7 @@ async function deleteBranch(req, res) {
 
 /* -----------------------( Artifacts API Endpoints )------------------------- */
 /**
- * GET /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
  * @description Gets an artifact by its artifact.id, project.id, branch.id and
  * artifact.id.
@@ -4806,7 +4806,8 @@ async function getArtifact(req, res) {
     populate: 'array',
     archived: 'boolean',
     fields: 'array',
-    minified: 'boolean'
+    minified: 'boolean',
+    includeArchived: 'boolean',
   };
 
   // Sanity Check: there should always be a user in the request
@@ -4865,7 +4866,7 @@ async function getArtifact(req, res) {
 }
 
 /**
- * POST /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
  * @description Takes an organization ID, project ID, and artifact ID in the URI
  * along with the request body to create an artifact.
@@ -4898,7 +4899,7 @@ async function postArtifact(req, res) {
 
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.
-      const error = new M.ServerError('Artifact upload failed.');
+      const error = new M.ServerError('Artifact upload failed.', 'warn');
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
@@ -4964,7 +4965,7 @@ async function postArtifact(req, res) {
 }
 
 /**
- * PATCH /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
  * @description Updates the artifact specified in the URI. Takes an org id,
  * project id, and artifact id in the URI and updated properties of the artifact
@@ -5066,7 +5067,7 @@ async function patchArtifact(req, res) {
 }
 
 /**
- * DELETE /api/orgs/:orgid/projects/:projectid/artifacts/:artifactid
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
  * @description Takes an orgid, projectid, artifactid in the URI along with delete
  * options in the body and deletes the corresponding artifact.
