@@ -10,6 +10,7 @@
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author James Eckstein <james.eckstein@lmco.com>
  *
  * @description Provides permission lookup capabilities for MBEE actions.
  */
@@ -19,18 +20,22 @@ module.exports = {
   createOrg,
   createProject,
   createUser,
+  createBranch,
   deleteElement,
   deleteOrg,
   deleteProject,
   deleteUser,
+  deleteBranch,
   readElement,
   readOrg,
   readProject,
   readUser,
+  readBranch,
   updateElement,
   updateOrg,
   updateProject,
-  updateUser
+  updateUser,
+  updateBranch
 };
 
 
@@ -191,7 +196,7 @@ function createProject(user, org) {
  * action.
  */
 function readProject(user, org, project) {
-  // Admin's can create projects
+  // Admin's can read projects
   if (user.admin) {
     return true;
   }
@@ -227,7 +232,7 @@ function readProject(user, org, project) {
  * action.
  */
 function updateProject(user, org, project) {
-  // Admin's can create projects
+  // Admin's can update projects
   if (user.admin) {
     return true;
   }
@@ -265,13 +270,13 @@ function deleteProject(user, org, project) {
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project to add elements to.
- * @params {Object} branch - Param not yet supported.
+ * @params {Branch} branch - Param not yet supported.
  *
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
 function createElement(user, org, project, branch) {
-  // Admin's can create projects
+  // Admin's can create project elements
   if (user.admin) {
     return true;
   }
@@ -292,13 +297,13 @@ function createElement(user, org, project, branch) {
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project containing the elements.
- * @params {Object} branch - Param not yet supported.
+ * @params {Branch} branch - Param not yet supported.
  *
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
 function readElement(user, org, project, branch) {
-// Admin's can create projects
+  // Admin's can read project elements
   if (user.admin) {
     return true;
   }
@@ -329,13 +334,13 @@ function readElement(user, org, project, branch) {
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project containing the elements.
- * @params {Object} branch - Param not yet supported.
+ * @params {Branch} branch - Param not yet supported.
  *
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
 function updateElement(user, org, project, branch) {
-  // Admin's can create projects
+  // Admin's can update project elements
   if (user.admin) {
     return true;
   }
@@ -356,13 +361,13 @@ function updateElement(user, org, project, branch) {
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project containing the elements.
- * @params {Object} branch - Param not yet supported.
+ * @params {Branch} branch - Param not yet supported.
  *
  * @returns {boolean} Whether or not the user has permission to perform the
  * action.
  */
 function deleteElement(user, org, project, branch) {
-  // Admin's can create projects
+  // Admin's can delete project elements
   if (user.admin) {
     return true;
   }
@@ -372,5 +377,122 @@ function deleteElement(user, org, project, branch) {
   if (!project.permissions.hasOwnProperty(user.username)) {
     return false;
   }
+  return project.permissions[user.username].includes('write');
+}
+
+
+/**
+ * @description Verify if user has permission to create branches in
+ * the project.
+ *
+ * @params {User} user - The user object to check permission for.
+ * @params {Organization} org - The org object containing the project.
+ * @params {Project} project - The project to add branches to.
+ *
+ * @returns {boolean} Whether or not the user has permission to perform the
+ * action.
+ */
+function createBranch(user, org, project) {
+  // Admin's can create branches
+  if (user.admin) {
+    return true;
+  }
+
+  // If the visibility is not set to "internal" (i.e. it is "private")
+  // user must have read permissions on project
+  if (!project.permissions.hasOwnProperty(user.username)) {
+    return false;
+  }
+
+  return project.permissions[user.username].includes('write');
+}
+
+
+/**
+ * @description Verify if user has permission to read branches in the
+ * project.
+ *
+ * @params {User} user - The user object to check permission for.
+ * @params {Organization} org - The org object containing the project.
+ * @params {Project} project - The project containing the branch.
+ * @params {Branch} branch - Param not yet supported.
+ *
+ * @returns {boolean} Whether or not the user has permission to perform the
+ * action.
+ */
+function readBranch(user, org, project, branch) {
+  // Admin's can read branches
+  if (user.admin) {
+    return true;
+  }
+
+  // If project visibility is set to "internal", user only needs read
+  // permissions on the org to read the project contents
+  if (project.visibility === 'internal') {
+    // If not admin, user must have write permissions on org.
+    if (!org.permissions.hasOwnProperty(user.username)) {
+      return false;
+    }
+    return org.permissions[user.username].includes('read');
+  }
+
+  // If the visibility is not set to "internal" (i.e. it is "private")
+  // user must have read permissions on project
+  if (!project.permissions.hasOwnProperty(user.username)) {
+    return false;
+  }
+  return project.permissions[user.username].includes('read');
+}
+
+
+/**
+ * @description Verify if user has permission to update project branches.
+ *
+ * @params {User} user - The user object to check permission for.
+ * @params {Organization} org - The org object containing the project.
+ * @params {Project} project - The project containing the branch.
+ * @params {Branch} branch - Param not yet supported.
+ *
+ * @returns {boolean} Whether or not the user has permission to perform the
+ * action.
+ */
+function updateBranch(user, org, project, branch) {
+  // Admin's can update branches
+  if (user.admin) {
+    return true;
+  }
+
+  // If the visibility is not set to "internal" (i.e. it is "private")
+  // user must have read permissions on project
+  if (!project.permissions.hasOwnProperty(user.username)) {
+    return false;
+  }
+  return project.permissions[user.username].includes('write');
+}
+
+
+/**
+ * @description Verify if user has permission to delete the project branches.
+ *
+ * @params {User} user - The user object to check permission for.
+ * @params {Organization} org - The org object containing the project.
+ * @params {Project} project - The project containing the elements.
+ * @params {Branch} branch - Param not yet supported.
+ *
+ * @returns {boolean} Whether or not the user has permission to perform the
+ * action.
+ */
+function deleteBranch(user, org, project, branch) {
+  // Admin's can delete branches
+  if (user.admin) {
+    return true;
+  }
+
+  // If the visibility is not set to "internal" (i.e. it is "private")
+  // user must have read permissions on project
+  if (!project.permissions.hasOwnProperty(user.username)) {
+    return false;
+  }
+
   return project.permissions[user.username].includes('write');
 }
