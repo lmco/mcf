@@ -112,7 +112,7 @@ async function usernameTooLong() {
 
   // Save user
   await userObject.save().should.eventually.be.rejectedWith('User validation failed: _id: '
-    + 'Too many characters in username')
+    + 'Too many characters in username');
 }
 
 /**

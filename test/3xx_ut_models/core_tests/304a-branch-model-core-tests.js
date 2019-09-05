@@ -137,7 +137,9 @@ async function createBranch() {
  */
 async function findBranch() {
   // Find the branch
-  const branch = await Branch.findOne({ _id: utils.createID(project._id, testData.branches[0].id) });
+  const branch = await Branch.findOne(
+    { _id: utils.createID(project._id, testData.branches[0].id) }
+  );
   // Verify found branch is correct
   branch.name.should.equal(testData.branches[0].name);
 }

@@ -144,7 +144,7 @@ async function putWithoutId() {
   let foundOrgs;
   try {
     // Expected error, find valid orgs
-    foundOrgs = await OrgController.find(adminUser, [testOrgObj0.id, testOrgObj1.id])
+    foundOrgs = await OrgController.find(adminUser, [testOrgObj0.id, testOrgObj1.id]);
   }
   catch (error) {
     M.log.error(error);

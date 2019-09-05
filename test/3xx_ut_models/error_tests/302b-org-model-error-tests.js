@@ -117,7 +117,7 @@ async function idNotProvided() {
 
   // Save org
   await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-    + '_id: Path `_id` is required.')
+    + '_id: Path `_id` is required.');
 }
 
 /**
@@ -159,4 +159,3 @@ async function permissionsInvalid() {
     + 'object is not properly formatted.'
   );
 }
-
