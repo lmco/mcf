@@ -59,41 +59,58 @@
   margin: 20px;
 }
 
-.search-results {
-  margin: 20px;
+#search-message {
+  margin-left: 80px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
 
-  .search-result {
+#search-results {
+  width: 82%;
+  padding: 0px;
+  border: 1px solid rgba(0,0,0,0.125);
+  border-radius: .25rem;
+}
 
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    padding: 10px;
-    margin: 20px;
-
-    .search-result-header {
-      span {
-        margin-left: 15px;
-      }
-    }
-
-    .search-result-raw {
-      background-color: #efefef;
-      border: 1px solid #e8e8e8;
-      font-family: Consolas, "Courier New";
-      margin: 20px;
-      overflow: scroll;
-    }
-  }
+.search-body {
+  margin: 1em;
+  font-size: smaller;
+  grid-area: header;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 300;
 }
 
 #search-branch-bar {
   padding: 80px 80px 0px 60px;
 }
 
+#btn-pagination-grp {
+  float: right;
+}
+
+@mixin btn-page {
+  font-size: 0.875rem;
+  border: none;
+  background-color: Transparent;
+  box-shadow: none;
+  color: $color-primary;
+}
+
+#btn-next-result-page, #btn-prev-result-page {
+  @include btn-page;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0,0,0,0.03);
+}
+
 /******************************************************************************
 /*                       Adv Search Form Styling                              *
 /******************************************************************************/
 
-.adv-search {
+.search-container {
   padding: 4px 80px;
   margin-bottom: 20px;
 }

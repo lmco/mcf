@@ -67,7 +67,7 @@ class BranchBar extends Component {
     const orgId = this.props.project.org;
     const projId = this.props.project.id;
     const base = `/api/orgs/${orgId}/projects/${projId}/branches`;
-    const url = `${base}?archived=true&minified=true`;
+    const url = `${base}?includeArchived=true&minified=true`;
 
     // Grab all branches
     $.ajax({

@@ -54,6 +54,8 @@ class Search extends Component {
     this.state = {
       query: getParams.q || null,
       results: null,
+      page: 1,
+      apiUrl: '',
       message: '',
       searchBtnHidden: false
     };
@@ -63,6 +65,7 @@ class Search extends Component {
     this.doSearch = this.doSearch.bind(this);
     this.getAdvResults = this.getAdvResults.bind(this);
     this.toggleSearchBtn = this.toggleSearchBtn.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
   }
 
   componentDidMount() {
@@ -76,12 +79,17 @@ class Search extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  getAdvResults(results, message) {
-    this.setState({ results: results, message: message });
+  getAdvResults(results, message, apiUrl) {
+    this.setState({ results: results, message: message, apiUrl: apiUrl, page: 1 });
   }
 
   toggleSearchBtn() {
     this.setState((prevState) => ({ searchBtnHidden: !prevState.searchBtnHidden }));
+  }
+
+  // Handles prev/next button changes for Search Results
+  handlePageChange(results, page) {
+    this.setState({ results: results, page: page });
   }
 
   doSearch(e) {
@@ -95,7 +103,8 @@ class Search extends Component {
     // Pre-search state resets
     this.setState({
       message: '',
-      results: 'Searching ...'
+      results: 'Searching ...',
+      page: 1
     });
 
     // Disable form submit
@@ -116,10 +125,9 @@ class Search extends Component {
     const url = `/api/orgs/${oid}/projects/${pid}/branches/${bid}/elements/search`;
 
     // Do ajax request
-    const start = new Date();
     $.ajax({
       method: 'GET',
-      url: `${url}?q=${this.state.query}&limit=100&minified=true`,
+      url: `${url}?q=${this.state.query}&limit=11&minified=true`,
       statusCode: {
         401: () => {
           // Refresh when session expires
@@ -128,12 +136,9 @@ class Search extends Component {
       }
     })
     .done(data => {
-      const end = new Date();
-      const elapsed = (end - start) / 1000;
-
       this.setState({
         results: data,
-        message: `Got ${data.length} results in ${elapsed} seconds.`
+        apiUrl: `${url}?q=${this.state.query}&limit=11&minified=true`
       });
     })
     .fail(res => {
@@ -160,7 +165,11 @@ class Search extends Component {
       );
     }
     else if (Array.isArray(this.state.results)) {
-      searchResults = (<SearchResults results={this.state.results}/>);
+      searchResults = (<SearchResults results={this.state.results}
+                                      page={this.state.page}
+                                      apiUrl={this.state.apiUrl}
+                                      handlePageChange={this.handlePageChange}
+                                      {...this.props}/>);
     }
 
     return (
@@ -199,9 +208,10 @@ class Search extends Component {
                             getAdvResults={this.getAdvResults}
                             toggleSearchBtn={this.toggleSearchBtn}
                             options={ options }
+                            uri={this.state.uri}
                             {...this.props}/>
             <div>
-              <div style={{ marginLeft: '40px', fontSize: '12px' }}>
+              <div id='search-message'>
                 {this.state.message}
               </div>
             </div>

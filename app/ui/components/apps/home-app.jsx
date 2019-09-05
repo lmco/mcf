@@ -28,6 +28,7 @@ import List from '../general/list/list.jsx';
 import OrgList from '../home-views/org-list.jsx';
 import Create from '../shared-views/create.jsx';
 import Delete from '../shared-views/delete.jsx';
+import InputGroup from 'reactstrap/es/InputGroup';
 
 // Define HomePage Component
 class HomeApp extends Component {
@@ -49,6 +50,7 @@ class HomeApp extends Component {
       admin: false,
       write: false,
       writePermOrgs: null,
+      displayOrgs: {},
       error: null
     };
 
@@ -61,6 +63,8 @@ class HomeApp extends Component {
     this.handleResize = this.handleResize.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     this.handleCreateToggle = this.handleCreateToggle.bind(this);
+    this.onExpandChange = this.onExpandChange.bind(this);
+    this.handleExpandCollapse = this.handleExpandCollapse.bind(this);
   }
 
   componentDidMount() {
@@ -134,8 +138,14 @@ class HomeApp extends Component {
       this.setState({ admin: user.admin });
     }
 
+    const displayOrgs = {};
+
+    orgs.forEach((org) => {
+      displayOrgs[org.id] = true;
+    });
+
     // Set the org state
-    this.setState({ orgs: orgs });
+    this.setState({ orgs: orgs, displayOrgs: displayOrgs });
   }
 
   componentWillUnmount() {
@@ -167,6 +177,25 @@ class HomeApp extends Component {
     this.setState({ modalCreate: !this.state.modalCreate });
   }
 
+  // Toggle the display value for an org
+  onExpandChange(orgId, value) {
+    const displayOrgs = this.state.displayOrgs;
+    displayOrgs[orgId] = value;
+    this.setState({ displayOrgs: displayOrgs });
+  }
+
+  handleExpandCollapse(event) {
+    const name = event.target.name;
+    const displayOrgs = this.state.displayOrgs;
+    const expanded = (name === 'expand');
+
+    Object.keys(displayOrgs).forEach((org) => {
+      displayOrgs[org] = expanded;
+    });
+
+    this.setState({ displayOrgs: displayOrgs });
+  }
+
   render() {
     // Initialize variables
     let titleClass = 'workspace-title workspace-title-padding';
@@ -177,18 +206,32 @@ class HomeApp extends Component {
       list = this.state.orgs.map(org => {
         const username = this.state.user.username;
 
+        const showProj = (this.state.displayOrgs[org.id]);
+
         if (!this.state.user.admin) {
           if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
-            return (<OrgList org={org} key={`org-key-${org.id}`} user={this.state.user} write={this.state.write}
-                             admin={this.state.admin}/>);
+            return (<OrgList org={org} key={`org-key-${org.id}`}
+                             user={this.state.user}
+                             write={this.state.write}
+                             admin={this.state.admin}
+                             showProjs={showProj}
+                             onExpandChange={this.onExpandChange}/>);
           }
           else {
-            return (<OrgList key={`org-key-${org.id}`} org={org} user={this.state.user} admin={this.state.admin}/>);
+            return (<OrgList org={org} key={`org-key-${org.id}`}
+                             user={this.state.user}
+                             admin={this.state.admin}
+                             showProjs={showProj}
+                             onExpandChange={this.onExpandChange}/>);
           }
         }
         else {
-          return (<OrgList org={org} key={`org-key-${org.id}`} user={this.state.user} write={this.state.write}
-                           admin={this.state.admin}/>);
+          return (<OrgList org={org} key={`org-key-${org.id}`}
+                           user={this.state.user}
+                           write={this.state.write}
+                           admin={this.state.admin}
+                           showProjs={showProj}
+                           onExpandChange={this.onExpandChange}/>);
         }
       });
     }
@@ -245,6 +288,21 @@ class HomeApp extends Component {
               )
             }
           </div>
+          { /* Expand/Collapse Projects */ }
+          <InputGroup id='grp-expand-collapse'>
+            <Button id='btn-expand'
+                    type='button'
+                    name='expand'
+                    onClick={this.handleExpandCollapse}>
+              [ + ]
+            </Button>
+            <Button id='btn-collapse'
+                    type='button'
+                    name='collapse'
+                    onClick={this.handleExpandCollapse}>
+              [ - ]
+            </Button>
+          </InputGroup>
           { /* Verify there are projects */ }
           <div className='extra-padding'>
           {(this.state.orgs.length === 0)

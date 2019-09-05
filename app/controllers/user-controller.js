@@ -47,6 +47,7 @@ const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-helper');
+const permissions = M.require('lib.permissions');
 
 /**
  * @description This function finds one or many users. Depending on the given
@@ -60,7 +61,7 @@ const helper = M.require('lib.controller-helper');
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
+ * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
@@ -83,6 +84,8 @@ const helper = M.require('lib.controller-helper');
  * users that were created by a specific person
  * @param {string} [options.lastModifiedBy] - A string that will search for matches for
  * users that were last modified by a specific person
+ * @param {string} [options.archived] - Search only for archived users.  If false,
+ * only returns unarchived users.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - A string that will search for matches for
  * users that were archived by a specific person
  * @param {boolean} [options.lean = false] - A boolean value that if true
@@ -119,28 +122,36 @@ async function find(requestingUser, users, options) {
     : undefined;
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], User);
+  const validatedOptions = utils.validateOptions(options, ['populate',
+    'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], User);
 
   // Define searchQuery
   const searchQuery = { archived: false };
-  // If the archived field is true, remove it from the query
-  if (validOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
 
   // Ensure search options are valid
   if (options) {
     // List of valid search options
     const validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
-      'lastModifiedBy', 'archivedBy'];
+      'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Check each option for valid search queries
     Object.keys(options).forEach((o) => {
       // If the search option is valid
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // Add the search option to the searchQuery
@@ -166,19 +177,19 @@ async function find(requestingUser, users, options) {
   let foundUser;
   try {
     // If the lean option is supplied
-    if (validOptions.lean) {
+    if (validatedOptions.lean) {
       // Find the users
-      foundUser = await User.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString).lean();
+      foundUser = await User.find(searchQuery, validatedOptions.fieldsString,
+        { limit: validatedOptions.limit, skip: validatedOptions.skip })
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString).lean();
     }
     else {
       // Find the users
-      foundUser = await User.find(searchQuery, validOptions.fieldsString,
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString);
+      foundUser = await User.find(searchQuery, validatedOptions.fieldsString,
+        { limit: validatedOptions.limit, skip: validatedOptions.skip })
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString);
     }
   }
   catch (error) {
@@ -235,7 +246,7 @@ async function create(requestingUser, users, options) {
   helper.checkParamsDataType('object', users, 'Users');
   // For create user only: requesting user must be admin
   try {
-    assert.ok(requestingUser.admin === true, 'User does not have permissions to create users.');
+    assert.ok(permissions.createUser(requestingUser) === true, 'User does not have permissions to create users.');
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
@@ -246,7 +257,7 @@ async function create(requestingUser, users, options) {
   const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], User);
 
   // Define array to store user data
@@ -350,13 +361,13 @@ async function create(requestingUser, users, options) {
   let foundCreatedUsers;
   try {
     // If the lean option is supplied
-    if (validOptions.lean) {
+    if (validatedOptions.lean) {
       foundCreatedUsers = await User.find({ _id: { $in: arrUsernames } },
-        validOptions.fieldsString).populate(validOptions.populateString).lean();
+        validatedOptions.fieldsString).populate(validatedOptions.populateString).lean();
     }
     else {
       foundCreatedUsers = await User.find({ _id: { $in: arrUsernames } },
-        validOptions.fieldsString).populate(validOptions.populateString);
+        validatedOptions.fieldsString).populate(validatedOptions.populateString);
     }
   }
   catch (error) {
@@ -425,7 +436,7 @@ async function update(requestingUser, users, options) {
   const duplicateCheck = {};
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], User);
 
   // Check the type of the users parameter
@@ -467,6 +478,7 @@ async function update(requestingUser, users, options) {
   }
 
   // Ensure user cannot update others, unless sys-admin
+  // TODO: Consider updating logic to permissions library
   if (!reqUser.admin && (arrUsernames.length > 1 || arrUsernames[0] !== reqUser.username)) {
     throw new M.PermissionError('Cannot update other users unless admin.', 'warn');
   }
@@ -579,13 +591,13 @@ async function update(requestingUser, users, options) {
   let foundUpdatedUsers;
   try {
     // If the lean option is supplied
-    if (validOptions.lean) {
-      foundUpdatedUsers = await User.find(searchQuery, validOptions.fieldsString)
-      .populate(validOptions.populateString).lean();
+    if (validatedOptions.lean) {
+      foundUpdatedUsers = await User.find(searchQuery, validatedOptions.fieldsString)
+      .populate(validatedOptions.populateString).lean();
     }
     else {
-      foundUpdatedUsers = await User.find(searchQuery, validOptions.fieldsString)
-      .populate(validOptions.populateString);
+      foundUpdatedUsers = await User.find(searchQuery, validatedOptions.fieldsString)
+      .populate(validatedOptions.populateString);
     }
   }
   catch (error) {
@@ -644,7 +656,7 @@ async function createOrReplace(requestingUser, users, options) {
   helper.checkParamsDataType('object', users, 'Users');
   // createOrReplace function: requesting user must be admin
   try {
-    assert.ok(requestingUser.admin === true, 'User does not have permissions'
+    assert.ok(permissions.createUser(requestingUser) === true, 'User does not have permissions'
       + 'to replace users.');
   }
   catch (err) {
@@ -790,7 +802,7 @@ async function remove(requestingUser, users, options) {
   helper.checkParams(requestingUser, options);
   helper.checkParamsDataType(['object', 'string'], users, 'Users');
   try {
-    assert.ok(requestingUser.admin === true, 'User does not have permissions to delete users.');
+    assert.ok(permissions.deleteUser(requestingUser) === true, 'User does not have permissions to delete users.');
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
@@ -951,42 +963,66 @@ async function search(requestingUser, query, options) {
   const searchQuery = { archived: false };
 
   // Validate and set the options
-  const validOptions = utils.validateOptions(options, ['archived', 'populate',
-    'limit', 'skip', 'lean', 'sort'], User);
+  const validatedOptions = utils.validateOptions(options, ['populate',
+    'limit', 'skip', 'lean', 'sort', 'includeArchived'], User);
+
+  // Ensure search options are valid
+  if (options) {
+    // List of valid search options
+    const validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
+      'lastModifiedBy', 'archived', 'archivedBy'];
+
+    // Check each option for valid search queries
+    Object.keys(options).forEach((o) => {
+      // If the search option is valid
+      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
+        // Ensure the search option is a string
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
+          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+        }
+        // Add the search option to the searchQuery
+        searchQuery[o] = sani.mongo(options[o]);
+      }
+    });
+  }
 
   // Add text to search query
   searchQuery.$text = { $search: query };
-  // If the archived field is true, remove it from the query
-  if (validOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
   }
 
   // Add sorting by metadata
   // If no sorting option was specified ($natural is the default) then remove
   // $natural. $natural does not work with metadata sorting
-  if (validOptions.sort.$natural) {
-    validOptions.sort = { score: { $meta: 'textScore' } };
+  if (validatedOptions.sort.$natural) {
+    validatedOptions.sort = { score: { $meta: 'textScore' } };
   }
   else {
-    validOptions.sort.score = { $meta: 'textScore' };
+    validatedOptions.sort.score = { $meta: 'textScore' };
   }
 
   let foundUsers;
   try {
     // If the lean option is supplied
-    if (validOptions.lean) {
+    if (validatedOptions.lean) {
       // Search for the user
       foundUsers = await User.find(searchQuery, { score: { $meta: 'textScore' } },
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString).lean();
+        { limit: validatedOptions.limit, skip: validatedOptions.skip })
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString).lean();
     }
     else {
       // Search for the user
       foundUsers = await User.find(searchQuery, { score: { $meta: 'textScore' } },
-        { limit: validOptions.limit, skip: validOptions.skip })
-      .sort(validOptions.sort)
-      .populate(validOptions.populateString);
+        { limit: validatedOptions.limit, skip: validatedOptions.skip })
+      .sort(validatedOptions.sort)
+      .populate(validatedOptions.populateString);
     }
   }
   catch (error) {
