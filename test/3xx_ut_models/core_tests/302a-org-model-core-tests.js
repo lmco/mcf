@@ -21,6 +21,11 @@
 
 // NPM modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Org = M.require('models.organization');
@@ -91,7 +96,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Creates an organization using the Organization model.
  */
-function createOrg(done) {
+async function createOrg() {
   // Create an organization from the Organization model object
   const org = new Org({
     _id: testData.orgs[0].id,
@@ -102,125 +107,117 @@ function createOrg(done) {
       read: [userAdmin._id]
     }
   });
-  // Save the Organization model object to the database
-  org.save()
-  .then(() => done())
-  .catch((error) => {
+  try {
+    // Save the Organization model object to the database
+    await org.save();
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Finds an organization using the Organization Model
  */
-function findOrg(done) {
-  // Find the created organization from the previous createOrg() test
-  Org.findOne({ _id: testData.orgs[0].id })
-  .then((org) => {
-    // Verify correct org is returned
-    chai.expect(org.id).to.equal(testData.orgs[0].id);
-    chai.expect(org._id).to.equal(testData.orgs[0].id);
-    chai.expect(org.name).to.equal(testData.orgs[0].name);
-    done();
-  })
-  .catch((error) => {
+async function findOrg() {
+  let org;
+  try {
+    // Find the created organization from the previous createOrg() test
+    org = await Org.findOne({ _id: testData.orgs[0].id });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Verify correct org is returned
+  org.id.should.equal(testData.orgs[0].id);
+  org._id.should.equal(testData.orgs[0].id);
+  org.name.should.equal(testData.orgs[0].name);
 }
 
 /**
  * @description Updates an organization using the Organization Model
  */
-function updateOrg(done) {
-  // Find and update the org created in the previous createOrg() test
-  Org.findOne({ _id: testData.orgs[0].id })
-  .then((foundOrg) => {
+async function updateOrg() {
+  try {
+    // Find and update the org created in the previous createOrg() test
+    const foundOrg = await Org.findOne({ _id: testData.orgs[0].id });
     foundOrg.name = testData.orgs[0].name;
-    return foundOrg.save();
-  })
-  .then((updatedOrg) => {
+    const updatedOrg = await foundOrg.save();
     // Verify org is updated correctly
-    chai.expect(updatedOrg.id).to.equal(testData.orgs[0].id);
-    chai.expect(updatedOrg.name).to.equal(testData.orgs[0].name);
-    done();
-  })
-  .catch((error) => {
+    updatedOrg.id.should.equal(testData.orgs[0].id);
+    updatedOrg.name.should.equal(testData.orgs[0].name);
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Finds permissions an organization using the Organization Model.
  */
-function findOrgPermissions(done) {
-  // Finds permissions on the org created in the previous createOrg() test
-  Org.findOne({ _id: testData.orgs[0].id })
-  .then((org) => {
-    // Confirming user permissions are in organization
-    chai.expect(org.permissions.write[0].toString()).to.equal(userAdmin._id.toString());
-    done();
-  })
-  .catch((error) => {
+async function findOrgPermissions() {
+  let org;
+  try {
+    // Finds permissions on the org created in the previous createOrg() test
+    org = await Org.findOne({ _id: testData.orgs[0].id });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.eqaul(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Confirming user permissions are in organization
+  org.permissions.write[0].toString().should.equal(userAdmin._id.toString());
 }
 
 /**
  * @description Archives the organization previously created in createOrg().
  */
-function archiveOrg(done) {
+async function archiveOrg() {
   // LM: Changed from findOneAndUpdate to a find and then update
   // findOneAndUpdate does not call setters, and was causing strange
   // behavior with the archived and archivedOn fields.
   // https://stackoverflow.com/questions/18837173/mongoose-setters-only-get-called-when-create-a-new-doc
 
-  // Find the previously created organization from createOrg.
-  Org.findOne({ _id: testData.orgs[0].id })
-  .then((org) => {
+  let org;
+  let foundOrg;
+  try {
+    // Find the previously created organization from createOrg.
+    org = await Org.findOne({ _id: testData.orgs[0].id });
     // Set the archived field of the organization to true
     org.archived = true;
     // Save the updated organization object to the database
-    return org.save();
-  })
-  // Find the previously updated organization
-  .then((org) => Org.findOne({ _id: org.id }))
-  .then((org) => {
-    // Verify the organization has been archived.
-    chai.expect(org.archivedOn).to.not.equal(null);
-    chai.expect(org.archived).to.equal(true);
-    done();
-  })
-  .catch((error) => {
+    await org.save();
+    // Find the previously updated organization
+    foundOrg = await Org.findOne({ _id: org.id });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Verify the organization has been archived.
+  foundOrg.archivedOn.should.not.equal(null);
+  foundOrg.archived.should.equal(true);
 }
 
 /**
  * @description Deletes the previously created organization from createOrg.
  */
-function deleteOrg(done) {
-  // find and remove the organization
-  Org.findOneAndRemove({ _id: testData.orgs[0].id })
-  .then(() => done())
-  .catch((error) => {
+async function deleteOrg() {
+  try {
+    // find and remove the organization
+    await Org.findOneAndRemove({ _id: testData.orgs[0].id });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
 }
