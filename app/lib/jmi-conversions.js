@@ -87,6 +87,16 @@ function jmi12(data, field) {
  * @return {Object} The converted JMI type 3 object.
  */
 function jmi13(data, field) {
+  // Ensure that each element has a parent and contain field
+  if (!data.every(e => e.hasOwnProperty('contains'))) {
+    throw new M.DataFormatError('Elements must have the \'contains\' field to '
+      + 'convert to JMI type 3.');
+  }
+  if (!data.every(e => e.hasOwnProperty('parent'))) {
+    throw new M.DataFormatError('Elements must have the \'parent\' field to '
+      + 'convert to JMI type 3.');
+  }
+
   // Convert the array of objects to JMI2
   const jmi2Obj = jmi12(data, field);
   // Convert the JMI2 object to JMI3
