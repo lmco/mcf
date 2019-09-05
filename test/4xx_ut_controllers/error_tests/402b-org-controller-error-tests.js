@@ -16,6 +16,12 @@
 
 // NPM modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+// Initialize chai should function, used for expecting promise rejections
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const OrgController = M.require('controllers.organization-controller');
@@ -95,66 +101,55 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies invalid Id PUT call does not delete existing orgs.
  */
-function putInvalidId(done) {
+async function putInvalidId() {
   // Create the test org objects
   const testOrgObj0 = testData.orgs[0];
   const testOrgObj1 = testData.orgs[1];
   const invalidOrgObj = { id: 'INVALID_ID', name: 'org name' };
 
-  OrgController.createOrReplace(adminUser,
-    [testOrgObj0, testOrgObj1, invalidOrgObj])
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Org put successfully.'));
-  })
-  .catch((error) => {
-    // Verify the error message
-    chai.expect(error.message).to.equal('Organization validation failed: _id: Path `_id` is invalid (INVALID_ID).');
+  await OrgController.createOrReplace(adminUser, [testOrgObj0, testOrgObj1, invalidOrgObj])
+  .should.eventually.be.rejectedWith(
+    'Organization validation failed: _id: Path `_id` is invalid (INVALID_ID).'
+  );
 
+  let foundOrgs;
+  try {
     // Expected error, find valid orgs
-    return OrgController.find(adminUser, [testOrgObj0.id, testOrgObj1.id]);
-  })
-  .then((foundOrgs) => {
-    // Expect to find 2 orgs
-    chai.expect(foundOrgs.length).to.equal(2);
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.message).to.equal(null);
-    done();
-  });
+    foundOrgs = await OrgController.find(adminUser, [testOrgObj0.id, testOrgObj1.id]);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Expect to find 2 orgs
+  foundOrgs.length.should.equal(2);
 }
 
 /**
  * @description Verifies PUT call without Id does not delete existing orgs.
  * Note: This test should fail prior to deletion of existing orgs.
  */
-function putWithoutId(done) {
+async function putWithoutId() {
   // Create the test org objects
   const testOrgObj0 = testData.orgs[0];
   const testOrgObj1 = testData.orgs[1];
   const invalidOrgObj = { name: 'missing id' };
 
-  OrgController.createOrReplace(adminUser,
+  // Expect
+  await OrgController.createOrReplace(adminUser,
     [testOrgObj0, testOrgObj1, invalidOrgObj])
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Org put successfully.'));
-  })
-  .catch((error) => {
-    // Expected error, find valid orgs
-    OrgController.find(adminUser, [testOrgObj0.id, testOrgObj1.id])
-    .then((foundOrgs) => {
-      // Verify the error message
-      chai.expect(error.message).to.equal('Org #3 does not have an id.');
+  .should.eventually.be.rejectedWith('Org #3 does not have an id.');
 
-      // Expect to find 2 orgs
-      chai.expect(foundOrgs.length).to.equal(2);
-      done();
-    })
-    .catch((err) => {
-      chai.expect(err.message).to.equal(null);
-      done();
-    });
-  });
+  let foundOrgs;
+  try {
+    // Expected error, find valid orgs
+    foundOrgs = await OrgController.find(adminUser, [testOrgObj0.id, testOrgObj1.id])
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+  foundOrgs.length.should.equal(2);
 }
