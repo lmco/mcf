@@ -4002,6 +4002,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      were archived by a specific person.
  *         in: query
  *         type: string
+ *       - name: failedlogins
+ *         description: A hidden option only applied within the API Controller used
+ *                      to populate the failedlogins field when the requesting user
+ *                      is an admin.
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET users, returns user public data.
