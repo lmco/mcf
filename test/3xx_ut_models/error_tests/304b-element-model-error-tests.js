@@ -149,6 +149,11 @@ async function idNotProvided() {
  * @description Attempts to create an element with an invalid id.
  */
 async function invalidID() {
+  if (customValidators.hasOwnProperty('element_id')) {
+    M.log.verbose('Skipping valid element id test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
   const elemData = Object.assign({}, testData.elements[0]);
   elemData.project = 'org:proj';
   elemData.branch = 'org:proj:branch';

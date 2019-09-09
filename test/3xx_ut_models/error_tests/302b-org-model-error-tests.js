@@ -30,6 +30,7 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const customValidators = M.config.validators || {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -111,6 +112,11 @@ async function idTooLong() {
  * @description Attempts to create an org with an invalid ID.
  */
 async function invalidID() {
+  if (customValidators.hasOwnProperty('org_id')) {
+    M.log.verbose('Skipping valid org id test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
   const orgData = Object.assign({}, testData.orgs[0]);
 
   // Change id to be invalid
