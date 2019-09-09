@@ -11,7 +11,9 @@
  *
  * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @description
+ * @description Tests functionality for locking out users after exceeding the
+ * allowed amount of failed login attempts within a specific time period and the
+ * related tracking of such attempts.
  */
 
 // Node modules
