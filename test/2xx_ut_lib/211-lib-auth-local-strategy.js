@@ -243,7 +243,7 @@ async function noAdminLockout() {
   // Expect specific error message for the only active admin user exceeding the login attempts
   await localAuth.handleBasicAuth(req, res, adminUser._id, 'wrongPassword')
   .should.eventually.be.rejectedWith('Incorrect login attempts exceeded '
-      + 'on only active admin account.  Contacting the police.');
+      + 'on only active admin account.');
 
   // The admin user should not be archived
   const foundAdmin = await User.findOne({ _id: adminUser._id });

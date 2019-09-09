@@ -94,10 +94,12 @@ async function handleBasicAuth(req, res, username, password) {
       const admins = await User.find({ admin: true, archived: false }).lean();
       // Check if the user is the only admin
       if (user.admin && admins.length === 1) {
+        // It is recommended that a listener be registered for this event to notify the proper
+        // administrators/authorities
         EventEmitter.emit('sole-admin-failed-login-exceeded', user.username);
         // Throw a critical error
         throw new M.AuthorizationError('Incorrect login attempts exceeded '
-        + 'on only active admin account.  Contacting the police.', 'critical');
+        + 'on only active admin account.', 'critical');
       }
       // Archive the user and throw an error
       else {
