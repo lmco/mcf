@@ -1891,7 +1891,9 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
 
 /**
  * @description A non-exposed helper function that validates the sourceNamespace and/or
- * targetNamespace to ensure that
+ * targetNamespace to ensure that they are formatted properly.  A namespace must contain a
+ * org, project, and branch id and cannot reference the same project.  This function also
+ * pushes to lists of ids keeping track of source, target, and project references
  *
  * @param {object} elem - The element object to validate
  * @param {number} index - The index of the iteration
