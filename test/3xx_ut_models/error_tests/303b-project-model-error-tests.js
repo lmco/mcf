@@ -133,7 +133,7 @@ async function idNotProvided() {
  * @description Attempts to create a project with an invalid id.
  */
 async function invalidID() {
-  if (customValidators.hasOwnProperty('project_id')) {
+  if (customValidators.hasOwnProperty('project_id') || customValidators.hasOwnProperty('id')) {
     M.log.verbose('Skipping valid project id test due to an existing custom'
       + ' validator.');
     this.skip();

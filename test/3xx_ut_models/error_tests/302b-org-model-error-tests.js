@@ -112,7 +112,7 @@ async function idTooLong() {
  * @description Attempts to create an org with an invalid ID.
  */
 async function invalidID() {
-  if (customValidators.hasOwnProperty('org_id')) {
+  if (customValidators.hasOwnProperty('org_id') || customValidators.hasOwnProperty('id')) {
     M.log.verbose('Skipping valid org id test due to an existing custom'
       + ' validator.');
     this.skip();

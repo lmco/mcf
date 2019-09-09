@@ -136,7 +136,7 @@ async function idNotProvided() {
  * @description Attempts to create a branch with an invalid id.
  */
 async function invalidID() {
-  if (customValidators.hasOwnProperty('branch_id')) {
+  if (customValidators.hasOwnProperty('branch_id') || customValidators.hasOwnProperty('id')) {
     M.log.verbose('Skipping valid branch id test due to an existing custom'
       + ' validator.');
     this.skip();
