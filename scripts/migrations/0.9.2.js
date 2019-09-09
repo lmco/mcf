@@ -66,41 +66,106 @@ module.exports.up = async function() {
   // Find all branches
   const branches = await mongoose.connection.db.collection('branches').find({}).toArray();
   // Iterate through the projects to find their elements
-  branches.forEach(async (branch) => {
+  // Using a for loop instead of forEach so that each loop happens sequentially rather than
+  // in parallel so that the database requests don't interrupt each other
+  for (let i = 0; i < branches.length; i++) {
+    const branch = branches[i];
+    // Get project ID
+    let projID = utils.parseID(branch._id);
+    projID.pop();
+    projID = utils.createID(projID);
+
+    // Get the model element
+    const modelID = utils.createID(branch._id, 'model');
+    // eslint-disable-next-line no-await-in-loop
+    const models = await mongoose.connection.db.collection('elements')
+    .find({ _id: modelID }).toArray();
+    const model = models[0];
+
     // Find the __mbee__ element
-    const mbeeID = utils.createID(branch.id, '__mbee__');
+    const mbeeID = utils.createID(branch._id, '__mbee__');
+    // eslint-disable-next-line no-await-in-loop
     const mbeeElem = await mongoose.connection.db.collection('elements')
     .find({ _id: mbeeID }).toArray();
-    if (mbeeElem === []) {
+    if (mbeeElem.length === 0) {
       // create it if it doesn't exist
+      // eslint-disable-next-line no-await-in-loop
       await mongoose.connection.db.collection('elements').insertOne({
         _id: mbeeID,
-        parent: utils.createID(branch.id, 'model')
+        name: '__mbee__',
+        parent: modelID,
+        source: null,
+        target: null,
+        documentation: '',
+        type: '',
+        archivedBy: null,
+        createdBy: model.createdBy,
+        lastModifiedBy: model.lastModifiedBy,
+        archivedOn: null,
+        archived: false,
+        project: projID,
+        branch: branch._id,
+        createdOn: model.createdOn,
+        updatedOn: model.updatedOn
       });
     }
+
     // Find the holding_bin element
-    const holdingBinID = utils.createID(branch.id, 'holding_bin');
+    const holdingBinID = utils.createID(branch._id, 'holding_bin');
+    // eslint-disable-next-line no-await-in-loop
     const holdingBinElem = await mongoose.connection.db.collection('elements')
     .find({ _id: holdingBinID }).toArray();
-    if (holdingBinElem === []) {
+    if (holdingBinElem.length === 0) {
       // create it if it doesn't exist
+      // eslint-disable-next-line no-await-in-loop
       await mongoose.connection.db.collection('elements').insertOne({
         _id: holdingBinID,
-        parent: utils.createID(branch.id, 'model')
+        name: 'holding bin',
+        parent: mbeeID,
+        source: null,
+        target: null,
+        documentation: '',
+        type: '',
+        archivedBy: null,
+        createdBy: model.createdBy,
+        lastModifiedBy: model.lastModifiedBy,
+        archivedOn: null,
+        archived: false,
+        project: projID,
+        branch: branch._id,
+        createdOn: model.createdOn,
+        updatedOn: model.updatedOn
       });
     }
+
     // Find the undefined element
-    const undefinedID = utils.createID(branch.id, 'undefined');
+    const undefinedID = utils.createID(branch._id, 'undefined');
+    // eslint-disable-next-line no-await-in-loop
     const undefinedElem = await mongoose.connection.db.collection('elements')
     .find({ _id: undefinedID }).toArray();
-    if (undefinedElem === []) {
+    if (undefinedElem.length === 0) {
       // create it if it doesn't exist
+      // eslint-disable-next-line no-await-in-loop
       await mongoose.connection.db.collection('elements').insertOne({
         _id: undefinedID,
-        parent: utils.createID(branch.id, 'model')
+        name: 'undefined element',
+        parent: mbeeID,
+        source: null,
+        target: null,
+        documentation: '',
+        type: '',
+        archivedBy: null,
+        createdBy: model.createdBy,
+        lastModifiedBy: model.lastModifiedBy,
+        archivedOn: null,
+        archived: false,
+        project: projID,
+        branch: branch._id,
+        createdOn: model.createdOn,
+        updatedOn: model.updatedOn
       });
     }
-  });
+  }
 
   try {
     // If no server data currently exists, create the document
