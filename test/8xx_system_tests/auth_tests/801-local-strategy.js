@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.211-lib-auth-local-strategy
+ * @module test.auth-tests.801-local-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -69,12 +69,15 @@ describe(M.getModuleName(module.filename), () => {
     }
   });
 
-  /* Execute the tests */
-  it('should log the time and ip address of a failed login attempt', logFailedLogin);
-  it('should only return the failedlogins field if the requesting user is an admin', failedloginsField);
-  it('should archive a user after 5 failed login attempts in 15 minutes', lockoutUser);
-  it('should not archive a user after 5 failed login attempts if that user is the only'
-  + ' non-archived admin', noAdminLockout);
+  // Only execute the tests if local auth strategy is enabled
+  if (M.config.auth.strategy === 'local-strategy' || M.config.auth.strategy === 'local-ldap-strategy') {
+    /* Execute the tests */
+    it('should log the time and ip address of a failed login attempt', logFailedLogin);
+    it('should only return the failedlogins field if the requesting user is an admin', failedloginsField);
+    it('should archive a user after 5 failed login attempts in 15 minutes', lockoutUser);
+    it('should not archive a user after 5 failed login attempts if that user is the only'
+      + ' non-archived admin', noAdminLockout);
+  }
 });
 
 /* --------------------( Tests )-------------------- */
@@ -205,8 +208,8 @@ async function lockoutUser() {
   }
   await localAuth.handleBasicAuth(req, res, user._id, 'wrongPassword')
   .should.eventually.be.rejectedWith(`Account '${user.username}' has been locked after `
-      + 'exceeding allowed number of failed login attempts. '
-      + 'Please contact your local administrator.');
+    + 'exceeding allowed number of failed login attempts. '
+    + 'Please contact your local administrator.');
 
   // Remove the test user
   await UserController.remove(adminUser, user._id);
@@ -221,8 +224,8 @@ async function noAdminLockout() {
   // Skip this test if there are other active admins
   const admins = await User.find({ admin: true, archived: false });
   if (admins.length > 1) {
-    M.log.info('skipping noAdminLockout test, additional admins found on the database');
-    return;
+    M.log.info('Skipping noAdminLockout test; additional admins found on the database.');
+    this.skip();
   }
   // Create mock request object
   const req = {
@@ -243,7 +246,7 @@ async function noAdminLockout() {
   // Expect specific error message for the only active admin user exceeding the login attempts
   await localAuth.handleBasicAuth(req, res, adminUser._id, 'wrongPassword')
   .should.eventually.be.rejectedWith('Incorrect login attempts exceeded '
-      + 'on only active admin account.');
+    + 'on only active admin account.');
 
   // The admin user should not be archived
   const foundAdmin = await User.findOne({ _id: adminUser._id });
