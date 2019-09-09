@@ -69,15 +69,12 @@ describe(M.getModuleName(module.filename), () => {
     }
   });
 
-  // Only execute the tests if local auth strategy is enabled
-  if (M.config.auth.strategy === 'local-strategy' || M.config.auth.strategy === 'local-ldap-strategy') {
-    /* Execute the tests */
-    it('should log the time and ip address of a failed login attempt', logFailedLogin);
-    it('should only return the failedlogins field if the requesting user is an admin', failedloginsField);
-    it('should archive a user after 5 failed login attempts in 15 minutes', lockoutUser);
-    it('should not archive a user after 5 failed login attempts if that user is the only'
-      + ' non-archived admin', noAdminLockout);
-  }
+  /* Execute the tests */
+  it('should log the time and ip address of a failed login attempt', logFailedLogin);
+  it('should only return the failedlogins field if the requesting user is an admin', failedloginsField);
+  it('should archive a user after 5 failed login attempts in 15 minutes', lockoutUser);
+  it('should not archive a user after 5 failed login attempts if that user is the only'
+    + ' non-archived admin', noAdminLockout);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -86,6 +83,10 @@ describe(M.getModuleName(module.filename), () => {
  * address of a failed login attempt
  */
 async function logFailedLogin() {
+  if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
+    M.log.verbose('Test skipped because local auth strategy is not enabled');
+    this.skip();
+  }
   // Create a test user
   const userData = testData.users[0];
 
@@ -125,6 +126,10 @@ async function logFailedLogin() {
  * of a user
  */
 async function failedloginsField() {
+  if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
+    M.log.verbose('Test skipped because local auth strategy is not enabled');
+    this.skip();
+  }
   // Create a test user
   const userData = testData.users[0];
 
@@ -183,6 +188,10 @@ async function failedloginsField() {
  * attempts within a 15 minute window
  */
 async function lockoutUser() {
+  if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
+    M.log.verbose('Test skipped because local auth strategy is not enabled');
+    this.skip();
+  }
   // Create a test user
   const userData = testData.users[0];
 
@@ -220,6 +229,10 @@ async function lockoutUser() {
  * if that user enters five incorrect login attempts in fifteen minutes
  */
 async function noAdminLockout() {
+  if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
+    M.log.verbose('Test skipped because local auth strategy is not enabled');
+    this.skip();
+  }
   // This test will only work if there are no other active admins on the database
   // Skip this test if there are other active admins
   const admins = await User.find({ admin: true, archived: false });
