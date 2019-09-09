@@ -70,6 +70,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject when an element ID is too short', idTooShort);
   it('should reject when an element ID is too long', idTooLong);
   it('should reject if no id (_id) is provided', idNotProvided);
+  it('should reject an invalid element ID', invalidID);
   it('should reject if no project is provided', projectNotProvided);
   it('should reject if a project is invalid', projectInvalid);
   it('should reject if no branch is provided', branchNotProvided);
@@ -142,6 +143,26 @@ async function idNotProvided() {
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
     + 'Path `_id` is required.');
+}
+
+/**
+ * @description Attempts to create an element with an invalid id.
+ */
+async function invalidID() {
+  const elemData = Object.assign({}, testData.elements[0]);
+  elemData.project = 'org:proj';
+  elemData.branch = 'org:proj:branch';
+  elemData.parent = 'org:proj:branch:model';
+
+  // Change id to be invalid
+  elemData._id = 'INVALID_ID';
+
+  // Create element object
+  const elemObject = new Element(elemData);
+
+  // Expect save() to fail with specific error message
+  await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: '
+    + `_id: Path \`_id\` is invalid (${elemData._id})`);
 }
 
 /**

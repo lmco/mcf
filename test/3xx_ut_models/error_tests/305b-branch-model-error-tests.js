@@ -70,6 +70,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject when a branch ID is too short', idTooShort);
   it('should reject when a branch ID is too long', idTooLong);
   it('should reject if no id (_id) is provided', idNotProvided);
+  it('should reject an invalid branch ID', invalidID);
   it('should reject if no project is provided', projectNotProvided);
   it('should reject if the project is invalid', projectInvalid);
   it('should reject if the source is invalid', sourceInvalid);
@@ -129,6 +130,24 @@ async function idNotProvided() {
   // Expect save() to fail with specific error message
   await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
     + 'Path `_id` is required.');
+}
+
+/**
+ * @description Attempts to create a branch with an invalid id.
+ */
+async function invalidID() {
+  const branchData = Object.assign({}, testData.branches[0]);
+  branchData.project = 'org:proj';
+
+  // Change id to be invalid.
+  branchData._id = 'INVALID_ID';
+
+  // Create branch object
+  const branchObject = new Branch(branchData);
+
+  // Expect save() to fail with specific error message
+  await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: '
+    + `_id: Path \`_id\` is invalid (${branchData._id})`);
 }
 
 /**

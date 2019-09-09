@@ -68,6 +68,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject when a project ID is too short', idTooShort);
   it('should reject when a project ID is too long', idTooLong);
   it('should reject if no id (_id) is provided', idNotProvided);
+  it('should reject an invalid project ID', invalidID);
   it('should reject if no org is provided', orgNotProvided);
   it('should reject if the org is invalid', orgInvalid);
   it('should reject if no name is provided', nameNotProvided);
@@ -126,6 +127,24 @@ async function idNotProvided() {
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
     + 'Path `_id` is required.');
+}
+
+/**
+ * @description Attempts to create a project with an invalid id.
+ */
+async function invalidID() {
+  const projData = Object.assign({}, testData.projects[0]);
+  projData.org = 'org';
+
+  // Change id to be invalid
+  projData._id = 'INVALID_ID';
+
+  // Create project object
+  const projObject = new Project(projData);
+
+  // Expect save() to fail with specific error message
+  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
+    + `_id: Path \`_id\` is invalid (${projData._id})`);
 }
 
 /**
