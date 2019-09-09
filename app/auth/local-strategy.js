@@ -89,7 +89,8 @@ async function handleBasicAuth(req, res, username, password) {
       });
     // Check if user has entered an incorrect password five times in the past 15 minutes
     if (user.failedlogins[user.failedlogins.length - 4]
-      && user.failedlogins[user.failedlogins.length - 4].timestamp > Date.now() - 15 * 60 * 1000) {
+      && user.failedlogins[user.failedlogins.length - 4].timestamp
+      > Date.now() - 15 * utils.timeConversions.MINUTES) {
       // Count the number of non-archived admins in the database
       const admins = await User.find({ admin: true, archived: false }).lean();
       // Check if the user is the only admin
