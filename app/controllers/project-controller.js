@@ -397,6 +397,7 @@ async function create(requestingUser, organizationID, projects, options) {
     projObj.createdBy = reqUser._id;
     projObj.updatedOn = Date.now();
     projObj.archivedBy = (projObj.archived) ? reqUser._id : null;
+    projObj.archivedOn = (projObj.archived) ? Date.now() : null;
     return projObj;
   });
 

@@ -350,6 +350,7 @@ async function create(requestingUser, orgs, options) {
     orgObj.createdBy = reqUser._id;
     orgObj.updatedOn = Date.now();
     orgObj.archivedBy = (orgObj.archived) ? reqUser._id : null;
+    orgObj.archivedOn = (orgObj.archived) ? Date.now() : null;
     return orgObj;
   });
 

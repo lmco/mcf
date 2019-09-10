@@ -192,6 +192,7 @@ async function archiveOrg() {
     org = await Org.findOne({ _id: testData.orgs[0].id });
     // Set the archived field of the organization to true
     org.archived = true;
+    org.archivedOn = Date.now();
     // Save the updated organization object to the database
     await org.save();
     // Find the previously updated organization

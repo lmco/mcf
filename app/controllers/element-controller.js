@@ -523,6 +523,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     elemObj.createdBy = reqUser._id;
     elemObj.updatedOn = Date.now();
     elemObj.archivedBy = (elemObj.archived) ? reqUser._id : null;
+    elemObj.archivedOn = (elemObj.archived) ? Date.now() : null;
 
     // Add hidden fields
     elemObj.$parent = elemObj.parent;

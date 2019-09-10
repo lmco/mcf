@@ -47,13 +47,7 @@ module.exports = function extensionPlugin(schema) {
     },
     archived: {
       type: Boolean,
-      default: false,
-      set: function(v) {
-        if (v) {
-          this.archivedOn = Date.now();
-        }
-        return v;
-      }
+      default: false
     }
   });
 
