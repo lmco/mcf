@@ -110,15 +110,10 @@ module.exports.up = async function() {
     const model = models.filter((m) => m._id === modelID)[0];
     // Get the name
     let name = null;
-    switch (id) {
-      case '__mbee__':
-        name = id; break;
-      case 'holding_bin':
-        name = 'holding bin'; break;
-      case 'undefined':
-        name = 'undefined element'; break;
-      default: break;
-    }
+    if (id === '__mbee__') name = id;
+    else if (id === 'holding_bin') name = 'holding bin';
+    else if (id === 'undefined') name = 'undefined element';
+    // Return the element object
     return {
       _id: elemID,
       name: name,
