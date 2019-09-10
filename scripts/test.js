@@ -19,9 +19,10 @@
 const fs = require('fs');
 const path = require('path');
 const Mocha = require('mocha');
-require('@babel/register')();
-require('@babel/polyfill');
-require(path.join(M.root, 'test', 'set-up.jsx'));
+
+require('@babel/register')();        // Transpile react tests to javascript
+require('@babel/polyfill');          // Transpile async await for javascript
+require(path.join(M.root, 'test', 'set-up.jsx'));  // Configuring the JSDOM for react tests
 
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
