@@ -328,6 +328,7 @@ async function create(requestingUser, users, options) {
     userObj.createdBy = reqUser._id;
     userObj.updatedOn = Date.now();
     userObj.archivedBy = (userObj.archived) ? reqUser._id : null;
+    userObj.archivedOn = (userObj.archived) ? Date.now() : null;
     userObj.hashPassword();
     return userObj;
   });
