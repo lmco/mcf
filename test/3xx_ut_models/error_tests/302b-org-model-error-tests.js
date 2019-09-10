@@ -30,6 +30,7 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const customValidators = M.config.validators || {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -66,6 +67,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   it('should reject when an org ID is too short', idTooShort);
   it('should reject when an org ID is too long', idTooLong);
+  it('should reject an invalid org ID', invalidID);
   it('should reject if no id (_id) is provided', idNotProvided);
   it('should reject if no name is provided', nameNotProvided);
   it('should reject if the permissions object in invalid', permissionsInvalid);
@@ -104,6 +106,28 @@ async function idTooLong() {
   // Save org
   await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
     + '_id: Too many characters in ID');
+}
+
+/**
+ * @description Attempts to create an org with an invalid ID.
+ */
+async function invalidID() {
+  if (customValidators.hasOwnProperty('org_id') || customValidators.hasOwnProperty('id')) {
+    M.log.verbose('Skipping valid org id test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
+  const orgData = Object.assign({}, testData.orgs[0]);
+
+  // Change id to be invalid
+  orgData._id = 'INVALID_ID';
+
+  // Create org object
+  const orgObject = new Org(orgData);
+
+  // Save org
+  await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
+    + `_id: Path \`_id\` is invalid (${orgData._id})`);
 }
 
 /**
