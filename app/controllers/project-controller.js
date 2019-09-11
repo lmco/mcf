@@ -472,7 +472,7 @@ async function create(requestingUser, organizationID, projects, options) {
     archivedBy: (p.archived) ? reqUser._id : null
   }));
 
-  // Create a undefined element for each project
+  // Create an undefined element for each project
   const elemUndefinedBinObj = projObjects.map((p) => new Element({
     _id: utils.createID(p._id, 'master', 'undefined'),
     name: 'undefined element',
