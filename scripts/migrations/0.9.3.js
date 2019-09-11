@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module scripts.migrations.0.9.0
+ * @module scripts.migrations.0.9.3
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
