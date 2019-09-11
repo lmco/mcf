@@ -81,19 +81,6 @@ module.exports.up = async function() {
   // Filter to find any missing elements
   const missingElemIDs = expectedElems.filter((e) => !foundElemIDs.includes(e));
 
-  // Get the ids of the affected branches
-  const affectedBranches = await missingElemIDs.map((id) => {
-    const ids = utils.parseID(id);
-    ids.pop();
-    return utils.createID(ids);
-  })
-  // (no duplicates)
-  .filter((value, index, self) => self.indexOf(value) === index);
-
-  // Get the model element for each missing element
-  const modelIDs = await affectedBranches.map((branchID) => utils.createID(branchID, 'model'));
-  const models = await Element.find({ _id: modelIDs }).lean();
-
   // Create missing element objects
   const missingElems = missingElemIDs.map((elemID) => {
     const ids = utils.parseID(elemID);
@@ -101,36 +88,44 @@ module.exports.up = async function() {
     const id = ids.pop();
     // Get the branch id
     const branchID = utils.createID(ids);
-    // Get the model id
-    const modelID = utils.createID(branchID, 'model');
     // Get the project id
     ids.pop();
     const projID = utils.createID(ids);
-    // Get the model
-    const model = models.filter((m) => m._id === modelID)[0];
-    // Get the name
+    // Get the branch
+    const branch = branches.filter((b) => b._id === branchID)[0];
+    // Get the name and parent
     let name = null;
-    if (id === '__mbee__') name = id;
-    else if (id === 'holding_bin') name = 'holding bin';
-    else if (id === 'undefined') name = 'undefined element';
+    let parent = null;
+    if (id === '__mbee__') {
+      name = id;
+      parent = utils.createID(branchID, 'model');
+    }
+    else if (id === 'holding_bin') {
+      name = 'holding bin';
+      parent = utils.createID(branchID, '__mbee__');
+    }
+    else if (id === 'undefined') {
+      name = 'undefined element';
+      parent = utils.createID(branchID, '__mbee__');
+    }
     // Return the element object
     return {
       _id: elemID,
       name: name,
-      parent: modelID,
+      parent: parent,
       source: null,
       target: null,
       documentation: '',
       type: '',
       archivedBy: null,
-      createdBy: model.createdBy,
-      lastModifiedBy: model.lastModifiedBy,
+      createdBy: branch.createdBy,
+      lastModifiedBy: branch.createdBy,
       archivedOn: null,
       archived: false,
       project: projID,
       branch: branchID,
-      createdOn: model.createdOn,
-      updatedOn: model.updatedOn
+      createdOn: branch.createdOn,
+      updatedOn: branch.createdOn
     };
   });
 
@@ -144,7 +139,7 @@ module.exports.up = async function() {
     }
     // Otherwise, update the existing server data document
     return await mongoose.connection.db.collection('server_data')
-    .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.3' } });
+    .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.0' } });
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
