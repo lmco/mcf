@@ -139,7 +139,7 @@ module.exports.up = async function() {
     }
     // Otherwise, update the existing server data document
     return await mongoose.connection.db.collection('server_data')
-    .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.0' } });
+    .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.3' } });
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
