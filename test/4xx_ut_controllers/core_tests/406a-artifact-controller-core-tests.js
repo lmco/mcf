@@ -81,7 +81,8 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('should create an artifact', createArtifact);
-  it('should find an artifact', findArtifact);
+  it('should get an artifact blob', getArtifactBlob);
+  it('should get an artifact', getArtifact);
   it('should update an artifact file', updateArtifact);
   it('should delete an artifact', deleteArtifact);
 });
@@ -138,9 +139,49 @@ async function createArtifact() {
 }
 
 /**
+ * @description Gets the artifact blob.
+ */
+async function getArtifactBlob() {
+  const artData = [testData.artifacts[0].id];
+  try {
+    // Find the artifact previously uploaded.
+    const artifact = await ArtifactController.getArtifactBlob(adminUser,
+      org.id, projectID, branchID, artData);
+
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(artifact.blob)).to.equal(true);
+
+    chai.expect(artifact.id).to.equal(
+      utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
+    );
+    chai.expect(artifact.filename).to.equal(
+      testData.artifacts[0].filename
+    );
+    chai.expect(artifact.contentType).to.equal(
+      path.extname(testData.artifacts[0].filename)
+    );
+    chai.expect(artifact.project).to.equal(project._id);
+    chai.expect(artifact.branch).to.equal(
+      utils.createID(org.id, projectID, branchID)
+    );
+    chai.expect(artifact.location).to.equal(
+      testData.artifacts[0].location
+    );
+    chai.expect(artifact.hash).to.equal(testData.artifacts[0].hash);
+    chai.expect(artifact.history[0].user).to.equal(adminUser.id);
+    chai.expect(artifact.history[0].updatedOn).to.not.equal(null);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+  }
+}
+
+/**
  * @description Finds an existing artifact.
  */
-async function findArtifact() {
+async function getArtifact() {
   const artData = [testData.artifacts[0].id];
   try {
     // Find the artifact previously uploaded.

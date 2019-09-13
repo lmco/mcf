@@ -14,19 +14,6 @@
  * @description This implements the behavior and logic for artifacts.
  * It also provides function for interacting with artifacts.
  *
- * An Artifact represents arbitrary data or binary file. Example: PDFs, docx,
- * dat, png, and any other binary file.
- *
- * There are basically two parts to Artifacts. The artifact metadata and the
- * binary blob.
- *
- * Artifact Metadata: This controller directs and stores any metadata of artifacts
- * in the mongo database via mongoose calls.
- *
- * Examples of metadata are artifact IDs, user, and filename.
- *
- * Artifact Blob: The actual binary file. This controller stores blobs on the
- * filesystem utilizing fs library.
  */
 
 // Expose artifact controller functions
@@ -36,14 +23,13 @@ module.exports = {
   find,
   create,
   update,
-  remove
+  remove,
+  getArtifactBlob
 
 };
 
 // Node.js Modules
 const assert = require('assert');
-const fs = require('fs');        // Access the filesystem
-const path = require('path');    // Find directory paths
 
 // MBEE modules
 const Artifact = M.require('models.artifact');
@@ -57,6 +43,22 @@ const validators = M.require('lib.validators');
 const utils = M.require('lib.utils');
 const helper = M.require('lib.controller-helper');
 const jmi = M.require('lib.jmi-conversions');
+const ArtifactModule = M.require(`artifact.${M.config.artifact.strategy}`);
+const errors = M.require('lib.errors');
+
+// Error Check - Verify ArtifactModule is imported and implements required functions
+if (!ArtifactModule.hasOwnProperty('getArtifactBlob')) {
+  M.log.critical(`Error: Artifact Strategy (${M.config.auth.strategy}) does not implement getArtifactBlob.`);
+  process.exit(0);
+}
+if (!ArtifactModule.hasOwnProperty('addArtifactBlob')) {
+  M.log.critical(`Error: Artifact Strategy (${M.config.auth.strategy}) does not implement addArtifactBlob.`);
+  process.exit(0);
+}
+if (!ArtifactModule.hasOwnProperty('removeArtifactBlob')) {
+  M.log.critical(`Error: Artifact Strategy (${M.config.auth.strategy}) does not implement removeArtifactBlob.`);
+  process.exit(0);
+}
 
 /**
  * @description This function finds an artifact based on artifact id.
@@ -127,7 +129,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
   // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
+  const validatedOptions = utils.validateOptions(options, ['getBlob', 'archived', 'populate',
     'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
 
   // Ensure options are valid
@@ -201,11 +203,11 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   try {
     // Find the artifacts
     return await Artifact.find(searchQuery, validatedOptions.fieldsString)
-      .sort(validatedOptions.sort)
-      .skip(validatedOptions.skip)
-      .limit(validatedOptions.limit)
-      .populate(validatedOptions.populateString)
-      .lean(validatedOptions.lean)
+    .sort(validatedOptions.sort)
+    .skip(validatedOptions.skip)
+    .limit(validatedOptions.limit)
+    .populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
@@ -259,7 +261,7 @@ async function create(requestingUser, organizationID, projectID, branch,
   }
   M.log.debug('create(): Start of function');
 
-  if (Array.isArray(artifacts)){
+  if (Array.isArray(artifacts)) {
     throw new M.NotImplementedError('Batch creation of artifact not implemented.', 'warn');
   }
 
@@ -372,25 +374,16 @@ async function create(requestingUser, organizationID, projectID, branch,
     // Generate hash
     hashedName = mbeeCrypto.sha256Hash(artifactBlob);
 
-    // Create the main artifact path
-    const artifactPath = path.join(M.root, M.config.artifact.path);
+    await ArtifactModule.addArtifactBlob(hashedName, artifactBlob);
 
-    const fullPath = path.join(artifactPath,
-      hashedName.substring(0, 2), hashedName);
-
-    // Check if artifact file exist
-    if (!fs.existsSync(fullPath)) {
-      await addArtifactOS(hashedName, artifactBlob);
-
-      // Define new hash history entry
-      newHistoryEntry = {
-        user: reqUser,
-        updatedOn: Date.now()
-      };
-    }
+    // Define new hash history entry
+    newHistoryEntry = {
+      user: reqUser,
+      updatedOn: Date.now()
+    };
   }
 
-  const artObjects = artsToCreate.map( (a) => {
+  const artObjects = artsToCreate.map((a) => {
     const artObj = new Artifact(a);
     artObj.hash = hashedName;
     artObj.history = [newHistoryEntry];
@@ -733,7 +726,7 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
 
   // Loop through artifact history
   foundArtifacts.forEach((a) => {
-    removeArtifactOS(a.hash);
+    ArtifactModule.removeArtifactBlob(a.hash);
   });
 
   // TODO: Change the emitter to return artifacts rather than ids
@@ -745,188 +738,77 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
 }
 
 /**
- * @description This function returns the artifact binary file.
+ * @description This function finds an artifact based on artifact id and
+ * returns the blob.
  *
- * @param {User} reqUser - The user object of the requesting user.
- * @param {String} organizationID - The organization ID.
- * @param {String} projectID - The project ID.
- * @param {String} artifactID - The artifact ID.
+ * @param {User} requestingUser - The requesting user.
+ * @param {string} organizationID - The organization ID for the org the
+ * project belongs to.
+ * @param {string} projectID - The project ID of the Project which is being
+ * searched for.
+ * @param {string} branch - The branch ID
+ * @param {(string|string[])} artifacts - The artifacts to find. Can either be
+ * an array of artifact ids, a single artifact id, or not provided, which
+ * defaults to every artifact in a project being found.
+ * @param {Object} [options] - A parameter that provides supported options.
+ * @param {string[]} [options.populate] - A list of fields to populate on return
+ * of the found objects. By default, no fields are populated.
+ * @param {boolean} [options.includeArchived = false] - If true, find
+ * results will include archived objects.
+ * @param {string[]} [options.fields] - An array of fields to return. By default
+ * includes the _id, id, and contains. To NOT include a field, provide a '-' in
+ * front.
+ * @param {number} [options.limit = 0] - A number that specifies the maximum
+ * number of documents to be returned to the user. A limit of 0 is equivalent to
+ * setting no limit.
+ * @param {number} [options.skip = 0] - A non-negative number that specifies the
+ * number of documents to skip returning. For example, if 10 documents are found
+ * and skip is 5, the first 5 documents will NOT be returned.
+ * @param {boolean} [options.lean = false] - A boolean value that if true
+ * returns raw JSON instead of converting the data to objects.
+ * @param {string} [options.sort] - Provide a particular field to sort the results by.
+ * You may also add a negative sign in front of the field to indicate sorting in
+ * reverse order.
+ * @param {string} [options.createdBy] - Search for artifacts with a specific
+ * createdBy value.
+ * @param {string} [options.lastModifiedBy] - Search for artifacts with a
+ * specific lastModifiedBy value.
+ * @param {string} [options.archivedBy] - Search for artifacts with a specific
+ * archivedBy value.
+ * @param {string} [options.custom....] - Search for any key in custom data. Use
+ * dot notation for the keys. Ex: custom.hello = 'world'
  *
- * @return {Promise} resolve - artifact
- *                   reject - error
- @example
- * getArtifactBlob({User}, 'orgID', 'projectID', 'artifactID')
- * .then(function(artifact) {
- *   // Do something with the found artifact binary
+ * @return {Promise} Artifact objects
+ *
+ * @example
+ * find({User}, 'orgID', 'projID', 'branchID' ['artifact1'], { populate: 'project' })
+ * .then(function(artifacts) {
+ *   // Do something with the found artifacts
  * })
  * .catch(function(error) {
  *   M.log.error(error);
  * });
- */
-// function getArtifactBlob(reqUser, organizationID, projectID, artifactID) {
-//   return new Promise((resolve, reject) => {
-//     let artifactMeta;
-//     findArtifact(reqUser, organizationID, projectID, artifactID)
-//     .then((foundArtifact) => {
-//       // Artifact metadata found, save it
-//       artifactMeta = foundArtifact;
-//
-//       // Get the Artifact Blob
-//       return getArtifactOS(artifactMeta.history[artifactMeta.history.length - 1].hash);
-//     })
-//     .then((ArtifactBlob) => resolve({ artifactBlob: ArtifactBlob, artifactMeta: artifactMeta }))
-//     .catch((error) => {
-//       reject(M.CustomError.parseCustomError(error));
-//     });
-//   });
-// }
+ * */
+async function getArtifactBlob(requestingUser, organizationID,
+  projectID, branch, artifacts, options) {
+  try {
+    const artifact = await find(requestingUser, organizationID,
+      projectID, branch, artifacts, options);
 
-/**
- * @description This function adds the artifact blob file to the file system.
- *
- * @param {string} hashedName - hash name of the file
- * @param {Buffer} artifactBlob - A binary large object artifact
- */
-function addArtifactOS(hashedName, artifactBlob) {
-  return new Promise((resolve, reject) => {
-    // Check hashname for null
-    if (hashedName === null) {
-      // Remote link, return resolve
-      return resolve();
+    // If no artifact found, return 404 error
+    if (artifact.length === 0) {
+      throw new M.NotFoundError(
+        `Artifact [${artifacts[0]}] not found.`, 'warn'
+      );
     }
-    // Creates main artifact directory if not exist
-    createStorageDirectory()
-    .then(() => {
-      // Create the main artifact path
-      const artifactPath = path.join(M.root, M.config.artifact.path);
-      // Set sub folder path and artifact path
-      // Note: Folder name is the first 2 characters from the generated hash
-      const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
-      const filePath = path.join(folderPath, hashedName);
 
-      // Check results
-      if (!fs.existsSync(folderPath)) {
-        // Directory does NOT exist, create it
-        // Note: Use sync to ensure directory created before advancing
-        fs.mkdirSync(folderPath, (makeDirectoryError) => {
-          if (makeDirectoryError) {
-            throw M.CustomError.parseCustomError(makeDirectoryError);
-          }
-        });
-      }
-      // Check if file already exist
-      if (!fs.existsSync(filePath)) {
-        try {
-          // Write out artifact file, defaults to 666 permission.
-          fs.writeFileSync(filePath, artifactBlob);
-        }
-        catch (error) {
-          // Error occurred, log it
-          throw new M.CustomError('Could not create Artifact BLOB.', 500, 'warn');
-        }
-        // Return resolve
-        return resolve();
-      }
-      // Return resolve
-      return resolve();
-    })
-    .catch((error) => reject(M.CustomError.parseCustomError(error)));
-  });
-}
+    const retArtObj = JSON.parse(JSON.stringify(artifact[0]));
 
-/**
- * @description This function removes the artifact blob file and sub folder
- * from the file system.
- *
- * @param {string} hashedName - hash name of the file
- */
-function removeArtifactOS(hashedName) {
-  return new Promise((resolve) => {
-    // Check hashname for null
-    if (hashedName === null) {
-      // Remote link, return resolve
-      return resolve();
-    }
-    // Create the main artifact path
-    const artifactPath = path.join(M.root, M.config.artifact.path);
-    // Create sub folder path and artifact path
-    // Note: Folder name is the first 2 characters from the generated hash
-    const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
-    const filePath = path.join(folderPath, hashedName);
-
-    // Remove the artifact file
-    // Note: Use sync to ensure file is removed before advancing
-    fs.unlinkSync(filePath, (error) => {
-      // Check directory NOT exist
-      if (error) {
-        throw new M.CustomError(error.message, 500, 'warn');
-      }
-    });
-
-    // Check if directory is empty
-    fs.readdir(folderPath, function(err, files) {
-      if (err) {
-        M.log.warn(err);
-      }
-      // Check if empty directory
-      if (!files.length) {
-        // Directory empty, remove it
-        fs.rmdir(folderPath, (error) => {
-          // Check directory NOT exist
-          if (error) {
-            throw new M.CustomError(error.message, 500, 'warn');
-          }
-        });
-      }
-    });
-    return resolve();
-  });
-}
-
-/**
- * @description This function get the artifact blob file
- * from the file system.
- *
- * @param {String} hashedName - hash name of the file
- */
-// function getArtifactOS(hashName) {
-//   return new Promise((resolve, reject) => {
-//     // Create the main artifact path
-//     const artifactPath = path.join(M.root, M.config.artifact.path);
-//     // Create sub folder path and artifact path
-//     // Note: Folder name is the first 2 characters from the generated hash
-//     const folderPath = path.join(artifactPath, hashName.substring(0, 2));
-//     const filePath = path.join(folderPath, hashName);
-//     try {
-//       // Read the artifact file
-//       // Note: Use sync to ensure file is read before advancing
-//       return resolve(fs.readFileSync(filePath));
-//     }
-//     catch (err) {
-//       return reject(new M.CustomError('Artifact binary not found.', 404, 'warn'));
-//     }
-//   });
-// }
-
-/**
- * @description This function creates the artifact storage directory if
- * it doesn't exist.
- */
-function createStorageDirectory() {
-  return new Promise((resolve) => {
-    // Create the main artifact path
-    const artifactPath = path.join(M.root, M.config.artifact.path);
-
-    // Check directory NOT exist
-    if (!fs.existsSync(artifactPath)) {
-      // Directory does NOT exist, create it
-      fs.mkdirSync(artifactPath, (error) => {
-        // Check for errors
-        if (error) {
-          throw new M.CustomError(error.message, 500, 'warn');
-        }
-      });
-    }
-    return resolve();
-  });
+    // Include artifact blob in return obj
+    retArtObj.blob = ArtifactModule.getArtifactBlob(retArtObj.hash);
+    return retArtObj;
+  }
+  catch (error) {
+    throw errors.captureError(error.message);
+  }
 }

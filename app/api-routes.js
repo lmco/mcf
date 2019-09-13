@@ -11,6 +11,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This file defines the MBEE API routes.
  *
@@ -100,7 +101,6 @@ api.route('/login')
   AuthController.doLogin,
   APIController.login
 );
-
 
 /**
  * @swagger
@@ -3912,6 +3912,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: string
  *       - name: branchid
  *         description: The ID of the branch containing the searched artifact.
+ *         in: path
+ *         required: true
+ *         type: string
  *       - name: artifactid
  *         description: The artifact ID.
  *         in: URI
@@ -4222,6 +4225,70 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.deleteArtifact
+);
+
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}/download:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns an artifact Blob. Requesting user must have read access
+ *                  on the project to find an artifact.
+ *     produces:
+ *       - application/octet-stream
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the searched artifact.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to element not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid/download')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.getArtifactBlob
 );
 
 /**

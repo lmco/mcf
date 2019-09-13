@@ -13,12 +13,22 @@
  *
  * @description
  * <p>This module defines the artifact data model. Artifacts are objects stored
- * in the database, which point to files stored in another location. Multiple
- * artifact objects can point to the same file, as artifacts are stored on a per
- * branch basis. Artifacts also store a history, which details who and when a
- * user changed the artifact file (not the database object/meta-data).</p>
+ * in local or remote database. The location of storage depends on the
+ * Artifact strategy being used. This is set in the configuration file.</p>
  *
- * TODO: Phill update this model with changes after completion of artifacts.
+ * <h4>Artifact MetaData</h4>
+ * <p>This controller directs and stores any metadata of artifacts in the
+ * database. (Ex. artifact IDs, user, and filename.)</p>
+ *
+ * <h4>Artifact Blob</h4>
+ * <p> Binary large object, aka Blob, are the actual binary file. This
+ * controller stores blobs based on the artifact strategy.</p>
+ *
+ * <h4>Artifact History</h4>
+ * <p>Artifacts also store a history, which details who and when a
+ * user changed the artifact blob. The history is record within the
+ * artifact metadata.</p>
+ *
  */
 
 // NPM modules
@@ -145,7 +155,6 @@ ArtifactSchema.methods.getValidPopulateFields = function() {
 ArtifactSchema.statics.getValidPopulateFields = function() {
   return ArtifactSchema.methods.getValidPopulateFields();
 };
-
 
 /**
  * @description Validates an object to ensure that it only contains keys
