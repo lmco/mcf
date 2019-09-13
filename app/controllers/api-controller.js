@@ -103,6 +103,7 @@ module.exports = {
   patchArtifact,
   postArtifact,
   deleteArtifact,
+  getArtifactBlob,
   invalidRoute
 };
 
@@ -138,15 +139,17 @@ function formatJSON(obj, minified = false) {
  *
  * @returns {Object} res - The response object
  */
-function returnResponse(req, res, message, statusCode) {
+function returnResponse(req, res, message, statusCode,
+  contentType = 'application/json') {
   if (statusCode === 200) {
     // We send these headers for a success response
-    res.header('Content-Type', 'application/json');
+    res.header('Content-Type', contentType);
   }
   else {
     // We send these headers for an error response
     res.header('Content-Type', 'text/plain');
   }
+
   // Send the message
   res.status(statusCode).send(message);
   // Log the response
@@ -4807,7 +4810,7 @@ async function getArtifact(req, res) {
     archived: 'boolean',
     fields: 'array',
     minified: 'boolean',
-    includeArchived: 'boolean',
+    includeArchived: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -4923,8 +4926,9 @@ async function postArtifact(req, res) {
     options.lean = true;
 
     // Sanity Check: originalname/mimitype are required fields
-    if (!(Object.prototype.hasOwnProperty.call(req.file, 'originalname')
-      && Object.prototype.hasOwnProperty.call(req.file, 'mimetype'))) {
+    if (!req.file
+      || !Object.prototype.hasOwnProperty.call(req.file, 'originalname')
+      || !Object.prototype.hasOwnProperty.call(req.file, 'mimetype')) {
       const error = new M.DataFormatError('File not defined.', 'warn');
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
@@ -5126,6 +5130,62 @@ async function deleteArtifact(req, res) {
   catch (error) {
     // If an error was thrown, return it and its status
     returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/:artifactid/download
+ *
+ * @description Gets an artifact blob by artifact.id, project.id, branch.id,
+ * and artifact.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Buffer} Artifact blob.
+ */
+async function getArtifactBlob(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  try {
+    // Find the artifact from it's artifact.id, project.id, and org.id
+    // NOTE: find() sanitizes input params
+    const artifact = await ArtifactController.getArtifactBlob(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.artifactid, options);
+
+    res.header('Content-Disposition', `attachment; filename='${artifact.filename}'`);
+
+    // Return 200: OK and public artifact data
+    return returnResponse(req, res, artifact.blob, 200, `${artifact.contentType}`);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 

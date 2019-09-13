@@ -90,6 +90,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should POST an artifact', postArtifact);
   it('should GET an artifact', getArtifact);
+  it('should GET an artifact', getArtifactBlob);
   it('should PATCH an artifact', patchArtifact);
   it('should DELETE an artifact', deleteArtifact);
 });
@@ -193,6 +194,42 @@ function getArtifact(done) {
     // Verify specific fields not returned
     chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET request to get an artifact blob.
+ */
+function getArtifactBlob(done) {
+  const artData = testData.artifacts[0];
+  artData.project = projID;
+  artData.branch = branchID;
+
+  const options = {
+    method: 'GET',
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}/download`,
+    headers: testUtils.getHeaders(),
+    encoding: null
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(body)).to.equal(true);
+
+    // Get the file
+    const artifactPath = path.join(M.root, artData.location, artData.filename);
+    const fileData = fs.readFileSync(artifactPath);
+
+    // Deep compare both binaries
+    chai.expect(body).to.deep.equal(fileData);
+
     done();
   });
 }
