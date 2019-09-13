@@ -747,7 +747,8 @@ function getUserPublicData(user, options) {
     archivedOn: (user.archivedOn) ? user.archivedOn.toString() : undefined,
     archivedBy: archivedBy,
     admin: user.admin,
-    provider: user.provider
+    provider: user.provider,
+    failedlogins: (options.failedlogins) ? user.failedlogins : undefined
   };
 
   // If the fields options is defined

@@ -24,7 +24,6 @@ import React, { Component } from 'react';
 
 // MBEE Modules
 import ElementSubtree from './element-subtree.jsx';
-
 /* eslint-enable no-unused-vars */
 
 // Define component
@@ -40,20 +39,13 @@ class ElementTree extends Component {
       id: null,
       treeRoot: null,
       branch: props.branch,
-      childrenOpen: {},
       error: null
     };
 
     // Bind functions
     this.getElement = this.getElement.bind(this);
-    this.setChildOpen = this.setChildOpen.bind(this);
-  }
-
-  /**
-   * Set the open children state and ids to the object
-   */
-  setChildOpen(id, state) {
-    this.state.childrenOpen[id] = state;
+    this.unsetCheckbox = this.unsetCheckbox.bind(this);
+    this.handleCheck = this.handleCheck.bind(this);
   }
 
   /**
@@ -91,6 +83,14 @@ class ElementTree extends Component {
     });
   }
 
+  unsetCheckbox() {
+    this.props.unsetCheckbox();
+  }
+
+  handleCheck() {
+    this.props.handleCheck();
+  }
+
   componentDidMount() {
     // Get element information
     this.getElement();
@@ -104,20 +104,22 @@ class ElementTree extends Component {
 
   render() {
     let tree = null;
+
     if (this.state.treeRoot !== null) {
       tree = <ElementSubtree id='model'
                              url={this.state.url}
                              data={this.state.treeRoot}
                              project={this.props.project}
                              parent={null}
-                             isOpen={true}
                              archived={this.props.archived}
                              setRefreshFunctions={this.props.setRefreshFunctions}
                              displayIds={this.props.displayIds}
-                             childrenOpen={this.state.childrenOpen}
+                             expand={this.props.expand}
+                             collapse={this.props.collapse}
                              linkElements={this.props.linkElements}
-                             setChildOpen={this.setChildOpen}
                              parentRefresh={this.getElement}
+                             unsetCheckbox={this.props.unsetCheckbox}
+                             handleCheck={this.props.handleCheck}
                              clickHandler={this.props.clickHandler}/>;
     }
 

@@ -10,6 +10,7 @@
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This file executes the MBEE test suite with Mocha.
  */
@@ -18,6 +19,10 @@
 const fs = require('fs');
 const path = require('path');
 const Mocha = require('mocha');
+
+require('@babel/register')();        // Transpile react tests to javascript
+require('@babel/polyfill');          // Transpile async await for javascript
+require(path.join(M.root, 'test', 'set-up.jsx'));  // Configuring the JSDOM for react tests
 
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
@@ -59,7 +64,7 @@ function test(_args) {
   // Add default grep command to define which tests to run
   if (!_args.includes('--grep')) {
     _args.push('--grep');
-    _args.push('^[1-5]');
+    _args.push('^[1-57]');
   }
 
   // Allocate options variable for mocha

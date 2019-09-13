@@ -48,6 +48,7 @@ const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-helper');
+const permissions = M.require('lib.permissions');
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -160,6 +161,7 @@ async function find(requestingUser, organizationID, projects, options) {
   }
 
   // If not system admin, add permissions check
+  // TODO: Consider updating logic to use permissions library
   if (!reqUser.admin) {
     searchQuery[`permissions.${reqUser._id}`] = 'read';
   }
@@ -195,8 +197,7 @@ async function find(requestingUser, organizationID, projects, options) {
     const foundOrg = await helper.findAndValidate(Organization, orgID,
       ((options && options.archived) || validatedOptions.includeArchived));
     // Permissions check
-    if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-      || !foundOrg.permissions[reqUser._id].includes('read'))) {
+    if (!permissions.readOrg(reqUser, foundOrg)) {
       throw new M.PermissionError('User does not have permission to find'
         + ` projects on the organization [${orgID}].`, 'warn');
     }
@@ -333,8 +334,7 @@ async function create(requestingUser, organizationID, projects, options) {
   // Find the organization, validate that it exists and is not archived
   const foundOrg = await helper.findAndValidate(Organization, orgID);
   // Permissions check
-  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-    || !foundOrg.permissions[reqUser._id].includes('write'))) {
+  if (!permissions.createProject(reqUser, foundOrg)) {
     throw new M.PermissionError('User does not have permission to create'
       + ` projects on the organization [${orgID}].`, 'warn');
   }
@@ -397,6 +397,7 @@ async function create(requestingUser, organizationID, projects, options) {
     projObj.createdBy = reqUser._id;
     projObj.updatedOn = Date.now();
     projObj.archivedBy = (projObj.archived) ? reqUser._id : null;
+    projObj.archivedOn = (projObj.archived) ? Date.now() : null;
     return projObj;
   });
 
@@ -471,7 +472,7 @@ async function create(requestingUser, organizationID, projects, options) {
     archivedBy: (p.archived) ? reqUser._id : null
   }));
 
-  // Create a undefined element for each project
+  // Create an undefined element for each project
   const elemUndefinedBinObj = projObjects.map((p) => new Element({
     _id: utils.createID(p._id, 'master', 'undefined'),
     name: 'undefined element',
@@ -622,8 +623,7 @@ async function update(requestingUser, organizationID, projects, options) {
   // Find the organization containing the projects, validate that it exists and is not archived
   const foundOrg = await helper.findAndValidate(Organization, orgID);
   // Permissions check
-  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-    || !foundOrg.permissions[reqUser._id].includes('read'))) {
+  if (!permissions.readOrg(reqUser, foundOrg)) {
     throw new M.PermissionError('User does not have permission to update'
       + ` projects on the organization [${orgID}].`, 'warn');
   }
@@ -633,8 +633,7 @@ async function update(requestingUser, organizationID, projects, options) {
 
   // Check that the user has admin permissions
   foundProjects.forEach((proj) => {
-    if (!reqUser.admin && (!proj.permissions[reqUser._id]
-      || !proj.permissions[reqUser._id].includes('admin'))) {
+    if (!permissions.updateProject(reqUser, foundOrg, proj)) {
       throw new M.PermissionError('User does not have permission to update'
         + ` the project [${utils.parseID(proj._id).pop()}].`, 'warn');
     }
@@ -980,12 +979,6 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
   // Find the organization containing the projects, validate that it exists and is not archived
   const foundOrg = await helper.findAndValidate(Organization, orgID);
-  // Permissions check
-  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-    || !foundOrg.permissions[reqUser._id].includes('write'))) {
-    throw new M.PermissionError('User does not have permission to create or replace'
-      + ` projects on the organization [${orgID}].`, 'warn');
-  }
 
   // Find the projects to update
   foundProjects = await Project.find(searchQuery).lean();
@@ -993,8 +986,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
   // Check if new projects are being created
   if (projectsToLookUp.length > foundProjects.length) {
     // Ensure the user has at least write access on the organization
-    if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-      || !foundOrg.permissions[reqUser._id].includes('write'))) {
+    if (!permissions.createProject(reqUser, foundOrg)) {
       throw new M.PermissionError('User does not have permission to create'
         + ` projects on the organization [${orgID}].`, 'warn');
     }
@@ -1002,8 +994,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
   // Check that the user has admin permissions
   foundProjects.forEach((proj) => {
-    if (!reqUser.admin && (!proj.permissions[reqUser._id]
-      || !proj.permissions[reqUser._id].includes('admin'))) {
+    if (!permissions.updateProject(reqUser, foundOrg, proj)) {
       throw new M.PermissionError('User does not have permission to create or '
         + `replace the project [${utils.parseID(proj._id).pop()}].`, 'warn');
     }
@@ -1132,7 +1123,7 @@ async function remove(requestingUser, organizationID, projects, options) {
   helper.checkParamsDataType(['object', 'string'], projects, 'Projects');
   // Remove project function only: must be an admin
   try {
-    assert.ok(requestingUser.admin, 'User does not have permissions to delete projects.');
+    assert.ok(permissions.deleteProject(requestingUser), 'User does not have permissions to delete projects.');
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
@@ -1141,7 +1132,6 @@ async function remove(requestingUser, organizationID, projects, options) {
   // Sanitize input parameters and function-wide variables
   const orgID = sani.mongo(organizationID);
   const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
   let searchedIDs = [];
 
   // Define searchQuery and ownedQuery
@@ -1165,13 +1155,7 @@ async function remove(requestingUser, organizationID, projects, options) {
   }
 
   // Find the organization, validate that it was found and not archived
-  const foundOrg = await helper.findAndValidate(Organization, orgID);
-  // Permissions check
-  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-    || !foundOrg.permissions[reqUser._id].includes('admin'))) {
-    throw new M.PermissionError('User does not have permission to remove'
-      + ` projects on the organization [${orgID}].`, 'warn');
-  }
+  await helper.findAndValidate(Organization, orgID);
 
   // Find the projects to delete
   const foundProjects = await Project.find(searchQuery).lean();
