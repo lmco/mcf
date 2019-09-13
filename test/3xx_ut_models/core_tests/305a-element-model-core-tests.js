@@ -20,6 +20,11 @@
 
 // Node modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Element = M.require('models.element');
@@ -132,7 +137,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Creates an element using the element model
  */
-function createElement(done) {
+async function createElement() {
   // Create new element object
   const newElement = new Element({
     _id: utils.createID(org.id, projID, branchID, testData.elements[0].id),
@@ -143,91 +148,55 @@ function createElement(done) {
   });
 
   // Save element object to database
-  newElement.save()
-  .then((createdElement) => {
-    // Check element object saved correctly
-    chai.expect(createdElement._id).to.equal(
-      utils.createID(branch._id, testData.elements[0].id)
-    );
-    chai.expect(createdElement.name).to.equal(testData.elements[0].name);
-    chai.expect(createdElement.project).to.equal(project._id);
-    chai.expect(createdElement.branch).to.equal(branch._id);
-    chai.expect(createdElement.parent).to.equal(null);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+  const createdElement = await newElement.save();
+  // Check element object saved correctly
+  createdElement._id.should.equal(utils.createID(branch._id, testData.elements[0].id));
+  createdElement.name.should.equal(testData.elements[0].name);
+  createdElement.project.should.equal(project._id);
+  createdElement.branch.should.equal(branch._id);
+  chai.expect(createdElement.parent).to.equal(null);
 }
 
 /**
  * @description Find an element using the element model
  */
-function findElement(done) {
+async function findElement() {
   // Find the element
-  Element.findOne({ _id: utils.createID(branch._id, testData.elements[0].id) })
-  .then((element) => {
-    // Verify found element is correct
-    chai.expect(element.name).to.equal(testData.elements[0].name);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+  const element = await Element.findOne(
+    { _id: utils.createID(branch._id, testData.elements[0].id) }
+  );
+  // Verify found element is correct
+  chai.expect(element.name).to.equal(testData.elements[0].name);
 }
 
 /**
  * @description Update an element using the element model
  */
-function updateElement(done) {
+async function updateElement() {
   // Update the element
-  Element.findOneAndUpdate(
+  await Element.findOneAndUpdate(
     { _id: utils.createID(branch._id, testData.elements[0].id) },
     { name: `${testData.elements[0]}_edit` }
-  )
+  );
   // Find the updated element
-  .then(() => Element.findOne({
-    _id: utils.createID(branch._id, testData.elements[0].id) }))
-  .then((element) => {
-    // Verify the found element was update successfully
-    chai.expect(element.name).to.equal(`${testData.elements[0]}_edit`);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+  const element = await Element.findOne({
+    _id: utils.createID(branch._id, testData.elements[0].id) });
+  // Verify the found element was update successfully
+  element.name.should.equal(`${testData.elements[0]}_edit`);
 }
 
 /**
  * @description Delete an element using the element model
  */
-function deleteElement(done) {
+async function deleteElement() {
   // Create the element ID to remove
   const elementID = utils.createID(branch._id, testData.elements[0].id);
 
   // Find and delete the element
-  Element.findOneAndRemove({ _id: elementID })
+  await Element.findOneAndRemove({ _id: elementID });
 
   // Attempt to find the element
-  .then(() => Element.findOne({ _id: elementID }))
-  .then((element) => {
-    // Expect no elements to be found
-    chai.expect(element).to.equal(null);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+  const element = await Element.findOne({ _id: elementID });
+  // Expect no elements to be found
+  chai.expect(element).to.equal(null);
 }
