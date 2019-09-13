@@ -64,17 +64,21 @@ function jmi12(data, field) {
 
   // Initialize return object
   const returnObj = {};
-
-  // Loop through data
-  data.forEach((object) => {
-    // Error Check: Ensure there are no duplicate keys
-    if (returnObj[object[field]]) {
-      throw new M.DataFormatError('Invalid object, duplicate keys '
-        + `[${object[field]}] exist.`, 'warn');
-    }
-    // Create JMI type 2 object
-    returnObj[object[field]] = object;
-  });
+  try {
+    // Loop through data
+    data.forEach((object) => {
+      // Error Check: Ensure there are no duplicate keys
+      if (returnObj[object[field]]) {
+        throw new M.DataFormatError('Invalid object, duplicate keys '
+          + `[${object[field]}] exist.`, 'warn');
+      }
+      // Create JMI type 2 object
+      returnObj[object[field]] = object;
+    });
+  }
+  catch (error) {
+    throw new M.DataFormatError('Cannot create multiple elements with the same ID.', 'warn');
+  }
 
   // Return JMI type 2 object
   return returnObj;
