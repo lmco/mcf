@@ -324,7 +324,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
     return foundElements;
   }
   catch (error) {
-
+    throw errors.captureError(error);
   }
 }
 
