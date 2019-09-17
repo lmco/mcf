@@ -66,6 +66,7 @@ const mongoose = require('mongoose');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
+const customValidators = M.config.validators || {};
 
 
 /* ---------------------------( Element Schemas )---------------------------- */
@@ -94,7 +95,7 @@ const ElementSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.element.id),
-    maxlength: [147, 'Too many characters in ID'],
+    maxlength: [validators.element.idLength, 'Too many characters in ID'],
     minlength: [11, 'Too few characters in ID'],
     validate: {
       validator: function(v) {

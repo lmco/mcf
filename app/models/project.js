@@ -86,7 +86,7 @@ const ProjectSchema = new mongoose.Schema({
     required: true,
     match: RegExp(validators.project.id),
     // TODO: Dynamically compute the length of these
-    maxlength: [73, 'Too many characters in ID'],
+    maxlength: [validators.project.idLength, 'Too many characters in ID'],
     minlength: [5, 'Too few characters in ID'],
     validate: {
       validator: function(v) {

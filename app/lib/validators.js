@@ -23,6 +23,7 @@ const customValidators = M.config.validators || {};
 
 // This ID is used as the common regex for other ID fields in this module
 const id = customValidators.id || '([_a-z0-9])([-_a-z0-9.]){0,}';
+const idLength = customValidators.id_length || 36;
 
 // A list of reserved keywords which cannot be used in ids
 module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
@@ -44,7 +45,8 @@ module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
  *     - myOrg [invalid - uses uppercase letter]
  */
 module.exports.org = {
-  id: customValidators.org_id || `^${id}$`
+  id: customValidators.org_id || `^${id}$`,
+  idLength: customValidators.org_id_length || idLength
 };
 
 /**
@@ -63,7 +65,8 @@ module.exports.org = {
  *      - myProject [invalid - cannot use uppercase characters]
  */
 module.exports.project = {
-  id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`
+  id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`,
+  idLength: customValidators.project_id_length || idLength * 2 + utils.ID_DELIMITER.length
 };
 
 /**
@@ -82,7 +85,8 @@ module.exports.project = {
  *      - my-branch [invalid - must contain org and proj segments]
  */
 module.exports.branch = {
-  id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  idLength: customValidators.branch_id_length || idLength * 3 + utils.ID_DELIMITER.length * 2
 };
 
 /**
@@ -101,7 +105,8 @@ module.exports.branch = {
  *      - my-artifact [invalid - must contain org, proj, and branch segments]
  */
 module.exports.artifact = {
-  id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  idLength: customValidators.artifact_id_length || idLength * 4 + utils.ID_DELIMITER.length * 3
 };
 
 /**
@@ -120,7 +125,8 @@ module.exports.artifact = {
  *      - my-element [invalid - must contain org, proj, and branch segments]
  */
 module.exports.element = {
-  id: customValidators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+  id: customValidators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  idLength: customValidators.element_id_length || idLength * 4 + utils.ID_DELIMITER.length * 3
 };
 
 /**
@@ -138,6 +144,7 @@ module.exports.element = {
  */
 module.exports.user = {
   username: customValidators.user_username || '^([a-z])([a-z0-9_]){0,}$',
+  usernameLength: customValidators.user_username_length || idLength,
   email: customValidators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
   fname: customValidators.user_fname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
   lname: customValidators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',

@@ -76,7 +76,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Username is required.'],
     match: RegExp(validators.user.username),
-    maxlength: [36, 'Too many characters in username'],
+    maxlength: [validators.user.usernameLength, 'Too many characters in username'],
     minlength: [3, 'Too few characters in username'],
     validate: {
       validator: function(v) {
