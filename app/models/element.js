@@ -66,7 +66,6 @@ const mongoose = require('mongoose');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
-const customValidators = M.config.validators || {};
 
 
 /* ---------------------------( Element Schemas )---------------------------- */
