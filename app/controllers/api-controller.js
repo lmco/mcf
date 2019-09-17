@@ -2129,6 +2129,10 @@ async function getUsers(req, res) {
     // Get Users
     // NOTE: find() sanitizes req.usernames
     const users = await UserController.find(req.user, usernames, options);
+
+    // Set the failedlogins parameter to true if the requesting user is an admin
+    if (req.user.admin) options.failedlogins = true;
+
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2517,7 +2521,7 @@ async function getUser(req, res) {
   options.lean = true;
 
   try {
-    // Find the member from it's username
+    // Find the member from its username
     // NOTE: find() sanitizes req.params.username
     const users = await UserController.find(req.user, req.params.username, options);
     // If no user found, return 404 error
@@ -2526,6 +2530,9 @@ async function getUser(req, res) {
         `User [${req.params.username}] not found.`, 'warn'
       );
     }
+
+    // Set the failedlogins parameter to true if the requesting user is an admin
+    if (req.user.admin) options.failedlogins = true;
 
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
@@ -2997,6 +3004,9 @@ async function searchUsers(req, res) {
     if (users.length === 0) {
       throw new M.NotFoundError('No users found.', 'warn');
     }
+
+    // Set the failedlogins parameter to true if the requesting user is an admin
+    if (req.user.admin) options.failedlogins = true;
 
     const usersPublicData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))

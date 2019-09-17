@@ -19,6 +19,12 @@
 // NPM modules
 const chai = require('chai');
 const path = require('path'); // Find directory paths
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+// Initialize chai should function, used for expecting promise rejections
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Artifact = M.require('models.artifact');

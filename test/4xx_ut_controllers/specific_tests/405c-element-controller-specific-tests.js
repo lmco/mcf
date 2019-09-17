@@ -486,7 +486,7 @@ function optionSubtreeFind(done) {
   const elemID = utils.parseID(elements[2]._id).pop();
   // Create the options object. Search for includeArchived:true since one child element
   // was archived in a previous test
-  const options = { subtree: true, includeArchived: true };
+  const options = { subtree: true, includeArchived: true, lean: true };
 
   // Find the element and its subtree
   ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options)
@@ -494,7 +494,7 @@ function optionSubtreeFind(done) {
     // Expect there to be 5 elements found, the searched element and 4 in subtree
     chai.expect(foundElements.length).to.equal(5);
     // Attempt to convert elements to JMI3, if successful then it's a valid tree
-    const jmi3Elements = jmi.convertJMI(1, 3, foundElements);
+    const jmi3Elements = jmi.convertJMI(1, 3, foundElements, '_id', '_id');
     // Verify that there is only one top level key in jmi3, which should be the
     // searched element
     chai.expect(Object.keys(jmi3Elements).length).to.equal(1);

@@ -31,6 +31,7 @@ const User = M.require('models.user');
 const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+const EventEmitter = M.require('lib.events');
 
 /**
  * @description This function implements handleBasicAuth() in lib/auth.js.
@@ -75,9 +76,50 @@ async function handleBasicAuth(req, res, username, password) {
   catch (verifyErr) {
     throw new M.ServerError(verifyErr.message, 'warn');
   }
+
   // Check password is valid
   if (!result) {
-    throw new M.AuthorizationError('Invalid password.', 'warn');
+    // Add the current time to the list of failed login attempts
+    User.updateOne({ _id: username },
+      { $push: { failedlogins: {
+        ipaddress: req.connection.remoteAddress,
+        timestamp: Date.now()
+      } } }, (err) => {
+        if (err) throw new M.DatabaseError('Could not update failed login attempts', 'critical');
+      });
+    // Check if user has entered an incorrect password five times in the past 15 minutes
+    if (user.failedlogins[user.failedlogins.length - 4]
+      && user.failedlogins[user.failedlogins.length - 4].timestamp
+      > Date.now() - 15 * utils.timeConversions.MINUTES) {
+      // Count the number of non-archived admins in the database
+      const admins = await User.find({ admin: true, archived: false }).lean();
+      // Check if the user is the only admin
+      if (user.admin && admins.length === 1) {
+        // It is recommended that a listener be registered for this event to notify the proper
+        // administrators/authorities
+        EventEmitter.emit('sole-admin-failed-login-exceeded', user.username);
+        // Throw a critical error
+        throw new M.AuthorizationError('Incorrect login attempts exceeded '
+        + 'on only active admin account.', 'critical');
+      }
+      // Archive the user and throw an error
+      else {
+        User.updateOne({ _id: username }, { archived: true }, (err) => {
+          if (err) {
+            throw new M.DatabaseError('Could not lock user after failed login attempts exceeded',
+              'critical');
+          }
+        });
+        EventEmitter.emit('user-account-locked', user.username);
+        throw new M.AuthorizationError(`Account '${user.username}' has been locked after `
+          + 'exceeding allowed number of failed login attempts. '
+          + 'Please contact your local administrator.', 'warn');
+      }
+    }
+    // User is within allowed number of failed attempts; throw an error
+    else {
+      throw new M.AuthorizationError('Invalid password.', 'warn');
+    }
   }
   // Authenticated, return user
   return user;

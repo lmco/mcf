@@ -20,6 +20,11 @@
 // Node modules
 const chai = require('chai');
 const crypto = require('crypto');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const User = M.require('models.user');
@@ -74,102 +79,99 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Creates a user via model and save it to the database.
  */
-function createUser(done) {
+async function createUser() {
   const userData = testData.users[1];
   userData._id = userData.username;
+  // Create a hash of the password
+  const derivedKey = crypto.pbkdf2Sync(userData.password, userData._id.toString(), 1000, 32, 'sha256');
   // Create a new User object
   const user = new User(userData);
-  // Save user object to the database
-  user.save()
-  .then((savedUser) => {
-    // Create a hash of the password
-    const derivedKey = crypto.pbkdf2Sync(userData.password, userData._id.toString(), 1000, 32, 'sha256');
-    // Ensure that the user password is stored as a hash
-    chai.expect(savedUser.password).to.equal(derivedKey.toString('hex'));
-    done();
-  })
-  .catch((error) => {
+  let savedUser;
+  try {
+    // Save user object to the database
+    savedUser = await user.save();
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Ensure that the user password is stored as a hash
+  savedUser.password.should.equal(derivedKey.toString('hex'));
 }
 
 /**
  * @description Checks that the user from the previous createUser test was
  * created successfully and contains the expected data.
  */
-function getUser(done) {
-  // Find the created user from the previous createUser test.
-  User.findOne({ _id: testData.users[1].username })
-  .then((user) => {
-    // Check first, last, and preferred name
-    chai.expect(user.fname).to.equal(testData.users[1].fname);
-    chai.expect(user.lname).to.equal(testData.users[1].lname);
-    chai.expect(user.preferredName).to.equal(testData.users[1].preferredName);
-    // Check the name
-    chai.expect(user.name).to.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
-    done();
-  })
-  .catch((error) => {
+async function getUser() {
+  let user;
+  try {
+    // Find the created user from the previous createUser test.
+    user = await User.findOne({ _id: testData.users[1].username });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Check first, last, and preferred name
+  user.fname.should.equal(testData.users[1].fname);
+  user.lname.should.equal(testData.users[1].lname);
+  user.preferredName.should.equal(testData.users[1].preferredName);
+  // Check the name
+  user.name.should.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
 }
 
 /**
  * @description Gets a users public data.
  */
-function getUserPublicData(done) {
-  // Find the created user from the previous createUser test.
-  User.findOne({ _id: testData.users[1].username })
-  .then((user) => {
-    // Check first, last, and preferred name
-    chai.expect(user.fname).to.equal(testData.users[1].fname);
-    chai.expect(user.lname).to.equal(testData.users[1].lname);
-    chai.expect(user.preferredName).to.equal(testData.users[1].preferredName);
-    // Check the name
-    chai.expect(user.name).to.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
-    done();
-  })
-  .catch((error) => {
+async function getUserPublicData() {
+  let user;
+  try {
+    // Find the created user from the previous createUser test.
+    user = await User.findOne({ _id: testData.users[1].username });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Check first, last, and preferred name
+  user.fname.should.equal(testData.users[1].fname);
+  user.lname.should.equal(testData.users[1].lname);
+  user.preferredName.should.equal(testData.users[1].preferredName);
+  // Check the name
+  user.name.should.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
 }
 
 /**
  * @description Checks that a user password was properly stored and can be
  * authenticated.
  */
-function verifyValidPassword(done) {
-  // Find the created user from the previous createUser test.
-  User.findOne({ _id: testData.users[1].username })
-  // Verify the user's password
-  .then((user) => user.verifyPassword(testData.users[1].password))
-  .then((result) => {
-    // expected - verifyPassword() returned true
-    chai.expect(result).to.equal(true);
-    done();
-  })
-  .catch((error) => {
+async function verifyValidPassword() {
+  let user;
+  let result;
+  try {
+    // Find the created user from the previous createUser test.
+    user = await User.findOne({ _id: testData.users[1].username });
+    // Verify the user's password
+    result = await user.verifyPassword(testData.users[1].password);
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // expected - verifyPassword() returned true
+  result.should.equal(true);
 }
 
 /**
  * @description Updates the first and last name of the user previously created
  * in the createUser test.
  */
-function updateUser(done) {
+async function updateUser() {
   // Define query
   const query = { _id: testData.users[1].username };
 
@@ -179,37 +181,38 @@ function updateUser(done) {
     lname: testData.users[1].lname
   };
 
-  // Find and updated the user created in the previous createUser test.
-  User.updateOne(query, newUserData)
-  .then(() => User.findOne(query))
-  .then((updatedUser) => {
-    chai.expect(updatedUser._id).to.equal(testData.users[1].username);
-    chai.expect(updatedUser.fname).to.equal(`${testData.users[1].fname}edit`);
-    chai.expect(updatedUser.lname).to.equal(testData.users[1].lname);
-    chai.expect(updatedUser.name).to.equal(`${testData.users[1].fname}edit ${testData.users[1].lname}`);
-    done();
-  })
-  .catch((error) => {
+  let updatedUser;
+  try {
+    // Find and updated the user created in the previous createUser test.
+    await User.updateOne(query, newUserData);
+    updatedUser = await User.findOne(query);
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  updatedUser._id.should.equal(testData.users[1].username);
+  updatedUser.fname.should.equal(`${testData.users[1].fname}edit`);
+  updatedUser.lname.should.equal(testData.users[1].lname);
+  updatedUser.name.should.equal(`${testData.users[1].fname}edit ${testData.users[1].lname}`);
 }
 
 /**
  * @description Delete a user
  */
-function deleteUser(done) {
-  // Find the previously created user from the createUser test.
-  User.findOne({ _id: testData.users[1].username })
-  // Delete the user
-  .then(user => user.remove())
-  .then(() => done())
-  .catch(error => {
+async function deleteUser() {
+  try {
+    // Find the previously created user from the createUser test.
+    const user = await User.findOne({ _id: testData.users[1].username });
+    // Delete the user
+    await user.remove();
+    // Try to find the user again; expect the search to return null
+    await User.findOne({ _id: testData.users[1].username }).should.eventually.be.null;
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
 }

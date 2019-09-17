@@ -45,6 +45,7 @@ class BranchBar extends Component {
     };
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleCheck = this.handleCheck.bind(this);
   }
 
   // Handles branch change
@@ -60,6 +61,11 @@ class BranchBar extends Component {
       // Reload the place with new branch
       window.location.replace(newUrl);
     }
+  }
+
+  // Handle checkbox selections
+  handleCheck(event) {
+    this.props.handleCheck(event);
   }
 
   componentDidMount() {
@@ -200,7 +206,7 @@ class BranchBar extends Component {
                     <i className='fas fa-ellipsis-v' style={{ fontSize: '15px' }}/>
                   </span>
                   </DropdownToggle>
-                  <DropdownMenu className='options-card'>
+                  <DropdownMenu className='options-card' style={{ minWidth: '11rem' }}>
                     <div>
                       <Label check className='minimize'>
                         <Input type='checkbox'
@@ -208,7 +214,7 @@ class BranchBar extends Component {
                                id='archived'
                                checked={this.props.archived}
                                value={this.state.archived}
-                               onChange={this.props.displayArchElems}/>
+                               onChange={this.handleCheck}/>
                         <div style={{ paddingTop: '3px' }}>
                           Include archived
                         </div>
@@ -217,13 +223,39 @@ class BranchBar extends Component {
                     <div>
                       <Label check className='minimize'>
                         <Input type='checkbox'
-                               name='archived'
-                               id='archived'
+                               name='displayIds'
+                               id='displayIds'
                                checked={this.props.displayIds}
                                value={this.props.displayIds}
-                               onChange={this.props.toggleIds}/>
+                               onChange={this.handleCheck}/>
                         <div style={{ paddingTop: '3px' }}>
                           Toggle IDs
+                        </div>
+                      </Label>
+                    </div>
+                    <div>
+                      <Label check className='minimize'>
+                        <Input type='checkbox'
+                               name='expand'
+                               id='expand'
+                               checked={this.props.expand}
+                               value={this.props.expand}
+                               onChange={this.handleCheck}/>
+                        <div style={{ paddingTop: '3px' }}>
+                          Expand All
+                        </div>
+                      </Label>
+                    </div>
+                    <div>
+                      <Label check className='minimize'>
+                        <Input type='checkbox'
+                               name='collapse'
+                               id='collapse'
+                               checked={this.props.collapse}
+                               value={this.props.collapse}
+                               onChange={this.handleCheck}/>
+                        <div style={{ paddingTop: '3px' }}>
+                          Collapse All
                         </div>
                       </Label>
                     </div>

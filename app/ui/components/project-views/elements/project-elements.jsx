@@ -47,6 +47,8 @@ class ProjectElements extends Component {
       branch: props.match.params.branchid,
       archived: false,
       displayIds: true,
+      expand: false,
+      collapse: false,
       error: null
     };
 
@@ -55,8 +57,8 @@ class ProjectElements extends Component {
     this.closeSidePanel = this.closeSidePanel.bind(this);
     this.editElementInfo = this.editElementInfo.bind(this);
     this.createNewElement = this.createNewElement.bind(this);
-    this.displayArchivedElems = this.displayArchivedElems.bind(this);
-    this.toggleIds = this.toggleIds.bind(this);
+    this.handleCheck = this.handleCheck.bind(this);
+    this.unsetCheckbox = this.unsetCheckbox.bind(this);
   }
 
   setRefreshFunctions(id, refreshFunction) {
@@ -120,14 +122,28 @@ class ProjectElements extends Component {
     document.getElementById('side-panel').classList.add('side-panel-expanded');
   }
 
-  displayArchivedElems() {
-    // Change the archive state to opposite value
-    this.setState(prevState => ({ archived: !prevState.archived }));
+  handleCheck(event) {
+    const checkbox = event.target.name;
+    // Set new state to opposite of previous value
+    const newState = { [checkbox]: !this.state[checkbox] };
+
+    // Set collapse to false if expand is checked and vice versa
+    if (checkbox === 'expand') {
+      newState.collapse = false;
+    }
+    else if (checkbox === 'collapse') {
+      newState.expand = false;
+    }
+
+    // Update state with checkbox values
+    this.setState(newState);
   }
 
-  toggleIds() {
-    // Change the display id state to opposite value
-    this.setState(prevState => ({ displayIds: !prevState.displayIds }));
+  unsetCheckbox() {
+    this.setState({
+      collapse: false,
+      expand: false
+    });
   }
 
   componentDidMount() {
@@ -198,15 +214,20 @@ class ProjectElements extends Component {
             <BranchBar project={this.props.project}
                        branchid={this.state.branch}
                        archived={this.state.archived}
-                       displayArchElems={this.displayArchivedElems}
                        permissions={this.props.permissions}
                        displayIds={this.state.displayIds}
-                       toggleIds={this.toggleIds}/>
+                       expand={this.state.expand}
+                       collapse={this.state.collapse}
+                       handleCheck={this.handleCheck}/>
             <ElementTree project={this.props.project}
                          branch={this.state.branch}
                          linkElements={true}
                          archived={this.state.archived}
                          displayIds={this.state.displayIds}
+                         expand={this.state.expand}
+                         collapse={this.state.collapse}
+                         unsetCheckbox={this.unsetCheckbox}
+                         handleCheck={this.handleCheck}
                          setRefreshFunctions={this.setRefreshFunctions}
                          clickHandler={this.openElementInfo}/>
           </div>
