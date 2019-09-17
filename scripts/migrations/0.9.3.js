@@ -130,7 +130,9 @@ module.exports.up = async function() {
   });
 
   // Insert the missing elements
-  await Element.insertMany(missingElems);
+  if (missingElems.length !== 0) {
+    await Element.insertMany(missingElems);
+  }
 
   try {
     // If no server data currently exists, create the document
