@@ -95,7 +95,31 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // --------------- Find ---------------
+  // populate
+  // includearchived
+  // fields
+  // limit
+  // skip
   it('should sort find results', optionSortFind);
+  // minified
+  // tag
+  // source
+  // name
+  // createdBy
+  // lastModifiedBy
+  // archived
+  // custom
+  // --------------- Create ---------------
+  // populate
+  // fields
+  // minified
+  // --------------- Update ---------------
+  // populate
+  // fields
+  // minified
+  // --------------- Remove ---------------
+  // minified
 });
 
 /* --------------------( Tests )-------------------- */
