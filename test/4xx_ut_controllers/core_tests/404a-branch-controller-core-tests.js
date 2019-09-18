@@ -95,14 +95,14 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  // -------------- Find --------------
-  it('should find a branch', findBranch);
-  it('should find multiple branches', findBranches);
-  it('should find all branches', findAllBranches);
   // ------------- Create -------------
   it('should create a branch', createBranch);
   it('should create multiple branches', createBranches);
   it('should create a tag', createTag);
+  // -------------- Find --------------
+  it('should find a branch', findBranch);
+  it('should find multiple branches', findBranches);
+  it('should find all branches', findAllBranches);
   // ------------- Update -------------
   it('should update a branch', updateBranch);
   it('should update multiple branches', updateBranches);

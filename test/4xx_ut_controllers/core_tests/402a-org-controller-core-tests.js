@@ -76,13 +76,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // ------------- Create -------------
+  it('should create an org', createOrg);
+  it('should create multiple orgs', createOrgs);
   // -------------- Find --------------
   it('should find an org', findOrg);
   it('should find multiple orgs', findOrgs);
   it('should find all orgs', findAllOrgs);
-  // ------------- Create -------------
-  it('should create an org', createOrg);
-  it('should create multiple orgs', createOrgs);
   // ------------- Update -------------
   it('should update an org', updateOrg);
   it('should update multiple orgs', updateOrgs);
@@ -140,7 +140,8 @@ function createOrg(done) {
 function createOrgs(done) {
   const orgDataObjects = [
     testData.orgs[1],
-    testData.orgs[2]
+    testData.orgs[2],
+    testData.orgs[3]
   ];
 
   // Create orgs via controller

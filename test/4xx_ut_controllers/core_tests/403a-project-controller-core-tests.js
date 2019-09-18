@@ -89,13 +89,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // ------------- Create -------------
+  it('should create a project', createProject);
+  it('should create multiple projects', createProjects);
   // -------------- Find --------------
   it('should find a project', findProject);
   it('should find multiple projects', findProjects);
   it('should find all projects', findAllProjects);
-  // ------------- Create -------------
-  it('should create a project', createProject);
-  it('should create multiple projects', createProjects);
   // ------------- Update -------------
   it('should update a project', updateProject);
   it('should update multiple projects', updateProjects);
@@ -155,7 +155,8 @@ function createProjects(done) {
   const projDataObjects = [
     testData.projects[1],
     testData.projects[2],
-    testData.projects[3]
+    testData.projects[3],
+    testData.projects[4]
   ];
 
   // Create projects via controller
