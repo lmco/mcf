@@ -19,6 +19,8 @@
 const { execSync } = require('child_process');
 const path = require('path');
 
+const rm = (process.platform === 'win32') ? 'DEL /S /Q' : 'rm -rf';
+
 // Error Check - Check if file was run directly or global M object is undefined
 if (module.parent == null || typeof M === 'undefined') {
   clean();
@@ -52,17 +54,17 @@ function clean(_args) {
 
   // Clean logs
   if (args.length === 0 || args.includes('--all')) {
-    execSync(`rm -rf ${root}/build ${root}/logs`);
+    execSync(`${rm} ${root}/build ${root}/logs`);
   }
 
   // Clean data
   if (args.includes('--all') || args.includes('--data')) {
-    execSync(`rm -rf ${root}/data/*`);
+    execSync(`${rm} ${root}/data/*`);
   }
 
   // Clean node_modules
   if (args.includes('--all') || args.includes('--node-modules')) {
-    execSync(`rm -rf ${root}/node_modules`);
+    execSync(`${rm} ${root}/node_modules`);
   }
 
   // eslint-disable-next-line no-console
