@@ -101,6 +101,11 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // -------------- Find --------------
+  // ------------- Create -------------
+  // ------------- Update -------------
+  // ------------- Replace ------------
+  // ------------- Remove -------------
   it('should reject deletion of master branch'
     + ' saying branch cannot be deleted', deleteMasterBranch);
 });

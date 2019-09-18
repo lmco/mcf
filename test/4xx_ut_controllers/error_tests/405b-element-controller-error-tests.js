@@ -122,6 +122,11 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // -------------- Find --------------
+  // ------------- Create -------------
+  it('should reject creating elements to a tag '
+    + 'saying elements cannot be created.', createInTag);
+  // ------------- Update -------------
   it('should reject an update saying a source cannot be set to self', updateSourceToSelf);
   it('should reject an update saying a target cannot be set to self', updateTargetToSelf);
   it('should reject an update saying a source cannot be found', updateNonExistentSource);
@@ -130,14 +135,15 @@ describe(M.getModuleName(module.filename), () => {
     + ' updating a source', updateSourceWithNoTarget);
   it('should reject an update saying a source is required when'
     + ' updating a target', updateTargetWithNoSource);
-  it('should reject creating elements to a tag '
-    + 'saying elements cannot be created.', createInTag);
   it('should reject updating elements to a tag '
     + 'saying elements cannot be update.', updateInTag);
-  it('should reject deleting elements in a tag '
-    + 'saying elements cannot be deleted.', deleteInTag);
+  // ------------- Replace ------------
   it('should reject put elements with invalid id', putInvalidId);
   it('should reject put elements without id', putWithoutId);
+  // ------------- Remove -------------
+  it('should reject deleting elements in a tag '
+    + 'saying elements cannot be deleted.', deleteInTag);
+  // ------------- Search -------------
 });
 
 /* --------------------( Tests )-------------------- */

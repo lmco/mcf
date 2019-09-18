@@ -120,13 +120,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create an archived element', createArchivedElement);
-  it('should archive an element', archiveElement);
-  it('should create an element whose source is on a different project', createExternalSource);
-  it('should create an element whose target is on a different project', createExternalTarget);
-  it('should update an element source to be on a different project', updateExternalSource);
-  it('should update an element target to be on a different project', updateExternalTarget);
-  it('should delete an element which is part of a relationship', deleteRelElement);
+  // -------------- Find --------------
   it('should populate allowed fields when finding an element', optionPopulateFind);
   it('should find an archived element when the option archived is provided', optionArchivedFind);
   it('should find an element and its subtree when the option subtree '
@@ -138,21 +132,35 @@ describe(M.getModuleName(module.filename), () => {
     + ' from find()', optionSkipFind);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from find()', optionLeanFind);
+  it('should sort find results', optionSortFind);
+  it('should return every parent up to root with the rootpath option', optionRootpathFind);
+  // ------------- Create -------------
+  it('should create an archived element', createArchivedElement);
+  it('should create an element whose source is on a different project', createExternalSource);
+  it('should create an element whose target is on a different project', createExternalTarget);
   it('should populate allowed fields when creating an element', optionPopulateCreate);
   it('should return an element with only the specific fields specified from'
     + ' create()', optionFieldsCreate);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from create()', optionLeanCreate);
+  // ------------- Update -------------
+  it('should archive an element', archiveElement);
+  it('should update an element source to be on a different project', updateExternalSource);
+  it('should update an element target to be on a different project', updateExternalTarget);
   it('should populate allowed fields when updating an element', optionPopulateUpdate);
   it('should return an element with only the specific fields specified from'
     + ' update()', optionFieldsUpdate);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from update()', optionLeanUpdate);
+  // ------------- Replace ------------
   it('should populate allowed fields when replacing an element', optionPopulateReplace);
   it('should return an element with only the specific fields specified from'
     + ' createOrReplace()', optionFieldsReplace);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from createOrReplace()', optionLeanReplace);
+  // ------------- Remove -------------
+  it('should delete an element which is part of a relationship', deleteRelElement);
+  // ------------- Search -------------
   it('should populate allowed fields when searching an element', optionPopulateSearch);
   it('should search an archived element when the option archived is provided',
     optionArchivedSearch);
@@ -161,9 +169,7 @@ describe(M.getModuleName(module.filename), () => {
     + 'from search()', optionSkipSearch);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from search()', optionLeanSearch);
-  it('should sort find results', optionSortFind);
   it('should sort search results', optionSortSearch);
-  it('should return every parent up to root with the rootpath option', optionRootpath);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -404,7 +410,7 @@ function deleteRelElement(done) {
  * getValidPopulateFields() can all be populated in the find() function using
  * the option 'populate'.
  */
-function optionPopulateFind(done) {
+async function optionPopulateFind() {
   // Get the valid populate fields
   const pop = Element.getValidPopulateFields();
   // Create the options object
@@ -412,9 +418,11 @@ function optionPopulateFind(done) {
   // Get the element ID of a relationship element
   const elemID = utils.parseID(elements[5]._id).pop();
 
-  // Find a relationship element so source and target can be populated
-  ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options)
-  .then((foundElements) => {
+  try {
+    // Find a relationship element so source and target can be populated
+    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0],
+      branchID, elemID, options);
+
     // Verify the array length is exactly 1
     chai.expect(foundElements.length).to.equal(1);
     const elem = foundElements[0];
@@ -429,84 +437,84 @@ function optionPopulateFind(done) {
         chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
       }
     });
-    done();
-  })
-  .catch((error) => {
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }
 
 /**
  * @description Verifies that archived elements can be found in the find()
  * function using the option 'archived'.
  */
-function optionArchivedFind(done) {
-  // Create the options object
-  const options = { archived: true };
-  // Get the element ID of the archived element
-  const elemID = utils.parseID(elements[6]._id).pop();
+async function optionArchivedFind() {
+  try {
+    const elemID = utils.parseID(elements[9]._id).pop();
 
-  // Attempt to find the element without providing options
-  ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID)
-  .then((foundElements) => {
+    // Create the options object
+    const options = { archived: true };
+
+    // Attempt to find the element without providing options
+    const notFoundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      elemID);
     // Expect the array to be empty since the option archived: true was not provided
-    chai.expect(foundElements.length).to.equal(0);
+    chai.expect(notFoundElements.length).to.equal(0);
 
     // Attempt the find the element WITH providing the archived option
-    return ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options);
-  })
-  .then((foundElements) => {
+    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      elemID, options);
+
     // Expect the array to be of length 1
     chai.expect(foundElements.length).to.equal(1);
-    const elem = foundElements[0];
+    const element = foundElements[0];
 
     // Verify all of the archived fields are properly set
-    chai.expect(elem.archived).to.equal(true);
-    chai.expect(elem.archivedOn).to.not.equal(null);
-    chai.expect(elem.archivedBy).to.equal(adminUser.username);
-    done();
-  })
-  .catch((error) => {
+    chai.expect(element.archived).to.equal(true);
+    chai.expect(element.archivedOn).to.not.equal(null);
+    chai.expect(element.archivedBy).to.equal(adminUser.username);
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }
 
 /**
  * @description Verifies that an element and its subtree are returned when
  * using the option 'subtree' in find().
  */
-function optionSubtreeFind(done) {
-  // Get the ID of the element to find
-  const elemID = utils.parseID(elements[2]._id).pop();
-  // Create the options object. Search for includeArchived:true since one child element
-  // was archived in a previous test
-  const options = { subtree: true, includeArchived: true, lean: true };
+async function optionSubtreeFind() {
+  try {
+    // Set up
+    const elemID = utils.parseID(elements[2]._id).pop();
 
-  // Find the element and its subtree
-  ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options)
-  .then((foundElements) => {
-    // Expect there to be 5 elements found, the searched element and 4 in subtree
-    chai.expect(foundElements.length).to.equal(5);
+    // Create the options object. Search for includeArchived:true since one child element
+    // was archived in a previous test
+    const options = { subtree: true, includeArchived: true, lean: true };
+
+    // Find the element and its subtree
+    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      elemID, options);
+
+    // Expect there to be 6 elements found, the searched element and 5 in subtree
+    chai.expect(foundElements.length).to.equal(6);
+
     // Attempt to convert elements to JMI3, if successful then it's a valid tree
     const jmi3Elements = jmi.convertJMI(1, 3, foundElements, '_id', '_id');
+
     // Verify that there is only one top level key in jmi3, which should be the
     // searched element
     chai.expect(Object.keys(jmi3Elements).length).to.equal(1);
     chai.expect(Object.keys(jmi3Elements)[0]).to.equal(elements[2]._id);
-    done();
-  })
-  .catch((error) => {
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }
 
 /**
@@ -776,7 +784,7 @@ function optionFieldsCreate(done) {
  * @description Verifies that providing the option 'lean' returns raw JSON of an
  * element rather than a mongoose object in the create() function.
  */
-function optionLeanCreate(done) {
+async function optionLeanCreate() {
   // Create the element object
   const leanElemObj = {
     id: 'lean-element',
@@ -789,9 +797,10 @@ function optionLeanCreate(done) {
   // Create the options object with lean: true
   const options = { lean: true };
 
-  // Create the element without the lean option
-  ElementController.create(adminUser, org.id, projIDs[0], branchID, notLeanElemObj)
-  .then((createdElements) => {
+  try {
+    // Create the element without the lean option
+    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+      branchID, notLeanElemObj);
     // Expect there to be exactly 1 element created
     chai.expect(createdElements.length).to.equal(1);
     const elem = createdElements[0];
@@ -800,23 +809,20 @@ function optionLeanCreate(done) {
     chai.expect(elem instanceof Element).to.equal(true);
 
     // Create the element WITH the lean option
-    return ElementController.create(adminUser, org.id, projIDs[0], branchID, leanElemObj, options);
-  })
-  .then((createdElements) => {
+    const createdElements2 = await ElementController.create(adminUser, org.id, projIDs[0],
+      branchID, leanElemObj, options);
     // Expect there to be exactly 1 element created
-    chai.expect(createdElements.length).to.equal(1);
-    const elem = createdElements[0];
+    chai.expect(createdElements2.length).to.equal(1);
+    const elem2 = createdElements2[0];
 
     // Verify that the element is NOT a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(false);
-    done();
-  })
-  .catch((error) => {
+    chai.expect(elem2 instanceof Element).to.equal(false);
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }
 
 /**
@@ -927,48 +933,49 @@ function optionFieldsUpdate(done) {
  * @description Verifies that providing the option 'lean' returns raw JSON of an
  * element rather than a mongoose object in the update() function.
  */
-function optionLeanUpdate(done) {
-  // Create the update object
-  const leanUpdateObj = {
-    id: 'lean-element',
-    name: 'Lean Element Updated'
-  };
-  const notLeanUpdateObj = {
-    id: 'not-lean-element',
-    name: 'Not Lean Element Updated'
-  };
-  // Create the options object with lean: true
-  const options = { lean: true };
+async function optionLeanUpdate() {
+  try {
+    // Create the update object
+    const elem0 = {
+      id: utils.parseID(elements[0].id).pop(),
+      name: 'update 1'
+    };
 
-  // Update the element without the lean option
-  ElementController.update(adminUser, org.id, projIDs[0], branchID, notLeanUpdateObj)
-  .then((updatedElements) => {
+    // Create the options object with lean: true
+    const options = { lean: true };
+    // Update the element without the lean option
+    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0], branchID,
+      elem0);
+
     // Expect there to be exactly 1 element updated
     chai.expect(updatedElements.length).to.equal(1);
-    const elem = updatedElements[0];
+    const elem1 = updatedElements[0];
+    chai.expect(elem1.name).to.equal('update 1');
 
     // Verify that the element is a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(true);
+    chai.expect(elem1 instanceof Element).to.equal(true);
+
+    // Make a second update
+    elem0.name = 'Batch Element 0';
 
     // Update the element WITH the lean option
-    return ElementController.update(adminUser, org.id, projIDs[0], branchID,
-      leanUpdateObj, options);
-  })
-  .then((updatedElements) => {
+    const leanUpdatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+      branchID, elem0, options);
+
     // Expect there to be exactly 1 element updated
-    chai.expect(updatedElements.length).to.equal(1);
-    const elem = updatedElements[0];
+    chai.expect(leanUpdatedElements.length).to.equal(1);
+    const elem2 = leanUpdatedElements[0];
+    chai.expect(elem2.name).to.equal('Batch Element 0');
+
 
     // Verify that the element is NOT a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(false);
-    done();
-  })
-  .catch((error) => {
+    chai.expect(elem2 instanceof Element).to.equal(false);
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }
 
 /**
@@ -1466,39 +1473,30 @@ function optionSortSearch(done) {
 /**
  * @description Validates that findElement function can return every parent up to root
  */
-function optionRootpath(done) {
-  const testElems = [{
-    id: 'testelem00',
-    name: 'a',
-    parent: 'model'
-  },
-  {
-    id: 'testelem01',
-    name: 'b',
-    parent: 'testelem00'
-  }];
-  // create option
-  const option = { rootpath: true };
+async function optionRootpathFind() {
+  try {
+    const elemID = utils.parseID(elements[4]._id).pop();
 
-  ElementController.create(adminUser, org.id, projIDs[0], branchID, testElems)
-  .then((createdElements) => {
-    // Expect the create function to work properly
-    chai.expect(createdElements.length).to.equal(2);
+    const option = { rootpath: true };
 
     // Return a search on the furthest nested element with the rootpath option
-    return ElementController.find(adminUser, org.id, projIDs[0], branchID, testElems[1].id, option);
-  })
-  .then((foundElements) => {
+    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      elemID, option);
+
     // Expect to find 3 elements
-    chai.expect(foundElements.length).to.equal(3);
+    chai.expect(foundElements.length).to.equal(4);
 
-    const foundIDs = foundElements.map(e => utils.parseID(e.id).pop());
+    const foundIDs = foundElements.map(e => e.id);
+
     // Expect to find the model element and two test elements
-    chai.expect(foundIDs).to.include('model');
-    chai.expect(foundIDs).to.include(testElems[0].id);
-    chai.expect(foundIDs).to.include(testElems[1].id);
-
-    // Expect to find the test elements
-    done();
-  });
+    chai.expect(foundIDs).to.include(utils.createID(org.id, projIDs[0], branchID, 'model'));
+    chai.expect(foundIDs).to.include(elements[1].id);
+    chai.expect(foundIDs).to.include(elements[2].id);
+    chai.expect(foundIDs).to.include(elements[4].id);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
 }
