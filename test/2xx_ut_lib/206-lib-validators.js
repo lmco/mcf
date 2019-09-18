@@ -19,6 +19,7 @@ const chai = require('chai');
 
 // MBEE modules
 const validators = M.require('lib.validators');
+const customValidators = M.config.validators || {};
 
 /* --------------------( Main )-------------------- */
 /**
@@ -45,7 +46,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function verifyOrgID(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.org_id) this.skip();
+  if (customValidators.org_id) this.skip();
 
   // Valid IDs
   chai.expect(RegExp(validators.org.id).test('org3')).to.equal(true);
@@ -65,7 +66,7 @@ function verifyOrgID(done) {
  */
 function verifyProjectID(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.project_id) this.skip();
+  if (customValidators.project_id) this.skip();
 
   // Valid IDs
   chai.expect(RegExp(validators.project.id).test('someorgid:proj3')).to.equal(true);
@@ -83,7 +84,7 @@ function verifyProjectID(done) {
  */
 function verifyBranchID(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.branch_id) this.skip();
+  if (customValidators.branch_id) this.skip();
 
   // Valid IDs
   chai.expect(RegExp(validators.branch.id).test('org:proj:branch1')).to.equal(true);
@@ -101,7 +102,7 @@ function verifyBranchID(done) {
  */
 function verifyElementID(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.element_id) this.skip();
+  if (customValidators.element_id) this.skip();
 
   // Valid IDs
   chai.expect(RegExp(validators.element.id).test('org:proj:branch:elem3')).to.equal(true);
@@ -120,7 +121,7 @@ function verifyElementID(done) {
  */
 function verifyUserUsername(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.user_username) this.skip();
+  if (customValidators.user_username) this.skip();
 
   // Valid usernames
   chai.expect(RegExp(validators.user.username).test('testuser')).to.equal(true);
@@ -141,7 +142,7 @@ function verifyUserUsername(done) {
  */
 function verifyUserEmail(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.user_email) this.skip();
+  if (customValidators.user_email) this.skip();
 
   // Valid emails
   chai.expect(RegExp(validators.user.email).test('valid@test.com')).to.equal(true);
@@ -163,7 +164,7 @@ function verifyUserEmail(done) {
  */
 function verifyUserFName(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.user_fname) this.skip();
+  if (customValidators.user_fname) this.skip();
 
   // Valid names
   chai.expect(RegExp(validators.user.fname).test('First Last')).to.equal(true);
@@ -179,7 +180,7 @@ function verifyUserFName(done) {
  */
 function verifyUserLName(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.user_lname) this.skip();
+  if (customValidators.user_lname) this.skip();
 
   // Valid names
   chai.expect(RegExp(validators.user.lname).test('First-Middle Last')).to.equal(true);
@@ -194,7 +195,7 @@ function verifyUserLName(done) {
  */
 function verifyURLPath(done) {
   // Skip this test if a custom validator is defined
-  if (M.config.validators.url_next) this.skip();
+  if (customValidators.url_next) this.skip();
 
   // Valid paths
   chai.expect(RegExp(validators.url.next).test('/login')).to.equal(true);
