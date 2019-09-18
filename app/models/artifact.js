@@ -56,7 +56,7 @@ const ArtifactSchema = new mongoose.Schema({
     type: String,
     required: true,
     match: RegExp(validators.artifact.id),
-    maxlength: [147, 'Too many characters in ID'],
+    maxlength: [validators.artifact.idLength, 'Too many characters in ID'],
     minlength: [11, 'Too few characters in ID'],
     validate: {
       validator: function(v) {
