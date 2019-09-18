@@ -75,7 +75,12 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should sort the find results', optionSortFind);
+  // -------------- Find --------------
+  it('should sort find results', optionSortFind);
+  // ------------- Create -------------
+  // ------------- Update -------------
+  // ------------- Replace ------------
+  // ------------- Remove -------------
 });
 
 /* --------------------( Tests )-------------------- */

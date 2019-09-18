@@ -95,7 +95,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  // --------------- Find ---------------
+  // -------------- Find --------------
   // populate
   // includearchived
   // fields
@@ -110,15 +110,15 @@ describe(M.getModuleName(module.filename), () => {
   // lastModifiedBy
   // archived
   // custom
-  // --------------- Create ---------------
+  // ------------- Create -------------
   // populate
   // fields
   // minified
-  // --------------- Update ---------------
+  // ------------- Update -------------
   // populate
   // fields
   // minified
-  // --------------- Remove ---------------
+  // ------------- Remove -------------
   // minified
 });
 

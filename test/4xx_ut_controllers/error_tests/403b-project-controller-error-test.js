@@ -97,8 +97,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // -------------- Find --------------
+  // ------------- Create -------------
+  // ------------- Update -------------
+  // ------------- Replace ------------
   it('should reject put proj with invalid id', putInvalidId);
   it('should reject put proj without id', putWithoutId);
+  // ------------- Remove -------------
 });
 
 /* --------------------( Tests )-------------------- */
