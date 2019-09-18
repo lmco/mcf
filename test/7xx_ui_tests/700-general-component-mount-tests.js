@@ -44,7 +44,6 @@ import SidebarHeader from '../../app/ui/components/general/sidebar/sidebar-heade
 describe(M.getModuleName(module.filename), () => {
   it('Renders the list component', listRender);
   it('Renders the list item component', listItemRender);
-  it('Renders the custom data component', customDataRender);
   it('Renders the key data component', keyDataRender);
   it('Renders the divider component', dividerRender);
   it('Renders the sidebar header component', sidebarHeaderRender);
@@ -72,19 +71,6 @@ function listItemRender(done) {
   const wrapper = shallow(<ListItem />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
-  done();
-}
-
-/**
- * @description Mount the custom data component to verify
- * component renders correctly.
- */
-function customDataRender(done) {
-  // Render custom data component with needed prop
-  const wrapper = mount(<CustomData data={{ example: 'data' }}/>);
-  // Expect component to be in DOM
-  chai.expect(wrapper.find(CustomData).length).to.equal(1);
-  chai.expect(wrapper.find(KeyData).length).to.equal(1);
   done();
 }
 
