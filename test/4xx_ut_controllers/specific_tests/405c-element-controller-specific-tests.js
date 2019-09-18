@@ -120,13 +120,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create an archived element', createArchivedElement);
-  it('should archive an element', archiveElement);
-  it('should create an element whose source is on a different project', createExternalSource);
-  it('should create an element whose target is on a different project', createExternalTarget);
-  it('should update an element source to be on a different project', updateExternalSource);
-  it('should update an element target to be on a different project', updateExternalTarget);
-  it('should delete an element which is part of a relationship', deleteRelElement);
+  // -------------- Find --------------
   it('should populate allowed fields when finding an element', optionPopulateFind);
   it('should find an archived element when the option archived is provided', optionArchivedFind);
   it('should find an element and its subtree when the option subtree '
@@ -138,21 +132,35 @@ describe(M.getModuleName(module.filename), () => {
     + ' from find()', optionSkipFind);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from find()', optionLeanFind);
+  it('should sort find results', optionSortFind);
+  it('should return every parent up to root with the rootpath option', optionRootpathFind);
+  // ------------- Create -------------
+  it('should create an archived element', createArchivedElement);
+  it('should create an element whose source is on a different project', createExternalSource);
+  it('should create an element whose target is on a different project', createExternalTarget);
   it('should populate allowed fields when creating an element', optionPopulateCreate);
   it('should return an element with only the specific fields specified from'
     + ' create()', optionFieldsCreate);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from create()', optionLeanCreate);
+  // ------------- Update -------------
+  it('should archive an element', archiveElement);
+  it('should update an element source to be on a different project', updateExternalSource);
+  it('should update an element target to be on a different project', updateExternalTarget);
   it('should populate allowed fields when updating an element', optionPopulateUpdate);
   it('should return an element with only the specific fields specified from'
     + ' update()', optionFieldsUpdate);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from update()', optionLeanUpdate);
+  // ------------- Replace ------------
   it('should populate allowed fields when replacing an element', optionPopulateReplace);
   it('should return an element with only the specific fields specified from'
     + ' createOrReplace()', optionFieldsReplace);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from createOrReplace()', optionLeanReplace);
+  // ------------- Remove -------------
+  it('should delete an element which is part of a relationship', deleteRelElement);
+  // ------------- Search -------------
   it('should populate allowed fields when searching an element', optionPopulateSearch);
   it('should search an archived element when the option archived is provided',
     optionArchivedSearch);
@@ -161,9 +169,7 @@ describe(M.getModuleName(module.filename), () => {
     + 'from search()', optionSkipSearch);
   it('should return a raw JSON version of an element instead of a mongoose '
     + 'object from search()', optionLeanSearch);
-  it('should sort find results', optionSortFind);
   it('should sort search results', optionSortSearch);
-  it('should return every parent up to root with the rootpath option', optionRootpath);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -1466,7 +1472,7 @@ function optionSortSearch(done) {
 /**
  * @description Validates that findElement function can return every parent up to root
  */
-function optionRootpath(done) {
+function optionRootpathFind(done) {
   const testElems = [{
     id: 'testelem00',
     name: 'a',

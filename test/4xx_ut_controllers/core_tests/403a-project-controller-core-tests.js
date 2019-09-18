@@ -89,15 +89,20 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a project', createProject);
-  it('should create multiple projects', createProjects);
-  it('should create or replace a project', createOrReplaceProject);
-  it('should create and replace multiple projects', createOrReplaceProjects);
+  // -------------- Find --------------
   it('should find a project', findProject);
   it('should find multiple projects', findProjects);
   it('should find all projects', findAllProjects);
+  // ------------- Create -------------
+  it('should create a project', createProject);
+  it('should create multiple projects', createProjects);
+  // ------------- Update -------------
   it('should update a project', updateProject);
   it('should update multiple projects', updateProjects);
+  // ------------- Replace ------------
+  it('should create or replace a project', createOrReplaceProject);
+  it('should create and replace multiple projects', createOrReplaceProjects);
+  // ------------- Remove -------------
   it('should delete a project', deleteProject);
   it('should delete multiple projects', deleteProjects);
 });

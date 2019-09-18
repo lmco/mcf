@@ -77,19 +77,26 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create a user', createUser);
-  it('should create multiple users', createUsers);
-  it('should create or replace a user', createOrReplaceUser);
-  it('should create and replace multiple users', createOrReplaceUsers);
+  // -------------- Find --------------
   it('should find a user', findUser);
   it('should find multiple users', findUsers);
   it('should find all users', findAllUsers);
-  it('should find a user through text search', searchUser);
+  // ------------- Create -------------
+  it('should create a user', createUser);
+  it('should create multiple users', createUsers);
+  // ------------- Update -------------
   it('should update a user', updateUser);
   it('should update multiple users', updateUsers);
-  it('should update a users password', updateUserPassword);
+  // ------------- Replace ------------
+  it('should create or replace a user', createOrReplaceUser);
+  it('should create and replace multiple users', createOrReplaceUsers);
+  // ------------- Remove -------------
   it('should delete a user', deleteUser);
   it('should delete multiple users', deleteUsers);
+  // --------- Update Password --------
+  it('should update a users password', updateUserPassword);
+  // ------------- Search -------------
+  it('should find a user through text search', searchUser);
 });
 
 /* --------------------( Tests )-------------------- */

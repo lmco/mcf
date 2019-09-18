@@ -93,8 +93,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // -------------- Find --------------
+  // ------------- Create -------------
+  // ------------- Update -------------
+  // ------------- Replace ------------
   it('should reject put org with invalid id', putInvalidId);
   it('should reject put org without id', putWithoutId);
+  // ------------- Remove -------------
 });
 
 /* --------------------( Tests )-------------------- */

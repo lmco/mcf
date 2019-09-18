@@ -89,8 +89,15 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // -------------- Find --------------
+  // ------------- Create -------------
+  // ------------- Update -------------
+  // ------------- Replace ------------
   it('should reject put user with invalid username', putInvalidUsername);
   it('should reject put user without username', putWithoutUsername);
+  // ------------- Remove -------------
+  // --------- Update Password --------
+  // ------------- Search -------------
 });
 
 /* --------------------( Tests )-------------------- */
