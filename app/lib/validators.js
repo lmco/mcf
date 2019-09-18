@@ -67,7 +67,7 @@ const org = {
 const project = {
   id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`,
   idLength: org.idLength + utils.ID_DELIMITER.length
-  + customValidators.project_id_length ? customValidators.project_id_length : idLength
+  + (customValidators.project_id_length ? customValidators.project_id_length : idLength)
 };
 
 /**
@@ -87,8 +87,8 @@ const project = {
  */
 const branch = {
   id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
-  idLength: org.idLength + project.idLength + 2 * utils.ID_DELIMITER.length
-    + customValidators.branch_id_length ? customValidators.branch_id_length : idLength
+  idLength: project.idLength + utils.ID_DELIMITER.length
+    + (customValidators.branch_id_length ? customValidators.branch_id_length : idLength)
 };
 
 /**
@@ -108,8 +108,8 @@ const branch = {
  */
 const artifact = {
   id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
-  idLength: org.idLength + project.idLength + branch.idLength + 3 * utils.ID_DELIMITER.length
-    + customValidators.artifact_id_length ? customValidators.artifact_id_length : idLength
+  idLength: branch.idLength + utils.ID_DELIMITER.length
+    + (customValidators.artifact_id_length ? customValidators.artifact_id_length : idLength)
 };
 
 /**
@@ -129,8 +129,8 @@ const artifact = {
  */
 const element = {
   id: customValidators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
-  idLength: org.idLength + project.idLength + branch.idLength + 3 * utils.ID_DELIMITER.length
-  + customValidators.element_id_length ? customValidators.element_id_length : idLength
+  idLength: branch.idLength + utils.ID_DELIMITER.length
+  + (customValidators.element_id_length ? customValidators.element_id_length : idLength)
 };
 
 /**
