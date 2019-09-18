@@ -54,7 +54,8 @@ class CustomData extends Component {
       // Loop through custom data
       Object.keys(customData).forEach((key) => {
         // Create the key data view
-        keys.push(<KeyData key={`key-${key}`} keyName={key} data={customData[key]}/>);
+        /* eslint-disable-next-line no-undef */
+        keys.push(<KeyData key={`key-${key}`} keyName={key} data={decodeHTML(customData[key])}/>);
       });
     }
     else {

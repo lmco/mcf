@@ -55,3 +55,57 @@
   padding: 5px;
   font-weight: 700;
 }
+
+/******************************************************************************
+/*                       Custom Data Edit Styling                             *
+/******************************************************************************/
+
+.custom-kv-row {
+  margin-bottom: 10px;
+}
+
+.custom-key-col {
+  padding: 0px;
+}
+
+#btn-add-kv-pair {
+  display: block;
+  margin: 0 auto;
+  margin-top: 15px;
+
+  &:disabled {
+    color: #6c757d;
+    border-color: #6c757d;
+  }
+}
+
+#custom-input-nav {
+  border-color: transparent;
+}
+
+#custom-form {
+  border: 1px solid #dee2e6;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  padding: 15px;
+}
+
+// TODO: Place higher when refactoring CSS.
+@mixin btn-row-del {
+  padding: 0px;
+  font-size: 1.25rem;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none !important;
+  color: gray;
+}
+
+.custom-row-del {
+  @include btn-row-del;
+
+  &:hover, &:focus, &:active {
+    @include btn-row-del;
+  }
+}
