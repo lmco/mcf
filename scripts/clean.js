@@ -21,7 +21,6 @@ const path = require('path');
 
 const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
 const rmf = (process.platform === 'win32') ? 'DEL /S /Q' : 'rm -rf';
-const slash = (process.platform === 'win32') ? `\\` : '/'; //eslint-disable-line
 
 // Error Check - Check if file was run directly or global M object is undefined
 if (module.parent == null || typeof M === 'undefined') {
@@ -46,7 +45,7 @@ if (module.parent == null || typeof M === 'undefined') {
  * If NO flags are provided, defaults to `--all`
  */
 function clean(_args) {
-  const root = path.join(__dirname, `..${slash}`);
+  const root = path.join(__dirname, '..');
 
   // eslint-disable-next-line no-console
   console.log('Cleaning MBEE...');
