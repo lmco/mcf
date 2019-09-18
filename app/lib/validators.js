@@ -26,7 +26,7 @@ const id = customValidators.id || '([_a-z0-9])([-_a-z0-9.]){0,}';
 const idLength = customValidators.id_length || 36;
 
 // A list of reserved keywords which cannot be used in ids
-module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
+const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous'];
@@ -44,7 +44,7 @@ module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
  *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
  *     - myOrg [invalid - uses uppercase letter]
  */
-module.exports.org = {
+const org = {
   id: customValidators.org_id || `^${id}$`,
   idLength: customValidators.org_id_length || idLength
 };
@@ -64,9 +64,10 @@ module.exports.org = {
  *      - -project [invalid - must start with a letter or a number]
  *      - myProject [invalid - cannot use uppercase characters]
  */
-module.exports.project = {
+const project = {
   id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`,
-  idLength: customValidators.project_id_length || idLength * 2 + utils.ID_DELIMITER.length
+  idLength: org.idLength + utils.ID_DELIMITER.length
+  + customValidators.project_id_length ? customValidators.project_id_length : idLength
 };
 
 /**
@@ -84,9 +85,10 @@ module.exports.project = {
  *      - orgid:projid:myBranch [invalid - cannot use uppercase characters]
  *      - my-branch [invalid - must contain org and proj segments]
  */
-module.exports.branch = {
+const branch = {
   id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
-  idLength: customValidators.branch_id_length || idLength * 3 + utils.ID_DELIMITER.length * 2
+  idLength: org.idLength + project.idLength + 2 * utils.ID_DELIMITER.length
+    + customValidators.branch_id_length ? customValidators.branch_id_length : idLength
 };
 
 /**
@@ -104,9 +106,10 @@ module.exports.branch = {
  *      - orgid:projid:branchid:myArtifact [invalid - cannot use uppercase characters]
  *      - my-artifact [invalid - must contain org, proj, and branch segments]
  */
-module.exports.artifact = {
+const artifact = {
   id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
-  idLength: customValidators.artifact_id_length || idLength * 4 + utils.ID_DELIMITER.length * 3
+  idLength: org.idLength + project.idLength + branch.idLength + 3 * utils.ID_DELIMITER.length
+    + customValidators.artifact_id_length ? customValidators.artifact_id_length : idLength
 };
 
 /**
@@ -124,9 +127,10 @@ module.exports.artifact = {
  *      - orgid:projid:branchid:myElement [invalid - cannot use uppercase characters]
  *      - my-element [invalid - must contain org, proj, and branch segments]
  */
-module.exports.element = {
+const element = {
   id: customValidators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
-  idLength: customValidators.element_id_length || idLength * 4 + utils.ID_DELIMITER.length * 3
+  idLength: org.idLength + project.idLength + branch.idLength + 3 * utils.ID_DELIMITER.length
+  + customValidators.element_id_length ? customValidators.element_id_length : idLength
 };
 
 /**
@@ -142,7 +146,7 @@ module.exports.element = {
  *   - MUST start with a lowercase letter or uppercase letter
  *   - MUST only contain lowercase letters, uppercase letters, '-', or whitespace
  */
-module.exports.user = {
+const user = {
   username: customValidators.user_username || '^([a-z])([a-z0-9_]){0,}$',
   usernameLength: customValidators.user_username_length || idLength,
   email: customValidators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
@@ -163,7 +167,19 @@ module.exports.user = {
  *     - /login [valid]
  *     - https://lockheedmartin.com [invalid - cannot use external URLs]
  */
-module.exports.url = {
+const url = {
   // starts with one and only one '/'
   next: customValidators.url_next || '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
+};
+
+
+module.exports = {
+  reserved,
+  org,
+  project,
+  branch,
+  artifact,
+  element,
+  user,
+  url
 };
