@@ -184,7 +184,7 @@ class ProfileEdit extends Component {
     // Render user edit page
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='profile-edit-title'>
+        <div className='profile-edit-title'>
           <h2 className={titleClass}>User Edit</h2>
           {(!localUser)
             ? ''

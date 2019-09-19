@@ -20,17 +20,6 @@
   overflow: hidden;
   padding-top: 50px;
 
-  #workspace-header {
-    border-bottom: 1px solid $mbee-color;
-    padding: 12px 28px;
-    margin-top: -50px;
-
-    #workspace-header-btn {
-      width: 150px;
-    }
-
-  }
-
   #workspace-body {
     display: grid;
     grid-template-rows: 1fr;
@@ -76,6 +65,9 @@
   grid-template-areas: "header button";
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid $mbee-color;
+  padding: 12px 28px;
+  margin-top: -50px;
 }
 
 .home-header {

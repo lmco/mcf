@@ -109,6 +109,7 @@ class DeleteUser extends Component {
     this.setState({
       message: '',
       results: 'Searching ...'
+    //  TODO (ld/ je): Get rid of this if it doesnt effect anything
     }, () => { this.render(); });
 
     let query = this.state.username;
@@ -167,7 +168,7 @@ class DeleteUser extends Component {
     if (this.state.results === 'Searching ...') {
       searchResults = (
         <div style={{ width: '100%', textAlign: 'center' }}>
-          <Spinner type="grow" color="primary" />
+          <Spinner type='grow' color='primary' />
           <span style={{ paddingLeft: '20px' }}>
             Searching ...
           </span>
@@ -181,7 +182,7 @@ class DeleteUser extends Component {
     // Return the project delete form
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header'>
+        <div className='workspace-header'>
           <h2 className='workspace-title workspace-title-padding'>
             Delete User
           </h2>
@@ -189,7 +190,7 @@ class DeleteUser extends Component {
         <div className='extra-padding'>
           {(!this.state.error)
             ? ''
-            : (<UncontrolledAlert color="danger">
+            : (<UncontrolledAlert color='danger'>
               {this.state.error}
             </UncontrolledAlert>)
           }
@@ -209,7 +210,7 @@ class DeleteUser extends Component {
                     </Col>
                     <Col md={2} sm={4} xs={6} >
                       <Button className='btn'
-                              outline color="primary"
+                              outline color='primary'
                               type='submit'
                               onClick={this.doSearch}>
                         Search
@@ -224,7 +225,7 @@ class DeleteUser extends Component {
                 }
               </div>)
               : (<FormGroup>
-                  <Label for="username">Do you want to delete {selectedUser}?</Label>
+                  <Label for='username'>Do you want to delete {selectedUser}?</Label>
                  </FormGroup>)
             }
             {/* Button to submit and delete project */}

@@ -196,11 +196,11 @@ class ProjectElements extends Component {
     // Return element list
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header header-box-depth'>
+        <div className='workspace-header header-box-depth'>
           <h2 className={btnDisClassName}>{this.props.project.name} Model</h2>
           {(!isButtonDisplayed)
             ? ''
-            : (<div id='workspace-header-btn' className='workspace-header-button ws-button-group'>
+            : (<div className='workspace-header-button ws-button-group add-elements-btn'>
               <Button className='btn btn-sm'
                       outline color='primary'
                       onClick={this.createNewElement}>

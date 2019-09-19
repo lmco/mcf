@@ -209,7 +209,7 @@ class UserList extends Component {
         </Modal>
         {/* Display the list of users */}
         <div id='workspace' ref={this.ref}>
-          <div id='workspace-header' className='workspace-header header-box-depth'>
+          <div className='workspace-header header-box-depth'>
             <h2 className='workspace-title workspace-title-padding'>
               Users
             </h2>

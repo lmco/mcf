@@ -102,7 +102,7 @@ class MembersPage extends Component {
     return (
       <React.Fragment>
         <div id='workspace'>
-          <div id='workspace-header' className='workspace-header header-box-depth'>
+          <div className='workspace-header header-box-depth'>
             <h2 className='workspace-title workspace-title-padding'>
               Members of {title}
             </h2>
