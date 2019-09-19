@@ -258,7 +258,7 @@ class HomeApp extends Component {
           </ModalBody>
         </Modal>
         { /* Display the list of projects */ }
-        <div ref={this.ref}>
+        <div className='home-space' ref={this.ref}>
           <div className='workspace-header home-header'>
             <h2 className={titleClass}>Organizations</h2>
             { /* Verify user is an admin */ }

@@ -184,12 +184,12 @@ class ProfileEdit extends Component {
     // Render user edit page
     return (
       <div id='workspace'>
-        <div className='profile-edit-title'>
+        <div className='workspace-header'>
           <h2 className={titleClass}>User Edit</h2>
           {(!localUser)
             ? ''
             : (<div className='workspace-header-button'>
-                <Button className='btn'
+                <Button className='bigger-width-btn'
                         size='sm'
                         outline color='primary'
                         onClick={this.props.togglePasswordModal}>

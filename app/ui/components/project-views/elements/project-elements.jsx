@@ -201,11 +201,11 @@ class ProjectElements extends Component {
           {(!isButtonDisplayed)
             ? ''
             : (<div className='workspace-header-button ws-button-group add-elements-btn'>
-              <Button className='btn btn-sm'
+              <Button className='bigger-width-btn btn-sm'
                       outline color='primary'
                       onClick={this.createNewElement}>
                 <i className='fas fa-plus'/>
-                {' Add Element'}
+                Add Element
               </Button>
             </div>)}
         </div>
