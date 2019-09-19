@@ -1,0 +1,49 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.sass.components._box-list.scss
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description Defines the box list styles
+ */
+
+.box-list {
+  padding: 5px 10px;
+  margin: 15px;
+
+  .box-list-header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .box-list-footer {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 5px;
+
+    .footer-btn {
+      color: black;
+      &:hover {
+        cursor: pointer;
+        color: #cccccc;
+      }
+
+      .btn-label {
+        font-size: small;
+        font-weight: 100;
+      }
+
+      i {
+        padding: 5px;
+        font-size: small;
+      }
+    }
+  }
+}

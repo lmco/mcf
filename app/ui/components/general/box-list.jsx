@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.components.profile-views.profile-home
+ * @module ui.components.general.box-list
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,7 +11,8 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders a user's home page.
+ * TODO: Figure out where this is used and put a better description
+ * @description This renders a box with a list inside.
  */
 
 /* Modified ESLint rules for React. */

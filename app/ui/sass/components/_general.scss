@@ -20,18 +20,6 @@
   padding-top: 30px;
 }
 
-.dropdown-list {
-  border: 1px solid #ced4da;
-  position: absolute;
-  background-color: white;
-  width: 85%;
-
-  .drop-list {
-    margin-bottom: 0;
-    padding-left: 0;
-  }
-}
-
 .grayed-out {
   color: #c0c0c0;
 }
@@ -40,6 +28,7 @@
   font-size: smaller;
 }
 
+// TODO: in user list only way to get rid
 .spacing {
   padding: 0 24px;
 }
@@ -48,46 +37,14 @@
   padding-bottom: 10px;
 }
 
+// TODO: only in stat list item way to get rid
 .bold-name {
   font-weight: 600;
 }
 
+//TODO: only in box list something to look into changing
 .bolder-name {
   font-weight: 700;
-}
-
-.box-list {
-  padding: 5px 10px;
-  margin: 15px;
-
-  .box-list-header {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .box-list-footer {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 5px;
-
-    .footer-btn {
-      color: black;
-      &:hover {
-        cursor: pointer;
-        color: #cccccc;
-      }
-
-      .btn-label {
-        font-size: small;
-        font-weight: 100;
-      }
-
-      i {
-        padding: 5px;
-        font-size: small;
-      }
-    }
-  }
 }
 
 .transparent {
@@ -123,4 +80,31 @@
 
 .bigger-width-btn {
   width: 150px;
+}
+
+.controls-container {
+  display: flex;
+  grid-area: button;
+  justify-content: flex-end;
+  padding-right: 5px;
+
+  .add-btn {
+    color: $color-secondary;
+    padding-right: 20px;
+  }
+  .add-btn:hover {
+    color: darken($color-secondary, 20);
+    cursor: pointer;
+  }
+
+  .delete-btn {
+    color: $color-danger;
+  }
+  .delete-btn:hover {
+    color: darken($color-danger, 20);
+    cursor: pointer;
+  }
+  .fake-icon {
+    color: transparent;
+  }
 }

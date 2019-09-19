@@ -68,6 +68,7 @@
 * These scss files contain definitions of element components in our UI.
 * Such as the navbar.
 */
+@import './components/_box-list.scss';
 @import './components/_custom-data.scss';
 @import './components/_expand-collapse.scss';
 @import './components/_general.scss';

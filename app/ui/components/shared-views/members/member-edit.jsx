@@ -275,7 +275,7 @@ class MemberEdit extends Component {
         <h2>{header}</h2>
         <hr />
         <div>
-          <h3 className='edit-role-title'> {title} </h3>
+          <h3> {title} </h3>
           {(!this.state.error)
             ? ''
             : (<UncontrolledAlert color="danger">

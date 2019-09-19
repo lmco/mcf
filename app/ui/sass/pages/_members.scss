@@ -15,26 +15,6 @@
  */
 @import '../utils/_variables';
 
-.profile-edit-title {
-  display: grid;
-  grid-template-columns: minmax(auto, 70%) 1fr;
-  grid-template-areas: "header button";
-  justify-content: space-between;
-  align-items: center;
-}
-
-.user-title {
-  padding-right: 25px;
-}
-
-.table-padding {
-  padding-left: 10px;
-}
-
-.edit-role-title {
-  padding-bottom: 10px;
-}
-
 .username-search {
   display: grid;
   grid-template-columns: minmax(auto, 600px) 1fr;

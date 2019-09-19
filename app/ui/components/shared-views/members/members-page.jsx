@@ -108,7 +108,7 @@ class MembersPage extends Component {
             </h2>
           </div>
           <div id='workspace-body' className='extra-padding'>
-            <div className='main-workspace table-padding'>
+            <div className='main-workspace'>
               <div className='roles-box'>
                 {(this.props.project && !this.props.org)
                   ? (<MemberEdit project={this.props.project}
