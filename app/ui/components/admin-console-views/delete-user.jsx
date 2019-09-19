@@ -209,8 +209,7 @@ class DeleteUser extends Component {
                              onChange={this.updateUsername}/>
                     </Col>
                     <Col md={2} sm={4} xs={6} >
-                      <Button className='btn'
-                              outline color='primary'
+                      <Button outline color='primary'
                               type='submit'
                               onClick={this.doSearch}>
                         Search
