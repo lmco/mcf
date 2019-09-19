@@ -68,10 +68,15 @@
 * These scss files contain definitions of element components in our UI.
 * Such as the navbar.
 */
+@import './components/_custom-data.scss';
+@import './components/_expand-collapse.scss';
 @import './components/_general.scss';
+@import './components/_list.scss';
+@import './components/_model';
 @import './components/_navbar.scss';
+@import './components/_search.scss';
 @import './components/_sidebar.scss';
-@import './components/_components.scss';
+@import './components/_sidepanel.scss';
 
 /**
 * Pages
@@ -82,4 +87,4 @@
 */
 @import './pages/_home.scss';
 @import './pages/_project.scss';
-@import './pages/_user.scss';
+@import './pages/_members.scss';

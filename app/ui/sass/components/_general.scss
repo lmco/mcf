@@ -13,6 +13,7 @@
  *
  * @description Defines general html sass component styles
  */
+
 @import '../utils/_variables';
 
 .about-top {
@@ -101,4 +102,25 @@
 
 .extra-padding {
   padding: 20px;
+}
+
+#login-form {
+  margin-top: 40%;
+
+  button {
+    margin-top: 10px;
+    width: 100%;
+  }
+}
+
+.loading {
+  width: 100%;
+  height:100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.workspace-title-padding {
+  padding: 10px 0;
 }

@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.sass.components.workspace-components._user
+ * @module ui.sass.pages._members.scss
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,13 +11,9 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description Defines the user page sass variables
+ * @description Defines the members page style
  */
 @import '../utils/_variables';
-
-/******************************************************************************
-/*                           Members Page Styling                             *
-/******************************************************************************/
 
 .profile-edit-title {
   display: grid;

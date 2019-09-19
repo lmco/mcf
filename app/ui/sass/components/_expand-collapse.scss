@@ -1,0 +1,42 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.sass.components._expand-collapse
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description Defines the expand and collapse styles
+ */
+@import '../utils/_variables';
+
+@mixin btn-light-header {
+  padding: 0px;
+  margin-left: 5px;
+  font-size: 0.9rem;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none !important;
+  color: $mbee-navbar-color;
+}
+
+#btn-expand, #btn-collapse {
+  @include btn-light-header;
+
+  &:focus, &:active, &:hover, &:visited {
+    @include btn-light-header;
+    font-weight: 600;
+  }
+}
+
+#grp-expand-collapse {
+  margin-top: 5px;
+  margin-left: 35px;
+  margin-bottom: -20px;
+}

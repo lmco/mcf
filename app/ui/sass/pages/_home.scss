@@ -15,10 +15,6 @@
  */
 @import '../utils/_variables';
 
-/******************************************************************************
-/*                        Home List Component Styling                         *
-/******************************************************************************/
-
 .org-proj-list {
   display: grid;
   grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 60px);

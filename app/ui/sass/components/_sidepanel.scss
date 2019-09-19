@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.sass.components.workspace-components._sidepanel
+ * @module ui.sass.components._sidepanel
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,13 +11,11 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description Defines the side panel sass variables
+ * @description Defines the side panel styles.
  */
+
 @import '../utils/_variables';
 
-/******************************************************************************
-/*                            Side Panel Styling                               *
-/******************************************************************************/
 .element-panel-display {
   padding: 15px;
   position: sticky;
