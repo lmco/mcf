@@ -28,3 +28,25 @@
     background: #f7f7f7;
   }
 }
+
+// TODO (ld): consider moving this to model
+// TODO (ld): or consider moving model into project page
+.model-dropdown-btn {
+  &:active {
+    border: none;
+    outline: none;
+  }
+  &:focus {
+    border: none;
+    outline: none;
+  }
+}
+
+.branch-link {
+  color: $mbee-navbar-color;
+
+  &:hover {
+    color: lighten($mbee-navbar-color, 20);
+    text-decoration: none;
+  }
+}
