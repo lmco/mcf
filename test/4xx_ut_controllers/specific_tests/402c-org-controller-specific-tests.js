@@ -662,7 +662,7 @@ async function optionPopulateUpdate() {
     fields = fields.filter((f) => f !== 'archivedBy');
     const options = { populate: fields };
 
-    // Create the org
+    // Update the org
     const updatedOrgs = await OrgController.update(adminUser,
       orgObj, options);
     // There should be one org
@@ -698,7 +698,7 @@ async function optionFieldsUpdate() {
     const fields = ['name', 'permissions'];
     const options = { fields: fields, lean: true };
 
-    // Create the org
+    // Update the org
     const updatedOrgs = await OrgController.update(adminUser,
       orgObj, options);
     // There should be one org
@@ -735,7 +735,7 @@ async function optionLeanUpdate() {
     // Create lean option
     const options = { lean: true };
 
-    // Create the org
+    // Update the org
     const createdOrgs = await OrgController.update(adminUser,
       orgObj, options);
     // There should be one org
@@ -769,7 +769,7 @@ async function optionPopulateReplace() {
     fields = fields.filter((f) => f !== 'archivedBy');
     const options = { populate: fields };
 
-    // Create the org
+    // Replace the org
     const createdOrgs = await OrgController.createOrReplace(adminUser, orgObj,
       options);
     // There should be one org
@@ -805,7 +805,7 @@ async function optionFieldsReplace() {
     const fields = ['name', 'permissions'];
     const options = { fields: fields, lean: true };
 
-    // Create the org
+    // Replace the org
     const createdOrgs = await OrgController.createOrReplace(adminUser,
       orgObj, options);
     // There should be one org
@@ -842,7 +842,7 @@ async function optionLeanReplace() {
     // Create lean option
     const options = { lean: true };
 
-    // Create the org
+    // Replace the org
     const createdOrgs = await OrgController.createOrReplace(adminUser,
       orgObj, options);
     // There should be one org
