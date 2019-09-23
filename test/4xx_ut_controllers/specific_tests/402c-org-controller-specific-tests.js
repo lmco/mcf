@@ -351,7 +351,7 @@ function optionSortFind(done) {
   .then(() => done())
   .catch((error) => {
     M.log.error(error.message);
-    // Expect no error
+    // Expect no errors
     chai.expect(error.message).to.equal(null);
     done();
   });

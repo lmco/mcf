@@ -739,7 +739,7 @@ async function optionPopulateUpdate() {
     fields = fields.filter((f) => f !== 'archivedBy');
     const options = { populate: fields };
 
-    // Create the branch
+    // Update the branch
     const updatedBranches = await BranchController.update(adminUser, org.id, projID,
       branchObj, options);
     // There should be one branch
@@ -775,7 +775,7 @@ async function optionFieldsUpdate() {
     const fields = ['name', 'source', 'tag'];
     const options = { fields: fields, lean: true };
 
-    // Create the branch
+    // Update the branch
     const updatedBranches = await BranchController.update(adminUser, org.id, projID,
       branchObj, options);
     // There should be one branch
@@ -812,7 +812,7 @@ async function optionLeanUpdate() {
     // Create lean option
     const options = { lean: true };
 
-    // Create the branch
+    // Update the branch
     const createdBranches = await BranchController.update(adminUser, org.id, projID,
       branchObj, options);
     // There should be one branch
