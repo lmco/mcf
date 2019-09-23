@@ -11,8 +11,8 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * TODO: Put a better description
- * @description This renders a box with a list inside.
+ * @description This renders a list contained inside a box,
+ * used specifically in the branches and tags page.
  */
 
 /* Modified ESLint rules for React. */
