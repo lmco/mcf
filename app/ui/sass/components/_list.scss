@@ -16,23 +16,20 @@
 
 @import '../utils/_variables';
 
-.hover-darken:hover {
-  background: #f7f7f7;
-}
-
-.project-hover {
-  border-left: #eeeeee solid;
-  margin-left: 10px;
-
-  &:hover {
-    background: #f7f7f7;
-    border-left: $mbee-navbar-color solid;
-  }
-}
-
 // TODO (ld): Important is not best practice, but only way to get to work
 .archived-link {
   color: #c0c0c0 !important;
+}
+
+#branch-list-items {
+  margin: 0.5em;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+// TODO - consider renaming as it is only in lists/ or move it same with above
+.hover-darken:hover {
+  background: #f7f7f7;
 }
 
 .list-item {
@@ -56,27 +53,14 @@
   }
 }
 
-.stats-list-item {
-  display: grid;
-  grid-template-columns: minmax(auto, 750px) 1fr;
-  grid-template-areas: "header stats";
-  justify-content: space-between;
-  align-items: center;
+// TODO - consider splitting it up in specific lists?
+.project-hover {
+  border-left: #eeeeee solid;
+  margin-left: 10px;
 
-  .list-header {
-    margin: 1em;
-    grid-area: header;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    a:hover {
-      color:  lighten($mbee-navbar-color, 20);
-    }
-  }
-
-  .stats-list {
-    grid-area: stats;
-    justify-self: flex-end;
+  &:hover {
+    background: #f7f7f7;
+    border-left: $mbee-navbar-color solid;
   }
 }
 
@@ -112,6 +96,30 @@
     padding-left: 0px;
     padding-right: 0px;
     width: 1px;
+  }
+}
+
+.stats-list-item {
+  display: grid;
+  grid-template-columns: minmax(auto, 750px) 1fr;
+  grid-template-areas: "header stats";
+  justify-content: space-between;
+  align-items: center;
+
+  .list-header {
+    margin: 1em;
+    grid-area: header;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    a:hover {
+      color:  lighten($mbee-navbar-color, 20);
+    }
+  }
+
+  .stats-list {
+    grid-area: stats;
+    justify-self: flex-end;
   }
 }
 
@@ -163,10 +171,3 @@
   display: grid;
   grid-template-columns: 25% 25% 25% 25%;
 }
-
-#branch-list-items {
-  margin: 0.5em;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-}
-

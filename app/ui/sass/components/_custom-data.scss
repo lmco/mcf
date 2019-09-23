@@ -63,13 +63,23 @@
 
 #btn-add-kv-pair {
   display: block;
-  margin: 0 auto;
-  margin-top: 15px;
+  margin: 15px auto 0;
 
   &:disabled {
     color: #6c757d;
     border-color: #6c757d;
   }
+}
+
+// TODO: Place higher when refactoring CSS.
+%btn-row-del {
+  padding: 0px;
+  font-size: 1.25rem;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none !important;
+  color: gray;
 }
 
 #custom-input-nav {
@@ -85,22 +95,11 @@
 }
 
 .custom-key-col {
-  padding: 0px;
+  padding: 0;
 }
 
 .custom-kv-row {
   margin-bottom: 10px;
-}
-
-// TODO: Place higher when refactoring CSS.
-%btn-row-del {
-  padding: 0px;
-  font-size: 1.25rem;
-  background-color: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  outline: none !important;
-  color: gray;
 }
 
 .custom-row-del {

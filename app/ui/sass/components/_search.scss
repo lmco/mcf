@@ -18,22 +18,20 @@
 /******************************************************************************
 /*                           Search Form Styling                              *
 /******************************************************************************/
-
-#search {
-  overflow-y: scroll;
-  height: 100%;
+%btn-page {
+  font-size: 0.875rem;
+  border: none;
+  background-color: Transparent;
+  box-shadow: none;
+  color: $color-primary;
 }
 
-.search-form {
-  padding: 0px 80px 1px;
+#btn-pagination-grp {
+  float: right;
+}
 
-  .form-row {
-    width: 100%;
-
-    input {
-      width: 100%;
-    }
-  }
+#btn-next-result-page, #btn-prev-result-page {
+  @extend %btn-page;
 }
 
 .no-results {
@@ -42,17 +40,9 @@
   margin: 20px;
 }
 
-#search-message {
-  margin-left: 80px;
-  margin-bottom: 15px;
-  font-size: 13px;
-}
-
-#search-results {
-  width: 82%;
-  padding: 0px;
-  border: 1px solid rgba(0,0,0,0.125);
-  border-radius: .25rem;
+#search {
+  overflow-y: scroll;
+  height: 100%;
 }
 
 .search-body {
@@ -69,20 +59,34 @@
   padding: 80px 80px 0px 60px;
 }
 
-#btn-pagination-grp {
-  float: right;
+.search-container {
+  padding: 4px 80px;
+  margin-bottom: 20px;
 }
 
-%btn-page {
-  font-size: 0.875rem;
-  border: none;
-  background-color: Transparent;
-  box-shadow: none;
-  color: $color-primary;
+.search-form {
+  padding: 0px 80px 1px;
+
+  .form-row {
+    width: 100%;
+
+    input {
+      width: 100%;
+    }
+  }
 }
 
-#btn-next-result-page, #btn-prev-result-page {
-  @extend %btn-page;
+#search-message {
+  margin-left: 80px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+
+#search-results {
+  width: 82%;
+  padding: 0;
+  border: 1px solid rgba(0,0,0,0.125);
+  border-radius: .25rem;
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
@@ -92,14 +96,8 @@
 /******************************************************************************
 /*                           Adv Search Form Styling                          *
 /******************************************************************************/
-
-.search-container {
-  padding: 4px 80px;
-  margin-bottom: 20px;
-}
-
-.adv-col {
-  padding: 0px 10px 0px 0px;
+#adv-btns-grp {
+  margin: 0;
 }
 
 #adv-card {
@@ -111,10 +109,30 @@
   padding: 10px;
 }
 
-#frm-adv-label {
-  padding: 7px 0px 0px 14px;
-  margin: 0px;
-  font-size: 0.9rem;
+.adv-col {
+  padding: 0px 10px 0px 0px;
+}
+
+#adv-filter-btn {
+  margin-left: auto;
+  margin-right: 25px;
+}
+
+.adv-input-field {
+  border-radius: 0.25rem !important;
+}
+
+#adv-search-header{
+  margin: 0;
+  display: flex;
+}
+
+.adv-search-row {
+  padding: 5px;
+}
+
+.adv-search-select {
+  padding-right: 10px;
 }
 
 #adv-separator {
@@ -122,20 +140,8 @@
   margin: 12px;
 }
 
-.adv-search-select {
-  padding-right: 10px;
-}
-
-.adv-input-field {
-  border-radius: 0.25rem !important;
-}
-
-.adv-search-row {
-  padding: 5px;
-}
-
 %btn-adv-row-del {
-  padding: 0px;
+  padding: 0;
   margin-left: 5px;
   font-size: 1.25rem;
   background-color: transparent;
@@ -153,17 +159,20 @@
   }
 }
 
+#btn-adv-search {
+  float: none;
+  font-size: 0.875rem;
+  margin: 0 auto;
+  width: 200px;
+}
+
 %btn-adv-standard {
-  padding: 0px 0px 5px;
+  padding: 0 0 5px;
   font-size: 0.875rem;
   border: none;
   background-color: Transparent;
   box-shadow: none;
   color: $color-primary;
-}
-
-#adv-btns-grp {
-  margin: 0px;
 }
 
 #btn-add-adv-row {
@@ -179,45 +188,15 @@
   }
 }
 
-#btn-adv-search {
-  float: none;
-  font-size: 0.875rem;
-  margin: 0 auto;
-  width: 200px;
-}
-
-#adv-search-header{
-  margin: 0px;
-  display: flex;
-}
-
-#adv-filter-btn {
-  margin-left: auto;
-  margin-right: 25px;
+#frm-adv-label {
+  padding: 7px 0 0 14px;
+  margin: 0;
+  font-size: 0.9rem;
 }
 
 /******************************************************************************
 /*                       Adv Filter Form Styling                              *
 /******************************************************************************/
-
-#btn-grp-adv-filter {
-  margin: 0px 10px 0px 10px;
-}
-
-#filter-menu {
-  width: 475px !important;
-  overflow: visible;
-}
-
-#adv-filter-toggle {
-  outline: none !important;
-}
-
-#adv-filter-separator {
-  border-top: 1px solid rgba(0,0,0,0.125);
-  margin: 4px 15px;
-}
-
 .adv-elem-filters {
   margin-top: 8px;
 }
@@ -229,4 +208,22 @@
 
 #adv-filter-label {
   margin: auto;
+}
+
+#adv-filter-separator {
+  border-top: 1px solid rgba(0,0,0,0.125);
+  margin: 4px 15px;
+}
+
+#adv-filter-toggle {
+  outline: none !important;
+}
+
+#btn-grp-adv-filter {
+  margin: 0px 10px 0px 10px;
+}
+
+#filter-menu {
+  width: 475px !important;
+  overflow: visible;
 }
