@@ -814,7 +814,8 @@ async function optionPopulateReplace() {
     const options = { populate: fields };
 
     // Create the project
-    const createdProjects = await ProjectController.createOrReplace(adminUser, org.id, projectObj, options);
+    const createdProjects = await ProjectController.createOrReplace(adminUser, org.id, projectObj,
+      options);
     // There should be one project
     chai.expect(createdProjects.length).to.equal(1);
     const createdProject = createdProjects[0];
