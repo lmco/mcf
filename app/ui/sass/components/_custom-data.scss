@@ -16,14 +16,18 @@
 
 @import '../utils/_variables';
 
+%custom-key-display {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .custom-data {
   padding-left: 20px;
 
   .custom-key {
+    @extend %custom-key-display;
     padding-left: .5em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 
     i {
       font-size: 12px;
@@ -41,10 +45,8 @@
   }
 
   .custom-key-info {
+    @extend %custom-key-display;
     padding-left: 1em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .last-element {
@@ -71,7 +73,6 @@
   }
 }
 
-// TODO: Place higher when refactoring CSS.
 %btn-row-del {
   padding: 0px;
   font-size: 1.25rem;

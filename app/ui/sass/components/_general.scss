@@ -38,31 +38,8 @@
   padding-bottom: 10px;
 }
 
-.controls-container {
-  display: flex;
-  grid-area: button;
-  justify-content: flex-end;
-  padding-right: 5px;
-
-  .add-btn {
-    color: $color-secondary;
-    padding-right: 20px;
-  }
-  .add-btn:hover {
-    color: darken($color-secondary, 20);
-    cursor: pointer;
-  }
-
-  .delete-btn {
-    color: $color-danger;
-  }
-  .delete-btn:hover {
-    color: darken($color-danger, 20);
-    cursor: pointer;
-  }
-  .fake-icon {
-    color: transparent;
-  }
+.empty-item {
+  display: none;
 }
 
 // TODO: Consider changing certain pages to modals with headers & footers

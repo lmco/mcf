@@ -49,6 +49,7 @@
 * These scss files contain main definitions of page layouts through
 * out our UI. Such as the grid layout for our main layout.
 */
+@import './layout/_controls-container.scss';
 @import './layout/_grid.scss';
 @import './layout/_workspace.scss';
 

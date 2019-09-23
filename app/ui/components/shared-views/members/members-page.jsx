@@ -21,7 +21,7 @@
 import React, { Component } from 'react';
 
 // MBEE Modules
-import { Button, Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
+import { UncontrolledTooltip } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
 import UserListItem from '../list-items/user-list-item.jsx';
 import List from '../../general/list/list.jsx';
@@ -100,39 +100,37 @@ class MembersPage extends Component {
 
     // Return project member list
     return (
-      <React.Fragment>
-        <div id='workspace'>
-          <div className='workspace-header header-box-depth'>
-            <h2 className='workspace-title workspace-title-padding'>
-              Members of {title}
-            </h2>
-          </div>
-          <div id='workspace-body' className='extra-padding'>
-            <div className='main-workspace'>
-              <div className='roles-box'>
-                {(this.props.project && !this.props.org)
-                  ? (<MemberEdit project={this.props.project}
-                                 selectedUser={this.state.selectedUser}/>)
-                  : (<MemberEdit org={this.props.org}
-                                 selectedUser={this.state.selectedUser}/>)
-                }
-              </div>
-              <List className='members-box'>
-                <div className='template-header' key='user-info-template'>
-                  <UserListItem className='head-info'
-                                label={true}
-                                user={{ fname: 'Name',
-                                  lname: '',
-                                  username: 'Username' }}
-                                permission={'admin'}
-                                _key='user-template'/>
-                </div>
-                {listItems}
-              </List>
+      <div id='workspace'>
+        <div className='workspace-header header-box-depth'>
+          <h2 className='workspace-title workspace-title-padding'>
+            Members of {title}
+          </h2>
+        </div>
+        <div id='workspace-body' className='extra-padding'>
+          <div className='main-workspace'>
+            <div className='roles-box'>
+              {(this.props.project && !this.props.org)
+                ? (<MemberEdit project={this.props.project}
+                               selectedUser={this.state.selectedUser}/>)
+                : (<MemberEdit org={this.props.org}
+                               selectedUser={this.state.selectedUser}/>)
+              }
             </div>
+            <List className='members-box'>
+              <div className='template-header' key='user-info-template'>
+                <UserListItem className='head-info'
+                              label={true}
+                              user={{ fname: 'Name',
+                                lname: '',
+                                username: 'Username' }}
+                              permission={'admin'}
+                              _key='user-template'/>
+              </div>
+              {listItems}
+            </List>
           </div>
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 

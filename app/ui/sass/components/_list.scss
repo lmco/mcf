@@ -16,6 +16,14 @@
 
 @import '../utils/_variables';
 
+@mixin grid-list-items($grid_temp, $grid_areas, $just_cont, $align_items) {
+  display: grid;
+  grid-template-columns: $grid_temp;
+  grid-template-areas: $grid_areas;
+  justify-content: $just_cont;
+  align-items: $align_items;
+}
+
 // TODO (ld): Important is not best practice, but only way to get to work
 .archived-link {
   color: #c0c0c0 !important;
@@ -64,20 +72,23 @@
   }
 }
 
-.stats-list {
+%stat-list-template {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+}
+
+.stats-list {
+  @extend %stat-list-template;
+  justify-content: flex-end;
   height: 100%;
   min-width: 100%;
   max-width: 100%;
 
   .stats-item {
-    display: flex;
+    @extend %stat-list-template;
     justify-content: flex-start;
     padding-left: 1em;
     padding-right: 1em;
-    align-items: center;
     i {
       padding-right: .3em;
     }
@@ -86,25 +97,17 @@
     }
   }
 
-  .empty-item {
-    display: none;
-  }
-
   .stats-divider {
     border-right: 1px solid #eee;
     height: 80%;
-    padding-left: 0px;
-    padding-right: 0px;
+    padding-left: 0;
+    padding-right: 0;
     width: 1px;
   }
 }
 
 .stats-list-item {
-  display: grid;
-  grid-template-columns: minmax(auto, 750px) 1fr;
-  grid-template-areas: "header stats";
-  justify-content: space-between;
-  align-items: center;
+  @include grid-list-items(minmax(auto, 750px) 1fr, "header stats", space-between, center);
 
   .list-header {
     margin: 1em;
@@ -123,12 +126,12 @@
   }
 }
 
+%template-list-header {
+  @include grid-list-items(1fr minmax(2px, 60px), "main button", left, center);
+}
+
 .template-header {
-  display: grid;
-  grid-template-columns: 1fr minmax(2px, 60px);
-  grid-template-areas: "main button";
-  justify-content: left;
-  align-items: center;
+  @extend %template-list-header;
   border-bottom: 1px solid #ccc;
 
   .head-info {
@@ -148,11 +151,7 @@
 }
 
 .user-info {
-  display: grid;
-  grid-template-columns: 1fr minmax(2px, 60px);
-  grid-template-areas: "main button";
-  justify-content: left;
-  align-items: center;
+  @extend %template-list-header;
 
   &:hover {
     background: #f7f7f7;

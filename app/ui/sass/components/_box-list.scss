@@ -13,19 +13,21 @@
  *
  * @description Defines the box list styles
  */
+%box-display {
+  display: flex;
+  justify-content: space-between;
+}
 
 .box-list {
   padding: 5px 10px;
   margin: 15px;
 
   .box-list-header {
-    display: flex;
-    justify-content: space-between;
+    @extend %box-display;
   }
 
   .box-list-footer {
-    display: flex;
-    justify-content: space-between;
+    @extend %box-display;
     padding-top: 5px;
 
     .footer-btn {
