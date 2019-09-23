@@ -102,16 +102,16 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a branch created by a specific user', optionCreatedByFind);
   it('should find a branch last modified by a specific user', optionLastModifiedByFind);
   it('should only find archived branches', optionArchivedFind);
-  // it('should find a branch archived by a specific user, optionArchivedByFind);
+  it('should find a branch archived by a specific user', optionArchivedByFind);
   it('should find a branch based on its custom data', optionCustomFind);
   // ------------- Create -------------
   it('should populate the return object from create', optionPopulateCreate);
   it('should only return specified fields from create', optionFieldsCreate);
-  // lean
+  it('should return raw JSON rather than a model from create', optionLeanCreate);
   // ------------- Update -------------
   it('should populate the return object from update', optionPopulateUpdate);
   it('should only return specified fields from update', optionFieldsUpdate);
-  // lean
+  it('should return raw JSON rather than a model from update', optionLeanUpdate);
   // ------------- Remove -------------
 });
 
@@ -384,7 +384,7 @@ async function optionSortFind() {
 */
 async function optionTagFind() {
   try {
-    // Create limit option
+    // Create tag option
     const options = { tag: true };
 
     // Find the tag branch
@@ -409,7 +409,7 @@ async function optionTagFind() {
  */
 async function optionSourceFind() {
   try {
-    // Create limit option
+    // Create source option
     const options = { source: 'master' };
 
     // Find the branch
@@ -435,7 +435,7 @@ async function optionSourceFind() {
  */
 async function optionNameFind() {
   try {
-    // Create limit option
+    // Create name option
     const options = { name: 'Branch04' };
 
     // Find the branch
@@ -460,7 +460,7 @@ async function optionNameFind() {
  */
 async function optionCreatedByFind() {
   try {
-    // Create limit option
+    // Create createdBy option
     const options = { createdBy: 'test_admin' };
 
     // Find the branch
@@ -483,7 +483,7 @@ async function optionCreatedByFind() {
  */
 async function optionLastModifiedByFind() {
   try {
-    // Create limit option
+    // Create lastModifedBy option
     const options = { lastModifiedBy: 'test_admin' };
 
     // Find the branch
@@ -550,11 +550,41 @@ async function optionArchivedFind() {
 }
 
 /**
+ * @description Validates that branches archived by a specific user can be found
+ */
+async function optionArchivedByFind() {
+  try {
+    // Archive a branch
+    const update = {
+      id: utils.parseID(branches[0]._id).pop(),
+      archived: true
+    };
+    await BranchController.update(adminUser, org.id, projID, update);
+
+    // Create archivedBy option
+    const options = { archivedBy: 'test_admin' };
+
+    // Find the branch
+    const foundBranches = await BranchController.find(adminUser, org.id, projID, options);
+
+    // Validate that each branch was archived by the test admin
+    foundBranches.forEach((branch) => {
+      chai.expect(branch.archivedBy).to.equal('test_admin');
+    });
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
  * @description Validates that branches with specific custom data can be found
  */
 async function optionCustomFind() {
   try {
-    // Create limit option
+    // Create custom option
     const options = { 'custom.location': 'Location02' };
 
     // Find the branch
@@ -657,6 +687,42 @@ async function optionFieldsCreate() {
 }
 
 /**
+ * @description Validates that the create results return JSON data rather than model instances
+ */
+async function optionLeanCreate() {
+  try {
+    // Select a branch to test
+    const branchID = utils.parseID(branches[1]._id).pop();
+    const branchObj = {
+      id: branchID,
+      name: 'Branch01',
+      source: 'master'
+    };
+
+    // Delete the branch
+    await BranchController.remove(adminUser, org.id, projID, branchID);
+
+    // Create lean option
+    const options = { lean: true };
+
+    // Create the branch
+    const createdBranches = await BranchController.create(adminUser, org.id, projID,
+      branchObj, options);
+    // There should be one branch
+    chai.expect(createdBranches.length).to.equal(1);
+    const foundBranch = createdBranches[0];
+
+    // Expect the branch to be returned as raw JSON
+    chai.expect(foundBranch instanceof Branch).to.equal(false);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
  * @description Validates that the return object from update() can be populated
  */
 async function optionPopulateUpdate() {
@@ -723,6 +789,38 @@ async function optionFieldsUpdate() {
     fields.forEach((field) => {
       chai.expect(keys.includes(field)).to.equal(true);
     });
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the update results return JSON data rather than model instances
+ */
+async function optionLeanUpdate() {
+  try {
+    // Select a branch to test
+    const branchID = utils.parseID(branches[1]._id).pop();
+    const branchObj = {
+      id: branchID,
+      name: 'Branch01 lean update'
+    };
+
+    // Create lean option
+    const options = { lean: true };
+
+    // Create the branch
+    const createdBranches = await BranchController.update(adminUser, org.id, projID,
+      branchObj, options);
+    // There should be one branch
+    chai.expect(createdBranches.length).to.equal(1);
+    const foundBranch = createdBranches[0];
+
+    // Expect the branch to be returned as raw JSON
+    chai.expect(foundBranch instanceof Branch).to.equal(false);
   }
   catch (error) {
     M.log.error(error.message);
