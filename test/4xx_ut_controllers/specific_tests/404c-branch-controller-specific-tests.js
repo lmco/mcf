@@ -439,7 +439,7 @@ async function optionNameFind() {
     // Find the branch
     const foundBranches = await BranchController.find(adminUser, org.id, projID, options);
 
-    // There should be one branches found
+    // There should be one branch found
     chai.expect(foundBranches.length).to.equal(1);
     const foundBranch = foundBranches[0];
 
