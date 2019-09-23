@@ -706,7 +706,7 @@ async function optionPopulateUpdate() {
     fields = fields.filter((f) => f !== 'archivedBy');
     const options = { populate: fields };
 
-    // Create the project
+    // Update the project
     const updatedProjects = await ProjectController.update(adminUser, org.id,
       projectObj, options);
     // There should be one project
@@ -742,7 +742,7 @@ async function optionFieldsUpdate() {
     const fields = ['name', 'visibility'];
     const options = { fields: fields, lean: true };
 
-    // Create the project
+    // Update the project
     const updatedProjects = await ProjectController.update(adminUser, org.id,
       projectObj, options);
     // There should be one project
@@ -779,7 +779,7 @@ async function optionLeanUpdate() {
     // Create lean option
     const options = { lean: true };
 
-    // Create the project
+    // Update the project
     const createdProjects = await ProjectController.update(adminUser, org.id,
       projectObj, options);
     // There should be one project
@@ -813,7 +813,7 @@ async function optionPopulateReplace() {
     fields = fields.filter((f) => f !== 'archivedBy');
     const options = { populate: fields };
 
-    // Create the project
+    // Replace the project
     const createdProjects = await ProjectController.createOrReplace(adminUser, org.id, projectObj,
       options);
     // There should be one project
@@ -849,7 +849,7 @@ async function optionFieldsReplace() {
     const fields = ['name', 'visibility'];
     const options = { fields: fields, lean: true };
 
-    // Create the project
+    // Replace the project
     const createdProjects = await ProjectController.createOrReplace(adminUser, org.id,
       projectObj, options);
     // There should be one project
@@ -886,7 +886,7 @@ async function optionLeanReplace() {
     // Create lean option
     const options = { lean: true };
 
-    // Create the project
+    // Replace the project
     const createdProjects = await ProjectController.createOrReplace(adminUser, org.id,
       projectObj, options);
     // There should be one project
