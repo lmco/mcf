@@ -236,13 +236,9 @@ async function create(requestingUser, users, options) {
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType('object', users, 'Users');
+
     // For create user only: requesting user must be admin
-    try {
-      assert.ok(permissions.createUser(requestingUser) === true, 'User does not have permissions to create users.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    permissions.createUser(requestingUser);
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -457,10 +453,7 @@ async function update(requestingUser, users, options) {
     });
 
     // Ensure user cannot update others, unless sys-admin
-    // TODO: Consider updating logic to permissions library
-    if (!reqUser.admin && (arrUsernames.length > 1 || arrUsernames[0] !== reqUser.username)) {
-      throw new M.PermissionError('Cannot update other users unless admin.', 'warn');
-    }
+    permissions.updateUser(reqUser, arrUsernames[0]);
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrUsernames } };
@@ -625,14 +618,9 @@ async function createOrReplace(requestingUser, users, options) {
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType('object', users, 'Users');
+
     // createOrReplace function: requesting user must be admin
-    try {
-      assert.ok(permissions.createUser(requestingUser) === true, 'User does not have permissions'
-        + 'to replace users.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    permissions.createUser(requestingUser);
 
     // Sanitize input parameters and create function-wide variables
     const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
@@ -767,12 +755,6 @@ async function remove(requestingUser, users, options) {
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType(['object', 'string'], users, 'Users');
-    try {
-      assert.ok(permissions.deleteUser(requestingUser) === true, 'User does not have permissions to delete users.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
 
     // Sanitize input parameters and create function-wide variables
     const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
@@ -783,6 +765,9 @@ async function remove(requestingUser, users, options) {
     // Define searchQuery and memberQuery
     const searchQuery = {};
     const memberQuery = {};
+
+    // Permissions Check
+    permissions.deleteUser(reqUser);
 
     // Check the type of the users parameter
     if (Array.isArray(saniUsers)) {
@@ -1018,7 +1003,8 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
       // Ensure all provided passwords are strings
       assert.ok(typeof oldPassword === 'string', 'Old Password is not a string.');
       assert.ok(typeof newPassword === 'string', 'New Password is not a string.');
-      assert.ok(typeof confirmPassword === 'string', 'Passwords do not match.');
+      assert.ok(typeof confirmPassword === 'string', 'Confirm password is not a string');
+      assert.ok(confirmPassword === newPassword, 'Passwords do not match.');
     }
     catch (err) {
       throw new M.DataFormatError(err.message, 'warn');
@@ -1026,11 +1012,6 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-
-    // Check if newPassword and confirmPassword match
-    if (confirmPassword !== newPassword) {
-      throw new M.DataFormatError('Passwords do not match.', 'warn');
-    }
 
     // Find the requesting user
     const foundUser = await User.findOne({ _id: reqUser._id });

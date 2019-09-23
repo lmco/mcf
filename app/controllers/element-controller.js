@@ -178,24 +178,17 @@ async function find(requestingUser, organizationID, projectID, branchID, element
     // Find the organization and validate that it was found and not archived (unless specified)
     const organization = await helper.findAndValidate(Org, orgID,
       ((options && options.archived) || validatedOptions.includeArchived));
-    // Permissions check
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the org ${orgID}.`, 'warn');
-    }
 
     // Find the project and validate that it was found and not archived (unless specified)
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
       ((options && options.archived) || validatedOptions.includeArchived));
-    // Permissions check
-    if (!permissions.readProject(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the project ${projID}.`, 'warn');
-    }
 
     // Find the branch and validate that it was found and not archived (unless specified)
-    await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
+    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
       ((options && options.archived) || validatedOptions.includeArchived));
+
+    // Permissions check
+    permissions.readElement(reqUser, organization, project, branch);
 
     let elementsToFind = [];
 
@@ -456,19 +449,20 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
 
     // Find the organization and validate that it was found and not archived
     const organization = await helper.findAndValidate(Org, orgID);
-    // Permissions check
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the org ${orgID}.`, 'warn');
-    }
 
     // Find the project and validate that it was found and not archived
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-    // Permissions check
-    if (!permissions.createElement(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` create items on the project ${projID}.`, 'warn');
+
+    // Find the branch and validate that it was found and not archived
+    const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
+    // Check that the branch is is not a tag
+    if (foundBranch.tag) {
+      throw new M.OperationError(`[${branID}] is a tag and `
+        + 'does not allow elements to be created, updated, or deleted.', 'warn');
     }
+
+    // Permissions check
+    permissions.createElement(reqUser, organization, project, foundBranch);
 
     // Find all referenced projects
     const referencedProjects = await Project.find({ _id: { $in: projectRefs } }).lean();
@@ -481,14 +475,6 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
           + ' of internal.', 'warn');
       }
     });
-
-    // Find the branch and validate that it was found and not archived
-    const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
-    // Check that the branch is is not a tag
-    if (foundBranch.tag) {
-      throw new M.OperationError(`[${branID}] is a tag and `
-        + 'does not allow elements to be created, updated, or deleted.', 'warn');
-    }
 
     M.log.debug('create(): Before finding pre-existing elements');
 
@@ -749,26 +735,19 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Element);
 
-
     // Find the organization and validate that it was found and not archived
     const organization = await helper.findAndValidate(Org, orgID);
-    // Permissions check
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the org ${orgID}.`, 'warn');
-    }
 
     // Find the project and validate that it was found and not archived
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-    // Permissions check
-    if (!permissions.updateElement(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` update items on the project ${projID}.`, 'warn');
-    }
 
     // Find the branch and validate that it was found and not archived
     const foundBranch = await helper.findAndValidate(Branch,
       utils.createID(orgID, projID, branID));
+
+    // Permissions check
+    permissions.updateElement(reqUser, organization, project, foundBranch);
+
     // Check that the branch is is not a tag
     if (foundBranch.tag) {
       throw new M.OperationError(`[${branID}] is a tag and `
@@ -1114,19 +1093,9 @@ async function createOrReplace(requestingUser, organizationID, projectID,
 
     // Find the organization and validate that it was found and not archived
     const organization = await helper.findAndValidate(Org, orgID);
-    // Permissions check
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the org ${orgID}.`, 'warn');
-    }
 
     // Find the project and validate that it was found and not archived
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-    // Permissions check
-    if (!permissions.updateElement(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` create or replace items on the project ${projID}.`, 'warn');
-    }
 
     // Find the branch and validate that it was found and not archived
     const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
@@ -1135,6 +1104,9 @@ async function createOrReplace(requestingUser, organizationID, projectID,
       throw new M.OperationError(`[${branID}] is a tag and `
         + 'does not allow elements to be created, updated, or deleted.', 'warn');
     }
+
+    // Permissions check
+    permissions.updateElement(reqUser, organization, project, foundBranch);
 
     // Check the type of the elements parameter
     if (Array.isArray(saniElements)) {
@@ -1366,19 +1338,9 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
 
     // Find the organization and validate that it was found and not archived
     const organization = await helper.findAndValidate(Org, orgID);
-    // Permissions check
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the org ${orgID}.`, 'warn');
-    }
 
     // Find the project and validate that it was found and not archived
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-    // Permissions check
-    if (!permissions.deleteElement(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` remove items on the project ${projID}.`, 'warn');
-    }
 
     // Find the branch and validate that it was found and not archived
     const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
@@ -1387,6 +1349,9 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
       throw new M.OperationError(`[${branID}] is a tag and `
         + 'does not allow elements to be created, updated, or deleted.', 'warn');
     }
+
+    // Permissions check
+    permissions.deleteElement(reqUser, organization, project, foundBranch);
 
     // Find the elements to delete
     const foundElements = await Element.find({ _id: { $in: elementsToFind } }).lean();
@@ -1773,24 +1738,17 @@ async function search(requestingUser, organizationID, projectID, branchID, query
     // Find the organization and validate that it was found and not archived (unless specified)
     const organization = await helper.findAndValidate(Org, orgID,
       ((options && options.archived) || validatedOptions.includeArchived));
-    // Permissions check
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the org ${orgID}.`, 'warn');
-    }
 
     // Find the project and validate that it was found and not archived (unless specificed)
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
       ((options && options.archived) || validatedOptions.includeArchived));
-    // Permissions check
-    if (!permissions.readProject(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the project ${projID}.`, 'warn');
-    }
 
     // Find the branch and validate that it was found and not archived (unless specificed)
-    await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
+    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
       ((options && options.archived) || validatedOptions.includeArchived));
+
+    // Permissions check
+    permissions.readElement(reqUser, organization, project, branch);
 
     searchQuery.$text = { $search: query };
     // If the includeArchived field is true, remove archived from the query; return everything

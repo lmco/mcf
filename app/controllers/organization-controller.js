@@ -150,6 +150,7 @@ async function find(requestingUser, orgs, options) {
     }
 
     // If not system admin, add permissions check
+    // TODO: Rewrite using Permissions library
     if (!reqUser.admin) {
       searchQuery[`permissions.${reqUser._id}`] = 'read';
     }
@@ -228,13 +229,9 @@ async function create(requestingUser, orgs, options) {
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType('object', orgs, 'Orgs');
+
     // Create or remove orgs function only: must be admin
-    try {
-      assert.ok(permissions.createOrg(requestingUser) === true, 'User does not have permissions to create orgs.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    permissions.createOrg(requestingUser);
 
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -494,10 +491,7 @@ async function update(requestingUser, orgs, options) {
 
     // Check that the user has admin permissions
     foundOrgs.forEach((org) => {
-      if (!permissions.updateOrg(reqUser, org)) {
-        throw new M.PermissionError('User does not have permission to update'
-          + ` the org [${org._id}].`, 'warn');
-      }
+      permissions.updateOrg(reqUser, org);
     });
 
     // Verify the same number of orgs are found as desired
@@ -781,16 +775,12 @@ async function createOrReplace(requestingUser, orgs, options) {
     // Note: if more orgs than found, there must be new orgs
     if (orgsToLookup.length > foundOrgs.length) {
       // Requires global admin to create new orgs
-      assert.ok(permissions.createOrg(reqUser) === true, 'User does not have permissions'
-        + 'to create or replace orgs.');
+      permissions.createOrg(reqUser);
     }
 
     // Check that the user has admin permissions
     foundOrgs.forEach((org) => {
-      if (!permissions.updateOrg(reqUser, org)) {
-        throw new M.PermissionError('User does not have permission to'
-          + ` create or replace the org [${org._id}].`, 'warn');
-      }
+      permissions.updateOrg(reqUser, org);
     });
 
     // If data directory doesn't exist, create it
@@ -881,14 +871,6 @@ async function remove(requestingUser, orgs, options) {
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType(['object', 'string'], orgs, 'Orgs');
 
-    // Only for create or remove orgs: must be an admin
-    try {
-      assert.ok(permissions.deleteOrg(requestingUser) === true, 'User does not have permissions to delete orgs.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
-
     // Sanitize input parameters and function-wide variables
     const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
     let searchedIDs = [];
@@ -915,6 +897,11 @@ async function remove(requestingUser, orgs, options) {
 
     // Find the orgs to delete
     const foundOrgs = await Organization.find(searchQuery).lean();
+
+    foundOrgs.forEach(org => {
+      // Only for create or remove orgs: must be an admin
+      permissions.deleteOrg(requestingUser, org);
+    });
 
     const foundOrgIDs = foundOrgs.map(o => o._id);
     const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
