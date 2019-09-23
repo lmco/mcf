@@ -168,21 +168,13 @@ async function find(requestingUser, organizationID, projectID, branches, options
     // Find the org and check that it has been found and is not archived (unless specified)
     const organization = await helper.findAndValidate(Org, orgID,
       ((options && options.archived) || validatedOptions.includeArchived));
-    // Verify the user has at least read permissions on the organization
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to get'
-        + ` branches on the organization [${orgID}].`, 'warn');
-    }
 
     // Find the project and check that it has been found and is not archived (unless specified)
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
       ((options && options.archived) || validatedOptions.includeArchived));
 
     // Check permissions
-    if (!permissions.readBranch(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to get'
-        + ` branches on the project [${projID}].`, 'warn');
-    }
+    permissions.readBranch(reqUser, organization, project);
 
     // Check the type of the branches parameter
     if (Array.isArray(saniBranches)) {
@@ -332,19 +324,12 @@ async function create(requestingUser, organizationID, projectID, branches, optio
 
     // Find the org and check that it has been found and is not archived
     const organization = await helper.findAndValidate(Org, orgID);
-    // Verify the user has at least read permissions on the organization
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to read'
-        + ` branches on the organization [${orgID}].`, 'warn');
-    }
 
     // Find the project and check that it has been found and is not archived
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
+
     // Check permissions
-    if (!permissions.createBranch(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to create'
-        + ` branches on the project [${projID}].`, 'warn');
-    }
+    permissions.createBranch(reqUser, organization, project);
 
     sourceID = utils.createID(orgID, projID, sourceID);
 
@@ -603,20 +588,10 @@ async function update(requestingUser, organizationID, projectID, branches, optio
     const organization = await helper.findAndValidate(Org, orgID,
       ((options && options.archived) || validatedOptions.includeArchived));
 
-    // Verify the user has at least read permissions on the organization
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to read'
-        + ` branches on the organization [${orgID}].`, 'warn');
-    }
-
     // Find the project and check that it has been found and is not archived (unless specified)
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
       ((options && options.archived) || validatedOptions.includeArchived));
-    // Check permissions
-    if (!permissions.updateBranch(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to update'
-        + ` branches on the project [${projID}].`, 'warn');
-    }
+
     // Create list of ids
     let index = 1;
     branchesToUpdate.forEach((branch) => {
@@ -648,6 +623,11 @@ async function update(requestingUser, organizationID, projectID, branches, optio
 
     // Return when all branches have been found
     const foundBranches = await Branch.find(searchQuery).lean();
+
+    foundBranches.forEach(branch => {
+      // Check permissions
+      permissions.updateBranch(reqUser, organization, project, branch);
+    });
 
     // Verify the same number of branches are found as desired
     if (foundBranches.length !== arrIDs.length) {
@@ -805,22 +785,17 @@ async function remove(requestingUser, organizationID, projectID, branches, optio
 
     // Find the org and check that it has been found and is not archived
     const organization = await helper.findAndValidate(Org, orgID);
-    // Verify the user has at least read permissions on the organization
-    if (!permissions.readOrg(reqUser, organization)) {
-      throw new M.PermissionError('User does not have permission to get'
-        + ` branches on the organization [${orgID}].`, 'warn');
-    }
 
     // Find the project and check that it has been found and is not archived
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-    // Check permissions
-    if (!permissions.deleteBranch(reqUser, organization, project)) {
-      throw new M.PermissionError('User does not have permission to delete'
-        + ` branches on the project [${projID}].`, 'warn');
-    }
 
     // Find all the branches to delete
     const foundBranches = await Branch.find(searchQuery).lean();
+
+    foundBranches.forEach(branch => {
+      // Check permissions
+      permissions.deleteBranch(reqUser, organization, project, branch);
+    });
 
     const foundBranchIDs = foundBranches.map(b => b._id);
     ownedQuery.branch = { $in: foundBranchIDs };
