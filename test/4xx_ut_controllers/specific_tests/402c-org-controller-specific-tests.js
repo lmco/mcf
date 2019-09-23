@@ -227,12 +227,10 @@ async function optionLimitFind() {
   try {
     // Create limit option
     const options = { limit: 3 };
-    // All orgs that were created, plus the default org
-    const numOrgs = orgs.length + 1;
 
-    // Find all the orgs to validate that there are more orgs than will be limited
+    // Find all the orgs to validate
     const allOrgs = await OrgController.find(adminUser);
-    chai.expect(allOrgs.length).to.be.above(numOrgs);
+    const numOrgs = allOrgs.length;
 
     // Find all the orgs with the limit option
     const limitOrgs = await OrgController.find(adminUser, options);
