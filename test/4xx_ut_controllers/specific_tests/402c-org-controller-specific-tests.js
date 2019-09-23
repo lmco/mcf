@@ -66,7 +66,7 @@ describe(M.getModuleName(module.filename), () => {
   after(async () => {
     try {
       // Removing admin user
-      await Organization.deleteMany({_id: orgs.map((o) => o._id) });
+      await Organization.deleteMany({ _id: orgs.map((o) => o._id) });
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
