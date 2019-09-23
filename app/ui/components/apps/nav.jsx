@@ -178,7 +178,7 @@ class MbeeNav extends Component {
     );
   }
 
-} /* END MbeeNav Component */
+}
 
 // Render the navbar on the nav html element
 ReactDom.render(<MbeeNav />, document.getElementById('nav'));
