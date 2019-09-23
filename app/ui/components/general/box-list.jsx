@@ -11,7 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * TODO: Figure out where this is used and put a better description
+ * TODO: Put a better description
  * @description This renders a box with a list inside.
  */
 

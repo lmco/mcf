@@ -61,14 +61,6 @@
 /*                       Custom Data Edit Styling                             *
 /******************************************************************************/
 
-.custom-kv-row {
-  margin-bottom: 10px;
-}
-
-.custom-key-col {
-  padding: 0px;
-}
-
 #btn-add-kv-pair {
   display: block;
   margin: 0 auto;
@@ -92,8 +84,16 @@
   padding: 15px;
 }
 
+.custom-key-col {
+  padding: 0px;
+}
+
+.custom-kv-row {
+  margin-bottom: 10px;
+}
+
 // TODO: Place higher when refactoring CSS.
-@mixin btn-row-del {
+%btn-row-del {
   padding: 0px;
   font-size: 1.25rem;
   background-color: transparent;
@@ -104,9 +104,9 @@
 }
 
 .custom-row-del {
-  @include btn-row-del;
+  @extend %btn-row-del;
 
   &:hover, &:focus, &:active {
-    @include btn-row-del;
+    @extend %btn-row-del;
   }
 }

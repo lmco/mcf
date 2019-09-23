@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.sass._base.scss
+ * @module ui.sass._base
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -13,8 +13,6 @@
  *
  * @description Defines general html sass component styles
  */
-
-@import '../utils/_variables';
 
 body,html {
   margin: 0;
@@ -29,29 +27,16 @@ body,html {
   background: transparent; /* make scrollbar transparent */
 }
 
-
-.table-width {
-  width: 60%;
-}
-
-th, td {
-  padding: 5px;
-}
-
-th {
-  text-align: left;
-}
-
-hr {
-  border-color: #9c9c9c;
-}
-
 h2 {
   font-size: 18px;
 }
 
 h3 {
   font-size: 15px;
+}
+
+hr {
+  border-color: #9c9c9c;
 }
 
 label {
@@ -62,4 +47,12 @@ textarea[name="custom"] {
   font-family: Consolas, "Courier New";
   resize: vertical;
   outline: none;
+}
+
+th, td {
+  padding: 5px;
+}
+
+th {
+  text-align: left;
 }

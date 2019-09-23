@@ -73,7 +73,7 @@
   float: right;
 }
 
-@mixin btn-page {
+%btn-page {
   font-size: 0.875rem;
   border: none;
   background-color: Transparent;
@@ -82,7 +82,7 @@
 }
 
 #btn-next-result-page, #btn-prev-result-page {
-  @include btn-page;
+  @extend %btn-page;
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
@@ -134,7 +134,7 @@
   padding: 5px;
 }
 
-@mixin btn-adv-row-del {
+%btn-adv-row-del {
   padding: 0px;
   margin-left: 5px;
   font-size: 1.25rem;
@@ -146,14 +146,14 @@
 }
 
 .adv-row-del {
-  @include btn-adv-row-del;
+  @extend %btn-adv-row-del;
 
   &:hover, &:focus, &:active {
-    @include btn-adv-row-del;
+    @extend %btn-adv-row-del;
   }
 }
 
-@mixin btn-adv-standard {
+%btn-adv-standard {
   padding: 0px 0px 5px;
   font-size: 0.875rem;
   border: none;
@@ -167,15 +167,15 @@
 }
 
 #btn-add-adv-row {
-  @include btn-adv-standard;
+  @extend %btn-adv-standard;
   padding: 6px 0px 0px 0px;
 }
 
 #btn-adv-search-toggle{
-  @include btn-adv-standard;
+  @extend %btn-adv-standard;
 
   &:hover, &:focus, &:active {
-    @include btn-adv-standard;
+    @extend %btn-adv-standard;
   }
 }
 

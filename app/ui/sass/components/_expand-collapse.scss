@@ -15,7 +15,7 @@
  */
 @import '../utils/_variables';
 
-@mixin btn-light-header {
+%btn-light-header {
   padding: 0px;
   margin-left: 5px;
   font-size: 0.9rem;
@@ -27,10 +27,10 @@
 }
 
 #btn-expand, #btn-collapse {
-  @include btn-light-header;
+  @extend %btn-light-header;
 
   &:focus, &:active, &:hover, &:visited {
-    @include btn-light-header;
+    @extend %btn-light-header;
     font-weight: 600;
   }
 }
