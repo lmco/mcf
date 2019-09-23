@@ -94,6 +94,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should only return the specified fields', optionFieldsFind);
   it('should limit the number of search results', optionLimitFind);
   it('should skip over find results', optionSkipFind);
+  it('should should return raw JSON rather than instances of models', optionLeanFind);
   it('should sort find results', optionSortFind);
   it('should find a specific tagged branch', optionTagFind);
   it('should find a branch with a specific source', optionSourceFind);
@@ -275,6 +276,29 @@ async function optionSkipFind() {
     const skipBranches = await BranchController.find(adminUser, org.id, projID, options);
     // There should be eight branches
     chai.expect(skipBranches.length).to.equal(numBranches - options.skip);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that find results can return raw JSON rather than models
+ */
+async function optionLeanFind() {
+  try {
+    // Create lean option
+    const options = { lean: true };
+
+    // Find the branches without lean to check that they are models
+    const foundBranches = await BranchController.find(adminUser, org.id, projID);
+    chai.expect(foundBranches[0] instanceof Branch).to.equal(true);
+
+    // Find the branches with the lean option
+    const leanBranches = await BranchController.find(adminUser, org.id, projID, options);
+    chai.expect(leanBranches[0] instanceof Branch).to.equal(false);
   }
   catch (error) {
     M.log.error(error.message);
