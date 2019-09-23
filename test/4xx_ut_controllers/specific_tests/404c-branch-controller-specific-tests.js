@@ -386,7 +386,7 @@ async function optionSourceFind() {
     // Create limit option
     const options = { source: 'master' };
 
-    // Find the tag branch
+    // Find the branch
     const foundBranches = await BranchController.find(adminUser, org.id, projID, options);
 
     // There should be seven branches found
@@ -412,7 +412,7 @@ async function optionNameFind() {
     // Create limit option
     const options = { name: 'Branch04' };
 
-    // Find the tag branch
+    // Find the branch
     const foundBranches = await BranchController.find(adminUser, org.id, projID, options);
 
     // There should be one branches found
@@ -437,7 +437,7 @@ async function optionCreatedByFind() {
     // Create limit option
     const options = { createdBy: 'test_admin' };
 
-    // Find the tag branch
+    // Find the branch
     const foundBranches = await BranchController.find(adminUser, org.id, projID, options);
 
     // Validate that each branch was created by the test admin
@@ -460,7 +460,7 @@ async function optionLastModifiedByFind() {
     // Create limit option
     const options = { lastModifiedBy: 'test_admin' };
 
-    // Find the tag branch
+    // Find the branch
     const foundBranches = await BranchController.find(adminUser, org.id, projID, options);
 
     // Validate that each branch was created by the test admin
@@ -531,7 +531,7 @@ async function optionCustomFind() {
     // Create limit option
     const options = { 'custom.location': 'Location02' };
 
-    // Find the tag branch
+    // Find the branch
     const foundBranches = await BranchController.find(adminUser, org.id, projID, options);
     // There should be one branches found
     chai.expect(foundBranches.length).to.equal(1);
@@ -589,7 +589,7 @@ async function optionPopulateCreate() {
 }
 
 /**
- * @description Validates that the find results only return specified fields
+ * @description Validates that the create results only return specified fields
  */
 async function optionFieldsCreate() {
   try {
