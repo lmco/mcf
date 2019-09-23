@@ -292,7 +292,9 @@
     {
       "id": "branch02",
       "name": "Branch02",
-      "custom": {},
+      "custom": {
+        "location": "Location02"
+      },
       "tag": false,
       "source": "master"
     },
