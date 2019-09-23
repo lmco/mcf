@@ -178,7 +178,7 @@ async function optionIncludeArchivedFind() {
     // Perform a find on the branches
     const foundBranches = await BranchController.find(adminUser, org.id, projID,
       [branchID, archivedID], options);
-    // There should be one branch
+    // There should be two branches
     chai.expect(foundBranches.length).to.equal(2);
     chai.expect(foundBranches[0]._id).to.equal(branch._id);
     chai.expect(foundBranches[1]._id).to.equal(archivedBranch._id);
