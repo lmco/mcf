@@ -272,9 +272,8 @@ async function optionSkipFind() {
     const allBranches = await BranchController.find(adminUser, org.id, projID);
     chai.expect(allBranches.length).to.equal(numBranches);
 
-    // Find all the branches with the limit option
+    // Find all the branches with the skip option
     const skipBranches = await BranchController.find(adminUser, org.id, projID, options);
-    // There should be eight branches
     chai.expect(skipBranches.length).to.equal(numBranches - options.skip);
   }
   catch (error) {
