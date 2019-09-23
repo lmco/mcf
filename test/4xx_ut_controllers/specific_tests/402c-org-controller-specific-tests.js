@@ -226,11 +226,7 @@ async function optionFieldsFind() {
 async function optionLimitFind() {
   try {
     // Create limit option
-    const options = { limit: 3 };
-
-    // Find all the orgs to validate
-    const allOrgs = await OrgController.find(adminUser);
-    const numOrgs = allOrgs.length;
+    const options = { limit: 2 };
 
     // Find all the orgs with the limit option
     const limitOrgs = await OrgController.find(adminUser, options);
