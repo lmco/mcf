@@ -73,8 +73,8 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
-  it('should find an archived user when the option archived is provided', optionArchivedFind);
-  // includeArchived
+  it('should only find archived users when the option archived is provided', optionArchivedFind);
+  it('should include archived users in the find results', optionIncludeArchivedFind);
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from find()', optionLeanFind);
   it('should populate allowed fields when finding a user', optionPopulateFind);
@@ -405,6 +405,56 @@ function optionArchivedFind(done) {
     chai.expect(error.message).to.equal(null);
     done();
   });
+}
+
+/**
+ * @description Verifies that archived users can be found in the find()
+ * function using the option 'archived'.
+ */
+async function optionIncludeArchivedFind() {
+  try {
+    // Create user object
+    const userData = {
+      username: 'testuser00',
+      password: 'Abc123!@',
+      fname: 'Test',
+      archived: true
+    };
+    // Create the options object
+    const options = { includeArchived: true };
+
+    // Create an archived user
+    const createdUsers = await UserController.create(adminUser, userData);
+    const createdUser = createdUsers[0];
+
+    // Verify that the user is archived
+    chai.expect(createdUser.archived).to.equal(true);
+
+    // Attempt to find the user without providing options
+    const foundUsers = await UserController.find(adminUser, userData.username);
+
+    // Expect the array to be empty since the option archived: true was not provided
+    chai.expect(foundUsers.length).to.equal(0);
+
+    // Attempt the find the user WITH the includeArchived option
+    const archivedUsers = await UserController.find(adminUser, userData.username, options);
+
+    // Expect the array to be of length 1
+    chai.expect(archivedUsers.length).to.equal(1);
+    const archivedUser = archivedUsers[0];
+
+    // Verify all of the archived fields are properly set
+    chai.expect(archivedUser.archived).to.equal(true);
+    chai.expect(archivedUser.archivedOn).to.not.equal(null);
+    chai.expect(archivedUser.archivedBy).to.equal(adminUser.username);
+    // Remove test user
+    await UserController.remove(adminUser, userData.username);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
 }
 
 /**
