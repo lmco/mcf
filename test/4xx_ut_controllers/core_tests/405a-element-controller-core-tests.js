@@ -97,16 +97,22 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // ------------- Create -------------
   it('should create an element', createElement);
   it('should create multiple elements', createElements);
-  it('should create or replace an element', createOrReplaceElement);
-  it('should create or replace multiple elements', createOrReplaceElements);
+  // -------------- Find --------------
   it('should find an element', findElement);
   it('should find multiple elements', findElements);
   it('should find all elements', findAllElements);
-  it('should find an element through text search', searchElement);
+  // ------------- Update -------------
   it('should update an element', updateElement);
   it('should update multiple elements', updateElements);
+  // ------------- Replace ------------
+  it('should create or replace an element', createOrReplaceElement);
+  it('should create or replace multiple elements', createOrReplaceElements);
+  // ------------- Search -------------
+  it('should find an element through text search', searchElement);
+  // ------------- Remove -------------
   it('should delete an element', deleteElement);
   it('should delete multiple elements', deleteElements);
 });
@@ -179,7 +185,8 @@ function createElements(done) {
     testData.elements[2],
     testData.elements[3],
     testData.elements[4],
-    testData.elements[5]
+    testData.elements[5],
+    testData.elements[6]
   ];
 
   // Create elements via controller

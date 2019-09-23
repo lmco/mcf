@@ -206,6 +206,12 @@
       "parent": "batchelem2",
       "documentation": "Element #8",
       "custom": {}
+    },
+    {
+      "id": "batchelem9",
+      "name": "Batch Element 9",
+      "parent": "model",
+      "archived": "true"
     }
   ],
   "artifacts": [
@@ -286,7 +292,9 @@
     {
       "id": "branch02",
       "name": "Branch02",
-      "custom": {},
+      "custom": {
+        "location": "Location02"
+      },
       "tag": false,
       "source": "master"
     },

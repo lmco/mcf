@@ -15,6 +15,9 @@
  * @description Provides permission lookup capabilities for MBEE actions.
  */
 
+// Node.js Modules
+const assert = require('assert');
+
 module.exports = {
   createElement,
   createOrg,
@@ -38,27 +41,26 @@ module.exports = {
   updateBranch
 };
 
-
 /**
  * @description Verifies if user has permission to create users.
  *
  * @params {User} user - The user object to check permission for.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function createUser(user) {
-  return user.admin;
+  if (!user.admin) {
+    throw new M.PermissionError('User does not have permission to create users.', 'warn');
+  }
 }
 
+
 /**
- * @description Verifies if user has permission to read other user
- * objects.
+ * @description Verifies if user has permission to read other user objects.
  *
  * @params {User} user - The user object to check permission for.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @returns {boolean} allows users to read other user objects by default.
  */
 function readUser(user) {
   return true;
@@ -71,11 +73,15 @@ function readUser(user) {
  * @params {User} user - The user object to check permission for.
  * @params {User} userToUpdate - The user object to updated.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function updateUser(user, userToUpdate) {
-  return user.admin || user.username === userToUpdate.username;
+  try {
+    assert.ok(user.admin || user.username === userToUpdate._id);
+  }
+  catch (error) {
+    throw new M.PermissionError('User does not have permission to update other users.', 'warn');
+  }
 }
 
 
@@ -84,66 +90,65 @@ function updateUser(user, userToUpdate) {
  *
  * @params {User} user - The user object to check permission for.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function deleteUser(user) {
-  return user.admin;
+  if (!user.admin) {
+    throw new M.PermissionError('User does not have permission to delete users.', 'warn');
+  }
 }
+
 
 /**
  * @description Verifies if user has permission to create an organization.
  *
  * @params {User} user - The user object to check permission for.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function createOrg(user) {
-  return user.admin;
+  if (!user.admin) {
+    throw new M.PermissionError('User does not have permission to create orgs.', 'warn');
+  }
 }
 
+
 /**
- * @description Verifies if user has permission to read the
- * organization.
+ * @description Verifies if user has permission to read the organization.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object to read.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function readOrg(user, org) {
-  // Admin's can access any org
-  if (user.admin) {
-    return true;
+  try {
+    assert.ok(user.admin || org.permissions.hasOwnProperty(user._id));
   }
-  // User must be a member of the org to read it
-  return org.permissions.hasOwnProperty(user.username);
+  catch (error) {
+    throw new M.PermissionError(`User does not have permission to find the org [${org._id}].`, 'warn');
+  }
 }
 
 
 /**
- * @description Verifies if user has permission to update organization
- * object.
+ * @description Verifies user has permission to update organization object.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object to update.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function updateOrg(user, org) {
-  // Admin's can update orgs
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id));
+      assert.ok(org.permissions[user._id].includes('admin'));
+    }
   }
-
-  // If not admin, user must have write permissions on org.
-  if (!org.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(`User does not have permission to update the org [${org._id}].`, 'warn');
   }
-  return org.permissions[user.username].includes('admin');
 }
 
 
@@ -153,35 +158,34 @@ function updateOrg(user, org) {
  *
  * @params {User} user - The user object to check permission for.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function deleteOrg(user) {
-  return user.admin;
+  if (!user.admin) {
+    throw new M.PermissionError('User does not have permission to delete orgs.', 'warn');
+  }
 }
 
 
 /**
- * @description Verifies if user has permission to create a project
- * within the org.
+ * @description Verifies if user has permission to create a project within the org.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function createProject(user, org) {
-  // Admin's can create projects
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id));
+      assert.ok(org.permissions[user._id].includes('write'));
+    }
   }
-
-  // If not admin, user must have write permissions on org.
-  if (!org.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError('User does not have permission to create'
+      + ` projects in the org [${org._id}].`, 'warn');
   }
-  return org.permissions[user.username].includes('write');
 }
 
 
@@ -192,101 +196,94 @@ function createProject(user, org) {
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project to read.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function readProject(user, org, project) {
-  // Admin's can read projects
-  if (user.admin) {
-    return true;
-  }
-
-  // If project visibility is set to "internal", user only needs read
-  // permissions on the org to read the project
-  if (project.visibility === 'internal') {
-    // If not admin, user must have write permissions on org.
-    if (!org.permissions.hasOwnProperty(user.username)) {
-      return false;
+  try {
+    if (!user.admin) {
+      if (project.visibility === 'internal') {
+        // User only needs read permissions on the org to read the project.
+        assert.ok(org.permissions.hasOwnProperty(user._id));
+      }
+      else if (project.visibility === 'private') {
+        // User must have read permissions on project.
+        assert.ok(project.permissions.hasOwnProperty(user._id));
+      }
     }
-    return org.permissions[user.username].includes('read');
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError('User does not have permission to find'
+      + ` projects in the org [${org._id}].`, 'warn');
   }
-  return project.permissions[user.username].includes('read');
 }
 
 
 /**
- * @description Verifies if user has permission to update project
- * object.
+ * @description Verifies if user has permission to update project object.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project to update.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function updateProject(user, org, project) {
-  // Admin's can update projects
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to update projects in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        `User does not have permission to update the project [${project._id}].`);
+      assert.ok(project.permissions[user._id].includes('admin'),
+        `User does not have permission to update the project [${project._id}].`);
+    }
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
   }
-
-  return project.permissions[user.username].includes('admin');
 }
 
 
 /**
- * @description Verifies if user has permission to delete the project
- * object.
+ * @description Verifies if user has permission to delete the project object.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project to delete.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function deleteProject(user, org, project) {
-  return user.admin;
+  if (!user.admin) {
+    throw new M.PermissionError('User does not have permissions to delete projects.', 'warn');
+  }
 }
 
 
 /**
- * @description Verify if user has permission to create elements in
- * the project.
+ * @description Verify if user has permission to create elements in the project.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project to add elements to.
  * @params {Branch} branch - Param not yet supported.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError
  */
 function createElement(user, org, project, branch) {
-  // Admin's can create project elements
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to create items in the org [${project._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        `User does not have permission to create items in the project [${project._id}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        `User does not have permission to create items in the project [${project._id}].`);
+    }
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
   }
-  return project.permissions[user.username].includes('write');
 }
 
 
@@ -299,149 +296,136 @@ function createElement(user, org, project, branch) {
  * @params {Project} project - The project containing the elements.
  * @params {Branch} branch - Param not yet supported.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError
  */
 function readElement(user, org, project, branch) {
-  // Admin's can read project elements
-  if (user.admin) {
-    return true;
-  }
-
-  // If project visibility is set to "internal", user only needs read
-  // permissions on the org to read the project contents
-  if (project.visibility === 'internal') {
-    // If not admin, user must have write permissions on org.
-    if (!org.permissions.hasOwnProperty(user.username)) {
-      return false;
+  try {
+    if (!user.admin) {
+      if (project.visibility === 'internal') {
+        // User only needs read permissions on the org to read the project.
+        assert.ok(org.permissions.hasOwnProperty(user._id));
+      }
+      else if (project.visibility === 'private') {
+        // User must have read permissions on project.
+        assert.ok(project.permissions.hasOwnProperty(user._id));
+      }
     }
-    return org.permissions[user.username].includes('read');
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError('User does not have permission to find'
+      + ` items in the project [${project._id}].`, 'warn');
   }
-  return project.permissions[user.username].includes('read');
 }
 
 
 /**
- * @description Verify if user has permission to update project
- * element objects.
+ * @description Verify if user has permission to update project element objects.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project containing the elements.
  * @params {Branch} branch - Param not yet supported.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError
  */
 function updateElement(user, org, project, branch) {
-  // Admin's can update project elements
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to update items in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        `User does not have permission to update items in the project [${project._id}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        `User does not have permission to update items in the project [${project._id}].`);
+    }
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
   }
-  return project.permissions[user.username].includes('write');
 }
 
 
 /**
- * @description Verify if user has permission to delete the project
- * elements.
+ * @description Verify if user has permission to delete the project elements.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project containing the elements.
  * @params {Branch} branch - Param not yet supported.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function deleteElement(user, org, project, branch) {
-  // Admin's can delete project elements
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to delete items in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        `User does not have permission to delete items in the project [${project._id}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        `User does not have permission to delete items in the project [${project._id}].`);
+    }
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
   }
-  return project.permissions[user.username].includes('write');
 }
 
 
 /**
- * @description Verify if user has permission to create branches in
- * the project.
+ * @description Verify if user has permission to create branches in the project.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project to add branches to.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function createBranch(user, org, project) {
-  // Admin's can create branches
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to create branches in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        `User does not have permission to create branches in the project [${project._id}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        `User does not have permission to create branches in the project [${project._id}].`);
+    }
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
   }
-
-  return project.permissions[user.username].includes('write');
 }
 
 
 /**
- * @description Verify if user has permission to read branches in the
- * project.
+ * @description Verify if user has permission to read branches in the project.
  *
  * @params {User} user - The user object to check permission for.
  * @params {Organization} org - The org object containing the project.
  * @params {Project} project - The project containing the branch.
  * @params {Branch} branch - Param not yet supported.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function readBranch(user, org, project, branch) {
-  // Admin's can read branches
-  if (user.admin) {
-    return true;
-  }
-
-  // If project visibility is set to "internal", user only needs read
-  // permissions on the org to read the project contents
-  if (project.visibility === 'internal') {
-    // If not admin, user must have write permissions on org.
-    if (!org.permissions.hasOwnProperty(user.username)) {
-      return false;
+  try {
+    if (!user.admin) {
+      if (project.visibility === 'internal') {
+        // User only needs read permissions on the org to read the project.
+        assert.ok(org.permissions.hasOwnProperty(user._id),
+          `User does not have permission to get branches in the org [${org._id}].`);
+      }
+      else {
+        // User must have read permissions on project.
+        assert.ok(project.permissions.hasOwnProperty(user._id),
+          `User does not have permission to get branches in the project [${project._id}].`);
+      }
     }
-    return org.permissions[user.username].includes('read');
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
   }
-  return project.permissions[user.username].includes('read');
 }
 
 
@@ -453,21 +437,22 @@ function readBranch(user, org, project, branch) {
  * @params {Project} project - The project containing the branch.
  * @params {Branch} branch - Param not yet supported.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function updateBranch(user, org, project, branch) {
-  // Admin's can update branches
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to update branches in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        `User does not have permission to update branches in the project [${project._id}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        `User does not have permission to update branches in the project [${project._id}].`);
+    }
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
   }
-  return project.permissions[user.username].includes('write');
 }
 
 
@@ -479,20 +464,21 @@ function updateBranch(user, org, project, branch) {
  * @params {Project} project - The project containing the elements.
  * @params {Branch} branch - Param not yet supported.
  *
- * @returns {boolean} Whether or not the user has permission to perform the
- * action.
+ * @throws {PermissionError}
  */
 function deleteBranch(user, org, project, branch) {
   // Admin's can delete branches
-  if (user.admin) {
-    return true;
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to delete branches in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        `User does not have permission to delete branches in the project [${project._id}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        `User does not have permission to delete branches in the project [${project._id}].`);
+    }
   }
-
-  // If the visibility is not set to "internal" (i.e. it is "private")
-  // user must have read permissions on project
-  if (!project.permissions.hasOwnProperty(user.username)) {
-    return false;
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
   }
-
-  return project.permissions[user.username].includes('write');
 }

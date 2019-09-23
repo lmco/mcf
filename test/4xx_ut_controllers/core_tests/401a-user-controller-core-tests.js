@@ -77,17 +77,24 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // ------------- Create -------------
   it('should create a user', createUser);
   it('should create multiple users', createUsers);
-  it('should create or replace a user', createOrReplaceUser);
-  it('should create and replace multiple users', createOrReplaceUsers);
+  // -------------- Find --------------
   it('should find a user', findUser);
   it('should find multiple users', findUsers);
   it('should find all users', findAllUsers);
-  it('should find a user through text search', searchUser);
+  // ------------- Update -------------
   it('should update a user', updateUser);
   it('should update multiple users', updateUsers);
+  // ------------- Replace ------------
+  it('should create or replace a user', createOrReplaceUser);
+  it('should create and replace multiple users', createOrReplaceUsers);
+  // --------- Update Password --------
   it('should update a users password', updateUserPassword);
+  // ------------- Search -------------
+  it('should find a user through text search', searchUser);
+  // ------------- Remove -------------
   it('should delete a user', deleteUser);
   it('should delete multiple users', deleteUsers);
 });
@@ -150,7 +157,8 @@ function createUser(done) {
 function createUsers(done) {
   const userDataObjects = [
     testData.users[1],
-    testData.users[2]
+    testData.users[2],
+    testData.users[3]
   ];
 
   // Create users via controller
@@ -666,7 +674,7 @@ function updateUserPassword(done) {
     // Verify user updated properly
     chai.expect(updatedUser._id).to.equal(userData.username);
     chai.expect(updatedUser.username).to.equal(userData.username);
-    chai.expect(updatedUser.preferredName).to.equal('Name Updated');
+    chai.expect(updatedUser.preferredName).to.equal(userData.preferredName);
     chai.expect(updatedUser.fname).to.equal(userData.fname);
     chai.expect(updatedUser.lname).to.equal(userData.lname);
     chai.expect(updatedUser.admin).to.equal(userData.admin);

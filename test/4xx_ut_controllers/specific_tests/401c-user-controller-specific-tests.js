@@ -72,28 +72,38 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should create an archived user', createArchivedUser);
-  it('should return a raw JSON version of a user instead of a mongoose '
-    + 'object from create()', optionLeanCreate);
-  it('should populate allowed fields when creating a user', optionPopulateCreate);
-  it('should return a user with only the specific fields specified from'
-    + ' create()', optionFieldsCreate);
-  it('should archive a user', archiveUser);
+  // -------------- Find --------------
   it('should find an archived user when the option archived is provided', optionArchivedFind);
+  // includeArchived
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from find()', optionLeanFind);
   it('should populate allowed fields when finding a user', optionPopulateFind);
   it('should return a limited number of users from find()', optionLimitFind);
   it('should return a second batch of users with the limit and skip option'
     + ' from find()', optionSkipFind);
+  it('should sort find results', optionSortFind);
+  // ------------- Create -------------
+  it('should create an archived user', createArchivedUser);
+  it('should return a raw JSON version of a user instead of a mongoose '
+    + 'object from create()', optionLeanCreate);
+  it('should populate allowed fields when creating a user', optionPopulateCreate);
+  it('should return a user with only the specific fields specified from'
+    + ' create()', optionFieldsCreate);
+  // ------------- Update -------------
+  it('should archive a user', archiveUser);
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from update()', optionLeanUpdate);
   it('should populate allowed fields when updating a user', optionPopulateUpdate);
+  // fields
+  // ------------- Replace ------------
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from createOrReplace()', optionLeanReplace);
   it('should populate allowed fields when replacing a user', optionPopulateReplace);
   it('should return a user with only the specific fields specified from'
     + ' createOrReplace()', optionFieldsReplace);
+  // ------------- Remove -------------
+  // --------- Update Password --------
+  // ------------- Search -------------
   it('should search an archived user when the option archived is provided',
     optionArchivedSearch);
   it('should return a raw JSON version of a user instead of a mongoose '
@@ -102,8 +112,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a limited number of users from search()', optionLimitSearch);
   it('should return a second batch of users with the limit and skip option '
     + 'from search()', optionSkipSearch);
-  it('should sort find results', optionSortFind);
   it('should sort search results', optionSortSearch);
+  // includeArchived
 });
 
 /* --------------------( Tests )-------------------- */

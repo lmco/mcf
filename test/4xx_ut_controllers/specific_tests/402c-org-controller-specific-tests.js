@@ -75,7 +75,32 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  it('should sort the find results', optionSortFind);
+  // -------------- Find --------------
+  // populate
+  // includeArchived
+  // fields
+  // limit
+  // skip
+  // lean
+  it('should sort find results', optionSortFind);
+  // name
+  // createdBy
+  // lastModifiedBy
+  // archived
+  // archivedBy
+  // ------------- Create -------------
+  // populate
+  // fields
+  // lean
+  // ------------- Update -------------
+  // populate
+  // fields
+  // lean
+  // ------------- Replace ------------
+  // populate
+  // fields
+  // lean
+  // ------------- Remove -------------
 });
 
 /* --------------------( Tests )-------------------- */
@@ -135,7 +160,7 @@ function optionSortFind(done) {
   .then(() => done())
   .catch((error) => {
     M.log.error(error.message);
-    // Expect no error
+    // Expect no errors
     chai.expect(error.message).to.equal(null);
     done();
   });
