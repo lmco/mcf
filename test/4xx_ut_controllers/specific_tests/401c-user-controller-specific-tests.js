@@ -74,6 +74,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   // -------------- Find --------------
   it('should find an archived user when the option archived is provided', optionArchivedFind);
+  // includeArchived
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from find()', optionLeanFind);
   it('should populate allowed fields when finding a user', optionPopulateFind);
@@ -93,6 +94,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from update()', optionLeanUpdate);
   it('should populate allowed fields when updating a user', optionPopulateUpdate);
+  // fields
   // ------------- Replace ------------
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from createOrReplace()', optionLeanReplace);
@@ -111,6 +113,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a second batch of users with the limit and skip option '
     + 'from search()', optionSkipSearch);
   it('should sort search results', optionSortSearch);
+  // includeArchived
 });
 
 /* --------------------( Tests )-------------------- */

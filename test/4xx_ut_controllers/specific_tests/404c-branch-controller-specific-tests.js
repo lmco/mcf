@@ -102,13 +102,16 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a branch created by a specific user', optionCreatedByFind);
   it('should find a branch last modified by a specific user', optionLastModifiedByFind);
   it('should only find archived branches', optionArchivedFind);
+  // it('should find a branch archived by a specific user, optionArchivedByFind);
   it('should find a branch based on its custom data', optionCustomFind);
   // ------------- Create -------------
   it('should populate the return object from create', optionPopulateCreate);
   it('should only return specified fields from create', optionFieldsCreate);
+  // lean
   // ------------- Update -------------
   it('should populate the return object from update', optionPopulateUpdate);
   it('should only return specified fields from update', optionFieldsUpdate);
+  // lean
   // ------------- Remove -------------
 });
 

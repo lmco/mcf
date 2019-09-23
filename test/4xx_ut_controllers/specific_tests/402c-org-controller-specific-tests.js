@@ -76,9 +76,26 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
+  // populate
+  // includeArchived
+  // fields
+  // limit
+  // skip
+  // lean
   it('should sort find results', optionSortFind);
+  // name
+  // createdBy
+  // lastModifiedBy
+  // archived
+  // archivedBy
   // ------------- Create -------------
+  // populate
+  // fields
+  // lean
   // ------------- Update -------------
+  // populate
+  // fields
+  // lean
   // ------------- Replace ------------
   // ------------- Remove -------------
 });
