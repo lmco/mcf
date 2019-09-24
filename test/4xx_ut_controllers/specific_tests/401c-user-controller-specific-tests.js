@@ -39,36 +39,33 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Connect to the database, create an admin user
    */
-  before((done) => {
-    // Connect to the database
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((user) => {
-      // Set global admin user
-      adminUser = user;
-      done();
-    })
-    .catch((error) => {
+  before(async () => {
+    try {
+      // Connect to the database
+      await db.connect();
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
+    }
+    catch (error) {
       M.log.error(error.message);
       // Expect no error
       chai.expect(error.message).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user, disconnect from database
    */
-  after((done) => {
-    testUtils.removeTestAdmin()
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      await testUtils.removeTestAdmin();
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error.message);
       // Expect no error
       chai.expect(error.message).to.equal(null);
-    });
+    }
   });
 
   /* Execute the tests */
@@ -94,7 +91,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from update()', optionLeanUpdate);
   it('should populate allowed fields when updating a user', optionPopulateUpdate);
-  // fields
+  it('should only include specified fields when updating a user', optionFieldsUpdate);
   // ------------- Replace ------------
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from createOrReplace()', optionLeanReplace);
@@ -106,6 +103,8 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- Search -------------
   it('should search an archived user when the option archived is provided',
     optionArchivedSearch);
+  it('should include archived users in the search results when the option includeArchived'
+    + ' is provided', optionIncludeArchivedSearch);
   it('should return a raw JSON version of a user instead of a mongoose '
     + 'object from search()', optionLeanSearch);
   it('should populate allowed fields when searching a user', optionPopulateSearch);
@@ -113,7 +112,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a second batch of users with the limit and skip option '
     + 'from search()', optionSkipSearch);
   it('should sort search results', optionSortSearch);
-  // includeArchived
 });
 
 /* --------------------( Tests )-------------------- */
@@ -794,6 +792,87 @@ function optionPopulateUpdate(done) {
 }
 
 /**
+ * @description Validates that the fields option when specified with the update
+ * function will cause the returned objects to only return the specified fields
+ */
+async function optionFieldsUpdate() {
+  try {
+    // Create the user object
+    const userData = {
+      username: 'testuser00',
+      password: 'Abc123!@',
+      fname: 'Test'
+    };
+    // Create the update object
+    const updateUser = {
+      username: userData.username,
+      fname: 'Update'
+    };
+    // Create the options object with the list of fields specifically to find
+    const findOptions = { fields: ['fname', 'createdBy'] };
+    // Create the options object with the list of fields to specifically NOT find
+    const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
+    // Create the list of fields which are always provided no matter what
+    const fieldsAlwaysProvided = ['_id'];
+
+    // Create the test user
+    const createdUsers = await UserController.create(adminUser, userData);
+    const createdUser = createdUsers[0];
+
+    // Validate user
+    chai.expect(createdUser._id).to.equal(userData.username);
+    chai.expect(createdUser.username).to.equal(userData.username);
+    chai.expect(createdUser.fname).to.equal(userData.fname);
+
+    // Update the user with the find options
+    const updatedUsers = await UserController.update(adminUser, updateUser, findOptions);
+    const updatedUser = updatedUsers[0];
+
+    // Validate that the user updated properly
+    chai.expect(updatedUser._id).to.equal(userData.username);
+    chai.expect(updatedUser.username).to.equal(userData.username);
+    chai.expect(updatedUser.fname).to.equal(updateUser.fname);
+
+    // Create the list of fields that should be returned
+    const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
+
+    // Create a list of visible user fields.
+    const visibleFields = Object.keys(updatedUser._doc);
+
+    // Check that the only keys in the user are the expected ones
+    chai.expect(visibleFields).to.have.members(expectedFields);
+
+    updateUser.fname = 'Updatetwo';
+
+    // Update the user again
+    const updatedUsers2 = await UserController.update(adminUser, updateUser, findOptions);
+    const updatedUser2 = updatedUsers2[0];
+
+    // Validate that the user updated properly
+    chai.expect(updatedUser2._id).to.equal(userData.username);
+    chai.expect(updatedUser2.username).to.equal(userData.username);
+    chai.expect(updatedUser2.fname).to.equal(updateUser.fname);
+
+    // Create the list of fields that should not be returned
+    const expectedFields2 = notFindOptions.fields;
+
+    // Create a list of visible user fields.
+    const visibleFields2 = Object.keys(updatedUser2._doc);
+
+    // Check that the only keys in the user are the expected ones
+    chai.expect(visibleFields2).to.not.have.members(expectedFields2);
+
+    // Remove test user
+    await UserController.remove(adminUser, userData.username);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
  * @description Validates that the lean option when specified with the createOrReplace function
  * will cause the returned objects to be lean
  */
@@ -1047,6 +1126,58 @@ function optionArchivedSearch(done) {
     chai.expect(error.message).to.equal(null);
     done();
   });
+}
+
+/**
+ * @description Validates that the archived option when specified in the search function
+ * allows for archived results to be returned
+ */
+async function optionIncludeArchivedSearch() {
+  try {
+    // Create user object
+    const userData = {
+      username: 'testuser00',
+      password: 'Abc123!@',
+      fname: 'FirstName',
+      archived: true
+    };
+    // Search term
+    const searchQuery = 'FirstName';
+    // Create options object
+    const options = { includeArchived: true };
+
+    // Create user via UserController
+    const createdUsers = await UserController.create(adminUser, userData);
+
+    const createdUser = createdUsers[0];
+
+    // Verify user created
+    chai.expect(createdUser._id).to.equal(userData.username);
+    chai.expect(createdUser.username).to.equal(userData.username);
+    chai.expect(createdUser.fname).to.equal(userData.fname);
+
+    // Verify user archived
+    chai.expect(createdUser.archived).to.equal(true);
+
+    // Search for users
+    const foundUsers = await UserController.search(adminUser, searchQuery, options);
+
+    // Expect to find at least one user
+    chai.expect(foundUsers).to.have.lengthOf.at.least(1);
+    // Validate search text in found users
+    foundUsers.forEach((foundUser) => {
+      chai.expect(foundUser.fname || foundUser.lname
+        || foundUser.preferredName).to.equal(searchQuery);
+    });
+
+    // Remove the test user
+    await UserController.remove(adminUser, userData.username);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
 }
 
 /**
