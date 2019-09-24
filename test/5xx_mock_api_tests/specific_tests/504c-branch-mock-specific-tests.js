@@ -50,7 +50,7 @@ describe(M.getModuleName(module.filename), () => {
   before(async () => {
     try {
       // Open the database connection
-      await db.connect()
+      await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
       // Create organization
