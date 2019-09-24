@@ -116,7 +116,7 @@ async function putInvalidUsername() {
 
   await UserController.createOrReplace(adminUser, [testUserObj0, testUserObj1, invalidUserObj])
   .should.eventually.be.rejectedWith(
-    'User validation failed: _id: Path `_id` is invalid (INVALID_NAME).'
+    'User validation failed: _id: Invalid username [INVALID_NAME].'
   );
 
   let foundUsers;

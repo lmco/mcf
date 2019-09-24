@@ -113,11 +113,11 @@ async function find(requestingUser, organizationID, projectID, branches, options
 
     // Sanitize input parameters
     const saniBranches = (branches !== undefined)
-      ? sani.mongo(JSON.parse(JSON.stringify(branches)))
+      ? sani.db(JSON.parse(JSON.stringify(branches)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
     let branchesToFind = [];
 
     // Define searchQuery
@@ -151,7 +151,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
             options[o] = utils.createID(orgID, projID, options[o]);
           }
           // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+          searchQuery[o] = sani.db(options[o]);
         }
       });
     }
@@ -194,9 +194,12 @@ async function find(requestingUser, organizationID, projectID, branches, options
 
     // Find branches in a project
     return await Branch.find(searchQuery, validatedOptions.fieldsString,
-      { limit: validatedOptions.limit, skip: validatedOptions.skip })
-    .sort(validatedOptions.sort).populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+      { limit: validatedOptions.limit,
+        skip: validatedOptions.skip,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -259,10 +262,10 @@ async function create(requestingUser, organizationID, projectID, branches, optio
     }
 
     // Sanitize input parameters and create function-wide variables
-    const saniBranches = sani.mongo(JSON.parse(JSON.stringify(branches)));
+    const saniBranches = sani.db(JSON.parse(JSON.stringify(branches)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
     let newBranches = [];
     let elementsCloning;
 
@@ -334,7 +337,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
     sourceID = utils.createID(orgID, projID, sourceID);
 
     // Find the source branch to verify existence
-    const foundSourceBranch = await Branch.findOne({ _id: sourceID }).lean();
+    const foundSourceBranch = await Branch.findOne({ _id: sourceID }, '_id', { lean: true });
     // Check that the branch was found
     if (!foundSourceBranch) {
       throw new M.NotFoundError(`Branch [${utils.parseID(sourceID).pop()}] not found in the `
@@ -345,7 +348,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find any existing, conflicting branches
-    const foundBranches = await Branch.find(searchQuery, '_id').lean();
+    const foundBranches = await Branch.find(searchQuery, '_id', { lean: true });
 
     // If there are any foundBranches, there is a conflict
     if (foundBranches.length > 0) {
@@ -382,7 +385,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
       newBranches = createdBranches;
 
       // Find all the elements in the branch we are branching from
-      const elementsToClone = await Element.find({ branch: sourceID }).lean();
+      const elementsToClone = await Element.find({ branch: sourceID }, null, { lean: true });
 
       let elementsToCreate = [];
       // Grabbing all the element ids
@@ -472,9 +475,9 @@ async function create(requestingUser, organizationID, projectID, branches, optio
 
       await Promise.all(promises);
       // Create the new elements
-      const queryResult = await Element.insertMany(elementsToCreate, { rawResult: true });
+      const newElements = await Element.insertMany(elementsToCreate, { lean: true });
 
-      if (queryResult.result.n !== (newBranches.length * elementsCloning.length)) {
+      if (newElements.length !== (newBranches.length * elementsCloning.length)) {
         // Not all elements were created
         throw new M.DatabaseError('Not all elements were cloned from branch.', 'error');
       }
@@ -484,9 +487,9 @@ async function create(requestingUser, organizationID, projectID, branches, optio
         try {
           // If there was an error with inserting elements into the branch
           // Delete any elements created from branch
-          await Element.deleteMany({ branch: { $in: arrIDs } }).lean();
+          await Element.deleteMany({ branch: { $in: arrIDs } });
           // Delete the branches
-          await Branch.deleteMany({ _id: { $in: arrIDs } }).lean();
+          await Branch.deleteMany({ _id: { $in: arrIDs } });
           // Send original error
           resolve(error);
         }
@@ -502,8 +505,10 @@ async function create(requestingUser, organizationID, projectID, branches, optio
     EventEmitter.emit('branches-created', branchObjects);
 
     return await Branch.find({ _id: { $in: arrIDs } },
-      validatedOptions.fieldsString).populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+      validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -559,9 +564,9 @@ async function update(requestingUser, organizationID, projectID, branches, optio
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const saniBranches = sani.mongo(JSON.parse(JSON.stringify(branches)));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const saniBranches = sani.db(JSON.parse(JSON.stringify(branches)));
     const duplicateCheck = {};
     let branchesToUpdate = [];
     const arrIDs = [];
@@ -622,7 +627,7 @@ async function update(requestingUser, organizationID, projectID, branches, optio
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Return when all branches have been found
-    const foundBranches = await Branch.find(searchQuery).lean();
+    const foundBranches = await Branch.find(searchQuery, null, { lean: true });
 
     foundBranches.forEach(branch => {
       // Check permissions
@@ -715,8 +720,10 @@ async function update(requestingUser, organizationID, projectID, branches, optio
     await Branch.bulkWrite(bulkArray);
 
 
-    const foundUpdatedBranches = await Branch.find(searchQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    const foundUpdatedBranches = await Branch.find(searchQuery, validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
 
     // Emit the event branches-updated
     EventEmitter.emit('branches-updated', foundUpdatedBranches);
@@ -757,9 +764,9 @@ async function remove(requestingUser, organizationID, projectID, branches, optio
     helper.checkParamsDataType(['object', 'string'], branches, 'Branches');
 
     // Sanitize input parameters and function-wide variables
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const saniBranches = sani.mongo(JSON.parse(JSON.stringify(branches)));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const saniBranches = sani.db(JSON.parse(JSON.stringify(branches)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let searchedIDs = [];
 
@@ -790,7 +797,7 @@ async function remove(requestingUser, organizationID, projectID, branches, optio
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
     // Find all the branches to delete
-    const foundBranches = await Branch.find(searchQuery).lean();
+    const foundBranches = await Branch.find(searchQuery, null, { lean: true });
 
     foundBranches.forEach(branch => {
       // Check permissions
@@ -820,9 +827,9 @@ async function remove(requestingUser, organizationID, projectID, branches, optio
     });
 
     // Delete any elements in the branch
-    await Element.deleteMany(ownedQuery).lean();
+    await Element.deleteMany(ownedQuery);
     // Delete all the branches
-    const retQuery = await Branch.deleteMany(searchQuery).lean();
+    const retQuery = await Branch.deleteMany(searchQuery);
 
 
     // Verify that all of the branches were correctly deleted

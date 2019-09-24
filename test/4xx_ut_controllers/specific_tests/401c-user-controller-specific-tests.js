@@ -72,8 +72,8 @@ describe(M.getModuleName(module.filename), () => {
   // -------------- Find --------------
   it('should only find archived users when the option archived is provided', optionArchivedFind);
   it('should include archived users in the find results', optionIncludeArchivedFind);
-  it('should return a raw JSON version of a user instead of a mongoose '
-    + 'object from find()', optionLeanFind);
+  it('should return a raw JSON version of a user instead of a document with instance '
+    + 'methods from find()', optionLeanFind);
   it('should populate allowed fields when finding a user', optionPopulateFind);
   it('should return a limited number of users from find()', optionLimitFind);
   it('should return a second batch of users with the limit and skip option'
@@ -81,20 +81,20 @@ describe(M.getModuleName(module.filename), () => {
   it('should sort find results', optionSortFind);
   // ------------- Create -------------
   it('should create an archived user', createArchivedUser);
-  it('should return a raw JSON version of a user instead of a mongoose '
-    + 'object from create()', optionLeanCreate);
+  it('should return a raw JSON version of a user instead of a document with'
+    + ' instance methods from create()', optionLeanCreate);
   it('should populate allowed fields when creating a user', optionPopulateCreate);
   it('should return a user with only the specific fields specified from'
     + ' create()', optionFieldsCreate);
   // ------------- Update -------------
   it('should archive a user', archiveUser);
-  it('should return a raw JSON version of a user instead of a mongoose '
-    + 'object from update()', optionLeanUpdate);
+  it('should return a raw JSON version of a user instead of a document with'
+    + ' instance methods from update()', optionLeanUpdate);
   it('should populate allowed fields when updating a user', optionPopulateUpdate);
   it('should only include specified fields when updating a user', optionFieldsUpdate);
   // ------------- Replace ------------
-  it('should return a raw JSON version of a user instead of a mongoose '
-    + 'object from createOrReplace()', optionLeanReplace);
+  it('should return a raw JSON version of a user instead of a document with'
+    + ' instance methods from createOrReplace()', optionLeanReplace);
   it('should populate allowed fields when replacing a user', optionPopulateReplace);
   it('should return a user with only the specific fields specified from'
     + ' createOrReplace()', optionFieldsReplace);
@@ -105,8 +105,8 @@ describe(M.getModuleName(module.filename), () => {
     optionArchivedSearch);
   it('should include archived users in the search results when the option includeArchived'
     + ' is provided', optionIncludeArchivedSearch);
-  it('should return a raw JSON version of a user instead of a mongoose '
-    + 'object from search()', optionLeanSearch);
+  it('should return a raw JSON version of a user instead of a document with'
+    + ' instance methods from search()', optionLeanSearch);
   it('should populate allowed fields when searching a user', optionPopulateSearch);
   it('should return a limited number of users from search()', optionLimitSearch);
   it('should return a second batch of users with the limit and skip option '
@@ -133,12 +133,11 @@ function createArchivedUser(done) {
     const createdUser = createdUsers[0];
     // Verify user created properly
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Verify that the user is archived
     chai.expect(createdUser.archived).to.equal(true);
-    chai.expect(createdUser.archivedBy).to.equal(adminUser.username);
+    chai.expect(createdUser.archivedBy).to.equal(adminUser._id);
     chai.expect(createdUser.archivedOn).to.not.equal(null);
   })
   // Remove the test user
@@ -175,8 +174,8 @@ function optionLeanCreate(done) {
     chai.expect(createdUser._id).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
-    // Test that the returned object is lean
-    chai.expect(createdUser instanceof User).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof createdUser.getValidUpdateFields).to.equal('undefined');
   })
   // Remove the test user
   .then(() => UserController.remove(adminUser, userData.username))
@@ -211,7 +210,6 @@ function optionPopulateCreate(done) {
 
     // Verify user created properly
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // For each field in pop
@@ -318,7 +316,6 @@ function archiveUser(done) {
 
     // Verify user created properly
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Verify that the user is not archived
@@ -332,12 +329,11 @@ function archiveUser(done) {
 
     // Verify user updated properly
     chai.expect(updatedUser._id).to.equal(userData.username);
-    chai.expect(updatedUser.username).to.equal(userData.username);
     chai.expect(updatedUser.fname).to.equal(userData.fname);
 
     // Verify that the user has been archived
     chai.expect(updatedUser.archived).to.equal(true);
-    chai.expect(updatedUser.archivedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.archivedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archivedOn).to.not.equal(null);
   })
   // Remove test user
@@ -392,7 +388,7 @@ function optionArchivedFind(done) {
     // Verify all of the archived fields are properly set
     chai.expect(foundUser.archived).to.equal(true);
     chai.expect(foundUser.archivedOn).to.not.equal(null);
-    chai.expect(foundUser.archivedBy).to.equal(adminUser.username);
+    chai.expect(foundUser.archivedBy).to.equal(adminUser._id);
   })
   // Remove test user
   .then(() => UserController.remove(adminUser, userData.username))
@@ -476,7 +472,6 @@ function optionLeanFind(done) {
 
     // Verify user created properly
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Find the user with the lean option
@@ -489,8 +484,8 @@ function optionLeanFind(done) {
     chai.expect(foundUser._id).to.equal(userData.username);
     chai.expect(foundUser.fname).to.equal(userData.fname);
 
-    // Verify that the user is NOT a mongoose object
-    chai.expect(foundUser instanceof User).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof foundUser.getValidUpdateFields).to.equal('undefined');
   })
   .then(() => UserController.remove(adminUser, userData.username))
   .then(() => done())
@@ -526,7 +521,6 @@ function optionPopulateFind(done) {
 
     // Verify user created
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
 
     // Find the user with the populate option
     return UserController.find(adminUser, userData.username, options);
@@ -536,7 +530,6 @@ function optionPopulateFind(done) {
 
     // Verify user found
     chai.expect(foundUser._id).to.equal(userData.username);
-    chai.expect(foundUser.username).to.equal(userData.username);
 
     // For each field in pop
     pop.forEach((field) => {
@@ -701,7 +694,6 @@ function optionLeanUpdate(done) {
 
     // Validate user properties
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Update the user
@@ -714,8 +706,8 @@ function optionLeanUpdate(done) {
     chai.expect(updatedUser._id).to.equal(userData.username);
     chai.expect(updatedUser.fname).to.equal(updateUser.fname);
 
-    // Verify that the returned user object is lean
-    chai.expect(updatedUser instanceof User).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof updatedUser.getValidUpdateFields).to.equal('undefined');
   })
   // Remove test user
   .then(() => UserController.remove(adminUser, userData.username))
@@ -756,7 +748,6 @@ function optionPopulateUpdate(done) {
 
     // Validate user
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Update the user
@@ -767,7 +758,6 @@ function optionPopulateUpdate(done) {
 
     // Validate that the user updated properly
     chai.expect(updatedUser._id).to.equal(userData.username);
-    chai.expect(updatedUser.username).to.equal(userData.username);
     chai.expect(updatedUser.fname).to.equal(updateUser.fname);
 
     // Validate that the returned object has populated fields
@@ -899,7 +889,6 @@ function optionLeanReplace(done) {
 
     // Validate created user
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Replace the user
@@ -912,8 +901,8 @@ function optionLeanReplace(done) {
     chai.expect(replacedUser._id).to.equal(userData.username);
     chai.expect(replacedUser.fname).to.equal(replaceUserObj.fname);
 
-    // Check that the returned object is lean
-    chai.expect(replacedUser instanceof User).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof replacedUser.getValidUpdateFields).to.equal('undefined');
   })
   // Remove test user
   .then(() => UserController.remove(adminUser, userData.username))
@@ -955,7 +944,6 @@ function optionPopulateReplace(done) {
 
     // Validate created user
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Replace the user
@@ -966,7 +954,6 @@ function optionPopulateReplace(done) {
 
     // Validate that user was replaced properly
     chai.expect(replacedUser._id).to.equal(userData.username);
-    chai.expect(replacedUser.username).to.equal(userData.username);
     chai.expect(replacedUser.fname).to.equal(replaceUserObj.fname);
 
     // Validate that the returned object has populated fields
@@ -1026,7 +1013,6 @@ function optionFieldsReplace(done) {
 
     // Validate created user
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Replace a user with field find options
@@ -1037,7 +1023,6 @@ function optionFieldsReplace(done) {
 
     // Validate that user was replaced properly
     chai.expect(replacedUser._id).to.equal(userData.username);
-    chai.expect(replacedUser.username).to.equal(userData.username);
     chai.expect(replacedUser.fname).to.equal(replaceUserObj1.fname);
 
     // Create the list of fields that should be returned
@@ -1056,7 +1041,6 @@ function optionFieldsReplace(done) {
 
     // Validate user replaced properly
     chai.expect(replacedUser._id).to.equal(userData.username);
-    chai.expect(replacedUser.username).to.equal(userData.username);
     chai.expect(replacedUser.fname).to.equal(replaceUserObj2.fname);
 
     // Create a list of visible user fields.
@@ -1100,7 +1084,6 @@ function optionArchivedSearch(done) {
 
     // Verify user created
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Verify user archived
@@ -1202,7 +1185,6 @@ function optionLeanSearch(done) {
 
     // Verify user created
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Search for users
@@ -1213,8 +1195,8 @@ function optionLeanSearch(done) {
       // Validate search text in found users
       chai.expect(foundUser.fname || foundUser.lname
         || foundUser.preferredName).to.equal(searchQuery);
-      // Expect every returned user object to be lean
-      chai.expect(foundUser instanceof User).to.equal(false);
+      // Expect the instance method getValidUpdateFields to be undefined
+      chai.expect(typeof foundUser.getValidUpdateFields).to.equal('undefined');
     });
   })
   .then(() => UserController.remove(adminUser, userData.username))
@@ -1251,7 +1233,6 @@ function optionPopulateSearch(done) {
 
     // Verify user created
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Search for users
@@ -1312,7 +1293,6 @@ function optionLimitSearch(done) {
 
     // Verify user created
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Search for users
@@ -1444,11 +1424,11 @@ function optionSortFind(done) {
 
     // Validate that the sort option is working
     chai.expect(foundUsers[0].fname).to.equal('a');
-    chai.expect(foundUsers[0].username).to.equal('testuser1');
+    chai.expect(foundUsers[0]._id).to.equal('testuser1');
     chai.expect(foundUsers[1].fname).to.equal('b');
-    chai.expect(foundUsers[1].username).to.equal('testuser2');
+    chai.expect(foundUsers[1]._id).to.equal('testuser2');
     chai.expect(foundUsers[2].fname).to.equal('c');
-    chai.expect(foundUsers[2].username).to.equal('testuser0');
+    chai.expect(foundUsers[2]._id).to.equal('testuser0');
 
     // Find the users and return them sorted in reverse
     return UserController.find(adminUser, [user1.username, user2.username, user3.username],
@@ -1460,11 +1440,11 @@ function optionSortFind(done) {
 
     // Validate that the sort option is working
     chai.expect(foundUsers[0].fname).to.equal('c');
-    chai.expect(foundUsers[0].username).to.equal('testuser0');
+    chai.expect(foundUsers[0]._id).to.equal('testuser0');
     chai.expect(foundUsers[1].fname).to.equal('b');
-    chai.expect(foundUsers[1].username).to.equal('testuser2');
+    chai.expect(foundUsers[1]._id).to.equal('testuser2');
     chai.expect(foundUsers[2].fname).to.equal('a');
-    chai.expect(foundUsers[2].username).to.equal('testuser1');
+    chai.expect(foundUsers[2]._id).to.equal('testuser1');
   })
   .then(() => UserController.remove(adminUser, [user1.username, user2.username, user3.username]))
   .then(() => done())
@@ -1527,11 +1507,11 @@ function optionSortSearch(done) {
 
     // Validate that the sort option is working
     chai.expect(foundUsers[0].fname).to.equal('a');
-    chai.expect(foundUsers[0].username).to.equal('testuser02');
+    chai.expect(foundUsers[0]._id).to.equal('testuser02');
     chai.expect(foundUsers[1].fname).to.equal('b');
-    chai.expect(foundUsers[1].username).to.equal('testuser00');
+    chai.expect(foundUsers[1]._id).to.equal('testuser00');
     chai.expect(foundUsers[2].fname).to.equal('c');
-    chai.expect(foundUsers[2].username).to.equal('testuser01');
+    chai.expect(foundUsers[2]._id).to.equal('testuser01');
 
     // Search the users and return them sorted in reverse
     return UserController.search(adminUser, searchQuery, sortOptionReverse);
@@ -1542,11 +1522,11 @@ function optionSortSearch(done) {
 
     // Validate that the sort option is working
     chai.expect(foundUsers[0].fname).to.equal('c');
-    chai.expect(foundUsers[0].username).to.equal('testuser01');
+    chai.expect(foundUsers[0]._id).to.equal('testuser01');
     chai.expect(foundUsers[1].fname).to.equal('b');
-    chai.expect(foundUsers[1].username).to.equal('testuser00');
+    chai.expect(foundUsers[1]._id).to.equal('testuser00');
     chai.expect(foundUsers[2].fname).to.equal('a');
-    chai.expect(foundUsers[2].username).to.equal('testuser02');
+    chai.expect(foundUsers[2]._id).to.equal('testuser02');
   })
   .then(() => UserController.remove(adminUser, [user1.username, user2.username,
     user3.username, user4.username]))

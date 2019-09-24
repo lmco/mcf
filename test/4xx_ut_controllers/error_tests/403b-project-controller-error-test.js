@@ -119,7 +119,7 @@ async function putInvalidId() {
   await ProjectController.createOrReplace(adminUser, org.id,
     [testProjObj0, testProjObj1, invalidProjObj])
   .should.eventually.be.rejectedWith(
-    'Project validation failed: _id: Path `_id` is invalid (testorg00:INVALID_ID).'
+    `Project validation failed: _id: Invalid project ID [${invalidProjObj.id}].`
   );
 
   let foundProjs;

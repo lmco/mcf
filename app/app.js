@@ -33,7 +33,6 @@ const middleware = M.require('lib.middleware');
 const migrate = M.require('lib.migrate');
 const Organization = M.require('models.organization');
 const User = M.require('models.user');
-const Session = M.require('models.session');
 
 // Initialize express app and export the object
 const app = express();
@@ -93,7 +92,7 @@ function initApp() {
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: M.config.auth.session.expires * units },
-      store: Session
+      store: new db.Store()
     }));
 
     // Enable flash messages
@@ -161,7 +160,7 @@ function createDefaultOrganization() {
       createdOrg = true;
       // Default organization does NOT exist, create it and add all active users
       // to permissions list
-      const defaultOrg = new Organization({
+      const defaultOrg = Organization.createDocument({
         _id: M.config.server.defaultOrganizationId,
         name: M.config.server.defaultOrganizationName
       });
@@ -202,7 +201,7 @@ function createDefaultAdmin() {
       // set userCreated to true
       userCreated = true;
       // No global admin exists, create local user as global admin
-      const adminUserData = new User({
+      const adminUserData = User.createDocument({
         // Set username and password of global admin user from configuration.
         _id: M.config.server.defaultAdminUsername,
         password: M.config.server.defaultAdminPassword,

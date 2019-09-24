@@ -733,7 +733,6 @@ function getUserPublicData(user, options) {
 
   const data = {
     username: user._id,
-    name: (user.fname && user.lname) ? user.name : undefined,
     fname: user.fname,
     preferredName: user.preferredName,
     lname: user.lname,

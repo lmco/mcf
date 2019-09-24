@@ -36,14 +36,13 @@
  * <h4>Custom Data</h4>
  * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
  * is stored in an object, and can contain any valid JSON the user desires.
- * Only organization admins can update the custom data.</p>
+ * Only organization admins can update the custom data. The field "custom" is
+ * common to all models, and is added through the extensions plugin.</p>
  *
  */
 
-// NPM modules
-const mongoose = require('mongoose');
-
 // MBEE modules
+const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 
@@ -62,28 +61,46 @@ const extensions = M.require('models.plugin.extensions');
  * @property {Object} custom - JSON used to store additional data.
  *
  */
-const OrganizationSchema = new mongoose.Schema({
+const OrganizationSchema = new db.Schema({
   _id: {
-    type: String,
+    type: 'String',
     required: true,
-    match: RegExp(validators.org.id),
-    maxlength: [validators.org.idLength, 'Too many characters in ID'],
-    minlength: [2, 'Too few characters in ID'],
-    validate: {
+    validate: [{
       validator: function(v) {
         // If the ID is a reserved keyword, reject
         return !validators.reserved.includes(v);
       },
       message: 'Organization ID cannot include the following words: '
         + `[${validators.reserved}].`
-    }
+    }, {
+      validator: function(v) {
+        // If the ID is longer than max length, reject
+        return v.length <= validators.org.idLength;
+      },
+      message: props => `Org ID length [${props.value.length}] must not be more`
+        + ` than ${validators.org.idLength} characters.`
+    }, {
+      validator: function(v) {
+        // If the ID is shorter than min length, reject
+        return v.length > 1;
+      },
+      message: props => `Org ID length [${props.value.length}] must not be less`
+        + ' than 2 characters.'
+    }, {
+      validator: function(v) {
+        // If the ID is invalid, reject
+        return RegExp(validators.org.id).test(v);
+      },
+      message: props => `Invalid org ID [${props.value}].`
+    }]
   },
   name: {
-    type: String,
+    type: 'String',
+    index: true,
     required: true
   },
   permissions: {
-    type: mongoose.Schema.Types.Mixed,
+    type: 'Object',
     default: {},
     validate: {
       validator: function(v) {
@@ -104,10 +121,6 @@ const OrganizationSchema = new mongoose.Schema({
       },
       message: props => 'The organization permissions object is not properly formatted.'
     }
-  },
-  custom: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
   }
 });
 
@@ -127,78 +140,38 @@ OrganizationSchema.plugin(extensions);
  * @description Returns supported permission levels
  * @memberOf OrganizationSchema
  */
-OrganizationSchema.methods.getPermissionLevels = function() {
+OrganizationSchema.method('getPermissionLevels', function() {
   return ['remove_all', 'read', 'write', 'admin'];
-};
-OrganizationSchema.statics.getPermissionLevels = function() {
-  return OrganizationSchema.methods.getPermissionLevels();
-};
+});
+OrganizationSchema.static('getPermissionLevels', function() {
+  return ['remove_all', 'read', 'write', 'admin'];
+});
 
 /**
  * @description Returns organization fields that can be changed
  * @memberOf OrganizationSchema
  */
-OrganizationSchema.methods.getValidUpdateFields = function() {
+OrganizationSchema.method('getValidUpdateFields', function() {
   return ['name', 'custom', 'archived', 'permissions'];
-};
-OrganizationSchema.statics.getValidUpdateFields = function() {
-  return OrganizationSchema.methods.getValidUpdateFields();
-};
+});
+OrganizationSchema.static('getValidUpdateFields', function() {
+  return ['name', 'custom', 'archived', 'permissions'];
+});
 
 /**
  * @description Returns a list of fields a requesting user can populate
  * @memberOf OrganizationSchema
  */
-OrganizationSchema.methods.getValidPopulateFields = function() {
+OrganizationSchema.method('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'projects'];
-};
+});
 
-OrganizationSchema.statics.getValidPopulateFields = function() {
-  return OrganizationSchema.methods.getValidPopulateFields();
-};
-
-
-/**
- * @description Validates an object to ensure that it only contains keys
- * which exist in the organization model.
- *
- * @param {Object} object - Object for key verification.
- *
- * @return {boolean} The boolean indicating if the object contained only
- * existing fields.
- */
-OrganizationSchema.statics.validateObjectKeys = function(object) {
-  // Initialize returnBool to true
-  let returnBool = true;
-  // Set list array of valid keys
-  const validKeys = Object.keys(OrganizationSchema.paths);
-  // Add 'id' to list of valid keys, for 0.6.0 support
-  validKeys.push('id');
-  // Check if the object is NOT an instance of the organization model
-  if (!(object instanceof mongoose.model('Organization', OrganizationSchema))) {
-    // Loop through each key of the object
-    Object.keys(object).forEach(key => {
-      // Check if the object key is a key in the organization model
-      if (!validKeys.includes(key)) {
-        // Key is not in organization model, return false
-        returnBool = false;
-      }
-    });
-  }
-  // All object keys found in organization model or object was an instance of
-  // organization model, return true
-  return returnBool;
-};
-
-
-/* -----------------------( Organization Properties )------------------------ */
-
-// Required for virtual getters
-OrganizationSchema.set('toJSON', { virtuals: true });
-OrganizationSchema.set('toObject', { virtuals: true });
+OrganizationSchema.static('getValidPopulateFields', function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'projects'];
+});
 
 
 /* ----------------------( Organization Schema Export )---------------------- */
 
-// Export mongoose model as "Organization"
-module.exports = mongoose.model('Organization', OrganizationSchema);
+// Export model as "Organization"
+module.exports = new db.Model('Organization', OrganizationSchema);

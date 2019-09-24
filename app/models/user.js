@@ -38,21 +38,20 @@
  * <h4>Custom Data</h4>
  * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
  * is stored in an object, and can contain any valid JSON the user desires.
- * Users can update their own custom data.</p>
+ * Users can update their own custom data. The field "custom" is common to all
+ * models, and is added through the extensions plugin.</p>
  */
 
 // Node Modules
 const crypto = require('crypto');
 
-// NPM modules
-const mongoose = require('mongoose');
-
 // MBEE Modules
+const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 
 
-/* ----------------------------( Element Model )----------------------------- */
+/* -----------------------------( User Schema )------------------------------ */
 
 /**
  * @namespace
@@ -68,58 +67,97 @@ const extensions = M.require('models.plugin.extensions');
  * @property {boolean} admin - Indicates if the user is a global admin.
  * @property {string} provider - Defines the authentication provider for the
  * user.
- * @property {Object} custom - JSON used to store additional data.
+ * @property {Object} failedLogins - Stores the history of failed login
+ * attempts.
  *
  */
-const UserSchema = new mongoose.Schema({
+const UserSchema = new db.Schema({
   _id: {
-    type: String,
+    type: 'String',
     required: [true, 'Username is required.'],
-    match: RegExp(validators.user.username),
-    maxlength: [validators.user.usernameLength, 'Too many characters in username'],
-    minlength: [3, 'Too few characters in username'],
-    validate: {
+    validate: [{
       validator: function(v) {
         // If the ID is a reserved keyword, reject
         return !validators.reserved.includes(v);
       },
       message: 'Username cannot include the following words: '
       + `[${validators.reserved}].`
-    }
+    }, {
+      validator: function(v) {
+        // If the username is longer than max length, reject
+        return v.length <= validators.user.usernameLength;
+      },
+      message: props => `Username length [${props.value.length}] must not be`
+        + ` more than ${validators.user.usernameLength} characters.`
+    }, {
+      validator: function(v) {
+        // If the username is shorter than min length, reject
+        return v.length > 2;
+      },
+      message: props => `Username length [${props.value.length}] must not be`
+        + ' less than 3 characters.'
+    }, {
+      validator: function(v) {
+        // If the username is invalid, reject
+        return RegExp(validators.user.username).test(v);
+      },
+      message: props => `Invalid username [${props.value}].`
+    }]
   },
   password: {
-    type: String,
+    type: 'String',
     required: false
   },
   email: {
-    type: String,
-    match: RegExp(validators.user.email),
-    default: ''
+    type: 'String',
+    default: '',
+    validate: {
+      validator: function(v) {
+        // If the email is invalid and provided, reject
+        return !(!RegExp(validators.user.email).test(v) && v);
+      },
+      message: props => `Invalid email [${props.value}].`
+    }
   },
   fname: {
-    type: String,
+    type: 'String',
     default: '',
-    match: RegExp(validators.user.fname),
-    maxlength: [36, 'Too many characters in first name']
+    validate: {
+      validator: function(v) {
+        // If the fname is invalid and provided, reject
+        return !(!RegExp(validators.user.fname).test(v) && v);
+      },
+      message: props => `Invalid first name [${props.value}].`
+    }
   },
   preferredName: {
-    type: String,
+    type: 'String',
     default: '',
-    match: RegExp(validators.user.fname),
-    maxlength: [36, 'Too many characters in preferred name']
+    validate: {
+      validator: function(v) {
+        // If the preferredName is invalid and provided, reject
+        return !(!RegExp(validators.user.fname).test(v) && v);
+      },
+      message: props => `Invalid preferred name [${props.value}].`
+    }
   },
   lname: {
-    type: String,
+    type: 'String',
     default: '',
-    match: RegExp(validators.user.lname),
-    maxlength: [36, 'Too many characters in last name']
+    validate: {
+      validator: function(v) {
+        // If the lname is invalid and provided, reject
+        return !(!RegExp(validators.user.lname).test(v) && v);
+      },
+      message: props => `Invalid last name [${props.value}].`
+    }
   },
   admin: {
-    type: Boolean,
+    type: 'Boolean',
     default: false
   },
   provider: {
-    type: String,
+    type: 'String',
     validate: {
       validator: function(v) {
         return validators.user.provider(v);
@@ -127,22 +165,10 @@ const UserSchema = new mongoose.Schema({
     },
     default: 'local'
   },
-  custom: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
-  },
   failedlogins: {
-    type: mongoose.Schema.Types.Mixed,
+    type: 'Object',
     default: []
   }
-});
-UserSchema.virtual('name')
-.get(function() {
-  return `${this.fname} ${this.lname}`;
-});
-UserSchema.virtual('username')
-.get(function() {
-  return this._id;
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
@@ -155,6 +181,14 @@ UserSchema.plugin(extensions);
  * @memberOf UserSchema
  */
 UserSchema.pre('save', function(next) {
+  // Validate the _id field to make sure it exists, since used in hashPassword()
+  const errors = this.validateSync('_id');
+  if (errors) {
+    // Throw the error if one was found
+    throw errors.ValidationError;
+  }
+
+  // Hash the user password
   UserSchema.statics.hashPassword(this);
   next();
 });
@@ -163,10 +197,10 @@ UserSchema.pre('save', function(next) {
 /**
  * @description Verifies a password matches the stored hashed password.
  *
- * @param {string} pass  The password to be compared with the stored password.
+ * @param {string} pass - The password to be compared with the stored password.
  * @memberOf UserSchema
  */
-UserSchema.methods.verifyPassword = function(pass) {
+UserSchema.method('verifyPassword', function(pass) {
   return new Promise((resolve, reject) => {
     // Hash the input plaintext password
     crypto.pbkdf2(pass, this._id.toString(), 1000, 32, 'sha256', (err, derivedKey) => {
@@ -178,36 +212,36 @@ UserSchema.methods.verifyPassword = function(pass) {
       return resolve(derivedKey.toString('hex') === this.password);
     });
   });
-};
+});
 
 /**
  * @description Returns user fields that can be changed
  * @memberOf UserSchema
  */
-UserSchema.methods.getValidUpdateFields = function() {
+UserSchema.method('getValidUpdateFields', function() {
   return ['fname', 'preferredName', 'lname', 'email', 'custom', 'archived', 'admin'];
-};
+});
 
-UserSchema.statics.getValidUpdateFields = function() {
-  return UserSchema.methods.getValidUpdateFields();
-};
+UserSchema.static('getValidUpdateFields', function() {
+  return ['fname', 'preferredName', 'lname', 'email', 'custom', 'archived', 'admin'];
+});
 
 /**
  * @description Returns a list of fields a requesting user can populate
  * @memberOf UserSchema
  */
-UserSchema.methods.getValidPopulateFields = function() {
+UserSchema.method('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy'];
-};
+});
 
-UserSchema.statics.getValidPopulateFields = function() {
-  return UserSchema.methods.getValidPopulateFields();
-};
+UserSchema.static('getValidPopulateFields', function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy'];
+});
 
 /**
  * @description Validates and hashes a password
  */
-UserSchema.methods.hashPassword = function() {
+UserSchema.method('hashPassword', function() {
   // Require auth module
   const AuthController = M.require('lib.auth');
 
@@ -221,12 +255,12 @@ UserSchema.methods.hashPassword = function() {
     const derivedKey = crypto.pbkdf2Sync(this.password, this._id.toString(), 1000, 32, 'sha256');
     this.password = derivedKey.toString('hex');
   }
-};
+});
 
 /**
  * @description Validates and hashes a password
  */
-UserSchema.statics.hashPassword = function(obj) {
+UserSchema.static('hashPassword', function(obj) {
   // Require auth module
   const AuthController = M.require('lib.auth');
 
@@ -240,7 +274,7 @@ UserSchema.statics.hashPassword = function(obj) {
     const derivedKey = crypto.pbkdf2Sync(obj.password, obj._id.toString(), 1000, 32, 'sha256');
     obj.password = derivedKey.toString('hex');
   }
-};
+});
 
 /* ------------------------------( User Index )------------------------------ */
 /**
@@ -254,11 +288,6 @@ UserSchema.index({
   lname: 'text'
 });
 
-/* ---------------------------( User Properties )---------------------------- */
-// Required for virtual getters
-UserSchema.set('toJSON', { virtuals: true });
-UserSchema.set('toObject', { virtuals: true });
-
 /* -------------------------( User Schema Export )--------------------------- */
-// Export mongoose model as 'User'
-module.exports = mongoose.model('User', UserSchema);
+// Export model as 'User'
+module.exports = new db.Model('User', UserSchema);

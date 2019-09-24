@@ -119,7 +119,7 @@ async function find(requestingUser, users, options) {
 
     // Sanitize input parameters
     const saniUsers = (users !== undefined)
-      ? sani.mongo(JSON.parse(JSON.stringify(users)))
+      ? sani.db(JSON.parse(JSON.stringify(users)))
       : undefined;
 
     // Initialize and ensure options are valid
@@ -156,7 +156,7 @@ async function find(requestingUser, users, options) {
             throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
           }
           // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+          searchQuery[o] = sani.db(options[o]);
         }
       });
     }
@@ -175,14 +175,14 @@ async function find(requestingUser, users, options) {
       throw new M.DataFormatError('Invalid input for finding users.', 'warn');
     }
 
-    // Find the users
-    const foundUser = await User.find(searchQuery, validatedOptions.fieldsString,
-      { limit: validatedOptions.limit, skip: validatedOptions.skip })
-    .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
-
-    return foundUser;
+    // Find and return the users
+    return await User.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit,
+        skip: validatedOptions.skip,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -242,7 +242,7 @@ async function create(requestingUser, users, options) {
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.db(JSON.parse(JSON.stringify(users)));
 
     // Initialize and ensure options are valid
     const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -298,7 +298,7 @@ async function create(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find any existing, conflicting users
-    const foundUsers = await User.find(searchQuery, '_id').lean();
+    const foundUsers = await User.find(searchQuery, '_id', { lean: true });
     // If there are any foundUsers, there is a conflict
     if (foundUsers.length > 0) {
       // Get arrays of the foundUsers's usernames
@@ -311,7 +311,7 @@ async function create(requestingUser, users, options) {
 
     // For each object of user data, create the user object
     const userObjects = usersToCreate.map((u) => {
-      const userObj = new User(u);
+      const userObj = User.createDocument(u);
       userObj.lastModifiedBy = reqUser._id;
       userObj.createdBy = reqUser._id;
       userObj.updatedOn = Date.now();
@@ -340,9 +340,10 @@ async function create(requestingUser, users, options) {
     // Save the updated default org
     await defaultOrg.save();
 
-    return await User.find({ _id: { $in: arrUsernames } },
-      validatedOptions.fieldsString).populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+    return await User.find({ _id: { $in: arrUsernames } }, validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -356,8 +357,8 @@ async function create(requestingUser, users, options) {
  * exist in the update object that don't exist in the current custom data,
  * the key/value pair will be added. If the key/value pairs do exist, the value
  * will be changed. If a user is archived, they must first be unarchived before
- * any other updates occur. NOTE: A user cannot archive or unarchive themselves.
- * This function is restricted to system-wide admins ONLY.
+ * any other updates occur. NOTE: A user cannot archive or un-archive
+ * themselves. This function is restricted to system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(Object|Object[])} users - Either an array of objects containing
@@ -404,7 +405,7 @@ async function update(requestingUser, users, options) {
     helper.checkParamsDataType('object', users, 'Users');
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.db(JSON.parse(JSON.stringify(users)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let usersToUpdate = [];
     const duplicateCheck = {};
@@ -459,7 +460,7 @@ async function update(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find the users to update
-    const foundUsers = await User.find(searchQuery).lean();
+    const foundUsers = await User.find(searchQuery, null, { lean: true });
     // Verify the same number of users are found as desired
     if (foundUsers.length !== arrUsernames.length) {
       const foundIDs = foundUsers.map(u => u._id);
@@ -510,7 +511,7 @@ async function update(requestingUser, users, options) {
 
         // If updating the admin key, ensure the requesting user is an admin
         if (key === 'admin' && !reqUser.admin) {
-          throw new M.PermissionError(`${reqUser.username} does not have`
+          throw new M.PermissionError(`${reqUser._id} does not have`
             + ' permissions to update the admin field.', 'warn');
         }
 
@@ -524,7 +525,7 @@ async function update(requestingUser, users, options) {
         }
         // Set archivedBy if archived field is being changed
         else if (key === 'archived') {
-          // User cannot archive or unarchive themselves
+          // User cannot archive or un-archive themselves
           if ((user._id === reqUser._id) && (updateUser[key] !== user.archived)) {
             throw new M.OperationError('User cannot archive or unarchive themselves', 'warn');
           }
@@ -560,8 +561,10 @@ async function update(requestingUser, users, options) {
     // Update all users through a bulk write to the database
     await User.bulkWrite(bulkArray);
 
-    const foundUpdatedUsers = await User.find(searchQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    const foundUpdatedUsers = await User.find(searchQuery, validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
 
     // Emit the event users-updated
     EventEmitter.emit('users-updated', foundUpdatedUsers);
@@ -623,7 +626,7 @@ async function createOrReplace(requestingUser, users, options) {
     permissions.createUser(requestingUser);
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.db(JSON.parse(JSON.stringify(users)));
     const duplicateCheck = {};
     let usersToLookup = [];
     let createdUsers = [];
@@ -670,7 +673,7 @@ async function createOrReplace(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find the users to update
-    const foundUsers = await User.find(searchQuery).lean();
+    const foundUsers = await User.find(searchQuery, null, { lean: true });
 
     // If data directory doesn't exist, create it
     if (!fs.existsSync(path.join(M.root, 'data'))) {
@@ -681,7 +684,7 @@ async function createOrReplace(requestingUser, users, options) {
     fs.writeFileSync(path.join(M.root, 'data', `PUT-backup-users-${ts}.json`),
       JSON.stringify(foundUsers));
 
-    await User.deleteMany({ _id: { $in: foundUsers.map(u => u._id) } }).lean();
+    await User.deleteMany({ _id: { $in: foundUsers.map(u => u._id) } });
 
     // Emit the event users-deleted
     EventEmitter.emit('users-deleted', foundUsers);
@@ -757,7 +760,7 @@ async function remove(requestingUser, users, options) {
     helper.checkParamsDataType(['object', 'string'], users, 'Users');
 
     // Sanitize input parameters and create function-wide variables
-    const saniUsers = sani.mongo(JSON.parse(JSON.stringify(users)));
+    const saniUsers = sani.db(JSON.parse(JSON.stringify(users)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let foundUsernames = [];
     let searchedUsernames = [];
@@ -800,7 +803,7 @@ async function remove(requestingUser, users, options) {
 
     // Create memberQuery
     foundUsers.forEach((user) => {
-      memberQuery[`permissions.${user.username}`] = 'read';
+      memberQuery[`permissions.${user._id}`] = 'read';
     });
 
     // Check that user can remove each user
@@ -850,7 +853,7 @@ async function remove(requestingUser, users, options) {
     await Promise.all(promises2);
 
     // Remove the users
-    await User.deleteMany(searchQuery).lean();
+    await User.deleteMany(searchQuery);
 
     // Emit the event users-deleted
     EventEmitter.emit('users-deleted', foundUsers);
@@ -864,15 +867,15 @@ async function remove(requestingUser, users, options) {
 }
 
 /**
- * @description A function which searches for users using mongo's built in text
- * search.  Returns any users that match the text search, in order of the best
- * matches to the worst.  Searches the fname, preferredName, and lname fields.
+ * @description A function which searches for users using a text-based search.
+ * Returns any users that match the text search, in order of the best matches to
+ * the worst.  Searches the fname, preferredName, and lname fields.
  *
  * @param {User} requestingUser - The object containing the requesting user
  * @param {string} query - The text-based query to search the database for.
  * @param {Object} [options] - A parameter that provides supported options.
  * @param {boolean} [options.archived] - A parameter that if true, will return
- * search results containing both archived and nonarchived users.
+ * search results containing both archived and non-archived users.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects.  By default, no fields are populated.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
@@ -936,7 +939,7 @@ async function search(requestingUser, query, options) {
             throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
           }
           // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+          searchQuery[o] = sani.db(options[o]);
         }
       });
     }
@@ -959,10 +962,12 @@ async function search(requestingUser, query, options) {
     }
 
     return await User.find(searchQuery, { score: { $meta: 'textScore' } },
-      { limit: validatedOptions.limit, skip: validatedOptions.skip })
-    .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+      { limit: validatedOptions.limit,
+        skip: validatedOptions.skip,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
