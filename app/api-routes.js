@@ -3683,7 +3683,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                  updated [name, custom, archived, parent, documentation,
  *                  type]. Elements that are currently archived must first be
  *                  unarchived before making any other updates. Requesting user
- *                  must have at least write access on the porject to update an
+ *                  must have at least write access on the project to update an
  *                  element.
  *     produces:
  *       - application/json

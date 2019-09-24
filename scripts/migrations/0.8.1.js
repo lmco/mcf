@@ -22,13 +22,11 @@
 const fs = require('fs');
 const path = require('path');
 
-// NPM modules
-const mongoose = require('mongoose');
-
 // MBEE modules
 const Branch = M.require('models.branch');
 const Element = M.require('models.element');
 const Project = M.require('models.project');
+const ServerData = M.require('models.server-data');
 const utils = M.require('lib.utils');
 
 /**
@@ -37,19 +35,18 @@ const utils = M.require('lib.utils');
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
     // Get all documents from the server data
-    mongoose.connection.db.collection('server_data').find({}).toArray()
+    ServerData.find({})
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.8.0' });
+        return ServerData.insertMany([{ _id: 'server_data', version: '0.8.0' }]);
       }
 
-      return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.8.0' } });
+      return ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.8.0' } });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -64,35 +61,21 @@ module.exports.down = function() {
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
-    let collectionNames = [];
-    mongoose.connection.db.collections()
-    .then((existingCollections) => {
-      collectionNames = existingCollections.map(c => c.s.name);
-      // If the elements collection exists, run the helper function
-      if (collectionNames.includes('elements')) {
-        return elementHelper();
-      }
-    })
-    .then(() => {
-      // If the project collection exists, run the helper function
-      if (collectionNames.includes('projects')) {
-        return branchHelper();
-      }
-    })
+    elementHelper()
+    .then(() => branchHelper())
     // Get all documents from the server data
-    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    .then(() => ServerData.find({}))
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.8.1' });
+        return ServerData.insertMany([{ _id: 'server_data', version: '0.8.1' }]);
       }
 
-      return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.8.1' } });
+      return ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.8.1' } });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -113,7 +96,7 @@ function elementHelper() {
     }
 
     // Find all elements, returning only the _id
-    Element.find({}, '_id').lean()
+    Element.find({}, '_id', { lean: true })
     .then((elements) => {
       // Remove any elements which may have already been migrated
       elementIDs = elements.map(e => e._id).filter(e => utils.parseID(e).length === 3);
@@ -144,7 +127,7 @@ function elementHelperRecursive(ids) {
     let elems = [];
     let deleted = false;
     let error = '';
-    Element.find({ _id: { $in: ids } }).lean()
+    Element.find({ _id: { $in: ids } }, null, { lean: true })
     .then((foundElements) => {
       elems = foundElements;
       // Write contents to temporary file
@@ -157,7 +140,7 @@ function elementHelperRecursive(ids) {
       });
     })
     // Delete elements from the database
-    .then(() => Element.deleteMany({ _id: { $in: ids } }).lean())
+    .then(() => Element.deleteMany({ _id: { $in: ids } }))
     .then(() => {
       deleted = true;
       // Loop through each element
@@ -232,7 +215,7 @@ function elementHelperRecursive(ids) {
 
         // Reinsert the elements. Use the collection directly to avoid
         // model validation.
-        return Element.collection.insertMany(elemsToInsert);
+        return Element.insertMany(elemsToInsert, { skipValidation: true });
       }
       else {
         return reject(err);
@@ -275,12 +258,12 @@ function branchHelper() {
     }
 
     // Find all projects
-    Project.find({}).lean()
+    Project.find({}, null, { lean: true })
     .then((foundProjects) => {
       projects = foundProjects;
 
       // Find all branches, in case one already exists
-      return Branch.find({}).lean();
+      return Branch.find({}, null, { lean: true });
     })
     .then((foundBranches) => {
       const projectIDs = [];
@@ -322,7 +305,7 @@ function branchHelper() {
       });
 
       // Create all branches
-      return Branch.insertMany(branchesToCreate, { rawResult: true });
+      return Branch.insertMany(branchesToCreate);
     })
     .then(() => resolve())
     .catch((error) => reject(error));

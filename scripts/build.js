@@ -35,6 +35,7 @@ const concat = require('gulp-concat');
 const minify = require('gulp-minify');
 const sass = require('gulp-sass');
 const markdown = require('gulp-markdown');
+const rename = require('gulp-rename');
 const webpack = require('webpack');
 const validators = M.require('lib.validators');
 
@@ -166,6 +167,12 @@ function build(_args) {
     M.log.info('  + Building flight manual ...');
     gulp.src('./doc/**/*.md')
     .pipe(markdown())
+    .pipe(gulp.dest('build/fm'));
+
+    // Add database configuration README as an appendix
+    gulp.src('./app/db/*.md')
+    .pipe(markdown())
+    .pipe(rename('appendix-C-database-configuration.html'))
     .pipe(gulp.dest('build/fm'));
   }
 

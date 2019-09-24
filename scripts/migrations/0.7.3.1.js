@@ -19,8 +19,9 @@
 const fs = require('fs');
 const path = require('path');
 
-// NPM modules
-const mongoose = require('mongoose');
+// MBEE modules
+const Project = M.require('models.project');
+const ServerData = M.require('models.server-data');
 
 /**
  * @description Handles the database migration from 0.7.3.1 to 0.7.3.
@@ -28,19 +29,18 @@ const mongoose = require('mongoose');
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
     // Get all documents from the server data
-    mongoose.connection.db.collection('server_data').find({}).toArray()
+    ServerData.find({})
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.7.3' });
+        return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3' }]);
       }
 
-      return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.7.3' } });
+      return ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.7.3' } });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -53,28 +53,20 @@ module.exports.down = function() {
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
-    mongoose.connection.db.collections()
-    .then((existingCollections) => {
-      const collectionNames = existingCollections.map(c => c.s.name);
-      // If the projects collection exists, run the helper function
-      if (collectionNames.includes('projects')) {
-        return projectHelper();
-      }
-    })
+    projectHelper()
     // Get all documents from the server data
-    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    .then(() => ServerData.find({}))
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.7.3.1' });
+        return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3.1' }]);
       }
 
-      return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.7.3.1' } });
+      return ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.7.3.1' } });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -95,7 +87,7 @@ function projectHelper() {
     }
 
     // Find all projects
-    mongoose.connection.db.collection('projects').find({}).toArray()
+    Project.find({})
     .then((foundProjects) => {
       projects = foundProjects;
 
@@ -109,8 +101,7 @@ function projectHelper() {
       });
     })
     // Add the projectReferences field to each project
-    .then(() => mongoose.connection.db.collection('projects').updateMany({},
-      { $set: { projectReferences: [] } }))
+    .then(() => Project.updateMany({}, { $set: { projectReferences: [] } }))
     .then(() => {
       if (fs.existsSync(path.join(M.root, 'data', 'projects-0731.json'))) {
         return new Promise(function(res, rej) {

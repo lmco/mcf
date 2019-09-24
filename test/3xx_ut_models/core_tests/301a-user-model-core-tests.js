@@ -13,8 +13,8 @@
  *
  * @description Tests the user model by performing various actions such as a
  * find, create, updated, archive, and delete. Does NOT test the user
- * controller but instead directly manipulates data using mongoose to check
- * the user model methods, validators, setters, and getters.
+ * controller but instead directly manipulates data to check the user model
+ * methods, validators, setters, and getters.
  */
 
 // Node modules
@@ -85,7 +85,7 @@ async function createUser() {
   // Create a hash of the password
   const derivedKey = crypto.pbkdf2Sync(userData.password, userData._id.toString(), 1000, 32, 'sha256');
   // Create a new User object
-  const user = new User(userData);
+  const user = User.createDocument(userData);
   let savedUser;
   try {
     // Save user object to the database
@@ -119,8 +119,6 @@ async function getUser() {
   user.fname.should.equal(testData.users[1].fname);
   user.lname.should.equal(testData.users[1].lname);
   user.preferredName.should.equal(testData.users[1].preferredName);
-  // Check the name
-  user.name.should.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
 }
 
 /**
@@ -141,8 +139,6 @@ async function getUserPublicData() {
   user.fname.should.equal(testData.users[1].fname);
   user.lname.should.equal(testData.users[1].lname);
   user.preferredName.should.equal(testData.users[1].preferredName);
-  // Check the name
-  user.name.should.equal(`${testData.users[1].fname} ${testData.users[1].lname}`);
 }
 
 /**
@@ -172,47 +168,34 @@ async function verifyValidPassword() {
  * in the createUser test.
  */
 async function updateUser() {
-  // Define query
-  const query = { _id: testData.users[1].username };
-
-  // Define newUserData
-  const newUserData = {
-    fname: `${testData.users[1].fname}edit`,
-    lname: testData.users[1].lname
-  };
-
-  let updatedUser;
   try {
-    // Find and updated the user created in the previous createUser test.
-    await User.updateOne(query, newUserData);
-    updatedUser = await User.findOne(query);
+    // Update the name of the user created in the createUser() test
+    await User.updateOne({ _id: testData.users[1].username }, { fname: 'Updated' });
+
+    // Find the updated user
+    const foundUser = await User.findOne({ _id: testData.users[1].username });
+
+    // Verify user is updated correctly
+    foundUser._id.should.equal(testData.users[1].username);
+    foundUser.fname.should.equal('Updated');
   }
   catch (error) {
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
   }
-  updatedUser._id.should.equal(testData.users[1].username);
-  updatedUser.fname.should.equal(`${testData.users[1].fname}edit`);
-  updatedUser.lname.should.equal(testData.users[1].lname);
-  updatedUser.name.should.equal(`${testData.users[1].fname}edit ${testData.users[1].lname}`);
 }
 
 /**
  * @description Delete a user
  */
 async function deleteUser() {
-  try {
-    // Find the previously created user from the createUser test.
-    const user = await User.findOne({ _id: testData.users[1].username });
-    // Delete the user
-    await user.remove();
-    // Try to find the user again; expect the search to return null
-    await User.findOne({ _id: testData.users[1].username }).should.eventually.be.null;
-  }
-  catch (error) {
-    M.log.error(error);
-    // There should be no error
-    should.not.exist(error);
-  }
+  // Remove the user
+  await User.deleteMany({ _id: testData.users[1].username });
+
+  // Attempt to find the user
+  const foundUser = await User.findOne({ _id: testData.users[1].username });
+
+  // foundUser should be null
+  should.not.exist(foundUser);
 }

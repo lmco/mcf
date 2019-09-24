@@ -153,8 +153,8 @@ function postElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(createdElement.createdBy).to.equal(adminUser.username);
-    chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdElement.createdBy).to.equal(adminUser._id);
+    chai.expect(createdElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdElement.createdOn).to.not.equal(null);
     chai.expect(createdElement.updatedOn).to.not.equal(null);
     chai.expect(createdElement.archived).to.equal(false);
@@ -225,8 +225,8 @@ function postElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(createdElement.createdBy).to.equal(adminUser.username);
-      chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdElement.createdBy).to.equal(adminUser._id);
+      chai.expect(createdElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdElement.createdOn).to.not.equal(null);
       chai.expect(createdElement.updatedOn).to.not.equal(null);
       chai.expect(createdElement.archived).to.equal(false);
@@ -285,8 +285,8 @@ function putElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
-    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
+    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedElem.createdOn).to.not.equal(null);
     chai.expect(replacedElem.updatedOn).to.not.equal(null);
     chai.expect(replacedElem.archived).to.equal(false);
@@ -358,8 +358,8 @@ function putElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
-      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
+      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedElem.createdOn).to.not.equal(null);
       chai.expect(replacedElem.updatedOn).to.not.equal(null);
       chai.expect(replacedElem.archived).to.equal(false);
@@ -417,8 +417,8 @@ function getElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archived).to.equal(false);
@@ -491,8 +491,8 @@ function getElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
       chai.expect(foundElement.archived).to.equal(false);
@@ -554,8 +554,8 @@ function searchElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archived).to.equal(false);
@@ -617,8 +617,8 @@ function patchElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedElement.createdOn).to.not.equal(null);
     chai.expect(updatedElement.updatedOn).to.not.equal(null);
     chai.expect(updatedElement.archived).to.equal(false);
@@ -695,8 +695,8 @@ function patchElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedElement.createdOn).to.not.equal(null);
       chai.expect(updatedElement.updatedOn).to.not.equal(null);
       chai.expect(updatedElement.archived).to.equal(false);

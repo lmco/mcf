@@ -55,7 +55,7 @@ module.exports.createNonAdminUser = function() {
       }
 
       // Create user
-      const user = new User({
+      const user = User.createDocument({
         _id: testData.users[1].username,
         password: testData.users[1].password,
         fname: testData.users[1].fname,
@@ -106,7 +106,7 @@ module.exports.createTestAdmin = function() {
       }
 
       // Create user
-      const user = new User({
+      const user = User.createDocument({
         _id: testData.adminUser.username,
         password: testData.adminUser.password,
         provider: 'local',
@@ -160,7 +160,7 @@ module.exports.removeNonAdminUser = function() {
       orgs[0].markModified('permissions');
       return orgs[0].save();
     })
-    .then(() => resolve(userToDelete.username))
+    .then(() => resolve(userToDelete._id))
     .catch((error) => reject(error));
   });
 };
@@ -188,7 +188,7 @@ module.exports.removeTestAdmin = function() {
       orgs[0].markModified('permissions');
       return orgs[0].save();
     })
-    .then(() => resolve(userToDelete.username))
+    .then(() => resolve(userToDelete._id))
     .catch((error) => reject(error));
   });
 };
@@ -200,7 +200,7 @@ module.exports.removeTestAdmin = function() {
 module.exports.createTestOrg = function(adminUser) {
   return new Promise((resolve, reject) => {
     // Create the new organization
-    const newOrg = new Organization({
+    const newOrg = Organization.createDocument({
       _id: testData.orgs[0].id,
       name: testData.orgs[0].name,
       custom: null
@@ -242,7 +242,7 @@ module.exports.createTestProject = function(adminUser, orgID) {
   return new Promise((resolve, reject) => {
     let createdProject = {};
     // Create the new project
-    const newProject = new Project({
+    const newProject = Project.createDocument({
       _id: utils.createID(orgID, testData.projects[0].id),
       org: orgID,
       name: testData.projects[0].name,
@@ -255,10 +255,13 @@ module.exports.createTestProject = function(adminUser, orgID) {
     .then((_newProj) => {
       createdProject = _newProj;
 
-      const newBranch = new Branch({
+      const newBranch = Branch.createDocument({
         _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id),
         project: _newProj._id,
         createdBy: adminUser._id,
+        createdOn: Date.now(),
+        lasModifiedBy: adminUser._id,
+        updatedOn: Date.now(),
         name: testData.branches[0].name,
         source: null
       });
@@ -266,11 +269,14 @@ module.exports.createTestProject = function(adminUser, orgID) {
       return newBranch.save();
     })
     .then((_newBranch) => {
-      const newElement = new Element({
+      const newElement = Element.createDocument({
         _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id, 'model'),
         project: createdProject._id,
         branch: _newBranch._id,
         createdBy: adminUser._id,
+        createdOn: Date.now(),
+        lasModifiedBy: adminUser._id,
+        updatedOn: Date.now(),
         name: 'Model'
       });
 
@@ -288,7 +294,7 @@ module.exports.createTag = function(adminUser, orgID, projID) {
   return new Promise((resolve, reject) => {
     // Create a new tag
     let createdTag;
-    const newTag = new Branch({
+    const newTag = Branch.createDocument({
       _id: utils.createID(orgID, projID, 'tag'),
       project: utils.createID(orgID, projID),
       createdBy: adminUser._id,
@@ -302,7 +308,7 @@ module.exports.createTag = function(adminUser, orgID, projID) {
       createdTag = _newBranch;
 
       // Create a root element for tag
-      const newElement = new Element({
+      const newElement = Element.createDocument({
         _id: utils.createID(_newBranch._id, 'model'),
         project: utils.createID(orgID, projID),
         branch: _newBranch._id,
@@ -314,7 +320,7 @@ module.exports.createTag = function(adminUser, orgID, projID) {
     })
     .then(() => {
       // Create a non root element in the tag
-      const newElement = new Element({
+      const newElement = Element.createDocument({
         _id: utils.createID(createdTag._id, testData.elements[1].id),
         project: utils.createID(orgID, projID),
         branch: createdTag._id,
@@ -440,7 +446,7 @@ module.exports.createResponse = function(res) {
  * @param {object} user - The requesting user. Must contains a username and password.
  */
 module.exports.getHeaders = function(contentType = 'application/json', user = testData.adminUser) {
-  const formattedCreds = `${user.username}:${user.password}`;
+  const formattedCreds = `${user.username || user._id}:${user.password}`;
   const basicAuthHeader = `Basic ${Buffer.from(`${formattedCreds}`).toString('base64')}`;
   return {
     'content-type': contentType,
@@ -479,7 +485,7 @@ module.exports.testResponseLogging = function(responseLength, req, res, done) {
 
   // Ensure parts of response log are correct
   chai.expect(content[0]).to.equal((req.ip === '::1') ? '127.0.0.1' : req.ip);
-  chai.expect(content[1]).to.equal((req.user) ? req.user.username : 'anonymous');
+  chai.expect(content[1]).to.equal((req.user) ? req.user._id : 'anonymous');
   chai.expect(content[3]).to.equal(`"${req.method}`);
   chai.expect(content[4]).to.equal(`${req.originalUrl}"`);
   chai.expect(content[5]).to.equal(res.statusCode.toString());

@@ -9,11 +9,11 @@
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description Tests creating, updating and deleting artifacts through the model.
- * Tests the artifact model by performing various actions such as a
+ * @description Tests creating, updating and deleting artifacts through the
+ * model. Tests the artifact model by performing various actions such as a
  * find, create, updated, and delete. Does NOT test the artifact
- * controller but instead directly manipulates data using mongoose to check
- * the artifact model methods, validators, setters, and getters.
+ * controller but instead directly manipulates data to check the artifact model
+ * methods, validators, setters, and getters.
  */
 
 // NPM modules
@@ -34,9 +34,9 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
-let org = null;
-let project = null;
-let branch = null;
+const org = testData.orgs[0];
+const project = testData.projects[0];
+const branch = testData.branches[0];
 
 
 /* --------------------( Main )-------------------- */
@@ -51,23 +51,6 @@ describe(M.getModuleName(module.filename), () => {
    * Before: runs before all tests
    */
   before(async () => {
-    org = {
-      _id: testData.orgs[0].id,
-      name: testData.orgs[0].name
-    };
-
-    project = {
-      _id: utils.createID(org._id, testData.projects[1].id),
-      name: testData.projects[1].name,
-      org: org._id
-    };
-
-    branch = {
-      _id: utils.createID(project._id, testData.branches[0].id),
-      name: testData.branches[0].name,
-      project: project._id
-    };
-
     try {
       await db.connect();
     }
@@ -109,12 +92,12 @@ async function createArtifact() {
   const artifactID = testData.artifacts[0].id;
 
   // Upload new artifact
-  const artifact = new Artifact({
-    _id: utils.createID(branch._id, artifactID),
+  const artifact = Artifact.createDocument({
+    _id: utils.createID(org.id, project.id, branch.id, artifactID),
     filename: testData.artifacts[0].filename,
     contentType: path.extname(testData.artifacts[0].filename),
-    project: project._id,
-    branch: branch._id,
+    project: utils.createID(org.id, project.id),
+    branch: utils.createID(org.id, project.id, branch.id),
     location: testData.artifacts[0].location,
     history: testData.artifacts[0].history[0]
   });
@@ -122,8 +105,8 @@ async function createArtifact() {
   try {
     // Save artifact object to the database
     const createdArtifact = await artifact.save();
-    chai.expect(createdArtifact.id).to.equal(
-      utils.createID(branch._id, testData.artifacts[0].id)
+    chai.expect(createdArtifact._id).to.equal(
+      utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id)
     );
     chai.expect(createdArtifact.filename).to.equal(
       testData.artifacts[0].filename
@@ -131,8 +114,8 @@ async function createArtifact() {
     chai.expect(createdArtifact.contentType).to.equal(
       path.extname(testData.artifacts[0].filename)
     );
-    chai.expect(createdArtifact.project).to.equal(project._id);
-    chai.expect(createdArtifact.branch).to.equal(branch._id);
+    chai.expect(createdArtifact.project).to.equal(utils.createID(org.id, project.id));
+    chai.expect(createdArtifact.branch).to.equal(utils.createID(org.id, project.id, branch.id));
     chai.expect(createdArtifact.location).to.equal(testData.artifacts[0].location);
     chai.expect(createdArtifact.history[0].hash).to.equal(
       testData.artifacts[0].history[0].hash
@@ -156,7 +139,7 @@ async function findArtifact() {
   try {
     // Find the artifact previously uploaded.
     const artifactToUpdate = await Artifact.find(
-      { _id: utils.createID(branch._id, testData.artifacts[0].id) }
+      { _id: utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id) }
     );
 
     // Check if artifact found
@@ -174,37 +157,30 @@ async function findArtifact() {
  */
 async function updateArtifact() {
   try {
-    // Find the artifact previously uploaded.
-    const artifactToUpdate = await Artifact.find(
-      { _id: utils.createID(branch._id, testData.artifacts[0].id) }
-    );
+    const artID = utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id);
+    // Update the name of the artifact created in the createArtifact() test
+    await Artifact.updateOne({ _id: artID }, { filename: 'Updated Name' });
 
-    // Check if artifact found
-    chai.expect(artifactToUpdate.length).to.equal(1);
+    // Find the updated artifact
+    const foundArtifact = await Artifact.findOne({ _id: artID });
 
-    // Update the filename
-    artifactToUpdate[0].filename = testData.artifacts[2].filename;
-    // Save the updated artifact
-    const updatedArtifact = await artifactToUpdate[0].save();
-    chai.expect(updatedArtifact.id).to.equal(
-      utils.createID(branch._id, testData.artifacts[0].id)
+    chai.expect(foundArtifact._id).to.equal(
+      utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id)
     );
-    chai.expect(updatedArtifact.filename).to.equal(
-      testData.artifacts[2].filename
-    );
-    chai.expect(updatedArtifact.contentType).to.equal(
+    chai.expect(foundArtifact.filename).to.equal('Updated Name');
+    chai.expect(foundArtifact.contentType).to.equal(
       path.extname(testData.artifacts[0].filename)
     );
-    chai.expect(updatedArtifact.project).to.equal(project._id);
-    chai.expect(updatedArtifact.branch).to.equal(branch._id);
-    chai.expect(updatedArtifact.location).to.equal(testData.artifacts[0].location);
-    chai.expect(updatedArtifact.history[0].hash).to.equal(
+    chai.expect(foundArtifact.project).to.equal(utils.createID(org.id, project.id));
+    chai.expect(foundArtifact.branch).to.equal(utils.createID(org.id, project.id, branch.id));
+    chai.expect(foundArtifact.location).to.equal(testData.artifacts[0].location);
+    chai.expect(foundArtifact.history[0].hash).to.equal(
       testData.artifacts[0].history[0].hash
     );
-    chai.expect(updatedArtifact.history[0].user).to.equal(
+    chai.expect(foundArtifact.history[0].user).to.equal(
       testData.artifacts[0].history[0].user
     );
-    chai.expect(updatedArtifact.history[0].updatedOn).to.not.equal(null);
+    chai.expect(foundArtifact.history[0].updatedOn).to.not.equal(null);
   }
   catch (error) {
     M.log.error(error);
@@ -217,20 +193,16 @@ async function updateArtifact() {
  * @description Finds and deletes an artifact.
  */
 async function deleteArtifact() {
-  try {
-    const artifactQuery = { _id: utils.createID(branch._id, testData.artifacts[0].id) };
-    // Find and delete the artifact
-    await Artifact.findOneAndRemove(artifactQuery);
+  const artID = utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id);
 
-    // Ensure artifact deleted
-    const deletedArtifact = await Artifact.find(artifactQuery);
-    chai.expect(deletedArtifact.length).to.equal(0);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-  }
+  // Remove the artifact
+  await Artifact.deleteMany({ _id: artID });
+
+  // Attempt to find the artifact
+  const foundArtifact = await Artifact.findOne({ _id: artID });
+
+  // foundArtifact should be null
+  should.not.exist(foundArtifact);
 }
 
 /**
@@ -238,6 +210,6 @@ async function deleteArtifact() {
  */
 async function getStaticPopFields() {
   const validPopulatedFields = ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
-  // Ensure corrent populate fields
+  // Ensure correct populate fields
   chai.expect(validPopulatedFields).to.eql(Artifact.getValidPopulateFields());
 }
