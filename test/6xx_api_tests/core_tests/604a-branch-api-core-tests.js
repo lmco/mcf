@@ -75,7 +75,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Delete organization and admin user
+   * After: Delete organization and admin user.
    */
   after((done) => {
     // Delete organization
@@ -108,6 +108,8 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies POST
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid
  * creates a single branch.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postBranch(done) {
   const branchData = testData.branches[1];
@@ -150,6 +152,8 @@ function postBranch(done) {
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/branches
  * creates multiple branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postBranches(done) {
   const branchData = [
@@ -210,6 +214,8 @@ function postBranches(done) {
  * @description Verifies GET
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid
  * finds a single branch.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getBranch(done) {
   const branchData = testData.branches[0];
@@ -251,6 +257,8 @@ function getBranch(done) {
 /**
  * @description Verifies GET /api/orgs/:orgid/projects/:projectid/branches
  * finds multiple branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getBranches(done) {
   const branchData = [
@@ -306,6 +314,8 @@ function getBranches(done) {
  * @description Verifies PATCH
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid
  * updates a single branch.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchBranch(done) {
   const branchData = testData.branches[1];
@@ -352,6 +362,8 @@ function patchBranch(done) {
 /**
  * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/branches
  * updates multiple branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchBranches(done) {
   const branchData = [
@@ -415,6 +427,8 @@ function patchBranches(done) {
  * @description Verifies DELETE
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid
  * deletes a single branch.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteBranch(done) {
   const branchData = testData.branches[1];
@@ -441,6 +455,8 @@ function deleteBranch(done) {
 /**
  * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/branches
  * deletes multiple branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteBranches(done) {
   const branchData = [

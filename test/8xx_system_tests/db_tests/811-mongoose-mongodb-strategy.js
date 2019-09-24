@@ -39,7 +39,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies the sanitization function properly sanitizes keys
  * with '$'.
  */
-function sanitizeTest(done) {
+async function sanitizeTest() {
   // If not using the mongoose-mongodb-strategy strategy, skip this test
   if (M.config.db.strategy !== 'mongoose-mongodb-strategy') {
     M.log.verbose('Test skipped because the mongoose-mongodb-strategy is not '
@@ -51,5 +51,4 @@ function sanitizeTest(done) {
   const mongoSan = mongoStrategy.sanitize({ $lt: 10 });
   // Verify data correctly sanitized
   chai.expect(Object.keys(mongoSan).length).to.equal(0);
-  done();
 }
