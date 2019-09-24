@@ -3060,7 +3060,7 @@ async function patchPassword(req, res) {
   }
 
   // Ensure user is not trying to change another user's password
-  if (req.user.username !== req.params.username) {
+  if (req.user._id !== req.params.username) {
     const error = new M.OperationError('Cannot change another user\'s password.', 'warn');
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }

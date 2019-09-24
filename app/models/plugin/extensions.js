@@ -19,46 +19,39 @@
 module.exports = function extensionPlugin(schema) {
   schema.add({
     archivedBy: {
-      type: String,
+      type: 'String',
       ref: 'User',
       default: null
     },
     createdBy: {
-      type: String,
+      type: 'String',
       ref: 'User',
       default: null
     },
     lastModifiedBy: {
-      type: String,
+      type: 'String',
       ref: 'User',
       default: null
     },
     createdOn: {
-      type: Date,
+      type: 'Date',
       default: Date.now
     },
     archivedOn: {
-      type: Date,
+      type: 'Date',
       default: null
     },
     updatedOn: {
-      type: Date,
+      type: 'Date',
       default: null
     },
     archived: {
-      type: Boolean,
+      type: 'Boolean',
       default: false
+    },
+    custom: {
+      type: 'Object',
+      default: {}
     }
-  });
-
-  schema.pre('save', function(next) {
-    // createdOn cannot be changed
-    if (this.isModified('createdOn')) {
-      next(new M.OperationError('createdOn is protected and cannot be changed.', 'warn'));
-    }
-    // Update time
-    this.updatedOn = Date.now();
-
-    return next();
   });
 };

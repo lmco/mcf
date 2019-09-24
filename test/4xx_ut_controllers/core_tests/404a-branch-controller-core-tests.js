@@ -134,8 +134,8 @@ function createBranch(done) {
     chai.expect(createdBranch.tag).to.equal(branchData.tag);
 
     // Verify additional properties
-    chai.expect(createdBranch.createdBy).to.equal(adminUser.username);
-    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdBranch.createdBy).to.equal(adminUser._id);
+    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdBranch.archivedBy).to.equal(null);
     chai.expect(createdBranch.createdOn).to.not.equal(null);
     chai.expect(createdBranch.updatedOn).to.not.equal(null);
@@ -183,8 +183,8 @@ function createBranches(done) {
       chai.expect(createdBranch.project).to.equal(utils.createID(org.id, projID));
 
       // Verify additional properties
-      chai.expect(createdBranch.createdBy).to.equal(adminUser.username);
-      chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdBranch.createdBy).to.equal(adminUser._id);
+      chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdBranch.archivedBy).to.equal(null);
       chai.expect(createdBranch.createdOn).to.not.equal(null);
       chai.expect(createdBranch.updatedOn).to.not.equal(null);
@@ -222,8 +222,8 @@ function createTag(done) {
     chai.expect(createdBranch.tag).to.equal(branchData.tag);
 
     // Verify additional properties
-    chai.expect(createdBranch.createdBy).to.equal(adminUser.username);
-    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdBranch.createdBy).to.equal(adminUser._id);
+    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdBranch.archivedBy).to.equal(null);
     chai.expect(createdBranch.createdOn).to.not.equal(null);
     chai.expect(createdBranch.updatedOn).to.not.equal(null);
@@ -259,7 +259,7 @@ function findBranch(done) {
     chai.expect(foundBranch.project).to.equal(utils.createID(org.id, projID));
 
     // Verify additional properties
-    chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundBranch.archivedBy).to.equal(null);
     chai.expect(foundBranch.createdOn).to.not.equal(null);
     chai.expect(foundBranch.updatedOn).to.not.equal(null);
@@ -310,8 +310,8 @@ function findBranches(done) {
       chai.expect(foundBranch.project).to.equal(utils.createID(org.id, projID));
 
       // Verify additional properties
-      chai.expect(foundBranch.createdBy).to.equal(adminUser.username);
-      chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundBranch.createdBy).to.equal(adminUser._id);
+      chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundBranch.archivedBy).to.equal(null);
       chai.expect(foundBranch.createdOn).to.not.equal(null);
       chai.expect(foundBranch.updatedOn).to.not.equal(null);
@@ -364,8 +364,8 @@ function findAllBranches(done) {
 
       // Verify additional properties
       if (branchID !== utils.createID(org.id, projID, 'master')) {
-        chai.expect(foundBranch.createdBy).to.equal(adminUser.username);
-        chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser.username);
+        chai.expect(foundBranch.createdBy).to.equal(adminUser._id);
+        chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser._id);
       }
       chai.expect(foundBranch.archivedBy).to.equal(null);
       chai.expect(foundBranch.createdOn).to.not.equal(null);
@@ -409,8 +409,8 @@ function updateBranch(done) {
     chai.expect(updatedBranch.project).to.equal(utils.createID(org.id, projID));
 
     // Verify additional properties
-    chai.expect(updatedBranch.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedBranch.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedBranch.archivedBy).to.equal(null);
     chai.expect(updatedBranch.createdOn).to.not.equal(null);
     chai.expect(updatedBranch.updatedOn).to.not.equal(null);
@@ -464,8 +464,8 @@ function updateBranches(done) {
       chai.expect(updatedBranch.project).to.equal(utils.createID(org.id, projID));
 
       // Verify additional properties
-      chai.expect(updatedBranch.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedBranch.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedBranch.archivedBy).to.equal(null);
       chai.expect(updatedBranch.createdOn).to.not.equal(null);
       chai.expect(updatedBranch.updatedOn).to.not.equal(null);

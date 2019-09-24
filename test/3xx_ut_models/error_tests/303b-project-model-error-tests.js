@@ -26,6 +26,8 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 // MBEE modules
 const Project = M.require('models.project');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -88,11 +90,12 @@ async function idTooShort() {
   projData._id = '01:0';
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
-    + 'Too few characters in ID');
+    + `Project ID length [${utils.parseID(projData._id).pop().length}] must not`
+    + ' be less than 2 characters.');
 }
 
 /**
@@ -107,11 +110,13 @@ async function idTooLong() {
     + '01234567890123456';
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
-    + 'Too many characters in ID');
+    + `Project ID length [${projData._id.length - validators.org.idLength - 1}]`
+    + ` must not be more than ${validators.project.idLength - validators.org.idLength - 1}`
+    + ' characters.');
 }
 
 /**
@@ -122,7 +127,7 @@ async function idNotProvided() {
   projData.org = 'org';
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
@@ -145,11 +150,11 @@ async function invalidID() {
   projData._id = 'INVALID_ID';
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
-    + `_id: Path \`_id\` is invalid (${projData._id})`);
+    + `_id: Invalid project ID [${projData._id}].`);
 }
 
 /**
@@ -160,7 +165,7 @@ async function orgNotProvided() {
   projData._id = `org:${projData.id}`;
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith('Project validation failed: org: '
@@ -182,7 +187,7 @@ async function orgInvalid() {
   projData.org = 'INVALID';
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith(
@@ -202,7 +207,7 @@ async function nameNotProvided() {
   delete projData.name;
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
@@ -223,7 +228,7 @@ async function permissionsInvalid() {
   };
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith(
@@ -244,7 +249,7 @@ async function visibilityInvalid() {
   projData.visibility = 'public';
 
   // Create project object
-  const projObject = new Project(projData);
+  const projObject = Project.createDocument(projData);
 
   // Expect save() to fail with specific error message
   await projObject.save().should.eventually.be.rejectedWith(

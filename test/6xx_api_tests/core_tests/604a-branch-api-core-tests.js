@@ -134,8 +134,8 @@ function postBranch(done) {
     chai.expect(createdBranch.tag).to.equal(branchData.tag);
 
     // Verify additional properties
-    chai.expect(createdBranch.createdBy).to.equal(adminUser.username);
-    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdBranch.createdBy).to.equal(adminUser._id);
+    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdBranch.createdOn).to.not.equal(null);
     chai.expect(createdBranch.updatedOn).to.not.equal(null);
     chai.expect(createdBranch.archived).to.equal(false);
@@ -192,8 +192,8 @@ function postBranches(done) {
       chai.expect(createdBranch.tag).to.equal(branchObj.tag);
 
       // Verify additional properties
-      chai.expect(createdBranch.createdBy).to.equal(adminUser.username);
-      chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdBranch.createdBy).to.equal(adminUser._id);
+      chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdBranch.createdOn).to.not.equal(null);
       chai.expect(createdBranch.updatedOn).to.not.equal(null);
       chai.expect(createdBranch.archived).to.equal(false);
@@ -235,7 +235,7 @@ function getBranch(done) {
     chai.expect(foundBranch.tag).to.equal(branchData.tag);
 
     // Verify additional properties
-    chai.expect(foundBranch.createdBy).to.equal(adminUser.username);
+    chai.expect(foundBranch.createdBy).to.equal(adminUser._id);
     chai.expect(foundBranch.lastModifiedBy).to.equal(null);
     chai.expect(foundBranch.createdOn).to.not.equal(null);
     chai.expect(foundBranch.updatedOn).to.not.equal(null);
@@ -288,7 +288,7 @@ function getBranches(done) {
       chai.expect(foundBranch.tag).to.equal(branchObj.tag);
 
       // Verify additional properties
-      chai.expect(foundBranch.createdBy).to.equal(adminUser.username);
+      chai.expect(foundBranch.createdBy).to.equal(adminUser._id);
       chai.expect(foundBranch.lastModifiedBy).to.equal(null);
       chai.expect(foundBranch.createdOn).to.not.equal(null);
       chai.expect(foundBranch.updatedOn).to.not.equal(null);
@@ -336,8 +336,8 @@ function patchBranch(done) {
     chai.expect(updatedBranch.tag).to.equal(branchData.tag);
 
     // Verify additional properties
-    chai.expect(updatedBranch.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedBranch.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedBranch.createdOn).to.not.equal(null);
     chai.expect(updatedBranch.updatedOn).to.not.equal(null);
     chai.expect(updatedBranch.archived).to.equal(false);
@@ -397,8 +397,8 @@ function patchBranches(done) {
       chai.expect(updatedBranch.tag).to.equal(branchObj.tag);
 
       // Verify additional properties
-      chai.expect(updatedBranch.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedBranch.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedBranch.createdOn).to.not.equal(null);
       chai.expect(updatedBranch.updatedOn).to.not.equal(null);
       chai.expect(updatedBranch.archived).to.equal(false);

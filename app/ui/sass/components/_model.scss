@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.sass.components.workspace-components._model
+ * @module ui.sass.components._model
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,18 +11,62 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description Defines the element tree sass variables.
+ * @description Defines the element tree styles.
  */
-@import '../../utils/variables';
-@import './sidepanel';
+@import '../utils/variables';
 
+.branch-bar {
+  padding: 20px 48px 15px 17px;
+  display: flex;
+
+  .branches-dropdown {
+    display: flex;
+  }
+
+  .branch-input {
+    width: 200px;
+  }
+
+  .branch-tag {
+    display: flex;
+    padding-left: 10px;
+    padding-top: 3px;
+
+    .archived-check-box {
+      padding-left: 10px;
+      position: sticky;
+    }
+  }
+
+  .options-btn {
+    padding-left: 10px;
+  }
+
+  .branch-label {
+    padding: 6px;
+    font-weight: 600;
+    font-size: small;
+  }
+}
+
+// TODO - go delete the id instead of keep class and id
 #element-tree-container, .element-tree-container {
   padding-top: 10px;
   white-space: nowrap;
   padding-bottom: 10px;
 
-  i {
-    padding-right: 10px;
+  .clear-btn {
+    color: #9c9c9c;
+    padding-left: 10px;
+
+    &:hover {
+      color: darken(#9c9c9c, 15);
+      cursor: pointer;
+    }
+  }
+
+  .element-link {
+    color: black;
   }
 
   .element-tree {
@@ -65,62 +109,13 @@
     background: $highlight-color-primary;
   }
 
-  .clear-btn {
-    color: #9c9c9c;
-    padding-left: 10px;
-
-    &:hover {
-      color: darken(#9c9c9c, 15);
-      cursor: pointer;
-    }
+  i {
+    padding-right: 10px;
   }
 
   .transparent {
     color: transparent;
   }
-
-  .element-link {
-    color: black;
-  }
-}
-
-.branch-bar {
-  padding: 20px 48px 15px 17px;
-  display: flex;
-
-  .branches-dropdown {
-    display: flex;
-  }
-
-  .branch-input {
-    width: 200px;
-  }
-
-  .branch-tag {
-    display: flex;
-    padding-left: 10px;
-    padding-top: 3px;
-
-    .archived-check-box {
-      padding-left: 10px;
-      position: sticky;
-    }
-
-  }
-
-  .options-btn {
-    padding-left: 10px;
-  }
-
-  .branch-label {
-    padding: 6px;
-    font-weight: 600;
-    font-size: small;
-  }
-}
-
-.options-card {
-  padding: 15px 35px;
 }
 
 .element-selector {
@@ -140,7 +135,6 @@
       font-size: 14px;
       font-weight: 500;
     }
-
   }
 }
 
@@ -153,4 +147,8 @@
     font-weight: 600;
     font-size: small;
   }
+}
+
+.options-card {
+  padding: 15px 35px;
 }

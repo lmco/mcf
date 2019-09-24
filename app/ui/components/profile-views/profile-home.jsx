@@ -1,6 +1,6 @@
 // React Modules
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 // MBEE Modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
@@ -109,46 +109,41 @@ class ProfileHome extends Component {
                               icon='fas fa-box'
                               routerLink='/profile/orgs'/>)
             }
-            {(otherUser !== null)
-              ? ''
-              : (<SidebarLink id='Project'
-                              title='Projects'
-                              icon='fas fa-boxes'
-                              routerLink='/profile/projects'/>)
-            }
-          </Sidebar>
-          { /* Verify user data exists */ }
-          { // Display loading page or error page if user data is loading or failed to load
-            (!user)
-              ? <div id='view' className="loading"> {this.state.error || 'Loading information...'}</div>
-              : (
-                <Switch>
-                  {/* Verify if user is view their own profile, then return their info  */}
-                  {(otherUser === null)
-                    ? (<React.Fragment>
-                      {/* Route to user home page */}
-                      <Route exact path="/profile" render={(props) => <Profile {...props}
-                                                                                  admin={true}
-                                                                                  user={this.state.user} /> } />
-                      {/* Route to org list page */}
-                      <Route exact path={'/profile/orgs'}
-                             render={(props) => <OrganizationList {...props}
-                                                                  user={this.state.user} /> }/>
-                      {/* Route to project list page */}
-                      <Route exact path={'/profile/projects'}
-                             render={(props) => <ProjectList {...props}
-                                                             user={this.state.user} /> } />
-                    </React.Fragment>)
-                    : (<Route path={`/profile/${this.props.match.params.username}`}
-                              render={(props) => <Profile {...props}
-                                                             admin={user.admin}
-                                                             viewingUser={user}
-                                                             user={otherUser} /> } />)
-
-                  }
-                </Switch>
-              )
-          }
+          </ModalBody>
+        </Modal>
+        <div id='workspace'>
+          <div className='workspace-header header-box-depth'>
+            <h2 className='workspace-title'>
+              {user.fname} {user.lname}
+            </h2>
+            <div className='workspace-header-button'>
+              {(!this.props.admin)
+                ? ''
+                : (<Button className='btn'
+                           outline color="secondary"
+                           onClick={this.handleToggle}>
+                    Edit
+                  </Button>)
+              }
+            </div>
+          </div>
+          <div id='workspace-body'>
+            <div className='main-workspace extra-padding'>
+              <table className='table-width'>
+                <tbody>
+                <tr>
+                  <th>Username:</th>
+                  <td>{user.username}</td>
+                </tr>
+                <tr>
+                  <th>Email:</th>
+                  <td>{user.email}</td>
+                </tr>
+                </tbody>
+              </table>
+              <CustomData data={user.custom}/>
+            </div>
+          </div>
         </div>
       </Router>
     );

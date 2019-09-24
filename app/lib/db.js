@@ -9,84 +9,639 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Defines database connection functions.
  */
 
 // Node modules
-const fs = require('fs');
-const path = require('path');
-const mongoose = require('mongoose');
+const events = require('events');
+
+// MBEE modules
+const DBModule = M.require(`db.${M.config.db.strategy}`);
+
+const requiredFunctions = ['connect', 'disconnect', 'clear', 'sanitize',
+  'Schema', 'Model', 'Store'];
+
+// Error Check - Verify DBModule is imported and implements required functions/classes
+requiredFunctions.forEach((fxn) => {
+  if (!DBModule.hasOwnProperty(fxn)) {
+    M.log.critical(`Error: DB Strategy (${M.config.db.strategy}) does not implement ${fxn}.`);
+    process.exit(1);
+  }
+});
 
 /**
- * @description Create connection to database.
- *
- * @return {Promise} Resolved promise.
+ * @description Connects to the database
+ * @async
  */
-module.exports.connect = function() {
-  return new Promise((resolve, reject) => {
-    // Declare variables for mongoose connection
-    const dbName = M.config.db.name;
-    const url = M.config.db.url;
-    const dbPort = M.config.db.port;
-    const dbUsername = M.config.db.username;
-    const dbPassword = M.config.db.password;
-    let connectURL = 'mongodb://';
+async function connect() {
+  try {
+    return await DBModule.connect();
+  }
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'critical');
+  }
+}
 
-    // If username/password provided
-    if (dbUsername !== '' && dbPassword !== '' && dbUsername && dbPassword) {
-      // Append username/password to connection URL
-      connectURL = `${connectURL + dbUsername}:${dbPassword}@`;
-    }
-    connectURL = `${connectURL + url}:${dbPort}/${dbName}`;
+/**
+ * @description Disconnects from the database
+ * @async
+ */
+async function disconnect() {
+  try {
+    return await DBModule.disconnect();
+  }
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'critical');
+  }
+}
 
-    const options = {};
+/**
+ * @description Clears all contents from the database, equivalent to starting
+ * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN
+ * PRODUCTION.
+ * @async
+ */
+async function clear() {
+  try {
+    return await DBModule.clear();
+  }
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'critical');
+  }
+}
 
-    // Configure an SSL connection
-    // The 'sslCAFile' references file located in /certs.
-    if (M.config.db.ssl) {
-      connectURL += '?ssl=true';
-      // Retrieve CA file from /certs directory
-      const caPath = path.join(M.root, M.config.db.ca);
-      const caFile = fs.readFileSync(caPath, 'utf8');
-      options.sslCA = caFile;
-    }
+/**
+ * @description Sanitizes data which will be used in queries and inserted into
+ * the database. As each database has different special characters and keywords,
+ * this function should sanitize the data to protect against any injections or
+ * retrieval of data by unprivileged users.
+ *
+ * @param {*} data - User input to be sanitized. May be in any data format.
+ *
+ * @return {*} Sanitized user input.
+ */
+function sanitize(data) {
+  try {
+    return DBModule.sanitize(data);
+  }
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'error');
+  }
+}
 
-    // Remove mongoose deprecation warnings
-    mongoose.set('useFindAndModify', false);
-    mongoose.set('useNewUrlParser', true);
-    mongoose.set('useCreateIndex', true);
+/**
+ * @description Defines the Schema class. Schemas define the properties and
+ * methods that each instance of a document should have, as well as the static
+ * functions which belong on a model. The Schema class is closely based on the
+ * Mongoose.js Schema class {@link https://mongoosejs.com/docs/api/schema.html}.
+ */
+class Schema extends DBModule.Schema {
 
-    // Database debug logs
-    // Additional arguments may provide too much information
-    mongoose.set('debug', function(collectionName, methodName, arg1, arg2, arg3) {
-      M.log.debug(`DB OPERATION: ${collectionName}, ${methodName}`);
-    });
+  /**
+   * @description Class constructor. Calls the parent constructor and ensures
+   * that the parent class defined the required functions.
+   *
+   * @param {Object} definition - The parameters and functions which define the
+   * schema.
+   * @param {Object} [options] - A object containing valid options.
+   */
+  constructor(definition, options) {
+    // Call parent constructor
+    super(definition, options);
 
-    // Connect to database
-    mongoose.connect(connectURL, options, (err) => {
-      if (err) {
-        // If error, reject it
-        return reject(new M.DatabaseError(err.message, 'error'));
+    // Check that expected functions are defined
+    const expectedFunctions = ['add', 'plugin', 'index', 'pre',
+      'virtual', 'static', 'method'];
+    expectedFunctions.forEach((f) => {
+      // Ensure the parameter is defined
+      if (!(f in this)) {
+        M.log.critical(`The Schema function ${f} is not defined!`);
+        process.exit(1);
       }
-      return resolve();
+      // Ensure it is a function
+      if (typeof this[f] !== 'function') {
+        M.log.critical(`The Schema function ${f} is not a function!`);
+        process.exit(1);
+      }
     });
-  });
-};
+  }
+
+  /**
+   * @description Adds an object/schema to the current schema.
+   *
+   * @param {(Object|Schema)} obj - The object or schema to add to the current
+   * schema.
+   * @param {String} [prefix] - The optional prefix to add to the paths in obj.
+   */
+  add(obj, prefix) {
+    return super.add(obj, prefix);
+  }
+
+  /**
+   * @description Registers a plugin for the schema.
+   *
+   * @param {function} cb - A callback function to run.
+   * @param {Object} [options] - A object containing options.
+   */
+  plugin(cb, options) {
+    return super.plugin(cb, options);
+  }
+
+  /**
+   * @description Defines an index for the schema. Can support adding compound
+   * or text indexes.
+   *
+   * @param {Object} fields - A object containing the key/values pairs where the
+   * keys are the fields to add indexes to, and the values define the index type
+   * where 1 defines an ascending index, -1 a descending index, and 'text'
+   * defines a text index.
+   * @param {Object} [options] - An object containing options.
+   */
+  index(fields, options) {
+    return super.index(fields, options);
+  }
+
+  /**
+   * @description Defines a function to be run prior to a certain event
+   * occurring.
+   *
+   * @param {(String|RegExp)} methodName - The event to run the callback
+   * function before.
+   * @param {Object} [options] - An object containing options.
+   * @param {function} cb - The callback function to run prior to the event
+   * occurring.
+   */
+  pre(methodName, options, cb) {
+    return super.pre(methodName, options, cb);
+  }
+
+  /**
+   * @description Defines a virtual field for the schema. Virtuals are not
+   * stored in the database and rather are calculated post-find. Virtuals
+   * generally will require a second request to retrieve referenced documents.
+   * Populated virtuals contains a localField and foreignField which must match
+   * for a document to be added to the virtual collection. For example, the
+   * Organization Schema contains a virtual called "projects". This virtual
+   * returns all projects who "org" field matches the organization's "_id".
+   *
+   * @param {String} name - The name of the field to be added to the schema
+   * post-find.
+   * @param {Object} [options] - An object containing options.
+   * @param {(String|Model)} [options.ref] - The name of the model which the
+   * virtual references.
+   * @param {(String|Function)} [options.localField] - The field on the current
+   * schema which is being used to match the foreignField.
+   * @param {(String|Function)} [options.foreignField] - The field on the
+   * referenced schema which is being used to match the localField.
+   * @param {(boolean|Function)} [options.justOne] - If true, the virtual should
+   * only return a single document. If false, the virtual will be an array of
+   * documents.
+   */
+  virtual(name, options) {
+    return super.virtual(name, options);
+  }
+
+  /**
+   * @description Adds a static method to the schema. This method should later
+   * be an accessible static method on the model.
+   *
+   * @param {String} name - The name of the static function.
+   * @param {function} fn - The function to be added to the model.
+   */
+  static(name, fn) {
+    return super.static(name, fn);
+  }
+
+  /**
+   * @description Adds a non-static method to the schema, which later will be an
+   * instance method on the model.
+   *
+   * @param {String} name - The name of the non-static function.
+   * @param {function} fn - The function to be added to the model.
+   */
+  method(name, fn) {
+    return super.method(name, fn);
+  }
+
+}
 
 /**
- * @description Closes connection to database.
- *
- * @return {Promise} Resolved promise.
+ * @description Defines the Model class. Models are used to create documents and
+ * to directly manipulate the database. Operations should be defined to perform
+ * all basic CRUD operations on the database. The Model class requirements are
+ * closely based on the Mongoose.js Model class
+ * {@link https://mongoosejs.com/docs/api/model.html} with a few important
+ * exceptions. (1) The constructor creates an instance of the model, not a
+ * document. (2) The createDocument method is used to create an actual
+ * document. (3) The insertMany option "rawResult" is replaced with "lean".
  */
-module.exports.disconnect = function() {
-  return new Promise((resolve, reject) => {
-    mongoose.connection.close()
-    .then(() => resolve())
-    .catch((error) => {
-      M.log.critical(error);
-      return reject(error);
+class Model extends DBModule.Model {
+
+  /**
+   * @description Class constructor. Calls parent constructor, and ensures that
+   * each of the required functions is defined in the parent class.
+   *
+   * @param {String} name - The name of the model being created. This name is
+   * used to create the collection name in the database.
+   * @param {Schema} schema - The schema which is being turned into a model.
+   * Should be an instance of the Schema class.
+   * @param {String} [collection] - Optional name of the collection in the
+   * database, if not provided the name should be used.
+   */
+  constructor(name, schema, collection) {
+    // Call parent constructor
+    super(name, schema, collection);
+
+    // Check that expected functions are defined
+    const expectedFunctions = ['bulkWrite', 'createDocument', 'countDocuments',
+      'deleteIndex', 'deleteMany', 'ensureIndexes', 'find', 'findOne',
+      'getIndexes', 'insertMany', 'updateMany', 'updateOne'];
+    expectedFunctions.forEach((f) => {
+      // Ensure the parameter is defined
+      if (!(f in this)) {
+        M.log.critical(`The Model function ${f} is not defined!`);
+        process.exit(1);
+      }
+      // Ensure it is a function
+      if (typeof this[f] !== 'function') {
+        M.log.critical(`The Model function ${f} is not a function!`);
+        process.exit(1);
+      }
     });
-  });
+  }
+
+  /**
+   * @description Performs a large write operation on a collection. Can create,
+   * update, or delete multiple documents.
+   * @async
+   *
+   * @param {Object[]} ops - An array of objects detailing what operations to
+   * perform the data required for those operations.
+   * @param {Object} [ops.insertOne] - Specified an insertOne operation.
+   * @param {Object} [ops.insertOne.document] - The document to create, for
+   * insertOne.
+   * @param {Object} [ops.updateOne] - Specifies an updateOne operation.
+   * @param {Object} [ops.updateOne.filter] - An object containing parameters to
+   * filter the find query by, for updateOne.
+   * @param {Object} [ops.updateOne.update] - An object containing updates to
+   * the matched document from the updateOne filter.
+   * @param {Object} [ops.deleteOne] - Specifies a deleteOne operation.
+   * @param {Object} [ops.deleteOne.filter] - An object containing parameters to
+   * filter the find query by, for deleteOne.
+   * @param {Object} [ops.deleteMany] - Specifies a deleteMany operation.
+   * @param {Object} [ops.deleteMany.filter] - An object containing parameters
+   * to filter the find query by, for deleteMany.
+   * @param {Object} [options] - An object containing options.
+   * @param {function} [cb] - A callback function to run.
+   *
+   * @example
+   * await bulkWrite([
+   *   {
+   *     insertOne: {
+   *       document: {
+   *         name: 'Sample Name',
+   *       }
+   *     }
+   *   },
+   *   {
+   *     updateOne: {
+   *       filter: { _id: 'sample-id' },
+   *       update: { name: 'Sample Name Updated' }
+   *     }
+   *   },
+   *   {
+   *     deleteOne: {
+   *       filter: { _id: 'sample-id-to-delete' }
+   *     }
+   *   }
+   * ]);
+   *
+   * @return {Promise<Object>} Result of the bulkWrite operation.
+   */
+  async bulkWrite(ops, options, cb) {
+    return super.bulkWrite(ops, options, cb);
+  }
+
+  /**
+   * @description Creates a document based on the model's schema.
+   *
+   * @param {Object} doc - The JSON to be converted into a document. Should
+   * roughly align with the model's schema. Each document created should at
+   * least contain an _id, as well as the methods defined in the schema.
+   */
+  createDocument(doc) {
+    return super.createDocument(doc);
+  }
+
+  /**
+   * @description Counts the number of documents that matches a filter.
+   * @async
+   *
+   * @param {Object} filter - An object containing parameters to filter the
+   * find query by.
+   * @param {function} [cb] - A callback function to run.
+   *
+   * @return {Promise<Number>} The number of documents which matched the filter.
+   */
+  async countDocuments(filter, cb) {
+    return super.countDocuments(filter, cb);
+  }
+
+  /**
+   * @description Deletes the specified index from the database.
+   * @async
+   *
+   * @param {String} name - The name of the index.
+   *
+   * @return {Promise<void>}
+   */
+  async deleteIndex(name) {
+    return super.deleteIndex(name);
+  }
+
+  /**
+   * @description Deletes any documents that match the provided conditions.
+   * @async
+   *
+   * @param {Object} conditions - An object containing parameters to filter the
+   * find query by, and thus delete documents by.
+   * @param {Object} [options] - An object containing options.
+   * @param {function} [cb] - A callback function to run.
+   *
+   * @return {Promise<Object>} An object denoting the success of the delete
+   * operation.
+   */
+  async deleteMany(conditions, options, cb) {
+    return super.deleteMany(conditions, options, cb);
+  }
+
+  /**
+   * @description Creates all indexes (if not already created) for the model's
+   * schema.
+   * @async
+   *
+   * @return {Promise<void>}
+   */
+  async ensureIndexes() {
+    return super.ensureIndexes();
+  }
+
+  /**
+   * @description Finds multiple documents based on the filter provided.
+   * @async
+   *
+   * @param {Object} filter - An object containing parameters to filter the
+   * find query by.
+   * @param {(Object|String)} [projection] - Specifies the fields to return in
+   * the documents that match the filter. To return all fields, omit this
+   * parameter.
+   * @param {Object} [options] - An object containing options.
+   * @param {Object} [options.sort] - An object specifying the order by which
+   * to sort and return the documents. Keys are fields by which to sort, and
+   * values are the sort order where 1 is ascending and -1 is descending. It is
+   * possible to sort by metadata by providing the key $meta and a non-numerical
+   * value. This is used primarily for text based search.
+   * @param {Number} [options.limit] - Limits the number of documents returned.
+   * A limit of 0 is equivalent to setting no limit and a negative limit is not
+   * supported.
+   * @param {Number} [options.skip] - Skips a specified number of documents that
+   * matched the query. Given 10 documents match with a skip of 5, only the
+   * final 5 documents would be returned. A skip value of 0 is equivalent to not
+   * skipping any documents. A negative skip value is not supported.
+   * @param {String} [options.populate] - A space separated list of fields to
+   * populate of return of a document. Only fields that reference other
+   * documents can be populated. Populating a field returns the entire
+   * referenced document instead of that document's ID. If no document exists,
+   * null is returned.
+   * @param {Boolean} [options.lean] - If false (by default), every document
+   * returned will contain methods that were declared in the Schema. If true,
+   * just the raw JSON will be returned from the database.
+   * @param {function} [cb] - A callback function to run.
+   *
+   * @return {Promise<Object[]>} An array containing the found documents, if
+   * any.
+   */
+  async find(filter, projection, options, cb) {
+    return super.find(filter, projection, options, cb);
+  }
+
+  /**
+   * @description Finds a single document based on the filter provided.
+   * @async
+   *
+   * @param {Object} conditions - An object containing parameters to filter the
+   * find query by.
+   * @param {(Object|String)} [projection] - Specifies the fields to return in
+   * the document that matches the filter. To return all fields, omit this
+   * parameter.
+   * @param {Object} [options] - An object containing options.
+   * @param {String} [options.populate] - A space separated list of fields to
+   * populate of return of a document. Only fields that reference other
+   * documents can be populated. Populating a field returns the entire
+   * referenced document instead of that document's ID. If no document exists,
+   * null is returned.
+   * @param {Boolean} [options.lean] - If false (by default), every document
+   * returned will contain methods that were declared in the Schema. If true,
+   * just the raw JSON will be returned from the database.
+   * @param {function} [cb] - A callback function to run.
+   *
+   * @return {Promise<Object>} The found document, if any.
+   */
+  async findOne(conditions, projection, options, cb) {
+    return super.findOne(conditions, projection, options, cb);
+  }
+
+  /**
+   * @description Returns an array of indexes for the given model.
+   * @async
+   *
+   * @return {Promise<Object[]>} Array of index objects
+   */
+  async getIndexes() {
+    return super.getIndexes();
+  }
+
+  /**
+   * @description Inserts any number of documents into the database.
+   * @async
+   *
+   * @param {Object[]} docs - An array of documents to insert.
+   * @param {Object} [options] - An object containing options.
+   * @param {Boolean} [options.lean] - If false (by default), every document
+   * returned will contain methods that were declared in the Schema. If true,
+   * just the raw JSON will be returned from the database.
+   * @param {Boolean} [options.skipValidation] - If true, will not validate
+   * the documents which are being created.
+   * @param {function} [cb] - A callback function to run.
+   *
+   * @return {Promise<Object[]>} The created documents.
+   */
+  async insertMany(docs, options, cb) {
+    return super.insertMany(docs, options, cb);
+  }
+
+  /**
+   * @description Updates multiple documents matched by the filter with the same
+   * changes in the provided doc.
+   * @async
+   *
+   * @param {Object} filter - An object containing parameters to filter the
+   * find query by.
+   * @param {Object} doc - The object containing updates to the found documents.
+   * @param {Object} [options] - An object containing options.
+   * @param {function} [cb] - A callback function to run.
+   */
+  async updateMany(filter, doc, options, cb) {
+    return super.updateMany(filter, doc, options, cb);
+  }
+
+  /**
+   * @description Updates a single document which is matched by the filter, and
+   * is updated with the doc provided.
+   * @async
+   *
+   * @param {Object} filter - An object containing parameters to filter the
+   * find query by.
+   * @param {Object} doc - The object containing updates to the found document.
+   * @param {Object} [options] - An object containing options.
+   * @param {function} [cb] - A callback function to run.
+   *
+   * @return {Promise<Object>} The updated document.
+   */
+  async updateOne(filter, doc, options, cb) {
+    return super.updateOne(filter, doc, options, cb);
+  }
+
+}
+
+/**
+ * @description Defines the Store class. The Store class is used along with
+ * express-session to manage sessions. The class MUST extend the node's built in
+ * EventEmitter class. Please review the express-session documentation at
+ * {@link https://github.com/expressjs/session#session-store-implementation}
+ * to learn more about the Store implementation. There are many libraries
+ * available that support different databases, and a list of those are also
+ * available at the link above.
+ */
+class Store extends DBModule.Store {
+
+  constructor(options) {
+    super(options);
+
+    if (!(this instanceof events)) {
+      M.log.critical('The Store class must extend the Node.js EventEmitter '
+      + 'class!');
+      process.exit(1);
+    }
+
+    // Check that expected functions are defined
+    const expectedFunctions = ['destroy', 'get', 'set'];
+    expectedFunctions.forEach((f) => {
+      // Ensure the parameter is defined
+      if (!(f in this)) {
+        M.log.critical(`The Store function ${f} is not defined!`);
+        process.exit(1);
+      }
+      // Ensure it is a function
+      if (typeof this[f] !== 'function') {
+        M.log.critical(`The Store function ${f} is not a function!`);
+        process.exit(1);
+      }
+    });
+  }
+
+  /**
+   * @description An optional function used to get all sessions in the store
+   * as an array.
+   *
+   * @param {function} cb - The callback to run, should be called as
+   * cb(error, sessions).
+   */
+  all(cb) {
+    return super.all(cb);
+  }
+
+  /**
+   * @description A required function which deletes a given session from the
+   * store.
+   *
+   * @param {String} sid - The ID of the session to delete.
+   * @param {function} cb - The callback to run, should be called as cb(error).
+   */
+  destroy(sid, cb) {
+    return super.destroy(sid, cb);
+  }
+
+  /**
+   * @description An optional function which deletes all sessions from the
+   * store.
+   *
+   * @param {function} cb - The callback to run, should be called as cb(error).
+   */
+  clear(cb) {
+    return super.clear(cb);
+  }
+
+  /**
+   * @description An optional function which gets the count of all session in
+   * the store.
+   *
+   * @param {function} cb - The callback to run, should be called as
+   * cb(error, len).
+   */
+  length(cb) {
+    return super.length(cb);
+  }
+
+  /**
+   * @description A required function which gets the specified session from the
+   * store.
+   *
+   * @param {String} sid - The ID of the session to retrieve.
+   * @param {function} cb - The callback to run, should be called as
+   * cb(error, session). The session argument should be the session if found,
+   * otherwise null or undefined if not found.
+   */
+  get(sid, cb) {
+    return super.get(sid, cb);
+  }
+
+  /**
+   * @description A required function which upserts a given session into the
+   * store.
+   *
+   * @param {String} sid - The ID of the session to upsert.
+   * @param {Object} session - The session object to upsert.
+   * @param {function} cb - The callback to run, should be called as cb(error).
+   */
+  set(sid, session, cb) {
+    return super.set(sid, session, cb);
+  }
+
+  /**
+   * @description An optional yet recommended function which "touches" a given
+   * session. This function is used to reset the idle timer on an active session
+   * which may be potentially deleted.
+   *
+   * @param {String} sid - The ID of the session to "touch".
+   * @param {Object} session - The session to "touch".
+   * @param {function} cb - The callback to run, should be called as cb(error).
+   */
+  touch(sid, session, cb) {
+    return super.touch(sid, session, cb);
+  }
+
+}
+
+// Export different classes and functions
+module.exports = {
+  connect,
+  disconnect,
+  clear,
+  sanitize,
+  Schema,
+  Model,
+  Store
 };

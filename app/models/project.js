@@ -50,13 +50,12 @@
  * <h4>Custom Data</h4>
  * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
  * is stored in an object, and can contain any valid JSON the user desires.
- * Only project admins can update the custom data.</p>
+ * Only project admins can update the custom data. The field "custom" is common
+ * to all models, and is added through the extensions plugin.</p>
  */
 
-// NPM modules
-const mongoose = require('mongoose');
-
 // MBEE modules
+const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
@@ -75,20 +74,15 @@ const utils = M.require('lib.utils');
  * @property {Object} permissions - An object whose keys identify a
  * projects's roles. The keys are the users username, and values are arrays of
  * given permissions.
- * @property {Object} custom - JSON used to store additional data.
  * @property {string} visibility - The visibility level of a project defining
  * its permissions behaviour.
  *
  */
-const ProjectSchema = new mongoose.Schema({
+const ProjectSchema = new db.Schema({
   _id: {
-    type: String,
+    type: 'String',
     required: true,
-    match: RegExp(validators.project.id),
-    // TODO: Dynamically compute the length of these
-    maxlength: [validators.project.idLength, 'Too many characters in ID'],
-    minlength: [5, 'Too few characters in ID'],
-    validate: {
+    validate: [{
       validator: function(v) {
         const projID = utils.parseID(v).pop();
         // If the ID is a reserved keyword, reject
@@ -96,11 +90,35 @@ const ProjectSchema = new mongoose.Schema({
       },
       message: 'Project ID cannot include the following words: '
       + `[${validators.reserved}].`
-    }
+    }, {
+      validator: function(v) {
+        // If the ID is longer than max length, reject
+        return v.length <= validators.project.idLength;
+      },
+      // Return a message, with calculated length of project ID (project.max - org.max - :)
+      message: props => `Project ID length [${props.value.length - validators.org.idLength - 1}]`
+        + ` must not be more than ${validators.project.idLength - validators.org.idLength - 1}`
+        + ' characters.'
+    }, {
+      validator: function(v) {
+        // If the ID is shorter than min length, reject
+        return v.length > 4;
+      },
+      // Return a message, with calculated length of project ID (project.min - org.min - :)
+      message: props => `Project ID length [${props.value.length - 3}] must not`
+        + ' be less than 2 characters.'
+    }, {
+      validator: function(v) {
+        // If the ID is invalid, reject
+        return RegExp(validators.project.id).test(v);
+      },
+      message: props => `Invalid project ID [${utils.parseID(props.value).pop()}].`
+    }]
   },
   org: {
-    type: String,
+    type: 'String',
     ref: 'Organization',
+    index: true,
     required: true,
     validate: {
       validator: function(v) {
@@ -110,11 +128,11 @@ const ProjectSchema = new mongoose.Schema({
     }
   },
   name: {
-    type: String,
+    type: 'String',
     required: true
   },
   permissions: {
-    type: mongoose.Schema.Types.Mixed,
+    type: 'Object',
     default: {},
     validate: {
       validator: function(v) {
@@ -136,12 +154,8 @@ const ProjectSchema = new mongoose.Schema({
       message: props => 'The project permissions object is not properly formatted.'
     }
   },
-  custom: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
-  },
   visibility: {
-    type: String,
+    type: 'String',
     default: 'private',
     enum: ['private', 'internal']
   }
@@ -156,87 +170,48 @@ ProjectSchema.plugin(extensions);
  * @description Returns supported permission levels
  * @memberOf ProjectSchema
  */
-ProjectSchema.methods.getPermissionLevels = function() {
+ProjectSchema.method('getPermissionLevels', function() {
   return ['remove_all', 'read', 'write', 'admin'];
-};
-ProjectSchema.statics.getPermissionLevels = function() {
-  return ProjectSchema.methods.getPermissionLevels();
-};
+});
+ProjectSchema.static('getPermissionLevels', function() {
+  return ['remove_all', 'read', 'write', 'admin'];
+});
 
 /**
  * @description Returns project fields that can be changed
  * @memberOf ProjectSchema
  */
-ProjectSchema.methods.getValidUpdateFields = function() {
+ProjectSchema.method('getValidUpdateFields', function() {
   return ['name', 'custom', 'archived', 'permissions', 'visibility'];
-};
-ProjectSchema.statics.getValidUpdateFields = function() {
-  return ProjectSchema.methods.getValidUpdateFields();
-};
+});
+ProjectSchema.static('getValidUpdateFields', function() {
+  return ['name', 'custom', 'archived', 'permissions', 'visibility'];
+});
 
 /**
  * @description Returns supported visibility levels
  * @memberOf ProjectSchema
  */
-ProjectSchema.methods.getVisibilityLevels = function() {
+ProjectSchema.method('getVisibilityLevels', function() {
   return ['internal', 'private'];
-};
-ProjectSchema.statics.getVisibilityLevels = function() {
-  return ProjectSchema.methods.getVisibilityLevels();
-};
+});
+ProjectSchema.static('getVisibilityLevels', function() {
+  return ['internal', 'private'];
+});
 
 /**
  * @description Returns a list of fields a requesting user can populate
  * @memberOf ProjectSchema
  */
-ProjectSchema.methods.getValidPopulateFields = function() {
+ProjectSchema.method('getValidPopulateFields', function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
+});
+ProjectSchema.statics.getValidPopulateFields = function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
 };
-
-ProjectSchema.statics.getValidPopulateFields = function() {
-  return ProjectSchema.methods.getValidPopulateFields();
-};
-
-
-/**
- * @description Validates an object to ensure that it only contains keys
- * which exist in the project model.
- *
- * @param {Object} object - Object for key verification.
- * @return {boolean} The boolean indicating if the object contained only
- * existing fields.
- */
-ProjectSchema.statics.validateObjectKeys = function(object) {
-  // Initialize returnBool to true
-  let returnBool = true;
-  // Set list array of valid keys
-  const validKeys = Object.keys(ProjectSchema.paths);
-  // Add 'id' to list of valid keys, for 0.6.0 support
-  validKeys.push('id');
-  // Check if the object is NOT an instance of the project model
-  if (!(object instanceof mongoose.model('Project', ProjectSchema))) {
-    // Loop through each key of the object
-    Object.keys(object).forEach(key => {
-      // Check if the object key is a key in the project model
-      if (!validKeys.includes(key)) {
-        // Key is not in project model, return false
-        returnBool = false;
-      }
-    });
-  }
-  // All object keys found in project model or object was an instance of
-  // project model, return true
-  return returnBool;
-};
-
-/* --------------------------( Project Properties )-------------------------- */
-
-// Required for virtual getters
-ProjectSchema.set('toJSON', { virtuals: true });
-ProjectSchema.set('toObject', { virtuals: true });
 
 
 /* ------------------------( Project Schema Export )------------------------- */
 
-// Export mongoose model as "Project"
-module.exports = mongoose.model('Project', ProjectSchema);
+// Export model as "Project"
+module.exports = new db.Model('Project', ProjectSchema);

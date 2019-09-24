@@ -64,7 +64,7 @@ function OrganizationProjects(props) {
         </ModalBody>
       </Modal>
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header header-box-depth'>
+        <div className='workspace-header header-box-depth'>
            <h2 className='workspace-title workspace-title-padding'>Projects</h2>
           {/* Verify user has write permissions */}
           {(!props.write)
