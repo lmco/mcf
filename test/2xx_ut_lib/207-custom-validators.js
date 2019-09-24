@@ -38,7 +38,7 @@ const utils = M.require('lib.utils');
  * that group (the first parameter passed into describe) is derived from the
  * name of the current file.
  */
-describe(`MANUAL-${M.getModuleName(module.filename)}`, () => {
+describe(M.getModuleName(module.filename), () => {
   it('should use a default validator by default', verifyDefaultValidator);
   it('should use a custom validator when set', verifyCustomValidator);
 });
@@ -50,6 +50,7 @@ describe(`MANUAL-${M.getModuleName(module.filename)}`, () => {
  *
  */
 function verifyDefaultValidator(done) {
+  if (M.config.validators) this.skip();
   const A = validators.user.username;
   const B = '^([a-z])([a-z0-9_]){0,}$';
   chai.expect(A).to.equal(B);
@@ -61,6 +62,7 @@ function verifyDefaultValidator(done) {
  * that is specified in the config file.
  */
 function verifyCustomValidator(done) {
+  if (!M.config.validators) this.skip();
   const A = validators.element.id;
   const B = M.config.validators.id;
   const C = `^${B}${utils.ID_DELIMITER}${B}${utils.ID_DELIMITER}${B}$`;
