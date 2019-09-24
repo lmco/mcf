@@ -14,14 +14,11 @@
  * @description Migration script for version 0.9.3
  */
 
-// Node modules
-const mongoose = require('mongoose');
-
 // MBEE modules
 const utils = M.require('lib.utils');
 const Branch = M.require('models.branch');
 const Element = M.require('models.element');
-
+const ServerData = M.require('models.server-data');
 
 /**
  * @description Handles the database migration from 0.9.3 to 0.9.0.
@@ -29,19 +26,18 @@ const Element = M.require('models.element');
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
     // Get all documents from the server data
-    mongoose.connection.db.collection('server_data').find({}).toArray()
+    ServerData.find({})
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
       // If no server data currently exists, create the document
       if (serverData.length === 0) {
-        return mongoose.connection.db.collection('server_data').insertOne({ version: '0.9.0' });
+        return ServerData.insertMany([{ _id: 'server_data', version: '0.9.0' }]);
       }
 
-      return mongoose.connection.db.collection('server_data')
-      .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.0' } });
+      return ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.0' } });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -55,14 +51,14 @@ module.exports.up = async function() {
   let serverData;
   try {
     // Get all documents from the server data
-    serverData = await mongoose.connection.db.collection('server_data').find({}).toArray();
+    serverData = await ServerData.find({});
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
   }
   // Restrict collection to one document
   if (serverData.length > 1) {
-    throw new Error('Cannot have more than one document in the server_data collection.');
+    throw new Error('Cannot have more than one server data document.');
   }
 
   // Ensure there are no branches without an __mbee__, holding_bin, or undefined element
@@ -137,11 +133,10 @@ module.exports.up = async function() {
   try {
     // If no server data currently exists, create the document
     if (serverData.length === 0) {
-      return await mongoose.connection.db.collection('server_data').insertOne({ version: '0.9.3' });
+      return await ServerData.insertMany([{ _id: 'server_data', version: '0.9.3' }]);
     }
     // Otherwise, update the existing server data document
-    return await mongoose.connection.db.collection('server_data')
-    .updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.3' } });
+    return await ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.3' } });
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');

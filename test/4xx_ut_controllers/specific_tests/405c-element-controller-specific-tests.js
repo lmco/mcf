@@ -130,8 +130,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a limited number of elements from find()', optionLimitFind);
   it('should return a second batch of elements with the limit and skip option'
     + ' from find()', optionSkipFind);
-  it('should return a raw JSON version of an element instead of a mongoose '
-    + 'object from find()', optionLeanFind);
+  it('should return a raw JSON version of an element instead of a document with'
+    + ' instance methods from find()', optionLeanFind);
   it('should sort find results', optionSortFind);
   it('should return every parent up to root with the rootpath option', optionRootpathFind);
   // ------------- Create -------------
@@ -141,8 +141,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should populate allowed fields when creating an element', optionPopulateCreate);
   it('should return an element with only the specific fields specified from'
     + ' create()', optionFieldsCreate);
-  it('should return a raw JSON version of an element instead of a mongoose '
-    + 'object from create()', optionLeanCreate);
+  it('should return a raw JSON version of an element instead of a document with'
+    + ' instance methods from create()', optionLeanCreate);
   // ------------- Update -------------
   it('should archive an element', archiveElement);
   it('should update an element source to be on a different project', updateExternalSource);
@@ -150,14 +150,14 @@ describe(M.getModuleName(module.filename), () => {
   it('should populate allowed fields when updating an element', optionPopulateUpdate);
   it('should return an element with only the specific fields specified from'
     + ' update()', optionFieldsUpdate);
-  it('should return a raw JSON version of an element instead of a mongoose '
-    + 'object from update()', optionLeanUpdate);
+  it('should return a raw JSON version of an element instead of a document with'
+    + ' instance methods from update()', optionLeanUpdate);
   // ------------- Replace ------------
   it('should populate allowed fields when replacing an element', optionPopulateReplace);
   it('should return an element with only the specific fields specified from'
     + ' createOrReplace()', optionFieldsReplace);
-  it('should return a raw JSON version of an element instead of a mongoose '
-    + 'object from createOrReplace()', optionLeanReplace);
+  it('should return a raw JSON version of an element instead of a document with'
+    + ' instance methods from createOrReplace()', optionLeanReplace);
   // ------------- Remove -------------
   it('should delete an element which is part of a relationship', deleteRelElement);
   // ------------- Search -------------
@@ -167,8 +167,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a limited number of elements from search()', optionLimitSearch);
   it('should return a second batch of elements with the limit and skip option '
     + 'from search()', optionSkipSearch);
-  it('should return a raw JSON version of an element instead of a mongoose '
-    + 'object from search()', optionLeanSearch);
+  it('should return a raw JSON version of an element instead of a document with'
+    + ' instance methods from search()', optionLeanSearch);
+  it('should sort find results', optionSortFind);
+  it('should return a raw JSON version of an element instead of a document with'
+    + ' instance methods from search()', optionLeanSearch);
   it('should sort search results', optionSortSearch);
 });
 
@@ -193,7 +196,7 @@ function createArchivedElement(done) {
 
     // Expect archived to be true, and archivedOn and archivedBy to not be null
     chai.expect(elem.archived).to.equal(true);
-    chai.expect(elem.archivedBy).to.equal(adminUser.username);
+    chai.expect(elem.archivedBy).to.equal(adminUser._id);
     chai.expect(elem.archivedOn).to.not.equal(null);
     done();
   })
@@ -226,7 +229,7 @@ function archiveElement(done) {
 
     // Expect archived to be true, and archivedOn and archivedBy to not be null
     chai.expect(elem.archived).to.equal(true);
-    chai.expect(elem.archivedBy).to.equal(adminUser.username);
+    chai.expect(elem.archivedBy).to.equal(adminUser._id);
     chai.expect(elem.archivedOn).to.not.equal(null);
     done();
   })
@@ -473,7 +476,7 @@ async function optionArchivedFind() {
     // Verify all of the archived fields are properly set
     chai.expect(element.archived).to.equal(true);
     chai.expect(element.archivedOn).to.not.equal(null);
-    chai.expect(element.archivedBy).to.equal(adminUser.username);
+    chai.expect(element.archivedBy).to.equal(adminUser._id);
   }
   catch (error) {
     M.log.error(error);
@@ -637,7 +640,7 @@ function optionSkipFind(done) {
 
 /**
  * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a mongoose object in the find() function.
+ * element rather than a document with instance methods in the find() function.
  */
 function optionLeanFind(done) {
   // Get the ID of the element to find
@@ -652,8 +655,8 @@ function optionLeanFind(done) {
     chai.expect(foundElements.length).to.equal(1);
     const elem = foundElements[0];
 
-    // Verify that the element is a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(true);
+    // Expect the instance method getValidUpdateFields to be a function
+    chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
 
     // Find the element WITH the lean option
     return ElementController.find(adminUser, org.id, projIDs[0], branchID, elemID, options);
@@ -663,8 +666,9 @@ function optionLeanFind(done) {
     chai.expect(foundElements.length).to.equal(1);
     const elem = foundElements[0];
 
-    // Verify that the element is NOT a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof elem.getValidUpdateFields).to.equal('undefined');
+
     done();
   })
   .catch((error) => {
@@ -782,7 +786,8 @@ function optionFieldsCreate(done) {
 
 /**
  * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a mongoose object in the create() function.
+ * element rather than a document with instance methods object in the create()
+ * function.
  */
 async function optionLeanCreate() {
   // Create the element object
@@ -805,8 +810,8 @@ async function optionLeanCreate() {
     chai.expect(createdElements.length).to.equal(1);
     const elem = createdElements[0];
 
-    // Verify that the element is a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(true);
+    // Expect the instance method getValidUpdateFields to be a function
+    chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
 
     // Create the element WITH the lean option
     const createdElements2 = await ElementController.create(adminUser, org.id, projIDs[0],
@@ -815,8 +820,8 @@ async function optionLeanCreate() {
     chai.expect(createdElements2.length).to.equal(1);
     const elem2 = createdElements2[0];
 
-    // Verify that the element is NOT a mongoose object ('Element')
-    chai.expect(elem2 instanceof Element).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof elem2.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error);
@@ -931,7 +936,8 @@ function optionFieldsUpdate(done) {
 
 /**
  * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a mongoose object in the update() function.
+ * element rather than a document with instance methods object in the update()
+ * function.
  */
 async function optionLeanUpdate() {
   try {
@@ -952,8 +958,8 @@ async function optionLeanUpdate() {
     const elem1 = updatedElements[0];
     chai.expect(elem1.name).to.equal('update 1');
 
-    // Verify that the element is a mongoose object ('Element')
-    chai.expect(elem1 instanceof Element).to.equal(true);
+    // Expect the instance method getValidUpdateFields to be a function
+    chai.expect(typeof elem1.getValidUpdateFields).to.equal('function');
 
     // Make a second update
     elem0.name = 'Batch Element 0';
@@ -968,8 +974,8 @@ async function optionLeanUpdate() {
     chai.expect(elem2.name).to.equal('Batch Element 0');
 
 
-    // Verify that the element is NOT a mongoose object ('Element')
-    chai.expect(elem2 instanceof Element).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof elem2.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error);
@@ -1086,7 +1092,8 @@ function optionFieldsReplace(done) {
 
 /**
  * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a mongoose object in the createOrReplace() function.
+ * element rather than a document with instance methods object in the
+ * createOrReplace() function.
  */
 function optionLeanReplace(done) {
   // Create the element object
@@ -1108,8 +1115,8 @@ function optionLeanReplace(done) {
     chai.expect(replacedElements.length).to.equal(1);
     const elem = replacedElements[0];
 
-    // Verify that the element is a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(true);
+    // Expect the instance method getValidUpdateFields to be a function
+    chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
 
     // Replace the element WITH the lean option
     return ElementController.createOrReplace(adminUser, org.id, projIDs[0],
@@ -1120,8 +1127,8 @@ function optionLeanReplace(done) {
     chai.expect(replacedElements.length).to.equal(1);
     const elem = replacedElements[0];
 
-    // Verify that the element is NOT a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof elem.getValidUpdateFields).to.equal('undefined');
     done();
   })
   .catch((error) => {
@@ -1199,7 +1206,7 @@ function optionArchivedSearch(done) {
     // Verify all of the archived fields are properly set
     chai.expect(elem.archived).to.equal(true);
     chai.expect(elem.archivedOn).to.not.equal(null);
-    chai.expect(elem.archivedBy).to.equal(adminUser.username);
+    chai.expect(elem.archivedBy).to.equal(adminUser._id);
     done();
   })
   .catch((error) => {
@@ -1279,7 +1286,8 @@ function optionSkipSearch(done) {
 
 /**
  * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a mongoose object in the search() function.
+ * element rather than a document with instance methods object in the search()
+ * function.
  */
 function optionLeanSearch(done) {
   // Create the query to search with
@@ -1294,8 +1302,8 @@ function optionLeanSearch(done) {
     chai.expect(foundElements.length).to.equal(1);
     const elem = foundElements[0];
 
-    // Verify that the element is a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(true);
+    // Expect the instance method getValidUpdateFields to be a function
+    chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
 
     // Search for elements WITH the lean option
     return ElementController.search(adminUser, org.id, projIDs[0], branchID, query, options);
@@ -1305,8 +1313,8 @@ function optionLeanSearch(done) {
     chai.expect(foundElements.length).to.equal(1);
     const elem = foundElements[0];
 
-    // Verify that the element is NOT a mongoose object ('Element')
-    chai.expect(elem instanceof Element).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof elem.getValidUpdateFields).to.equal('undefined');
     done();
   })
   .catch((error) => {

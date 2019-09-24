@@ -170,15 +170,15 @@ function verifyProjectPermissions(done) {
 
   // Checking users' permissions on project 1
   chai.expect(can.readProject.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
-  chai.expect(can.readProject.bind(can, user2, org, project1)).to.not.throw(M.PermissionError);
+  chai.expect(can.createProject.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
   chai.expect(can.updateProject.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
-  chai.expect(can.updateProject.bind(can, user2, org, project1)).to.throw(M.PermissionError);
+  chai.expect(can.deleteProject.bind(can, user1, org, project1)).to.throw(M.PermissionError);
 
   // Checking users' permission on project 2
-  chai.expect(can.readProject.bind(can, user1, org, project2)).to.not.throw(M.PermissionError);
   chai.expect(can.readProject.bind(can, user2, org, project2)).to.not.throw(M.PermissionError);
-  chai.expect(can.updateProject.bind(can, user1, org, project2)).to.not.throw(M.PermissionError);
+  chai.expect(can.createProject.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.updateProject.bind(can, user2, org, project2)).to.throw(M.PermissionError);
+  chai.expect(can.deleteProject.bind(can, user2, org, project2)).to.throw(M.PermissionError);
 
   // Test is done
   done();
@@ -202,16 +202,15 @@ function verifyElementPermissions(done) {
 
   // Checking users' permissions on project 1
   chai.expect(can.readElement.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
-  chai.expect(can.readElement.bind(can, user2, org, project1)).to.not.throw(M.PermissionError);
+  chai.expect(can.createElement.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
   chai.expect(can.updateElement.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
-  chai.expect(can.updateElement.bind(can, user2, org, project1)).to.throw(M.PermissionError);
+  chai.expect(can.deleteElement.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
 
   // Checking users' permission on project 2
-  chai.expect(can.readElement.bind(can, user1, org, project2)).to.not.throw(M.PermissionError);
   chai.expect(can.readElement.bind(can, user2, org, project2)).to.not.throw(M.PermissionError);
-  chai.expect(can.updateElement.bind(can, user1, org, project2)).to.not.throw(M.PermissionError);
+  chai.expect(can.createElement.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.updateElement.bind(can, user2, org, project2)).to.throw(M.PermissionError);
-
+  chai.expect(can.deleteElement.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   // Test is done
   done();
 }
@@ -234,15 +233,15 @@ function verifyBranchPermissions(done) {
 
   // Checking users' permissions on project 1
   chai.expect(can.readBranch.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
-  chai.expect(can.readBranch.bind(can, user2, org, project1)).to.not.throw(M.PermissionError);
+  chai.expect(can.createBranch.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
   chai.expect(can.updateBranch.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
-  chai.expect(can.updateBranch.bind(can, user2, org, project1)).to.throw(M.PermissionError);
+  chai.expect(can.deleteBranch.bind(can, user1, org, project1)).to.not.throw(M.PermissionError);
 
   // Checking users' permission on project 2
-  chai.expect(can.readBranch.bind(can, user1, org, project2)).to.not.throw(M.PermissionError);
   chai.expect(can.readBranch.bind(can, user2, org, project2)).to.not.throw(M.PermissionError);
-  chai.expect(can.updateBranch.bind(can, user1, org, project2)).to.not.throw(M.PermissionError);
+  chai.expect(can.createBranch.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.updateBranch.bind(can, user2, org, project2)).to.throw(M.PermissionError);
+  chai.expect(can.deleteBranch.bind(can, user2, org, project2)).to.throw(M.PermissionError);
 
   // Test is done
   done();

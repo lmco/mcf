@@ -89,7 +89,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should only return the specified fields', optionFieldsFind);
   it('should limit the number of search results', optionLimitFind);
   it('should skip over find results', optionSkipFind);
-  it('should should return raw JSON rather than instances of models', optionLeanFind);
+  it('should return a raw JSON version of a project instead of a document with'
+    + ' instance methods from find()', optionLeanFind);
   it('should sort find results', optionSortFind);
   it('should find a project with a specific name', optionNameFind);
   it('should find projects with a certain level of visibility', optionVisibilityFind);
@@ -101,15 +102,18 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- Create -------------
   it('should populate the return object from create', optionPopulateCreate);
   it('should only return specified fields from create', optionFieldsCreate);
-  it('should return raw JSON rather than a model from create', optionLeanCreate);
+  it('should return a raw JSON version of a project instead of a document with'
+    + ' instance methods from create()', optionLeanCreate);
   // ------------- Update -------------
   it('should populate the return object from update', optionPopulateUpdate);
   it('should only return specified fields from update', optionFieldsUpdate);
-  it('should return raw JSON rather than a model from update', optionLeanUpdate);
+  it('should return a raw JSON version of a project instead of a document with'
+    + ' instance methods from update()', optionLeanUpdate);
   // ------------- Replace ------------
   it('should populate the return object from createOrReplace', optionPopulateReplace);
   it('should only return specified fields from createOrReplace', optionFieldsReplace);
-  it('should return raw JSON rather than a model from createOrReplace', optionLeanReplace);
+  it('should return a raw JSON version of a project instead of a document with'
+    + ' instance methods from createOrReplace()', optionLeanReplace);
   // ------------- Remove -------------
 });
 
@@ -291,11 +295,14 @@ async function optionLeanFind() {
 
     // Find the projects without lean to check that they are models
     const foundProjects = await ProjectController.find(adminUser, org.id);
-    chai.expect(foundProjects[0] instanceof Project).to.equal(true);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof foundProjects[0].getValidUpdateFields).to.equal('function');
 
     // Find the projects with the lean option
     const leanProjects = await ProjectController.find(adminUser, org.id, options);
-    chai.expect(leanProjects[0] instanceof Project).to.equal(false);
+
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof leanProjects[0].getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
@@ -679,8 +686,8 @@ async function optionLeanCreate() {
     chai.expect(createdProjects.length).to.equal(1);
     const foundProject = createdProjects[0];
 
-    // Expect the project to be returned as raw JSON
-    chai.expect(foundProject instanceof Project).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
@@ -786,8 +793,8 @@ async function optionLeanUpdate() {
     chai.expect(createdProjects.length).to.equal(1);
     const foundProject = createdProjects[0];
 
-    // Expect the project to be returned as raw JSON
-    chai.expect(foundProject instanceof Project).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
@@ -893,8 +900,8 @@ async function optionLeanReplace() {
     chai.expect(createdProjects.length).to.equal(1);
     const foundProject = createdProjects[0];
 
-    // Expect the project to be returned as raw JSON
-    chai.expect(foundProject instanceof Project).to.equal(false);
+    // Expect the instance method getValidUpdateFields to be undefined
+    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);

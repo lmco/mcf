@@ -1,4 +1,4 @@
-// ESLint disbled for client-side JS for now.
+// ESLint disabled for client-side JS for now.
 // TODO (jk) - determine long-term approach
 /* eslint-disabled */
 
