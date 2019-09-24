@@ -20,8 +20,14 @@ const fs = require('fs');
 const path = require('path');
 const process = require('process');
 
-// NPM modules
-const mongoose = require('mongoose');
+// MBEE modules
+const Artifact = M.require('models.artifact');
+const Branch = M.require('models.branch');
+const Element = M.require('models.element');
+const Organization = M.require('models.organization');
+const Project = M.require('models.user');
+const ServerData = M.require('models.server-data');
+const User = M.require('models.user');
 
 /**
  * @description Handles database migrations from a specific version, to a
@@ -40,12 +46,19 @@ module.exports.migrate = function(args) {
 
     // Prompt the user for input
     prompt(args)
-    // Get the server_data collection
-    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    .then(() => Artifact.findOne({})) // Ensure artifact model is created
+    .then(() => Branch.findOne({})) // Ensure branch model is created
+    .then(() => Element.findOne({})) // Ensure element model is created
+    .then(() => Organization.findOne({})) // Ensure org model is created
+    .then(() => Project.findOne({})) // Ensure project model is created
+    .then(() => ServerData.findOne({})) // Ensure server data model is created
+    .then(() => User.findOne({})) // Ensure user model is created
+    // Get the server data documents
+    .then(() => ServerData.find({}, null, { lean: true }))
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
 
       // If --to was provided
@@ -335,22 +348,12 @@ function runMigrations(from, migrations, move) {
  */
 module.exports.getSchemaVersion = function() {
   return new Promise((resolve, reject) => {
-    // Get all collections in the DB
-    mongoose.connection.db.collections()
-    .then((collections) => {
-      // Get all collection names
-      const existingCollections = collections.map(c => c.s.name);
-      // Create the server_data collection if it doesn't exist
-      if (!existingCollections.includes('server_data')) {
-        return mongoose.connection.db.createCollection('server_data');
-      }
-    })
     // Get all documents from the server data
-    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    ServerData.find({}, null, { lean: true })
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
       // No server data found, automatically upgrade versions
       if (serverData.length === 0) {

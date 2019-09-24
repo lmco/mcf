@@ -133,12 +133,12 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
     // Sanitize input parameters and create function-wide variables
     const saniElements = (elements !== undefined)
-      ? sani.mongo(JSON.parse(JSON.stringify(elements)))
+      ? sani.db(JSON.parse(JSON.stringify(elements)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branID = sani.mongo(branchID);
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
     let foundElements = [];
     const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
@@ -170,7 +170,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
             options[o] = utils.createID(orgID, projID, branID, options[o]);
           }
           // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+          searchQuery[o] = sani.db(options[o]);
         }
       });
     }
@@ -243,12 +243,13 @@ async function find(requestingUser, organizationID, projectID, branchID, element
       // If options.limit is defined an is less that 50k or count is less than 50k, find normally
       if ((validatedOptions.limit > 0 && validatedOptions.limit < 50000) || elementCount < 50000) {
         // Find the elements
-        foundElements = await Element.find(searchQuery, validatedOptions.fieldsString)
-        .skip(validatedOptions.skip)
-        .limit(validatedOptions.limit)
-        .sort(validatedOptions.sort)
-        .populate(validatedOptions.populateString)
-        .lean(validatedOptions.lean);
+        foundElements = await Element.find(searchQuery, validatedOptions.fieldsString,
+          { skip: validatedOptions.skip,
+            limit: validatedOptions.limit,
+            sort: validatedOptions.sort,
+            populate: validatedOptions.populateString,
+            lean: validatedOptions.lean
+          });
       }
       else {
         // Define batchLimit, batchSkip and numLoops
@@ -276,12 +277,13 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
           // Add find operation to array of promises
           promises.push(
-            Element.find(searchQuery, validatedOptions.fieldsString)
-            .skip(batchSkip)
-            .limit(batchLimit)
-            .sort(validatedOptions.sort)
-            .populate(validatedOptions.populateString)
-            .lean(validatedOptions.lean)
+            Element.find(searchQuery, validatedOptions.fieldsString,
+              { skip: batchSkip,
+                limit: batchLimit,
+                sort: validatedOptions.sort,
+                populate: validatedOptions.populateString,
+                lean: validatedOptions.lean
+              })
             .then((elems) => {
               foundElements = foundElements.concat(elems);
             })
@@ -297,12 +299,13 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
         // Add find operation to array of promises
         promises.push(
-          Element.find(searchQuery, validatedOptions.fieldsString)
-          .skip(validatedOptions.skip)
-          .limit(validatedOptions.limit)
-          .sort(validatedOptions.sort)
-          .populate(validatedOptions.populateString)
-          .lean(validatedOptions.lean)
+          Element.find(searchQuery, validatedOptions.fieldsString,
+            { skip: validatedOptions.skip,
+              limit: validatedOptions.limit,
+              sort: validatedOptions.sort,
+              populate: validatedOptions.populateString,
+              lean: validatedOptions.lean
+            })
           .then((elems) => {
             foundElements = foundElements.concat(elems);
           })
@@ -384,11 +387,11 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     helper.checkParamsDataType('object', elements, 'Elements');
 
     // Sanitize input parameters and create function-wide variables
-    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
+    const saniElements = sani.db(JSON.parse(JSON.stringify(elements)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branID = sani.mongo(branchID);
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
     const remainingElements = [];
     let populatedElements = [];
     const projectRefs = [];
@@ -465,7 +468,8 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     permissions.createElement(reqUser, organization, project, foundBranch);
 
     // Find all referenced projects
-    const referencedProjects = await Project.find({ _id: { $in: projectRefs } }).lean();
+    const referencedProjects = await Project.find({ _id: { $in: projectRefs } },
+      null, { lean: true });
 
     // Verify that each project has a visibility of 'internal'
     referencedProjects.forEach((proj) => {
@@ -483,7 +487,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
       // Split arrIDs into batches of 50000
       const tmpQuery = { _id: { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) } };
       // Attempt to find any elements with matching _id
-      promises.push(Element.find(tmpQuery, '_id').lean()
+      promises.push(Element.find(tmpQuery, '_id', { lean: true })
       .then((foundElements) => {
         if (foundElements.length > 0) {
           // Get array of the foundElements's ids
@@ -574,7 +578,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     M.log.debug('create(): Before finding extra elements');
 
     // Find extra elements, and only return _id for faster lookup
-    const extraElements = await Element.find(findExtraElementsQuery, '_id').lean();
+    const extraElements = await Element.find(findExtraElementsQuery, '_id', { lean: true });
     // Convert extraElements to JMI type 2 for easier lookup
     const extraElementsJMI2 = jmi.convertJMI(1, 2, extraElements);
     // Loop through each remaining element that does not have it's parent,
@@ -618,19 +622,21 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     });
 
     M.log.debug('create(): Before insertMany()');
-    const createdElements = await Element.insertMany(elementObjects, { rawResult: true });
+    const createdElements = await Element.insertMany(elementObjects, { lean: true });
     M.log.debug('create(): After insertMany()');
 
     promises = [];
-    const createdIDs = await createdElements.ops.map(e => e._id);
+    const createdIDs = await createdElements.map(e => e._id);
     // Find elements in batches
     for (let i = 0; i < createdIDs.length / 50000; i++) {
       // Split elementIDs list into batches of 50000
       const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
 
       // Add find operation to promises array
-      promises.push(Element.find(tmpQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString).lean(validatedOptions.lean)
+      promises.push(Element.find(tmpQuery, validatedOptions.fieldsString,
+        { populate: validatedOptions.populateString,
+          lean: validatedOptions.lean
+        })
       .then((_foundElements) => {
         populatedElements = populatedElements.concat(_foundElements);
       }));
@@ -719,10 +725,10 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branID = sani.mongo(branchID);
-    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    const saniElements = sani.db(JSON.parse(JSON.stringify(elements)));
     let foundElements = [];
     let elementsToUpdate = [];
     const duplicateCheck = {};
@@ -833,7 +839,8 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       index++;
     });
 
-    const referencedProjects2 = await Project.find({ _id: { $in: projectRefs } }).lean();
+    const referencedProjects2 = await Project.find({ _id: { $in: projectRefs } },
+      null, { lean: true });
 
     // Verify each project reference has a visibility of 'internal'
     referencedProjects2.forEach((proj) => {
@@ -854,7 +861,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
 
       // Add find operation to promises array
-      promises2.push(Element.find(searchQuery).lean()
+      promises2.push(Element.find(searchQuery, null, { lean: true })
       .then((_foundElements) => {
         foundElements = foundElements.concat(_foundElements);
       }));
@@ -873,7 +880,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       );
     }
 
-    const foundSourceTarget = await Element.find(sourceTargetQuery).lean();
+    const foundSourceTarget = await Element.find(sourceTargetQuery, null, { lean: true });
 
     // Convert elementsToUpdate to JMI type 2
     const jmiType2 = jmi.convertJMI(1, 2, elementsToUpdate);
@@ -999,8 +1006,10 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
       // Add find operation to promises array
-      promises3.push(Element.find(searchQuery, validatedOptions.fieldsString)
-      .populate(validatedOptions.populateString).lean(validatedOptions.lean)
+      promises3.push(Element.find(searchQuery, validatedOptions.fieldsString,
+        { populate: validatedOptions.populateString,
+          lean: validatedOptions.lean
+        })
       .then((_foundElements) => {
         foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
       }));
@@ -1081,10 +1090,10 @@ async function createOrReplace(requestingUser, organizationID, projectID,
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branID = sani.mongo(branchID);
-    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    const saniElements = sani.db(JSON.parse(JSON.stringify(elements)));
     const duplicateCheck = {};
     let foundElements = [];
     let elementsToLookup = [];
@@ -1157,7 +1166,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
       searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
       // Add find operation to promises array
-      promises.push(Element.find(searchQuery).lean()
+      promises.push(Element.find(searchQuery, null, { lean: true })
       .then((_foundElements) => {
         foundElements = foundElements.concat(_foundElements);
       }));
@@ -1166,7 +1175,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
     // Return when all elements have been found
     await Promise.all(promises);
 
-    const foundElementIDs = await foundElements.map(e => e._id);
+    const foundElementIDs = foundElements.map(e => e._id);
 
     // Error Check: ensure user cannot replace root element
     foundElementIDs.forEach((id) => {
@@ -1208,7 +1217,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
     });
 
     // Delete elements from database
-    await Element.deleteMany({ _id: foundElementIDs }).lean();
+    await Element.deleteMany({ _id: foundElementIDs });
 
     // Emit the event elements-deleted
     EventEmitter.emit('elements-deleted', foundElements);
@@ -1314,10 +1323,10 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branID = sani.mongo(branchID);
-    const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    const saniElements = sani.db(JSON.parse(JSON.stringify(elements)));
     let elementsToFind = [];
     let uniqueIDs = [];
 
@@ -1334,7 +1343,6 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
       // Invalid parameter, throw an error
       throw new M.DataFormatError('Invalid input for removing elements.', 'warn');
     }
-
 
     // Find the organization and validate that it was found and not archived
     const organization = await helper.findAndValidate(Org, orgID);
@@ -1354,8 +1362,9 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     permissions.deleteElement(reqUser, organization, project, foundBranch);
 
     // Find the elements to delete
-    const foundElements = await Element.find({ _id: { $in: elementsToFind } }).lean();
-    const foundElementIDs = await foundElements.map(e => e._id);
+    const foundElements = await Element.find({ _id: { $in: elementsToFind } },
+      null, { lean: true });
+    const foundElementIDs = foundElements.map(e => e._id);
 
     // Check if all elements were found
     const notFoundIDs = elementsToFind.filter(e => !foundElementIDs.includes(e));
@@ -1396,7 +1405,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
       const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
       // Find batch
       promises.push(
-        Element.find({ _id: { $in: batchIDs } }).lean()
+        Element.find({ _id: { $in: batchIDs } }, null, { lean: true })
         .then((e) => {
           elementsToDelete = elementsToDelete.concat(e);
         })
@@ -1410,7 +1419,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     for (let i = 0; i < uniqueIDs.length / 50000; i++) {
       const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
       // Delete batch
-      promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
+      promises.push(Element.deleteMany({ _id: { $in: batchIDs } }));
     }
     // Return when all deletes have completed
     await Promise.all(promises);
@@ -1427,7 +1436,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     };
 
     // Find all relationships which are now broken
-    const relationships = await Element.find(relQuery).lean();
+    const relationships = await Element.find(relQuery, null, { lean: true });
     const bulkArray = [];
     promises = [];
 
@@ -1507,7 +1516,7 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
   async function findElementTreeHelper(ids) {
     try {
       // Find all elements whose parent is in the list of given ids
-      const elements = await Element.find({ parent: { $in: ids } }, '_id').lean();
+      const elements = await Element.find({ parent: { $in: ids } }, '_id', { lean: true });
       // Get a list of element ids
       const foundIDs = elements.map(e => e._id);
       // Add these elements to the global list of found elements
@@ -1594,7 +1603,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
 
   // Define nested helper function
   async function findElementParentRecursive(e) {
-    const foundElement = await Element.findOne({ _id: e.parent }).lean();
+    const foundElement = await Element.findOne({ _id: e.parent }, null, { lean: true });
     // If foundElement is null, reject with error
     if (!foundElement) {
       throw new M.NotFoundError('Parent element '
@@ -1630,7 +1639,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
 
 /**
  * @description A function which searches elements within a certain project
- * using mongo's built in text search. Returns any elements that match the text
+ * using a text-based search. Returns any elements that match the text
  * search, in order of the best matches to the worst. Searches the _id, name,
  * documentation, parent, source and target fields.
  *
@@ -1695,9 +1704,9 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branID = sani.mongo(branchID);
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
     const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
     // Validate and set the options
@@ -1730,7 +1739,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
           }
 
           // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+          searchQuery[o] = sani.db(options[o]);
         }
       });
     }
@@ -1739,11 +1748,11 @@ async function search(requestingUser, organizationID, projectID, branchID, query
     const organization = await helper.findAndValidate(Org, orgID,
       ((options && options.archived) || validatedOptions.includeArchived));
 
-    // Find the project and validate that it was found and not archived (unless specificed)
+    // Find the project and validate that it was found and not archived (unless specified)
     const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
       ((options && options.archived) || validatedOptions.includeArchived));
 
-    // Find the branch and validate that it was found and not archived (unless specificed)
+    // Find the branch and validate that it was found and not archived (unless specified)
     const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
       ((options && options.archived) || validatedOptions.includeArchived));
 
@@ -1781,12 +1790,13 @@ async function search(requestingUser, organizationID, projectID, branchID, query
     projections.score.$meta = 'textScore';
 
     // Search for the elements
-    return await Element.find(searchQuery, projections)
-    .skip(validatedOptions.skip)
-    .limit(validatedOptions.limit)
-    .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+    return await Element.find(searchQuery, projections,
+      { skip: validatedOptions.skip,
+        limit: validatedOptions.limit,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populate,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -1821,7 +1831,7 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
   async function findElementTreeHelper(searchID) {
     try {
       // Find the parent of the element
-      const parent = await Element.findOne({ _id: searchID }, { _id: 1, parent: 1 }).lean();
+      const parent = await Element.findOne({ _id: searchID }, 'parent', { lean: true });
       // Ensure the parent was found
       if (!parent) {
         throw new M.DataFormatError('Element or parent not found', 'warn');

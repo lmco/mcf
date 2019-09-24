@@ -42,7 +42,7 @@
  * <h4>Documentation</h4>
  * <p>The documentation field allows users to store arbitrary text about a
  * certain element. The documentation field is included with the name in a
- * "text" index, and can be searched through using a MongoDB text search.</p>
+ * "text" index, and can be searched through using a text search.</p>
  *
  * <h4>Virtuals</h4>
  * <p>Elements support three virtuals: contains, sourceOf and targetOf. These
@@ -56,26 +56,24 @@
  * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data
  * is stored in an object, and can contain any valid JSON the user desires.
  * Only users with write and admin permissions on the project can update the
- * element's custom data.</p>
+ * element's custom data. The field "custom" is common to all models, and is
+ * added through the extensions plugin.</p>
  */
 
-// NPM modules
-const mongoose = require('mongoose');
-
 // MBEE modules
+const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
 
 
-/* ---------------------------( Element Schemas )---------------------------- */
+/* ----------------------------( Element Schema )---------------------------- */
 /**
  * @namespace
  *
  * @description The base schema definition inherited by all other element types.
  *
- * @property {string} _id - The elements non-unique element ID.
- * or taken from another source if imported.
+ * @property {string} _id - The elements unique element ID.
  * @property {string} name - The elements non-unique name.
  * @property {string} project - A reference to an element's project.
  * @property {string} branch - A reference to an element's branch.
@@ -86,17 +84,13 @@ const utils = M.require('lib.utils');
  * element is a relationship. NOTE: If target is provided, source is required.
  * @property {string} documentation - The element documentation.
  * @property {string} type - An optional type string.
- * @property {Object} custom - JSON used to store additional date.
  *
  */
-const ElementSchema = new mongoose.Schema({
+const ElementSchema = new db.Schema({
   _id: {
-    type: String,
+    type: 'String',
     required: true,
-    match: RegExp(validators.element.id),
-    maxlength: [validators.element.idLength, 'Too many characters in ID'],
-    minlength: [11, 'Too few characters in ID'],
-    validate: {
+    validate: [{
       validator: function(v) {
         const elemID = utils.parseID(v).pop();
         // If the ID is a reserved keyword, reject
@@ -104,14 +98,37 @@ const ElementSchema = new mongoose.Schema({
       },
       message: 'Element ID cannot include the following words: '
         + `[${validators.reserved}].`
-    }
+    }, {
+      validator: function(v) {
+        // If the ID is longer than max length, reject
+        return v.length <= validators.element.idLength;
+      },
+      // Return a message, with calculated length of element ID (element.max - branch.max - :)
+      message: props => `Element ID length [${props.value.length - validators.branch.idLength - 1}]`
+        + ` must not be more than ${validators.element.idLength - validators.branch.idLength - 1}`
+        + ' characters.'
+    }, {
+      validator: function(v) {
+        // If the ID is shorter than min length, reject
+        return v.length > 10;
+      },
+      // Return a message, with calculated length of element ID (element.min - branch.min - :)
+      message: props => `Element ID length [${props.value.length - 9}] must not`
+        + ' be less than 2 characters.'
+    }, {
+      validator: function(v) {
+        // If the ID is invalid, reject
+        return RegExp(validators.element.id).test(v);
+      },
+      message: props => `Invalid element ID [${utils.parseID(props.value).pop()}].`
+    }]
   },
   name: {
-    type: String,
+    type: 'String',
     default: ''
   },
   project: {
-    type: String,
+    type: 'String',
     required: true,
     ref: 'Project',
     validate: {
@@ -122,7 +139,7 @@ const ElementSchema = new mongoose.Schema({
     }
   },
   branch: {
-    type: String,
+    type: 'String',
     required: true,
     ref: 'Branch',
     index: true,
@@ -134,7 +151,7 @@ const ElementSchema = new mongoose.Schema({
     }
   },
   parent: {
-    type: String,
+    type: 'String',
     ref: 'Element',
     default: null,
     index: true,
@@ -146,7 +163,7 @@ const ElementSchema = new mongoose.Schema({
     }
   },
   source: {
-    type: String,
+    type: 'String',
     ref: 'Element',
     default: null,
     index: true,
@@ -167,7 +184,7 @@ const ElementSchema = new mongoose.Schema({
     }]
   },
   target: {
-    type: String,
+    type: 'String',
     ref: 'Element',
     default: null,
     index: true,
@@ -188,17 +205,13 @@ const ElementSchema = new mongoose.Schema({
     }]
   },
   documentation: {
-    type: String,
+    type: 'String',
     default: ''
   },
   type: {
-    type: String,
+    type: 'String',
     index: true,
     default: ''
-  },
-  custom: {
-    type: mongoose.Schema.Types.Mixed,
-    default: {}
   }
 }); // end of ElementSchema
 
@@ -209,6 +222,7 @@ ElementSchema.virtual('contains', {
   justOne: false,
   default: []
 });
+
 
 // Virtual which stores elements that the retrieved element is a source of
 ElementSchema.virtual('sourceOf', {
@@ -239,82 +253,55 @@ ElementSchema.plugin(extensions);
  * @description Returns element fields that can be changed
  * @memberOf ElementSchema
  */
-ElementSchema.methods.getValidUpdateFields = function() {
+ElementSchema.method('getValidUpdateFields', function() {
   return ['name', 'documentation', 'custom', 'archived', 'parent', 'type',
     'source', 'target'];
-};
+});
 
-ElementSchema.statics.getValidUpdateFields = function() {
-  return ElementSchema.methods.getValidUpdateFields();
-};
+ElementSchema.static('getValidUpdateFields', function() {
+  return ['name', 'documentation', 'custom', 'archived', 'parent', 'type',
+    'source', 'target'];
+});
 
 /**
  * @description Returns element fields that can be changed in bulk
  * @memberOf ElementSchema
  */
-ElementSchema.methods.getValidBulkUpdateFields = function() {
+ElementSchema.method('getValidBulkUpdateFields', function() {
   return ['name', 'documentation', 'custom', 'archived', 'type', 'source',
     'target'];
-};
+});
 
-ElementSchema.statics.getValidBulkUpdateFields = function() {
-  return ElementSchema.methods.getValidBulkUpdateFields();
-};
+ElementSchema.static('getValidBulkUpdateFields', function() {
+  return ['name', 'documentation', 'custom', 'archived', 'type', 'source',
+    'target'];
+});
 
 /**
  * @description Returns a list of fields a requesting user can populate
  * @memberOf ElementSchema
  */
-ElementSchema.methods.getValidPopulateFields = function() {
+ElementSchema.method('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source',
     'target', 'project', 'branch', 'sourceOf', 'targetOf', 'contains'];
-};
+});
 
-ElementSchema.statics.getValidPopulateFields = function() {
-  return ElementSchema.methods.getValidPopulateFields();
-};
+ElementSchema.static('getValidPopulateFields', function() {
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source',
+    'target', 'project', 'branch', 'sourceOf', 'targetOf', 'contains'];
+});
 
 /**
  * @description Returns a list of valid root elements
  * @memberOf ElementSchema
  */
-ElementSchema.methods.getValidRootElements = function() {
+ElementSchema.method('getValidRootElements', function() {
   return ['model', '__mbee__', 'holding_bin', 'undefined'];
-};
+});
 
-ElementSchema.statics.getValidRootElements = function() {
-  return ElementSchema.methods.getValidRootElements();
-};
-
-/**
- * @description Validates an object to ensure that it only contains keys
- * which exist in the element model.
- *
- * @param {Object} object - Object for key verification.
- * @return {boolean} The boolean indicating if the object contained only
- * existing fields.
- */
-ElementSchema.statics.validateObjectKeys = function(object) {
-  // Initialize returnBool to true
-  let returnBool = true;
-  // Check if the object is NOT an instance of the element model
-  if (!(object instanceof mongoose.model('Element', ElementSchema))) {
-    let validKeys = Object.keys(ElementSchema.paths);
-    validKeys = validKeys.filter((elem, pos) => validKeys.indexOf(elem) === pos);
-    validKeys.push('id');
-    // Loop through each key of the object
-    Object.keys(object).forEach(key => {
-      // Check if the object key is a key in the element model
-      if (!validKeys.includes(key)) {
-        // Key is not in element model, return false
-        returnBool = false;
-      }
-    });
-  }
-  // All object keys found in element model or object was an instance of
-  // element model, return true
-  return returnBool;
-};
+ElementSchema.static('getValidRootElements', function() {
+  return ['model', '__mbee__', 'holding_bin', 'undefined'];
+});
 
 /* ---------------------------( Element Indexes )---------------------------- */
 
@@ -329,13 +316,5 @@ ElementSchema.index({
 });
 
 
-/* --------------------------( Element Properties )-------------------------- */
-
-// Required for virtual getters
-ElementSchema.set('toJSON', { virtuals: true });
-ElementSchema.set('toObject', { virtuals: true });
-
-
 /* ------------------------( Element Schema Export )------------------------- */
-
-module.exports = mongoose.model('Element', ElementSchema);
+module.exports = new db.Model('Element', ElementSchema);

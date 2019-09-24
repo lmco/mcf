@@ -28,8 +28,6 @@ const sani = M.require('lib.sanitization');
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  it('should remove invalid mongo query keys from objects', mongoSanTest);
-  it('should remove mongo queries if the keys are strings', stringKeyMongoTest);
   it('should sanitize html inputs by user', htmlTest);
   it('should sanitize a JSON object for html input', sanitizeHtmlObject);
   it('should not sanitize the allowed exceptions', sanitizeAllowedCharacters);
@@ -37,25 +35,6 @@ describe(M.getModuleName(module.filename), () => {
 });
 
 /* --------------------( Tests )-------------------- */
-/**
- * @description Loads the sanitization library.
- */
-function mongoSanTest(done) {
-  const mongoSan = sani.mongo({ $lt: 10 });
-  chai.expect(Object.keys(mongoSan).length).to.equal(0);
-  done();
-}
-
-/**
- * @description Tests the html and mongo sanitization with input of
- * html. Expected output to be an empty object
- */
-function stringKeyMongoTest(done) {
-  const mongoStringSan = sani.mongo({ '$<script>': null });
-  chai.expect(Object.keys(mongoStringSan).length).to.equal(0);
-  done();
-}
-
 /**
  * @description Tests the html sanitation with html input.
  * Expected to change the html input.

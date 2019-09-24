@@ -112,7 +112,7 @@ function whoami(done) {
 
     // Verify expected response
     // NOTE: Test admin does not have a name, custom data or email
-    chai.expect(foundUser.username).to.equal(adminUser.username);
+    chai.expect(foundUser.username).to.equal(adminUser._id);
     chai.expect(foundUser).to.not.have.any.keys('password', '_id', '__v');
 
     // Expect the statusCode to be 200
@@ -158,8 +158,8 @@ function postUser(done) {
     // Verify extra properties
     chai.expect(createdUser.createdOn).to.not.equal(null);
     chai.expect(createdUser.updatedOn).to.not.equal(null);
-    chai.expect(createdUser.createdBy).to.equal(adminUser.username);
-    chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdUser.createdBy).to.equal(adminUser._id);
+    chai.expect(createdUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdUser.archived).to.equal(false);
     chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
 
@@ -217,8 +217,8 @@ function postUsers(done) {
       // Verify extra properties
       chai.expect(createdUser.createdOn).to.not.equal(null);
       chai.expect(createdUser.updatedOn).to.not.equal(null);
-      chai.expect(createdUser.createdBy).to.equal(adminUser.username);
-      chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdUser.createdBy).to.equal(adminUser._id);
+      chai.expect(createdUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdUser.archived).to.equal(false);
       chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -266,8 +266,8 @@ function putUser(done) {
     // Verify extra properties
     chai.expect(replacedUser.createdOn).to.not.equal(null);
     chai.expect(replacedUser.updatedOn).to.not.equal(null);
-    chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedUser.archived).to.equal(false);
     chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
 
@@ -326,8 +326,8 @@ function putUsers(done) {
       // Verify extra properties
       chai.expect(replacedUser.createdOn).to.not.equal(null);
       chai.expect(replacedUser.updatedOn).to.not.equal(null);
-      chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
-      chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedUser.createdBy).to.equal(adminUser._id);
+      chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedUser.archived).to.equal(false);
       chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -375,8 +375,8 @@ function getUser(done) {
     // Verify extra properties
     chai.expect(foundUser.createdOn).to.not.equal(null);
     chai.expect(foundUser.updatedOn).to.not.equal(null);
-    chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-    chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+    chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundUser.archived).to.equal(false);
     chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
 
@@ -436,8 +436,8 @@ function getUsers(done) {
       // Verify extra properties
       chai.expect(foundUser.createdOn).to.not.equal(null);
       chai.expect(foundUser.updatedOn).to.not.equal(null);
-      chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundUser.archived).to.equal(false);
       chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -488,7 +488,7 @@ function getAllUsers(done) {
       // Ensure user was found
       chai.expect(foundUser).to.not.equal(undefined);
 
-      if (foundUser.username !== adminUser.username) {
+      if (foundUser.username !== adminUser._id) {
         // Verify expected response
         chai.expect(foundUser.username).to.equal(userDataObject.username);
         chai.expect(foundUser.fname).to.equal(userDataObject.fname);
@@ -502,8 +502,8 @@ function getAllUsers(done) {
         // Verify extra properties
         chai.expect(foundUser.createdOn).to.not.equal(null);
         chai.expect(foundUser.updatedOn).to.not.equal(null);
-        chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-        chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+        chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+        chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
         chai.expect(foundUser.archived).to.equal(false);
         chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
       }
@@ -575,8 +575,8 @@ function searchUsers(done) {
       // Verify extra properties
       chai.expect(foundUser.createdOn).to.not.equal(null);
       chai.expect(foundUser.updatedOn).to.not.equal(null);
-      chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundUser.archived).to.equal(false);
       chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -628,8 +628,8 @@ function patchUser(done) {
     // Verify extra properties
     chai.expect(updatedUser.createdOn).to.not.equal(null);
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
-    chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
 
@@ -692,8 +692,8 @@ function patchUsers(done) {
       // Verify extra properties
       chai.expect(updatedUser.createdOn).to.not.equal(null);
       chai.expect(updatedUser.updatedOn).to.not.equal(null);
-      chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedUser.archived).to.equal(false);
       chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -747,8 +747,8 @@ function patchUserPassword(done) {
     // Verify extra properties
     chai.expect(updatedUser.createdOn).to.not.equal(null);
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
-    chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
 

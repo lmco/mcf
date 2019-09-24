@@ -114,7 +114,7 @@ async function putInvalidId() {
 
   await OrgController.createOrReplace(adminUser, [testOrgObj0, testOrgObj1, invalidOrgObj])
   .should.eventually.be.rejectedWith(
-    'Organization validation failed: _id: Path `_id` is invalid (INVALID_ID).'
+    `Organization validation failed: _id: Invalid org ID [${invalidOrgObj.id}].`
   );
 
   let foundOrgs;

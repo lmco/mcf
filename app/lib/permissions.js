@@ -77,7 +77,7 @@ function readUser(user) {
  */
 function updateUser(user, userToUpdate) {
   try {
-    assert.ok(user.admin || user.username === userToUpdate._id);
+    assert.ok(user.admin || user._id === userToUpdate._id, '');
   }
   catch (error) {
     throw new M.PermissionError('User does not have permission to update other users.', 'warn');
@@ -123,7 +123,7 @@ function createOrg(user) {
  */
 function readOrg(user, org) {
   try {
-    assert.ok(user.admin || org.permissions.hasOwnProperty(user._id));
+    assert.ok(user.admin || org.permissions.hasOwnProperty(user._id), '');
   }
   catch (error) {
     throw new M.PermissionError(`User does not have permission to find the org [${org._id}].`, 'warn');
@@ -142,8 +142,8 @@ function readOrg(user, org) {
 function updateOrg(user, org) {
   try {
     if (!user.admin) {
-      assert.ok(org.permissions.hasOwnProperty(user._id));
-      assert.ok(org.permissions[user._id].includes('admin'));
+      assert.ok(org.permissions.hasOwnProperty(user._id), '');
+      assert.ok(org.permissions[user._id].includes('admin'), '');
     }
   }
   catch (error) {
@@ -178,8 +178,8 @@ function deleteOrg(user) {
 function createProject(user, org) {
   try {
     if (!user.admin) {
-      assert.ok(org.permissions.hasOwnProperty(user._id));
-      assert.ok(org.permissions[user._id].includes('write'));
+      assert.ok(org.permissions.hasOwnProperty(user._id), '');
+      assert.ok(org.permissions[user._id].includes('write'), '');
     }
   }
   catch (error) {
@@ -203,11 +203,11 @@ function readProject(user, org, project) {
     if (!user.admin) {
       if (project.visibility === 'internal') {
         // User only needs read permissions on the org to read the project.
-        assert.ok(org.permissions.hasOwnProperty(user._id));
+        assert.ok(org.permissions.hasOwnProperty(user._id), '');
       }
       else if (project.visibility === 'private') {
         // User must have read permissions on project.
-        assert.ok(project.permissions.hasOwnProperty(user._id));
+        assert.ok(project.permissions.hasOwnProperty(user._id), '');
       }
     }
   }
@@ -268,7 +268,7 @@ function deleteProject(user, org, project) {
  * @params {Project} project - The project to add elements to.
  * @params {Branch} branch - Param not yet supported.
  *
- * @throws {PermissionError
+ * @throws {PermissionError}
  */
 function createElement(user, org, project, branch) {
   try {
@@ -296,18 +296,18 @@ function createElement(user, org, project, branch) {
  * @params {Project} project - The project containing the elements.
  * @params {Branch} branch - Param not yet supported.
  *
- * @throws {PermissionError
+ * @throws {PermissionError}
  */
 function readElement(user, org, project, branch) {
   try {
     if (!user.admin) {
       if (project.visibility === 'internal') {
         // User only needs read permissions on the org to read the project.
-        assert.ok(org.permissions.hasOwnProperty(user._id));
+        assert.ok(org.permissions.hasOwnProperty(user._id), '');
       }
       else if (project.visibility === 'private') {
         // User must have read permissions on project.
-        assert.ok(project.permissions.hasOwnProperty(user._id));
+        assert.ok(project.permissions.hasOwnProperty(user._id), '');
       }
     }
   }
@@ -326,7 +326,7 @@ function readElement(user, org, project, branch) {
  * @params {Project} project - The project containing the elements.
  * @params {Branch} branch - Param not yet supported.
  *
- * @throws {PermissionError
+ * @throws {PermissionError}
  */
 function updateElement(user, org, project, branch) {
   try {

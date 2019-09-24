@@ -15,6 +15,9 @@
  * @description Defines sanitization functions.
  */
 
+// MBEE modules
+const db = M.require('lib.db');
+
 /**
  * @description Sanitizes database queries and scripting tags.
  *
@@ -23,41 +26,14 @@
  * @return {string} Sanitized string
  */
 module.exports.sanitize = function(userInput) {
-  return module.exports.mongo(module.exports.html(userInput));
+  return module.exports.db(module.exports.html(userInput));
 };
 
 /**
- * @description Sanitizes database queries.
- *
- * <p> +-------+-----------------+
- * <br>| Input | Sanitized Output|
- * <br>+-------+-----------------+
- * <br>|   $   |                 |
- * <br>+-------+-----------------+ </p>
- *
- * @param {Object} userInput - User object data to be sanitized.
+ * @description Sanitizes database queries. Uses the sanitize function defined
+ * in the database strategy defined in the running config.
  */
-module.exports.mongo = function(userInput) {
-  if (Array.isArray(userInput)) {
-    return userInput.map((value) => this.mongo(value));
-  }
-  else if (userInput instanceof Object) {
-    // Check for '$' in each key parameter of userInput
-    Object.keys(userInput).forEach((key) => {
-      // If '$' in key, remove key from userInput
-      if (/^\$/.test(key)) {
-        delete userInput[key];
-      }
-      // If the value is an object
-      else if (typeof userInput[key] === 'object' && userInput[key] !== null) {
-        // Recursively call function on value
-        this.mongo(userInput[key]);
-      }
-    });
-  }
-  // Return modified userInput
-  return userInput;
-};
+module.exports.db = db.sanitize;
 
 /**
  * @description Sanitizes HTML input.

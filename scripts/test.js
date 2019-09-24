@@ -38,9 +38,7 @@ if (module.parent == null) {
  */
 function test(_args) {
   printHeader();
-  M.log.verbose('Running tests on mongo instance...');
-  M.log.verbose(`Mongo IP: ${M.config.db.url}:${M.config.db.port}`);
-  M.log.verbose(`Mongo DB: ${M.config.db.name}`);
+  M.log.verbose(`Running tests with DB strategy: ${M.config.db.strategy}`);
 
   // Remove --force from args
   if (_args.includes('--force')) {
@@ -58,7 +56,7 @@ function test(_args) {
   // Add default slow speed if not provided
   if (!_args.includes('--slow')) {
     _args.push('--slow');
-    _args.push('19');
+    _args.push('50');
   }
 
   // Add default grep command to define which tests to run

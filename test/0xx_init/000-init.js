@@ -19,13 +19,13 @@
  */
 
 // NPM modules
-const mongoose = require('mongoose');
 const chai = require('chai');
 
 // MBEE modules
 const Element = M.require('models.element');
-const User = M.require('models.user');
 const Organization = M.require('models.organization');
+const ServerData = M.require('models.server-data');
+const User = M.require('models.user');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
@@ -69,14 +69,12 @@ describe(M.getModuleName(module.filename), function() {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Cleans out the database by removing all items from all MongoDB
+ * @description Cleans out the database by removing all items from all
  * collections.
  */
 function cleanDB(done) {
-  mongoose.connection.db.dropDatabase()
-  .then(() => mongoose.connection.db.createCollection('server_data'))
-  .then(() => mongoose.connection.db.collection('server_data')
-  .insertOne({ version: M.schemaVersion }))
+  db.clear()
+  .then(() => ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]))
   // Ensure element indexes are created prior to running other tests
   .then(() => Element.ensureIndexes())
   // Ensure user indexes are created prior to running other tests
@@ -101,7 +99,7 @@ function createDefaultOrg(done) {
     chai.expect(org).to.equal(null);
 
     // Create default org object
-    const defOrg = new Organization({
+    const defOrg = Organization.createDocument({
       _id: M.config.server.defaultOrganizationId,
       name: M.config.server.defaultOrganizationName,
       createdBy: null,

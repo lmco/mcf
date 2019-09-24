@@ -116,7 +116,7 @@ async function authenticate(req, res, next) {
         // Handle Basic Authentication
         const user = await AuthModule.handleBasicAuth(req, res, username, password);
         // Successfully authenticated basic auth!
-        M.log.info(`Authenticated [${user.username}] via Basic Auth`);
+        M.log.info(`Authenticated [${user._id}] via Basic Auth`);
 
         // Set user req object
         req.user = user;
@@ -160,7 +160,7 @@ async function authenticate(req, res, next) {
         // Handle Token Authentication
         const user = await AuthModule.handleTokenAuth(req, res, token);
         // Successfully authenticated token auth!
-        M.log.info(`Authenticated [${user.username}] via Token Auth`);
+        M.log.info(`Authenticated [${user._id}] via Token Auth`);
 
         // Set user req object
         req.user = user;
@@ -206,7 +206,7 @@ async function authenticate(req, res, next) {
       // Handle Token Authentication
       const user = await AuthModule.handleTokenAuth(req, res, token);
       // Successfully authenticated token session!
-      M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
+      M.log.info(`Authenticated [${user._id}] via Session Token Auth`);
 
       // Set user req object
       req.user = user;
@@ -246,7 +246,7 @@ async function authenticate(req, res, next) {
       // Handle Basic Authentication
       const user = await AuthModule.handleBasicAuth(req, res, username, password);
       // Successfully authenticate credentials!
-      M.log.info(`Authenticated [${user.username}] via Form Input`);
+      M.log.info(`Authenticated [${user._id}] via Form Input`);
 
       // Set user req object
       req.user = user;

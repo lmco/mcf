@@ -26,6 +26,7 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 // MBEE modules
 const Org = M.require('models.organization');
 const db = M.require('lib.db');
+const validators = M.require('lib.validators');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -84,11 +85,11 @@ async function idTooShort() {
   orgData._id = '0';
 
   // Create org object
-  const orgObject = new Org(orgData);
+  const orgObject = Org.createDocument(orgData);
 
   // Save org
   await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed:'
-    + ' _id: Too few characters in ID');
+    + ` _id: Org ID length [${orgData._id.length}] must not be less than 2 characters.`);
 }
 
 /**
@@ -101,11 +102,12 @@ async function idTooLong() {
   orgData._id = '01234567890123456789012345678901234567890123456789012345678912345';
 
   // Create org object
-  const orgObject = new Org(orgData);
+  const orgObject = Org.createDocument(orgData);
 
   // Save org
   await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-    + '_id: Too many characters in ID');
+    + `_id: Org ID length [${orgData._id.length}] must not be more than `
+    + `${validators.org.idLength} characters.`);
 }
 
 /**
@@ -123,11 +125,11 @@ async function invalidID() {
   orgData._id = 'INVALID_ID';
 
   // Create org object
-  const orgObject = new Org(orgData);
+  const orgObject = Org.createDocument(orgData);
 
   // Save org
   await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-    + `_id: Path \`_id\` is invalid (${orgData._id})`);
+    + `_id: Invalid org ID [${orgData._id}].`);
 }
 
 /**
@@ -137,7 +139,7 @@ async function idNotProvided() {
   const orgData = Object.assign({}, testData.orgs[0]);
 
   // Create org object
-  const orgObject = new Org(orgData);
+  const orgObject = Org.createDocument(orgData);
 
   // Save org
   await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
@@ -155,7 +157,7 @@ async function nameNotProvided() {
   delete orgData.name;
 
   // Create org object
-  const orgObject = new Org(orgData);
+  const orgObject = Org.createDocument(orgData);
 
   // Save org
   await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
@@ -175,7 +177,7 @@ async function permissionsInvalid() {
   };
 
   // Create org object
-  const orgObject = new Org(orgData);
+  const orgObject = Org.createDocument(orgData);
 
   // Expect save() to fail with specific error message
   await orgObject.save().should.eventually.be.rejectedWith(
