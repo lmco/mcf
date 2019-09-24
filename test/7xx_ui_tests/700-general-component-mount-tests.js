@@ -14,6 +14,14 @@
  * @description This tests that the general component mount
  * and render.
  */
+const fs = require('fs');
+const path = require('path');
+const { JSDOM } = require("jsdom");
+import { configure } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+// Configure enzyme adaptor
+configure({ adapter: new Adapter() });
+const mbeeWhoAmI = fs.readFileSync(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'), { encoding: "utf-8" });
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
@@ -26,7 +34,6 @@ import chai from 'chai';
 // MBEE components
 import List from '../../app/ui/components/general/list/list.jsx';
 import ListItem from '../../app/ui/components/general/list/list-item.jsx';
-import CustomData from '../../app/ui/components/general/custom-data/custom-data.jsx';
 import KeyData from '../../app/ui/components/general/custom-data/key-data.jsx';
 import Divider from '../../app/ui/components/general/sidebar/divider.jsx';
 import SidebarHeader from '../../app/ui/components/general/sidebar/sidebar-header.jsx';
@@ -42,6 +49,17 @@ import SidebarHeader from '../../app/ui/components/general/sidebar/sidebar-heade
  */
 
 describe(M.getModuleName(module.filename), () => {
+  let window;
+  beforeEach(() => {
+    window = (new JSDOM('<!doctype html><body></body></html>', { runScripts: 'dangerously' })).window;
+    var $ = require('jquery')(window);
+
+    // Execute my library by inserting a <script> tag containing it.
+    const scriptEl = window.document.createElement('script');
+    scriptEl.textContent = mbeeWhoAmI;
+    window.document.body.appendChild(scriptEl);
+  });
+
   it('Renders the list component', listRender);
   it('Renders the list item component', listItemRender);
   it('Renders the key data component', keyDataRender);

@@ -27,7 +27,7 @@ import List from '../general/list/list.jsx';
 import OrgList from '../home-views/org-list.jsx';
 import Create from '../shared-views/create.jsx';
 import Delete from '../shared-views/delete.jsx';
-import InputGroup from 'reactstrap/es/InputGroup';
+import { InputGroup } from 'reactstrap';
 
 // Define HomePage Component
 class Home extends Component {
