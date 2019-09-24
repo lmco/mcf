@@ -1,0 +1,52 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.sass.components.workspace-components._project
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description Defines the project page sass variables
+ */
+@import '../utils/_variables';
+
+.branch-link {
+  color: $mbee-navbar-color;
+
+  &:hover {
+    color: lighten($mbee-navbar-color, 20);
+    text-decoration: none;
+  }
+}
+
+// TODO (ld): consider moving this to model
+// TODO (ld): or consider moving model into project page
+.model-dropdown-btn {
+  &:active {
+    border: none;
+    outline: none;
+  }
+  &:focus {
+    border: none;
+    outline: none;
+  }
+}
+
+.proj-org-header {
+  a {
+    width: 10%;
+
+    &:hover {
+      color: lighten($mbee-navbar-color, 20);
+    }
+  }
+
+  &:hover {
+    background: #f7f7f7;
+  }
+}

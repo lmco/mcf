@@ -275,7 +275,7 @@ class MemberEdit extends Component {
         <h2>{header}</h2>
         <hr />
         <div>
-          <h3 className='edit-role-title'> {title} </h3>
+          <h3> {title} </h3>
           {(!this.state.error)
             ? ''
             : (<UncontrolledAlert color="danger">
@@ -301,7 +301,7 @@ class MemberEdit extends Component {
           <Form style={{ paddingTop: '10px' }}>
             {/* Permissions user updates with */}
             <FormGroup>
-              <Label for="permissions">Permissions</Label>
+              <Label for='permissions'>Permissions</Label>
               <Input type='select'
                      name='permissions'
                      id='permissions'

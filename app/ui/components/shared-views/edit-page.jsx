@@ -196,7 +196,7 @@ class EditPage extends Component {
     // Render organization edit page
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header'>
+        <div className='workspace-header'>
           <h2 className='workspace-title workspace-title-padding'>Edit {title}</h2>
         </div>
         <div id='workspace-body' className='extra-padding'>

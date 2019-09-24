@@ -202,7 +202,7 @@ class Delete extends Component {
     // Return the project delete form
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header'>
+        <div className='workspace-header'>
           <h2 className='workspace-title workspace-title-padding'>
             Delete {title}
           </h2>
