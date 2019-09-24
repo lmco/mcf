@@ -147,7 +147,9 @@ class ElementSubtree extends Component {
    * Toggle the element to display it's children
    */
   toggleCollapse() {
-    this.props.unsetCheckbox();
+    if (this.props.unsetCheckbox) {
+      this.props.unsetCheckbox();
+    }
     this.setState((prevState) => ({ isOpen: !prevState.isOpen }));
   }
 
