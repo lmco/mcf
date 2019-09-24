@@ -15,17 +15,12 @@
  */
 @import '../utils/_variables';
 
-.proj-org-header {
-  a {
-    width: 10%;
-
-    &:hover {
-      color: lighten($mbee-navbar-color, 20);
-    }
-  }
+.branch-link {
+  color: $mbee-navbar-color;
 
   &:hover {
-    background: #f7f7f7;
+    color: lighten($mbee-navbar-color, 20);
+    text-decoration: none;
   }
 }
 
@@ -42,11 +37,16 @@
   }
 }
 
-.branch-link {
-  color: $mbee-navbar-color;
+.proj-org-header {
+  a {
+    width: 10%;
+
+    &:hover {
+      color: lighten($mbee-navbar-color, 20);
+    }
+  }
 
   &:hover {
-    color: lighten($mbee-navbar-color, 20);
-    text-decoration: none;
+    background: #f7f7f7;
   }
 }
