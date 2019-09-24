@@ -440,7 +440,7 @@ async function optionIncludeArchivedFind() {
     // Verify all of the archived fields are properly set
     chai.expect(archivedUser.archived).to.equal(true);
     chai.expect(archivedUser.archivedOn).to.not.equal(null);
-    chai.expect(archivedUser.archivedBy).to.equal(adminUser.username);
+    chai.expect(archivedUser.archivedBy).to.equal(adminUser._id);
     // Remove test user
     await UserController.remove(adminUser, userData.username);
   }
@@ -811,7 +811,6 @@ async function optionFieldsUpdate() {
 
     // Validate user
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Update the user with the find options
@@ -820,7 +819,6 @@ async function optionFieldsUpdate() {
 
     // Validate that the user updated properly
     chai.expect(updatedUser._id).to.equal(userData.username);
-    chai.expect(updatedUser.username).to.equal(userData.username);
     chai.expect(updatedUser.fname).to.equal(updateUser.fname);
 
     // Create the list of fields that should be returned
@@ -840,7 +838,6 @@ async function optionFieldsUpdate() {
 
     // Validate that the user updated properly
     chai.expect(updatedUser2._id).to.equal(userData.username);
-    chai.expect(updatedUser2.username).to.equal(userData.username);
     chai.expect(updatedUser2.fname).to.equal(updateUser.fname);
 
     // Create the list of fields that should not be returned
@@ -1136,7 +1133,6 @@ async function optionIncludeArchivedSearch() {
 
     // Verify user created
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.fname).to.equal(userData.fname);
 
     // Verify user archived
