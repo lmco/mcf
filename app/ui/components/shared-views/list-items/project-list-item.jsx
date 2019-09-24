@@ -69,11 +69,9 @@ class ProjectListItem extends Component {
     // Initialize variables
     const project = this.props.project;
     let colorClass;
-    console.log(project);
 
     // Verify if archived
     if (project.archived) {
-      console.log('am i being hit')
       // Gray-out the name
       colorClass = 'archived-link';
     }

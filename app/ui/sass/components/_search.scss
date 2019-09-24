@@ -16,86 +16,9 @@
 @import '../utils/_variables';
 
 /******************************************************************************
-/*                           Search Form Styling                              *
-/******************************************************************************/
-%btn-page {
-  font-size: 0.875rem;
-  border: none;
-  background-color: Transparent;
-  box-shadow: none;
-  color: $color-primary;
-}
-
-#btn-pagination-grp {
-  float: right;
-}
-
-#btn-next-result-page, #btn-prev-result-page {
-  @extend %btn-page;
-}
-
-.no-results {
-  display: flex;
-  justify-content: center;
-  margin: 20px;
-}
-
-#search {
-  overflow-y: scroll;
-  height: 100%;
-}
-
-.search-body {
-  margin: 1em;
-  font-size: smaller;
-  grid-area: header;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 300;
-}
-
-#search-branch-bar {
-  padding: 80px 80px 0px 60px;
-}
-
-.search-container {
-  padding: 4px 80px;
-  margin-bottom: 20px;
-}
-
-.search-form {
-  padding: 0px 80px 1px;
-
-  .form-row {
-    width: 100%;
-
-    input {
-      width: 100%;
-    }
-  }
-}
-
-#search-message {
-  margin-left: 80px;
-  margin-bottom: 15px;
-  font-size: 13px;
-}
-
-#search-results {
-  width: 82%;
-  padding: 0;
-  border: 1px solid rgba(0,0,0,0.125);
-  border-radius: .25rem;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-  background-color: rgba(0,0,0,0.03);
-}
-
-/******************************************************************************
 /*                           Adv Search Form Styling                          *
 /******************************************************************************/
+
 #adv-btns-grp {
   margin: 0;
 }
@@ -123,8 +46,8 @@
 }
 
 #adv-search-header{
-  margin: 0;
   display: flex;
+  margin: 0;
 }
 
 .adv-search-row {
@@ -141,14 +64,14 @@
 }
 
 %btn-adv-row-del {
-  padding: 0;
-  margin-left: 5px;
-  font-size: 1.25rem;
   background-color: transparent;
   border-color: transparent;
   box-shadow: none;
-  outline: none !important;
   color: gray;
+  font-size: 1.25rem;
+  margin-left: 5px;
+  outline: none !important;
+  padding: 0;
 }
 
 .adv-row-del {
@@ -167,12 +90,12 @@
 }
 
 %btn-adv-standard {
-  padding: 0 0 5px;
-  font-size: 0.875rem;
-  border: none;
   background-color: Transparent;
+  border: none;
   box-shadow: none;
   color: $color-primary;
+  font-size: 0.875rem;
+  padding: 0 0 5px;
 }
 
 #btn-add-adv-row {
@@ -189,20 +112,21 @@
 }
 
 #frm-adv-label {
+  font-size: 0.9rem;
   padding: 7px 0 0 14px;
   margin: 0;
-  font-size: 0.9rem;
 }
 
 /******************************************************************************
 /*                       Adv Filter Form Styling                              *
 /******************************************************************************/
+
 .adv-elem-filters {
   margin-top: 8px;
 }
 
 #adv-filter-frm {
-  margin: 0px;
+  margin: 0;
   padding-left: 40px;
 }
 
@@ -220,10 +144,89 @@
 }
 
 #btn-grp-adv-filter {
-  margin: 0px 10px 0px 10px;
+  margin: 0 10px 0 10px;
 }
 
 #filter-menu {
   width: 475px !important;
   overflow: visible;
+}
+
+/******************************************************************************
+/*                           Search Form Styling                              *
+/******************************************************************************/
+
+%btn-page {
+  background-color: Transparent;
+  border: none;
+  box-shadow: none;
+  color: $color-primary;
+  font-size: 0.875rem;
+}
+
+#btn-pagination-grp {
+  float: right;
+}
+
+#btn-next-result-page, #btn-prev-result-page {
+  @extend %btn-page;
+}
+
+.no-results {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+}
+
+#search {
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.search-body {
+  font-size: smaller;
+  font-weight: 300;
+  grid-area: header;
+  margin: 1em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+#search-branch-bar {
+  padding: 80px 80px 0px 60px;
+}
+
+.search-container {
+  padding: 4px 80px;
+  margin-bottom: 20px;
+}
+
+.search-form {
+  padding: 0px 80px 1px;
+
+  .form-row {
+    width: 100%;
+
+    input {
+      width: 100%;
+    }
+  }
+}
+
+#search-message {
+  font-size: 13px;
+  margin-left: 80px;
+  margin-bottom: 15px;
+}
+
+#search-results {
+  border: 1px solid rgba(0,0,0,0.125);
+  border-radius: .25rem;
+  padding: 0;
+  width: 82%;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0,0,0,0.03);
 }
