@@ -20,11 +20,11 @@
 }
 
 .org-proj-list {
+  align-items: center;
   display: grid;
   grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 60px);
   grid-template-areas: "icon org button";
   justify-content: left;
-  align-items: center;
   padding-left: 10px;
   padding-right: 10px;
 
@@ -46,23 +46,18 @@
 }
 
 .proj-list {
+  align-items: center;
+  border-left: #eeeeee solid;
   display: grid;
   grid-template-columns: 1fr minmax(0px, 65px);
   grid-template-areas: "org button";
   justify-content: left;
-  align-items: center;
   padding-left: 10px;
   padding-right: 10px;
-  border-left: #eeeeee solid;
   margin-left: 25px;
 
   &:hover {
     background: #f7f7f7;
     border-left: $mbee-navbar-color solid;
   }
-}
-
-.projects-list {
-  border-left: #eeeeee solid;
-  margin-left: 25px;
 }
