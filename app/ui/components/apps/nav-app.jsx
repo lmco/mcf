@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.components.apps.home-app
+ * @module ui.components.apps.nav
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -12,7 +12,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This renders the homepage.
+ * @description This renders the nav bar.
  */
 
 /* Modified ESLint rules for React. */
@@ -20,8 +20,9 @@
 
 // React Modules
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDom from 'react-dom';
 
-import Home from '../home-views/home.jsx';
+import MbeeNav from '../general/nav-bar.jsx';
 
-ReactDOM.render(<Home />, document.getElementById('main'));
+// Render the navbar on the nav html element
+ReactDom.render(<MbeeNav />, document.getElementById('nav'));

@@ -30,7 +30,7 @@ import Delete from '../shared-views/delete.jsx';
 import InputGroup from 'reactstrap/es/InputGroup';
 
 // Define HomePage Component
-class HomeApp extends Component {
+class Home extends Component {
 
   /* eslint-enable no-unused-vars */
 
@@ -316,4 +316,4 @@ class HomeApp extends Component {
 
 }
 
-export default HomeApp;
+export default Home;

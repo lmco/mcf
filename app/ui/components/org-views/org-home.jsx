@@ -30,7 +30,7 @@ import MembersPage from '../shared-views/members/members-page.jsx';
 import OrgProjects from '../org-views/organization-projects.jsx';
 
 // Define component
-class OrgApp extends Component {
+class OrgHome extends Component {
 
   /* eslint-enable no-unused-vars */
 
@@ -196,4 +196,4 @@ class OrgApp extends Component {
 
 }
 
-export default OrgApp;
+export default OrgHome;

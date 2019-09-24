@@ -17,7 +17,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import AdminConsole from '../admin-console-views/admin-console-home.jsx';
+import AdminConsoleHome from '../admin-console-views/admin-console-home.jsx';
 
 // Render on main html element
-ReactDOM.render(<AdminConsole />, document.getElementById('main'));
+ReactDOM.render(<AdminConsoleHome />, document.getElementById('main'));

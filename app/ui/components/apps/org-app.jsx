@@ -20,11 +20,11 @@ import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import ReactDom from 'react-dom';
 
-import OrgApp from '../org-views/org-home.jsx';
+import OrgHome from '../org-views/org-home.jsx';
 
 ReactDom.render(
   <Router>
-    <Route path={'/orgs/:orgid'} component={OrgApp} />
+    <Route path={'/orgs/:orgid'} component={OrgHome} />
   </Router>,
   document.getElementById('main')
 );

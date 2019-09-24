@@ -191,7 +191,7 @@ function build(_args) {
         },
         mode: mode,
         entry: {
-          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
+          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav-app.jsx'),
           'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
           'org-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'org-app.jsx'),
           'project-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'project-app.jsx'),

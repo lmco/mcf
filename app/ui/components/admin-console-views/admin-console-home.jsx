@@ -29,7 +29,7 @@ import OrganizationList from '../profile-views/organization-list.jsx';
 import ProjectList from '../profile-views/project-list.jsx';
 
 // Define component
-class AdminConsole extends Component {
+class AdminConsoleHome extends Component {
 
   /* eslint-enable no-unused-vars */
 
@@ -85,4 +85,4 @@ class AdminConsole extends Component {
 
 }
 
-export default AdminConsole;
+export default AdminConsoleHome;

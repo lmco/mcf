@@ -20,7 +20,7 @@ import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 // Initialize fake virtual DOM
-const jsdom = new JSDOM('<!doctype html><html><body></body></html>');
+const jsdom = new JSDOM('<!doctype html><html><body><script type="text/javascript" src="../app/ui/js/mbee.js"></script></body></html>');
 const { window } = jsdom;
 
 // Configure enzyme adaptor
