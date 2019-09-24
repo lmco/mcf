@@ -1794,7 +1794,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
       { skip: validatedOptions.skip,
         limit: validatedOptions.limit,
         sort: validatedOptions.sort,
-        populate: validatedOptions.populate,
+        populate: validatedOptions.populateString,
         lean: validatedOptions.lean
       });
   }
