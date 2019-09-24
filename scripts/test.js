@@ -60,9 +60,26 @@ function test(_args) {
   }
 
   // Add default grep command to define which tests to run
-  if (!_args.includes('--grep')) {
+  if (!_args.includes('--grep') && !_args.includes('--all')) {
     _args.push('--grep');
     _args.push('^[1-57]');
+  }
+
+  // Test everything if --all was specified
+  if (_args.includes('--all')) {
+    if (M.env === 'prod') {
+      // Throw an error if the server is running as prod
+      throw new M.ServerError('MBEE environment is currently set to production.  Running all'
+        + ' tests would wipe out the production database.', 'warn');
+    }
+    else if (_args.includes('--grep')) {
+      // Throw an error if --grep and --all are used together
+      throw new M.DataFormatError('Cannot use arguements --grep and --all together', 'warn');
+    }
+    const removeInd = _args.indexOf('--all');
+    _args.splice(removeInd, 1);
+    _args.push('--grep');
+    _args.push('^[0-9]');
   }
 
   // Allocate options variable for mocha
