@@ -207,30 +207,35 @@ class Model {
    * database, if not provided the name should be used.
    */
   constructor(name, schema, collection) {
+    this.schema = schema;
+    this.tableName = collection;
     // Connect to the database
     connect()
     .then((connection) => {
       this.connection = connection;
-      // Get all existing tables
-      console.log('Getting tables')
-      return this.listTables();
-    })
-    .then((tables) => {
-      console.log(tables);
-
-      // Set the table name
-      schema.schema.TableName = collection;
-      this.tableName = schema.schema.TableName;
-      schema.schema.BillingMode = 'PAY_PER_REQUEST';
+    //   // Get all existing tables
+    //   console.log('Getting tables')
+    //   return this.listTables();
+    // })
+    // .then((tables) => {
+    //   console.log(tables);
+    //
+    //   // Set the table name
+    //   schema.schema.TableName = collection;
+    //   this.tableName = schema.schema.TableName;
+    //   schema.schema.BillingMode = 'PAY_PER_REQUEST';
     })
     .catch((error) => {
-      M.log.critical('Constructor Failed');
-      console.log(error);
+      M.log.critical('Model Constructor Failed');
     });
-    console.log("Hi!")
   }
 
-  createTable(schema) {
+  async init() {
+    const tables = await this.listTables();
+    console.log(tables);
+  }
+
+  async createTable(schema) {
     return new Promise((resolve, reject) => {
       this.connection.createTable(schema, (err, data) => {
         if (err) {
@@ -245,14 +250,14 @@ class Model {
     });
   }
 
-  listTables() {
+  async listTables() {
     return new Promise((resolve, reject) => {
       this.connection.listTables({}).promise()
       .then((tables) => resolve(tables))
       .catch((err) => {
         M.log.warn('Failed to find tables.');
         M.log.error(err);
-        return reject(err)
+        return reject(err);
       });
     });
   }
