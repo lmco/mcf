@@ -690,6 +690,58 @@ class Model {
     });
   }
 
+  async updateItem(filter, doc, options) {
+    return new Promise((resolve, reject) => {
+      const updateObj = {
+        Keys: [],
+        TableName: this.TableName,
+        UpdateExpression: 'SET'
+      };
+
+      // For each parameter of the document being updated
+      Object.keys(doc).forEach((param) => {
+        // if (param !== '$set')
+        // Add the update to the update expression
+        updateObj.UpdateExpression += ` ${param} = ${doc[param]}`;
+      });
+
+      // For each parameter in the filter
+      Object.keys(filter).forEach((key) => {
+        // If the filter parameter is a field on the schema
+        if (Object.keys(this.definition).includes(key)) {
+          const value = filter[key];
+          const getObj = {};
+
+          // If the value is a string
+          if (typeof value === 'string') {
+            getObj[key] = { S: value };
+          }
+          // If the value is an array of strings
+          else if (Array.isArray(value) && value.every(v => typeof v === 'string')
+            && value.length !== 0) {
+            getObj[key] = { SS: value };
+          }
+
+          // If the getObj is populated
+          if (Object.keys(getObj).length > 0) {
+            // Add the get object to the list of keys to search
+            updateObj.Keys.push(getObj);
+          }
+        }
+        else {
+          M.log.error(`Filter param ${key} not a param on ${this.TableName} model.`);
+        }
+      });
+
+      this.connection.updateItem(updateObj).promise()
+      .then((updatedItem) => {
+        console.log(updatedItem);
+        return resolve(updatedItem);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
   /**
    * @description Updates multiple documents matched by the filter with the same
    * changes in the provided doc.
@@ -702,7 +754,7 @@ class Model {
    * @param {function} [cb] - A callback function to run.
    */
   async updateMany(filter, doc, options, cb) {
-    // return super.updateMany(filter, doc, options, cb);
+   return this.updateItem(filter, doc, options);
   }
 
   /**
