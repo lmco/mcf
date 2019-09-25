@@ -272,8 +272,8 @@ class Model {
   }
 
   /**
-   * @description Formats documents to return them in proper format, expected
-   * in controllers.
+   * @description Formats documents to return them in the proper format
+   * expected in controllers.
    *
    * @param {Object[]} documents -  The documents to properly format
    * @param {Object} options - The options supplied to the function.
@@ -282,16 +282,29 @@ class Model {
    */
   formatDocuments(documents, options) {
     // Loop through each document
-    documents.forEach((doc) => {
-      // Loop through each key of the document
-      Object.keys(doc).forEach((field) => {
-        // Change the value of each key from { type: value} to simply the value
-        doc[field] = Object.values(doc[field])[0];
-      });
-    });
+    for (let i = 0; i < documents.length; i++) {
+      documents[i] = this.formatDocument(documents[i], options);
+    }
 
     // Return modified documents
     return documents;
+  }
+
+  /**
+   * @description Formats a single document and returns it in the proper format
+   * expected in the controllers.
+   *
+   * @param {Object} document -  The documents to properly format
+   * @param {Object} options - The options supplied to the function.
+   *
+   * @return {Object[]} - Modified documents.
+   */
+  formatDocument(document, options) {
+    Object.keys(document).forEach((field) => {
+      // Change the value of each key from { type: value} to simply the value
+      document[field] = Object.values(document[field])[0];
+    });
+    return document;
   }
 
   async batchGetItem(filter, projection, options) {
@@ -693,39 +706,46 @@ class Model {
   async updateItem(filter, doc, options) {
     return new Promise((resolve, reject) => {
       const updateObj = {
-        Keys: [],
+        ExpressionAttributeNames: {},
+        ExpressionAttributeValues: {},
+        Key: {},
         TableName: this.TableName,
-        UpdateExpression: 'SET'
+        UpdateExpression: 'SET',
+        ReturnValues: 'ALL_NEW'
       };
 
       // For each parameter of the document being updated
       Object.keys(doc).forEach((param) => {
+        // Set attribute name
+        updateObj.ExpressionAttributeNames[`#${param}`] = param;
+
+        const valueObj = {};
+        // Get type of param
+        valueObj[this.definition[param].type] = doc[param];
+        // Set attribute value
+        updateObj.ExpressionAttributeValues[`:${param}`] = valueObj;
         // if (param !== '$set')
         // Add the update to the update expression
-        updateObj.UpdateExpression += ` ${param} = ${doc[param]}`;
+        updateObj.UpdateExpression += ` #${param} = :${param},`;
       });
+
+      // Remove trailing comma from UpdateExpression
+      updateObj.UpdateExpression = updateObj.UpdateExpression.slice(0, -1);
 
       // For each parameter in the filter
       Object.keys(filter).forEach((key) => {
         // If the filter parameter is a field on the schema
         if (Object.keys(this.definition).includes(key)) {
           const value = filter[key];
-          const getObj = {};
 
           // If the value is a string
           if (typeof value === 'string') {
-            getObj[key] = { S: value };
+            updateObj.Key[key] = { S: value };
           }
           // If the value is an array of strings
           else if (Array.isArray(value) && value.every(v => typeof v === 'string')
             && value.length !== 0) {
-            getObj[key] = { SS: value };
-          }
-
-          // If the getObj is populated
-          if (Object.keys(getObj).length > 0) {
-            // Add the get object to the list of keys to search
-            updateObj.Keys.push(getObj);
+            updateObj.Key[key] = { SS: value };
           }
         }
         else {
@@ -733,11 +753,9 @@ class Model {
         }
       });
 
+      // Update the single item
       this.connection.updateItem(updateObj).promise()
-      .then((updatedItem) => {
-        console.log(updatedItem);
-        return resolve(updatedItem);
-      })
+      .then((updatedItem) => resolve(this.formatDocument(updatedItem.Attributes, options)))
       .catch((error) => reject(error));
     });
   }
@@ -754,7 +772,7 @@ class Model {
    * @param {function} [cb] - A callback function to run.
    */
   async updateMany(filter, doc, options, cb) {
-   return this.updateItem(filter, doc, options);
+   // return this.updateItem(filter, doc, options);
   }
 
   /**
@@ -771,7 +789,7 @@ class Model {
    * @return {Promise<Object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
-    // return super.updateOne(filter, doc, options, cb);
+    return this.updateItem(filter, doc, options);
   }
 
 }
