@@ -62,14 +62,14 @@ describe(M.getModuleName(module.filename), () => {
  * @description Cleans out the database by removing all items from all
  * collections.
  */
-function cleanDB(done) {
-  db.clear()
-  .then(() => ServerData.insertMany({ _id: 'server_data', version: M.schemaVersion }))
-  .then(() => done())
-  .catch(error => {
+async function cleanDB() {
+  try {
+    await db.clear();
+    await ServerData.insertMany({ _id: 'server_data', version: M.schemaVersion });
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
-    done();
-  });
+  }
 }

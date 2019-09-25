@@ -54,58 +54,53 @@ describe(M.getModuleName(module.filename), () => {
  * @description Mount the list component to verify
  * component renders correctly.
  */
-function listRender(done) {
+async function listRender() {
   // Render list component
   const wrapper = shallow(<List />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
-  done();
 }
 
 /**
  * @description Mount the list item component to verify
  * component renders correctly.
  */
-function listItemRender(done) {
+async function listItemRender() {
   // Render list item component
   const wrapper = shallow(<ListItem />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
-  done();
 }
 
 /**
  * @description Mount the key data component to verify
  * component renders correctly.
  */
-function keyDataRender(done) {
+async function keyDataRender() {
   // Render key data component
   const wrapper = shallow(<KeyData />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
-  done();
 }
 
 /**
  * @description Mount the divider component to verify
  * component renders correctly.
  */
-function dividerRender(done) {
+async function dividerRender() {
   // Render key data component
   const wrapper = shallow(<Divider />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
-  done();
 }
 
 /**
  * @description Mount the sidebar header component to
  * verify component renders correctly.
  */
-function sidebarHeaderRender(done) {
+async function sidebarHeaderRender() {
   // Render sidebar header component
   const wrapper = shallow(<SidebarHeader />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
-  done();
 }
