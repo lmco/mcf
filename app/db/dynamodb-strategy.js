@@ -310,7 +310,7 @@ class Model {
   async batchGetItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
       // Make the projection comma separated instead of space separated
-      const projectionString = (projection) ? projection.split(' ').join(',') : '';
+      const projectionString = (projection) ? projection.split(' ').join(',') : undefined;
 
       // Initialize the batch get object
       const batchGetObj = { RequestItems: {} };
@@ -545,7 +545,7 @@ class Model {
    * @return {Promise<Object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
-    // return super.findOne(conditions, projection, options, cb);
+    return this.getItem(conditions, projection, options);
   }
 
   /**
@@ -564,6 +564,57 @@ class Model {
         M.log.error('Failed to get indexes.');
         return reject(error);
       });
+    });
+  }
+
+  /**
+   * @description Gets a single item from a DynamoDB table. Helper function for
+   * findOne().
+   */
+  async getItem(filter, projection, options) {
+    return new Promise((resolve, reject) => {
+      // Make the projection comma separated instead of space separated
+      const projectionString = (projection) ? projection.split(' ').join(',') : undefined;
+      const getObj = {
+        Key: {},
+        TableName: this.TableName,
+        ProjectionExpression: projectionString
+      };
+
+      // Loop through each field in the filter
+      Object.keys(filter).forEach((key) => {
+        // If the filter parameter is a field on the schema
+        if (Object.keys(this.definition).includes(key)) {
+          const value = filter[key];
+
+          // If the value is a string
+          if (typeof value === 'string') {
+            getObj.Key[key] = { S: value };
+          }
+          // If the value is an array of strings
+          else if (Array.isArray(value) && value.every(v => typeof v === 'string')
+            && value.length !== 0) {
+            getObj.Key[key] = { SS: value };
+          }
+        }
+        else {
+          M.log.error(`Filter param ${key} not a param on ${this.TableName} model.`);
+        }
+      });
+
+      // Make the getItem request
+      this.connection.getItem(getObj).promise()
+      .then((foundItem) => {
+        // If no document is found, return null
+        if (Object.keys(foundItem).length === 0) {
+          return resolve(null);
+        }
+        else {
+          // Return the document
+          return resolve(this.formatDocument(foundItem.Item, options));
+        }
+      })
+      .catch((error) => reject(error));
     });
   }
 
