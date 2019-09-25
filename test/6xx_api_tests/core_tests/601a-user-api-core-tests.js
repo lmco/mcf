@@ -43,37 +43,34 @@ describe(M.getModuleName(module.filename), () => {
    * Before: Run before all tests. Find
    * non-admin user and elevate to admin user.
    */
-  before((done) => {
-    // Open the database connection
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((_adminUser) => {
-      adminUser = _adminUser;
-      done();
-    })
-    .catch((error) => {
+  before(async () => {
+    try {
+      // Open the database connection
+      await db.connect();
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user.
    */
-  after((done) => {
-    // Delete test admin
-    testUtils.removeTestAdmin()
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      // Delete test admin
+      await testUtils.removeTestAdmin();
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute tests */
@@ -97,6 +94,8 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Makes a GET request to /api/users/whoami. Verifies return of
  * requesting user from API.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function whoami(done) {
   const userData = testData.adminUser;
@@ -123,6 +122,8 @@ function whoami(done) {
 
 /**
  * @description Verifies POST /api/users/:username creates a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postUser(done) {
   const userData = testData.users[0];
@@ -164,6 +165,8 @@ function postUser(done) {
 
 /**
  * @description Verifies POST /api/users creates multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postUsers(done) {
   const userData = [
@@ -217,6 +220,8 @@ function postUsers(done) {
 
 /**
  * @description Verifies PUT /api/users/:username creates or replaces a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putUser(done) {
   const userData = testData.users[0];
@@ -258,6 +263,8 @@ function putUser(done) {
 
 /**
  * @description Verifies PUT /api/users creates or replaces multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putUsers(done) {
   const userData = [
@@ -312,6 +319,8 @@ function putUsers(done) {
 
 /**
  * @description Verifies GET /api/users/:username finds a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getUser(done) {
   const userData = testData.users[0];
@@ -352,6 +361,8 @@ function getUser(done) {
 
 /**
  * @description Verifies GET /api/users finds multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getUsers(done) {
   const userData = [
@@ -406,6 +417,8 @@ function getUsers(done) {
 
 /**
  * @description Verifies GET /api/users finds all users if no ids are provided.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllUsers(done) {
   // Create request object
@@ -470,7 +483,9 @@ function getAllUsers(done) {
 }
 
 /**
- * @description Verifies GET /api/users/search
+ * @description Verifies GET /api/users/search.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function searchUsers(done) {
   // Create request object
@@ -528,6 +543,8 @@ function searchUsers(done) {
 
 /**
  * @description Verifies PATCH /api/users/:username updates a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUser(done) {
   const userData = testData.users[0];
@@ -573,6 +590,8 @@ function patchUser(done) {
 
 /**
  * @description Verifies PATCH /api/users updates multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUsers(done) {
   const userData = [
@@ -631,6 +650,8 @@ function patchUsers(done) {
 
 /**
  * @description Verifies mock PATCH request to update a users password.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUserPassword(done) {
   // Create request object
@@ -678,6 +699,8 @@ function patchUserPassword(done) {
 
 /**
  * @description Verifies DELETE /api/users/:username deletes a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteUser(done) {
   const userData = testData.users[0];
@@ -703,6 +726,8 @@ function deleteUser(done) {
 
 /**
  * @description Verifies DELETE /api/users/ deletes multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteUsers(done) {
   const userData = [
