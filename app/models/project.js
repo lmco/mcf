@@ -214,4 +214,4 @@ ProjectSchema.statics.getValidPopulateFields = function() {
 /* ------------------------( Project Schema Export )------------------------- */
 
 // Export model as "Project"
-module.exports = new db.Model('Project', ProjectSchema);
+module.exports = new db.Model('Project', ProjectSchema, 'projects');
