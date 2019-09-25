@@ -40,12 +40,6 @@ function test(_args) {
   printHeader();
   M.log.verbose(`Running tests with DB strategy: ${M.config.db.strategy}`);
 
-  // Remove --force from args
-  if (_args.includes('--force')) {
-    const removeInd = _args.indexOf('--force');
-    _args.splice(removeInd, 1);
-  }
-
   // Default timeout changed to 5000
   // Add default timeout if not provided
   if (!_args.includes('--timeout')) {
@@ -67,10 +61,14 @@ function test(_args) {
 
   // Test everything if --all was specified
   if (_args.includes('--all')) {
-    if (M.env === 'prod') {
-      // Throw an error if the server is running as prod
-      throw new M.ServerError('MBEE environment is currently set to production.  Running all'
-        + ' tests would wipe out the production database.', 'warn');
+    if (M.env.toLowerCase() === 'production' && !_args.includes('--force')) {
+      // Throw an error if the server is running as production
+      M.log.error('\nWARNING! You are attempting to run tests on a production database.\n\n'
+        + 'This operation could ERASE PRODUCTION DATA PERMANENTLY.\n'
+        + 'If you would still like to perform this action, use the\n'
+        + 'optional parameter --force\n\n'
+        + 'node mbee test --grep "[^[1-8]]" --force\n');
+      process.exit(-1);
     }
     else if (_args.includes('--grep')) {
       // Throw an error if --grep and --all are used together
@@ -80,6 +78,12 @@ function test(_args) {
     _args.splice(removeInd, 1);
     _args.push('--grep');
     _args.push('^[0-9]');
+  }
+
+  // Remove --force from args
+  if (_args.includes('--force')) {
+    const removeInd = _args.indexOf('--force');
+    _args.splice(removeInd, 1);
   }
 
   // Allocate options variable for mocha
