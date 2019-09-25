@@ -160,4 +160,4 @@ ArtifactSchema.static('getValidPopulateFields', function() {
 /* ----------------------( Artifact Schema Export )---------------------- */
 
 // Export model as "Artifact"
-module.exports = new db.Model('Artifact', ArtifactSchema);
+module.exports = new db.Model('Artifact', ArtifactSchema, 'artifacts');
