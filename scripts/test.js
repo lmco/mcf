@@ -72,7 +72,8 @@ function test(_args) {
     }
     else if (_args.includes('--grep')) {
       // Throw an error if --grep and --all are used together
-      throw new M.DataFormatError('Cannot use arguements --grep and --all together', 'warn');
+      M.log.error('Cannot use arguements --grep and --all together');
+      process.exit(-1);
     }
     const removeInd = _args.indexOf('--all');
     _args.splice(removeInd, 1);
