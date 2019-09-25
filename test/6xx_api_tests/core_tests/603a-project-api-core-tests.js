@@ -43,45 +43,37 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Run before all tests. Creates the admin user and test org.
    */
-  before((done) => {
-    // Connect db
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((_adminUser) => {
-      // Set global admin user
-      adminUser = _adminUser;
-
+  before(async () => {
+    try {
+      // Connect db
+      await db.connect();
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
       // Create test org
-      return testUtils.createTestOrg(adminUser);
-    })
-    .then((retOrg) => {
-      org = retOrg;
-      done();
-    })
-    .catch((error) => {
+      org = await testUtils.createTestOrg(adminUser);
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user and test org.
    */
-  after((done) => {
-    // Removing the test organization
-    testUtils.removeTestOrg(adminUser)
-    .then(() => testUtils.removeTestAdmin())
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      // Removing the test organization
+      await testUtils.removeTestOrg(adminUser);
+      await testUtils.removeTestAdmin();
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute tests */
@@ -103,6 +95,8 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid creates a
  * project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postProject(done) {
   const projData = testData.projects[0];
@@ -146,6 +140,8 @@ function postProject(done) {
 /**
  * @description Verifies POST /api/orgs/:orgid/projects creates multiple
  * projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postProjects(done) {
   const projData = [
@@ -201,6 +197,8 @@ function postProjects(done) {
 /**
  * @description Verifies PUT /api/orgs/:orgid/projects/:projectid creates or
  * replaces a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putProject(done) {
   const projData = testData.projects[0];
@@ -244,6 +242,8 @@ function putProject(done) {
 /**
  * @description Verifies PUT /api/orgs/:orgid/projects creates or replaces
  * multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putProjects(done) {
   const projData = [
@@ -300,6 +300,8 @@ function putProjects(done) {
 /**
  * @description Verifies GET /api/orgs/:orgid/projects/:projectid finds a
  * project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getProject(done) {
   const projData = testData.projects[0];
@@ -343,6 +345,8 @@ function getProject(done) {
 /**
  * @description Verifies GET /api/orgs/:orgid/projects finds multiple
  * projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getProjects(done) {
   const projData = [
@@ -399,6 +403,8 @@ function getProjects(done) {
 /**
  * @description Verifies GET /api/orgs/:orgid/projects finds all projects in
  * an org when no body or query parameters are provided.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllProjectsOnOrg(done) {
   const projData = [
@@ -455,6 +461,8 @@ function getAllProjectsOnOrg(done) {
 /**
  * @description Verifies GET /api/projects finds all projects a user has access
  * to.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllProjects(done) {
   const projData = [
@@ -511,6 +519,8 @@ function getAllProjects(done) {
 /**
  * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid updates a
  * project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchProject(done) {
   const projData = testData.projects[0];
@@ -558,6 +568,8 @@ function patchProject(done) {
 /**
  * @description Verifies PATCH /api/orgs/:orgid/projects updates multiple
  * projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchProjects(done) {
   const projData = [
@@ -619,6 +631,8 @@ function patchProjects(done) {
 /**
  * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid deletes a
  * project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteProject(done) {
   const projData = testData.projects[0];
@@ -645,6 +659,8 @@ function deleteProject(done) {
 /**
  * @description Verifies DELETE /api/orgs/:orgid/projects deletes multiple
  * projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteProjects(done) {
   const projData = [

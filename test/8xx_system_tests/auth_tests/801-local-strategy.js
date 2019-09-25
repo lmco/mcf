@@ -82,7 +82,7 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description This function tests that the local-strategy login function logs the time and ip
- * address of a failed login attempt
+ * address of a failed login attempt.
  */
 async function logFailedLogin() {
   if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
@@ -125,7 +125,7 @@ async function logFailedLogin() {
 
 /**
  * @description This function validates that only an admin user can see the failed login fields
- * of a user
+ * of a user.
  */
 async function failedloginsField() {
   if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
@@ -187,7 +187,7 @@ async function failedloginsField() {
 
 /**
  * @description This function tests that a user will be archived after five incorrect login
- * attempts within a 15 minute window
+ * attempts within a 15 minute window.
  */
 async function lockoutUser() {
   if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
@@ -234,7 +234,7 @@ async function lockoutUser() {
 
 /**
  * @description This function validates that the only non-archived admin user will NOT be archived
- * if that user enters five incorrect login attempts in fifteen minutes
+ * if that user enters five incorrect login attempts in fifteen minutes.
  */
 async function noAdminLockout() {
   if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
