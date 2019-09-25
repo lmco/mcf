@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.700-general-component-mount-tests
+ * @module test.7xx_ui_tests.701-app-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,22 +11,12 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This tests that the general component mount
- * and render.
+ * @description This tests the app of the home to
+ * verify the render works correctly.
  */
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
-const fs = require('fs');
-const path = require('path');
-const { JSDOM } = require("jsdom");
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-// Configure enzyme adaptor
-configure({ adapter: new Adapter() });
-const mbee = fs.readFileSync(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'), { encoding: "utf-8" });
-
-
 // NPM modules
 import React from 'react';
 import { shallow, mount } from 'enzyme';
@@ -44,28 +34,8 @@ import Home from '../../app/ui/components/home-views/home.jsx';
  * that group (the first parameter passed into describe) is derived from the
  * name of the current file.
  */
-
 describe(M.getModuleName(module.filename), () => {
-  let window;
-  beforeEach(() => {
-    window = (new JSDOM('<!doctype html><body></body></html>', { runScripts: 'outside-only' })).window;
-    var $ = require('jquery')(window);
-    window.eval(`
-      // This code executes in the jsdom global scope
-      mbeeWhoAmI = typeof XMLHttpRequest === "function";
-    `);
-
-    // assert(window.mbeeWhoAmI === true);
-    // var mbeeWhoAmI = require(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'))(window);
-
-    // Execute my library by inserting a <script> tag containing it.
-    const scriptEl = window.document.createElement('script');
-    scriptEl.textContent = mbee;
-    window.document.body.appendChild(scriptEl);
-    // console.log(window);
-  });
-
-  it('Renders the list component', homeRender);
+  it('Renders the home component', homeRender);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -75,8 +45,8 @@ describe(M.getModuleName(module.filename), () => {
  */
 function homeRender(done) {
   // Render list component
-  const wrapper = shallow(<Home />);
+  const wrapper = mount(<Home />, { attachTo: document.getElementById('main') });
   // Expect component to be in DOM
-  chai.expect(wrapper.exists()).to.equal(true);
+  chai.expect(wrapper.find(Home).length).to.equal(1);
   done();
 }

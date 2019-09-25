@@ -109,39 +109,39 @@ class ProfileHome extends Component {
                               icon='fas fa-box'
                               routerLink='/profile/orgs'/>)
             }
-          </ModalBody>
-        </Modal>
-        <div id='workspace'>
-          <div className='workspace-header header-box-depth'>
-            <h2 className='workspace-title'>
-              {user.fname} {user.lname}
-            </h2>
-            <div className='workspace-header-button'>
-              {(!this.props.admin)
-                ? ''
-                : (<Button className='btn'
-                           outline color="secondary"
-                           onClick={this.handleToggle}>
-                    Edit
-                  </Button>)
-              }
+          </Sidebar>
+          <div id='workspace'>
+            <div className='workspace-header header-box-depth'>
+              <h2 className='workspace-title'>
+                {user.fname} {user.lname}
+              </h2>
+              <div className='workspace-header-button'>
+                {(!this.props.admin)
+                  ? ''
+                  : (<Button className='btn'
+                             outline color="secondary"
+                             onClick={this.handleToggle}>
+                      Edit
+                    </Button>)
+                }
+              </div>
             </div>
-          </div>
-          <div id='workspace-body'>
-            <div className='main-workspace extra-padding'>
-              <table className='table-width'>
-                <tbody>
-                <tr>
-                  <th>Username:</th>
-                  <td>{user.username}</td>
-                </tr>
-                <tr>
-                  <th>Email:</th>
-                  <td>{user.email}</td>
-                </tr>
-                </tbody>
-              </table>
-              <CustomData data={user.custom}/>
+            <div id='workspace-body'>
+              <div className='main-workspace extra-padding'>
+                <table className='table-width'>
+                  <tbody>
+                  <tr>
+                    <th>Username:</th>
+                    <td>{user.username}</td>
+                  </tr>
+                  <tr>
+                    <th>Email:</th>
+                    <td>{user.email}</td>
+                  </tr>
+                  </tbody>
+                </table>
+                <CustomData data={user.custom}/>
+              </div>
             </div>
           </div>
         </div>
