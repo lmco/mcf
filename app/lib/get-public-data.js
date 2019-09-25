@@ -230,7 +230,7 @@ function getElementPublicData(element, options) {
     // If all contents are objects (they should be)
     if (element.contains.every(e => typeof e === 'object')) {
       // If the archived option is supplied
-      if (options.hasOwnProperty('archived') && options.archived === true) {
+      if (options.hasOwnProperty('includeArchived') && options.includeArchived === true) {
         // If the user specified 'contains' in the populate field of options
         if (options.populate && options.populate.includes('contains')) {
           data.contains = element.contains.map(e => getElementPublicData(e, {}));
@@ -257,7 +257,7 @@ function getElementPublicData(element, options) {
     // If all contents are objects (they should be)
     if (element.sourceOf.every(e => typeof e === 'object')) {
       // If the archived option is supplied
-      if (options.hasOwnProperty('archived') && options.archived === true) {
+      if (options.hasOwnProperty('includeArchived') && options.includeArchived === true) {
         // If user is populating sourceOf, return objects else just ids
         if (options.populate && options.populate.includes('sourceOf')) {
           data.sourceOf = element.sourceOf.map(e => getElementPublicData(e, {}));
@@ -285,7 +285,7 @@ function getElementPublicData(element, options) {
     // If all contents are objects (they should be)
     if (element.targetOf.every(e => typeof e === 'object')) {
       // If the archived option is supplied
-      if (options.hasOwnProperty('archived') && options.archived === true) {
+      if (options.hasOwnProperty('includeArchived') && options.includeArchived === true) {
         // If user is populating targetOf, return objects else just ids
         if (options.populate && options.populate.includes('targetOf')) {
           data.targetOf = element.targetOf.map(e => getElementPublicData(e, {}));
@@ -626,7 +626,7 @@ function getOrgPublicData(org, options) {
     // If all contents are objects (they should be)
     if (org.projects.every(p => typeof p === 'object')) {
       // If the archived option is supplied
-      if (options.hasOwnProperty('archived') && options.archived === true) {
+      if (options.hasOwnProperty('includeArchived') && options.includeArchived === true) {
         projects = org.projects.map(p => getProjectPublicData(p, { archived: true }));
       }
       else {

@@ -150,7 +150,7 @@ class InformationPage extends Component {
           </ModalBody>
         </Modal>
         <div id='workspace'>
-          <div id='workspace-header' className='workspace-header header-box-depth'>
+          <div className='workspace-header header-box-depth'>
             <h2 className={titleClass}>{name}</h2>
             { /* Verify user is an admin */}
             {(!isButtonDisplayed)

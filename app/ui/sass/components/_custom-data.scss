@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module ui.sass.components.workspace-components._custom-data
+ * @module ui.sass.components._custom-data
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,18 +11,23 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description Defines the all custom data sass variables.
+ * @description Defines the all custom data styles.
  */
-@import '../../utils/_variables';
+
+@import '../utils/_variables';
+
+%custom-key-display {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .custom-data {
   padding-left: 20px;
 
   .custom-key {
+    @extend %custom-key-display;
     padding-left: .5em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 
     i {
       font-size: 12px;
@@ -40,10 +45,8 @@
   }
 
   .custom-key-info {
+    @extend %custom-key-display;
     padding-left: 1em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .last-element {
@@ -60,23 +63,24 @@
 /*                       Custom Data Edit Styling                             *
 /******************************************************************************/
 
-.custom-kv-row {
-  margin-bottom: 10px;
-}
-
-.custom-key-col {
-  padding: 0px;
-}
-
 #btn-add-kv-pair {
   display: block;
-  margin: 0 auto;
-  margin-top: 15px;
+  margin: 15px auto 0;
 
   &:disabled {
     color: #6c757d;
     border-color: #6c757d;
   }
+}
+
+%btn-row-del {
+  padding: 0px;
+  font-size: 1.25rem;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none !important;
+  color: gray;
 }
 
 #custom-input-nav {
@@ -91,21 +95,18 @@
   padding: 15px;
 }
 
-// TODO: Place higher when refactoring CSS.
-@mixin btn-row-del {
-  padding: 0px;
-  font-size: 1.25rem;
-  background-color: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  outline: none !important;
-  color: gray;
+.custom-key-col {
+  padding: 0;
+}
+
+.custom-kv-row {
+  margin-bottom: 10px;
 }
 
 .custom-row-del {
-  @include btn-row-del;
+  @extend %btn-row-del;
 
   &:hover, &:focus, &:active {
-    @include btn-row-del;
+    @extend %btn-row-del;
   }
 }

@@ -254,7 +254,7 @@ class ProjectList extends Component {
         </Modal>
         {/* Display the list of project-views */}
         <div id='workspace' ref={this.ref}>
-          <div id='workspace-header' className='workspace-header header-box-depth'>
+          <div className='workspace-header header-box-depth'>
             <h2 className='workspace-title'>Projects</h2>
             <div className='workspace-header-button'>
               {/* Verify user has write permission */}

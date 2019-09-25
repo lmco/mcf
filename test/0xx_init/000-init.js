@@ -22,8 +22,11 @@
 const chai = require('chai');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
+const Branch = M.require('models.branch');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
+const Project = M.require('models.project');
 const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 const db = M.require('lib.db');
@@ -63,11 +66,34 @@ describe(M.getModuleName(module.filename), function() {
   /**
    * Execute the tests
    */
+  it('should initialize the models', initModels);
   it('clean database', cleanDB);
   it('should create the default org if it doesn\'t exist', createDefaultOrg);
 });
 
 /* --------------------( Tests )-------------------- */
+/**
+ * @description Initializes all models asynchronously.
+ * @async
+ *
+ * @return {Promise<void>}
+ */
+async function initModels() {
+  try {
+    await Artifact.init();
+    await Branch.init();
+    await Element.init();
+    await Organization.init();
+    await Project.init();
+    await ServerData.init();
+    await User.init();
+  }
+  catch (error) {
+    M.log.critical('Failed to initialize models.');
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
 /**
  * @description Cleans out the database by removing all items from all
  * collections.
