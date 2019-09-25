@@ -29,12 +29,12 @@ const jmi = M.require('lib.jmi-conversions');
 
 // Due to the use of MongoDB ObjectIDs, this file cannot be adjusted for other
 // databases, thus it must be rewritten or commented out
-if (M.config.db.strategy !== 'mongoose-mongodb-strategy') {
-  M.log.critical('The 0.6.0.1 migration is MongoDB specific. Please rewrite'
-    + ' this file or comment out helper functions if running for first time'
-    + ' and version is greater that 0.6.0.');
-  process.exit(1);
-}
+// if (M.config.db.strategy !== 'mongoose-mongodb-strategy') {
+//   M.log.critical('The 0.6.0.1 migration is MongoDB specific. Please rewrite'
+//     + ' this file or comment out helper functions if running for first time'
+//     + ' and version is greater that 0.6.0.');
+//   process.exit(1);
+// }
 
 /**
  * @description Handles the database migration from 0.6.0.1 to 0.6.0. This drop in
@@ -153,11 +153,11 @@ module.exports.up = function() {
           });
       });
     })
-    // Find all currently existing collections
-    .then(() => sixToSevenOrgHelper(orgs, jmiUsers))
-    .then(() => sixToSevenProjectHelper(projects, jmiUsers, jmiOrgs))
-    .then(() => sixToSevenElementHelper(elements, jmiUsers, jmiProjects, jmiElements))
-    .then(() => sixToSevenUserHelper(users, jmiUsers))
+    // // Find all currently existing collections
+    // .then(() => sixToSevenOrgHelper(orgs, jmiUsers))
+    // .then(() => sixToSevenProjectHelper(projects, jmiUsers, jmiOrgs))
+    // .then(() => sixToSevenElementHelper(elements, jmiUsers, jmiProjects, jmiElements))
+    // .then(() => sixToSevenUserHelper(users, jmiUsers))
     // Get all documents from the server data
     .then(() => ServerData.find({}))
     .then((serverData) => {

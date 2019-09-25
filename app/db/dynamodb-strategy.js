@@ -57,6 +57,7 @@ function sanitize() {
 }
 
 class Schema {
+
   constructor(definition, options) {
     this.schema = {
       AttributeDefinitions: [{
@@ -68,21 +69,18 @@ class Schema {
         KeyType: 'HASH'
       }]
     };
+    this.definition = definition;
 
-    // Object.keys(definition).forEach((key) => {
-    //   let type = '';
-    //   switch (definition[key].type) {
-    //     case 'String': type = 'S'; break;
-    //     case 'Number': type = 'N'; break;
-    //     case 'Date': type = 'N'; break;
-    //     case 'Object': type = 'S'; break;
-    //     default: type = 'S'; break;
-    //   }
-    //   this.schema.AttributeDefinitions.push({
-    //     AttributeName: key,
-    //     AttributeType: type
-    //   });
-    // });
+    Object.keys(this.definition).forEach((key) => {
+      switch (this.definition[key].type) {
+        case 'String': this.definition[key].type = 'S'; break;
+        case 'Number': this.definition[key].type = 'N'; break;
+        case 'Object': this.definition[key].type = 'M'; break;
+        case 'Date': this.definition[key].type = 'N'; break;
+        case 'Boolean': this.definition[key].type = 'N'; break;
+        default: this.definition[key].type = 'S'; break;
+      }
+    });
   }
 
   /**
@@ -207,40 +205,45 @@ class Model {
    * database, if not provided the name should be used.
    */
   constructor(name, schema, collection) {
-    this.schema = schema;
-    this.tableName = collection;
-    // Connect to the database
-    connect()
-    .then((connection) => {
-      this.connection = connection;
-    //   // Get all existing tables
-    //   console.log('Getting tables')
-    //   return this.listTables();
-    // })
-    // .then((tables) => {
-    //   console.log(tables);
-    //
-    //   // Set the table name
-    //   schema.schema.TableName = collection;
-    //   this.tableName = schema.schema.TableName;
-    //   schema.schema.BillingMode = 'PAY_PER_REQUEST';
-    })
-    .catch((error) => {
-      M.log.critical('Model Constructor Failed');
-    });
+    this.schema = schema.schema;
+    this.definition = schema.definition;
+    this.TableName = collection;
   }
 
+  /**
+   * @description Creates a table if it does not already exist in the database.
+   * @async
+   *
+   * @return {Promise<void>}
+   */
   async init() {
+    this.connection = await connect();
+    M.log.info(`Created connection for the Model ${this.TableName}`)
+    // Grab all existing tables
     const tables = await this.listTables();
-    console.log(tables);
+    // If the table does not currently exist
+    if (!tables.TableNames.includes(this.TableName)) {
+      await this.createTable();
+    }
   }
 
-  async createTable(schema) {
+  /**
+   * @description Creates a table in the database based on the local schema and
+   * TableName variables.
+   *
+   * @return {Promise<*|Promise<unknown>>}
+   */
+  async createTable() {
     return new Promise((resolve, reject) => {
-      this.connection.createTable(schema, (err, data) => {
+      // Set the TableName and BillingMode
+      this.schema.TableName = this.TableName;
+      this.schema.BillingMode = 'PAY_PER_REQUEST';
+
+      // Create the actual table
+      this.connection.createTable(this.schema, (err) => {
+        // If an error occurred, reject it
         if (err) {
-          M.log.warn(`Failed to create the table ${schema.TableName}.`);
-          M.log.error(err);
+          M.log.error(`Failed to create the table ${this.schema.TableName}.`);
           return reject(err);
         }
         else {
@@ -250,15 +253,98 @@ class Model {
     });
   }
 
+  /**
+   * @description Finds and returns an object containing a list of existing
+   * table's names in the database.
+   *
+   * @return {Promise<Object>} An object containing table names.
+   */
   async listTables() {
     return new Promise((resolve, reject) => {
+      // Find all tables
       this.connection.listTables({}).promise()
       .then((tables) => resolve(tables))
       .catch((err) => {
-        M.log.warn('Failed to find tables.');
-        M.log.error(err);
+        M.log.error('Failed to find tables.');
         return reject(err);
       });
+    });
+  }
+
+  /**
+   * @description Formats documents to return them in proper format, expected
+   * in controllers.
+   *
+   * @param {Object[]} documents -  The documents to properly format
+   * @param {Object} options - The options supplied to the function.
+   *
+   * @return {Object[]} - Modified documents.
+   */
+  formatDocuments(documents, options) {
+    // Loop through each document
+    documents.forEach((doc) => {
+      // Loop through each key of the document
+      Object.keys(doc).forEach((field) => {
+        // Change the value of each key from { type: value} to simply the value
+        doc[field] = Object.values(doc[field])[0];
+      });
+    });
+
+    // Return modified documents
+    return documents;
+  }
+
+  async batchGetItem(filter, projection, options) {
+    return new Promise((resolve, reject) => {
+      // Make the projection comma separated instead of space separated
+      const projectionString = (projection) ? projection.split(' ').join(',') : '';
+
+      // Initialize the batch get object
+      const batchGetObj = { RequestItems: {} };
+      batchGetObj.RequestItems[this.TableName] = {
+        Keys: [],
+        ProjectionExpression: projectionString
+      };
+
+      // Loop through each field in the filter
+      Object.keys(filter).forEach((key) => {
+        // If the filter parameter is a field on the schema
+        if (Object.keys(this.definition).includes(key)) {
+          const value = filter[key];
+          const getObj = {};
+
+          // If the value is a string
+          if (typeof value === 'string') {
+            getObj[key] = { S: value };
+          }
+          // If the value is an array of strings
+          else if (Array.isArray(value) && value.every(v => typeof v === 'string')
+            && value.length !== 0) {
+            getObj[key] = { SS: value };
+          }
+
+          // If the getObj is populated
+          if (Object.keys(getObj).length > 0) {
+            // Add the get object to the list of keys to search
+            batchGetObj.RequestItems[this.TableName].Keys.push(getObj);
+          }
+        }
+        else {
+          M.log.error(`Filter param ${key} not a param on ${this.TableName} model.`);
+        }
+      });
+
+      // If there are actually query parameters
+      if (batchGetObj.RequestItems[this.TableName].Keys.length > 0) {
+        // Make the batchGetItem request
+        this.connection.batchGetItem(batchGetObj)
+        .promise()
+        .then((foundDocs) => resolve(foundDocs.Responses[this.TableName]))
+        .catch((error) => reject(error));
+      }
+      else {
+        return resolve([]);
+      }
     });
   }
 
@@ -414,21 +500,13 @@ class Model {
    * any.
    */
   async find(filter, projection, options, cb) {
-    return new Promise((resolve, reject) => {
-      if (Object.keys(filter).length === 0) {
-        console.log('Finding');
-        this.connection.scan({ TableName: this.tableName }, (err, data) => {
-          if (err) {
-            M.log.warn(`Failed to find() ${this.tableName}`)
-            M.log.error(err);
-            return reject(err);
-          }
-          else {
-            console.log(data);
-          }
-        });
-      }
-    });
+    // Find all documents in the table
+    if (Object.keys(filter).length === 0) {
+      return this.scan(options);
+    }
+    else {
+      return this.batchGetItem(filter, projection, options);
+    }
   }
 
   /**
@@ -464,7 +542,16 @@ class Model {
    * @return {Promise<Object[]>} Array of index objects
    */
   async getIndexes() {
-    // return super.getIndexes();
+    return new Promise((resolve, reject) => {
+      this.connection.describeTable({ TableName: this.TableName }).promise()
+      .then((table) => {
+        return resolve(table.Table.KeySchema);
+      })
+      .catch((error) => {
+        M.log.error('Failed to get indexes.');
+        return reject(error);
+      });
+    });
   }
 
   /**
@@ -483,7 +570,124 @@ class Model {
    * @return {Promise<Object[]>} The created documents.
    */
   async insertMany(docs, options, cb) {
-    // return super.insertMany(docs, options, cb);
+    return new Promise((resolve, reject) => {
+      const promises = [];
+      let foundDocuments = [];
+      // Loop through all docs in batches of 100
+      for (let i = 0; i < docs.length / 100; i++) {
+        const batch = docs.slice(i * 100, i * 100 + 100);
+        const batchGetObj = {
+          RequestItems: {}
+        };
+        batchGetObj.RequestItems[this.TableName] = { Keys: [] };
+        batch.forEach((doc) => {
+          batchGetObj.RequestItems[this.TableName].Keys.push(
+            { _id: { S: doc._id } });
+        });
+
+        promises.push(
+          this.connection.batchGetItem(batchGetObj).promise()
+          .then((foundDocs) => {
+            foundDocuments = foundDocuments.concat(foundDocs.Responses[this.TableName]);
+          })
+          .catch((error) => {
+            return reject(error);
+          })
+        );
+      }
+
+      Promise.all(promises)
+      .then(() => {
+        // If documents with matching _ids exist, throw an error
+        if (foundDocuments.length > 0) {
+          return reject(new M.DatabaseError('Documents already exists with '
+            + 'matching _ids.', 'warn'));
+        }
+        else {
+          const promises2 = [];
+          let createdDocs = [];
+          // Loop through all docs in batches of 25
+          for (let i = 0; i < docs.length / 25; i++) {
+            const batch = docs.slice(i * 25, i * 25 + 25);
+            const batchWriteObj = {
+              RequestItems: {}
+            };
+            batchWriteObj.RequestItems[this.TableName] = [];
+            batch.forEach((doc) => {
+              const putObj = {
+                PutRequest: {
+                  Item: {}
+                }
+              };
+              Object.keys(doc).forEach((key) => {
+                if (this.definition[key]) {
+                  putObj.PutRequest.Item[key] = {};
+                  putObj.PutRequest.Item[key][this.definition[key].type] = doc[key];
+                }
+              });
+
+              batchWriteObj.RequestItems[this.TableName].push(putObj);
+            });
+
+            promises2.push(
+              this.connection.batchWriteItem(batchWriteObj).promise()
+            );
+          }
+
+          return Promise.all(promises2);
+        }
+      })
+      .then(() => {
+        const promises3 = [];
+        foundDocuments = [];
+        // Loop through all docs in batches of 100
+        for (let i = 0; i < docs.length / 100; i++) {
+          const batch = docs.slice(i * 100, i * 100 + 100);
+          const batchGetObj = {
+            RequestItems: {}
+          };
+          batchGetObj.RequestItems[this.TableName] = { Keys: [] };
+          batch.forEach((doc) => {
+            batchGetObj.RequestItems[this.TableName].Keys.push({ _id: { S: doc._id } });
+          });
+
+          promises3.push(
+            this.connection.batchGetItem(batchGetObj).promise()
+            .then((foundDocs) => {
+              foundDocuments = foundDocuments.concat(foundDocs.Responses[this.TableName]);
+            })
+            .catch((error) => {
+              return reject(error);
+            })
+          );
+        }
+
+        return Promise.all(promises3);
+      })
+      .then(() => resolve(foundDocuments))
+      .catch((error) => reject(error));
+    });
+  }
+
+  /**
+   * @description Scans and returns every document in the specified table.
+   * @async
+   *
+   * @param {Object} options - A list of provided options.
+   *
+   * @return {Promise<Object[]>} The found documents.
+   */
+  async scan(options) {
+    return new Promise((resolve, reject) => {
+      this.connection.scan({ TableName: this.TableName }, (err, data) => {
+        if (err) {
+          return reject(err);
+        }
+        else {
+          return resolve(this.formatDocuments(data.Items, options));
+        }
+      });
+    });
   }
 
   /**
