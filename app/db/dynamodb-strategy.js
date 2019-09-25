@@ -217,8 +217,8 @@ class Model {
    * @return {Promise<void>}
    */
   async init() {
+    // Create connection to the database
     this.connection = await connect();
-    M.log.info(`Created connection for the Model ${this.TableName}`)
     // Grab all existing tables
     const tables = await this.listTables();
     // If the table does not currently exist
