@@ -290,4 +290,4 @@ UserSchema.index({
 
 /* -------------------------( User Schema Export )--------------------------- */
 // Export model as 'User'
-module.exports = new db.Model('User', UserSchema);
+module.exports = new db.Model('User', UserSchema, 'users');

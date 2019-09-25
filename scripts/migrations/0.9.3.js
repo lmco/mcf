@@ -37,7 +37,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.9.0' }]);
       }
 
-      return ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.0' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.9.0' } });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -136,7 +136,7 @@ module.exports.up = async function() {
       return await ServerData.insertMany([{ _id: 'server_data', version: '0.9.3' }]);
     }
     // Otherwise, update the existing server data document
-    return await ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.9.3' } });
+    return await ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.9.3' } });
   }
   catch (error) {
     throw new M.DatabaseError(error.message, 'warn');
