@@ -855,12 +855,28 @@
       "returns": true
     }}],
     "jsdoc/newline-after-description": "error", // Recommended
-    /*"jsdoc/no-types": "off",
-    "jsdoc/no-undefined-types": "error", // Recommended
+    "jsdoc/no-types": "off",
+    "jsdoc/no-undefined-types": ["error", {
+      "definedTypes": [
+        "DataFormatError",
+        "AuthorizationError",
+        "PermissionError",
+        "OperationError",
+        "NotFoundError",
+        "BrewingError",
+        "ServerError",
+        "DatabaseError",
+        "User",
+        "Organization",
+        "Project",
+        "Branch",
+        "Element",
+        "Artifact"]
+    }], // Recommended
     "jsdoc/require-description": ["error", {
       "descriptionStyle": "tag"
     }],
-    "jsdoc/require-description-complete-sentence": ["error", {"tags": [
+    /*"jsdoc/require-description-complete-sentence": ["error", {"tags": [
       "param", "property", "returns"
     ]}],
     "jsdoc/require-example": "off",

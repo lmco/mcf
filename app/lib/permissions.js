@@ -76,7 +76,7 @@ function readUser(user) {
  * @params {User} user - The user object to check permission for.
  * @params {User} userToUpdate - The user object to updated.
  *
- * @throws {PermissionError}
+ * @throws {PermissionError} - A custom MBEE error.
  */
 function updateUser(user, userToUpdate) {
   try {

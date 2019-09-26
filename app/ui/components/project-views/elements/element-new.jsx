@@ -135,7 +135,7 @@ class ElementNew extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the parent field
+   * @description This function is called when the ElementSelector for the parent field
    * changes.
    */
   parentSelectHandler(_id) {
@@ -143,7 +143,7 @@ class ElementNew extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the source field
+   * @description This function is called when the ElementSelector for the source field
    * changes.
    */
   sourceSelectHandler(_id, project) {
@@ -163,7 +163,7 @@ class ElementNew extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the target field
+   * @description This function is called when the ElementSelector for the target field
    * changes.
    */
   targetSelectHandler(_id, project) {

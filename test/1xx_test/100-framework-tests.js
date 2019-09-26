@@ -34,14 +34,14 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * Runs an empty test case. This show that Mocha is working.
+ * @description Runs an empty test case. This show that Mocha is working.
  */
 function emptyTest(done) {
   done();
 }
 
 /**
- * Runs some simple assertions to verify chai is working.
+ * @description Runs some simple assertions to verify chai is working.
  */
 function assertionsTest(done) {
   chai.expect(2).to.equal(2);

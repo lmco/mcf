@@ -47,7 +47,7 @@ class ElementTree extends Component {
   }
 
   /**
-   * This is also considered the refresh function for root
+   * @description This is also considered the refresh function for root
    * element. When an element is deleted or created the
    * elements will be updated.
    */

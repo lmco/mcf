@@ -30,7 +30,7 @@ const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
 loadPlugins();
 
 /**
- * Actually loads the plugins by copying them from their source location into
+ * @description Actually loads the plugins by copying them from their source location into
  * the plugins directory, then loops over those plugins to "require" them and
  * use them as part of the plugins routes.
  */
