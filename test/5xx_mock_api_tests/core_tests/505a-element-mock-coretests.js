@@ -43,7 +43,7 @@ const branchID = 'master';
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Open the database connection
@@ -118,6 +118,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies mock POST request to create an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postElement(done) {
   const elemData = testData.elements[0];
@@ -190,6 +192,8 @@ function postElement(done) {
 
 /**
  * @description Verifies mock POST request to create multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postElements(done) {
   // Create request object
@@ -271,6 +275,8 @@ function postElements(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putElement(done) {
   const elemData = testData.elements[0];
@@ -343,6 +349,8 @@ function putElement(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putElements(done) {
   // Create request object
@@ -425,6 +433,8 @@ function putElements(done) {
 
 /**
  * @description Verifies mock GET request to get an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getElement(done) {
   const elemData = testData.elements[0];
@@ -497,6 +507,8 @@ function getElement(done) {
 
 /**
  * @description Verifies mock GET request to get multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getElements(done) {
   const elemData = [
@@ -581,6 +593,8 @@ function getElements(done) {
 
 /**
  * @description Verifies mock GET request to get all elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllElements(done) {
   const elemData = [
@@ -665,6 +679,8 @@ function getAllElements(done) {
 
 /**
  * @description Verifies mock GET request to search elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function searchElement(done) {
   const elemData = testData.elements[0];
@@ -742,6 +758,8 @@ function searchElement(done) {
 
 /**
  * @description Verifies mock PATCH request to update an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchElement(done) {
   const elemData = testData.elements[0];
@@ -818,6 +836,8 @@ function patchElement(done) {
 
 /**
  * @description Verifies mock PATCH request to update multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchElements(done) {
   // Create request object
@@ -908,6 +928,8 @@ function patchElements(done) {
 
 /**
  * @description Verifies mock DELETE request to delete an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteElement(done) {
   // Create request object
@@ -945,6 +967,8 @@ function deleteElement(done) {
 
 /**
  * @description Verifies mock DELETE request to delete multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteElements(done) {
   // Create request object
