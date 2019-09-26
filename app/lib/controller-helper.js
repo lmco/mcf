@@ -98,8 +98,7 @@ module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
  *
  * @param {object} model - The model being validated: org/project/branch.
  * @param {string} id - The ID of the model being validated.
- * @param {boolean} [archived] - Specifies whether or not to allow archived results.
- * Defaults to false.
+ * @param {boolean} [archived=false] - Specifies whether or not to allow archived results.
  *
  * @return {object} - an object containing the sanitized input parameters
  */
