@@ -44,8 +44,6 @@ class ElementTree extends Component {
 
     // Bind functions
     this.getElement = this.getElement.bind(this);
-    this.unsetCheckbox = this.unsetCheckbox.bind(this);
-    this.handleCheck = this.handleCheck.bind(this);
   }
 
   /**
@@ -81,14 +79,6 @@ class ElementTree extends Component {
         }
       }
     });
-  }
-
-  unsetCheckbox() {
-    this.props.unsetCheckbox();
-  }
-
-  handleCheck() {
-    this.props.handleCheck();
   }
 
   componentDidMount() {

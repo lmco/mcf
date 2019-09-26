@@ -25,7 +25,7 @@
  */
 module.exports.logRoute = function logRoute(req, res, next) {
   // Set username to anonymous if req.user is not defined
-  const username = (req.user) ? req.user.username : 'anonymous';
+  const username = (req.user) ? (req.user._id || req.user.username) : 'anonymous';
   // Log the method, url, and username for the request
   M.log.info(`${req.method} "${req.originalUrl}" requested by ${username}`);
   next();

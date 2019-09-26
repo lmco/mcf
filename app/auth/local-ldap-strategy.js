@@ -25,6 +25,7 @@ module.exports = {
 };
 
 // MBEE modules
+const errors = M.require('lib.errors');
 const LocalStrategy = M.require('auth.local-strategy');
 const LDAPStrategy = M.require('auth.ldap-strategy');
 const User = M.require('models.user');
@@ -41,47 +42,30 @@ const User = M.require('models.user');
  *
  * @return {Promise} Authenticated user object
  */
-function handleBasicAuth(req, res, username, password) {
-  return new Promise((resolve, reject) => {
+async function handleBasicAuth(req, res, username, password) {
+  try {
     // Search locally for the user
-    User.find({
-      _id: username,
-      archived: false
-    })
-    .exec(async (findUserErr, users) => {
-      // Check for errors
-      if (findUserErr) {
-        return reject(findUserErr);
-      }
-      // If user found and their provider is local,
-      // do local authentication
-      if (users.length === 1 && users[0].provider === 'local') {
-        try {
-          const localUser = await LocalStrategy.handleBasicAuth(req, res, username, password);
-          return resolve(localUser);
-        }
-        catch (localErr) {
-          return reject(localErr);
-        }
-      }
+    const users = await User.find({ _id: username, archived: false });
 
-      // User is not found locally or is found and provider is LDAP
-      // try LDAP authentication
-      else if (users.length === 0 || (users.length === 1 && users[0].provider === 'ldap')) {
-        try {
-          const ldapUser = await LDAPStrategy.handleBasicAuth(req, res, username, password);
-          return resolve(ldapUser);
-        }
-        catch (ldapErr) {
-          return reject(ldapErr);
-        }
-      }
-      else {
-        // More than 1 user found or provider not set to ldap/local
-        return reject(new M.ServerError('More than one user found or invalid provider.', 'error'));
-      }
-    });
-  });
+    // If user found and their provider is local,
+    // do local authentication
+    if (users.length === 1 && users[0].provider === 'local') {
+      return await LocalStrategy.handleBasicAuth(req, res, username, password);
+    }
+
+    // User is not found locally or is found and provider is LDAP
+    // try LDAP authentication
+    else if (users.length === 0 || (users.length === 1 && users[0].provider === 'ldap')) {
+      return await LDAPStrategy.handleBasicAuth(req, res, username, password);
+    }
+    else {
+      // More than 1 user found or provider not set to ldap/local
+      throw new M.ServerError('More than one user found or invalid provider.', 'error');
+    }
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**

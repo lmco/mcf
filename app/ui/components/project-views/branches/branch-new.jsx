@@ -201,7 +201,7 @@ class CreateBranch extends Component {
     // Return the form to create a project
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header'>
+        <div className='workspace-header'>
           <h2 className='workspace-title workspace-title-padding'>
             New Branch
           </h2>

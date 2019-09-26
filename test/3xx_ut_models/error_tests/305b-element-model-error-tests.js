@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.304b-element-model-tests
+ * @module test.305b-element-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -26,6 +26,8 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 // MBEE modules
 const Element = M.require('models.element');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -96,11 +98,12 @@ async function idTooShort() {
   elemData._id = '01:01:01:0';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
-    + 'Too few characters in ID');
+    + `Element ID length [${utils.parseID(elemData._id).pop().length}] must not`
+    + ' be less than 2 characters.');
 }
 
 /**
@@ -121,11 +124,13 @@ async function idTooLong() {
 
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
-    + 'Too many characters in ID');
+    + `Element ID length [${elemData._id.length - validators.branch.idLength - 1}]`
+    + ` must not be more than ${validators.element.idLength - validators.branch.idLength - 1}`
+    + ' characters.');
 }
 
 /**
@@ -138,7 +143,7 @@ async function idNotProvided() {
   elemData.parent = 'org:proj:branch:model';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
@@ -160,14 +165,14 @@ async function invalidID() {
   elemData.parent = 'org:proj:branch:model';
 
   // Change id to be invalid
-  elemData._id = 'INVALID_ID';
+  elemData._id = 'INVALID_ELEM_ID';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: '
-    + `_id: Path \`_id\` is invalid (${elemData._id})`);
+    + `_id: Invalid element ID [${elemData._id}].`);
 }
 
 /**
@@ -180,7 +185,7 @@ async function projectNotProvided() {
   elemData.parent = 'org:proj:branch:model';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: project: '
@@ -206,7 +211,7 @@ async function projectInvalid() {
   elemData.project = 'invalid_project';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith(
@@ -224,7 +229,7 @@ async function branchNotProvided() {
   elemData.parent = 'org:proj:branch:model';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: branch: '
@@ -250,7 +255,7 @@ async function branchInvalid() {
   elemData.branch = 'invalid_branch';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith(
@@ -277,7 +282,7 @@ async function parentInvalid() {
   elemData.parent = 'invalid_parent';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith(
@@ -305,7 +310,7 @@ async function sourceInvalid() {
   elemData.source = 'invalid_source';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith(
@@ -328,7 +333,7 @@ async function sourceWithNoTarget() {
   elemData.target = null;
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith(
@@ -356,7 +361,7 @@ async function targetInvalid() {
   elemData.target = 'invalid_target';
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith(
@@ -379,7 +384,7 @@ async function targetWithNoSource() {
   elemData.source = null;
 
   // Create element object
-  const elemObject = new Element(elemData);
+  const elemObject = Element.createDocument(elemData);
 
   // Expect save() to fail with specific error message
   await elemObject.save().should.eventually.be.rejectedWith(

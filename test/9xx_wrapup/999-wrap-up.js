@@ -20,9 +20,9 @@
 
 // NPM modules
 const chai = require('chai');
-const mongoose = require('mongoose');
 
 // MBEE modules
+const ServerData = M.require('models.server-data');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
@@ -59,19 +59,17 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Cleans out the database by removing all
- * items from all MongoDB collections.
+ * @description Cleans out the database by removing all items from all
+ * collections.
  */
-function cleanDB(done) {
-  mongoose.connection.db.dropDatabase()
-  .then(() => mongoose.connection.db.createCollection('server_data'))
-  .then(() => mongoose.connection.db.collection('server_data')
-  .insertOne({ version: M.schemaVersion }))
-  .then(() => done())
-  .catch(error => {
+async function cleanDB() {
+  try {
+    await db.clear();
+    await ServerData.insertMany({ _id: 'server_data', version: M.schemaVersion });
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
-    done();
-  });
+  }
 }

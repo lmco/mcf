@@ -209,22 +209,20 @@ class UserList extends Component {
         </Modal>
         {/* Display the list of users */}
         <div id='workspace' ref={this.ref}>
-          <div id='workspace-header' className='workspace-header header-box-depth'>
+          <div className='workspace-header header-box-depth'>
             <h2 className='workspace-title workspace-title-padding'>
               Users
             </h2>
             {/* Verify user is an admin */}
             <div className='workspace-header-button'>
-              <Button className='btn'
-                      outline color="primary"
+              <Button outline color="primary"
                       onClick={this.handleCreateToggle}>
                 {(this.state.width > 600)
                   ? 'Create'
                   : (<i className='fas fa-plus add-btn'/>)
                 }
               </Button>
-              <Button className='btn'
-                      outline color="danger"
+              <Button outline color="danger"
                       onClick={this.handleDeleteToggle}>
                 {(this.state.width > 600)
                   ? 'Delete'

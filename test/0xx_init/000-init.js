@@ -19,15 +19,18 @@
  */
 
 // NPM modules
-const mongoose = require('mongoose');
 const chai = require('chai');
 const { execSync } = require('child_process');
 const path = require('path');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
+const Branch = M.require('models.branch');
 const Element = M.require('models.element');
-const User = M.require('models.user');
 const Organization = M.require('models.organization');
+const Project = M.require('models.project');
+const ServerData = M.require('models.server-data');
+const User = M.require('models.user');
 const db = M.require('lib.db');
 
 /* --------------------( Main )-------------------- */
@@ -65,6 +68,7 @@ describe(M.getModuleName(module.filename), function() {
   /**
    * Execute the tests
    */
+  it('should initialize the models', initModels);
   it('clean database', cleanDB);
   it('should create the default org if it doesn\'t exist', createDefaultOrg);
   it('should clear artifact storage folder', clearArtifactStorage);
@@ -72,14 +76,34 @@ describe(M.getModuleName(module.filename), function() {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Cleans out the database by removing all items from all MongoDB
+ * @description Initializes all models asynchronously.
+ * @async
+ *
+ * @return {Promise<void>}
+ */
+async function initModels() {
+  try {
+    await Artifact.init();
+    await Branch.init();
+    await Element.init();
+    await Organization.init();
+    await Project.init();
+    await ServerData.init();
+    await User.init();
+  }
+  catch (error) {
+    M.log.critical('Failed to initialize models.');
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Cleans out the database by removing all items from all
  * collections.
  */
 function cleanDB(done) {
-  mongoose.connection.db.dropDatabase()
-  .then(() => mongoose.connection.db.createCollection('server_data'))
-  .then(() => mongoose.connection.db.collection('server_data')
-  .insertOne({ version: M.schemaVersion }))
+  db.clear()
+  .then(() => ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]))
   // Ensure element indexes are created prior to running other tests
   .then(() => Element.ensureIndexes())
   // Ensure user indexes are created prior to running other tests
@@ -103,7 +127,7 @@ function createDefaultOrg(done) {
     chai.expect(org).to.equal(null);
 
     // Create default org object
-    const defOrg = new Organization({
+    const defOrg = Organization.createDocument({
       _id: M.config.server.defaultOrganizationId,
       name: M.config.server.defaultOrganizationName,
       createdBy: null,
@@ -128,6 +152,7 @@ function createDefaultOrg(done) {
 function clearArtifactStorage(done) {
   const artifactPath = path.join(M.root, M.config.artifact.path);
   // Remove artifacts
-  execSync(`rm -rf ${artifactPath}/*`);
+  const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
+  execSync(`${rmd} ${artifactPath}/*`);
   done();
 }

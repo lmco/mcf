@@ -124,9 +124,9 @@ async function find(requestingUser, organizationID, projects, options) {
     helper.checkParamsDataType(['undefined', 'object', 'string'], projects, 'Projects');
 
     // Sanitize input parameters
-    const orgID = sani.mongo(organizationID);
+    const orgID = sani.db(organizationID);
     const saniProjects = (projects !== undefined)
-      ? sani.mongo(JSON.parse(JSON.stringify(projects)))
+      ? sani.db(JSON.parse(JSON.stringify(projects)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
@@ -156,16 +156,11 @@ async function find(requestingUser, organizationID, projects, options) {
             throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
           }
           // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+          searchQuery[o] = sani.db(options[o]);
         }
       });
     }
 
-    // If not system admin, add permissions check
-    // TODO: Consider updating logic to use permissions library
-    if (!reqUser.admin) {
-      searchQuery[`permissions.${reqUser._id}`] = 'read';
-    }
     // If the includeArchived field is true, remove archived from the query; return everything
     if (validatedOptions.includeArchived) {
       delete searchQuery.archived;
@@ -173,9 +168,6 @@ async function find(requestingUser, organizationID, projects, options) {
     // If the archived field is true, query only for archived elements
     if (validatedOptions.archived) {
       searchQuery.archived = true;
-    }
-    if (orgID !== null) {
-      searchQuery.org = orgID;
     }
 
     // Check the type of the projects parameter
@@ -193,22 +185,61 @@ async function find(requestingUser, organizationID, projects, options) {
     }
 
     // If the user specifies an organization
-    if (organizationID !== null) {
-      // Find the organization, validate that it exists and is not archived (unless specfified)
-      const foundOrg = await helper.findAndValidate(Organization, orgID,
+    let foundOrg;
+    if (orgID !== null) {
+      // Find the organization, validate that it exists and is not archived (unless specified)
+      foundOrg = await helper.findAndValidate(Organization, orgID,
         ((options && options.archived) || validatedOptions.includeArchived));
-      // Permissions check
-      if (!permissions.readOrg(reqUser, foundOrg)) {
-        throw new M.PermissionError('User does not have permission to find'
-          + ` projects on the organization [${orgID}].`, 'warn');
-      }
+
+      // Find all projects on the provided org, parse after
+      searchQuery.org = orgID;
+    }
+    // If orgID is null, find all projects the user has access to
+    else {
+      // Find all orgs the user has read access on
+      const orgQuery = {};
+      orgQuery[`permissions.${reqUser._id}`] = 'read';
+      const readOrgs = await Organization.find(orgQuery);
+
+      const orgIDs = readOrgs.map(o => o._id);
+      // Project must be internal and in an org the user has access to
+      const internalQuery = { $and: [{ visibility: 'internal' }, { org: orgIDs }] };
+      const permissionsQuery = {};
+      permissionsQuery[`permissions.${reqUser._id}`] = 'read';
+
+      // Add $or to search query, saying user must have read access or must be
+      // internal project within an organization the user has read access on
+      searchQuery.$or = [internalQuery, permissionsQuery];
     }
 
     // Find the projects
-    return await Project.find(searchQuery, validatedOptions.fieldsString,
-      { limit: validatedOptions.limit, skip: validatedOptions.skip })
-    .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    let foundProjects = await Project.find(searchQuery,
+      validatedOptions.fieldsString,
+      { limit: validatedOptions.limit,
+        skip: validatedOptions.skip,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
+
+    // If searching specific projects, remove projects not in that list
+    if (saniProjects) {
+      // Searched for single project
+      if (typeof saniProjects === 'string') {
+        foundProjects = foundProjects.filter(p => p._id === searchQuery._id);
+      }
+      // Searched for multiple projects
+      else {
+        foundProjects = foundProjects.filter(p => searchQuery._id.$in.includes(p._id));
+      }
+    }
+
+    // Run permissions checks on each of the remaining projects
+    foundProjects.forEach((proj) => {
+      permissions.readProject(reqUser, foundOrg, proj);
+    });
+
+    return foundProjects;
   }
   catch (error) {
     throw errors.captureError(error);
@@ -264,8 +295,8 @@ async function create(requestingUser, organizationID, projects, options) {
     helper.checkParamsDataType('object', projects, 'Projects');
 
     // Sanitize input parameters and function-wide variables
-    const orgID = sani.mongo(organizationID);
-    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.db(organizationID);
+    const saniProjects = sani.db(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     let projObjects = [];
 
@@ -335,12 +366,10 @@ async function create(requestingUser, organizationID, projects, options) {
     // Find the organization, validate that it exists and is not archived
     const foundOrg = await helper.findAndValidate(Organization, orgID);
     // Permissions check
-    if (!permissions.createProject(reqUser, foundOrg)) {
-      throw new M.PermissionError('User does not have permission to create'
-        + ` projects on the organization [${orgID}].`, 'warn');
-    }
+    permissions.createProject(reqUser, foundOrg);
+
     // Search for projects with the same id
-    const foundProjects = await Project.find(searchQuery, '_id').lean();
+    const foundProjects = await Project.find(searchQuery, '_id', { lean: true });
     // If there are any foundProjects, there is a conflict
     if (foundProjects.length > 0) {
       // Get arrays of the foundProjects's ids and names
@@ -352,14 +381,14 @@ async function create(requestingUser, organizationID, projects, options) {
     }
 
     // Get all existing users for permissions
-    const foundUsers = await User.find({}).lean();
+    const foundUsers = await User.find({}, null, { lean: true });
 
     // Create array of usernames
     const foundUsernames = foundUsers.map(u => u._id);
     const promises = [];
     // For each object of project data, create the project object
     projObjects = projectsToCreate.map((p) => {
-      const projObj = new Project(p);
+      const projObj = Project.createDocument(p);
       // Set org
       projObj.org = orgID;
       // Set permissions
@@ -412,7 +441,7 @@ async function create(requestingUser, organizationID, projects, options) {
     EventEmitter.emit('projects-created', projObjects);
 
     // Create a branch for each project
-    const branchObjects = projObjects.map((p) => new Branch({
+    const branchObjects = projObjects.map((p) => Branch.createDocument({
       _id: utils.createID(p._id, 'master'),
       name: 'Master',
       project: p._id,
@@ -429,7 +458,7 @@ async function create(requestingUser, organizationID, projects, options) {
     await Branch.insertMany(branchObjects);
 
     // Create a root model element for each project
-    const elemModelObj = projObjects.map((p) => new Element({
+    const elemModelObj = projObjects.map((p) => Element.createDocument({
       _id: utils.createID(p._id, 'master', 'model'),
       name: 'Model',
       parent: null,
@@ -444,7 +473,7 @@ async function create(requestingUser, organizationID, projects, options) {
     }));
 
     // Create a __MBEE__ element for each project
-    const elemMBEEObj = projObjects.map((p) => new Element({
+    const elemMBEEObj = projObjects.map((p) => Element.createDocument({
       _id: utils.createID(p._id, 'master', '__mbee__'),
       name: '__mbee__',
       parent: utils.createID(p._id, 'master', 'model'),
@@ -459,7 +488,7 @@ async function create(requestingUser, organizationID, projects, options) {
     }));
 
     // Create a holding bin element for each project
-    const elemHoldingBinObj = projObjects.map((p) => new Element({
+    const elemHoldingBinObj = projObjects.map((p) => Element.createDocument({
       _id: utils.createID(p._id, 'master', 'holding_bin'),
       name: 'holding bin',
       parent: utils.createID(p._id, 'master', '__mbee__'),
@@ -474,7 +503,7 @@ async function create(requestingUser, organizationID, projects, options) {
     }));
 
     // Create an undefined element for each project
-    const elemUndefinedBinObj = projObjects.map((p) => new Element({
+    const elemUndefinedBinObj = projObjects.map((p) => Element.createDocument({
       _id: utils.createID(p._id, 'master', 'undefined'),
       name: 'undefined element',
       parent: utils.createID(p._id, 'master', '__mbee__'),
@@ -496,8 +525,10 @@ async function create(requestingUser, organizationID, projects, options) {
     await Element.insertMany(conCatElemObj);
 
     return await Project.find({ _id: { $in: arrIDs } },
-      validatedOptions.fieldsString).populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+      validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -560,8 +591,8 @@ async function update(requestingUser, organizationID, projects, options) {
     helper.checkParamsDataType('object', projects, 'Projects');
 
     // Sanitize input parameters and create function-wide variables
-    const orgID = sani.mongo(organizationID);
-    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.db(organizationID);
+    const saniProjects = sani.db(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const duplicateCheck = {};
     const loweredVisibility = [];
@@ -624,21 +655,13 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // Find the organization containing the projects, validate that it exists and is not archived
     const foundOrg = await helper.findAndValidate(Organization, orgID);
-    // Permissions check
-    if (!permissions.readOrg(reqUser, foundOrg)) {
-      throw new M.PermissionError('User does not have permission to update'
-        + ` projects on the organization [${orgID}].`, 'warn');
-    }
 
     // Find the projects to update
-    const foundProjects = await Project.find(searchQuery).lean();
+    const foundProjects = await Project.find(searchQuery, null, { lean: true });
 
     // Check that the user has admin permissions
     foundProjects.forEach((proj) => {
-      if (!permissions.updateProject(reqUser, foundOrg, proj)) {
-        throw new M.PermissionError('User does not have permission to update'
-          + ` the project [${utils.parseID(proj._id).pop()}].`, 'warn');
-      }
+      permissions.updateProject(reqUser, foundOrg, proj);
     });
 
     // Verify the same number of projects are found as desired
@@ -654,7 +677,7 @@ async function update(requestingUser, organizationID, projects, options) {
     let foundUsers;
     // Find users if updating permissions
     if (updatingPermissions) {
-      foundUsers = await User.find({}).lean();
+      foundUsers = await User.find({}, null, { lean: true });
     }
     else {
       // Return an empty array if not updating permissions
@@ -712,7 +735,7 @@ async function update(requestingUser, organizationID, projects, options) {
           Object.keys(updateProj[key]).forEach((user) => {
             let permValue = updateProj[key][user];
             // Ensure user is not updating own permissions
-            if (user === reqUser.username) {
+            if (user === reqUser._id) {
               throw new M.OperationError('User cannot update own permissions.', 'warn');
             }
 
@@ -821,7 +844,8 @@ async function update(requestingUser, organizationID, projects, options) {
     };
 
     // Find broken relationships
-    const foundElements = await Element.find(relQuery).populate('source target').lean();
+    const foundElements = await Element.find(relQuery, null,
+      { populate: 'source target', lean: true });
 
     const bulkArray2 = [];
 
@@ -868,8 +892,10 @@ async function update(requestingUser, organizationID, projects, options) {
       return Element.bulkWrite(bulkArray2);
     }
 
-    const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
 
     // Emit the event projects-updated
     EventEmitter.emit('projects-updated', foundUpdatedProjects);
@@ -930,8 +956,8 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
     // Sanitize input parameters and create function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = sani.mongo(organizationID);
-    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.db(organizationID);
+    const saniProjects = sani.db(JSON.parse(JSON.stringify(projects)));
     const duplicateCheck = {};
     let foundProjects = [];
     let projectsToLookUp = [];
@@ -985,23 +1011,17 @@ async function createOrReplace(requestingUser, organizationID, projects, options
     const foundOrg = await helper.findAndValidate(Organization, orgID);
 
     // Find the projects to update
-    foundProjects = await Project.find(searchQuery).lean();
+    foundProjects = await Project.find(searchQuery, null, { lean: true });
 
     // Check if new projects are being created
     if (projectsToLookUp.length > foundProjects.length) {
       // Ensure the user has at least write access on the organization
-      if (!permissions.createProject(reqUser, foundOrg)) {
-        throw new M.PermissionError('User does not have permission to create'
-          + ` projects on the organization [${orgID}].`, 'warn');
-      }
+      permissions.createProject(reqUser, foundOrg);
     }
 
     // Check that the user has admin permissions
     foundProjects.forEach((proj) => {
-      if (!permissions.updateProject(reqUser, foundOrg, proj)) {
-        throw new M.PermissionError('User does not have permission to create or '
-          + `replace the project [${utils.parseID(proj._id).pop()}].`, 'warn');
-      }
+      permissions.updateProject(reqUser, foundOrg, proj);
     });
 
     // If data directory doesn't exist, create it
@@ -1031,17 +1051,17 @@ async function createOrReplace(requestingUser, organizationID, projects, options
       elemDelObj.push(utils.createID(p._id, 'master', 'holding_bin'));
       elemDelObj.push(utils.createID(p._id, 'master', 'undefined'));
     });
-    await Element.deleteMany({ _id: { $in: elemDelObj } }).lean();
+    await Element.deleteMany({ _id: { $in: elemDelObj } });
 
     // Delete branches from database
     const branchDelObj = [];
     foundProjects.forEach(p => {
       branchDelObj.push(utils.createID(p._id, 'master'));
     });
-    await Branch.deleteMany({ _id: { $in: branchDelObj } }).lean();
+    await Branch.deleteMany({ _id: { $in: branchDelObj } });
 
     // Delete projects from database
-    await Project.deleteMany({ _id: { $in: foundProjects.map(p => p._id) } }).lean();
+    await Project.deleteMany({ _id: { $in: foundProjects.map(p => p._id) } });
 
     // Emit the event projects-deleted
     EventEmitter.emit('projects-deleted', foundProjects);
@@ -1125,17 +1145,10 @@ async function remove(requestingUser, organizationID, projects, options) {
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID);
     helper.checkParamsDataType(['object', 'string'], projects, 'Projects');
-    // Remove project function only: must be an admin
-    try {
-      assert.ok(permissions.deleteProject(requestingUser), 'User does not have permissions to delete projects.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
 
     // Sanitize input parameters and function-wide variables
-    const orgID = sani.mongo(organizationID);
-    const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
+    const orgID = sani.db(organizationID);
+    const saniProjects = sani.db(JSON.parse(JSON.stringify(projects)));
     let searchedIDs = [];
 
     // Define searchQuery and ownedQuery
@@ -1159,10 +1172,15 @@ async function remove(requestingUser, organizationID, projects, options) {
     }
 
     // Find the organization, validate that it was found and not archived
-    await helper.findAndValidate(Organization, orgID);
+    const foundOrg = await helper.findAndValidate(Organization, orgID);
 
     // Find the projects to delete
-    const foundProjects = await Project.find(searchQuery).lean();
+    const foundProjects = await Project.find(searchQuery, null, { lean: true });
+
+    foundProjects.forEach(project => {
+      // Permissions Check - Must be Sys Admin
+      permissions.deleteProject(requestingUser, foundOrg, project);
+    });
 
     const foundProjectIDs = foundProjects.map(p => p._id);
     ownedQuery.project = { $in: foundProjectIDs };
@@ -1176,13 +1194,13 @@ async function remove(requestingUser, organizationID, projects, options) {
     }
 
     // Delete any elements in the project
-    await Element.deleteMany(ownedQuery).lean();
+    await Element.deleteMany(ownedQuery);
 
     // Delete any branches in the project
-    await Branch.deleteMany(ownedQuery).lean();
+    await Branch.deleteMany(ownedQuery);
 
     // Delete the projects
-    const retQuery = await Project.deleteMany(searchQuery).lean();
+    const retQuery = await Project.deleteMany(searchQuery);
 
     // Emit the event projects-deleted
     EventEmitter.emit('projects-deleted', foundProjects);

@@ -89,8 +89,15 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // -------------- Find --------------
+  // ------------- Create -------------
+  // ------------- Update -------------
+  // ------------- Replace ------------
   it('should reject put user with invalid username', putInvalidUsername);
   it('should reject put user without username', putWithoutUsername);
+  // ------------- Remove -------------
+  // --------- Update Password --------
+  // ------------- Search -------------
 });
 
 /* --------------------( Tests )-------------------- */
@@ -109,7 +116,7 @@ async function putInvalidUsername() {
 
   await UserController.createOrReplace(adminUser, [testUserObj0, testUserObj1, invalidUserObj])
   .should.eventually.be.rejectedWith(
-    'User validation failed: _id: Path `_id` is invalid (INVALID_NAME).'
+    'User validation failed: _id: Invalid username [INVALID_NAME].'
   );
 
   let foundUsers;

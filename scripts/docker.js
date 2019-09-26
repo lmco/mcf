@@ -89,10 +89,10 @@ function docker(args) {
       '--restart=always',
       '-e', `MBEE_ENV=${M.env}`
     ].concat(args.slice(1));
-    // Check if mongo is in docker container
-    if (M.config.docker.mongo.enabled) {
+    // Check if the database is in docker container
+    if (M.config.docker.db.enabled) {
       // http and docker http enabled, open specified ports
-      rargs = rargs.concat(['-p', `${M.config.docker.mongo.port}:${M.config.db.port}`]);
+      rargs = rargs.concat(['-p', `${M.config.docker.db.port}:${M.config.db.port}`]);
     }
     if (M.config.server.http.enabled && M.config.docker.http.enabled) {
       // http and docker http enabled, open specified ports

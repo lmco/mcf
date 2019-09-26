@@ -154,13 +154,13 @@ function doLogin(req, res, next) {
   // Generate the token
   const token = mbeeCrypto.generateToken({
     type: 'user',
-    username: req.user.username,
+    username: (req.user.username || req.user._id),
     created: (new Date(Date.now())),
     expires: (new Date(Date.now() + timeDelta))
   });
   // Set the session token
   req.session.token = token;
-  M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
+  M.log.info(`${req.originalUrl} Logged in ${(req.user.username || req.user._id)}`);
   // Callback
   next();
 }

@@ -43,37 +43,34 @@ describe(M.getModuleName(module.filename), () => {
    * Before: Run before all tests. Find
    * non-admin user and elevate to admin user.
    */
-  before((done) => {
-    // Open the database connection
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((_adminUser) => {
-      adminUser = _adminUser;
-      done();
-    })
-    .catch((error) => {
+  before(async () => {
+    try {
+      // Open the database connection
+      await db.connect();
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user.
    */
-  after((done) => {
-    // Delete test admin
-    testUtils.removeTestAdmin()
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      // Delete test admin
+      await testUtils.removeTestAdmin();
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute tests */
@@ -97,6 +94,8 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Makes a GET request to /api/users/whoami. Verifies return of
  * requesting user from API.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function whoami(done) {
   const userData = testData.adminUser;
@@ -123,6 +122,8 @@ function whoami(done) {
 
 /**
  * @description Verifies POST /api/users/:username creates a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postUser(done) {
   const userData = testData.users[0];
@@ -154,8 +155,8 @@ function postUser(done) {
     // Verify extra properties
     chai.expect(createdUser.createdOn).to.not.equal(null);
     chai.expect(createdUser.updatedOn).to.not.equal(null);
-    chai.expect(createdUser.createdBy).to.equal(adminUser.username);
-    chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdUser.createdBy).to.equal(adminUser._id);
+    chai.expect(createdUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdUser.archived).to.equal(false);
     chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
@@ -164,6 +165,8 @@ function postUser(done) {
 
 /**
  * @description Verifies POST /api/users creates multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postUsers(done) {
   const userData = [
@@ -206,8 +209,8 @@ function postUsers(done) {
       // Verify extra properties
       chai.expect(createdUser.createdOn).to.not.equal(null);
       chai.expect(createdUser.updatedOn).to.not.equal(null);
-      chai.expect(createdUser.createdBy).to.equal(adminUser.username);
-      chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdUser.createdBy).to.equal(adminUser._id);
+      chai.expect(createdUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdUser.archived).to.equal(false);
       chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -217,6 +220,8 @@ function postUsers(done) {
 
 /**
  * @description Verifies PUT /api/users/:username creates or replaces a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putUser(done) {
   const userData = testData.users[0];
@@ -248,8 +253,8 @@ function putUser(done) {
     // Verify extra properties
     chai.expect(replacedUser.createdOn).to.not.equal(null);
     chai.expect(replacedUser.updatedOn).to.not.equal(null);
-    chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedUser.archived).to.equal(false);
     chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
@@ -258,6 +263,8 @@ function putUser(done) {
 
 /**
  * @description Verifies PUT /api/users creates or replaces multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putUsers(done) {
   const userData = [
@@ -301,8 +308,8 @@ function putUsers(done) {
       // Verify extra properties
       chai.expect(replacedUser.createdOn).to.not.equal(null);
       chai.expect(replacedUser.updatedOn).to.not.equal(null);
-      chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
-      chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedUser.createdBy).to.equal(adminUser._id);
+      chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedUser.archived).to.equal(false);
       chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -312,6 +319,8 @@ function putUsers(done) {
 
 /**
  * @description Verifies GET /api/users/:username finds a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getUser(done) {
   const userData = testData.users[0];
@@ -342,8 +351,8 @@ function getUser(done) {
     // Verify extra properties
     chai.expect(foundUser.createdOn).to.not.equal(null);
     chai.expect(foundUser.updatedOn).to.not.equal(null);
-    chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-    chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+    chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundUser.archived).to.equal(false);
     chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
@@ -352,6 +361,8 @@ function getUser(done) {
 
 /**
  * @description Verifies GET /api/users finds multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getUsers(done) {
   const userData = [
@@ -395,8 +406,8 @@ function getUsers(done) {
       // Verify extra properties
       chai.expect(foundUser.createdOn).to.not.equal(null);
       chai.expect(foundUser.updatedOn).to.not.equal(null);
-      chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundUser.archived).to.equal(false);
       chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -406,6 +417,8 @@ function getUsers(done) {
 
 /**
  * @description Verifies GET /api/users finds all users if no ids are provided.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllUsers(done) {
   // Create request object
@@ -440,7 +453,7 @@ function getAllUsers(done) {
       // Ensure user was found
       chai.expect(foundUser).to.not.equal(undefined);
 
-      if (foundUser.username !== adminUser.username) {
+      if (foundUser.username !== adminUser._id) {
         // Verify expected response
         chai.expect(foundUser.username).to.equal(userDataObject.username);
         chai.expect(foundUser.fname).to.equal(userDataObject.fname);
@@ -454,8 +467,8 @@ function getAllUsers(done) {
         // Verify extra properties
         chai.expect(foundUser.createdOn).to.not.equal(null);
         chai.expect(foundUser.updatedOn).to.not.equal(null);
-        chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-        chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+        chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+        chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
         chai.expect(foundUser.archived).to.equal(false);
         chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
       }
@@ -470,7 +483,9 @@ function getAllUsers(done) {
 }
 
 /**
- * @description Verifies GET /api/users/search
+ * @description Verifies GET /api/users/search.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function searchUsers(done) {
   // Create request object
@@ -517,8 +532,8 @@ function searchUsers(done) {
       // Verify extra properties
       chai.expect(foundUser.createdOn).to.not.equal(null);
       chai.expect(foundUser.updatedOn).to.not.equal(null);
-      chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundUser.archived).to.equal(false);
       chai.expect(foundUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -528,6 +543,8 @@ function searchUsers(done) {
 
 /**
  * @description Verifies PATCH /api/users/:username updates a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUser(done) {
   const userData = testData.users[0];
@@ -563,8 +580,8 @@ function patchUser(done) {
     // Verify extra properties
     chai.expect(updatedUser.createdOn).to.not.equal(null);
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
-    chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
@@ -573,6 +590,8 @@ function patchUser(done) {
 
 /**
  * @description Verifies PATCH /api/users updates multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUsers(done) {
   const userData = [
@@ -620,8 +639,8 @@ function patchUsers(done) {
       // Verify extra properties
       chai.expect(updatedUser.createdOn).to.not.equal(null);
       chai.expect(updatedUser.updatedOn).to.not.equal(null);
-      chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedUser.archived).to.equal(false);
       chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
@@ -631,6 +650,8 @@ function patchUsers(done) {
 
 /**
  * @description Verifies mock PATCH request to update a users password.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUserPassword(done) {
   // Create request object
@@ -668,8 +689,8 @@ function patchUserPassword(done) {
     // Verify extra properties
     chai.expect(updatedUser.createdOn).to.not.equal(null);
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
-    chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     done();
@@ -678,6 +699,8 @@ function patchUserPassword(done) {
 
 /**
  * @description Verifies DELETE /api/users/:username deletes a user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteUser(done) {
   const userData = testData.users[0];
@@ -703,6 +726,8 @@ function deleteUser(done) {
 
 /**
  * @description Verifies DELETE /api/users/ deletes multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteUsers(done) {
   const userData = [

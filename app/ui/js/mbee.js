@@ -1,4 +1,4 @@
-// ESLint disbled for client-side JS for now.
+// ESLint disabled for client-side JS for now.
 // TODO (jk) - determine long-term approach
 /* eslint-disabled */
 
@@ -95,4 +95,25 @@ function convertCase(param, caseType) {
   }
 
   return convertedCase;
+}
+
+/**
+ * @description Decodes an HTML encoded string.
+ *
+ * @param {string} encodedString - HTML encoded string.
+ *
+ * @return {string} - decoded string.
+ */
+// eslint-disable-next-line no-unused-vars
+function decodeHTML(encodedString) {
+  // Check if input is string type
+  if (typeof encodedString === 'string') {
+    // Replace HTML escape sequences with corresponding characters
+    return String(encodedString)
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'");
+  }
 }

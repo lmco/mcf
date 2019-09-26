@@ -206,7 +206,7 @@ winston.addColors(colors);
  */
 function logResponse(responseLength, req, res) {
   // Set username to anonymous if req.user is not defined
-  const username = (req.user) ? req.user.username : 'anonymous';
+  const username = (req.user) ? (req.user._id || req.user.username) : 'anonymous';
   const date = JSON.stringify(new Date()).replace(/"/g, '');
   let ip = req.ip;
   // If IP is ::1, set it equal to 127.0.0.1
