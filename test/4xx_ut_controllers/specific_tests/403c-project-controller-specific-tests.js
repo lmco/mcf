@@ -20,6 +20,7 @@
 const chai = require('chai');
 
 // MBEE modules
+const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const Project = M.require('models.project');
 const db = M.require('lib.db');
@@ -55,7 +56,7 @@ describe(M.getModuleName(module.filename), () => {
       org = await testUtils.createTestOrg(adminUser);
 
       // Create projects for the tests to utilize
-      projects = await ProjectController.create(adminUser, org.id, testData.projects);
+      projects = await ProjectController.create(adminUser, org._id, testData.projects);
     }
     catch (error) {
       M.log.error(error);
@@ -84,6 +85,8 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
+  it('should find an \'internal\' project if a user is not part of the project,'
+    + ' but is a member of the org', findInternalProject);
   it('should populate find results', optionPopulateFind);
   it('should include archived projects in the find results', optionIncludeArchivedFind);
   it('should only return the specified fields', optionFieldsFind);
@@ -118,6 +121,36 @@ describe(M.getModuleName(module.filename), () => {
 });
 
 /* --------------------( Tests )-------------------- */
+
+/**
+ * @description Verifies that a user with no permissions on a project can still
+ * retrieve it if the project visibility is internal and the user has at least
+ * read permissions on the organization.
+ */
+async function findInternalProject() {
+  try {
+    // Create the non-admin user
+    const user = await testUtils.createNonAdminUser();
+    const updateObj = { id: org._id, permissions: {} };
+    updateObj.permissions[user._id] = 'read';
+    // Add user to organization
+    await OrgController.update(adminUser, updateObj);
+    // Update project visibility to internal
+    const projUpdate = { id: utils.parseID(projects[1]._id).pop(), visibility: 'internal' };
+    await ProjectController.update(adminUser, org._id, projUpdate);
+
+    // Verify the user can find the internal project
+    await ProjectController.find(user, org._id, utils.parseID(projects[1]._id).pop());
+
+    // Cleanup test: delete non-admin user and reset project visibility
+    await testUtils.removeNonAdminUser();
+    projUpdate.visibility = 'private';
+    await ProjectController.update(adminUser, org._id, projUpdate);
+  }
+  catch (error) {
+    chai.expect(error.message).to.equal(null);
+  }
+}
 
 /**
  * @description Validates that the find results can be populated.
