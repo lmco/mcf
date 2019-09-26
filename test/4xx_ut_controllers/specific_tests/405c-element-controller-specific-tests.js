@@ -1368,8 +1368,8 @@ async function optionSortSearch() {
     }];
 
     // Create sort options
-    const sortOption = {sort: 'name'};
-    const sortOptionReverse = {sort: '-name'};
+    const sortOption = { sort: 'name' };
+    const sortOptionReverse = { sort: '-name' };
     // Search term
     const searchQuery = 'searchme';
 
