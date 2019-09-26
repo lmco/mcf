@@ -298,13 +298,19 @@ class Model {
    * @param {Object} document -  The documents to properly format
    * @param {Object} options - The options supplied to the function.
    *
-   * @return {Object[]} - Modified documents.
+   * @return {Object} - Modified documents.
    */
-  formatDocument(document, options) {
+  formatDocument(document, options = {}) {
     Object.keys(document).forEach((field) => {
       // Change the value of each key from { type: value} to simply the value
       document[field] = Object.values(document[field])[0];
     });
+
+    // If the lean option is NOT supplied, add on document functions
+    if (!options.lean) {
+      document = this.createDocument(document); // eslint-disable-line no-param-reassign
+    }
+
     return document;
   }
 
@@ -425,12 +431,65 @@ class Model {
     const def = this.definition;
     const table = this.TableName;
     const conn = this.connection;
+    const modelName = this.modelName;
     const model = this;
-    doc.validate = async function() {
+    doc.__proto__.validate = function() {
+      const keys = Object.keys(doc);
+      // Loop over each valid parameter
+      Object.keys(def).forEach((param) => {
+        // Parameter was defined on the document
+        if (keys.includes(param)) {
+          // Validate type
+          let shouldBeType;
+          switch (def[param].type) {
+            case 'S':
+              shouldBeType = 'string'; break;
+            case 'N':
+              shouldBeType = 'number'; break;
+            case 'M':
+              shouldBeType = 'object'; break;
+            case 'BOOL':
+              shouldBeType = 'boolean'; break;
+            default:
+              throw new M.DataFormatError(`Invalid DynamoDB type: ${def[param].type}`);
+          }
 
-    }
+          // If not the correct type, throw an error
+          if (typeof doc[param] !== shouldBeType) { // eslint-disable-line valid-typeof
+            throw new M.DataFormatError(`The ${modelName} parameter `
+              + `[${param}] is not a ${shouldBeType}.`);
+          }
+
+          // Run validators
+          if (def[param].validate) {
+            def[param].validate.forEach((v) => {
+              if (!v.validator(doc[param])) {
+                throw new M.DataFormatError(v.message);
+              }
+            });
+          }
+        }
+        // If the parameter was not defined on the document
+        else {
+          // If the parameter is required and no default is provided, throw an error
+          if (def[param].required && !def[param].default) {
+            throw new M.DataFormatError(`The ${modelName} property ${param}`
+              + ' is required.');
+          }
+
+          // If a default exists
+          if (def[param].default) {
+            doc[param] = def[param].default;
+          }
+        }
+      });
+    };
     doc.save = async function() {
       return new Promise((resolve, reject) => {
+        // Ensure the document is valid
+        console.log(this);
+        this.validate();
+
         const putObj = {
           TableName: table,
           Item: {}
@@ -450,6 +509,7 @@ class Model {
         .catch((error) => reject(error));
       });
     };
+    doc.markModified = function(field) {};
 
     return doc;
   }
@@ -899,58 +959,6 @@ class Model {
    */
   async updateOne(filter, doc, options, cb) {
     return this.updateItem(filter, doc, options);
-  }
-
-  validateDocument(doc) {
-    const keys = Object.keys(doc);
-    // Loop over each valid parameter
-    Object.keys(this.definition).forEach((param) => {
-      // Parameter was defined on the document
-      if (keys.includes(param)) {
-        // Validate type
-        let shouldBeType;
-        switch (param.type) {
-          case 'S':
-            shouldBeType = 'string'; break;
-          case 'N':
-            shouldBeType = 'number'; break;
-          case 'M':
-            shouldBeType = 'object'; break;
-          case 'BOOL':
-            shouldBeType = 'boolean'; break;
-          default:
-            throw new M.DataFormatError(`Invalid DynamoDB type: ${param.type}`);
-        }
-
-        // If not the correct type, throw an error
-        if (typeof doc[param] !== shouldBeType) { // eslint-disable-line valid-typeof
-          throw new M.DataFormatError(`The ${this.modelName} parameter `
-            + `[${param}] is not a ${shouldBeType}.`);
-        }
-
-        // Run validators
-        if (this.definition[param].validate) {
-          this.definition[param].validate.forEach((v) => {
-            if (!v.validator(doc[param])) {
-              throw new M.DataFormatError(v.message);
-            }
-          });
-        }
-      }
-      // If the parameter was not defined on the document
-      else {
-        // If the parameter is required and no default is provided, throw an error
-        if (this.definition[param].required && !this.definition[param].default) {
-          throw new M.DataFormatError(`The ${this.modelName} property ${param}`
-            + ' is required.');
-        }
-
-        // If a default exists
-        if (this.definition[param].default) {
-          doc[param] = this.definition[param].default;
-        }
-      }
-    });
   }
 
 }

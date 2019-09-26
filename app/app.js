@@ -150,6 +150,7 @@ function createDefaultOrganization() {
       if (org !== null) {
         // Default organization exists, prune user permissions to only include
         // users currently in the database.
+        console.log(org);
         Object.keys(org.permissions).forEach((user) => {
           if (!userIDs.includes(user)) {
             delete org.permissions.user;
