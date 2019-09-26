@@ -209,8 +209,6 @@ async function find(requestingUser, organizationID, projects, options) {
         lean: validatedOptions.lean
       });
 
-    // console.log(foundProjects)
-
     // If searching specific projects, remove projects not in that list
     if (saniProjects) {
       // Searched for single project
