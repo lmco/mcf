@@ -41,7 +41,7 @@ let projID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Open the database connection
@@ -110,6 +110,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies mock POST request to create a branch.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postBranch(done) {
   const branchData = testData.branches[1];
@@ -165,6 +167,8 @@ function postBranch(done) {
 
 /**
  * @description Verifies mock POST request to create multiple branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postBranches(done) {
   // Create request object
@@ -234,6 +238,8 @@ function postBranches(done) {
 
 /**
  * @description Verifies mock GET request to get a branch.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getBranch(done) {
   const branchData = testData.branches[1];
@@ -289,6 +295,8 @@ function getBranch(done) {
 
 /**
  * @description Verifies mock GET request to get multiple branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getBranches(done) {
   const branchData = [
@@ -356,6 +364,8 @@ function getBranches(done) {
 
 /**
  * @description Verifies mock GET request to get all branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllBranches(done) {
   const branchesData = [
@@ -427,6 +437,8 @@ function getAllBranches(done) {
 
 /**
  * @description Verifies mock PATCH request to update a branch.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchBranch(done) {
   const branchData = testData.branches[1];
@@ -486,6 +498,8 @@ function patchBranch(done) {
 
 /**
  * @description Verifies mock PATCH request to update multiple branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchBranches(done) {
   // Create request object
@@ -559,6 +573,8 @@ function patchBranches(done) {
 
 /**
  * @description Verifies mock DELETE request to delete a branch.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteBranch(done) {
   // Create request object
@@ -595,6 +611,8 @@ function deleteBranch(done) {
 
 /**
  * @description Verifies mock DELETE request to delete multiple branches.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteBranches(done) {
   // Create request object
