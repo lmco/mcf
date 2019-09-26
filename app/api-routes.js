@@ -3775,7 +3775,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
  *                      branch]
-
+ *
  *         in: query
  *         type: string
  *       - name: minified
