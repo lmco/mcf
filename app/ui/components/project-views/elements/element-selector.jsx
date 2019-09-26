@@ -133,7 +133,7 @@ class ElementSelector extends React.Component {
   }
 
   /**
-   * Resets the selectedElementPreview state
+   * Resets the selectedElementPreview state.
    */
   clear() {
     this.setState({
@@ -142,7 +142,7 @@ class ElementSelector extends React.Component {
   }
 
   /**
-   * Changes the project
+   * Changes the project.
    */
   handleChange(event) {
     this.setState({ project: event.target.value });

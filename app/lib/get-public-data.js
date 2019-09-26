@@ -27,7 +27,7 @@ const utils = M.require('lib.utils');
  * @param {string} type - The type of item that the object is. Can be an org,
  * project, element or user.
  * @param {object} options - A list of options passed in by the user to the API
- * Controller
+ * Controller.
  *
  * @return {object} The modified object.
  */
@@ -59,7 +59,7 @@ module.exports.getPublicData = function(object, type, options) {
  *
  * @param {object} element - The raw JSON of the element.
  * @param {object} options - A list of options passed in by the user to the API
- * Controller
+ * Controller.
  *
  * @return {object} The public data of the element.
  */
@@ -340,7 +340,7 @@ function getElementPublicData(element, options) {
  *
  * @param {object} branch - The raw JSON of the branch.
  * @param {object} options - A list of options passed in by the user to the API
- * Controller
+ * Controller.
  *
  * @return {object} The public data of the branch.
  */
@@ -464,7 +464,7 @@ function getBranchPublicData(branch, options) {
  *
  * @param {object} project - The raw JSON of the project.
  * @param {object} options - A list of options passed in by the user to the API
- * Controller
+ * Controller.
  *
  * @return {object} The public data of the project.
  */
@@ -568,7 +568,7 @@ function getProjectPublicData(project, options) {
  *
  * @param {object} org - The raw JSON of the org.
  * @param {object} options - A list of options passed in by the user to the API
- * Controller
+ * Controller.
  *
  * @return {object} The public data of the org.
  */
@@ -686,7 +686,7 @@ function getOrgPublicData(org, options) {
  *
  * @param {object} user - The raw JSON of the user.
  * @param {object} options - A list of options passed in by the user to the API
- * Controller
+ * Controller.
  *
  * @return {object} The public data of the user.
  */

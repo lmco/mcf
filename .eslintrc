@@ -849,12 +849,12 @@
     "jsdoc/check-tag-names": "off", //TODO: reevaluate
     "jsdoc/check-types": "error", // Recommended
     "jsdoc/implements-on-classes": "warn", // Recommended
-    /*"jsdoc/match-description": ["error", {"tags": {
+    "jsdoc/match-description": ["error", {"tags": {
       "param": true,
       "property": true,
       "returns": true
     }}],
-    "jsdoc/newline-after-description": "error", // Recommended
+    /*"jsdoc/newline-after-description": "error", // Recommended
     "jsdoc/no-types": "off",
     "jsdoc/no-undefined-types": "error", // Recommended
     "jsdoc/require-description": ["error", {

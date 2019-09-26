@@ -324,7 +324,7 @@ class ElementEdit extends Component {
   }
 
   /**
-   * Renders the component
+   * Renders the component.
    */
   render() {
     // // Initialize variables

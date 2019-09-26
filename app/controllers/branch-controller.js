@@ -86,7 +86,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for branches with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
  * @return {Promise} Array of found branch objects
  *
@@ -220,7 +220,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
  * branch data or a single object containing branch data to create.
  * @param {string} [branches.id] - The ID of the branch being created.
  * @param {string} [branches.name] - The name of the branch.
- * @param {string} [branches.tag] = false - If the branch is a tag, the value
+ * @param {string} [branches.tag = false] - If the branch is a tag, the value
  * should be set to true. This will hinder all create, update, and deletes of
  * elements on the branch.
  * @param {object} [branches.custom] - The custom data of the branch.

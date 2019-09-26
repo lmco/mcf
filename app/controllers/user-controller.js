@@ -73,21 +73,21 @@ const permissions = M.require('lib.permissions');
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {string} [options.fname] - A string that will search for matches with
- * the user fname field, or first name
+ * the user fname field, or first name.
  * @param {string} [options.lname] - A string that will search for matches with
- * the user lname field, or last name
+ * the user lname field, or last name.
  * @param {string} [options.preferredName] - A string that will search for matches
- * with the user preferredName field
+ * with the user preferredName field.
  * @param {string} [options.email] - A string that will search for matches with
- * the user email field
+ * the user email field.
  * @param {string} [options.createdBy] - A string that will search for matches for
- * users that were created by a specific person
+ * users that were created by a specific person.
  * @param {string} [options.lastModifiedBy] - A string that will search for matches for
- * users that were last modified by a specific person
+ * users that were last modified by a specific person.
  * @param {string} [options.archived] - Search only for archived users.  If false,
  * only returns unarchived users.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - A string that will search for matches for
- * users that were archived by a specific person
+ * users that were archived by a specific person.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
@@ -871,7 +871,7 @@ async function remove(requestingUser, users, options) {
  * Returns any users that match the text search, in order of the best matches to
  * the worst.  Searches the fname, preferredName, and lname fields.
  *
- * @param {User} requestingUser - The object containing the requesting user
+ * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} query - The text-based query to search the database for.
  * @param {object} [options] - A parameter that provides supported options.
  * @param {boolean} [options.archived] - A parameter that if true, will return

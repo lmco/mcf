@@ -16,6 +16,8 @@
  * @description Defines the HTTP Rest API interface file. This file tightly
  * couples with the app/api-routes.js file.
  */
+/* eslint-disable jsdoc/match-description */
+
 
 // Node.js Modules
 const path = require('path');
@@ -104,9 +106,9 @@ module.exports = {
  * This function is used for formatting all API responses.
  *
  * @param {object} obj - An object to convert to JSON-formatted string.
- * @param {boolean} [minified] - Whether or not to format the object. Defaults to false.
+ * @param {boolean} [minified=false] - Whether or not to format the object.
  *
- * @returns {string} JSON string of object parameter
+ * @returns {string} JSON string of object parameter.
  */
 function formatJSON(obj, minified = false) {
   // If the object should be minified
@@ -128,7 +130,7 @@ function formatJSON(obj, minified = false) {
  * @param {string} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
  *
- * @returns {object} res - The response object
+ * @returns {object} The response object.
  */
 function returnResponse(req, res, message, statusCode) {
   if (statusCode === 200) {
@@ -173,8 +175,8 @@ function swaggerSpec() {
  *
  * @description Returns the swagger JSON specification.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with swagger JSON
  */
@@ -189,8 +191,8 @@ function swaggerJSON(req, res) {
  *
  * @description Returns the login token after AuthController.doLogin().
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with session token
  */
@@ -204,8 +206,8 @@ function login(req, res) {
  *
  * @description Returns 200 status. Used to confirm API is up and running.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with 200 status code
  */
@@ -219,8 +221,8 @@ function test(req, res) {
  *
  * @description Returns the version number as JSON.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with version
  */
@@ -242,8 +244,8 @@ function version(req, res) {
  *
  * @description Gets an array of all organizations that a user has access to.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with orgs' public data
  *
@@ -355,8 +357,8 @@ async function getOrgs(req, res) {
  *
  * @description Creates multiple orgs from an array of objects.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with orgs' public data
  */
@@ -442,8 +444,8 @@ async function postOrgs(req, res) {
  * @description Creates or replaces multiple orgs from an array of objects.
  * NOTE: this route is reserved for system-wide admins ONLY.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with orgs' public data
  */
@@ -528,8 +530,8 @@ async function putOrgs(req, res) {
  *
  * @description Updates multiple orgs from an array of objects.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with orgs' public data
  */
@@ -616,8 +618,8 @@ async function patchOrgs(req, res) {
  * objects.
  * NOTE: This function is system-admin ONLY.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with array of deleted org IDs.
  */
@@ -680,8 +682,8 @@ async function deleteOrgs(req, res) {
  *
  * @description Gets an organization by its id.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with org's public data
  */
@@ -760,8 +762,8 @@ async function getOrg(req, res) {
  * @description Takes an organization in the request body and an
  * organization ID in the URI and creates the organization.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with org's public data
  */
@@ -848,8 +850,8 @@ async function postOrg(req, res) {
  * @description Creates or replaces an organization.
  * NOTE: this route is reserved for system-wide admins ONLY.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with org's public data
  */
@@ -935,8 +937,8 @@ async function putOrg(req, res) {
  *
  * @description Updates the specified org.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with updated org
  */
@@ -1023,9 +1025,9 @@ async function patchOrg(req, res) {
  * @description Takes an orgid in the URI and deletes the corresponding org.
  * NOTE: This function is for system-wide admins ONLY.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
- * @param {Function} next - Callback function
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Callback function.
  *
  * @return {object} Response object with deleted org ID.
  */
@@ -1093,8 +1095,8 @@ async function deleteOrg(req, res, next) {
  *
  * @description Gets all projects a user has access to across all orgs.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with projects' public data
  */
@@ -1187,8 +1189,8 @@ async function getAllProjects(req, res) {
  * @description Gets an array of all projects that a user has access to on
  * a specified org or an array of specified projects on the specified org.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with projects' public data
  */
@@ -1299,8 +1301,8 @@ async function getProjects(req, res) {
  *
  * @description This function creates multiple projects.
  *
- * @param {object} req - request express object
- * @param {object} res - response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with created projects.
  */
@@ -1386,8 +1388,8 @@ async function postProjects(req, res) {
  * @description This function creates/replaces multiple projects.
  * NOTE: this route is reserved for system-wide admins ONLY.
  *
- * @param {object} req - request express object
- * @param {object} res - response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
  * @return {object} Response object with created/replaced projects.
  */

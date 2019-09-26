@@ -44,10 +44,10 @@ module.exports.ID_DELIMITER = ':';
  * @description Defines a render utility wrapper for the Express res.render
  * function to define and pass in default options.
  *
- * @param {object} req - Request object
- * @param {object} res - Response object
- * @param {string} name - Name of the template to render
- * @param {object} params - List of parameters to render
+ * @param {object} req - Request object.
+ * @param {object} res - Response object.
+ * @param {string} name - Name of the template to render.
+ * @param {object} params - List of parameters to render.
  */
 module.exports.render = function(req, res, name, params) {
   const opts = params || {};
@@ -137,8 +137,8 @@ module.exports.toTitleCase = function(s, keepUpper = false) {
  * @description Checks that two objects are equal by stringifying them and
  * comparing the resulting strings.
  *
- * @param {*} a
- * @param {*} b
+ * @param {*} a - The first parameter to be compared.
+ * @param {*} b - The second parameter to be compared.
  */
 module.exports.deepEqual = function(a, b) {
   try {
@@ -161,7 +161,7 @@ module.exports.deepEqual = function(a, b) {
  * @param {object} options - An optional parameter that provides supported
  * options.
  * @param {object} validOptions - An object containing valid option as keys and
- * the object's data type as values. ex. populate: 'array'
+ * the object's data type as values. ex. populate: 'array'.
  */
 module.exports.parseOptions = function(options, validOptions) {
   // Check option is defined
@@ -224,9 +224,9 @@ module.exports.parseOptions = function(options, validOptions) {
  * @description Validates a list of options and returns the desired response in
  * an object.
  *
- * @param {object} options - The options object passed into the controller.
- * Should contain key/value pairs where the key is the option and the value is
- * the user input
+ * @param {object} options - The options object passed into the controller. Should
+ * contain key/value pairs where the key is the option and the value is
+ * the user input.
  * @param {string[]} validOptions - An array of valid options for that function.
  * @param {object} model - The model of the controller which called this
  * function.
@@ -446,7 +446,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
 /**
  * @description Handles a data stream containing gzipped data.
  *
- * @param {object} dataStream - The stream object carrying a gzip file
+ * @param {object} dataStream - The stream object carrying a gzip file.
  *
  * @return {Promise} A promise containing the unzipped data
  */

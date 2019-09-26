@@ -19,8 +19,8 @@
 /**
  * @description Log the route and method requested by a user.
  *
- * @param {object} req - Request object from express
- * @param {object} res - Response object from express
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
  * @param {Function} next - Callback to express authentication flow.
  */
 module.exports.logRoute = function logRoute(req, res, next) {
@@ -34,8 +34,8 @@ module.exports.logRoute = function logRoute(req, res, next) {
 /**
  * @description Log the IP address where the request originated from
  *
- * @param {object} req - Request object from express
- * @param {object} res - Response object from express
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
  * @param {Function} next - Callback to express authentication flow.
  */
 module.exports.logIP = function logIP(req, res, next) {

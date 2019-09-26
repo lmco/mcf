@@ -41,9 +41,9 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  * This function implements different types of authentication according to
  * the strategy set up in the configuration file.
  *
- * @param {object} req - Express request object
- * @param {object} res - Express response object
- * @param {Function} next - Callback to express authentication
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {Function} next - Callback to express authentication.
  */
 async function authenticate(req, res, next) {
   // Extract authorization metadata
@@ -283,11 +283,11 @@ async function authenticate(req, res, next) {
  * Note: If validatePassword() function is NOT defined in custom strategy then
  * validation will fail.
  *
- * @param {string} password - Password to validate
- * @param {string} provider - the type of authentication strategy (ldap, local,
- * etc.)
+ * @param {string} password - Password to validate.
+ * @param {string} provider - The type of authentication strategy (ldap, local,
+ * etc).
  *
- * @returns {boolean} If password is correctly validated
+ * @returns {boolean} If password is correctly validated.
  */
 function validatePassword(password, provider) {
   // Check if custom validate password rules exist in auth strategy

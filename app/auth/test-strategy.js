@@ -39,12 +39,12 @@ const utils = M.require('lib.utils');
  *
  * Note: Uses username/password and configuration in config file.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
- * @param {string} username - Username to authenticate
- * @param {string} password - Password to authenticate
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} username - Username to authenticate.
+ * @param {string} password - Password to authenticate.
  *
- * @returns {Promise} Authenticated user object
+ * @returns {Promise} Authenticated user object.
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -79,11 +79,11 @@ function handleBasicAuth(req, res, username, password) {
  * @description This function implements handleTokenAuth() in lib/auth.js.
  * Authenticates user with passed in token.
  *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
- * @param {string} token - User authentication token, encrypted
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} token - User authentication token, encrypted.
  *
- * @returns {Promise} Local user object
+ * @returns {Promise} Local user object.
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -142,9 +142,9 @@ function handleTokenAuth(req, res, token) {
  * This function generates the session token for user login.
  * Upon successful login, generate token and set to session
  *
- * @param {object} req - Request express object
- * @param {object} res - response express object
- * @param {Function} next - Callback to express authentication
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Callback to express authentication.
  */
 function doLogin(req, res, next) {
   // Compute token expiration time

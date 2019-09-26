@@ -105,7 +105,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
  * @return {Promise} Array of found element objects
  *
@@ -1684,7 +1684,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
  * @return {Promise} An array of found elements.
  *
@@ -1871,13 +1871,13 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
  * org, project, and branch id and cannot reference the same project.  This function also
  * pushes to lists of ids keeping track of source, target, and project references
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to or updated on
- * @param {string} projID - The id of the project the element is being posted to or updated on
- * @param {object} projectRefs - A running list of references to other projects on the same org
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to or updated on.
+ * @param {string} projID - The id of the project the element is being posted to or updated on.
+ * @param {object} projectRefs - A running list of references to other projects on the same org.
  * @param {object} sourceTargetIDs - A list of source and target IDs to be queried for to ensure
- * that they exist before being updated
+ * that they exist before being updated.
  */
 function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
   sourceTargetIDs = null) {
@@ -1972,11 +1972,11 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
 /**
  * @description A non-exposed helper function that validates the setting of a source and target
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
  */
 function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
   try {
@@ -2004,11 +2004,11 @@ function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
 /**
  * @description A non-exposed helper function that validates the parent of an element being created
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
  */
 function elementParentCheck(elem, index, orgID, projID, branchID) {
   try {
@@ -2027,12 +2027,12 @@ function elementParentCheck(elem, index, orgID, projID, branchID) {
 /**
  * @description A non-exposed helper function that validates the id of an element being created
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
- * @param {object} arrIDs - An array of element ids being created
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
+ * @param {object} arrIDs - An array of element ids being created.
  */
 function elementIDCheck(elem, index, orgID, projID, branchID, arrIDs) {
   try {

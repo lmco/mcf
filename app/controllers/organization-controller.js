@@ -87,7 +87,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for orgs with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
  * @return {Promise} Array of found organization objects
  *

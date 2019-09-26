@@ -60,7 +60,7 @@ class ElementSubtree extends Component {
   }
 
   /**
-   * Toggle the element sub tree
+   * Toggle the element sub tree.
    */
   handleElementToggle() {
     this.setState({ elementWindow: !this.state.elementWindow });
@@ -144,7 +144,7 @@ class ElementSubtree extends Component {
   }
 
   /**
-   * Toggle the element to display it's children
+   * Toggle the element to display it's children.
    */
   toggleCollapse() {
     if (this.props.unsetCheckbox) {

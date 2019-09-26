@@ -354,13 +354,13 @@ module.exports.importTestData = function(filename) {
 /**
  * @description Helper function for setting mock request parameters.
  *
- * @param {object} user - The user making the request
- * @param {object} params - Parameters for API req
- * @param {object} body - Body for API req
- * @param {string} method - API method of req
- * @param {object} [query] - query options for API req
+ * @param {object} user - The user making the request.
+ * @param {object} params - Parameters for API req.
+ * @param {object} body - Body for API req.
+ * @param {string} method - API method of req.
+ * @param {object} [query] - Query options for API req.
  *
- * @returns {object} req - Request Object
+ * @returns {object} Request object.
  */
 module.exports.createRequest = function(user, params, body, method, query = {}) {
   // Error-Check
@@ -388,15 +388,15 @@ module.exports.createRequest = function(user, params, body, method, query = {}) 
  * @description Helper function for setting mock request parameters.  Creates a read
  * stream of a file and gives the stream request-like properties
  *
- * @param {object} user - The user making the request
- * @param {object} params - Parameters for API req
- * @param {object} body - Body for API req
- * @param {string} method - API method of req
- * @param {object} [query] - query options for API req
- * @param {string} filepath - The path to the file to create the read stream of
- * @param {object} headers - Headers for the API req
+ * @param {object} user - The user making the request.
+ * @param {object} params - Parameters for API req.
+ * @param {object} body - Body for API req.
+ * @param {string} method - API method of req.
+ * @param {object} [query] - Query options for API req.
+ * @param {string} filepath - The path to the file to create the read stream of.
+ * @param {object} headers - Headers for the API req.
  *
- * @returns {object} req - Request Object
+ * @returns {object} Request object.
  */
 module.exports.createReadStreamRequest = function(user, params, body, method, query = {},
   filepath, headers) {
@@ -425,7 +425,7 @@ module.exports.createReadStreamRequest = function(user, params, body, method, qu
 /**
  * @description Helper function for setting mock response status and header.
  *
- * @param {object} res - Response Object
+ * @param {object} res - Response Object.
  */
 module.exports.createResponse = function(res) {
   // Verifies the response code: 200 OK

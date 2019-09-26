@@ -103,9 +103,9 @@ function getStatusCode(error) {
  * @description A utility to ensure that all errors get turned into custom errors.
  * To be used on returned errors in .catch statements
  *
- * @param error - the error to check
+ * @param error - The error to check.
  *
- * @returns {CustomError|ServerError}
+ * @returns {CustomError|ServerError} An instance of either the MBEE CustomError or ServerError.
  */
 function captureError(error) {
   // If the error isn't already a custom error, make it one
