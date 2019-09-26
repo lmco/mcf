@@ -120,7 +120,7 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 
 /**
- * @description Validates that the find results can be populated
+ * @description Validates that the find results can be populated.
  */
 async function optionPopulateFind() {
   try {
@@ -153,7 +153,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results
+ * @description Validates that the find results can be include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -200,7 +200,7 @@ async function optionIncludeArchivedFind() {
 }
 
 /**
- * @description Validates that the find results only return specified fields
+ * @description Validates that the find results only return specified fields.
  */
 async function optionFieldsFind() {
   try {
@@ -235,7 +235,7 @@ async function optionFieldsFind() {
 }
 
 /**
- * @description Validates that the number of find results can be limited
+ * @description Validates that the number of find results can be limited.
  */
 async function optionLimitFind() {
   try {
@@ -260,7 +260,7 @@ async function optionLimitFind() {
 }
 
 /**
- * @description Validates that find results can be skipped over
+ * @description Validates that find results can be skipped over.
  */
 async function optionSkipFind() {
   try {
@@ -286,7 +286,7 @@ async function optionSkipFind() {
 }
 
 /**
- * @description Validates that find results can return raw JSON rather than models
+ * @description Validates that find results can return raw JSON rather than models.
  */
 async function optionLeanFind() {
   try {
@@ -312,7 +312,7 @@ async function optionLeanFind() {
 }
 
 /**
- * @description Validates that the find results can be sorted
+ * @description Validates that the find results can be sorted.
  */
 async function optionSortFind() {
   try {
@@ -377,7 +377,7 @@ async function optionSortFind() {
 }
 
 /**
- * @description Validates that projects with a specific name can be found
+ * @description Validates that projects with a specific name can be found.
  */
 async function optionNameFind() {
   try {
@@ -402,7 +402,7 @@ async function optionNameFind() {
 }
 
 /**
- * @description Validates that projects with a specific visibility can be found
+ * @description Validates that projects with a specific visibility can be found.
  */
 async function optionVisibilityFind() {
   try {
@@ -434,7 +434,7 @@ async function optionVisibilityFind() {
 }
 
 /**
- * @description Validates that projects created by a specific user can be found
+ * @description Validates that projects created by a specific user can be found.
  */
 async function optionCreatedByFind() {
   try {
@@ -457,7 +457,7 @@ async function optionCreatedByFind() {
 }
 
 /**
- * @description Validates that projects last modified by a specific user can be found
+ * @description Validates that projects last modified by a specific user can be found.
  */
 async function optionLastModifiedByFind() {
   try {
@@ -480,7 +480,7 @@ async function optionLastModifiedByFind() {
 }
 
 /**
- * @description Validates that only archived projects will be returned with the archived option
+ * @description Validates that only archived projects will be returned with the archived option.
  */
 async function optionArchivedFind() {
   try {
@@ -528,7 +528,7 @@ async function optionArchivedFind() {
 }
 
 /**
- * @description Validates that projects archived by a specific user can be found
+ * @description Validates that projects archived by a specific user can be found.
  */
 async function optionArchivedByFind() {
   try {
@@ -558,7 +558,7 @@ async function optionArchivedByFind() {
 }
 
 /**
- * @description Validates that projects with specific custom data can be found
+ * @description Validates that projects with specific custom data can be found.
  */
 async function optionCustomFind() {
   try {
@@ -582,7 +582,7 @@ async function optionCustomFind() {
 }
 
 /**
- * @description Validates that the return object from create() can be populated
+ * @description Validates that the return object from create() can be populated.
  */
 async function optionPopulateCreate() {
   try {
@@ -621,7 +621,7 @@ async function optionPopulateCreate() {
 }
 
 /**
- * @description Validates that the create results only return specified fields
+ * @description Validates that the create results only return specified fields.
  */
 async function optionFieldsCreate() {
   try {
@@ -662,7 +662,7 @@ async function optionFieldsCreate() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances
+ * @description Validates that the create results return JSON data rather than model instances.
  */
 async function optionLeanCreate() {
   try {
@@ -697,7 +697,7 @@ async function optionLeanCreate() {
 }
 
 /**
- * @description Validates that the return object from update() can be populated
+ * @description Validates that the return object from update() can be populated.
  */
 async function optionPopulateUpdate() {
   try {
@@ -734,7 +734,7 @@ async function optionPopulateUpdate() {
 }
 
 /**
- * @description Validates that the update results only return specified fields
+ * @description Validates that the update results only return specified fields.
  */
 async function optionFieldsUpdate() {
   try {
@@ -772,7 +772,7 @@ async function optionFieldsUpdate() {
 }
 
 /**
- * @description Validates that the update results return JSON data rather than model instances
+ * @description Validates that the update results return JSON data rather than model instances.
  */
 async function optionLeanUpdate() {
   try {
@@ -804,7 +804,7 @@ async function optionLeanUpdate() {
 }
 
 /**
- * @description Validates that the return object from create() can be populated
+ * @description Validates that the return object from create() can be populated.
  */
 async function optionPopulateReplace() {
   try {
@@ -841,7 +841,7 @@ async function optionPopulateReplace() {
 }
 
 /**
- * @description Validates that the create results only return specified fields
+ * @description Validates that the create results only return specified fields.
  */
 async function optionFieldsReplace() {
   try {
@@ -879,7 +879,7 @@ async function optionFieldsReplace() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances
+ * @description Validates that the create results return JSON data rather than model instances.
  */
 async function optionLeanReplace() {
   try {
