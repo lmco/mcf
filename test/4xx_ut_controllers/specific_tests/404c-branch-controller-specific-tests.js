@@ -390,7 +390,7 @@ async function optionSortFind() {
 
 /**
  * @description Validates that tagged branches can be found.
-*/
+ */
 async function optionTagFind() {
   try {
     // Create tag option
