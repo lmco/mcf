@@ -46,12 +46,12 @@ const ldapConfig = M.config.auth.ldap;
  * Implement authentication via LDAP using username/password and
  * configuration in config file.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {string} username - Username to authenticate via LDAP AD
- * @param {string} password - Password to authenticate via LDAP AD
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} username - Username to authenticate via LDAP AD.
+ * @param {string} password - Password to authenticate via LDAP AD.
  *
- * @returns {Promise} Authenticated user object
+ * @returns {Promise} Authenticated user object.
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -85,11 +85,11 @@ async function handleBasicAuth(req, res, username, password) {
  * @description This function implements handleTokenAuth() in lib/auth.js.
  * Authenticates user with passed in token.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {string} token - User authentication token, encrypted
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} token - User authentication token, encrypted.
  *
- * @returns {Promise} Local user object
+ * @returns {Promise} Local user object.
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -148,9 +148,9 @@ async function handleTokenAuth(req, res, token) {
  * This function generates the session token for user login.
  * Upon successful login, generate token and set to session
  *
- * @param {Object} req - Request express object
- * @param {Object} res - response express object
- * @param {function} next - Callback to express authentication
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Callback to express authentication.
  */
 function doLogin(req, res, next) {
   // Compute token expiration time
@@ -176,7 +176,7 @@ function doLogin(req, res, next) {
  * @description Connects to an LDAP server and resolves a client object used
  * to preform search and bind operations.
  *
- * @returns {Promise} An LDAP client object
+ * @returns {Promise} An LDAP client object.
  */
 function ldapConnect() {
   M.log.debug('Attempting to bind to the LDAP server.');
@@ -245,10 +245,10 @@ function ldapConnect() {
 /**
  * @description Searches for and resolve a user from LDAP server.
  *
- * @param {Object} ldapClient - LDAP client
- * @param {string} username - Username to find LDAP user
+ * @param {object} ldapClient - LDAP client.
+ * @param {string} username - Username to find LDAP user.
  *
- * @returns {Promise} LDAP user information
+ * @returns {Promise} LDAP user information.
  */
 function ldapSearch(ldapClient, username) {
   M.log.debug('Attempting to search for LDAP user.');
@@ -329,11 +329,11 @@ function ldapSearch(ldapClient, username) {
 /**
  * @description Validates a users password with LDAP server
  *
- * @param {Object} ldapClient - LDAP client
- * @param {Object} user - LDAP user
- * @param {string} password - Password to verify LDAP user
+ * @param {object} ldapClient - LDAP client.
+ * @param {object} user - LDAP user.
+ * @param {string} password - Password to verify LDAP user.
  *
- * @returns {Promise} Authenticated user's information
+ * @returns {Promise} Authenticated user's information.
  */
 function ldapAuth(ldapClient, user, password) {
   M.log.debug(`Authenticating ${user[ldapConfig.attributes.username]} ...`);
@@ -359,9 +359,9 @@ function ldapAuth(ldapClient, user, password) {
 /**
  * @description Synchronizes authenticated user's LDAP information with database.
  *
- * @param {Object} ldapUserObj - LDAP user information
+ * @param {object} ldapUserObj - LDAP user information.
  *
- * @returns {Promise} Synchronized user model object
+ * @returns {Promise} Synchronized user model object.
  */
 async function ldapSync(ldapUserObj) {
   M.log.debug('Synchronizing LDAP user with local database.');

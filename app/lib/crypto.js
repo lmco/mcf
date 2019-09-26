@@ -42,9 +42,9 @@ module.exports.encrypt = function encrypt(data) {
  * @description Decrypts data with AES-256. It expects data to be in the same
  * base64 encoded string format returned by encrypt().
  *
- * @param {string} data - Data to be decrypted
+ * @param {string} data - Data to be decrypted.
  *
- * @return {Object} Decrypted data
+ * @return {object} Decrypted data
  */
 module.exports.decrypt = function decrypt(data) {
   if (data === undefined || data.toString() === '') {
@@ -89,9 +89,9 @@ module.exports.generateToken = function generateToken(data) {
 /**
  * @description Inspects user token.
  *
- * @param {string} token - Token to inspect
+ * @param {string} token - Token to inspect.
  *
- * @return {Object} Decrypted token
+ * @return {object} Decrypted token
  */
 module.exports.inspectToken = function inspectToken(token) {
   // Decrypt input and return parsed data

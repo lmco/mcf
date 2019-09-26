@@ -64,7 +64,7 @@ function mbeeWhoAmI(callback) {
 
 /**
  * @description Given an API parameter string, converts to Proper Case. Conversely, given a Proper
- *              Case string will convert to an API parameter string.
+ * Case string will convert to an API parameter string.
  * e.g. createdBy -> Created By, lastModifiedBy -> Last Modified By
  *
  * @param {string} param - API parameter string.

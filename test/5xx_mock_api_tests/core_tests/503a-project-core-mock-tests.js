@@ -102,6 +102,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies mock POST request to create a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postProject(done) {
   // Create request object
@@ -156,6 +158,8 @@ function postProject(done) {
 
 /**
  * @description Verifies mock POST request to create multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postProjects(done) {
   // Create request object
@@ -221,6 +225,8 @@ function postProjects(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putProject(done) {
   // Create request object
@@ -275,6 +281,8 @@ function putProject(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putProjects(done) {
   // Create request object
@@ -341,6 +349,8 @@ function putProjects(done) {
 
 /**
  * @description Verifies mock GET request to find a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getProject(done) {
   // Create request object
@@ -395,6 +405,8 @@ function getProject(done) {
 
 /**
  * @description Verifies mock GET request to find multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getProjects(done) {
   // Create request object
@@ -462,6 +474,8 @@ function getProjects(done) {
 
 /**
  * @description Verifies mock GET request to find all projects in an org.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllProjectsOnOrg(done) {
   // Create request object
@@ -531,6 +545,8 @@ function getAllProjectsOnOrg(done) {
 /**
  * @description Verifies mock GET request to find all projects a user has access
  * to.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllProjects(done) {
   // Create request object
@@ -607,6 +623,8 @@ function getAllProjects(done) {
 
 /**
  * @description Verifies mock PATCH request to update a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchProject(done) {
   // Create request object
@@ -665,6 +683,8 @@ function patchProject(done) {
 
 /**
  * @description Verifies mock PATCH request to update multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchProjects(done) {
   // Create request object
@@ -736,6 +756,8 @@ function patchProjects(done) {
 
 /**
  * @description Verifies mock DELETE request to delete a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteProject(done) {
   // Create request object
@@ -774,6 +796,8 @@ function deleteProject(done) {
 
 /**
  * @description Verifies mock DELETE request to delete multiple project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteProjects(done) {
   // Create request object

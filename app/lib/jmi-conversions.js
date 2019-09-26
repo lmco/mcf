@@ -23,12 +23,12 @@ const assert = require('assert');
  *
  * @param {number} from - The current JMI version of the data.
  * @param {number} to - The JMI version to convert the data to.
- * @param {Object|Object[]} data - The data to convert between JMI versions.
- * @param {string} [field = _id] - The field to parse on
- * @param {String} [unique = id] - The unique identifier in the batch of
- * elements. Defaults to id.
+ * @param {object|object[]} data - The data to convert between JMI versions.
+ * @param {string} [field='_id'] - The field to parse on.
+ * @param {string} [unique='id'] - The unique identifier in the batch of
+ * elements.
  *
- * @return {Object|Object[]} The converted JMI.
+ * @return {object|object[]} The converted JMI.
  */
 module.exports.convertJMI = function(from, to, data, field = '_id', unique = 'id') {
   // Convert JMI type 1 to type 2
@@ -48,10 +48,10 @@ module.exports.convertJMI = function(from, to, data, field = '_id', unique = 'id
 /**
  * @description Converts data between JMI type 1 to type 2
  *
- * @param {Object[]} data - The data to convert between JMI versions.
- * @param {string} field - The field to parse on
+ * @param {object[]} data - The data to convert between JMI versions.
+ * @param {string} field - The field to parse on.
  *
- * @return {Object} The converted JMI type 2 object.
+ * @return {object} The converted JMI type 2 object.
  */
 function jmi12(data, field) {
   // Error Check: Ensure data is in JMI type 1
@@ -87,12 +87,12 @@ function jmi12(data, field) {
 /**
  * @description Converts data between JMI type 1 to type 3
  *
- * @param {Object[]} data - The data to convert between JMI versions.
- * @param {string} field - The field to parse on
- * @param {String} [unique = id] - The unique identifier in the batch of
- * elements. Defaults to id.
+ * @param {object[]} data - The data to convert between JMI versions.
+ * @param {string} field - The field to parse on.
+ * @param {string} [unique='id'] - The unique identifier in the batch of
+ * elements.
  *
- * @return {Object} The converted JMI type 3 object.
+ * @return {object} The converted JMI type 3 object.
  */
 function jmi13(data, field, unique = 'id') {
   // Ensure that each element has a parent and contain field
@@ -129,12 +129,12 @@ function jmi13(data, field, unique = 'id') {
 /**
  * @description Converts a JMI 2 object into JMI 3 format.
  *
- * @param {Object} jmi2 - A JMI 2 object containing elements. Keys are the
+ * @param {object} jmi2 - A JMI 2 object containing elements. Keys are the
  * unique identifier (id by default), and values are the element objects.
- * @param {String} [unique = id] - The unique identifier in the batch of
- * elements. Defaults to id.
+ * @param {string} [unique='id'] - The unique identifier in the batch of
+ * elements.
  *
- * @return {Object} Modified JMI2 object which is now in JMI3 format.
+ * @return {object} Modified JMI2 object which is now in JMI3 format.
  */
 function jmi23(jmi2, unique = 'id') {
   // Create an array for elements with no children
@@ -169,10 +169,10 @@ function jmi23(jmi2, unique = 'id') {
 /**
  * @description Helper function for converting JMI 2 to JMI 3
  *
- * @param {Object} jmi2 - JMI type 2 object
- * @param {string[]} ids - List of lowest level ids
- * @param {String} [unique = id] - The unique identifier in the batch of
- * elements. Defaults to id.
+ * @param {object} jmi2 - JMI type 2 object.
+ * @param {string[]} ids - List of lowest level ids.
+ * @param {string} [unique='id'] - The unique identifier in the batch of
+ * elements.
  */
 function jmi23Helper(jmi2, ids, unique = 'id') {
   // Create array for lowest level elements

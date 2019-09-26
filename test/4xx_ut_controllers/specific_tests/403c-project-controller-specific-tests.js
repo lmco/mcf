@@ -20,6 +20,7 @@
 const chai = require('chai');
 
 // MBEE modules
+const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const Project = M.require('models.project');
 const db = M.require('lib.db');
@@ -55,7 +56,7 @@ describe(M.getModuleName(module.filename), () => {
       org = await testUtils.createTestOrg(adminUser);
 
       // Create projects for the tests to utilize
-      projects = await ProjectController.create(adminUser, org.id, testData.projects);
+      projects = await ProjectController.create(adminUser, org._id, testData.projects);
     }
     catch (error) {
       M.log.error(error);
@@ -84,6 +85,8 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
+  it('should find an \'internal\' project if a user is not part of the project,'
+    + ' but is a member of the org', findInternalProject);
   it('should populate find results', optionPopulateFind);
   it('should include archived projects in the find results', optionIncludeArchivedFind);
   it('should only return the specified fields', optionFieldsFind);
@@ -120,7 +123,37 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 
 /**
- * @description Validates that the find results can be populated
+ * @description Verifies that a user with no permissions on a project can still
+ * retrieve it if the project visibility is internal and the user has at least
+ * read permissions on the organization.
+ */
+async function findInternalProject() {
+  try {
+    // Create the non-admin user
+    const user = await testUtils.createNonAdminUser();
+    const updateObj = { id: org._id, permissions: {} };
+    updateObj.permissions[user._id] = 'read';
+    // Add user to organization
+    await OrgController.update(adminUser, updateObj);
+    // Update project visibility to internal
+    const projUpdate = { id: utils.parseID(projects[1]._id).pop(), visibility: 'internal' };
+    await ProjectController.update(adminUser, org._id, projUpdate);
+
+    // Verify the user can find the internal project
+    await ProjectController.find(user, org._id, utils.parseID(projects[1]._id).pop());
+
+    // Cleanup test: delete non-admin user and reset project visibility
+    await testUtils.removeNonAdminUser();
+    projUpdate.visibility = 'private';
+    await ProjectController.update(adminUser, org._id, projUpdate);
+  }
+  catch (error) {
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the find results can be populated.
  */
 async function optionPopulateFind() {
   try {
@@ -153,7 +186,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results
+ * @description Validates that the find results can be include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -200,7 +233,7 @@ async function optionIncludeArchivedFind() {
 }
 
 /**
- * @description Validates that the find results only return specified fields
+ * @description Validates that the find results only return specified fields.
  */
 async function optionFieldsFind() {
   try {
@@ -235,7 +268,7 @@ async function optionFieldsFind() {
 }
 
 /**
- * @description Validates that the number of find results can be limited
+ * @description Validates that the number of find results can be limited.
  */
 async function optionLimitFind() {
   try {
@@ -260,7 +293,7 @@ async function optionLimitFind() {
 }
 
 /**
- * @description Validates that find results can be skipped over
+ * @description Validates that find results can be skipped over.
  */
 async function optionSkipFind() {
   try {
@@ -286,7 +319,7 @@ async function optionSkipFind() {
 }
 
 /**
- * @description Validates that find results can return raw JSON rather than models
+ * @description Validates that find results can return raw JSON rather than models.
  */
 async function optionLeanFind() {
   try {
@@ -312,7 +345,7 @@ async function optionLeanFind() {
 }
 
 /**
- * @description Validates that the find results can be sorted
+ * @description Validates that the find results can be sorted.
  */
 async function optionSortFind() {
   try {
@@ -377,7 +410,7 @@ async function optionSortFind() {
 }
 
 /**
- * @description Validates that projects with a specific name can be found
+ * @description Validates that projects with a specific name can be found.
  */
 async function optionNameFind() {
   try {
@@ -402,7 +435,7 @@ async function optionNameFind() {
 }
 
 /**
- * @description Validates that projects with a specific visibility can be found
+ * @description Validates that projects with a specific visibility can be found.
  */
 async function optionVisibilityFind() {
   try {
@@ -434,7 +467,7 @@ async function optionVisibilityFind() {
 }
 
 /**
- * @description Validates that projects created by a specific user can be found
+ * @description Validates that projects created by a specific user can be found.
  */
 async function optionCreatedByFind() {
   try {
@@ -457,7 +490,7 @@ async function optionCreatedByFind() {
 }
 
 /**
- * @description Validates that projects last modified by a specific user can be found
+ * @description Validates that projects last modified by a specific user can be found.
  */
 async function optionLastModifiedByFind() {
   try {
@@ -480,7 +513,7 @@ async function optionLastModifiedByFind() {
 }
 
 /**
- * @description Validates that only archived projects will be returned with the archived option
+ * @description Validates that only archived projects will be returned with the archived option.
  */
 async function optionArchivedFind() {
   try {
@@ -528,7 +561,7 @@ async function optionArchivedFind() {
 }
 
 /**
- * @description Validates that projects archived by a specific user can be found
+ * @description Validates that projects archived by a specific user can be found.
  */
 async function optionArchivedByFind() {
   try {
@@ -558,7 +591,7 @@ async function optionArchivedByFind() {
 }
 
 /**
- * @description Validates that projects with specific custom data can be found
+ * @description Validates that projects with specific custom data can be found.
  */
 async function optionCustomFind() {
   try {
@@ -582,7 +615,7 @@ async function optionCustomFind() {
 }
 
 /**
- * @description Validates that the return object from create() can be populated
+ * @description Validates that the return object from create() can be populated.
  */
 async function optionPopulateCreate() {
   try {
@@ -621,7 +654,7 @@ async function optionPopulateCreate() {
 }
 
 /**
- * @description Validates that the create results only return specified fields
+ * @description Validates that the create results only return specified fields.
  */
 async function optionFieldsCreate() {
   try {
@@ -662,7 +695,7 @@ async function optionFieldsCreate() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances
+ * @description Validates that the create results return JSON data rather than model instances.
  */
 async function optionLeanCreate() {
   try {
@@ -697,7 +730,7 @@ async function optionLeanCreate() {
 }
 
 /**
- * @description Validates that the return object from update() can be populated
+ * @description Validates that the return object from update() can be populated.
  */
 async function optionPopulateUpdate() {
   try {
@@ -734,7 +767,7 @@ async function optionPopulateUpdate() {
 }
 
 /**
- * @description Validates that the update results only return specified fields
+ * @description Validates that the update results only return specified fields.
  */
 async function optionFieldsUpdate() {
   try {
@@ -772,7 +805,7 @@ async function optionFieldsUpdate() {
 }
 
 /**
- * @description Validates that the update results return JSON data rather than model instances
+ * @description Validates that the update results return JSON data rather than model instances.
  */
 async function optionLeanUpdate() {
   try {
@@ -804,7 +837,7 @@ async function optionLeanUpdate() {
 }
 
 /**
- * @description Validates that the return object from create() can be populated
+ * @description Validates that the return object from create() can be populated.
  */
 async function optionPopulateReplace() {
   try {
@@ -841,7 +874,7 @@ async function optionPopulateReplace() {
 }
 
 /**
- * @description Validates that the create results only return specified fields
+ * @description Validates that the create results only return specified fields.
  */
 async function optionFieldsReplace() {
   try {
@@ -879,7 +912,7 @@ async function optionFieldsReplace() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances
+ * @description Validates that the create results return JSON data rather than model instances.
  */
 async function optionLeanReplace() {
   try {

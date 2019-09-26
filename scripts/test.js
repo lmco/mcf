@@ -129,7 +129,7 @@ function test(_args) {
 
 
 /**
- * Prints the MBEE test framework header.
+ * @description Prints the MBEE test framework header.
  */
 function printHeader() {
   const Y = '\u001b[33m';

@@ -90,6 +90,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies mock POST request to create an organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postOrg(done) {
   const orgData = testData.orgs[0];
@@ -138,6 +140,8 @@ function postOrg(done) {
 
 /**
  * @description Verifies mock POST request to create multiple organizations.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postOrgs(done) {
   // Create request object
@@ -198,6 +202,8 @@ function postOrgs(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace an organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putOrg(done) {
   const orgData = testData.orgs[0];
@@ -247,6 +253,8 @@ function putOrg(done) {
 /**
  * @description Verifies mock PUT request to create/replace multiple
  * organizations.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putOrgs(done) {
   // Create request object
@@ -308,6 +316,8 @@ function putOrgs(done) {
 
 /**
  * @description Verifies mock GET request to get an organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getOrg(done) {
   // Create request object
@@ -355,6 +365,8 @@ function getOrg(done) {
 
 /**
  * @description Verifies mock GET request to get multiple organizations.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getOrgs(done) {
   const orgData = [
@@ -417,6 +429,8 @@ function getOrgs(done) {
 
 /**
  * @description Verifies mock GET request to get all organizations.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllOrgs(done) {
   const orgData = [
@@ -481,6 +495,8 @@ function getAllOrgs(done) {
 
 /**
  * @description Verifies mock PATCH request to update an organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchOrg(done) {
   // Create request object
@@ -527,6 +543,8 @@ function patchOrg(done) {
 
 /**
  * @description Verifies mock PATCH request to update multiple orgs.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchOrgs(done) {
   // Create request object
@@ -592,6 +610,8 @@ function patchOrgs(done) {
 
 /**
  * @description Verifies mock DELETE request to delete an organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteOrg(done) {
   // Create request object
@@ -627,6 +647,8 @@ function deleteOrg(done) {
 
 /**
  * @description Verifies mock DELETE request to delete multiple organizations.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteOrgs(done) {
   // Create request object

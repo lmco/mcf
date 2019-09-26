@@ -21,7 +21,7 @@
  *
  * @param {string} inputString - The name of the file to parse.
  *
- * @return {Object} valid JSON
+ * @return {object} valid JSON
  */
 module.exports.removeComments = function(inputString) {
   // Ensure inputString is of type string

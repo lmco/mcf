@@ -157,7 +157,7 @@ module.exports.migrate = function(args) {
 /**
  * @description Prompts the user for approval to migrate the database
  *
- * @param {string[]} args - Array of command line arguments
+ * @param {string[]} args - Array of command line arguments.
  */
 function prompt(args) {
   return new Promise((resolve) => {
@@ -283,7 +283,7 @@ function sortVersions(versions, order) {
  *
  * @param {string} from - The current version migrating from.
  * @param {string[]} migrations - The list of migrations to run.
- * @param {number} move - Either 1 (migrate up) or -1 (migrate down)
+ * @param {number} move - Either 1 (migrate up) or -1 (migrate down).
  *
  * @return {Promise} Resolved promise.
  */
