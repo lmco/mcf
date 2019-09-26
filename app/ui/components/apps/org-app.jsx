@@ -15,6 +15,9 @@
  * @description This renders an organization page.
  */
 
+/* Modified ESLint rules for React. */
+/* eslint-disable no-unused-vars */
+
 // React Modules
 import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';

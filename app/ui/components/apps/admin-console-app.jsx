@@ -13,6 +13,10 @@
  *
  * @description This renders the admin console page.
  */
+
+/* Modified ESLint rules for React. */
+/* eslint-disable no-unused-vars */
+
 // React Modules
 import React from 'react';
 import ReactDOM from 'react-dom';
