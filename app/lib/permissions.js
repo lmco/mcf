@@ -236,10 +236,10 @@ function updateProject(user, org, project) {
     if (!user.admin) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to update projects in the org [${org._id}].`);
-      assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to update the project [${project._id}].`);
-      assert.ok(project.permissions[user._id].includes('admin'),
-        `User does not have permission to update the project [${project._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id), 'User does not '
+        + `have permission to update the project [${utils.parseID(project._id).pop()}].`);
+      assert.ok(project.permissions[user._id].includes('admin'), 'User does not'
+        + `have permission to update the project [${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -278,11 +278,13 @@ function createElement(user, org, project, branch) {
   try {
     if (!user.admin) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
-        `User does not have permission to create items in the org [${project._id}].`);
+        `User does not have permission to create items in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to create items in the project [${project._id}].`);
+        'User does not have permission to create items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to create items in the project [${project._id}].`);
+        'User does not have permission to create items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -317,7 +319,7 @@ function readElement(user, org, project, branch) {
   }
   catch (error) {
     throw new M.PermissionError('User does not have permission to find'
-      + ` items in the project [${project._id}].`, 'warn');
+      + ` items in the project [${utils.parseID(project._id).pop()}].`, 'warn');
   }
 }
 
@@ -338,9 +340,11 @@ function updateElement(user, org, project, branch) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to update items in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to update items in the project [${project._id}].`);
+        'User does not have permission to update items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to update items in the project [${project._id}].`);
+        'User does not have permission to update items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -365,9 +369,11 @@ function deleteElement(user, org, project, branch) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to delete items in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to delete items in the project [${project._id}].`);
+        'User does not have permission to delete items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to delete items in the project [${project._id}].`);
+        'User does not have permission to delete items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -391,9 +397,11 @@ function createBranch(user, org, project) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to create branches in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to create branches in the project [${project._id}].`);
+        'User does not have permission to create branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to create branches in the project [${project._id}].`);
+        'User does not have permission to create branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -423,7 +431,8 @@ function readBranch(user, org, project, branch) {
       else {
         // User must have read permissions on project.
         assert.ok(project.permissions.hasOwnProperty(user._id),
-          `User does not have permission to get branches in the project [${project._id}].`);
+          'User does not have permission to get branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       }
     }
   }
@@ -449,9 +458,11 @@ function updateBranch(user, org, project, branch) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to update branches in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to update branches in the project [${project._id}].`);
+        'User does not have permission to update branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to update branches in the project [${project._id}].`);
+        'User does not have permission to update branches in the project '
+      + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -477,9 +488,11 @@ function deleteBranch(user, org, project, branch) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to delete branches in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to delete branches in the project [${project._id}].`);
+        'User does not have permission to delete branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to delete branches in the project [${project._id}].`);
+        'User does not have permission to delete branches in the project '
+      + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
