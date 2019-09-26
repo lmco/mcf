@@ -47,6 +47,6 @@ function homeRender(done) {
   // Render list component
   const wrapper = mount(<Home />, { attachTo: document.getElementById('main') });
   // Expect component to be in DOM
-  chai.expect(wrapper.find(Home).length).to.equal(1);
+  chai.expect(wrapper.exists()).to.equal(true);
   done();
 }

@@ -26,8 +26,8 @@ import Adapter from 'enzyme-adapter-react-16';
 configure({ adapter: new Adapter() });
 
 // Node modules
-const jquery = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery', 'dist', 'jquery.min.js'), { encoding: "utf-8" });
-const jqueryUI = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery-ui-dist', 'jquery-ui.min.js'), { encoding: "utf-8" });
+const jquery = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery', 'dist', 'jquery.min.js'), { encoding: 'utf-8' });
+const jqueryUI = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery-ui-dist', 'jquery-ui.min.js'), { encoding: 'utf-8' });
 
 // MBEE modules
 const mbee = fs.readFileSync(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'), { encoding: "utf-8" });
@@ -47,7 +47,7 @@ const html = '<!doctype html>' +
   '<body>' +
   '  <div id="main"></div>' +
   '</body>' +
-  '</html>'
+  '</html>';
 const jsdom = new JSDOM(html, options);
 const { window } = jsdom;
 
@@ -58,9 +58,9 @@ window.document.body.appendChild(scriptJQuery);
 const scriptJQueryUI = window.document.createElement('script');
 scriptJQueryUI.textContent = jqueryUI;
 window.document.body.appendChild(scriptJQueryUI);
-const scriptEl = window.document.createElement('script');
-scriptEl.textContent = mbee;
-window.document.body.appendChild(scriptEl);
+const scriptMBEE = window.document.createElement('script');
+scriptMBEE.textContent = mbee;
+window.document.body.appendChild(scriptMBEE);
 
 // Copying properties to object
 function copyProps(src, target) {
@@ -70,10 +70,29 @@ function copyProps(src, target) {
   });
 }
 
+window.sessionStorage['mbee-user'] = JSON.stringify({
+  "admin": true,
+  "custom": {},
+  "email": "",
+  "fname": "",
+  "lname": "",
+  "preferredName": "",
+  "provider": "local",
+  "username": "admin"
+});
+
 // Globally defining jquery, window, and document
 global.$ = require('jquery')(window);
 global.window = window;
 global.document = window.document;
+
+// const url = 'http://localhost:6233';
+// Object.defineProperty(window, 'location', {
+//   value: {
+//     href: url,
+//   },
+//   writable: true,
+// });
 
 // Exposing global properties if undefined
 const exposedProperties = ['window', 'navigator', 'document'];

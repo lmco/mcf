@@ -22,6 +22,7 @@ const Mocha = require('mocha');
 
 require('@babel/register')();        // Transpile react tests to javascript
 require('@babel/polyfill');          // Transpile async await for javascript
+require(path.join(M.root, 'test', '7xx_ui_tests', 'setup.js'));
 
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
