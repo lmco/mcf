@@ -31,9 +31,13 @@ const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
 const migrate = M.require('lib.migrate');
+const Artifact = M.require('models.artifact');
+const Branch = M.require('models.branch');
+const Element = M.require('models.element');
 const Organization = M.require('models.organization');
+const Project = M.require('models.project');
+const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
-const Session = M.require('models.session');
 
 // Initialize express app and export the object
 const app = express();
@@ -44,6 +48,7 @@ module.exports = app;
  * default organization if needed.
  */
 db.connect()
+.then(() => initModels())
 .then(() => migrate.getSchemaVersion())
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
@@ -93,7 +98,7 @@ function initApp() {
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: M.config.auth.session.expires * units },
-      store: Session
+      store: new db.Store()
     }));
 
     // Enable flash messages
@@ -161,7 +166,7 @@ function createDefaultOrganization() {
       createdOrg = true;
       // Default organization does NOT exist, create it and add all active users
       // to permissions list
-      const defaultOrg = new Organization({
+      const defaultOrg = Organization.createDocument({
         _id: M.config.server.defaultOrganizationId,
         name: M.config.server.defaultOrganizationName
       });
@@ -202,7 +207,7 @@ function createDefaultAdmin() {
       // set userCreated to true
       userCreated = true;
       // No global admin exists, create local user as global admin
-      const adminUserData = new User({
+      const adminUserData = User.createDocument({
         // Set username and password of global admin user from configuration.
         _id: M.config.server.defaultAdminUsername,
         password: M.config.server.defaultAdminPassword,
@@ -232,4 +237,20 @@ function createDefaultAdmin() {
     // Catch and reject error
     .catch(error => reject(error));
   });
+}
+
+/**
+ * @description Initializes all models asynchronously.
+ * @async
+ *
+ * @return {Promise<void>}
+ */
+async function initModels() {
+  await Artifact.init();
+  await Branch.init();
+  await Element.init();
+  await Organization.init();
+  await Project.init();
+  await ServerData.init();
+  await User.init();
 }

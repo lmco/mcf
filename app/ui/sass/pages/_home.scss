@@ -13,18 +13,18 @@
  *
  * @description Defines all the home page sass variables.
  */
-@import '../../utils/_variables';
+@import '../utils/_variables';
 
-/******************************************************************************
-/*                        Home List Component Styling                         *
-/******************************************************************************/
+.home-space {
+  overflow: hidden;
+}
 
 .org-proj-list {
+  align-items: center;
   display: grid;
   grid-template-columns: minmax(0, 10px) 1fr minmax(2px, 60px);
   grid-template-areas: "icon org button";
   justify-content: left;
-  align-items: center;
   padding-left: 10px;
   padding-right: 10px;
 
@@ -46,50 +46,18 @@
 }
 
 .proj-list {
+  align-items: center;
+  border-left: #eeeeee solid;
   display: grid;
   grid-template-columns: 1fr minmax(0px, 65px);
   grid-template-areas: "org button";
   justify-content: left;
-  align-items: center;
   padding-left: 10px;
   padding-right: 10px;
-  border-left: #eeeeee solid;
   margin-left: 25px;
 
   &:hover {
     background: #f7f7f7;
     border-left: $mbee-navbar-color solid;
   }
-}
-
-.controls-container {
-  display: flex;
-  grid-area: button;
-  justify-content: flex-end;
-  padding-right: 5px;
-
-  .add-btn {
-    color: $color-secondary;
-    padding-right: 20px;
-  }
-  .add-btn:hover {
-    color: darken($color-secondary, 20);
-    cursor: pointer;
-  }
-
-  .delete-btn {
-    color: $color-danger;
-  }
-  .delete-btn:hover {
-    color: darken($color-danger, 20);
-    cursor: pointer;
-  }
-  .fake-icon {
-    color: transparent;
-  }
-}
-
-.projects-list {
-  border-left: #eeeeee solid;
-  margin-left: 25px;
 }

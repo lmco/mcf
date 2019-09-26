@@ -115,7 +115,7 @@ async function createArtifact() {
   try {
     const createdArtifact = await ArtifactController.create(adminUser, org.id,
       projectID, branchID, artData);
-    chai.expect(createdArtifact[0].id).to.equal(
+    chai.expect(createdArtifact[0]._id).to.equal(
       utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
     );
     chai.expect(createdArtifact[0].filename).to.equal(
@@ -150,7 +150,7 @@ async function getArtifact() {
       projectID, branchID, artData);
     // Check if artifact found
     chai.expect(foundArtifact.length).to.equal(1);
-    chai.expect(foundArtifact[0].id).to.equal(
+    chai.expect(foundArtifact[0]._id).to.equal(
       utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
     );
     chai.expect(foundArtifact[0].name).to.equal(
@@ -198,7 +198,7 @@ async function updateArtifact() {
 
     // Check if artifact found
     chai.expect(updatedArtifact.length).to.equal(1);
-    chai.expect(updatedArtifact[0].id).to.equal(
+    chai.expect(updatedArtifact[0]._id).to.equal(
       utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
     );
     chai.expect(updatedArtifact[0].name).to.equal(

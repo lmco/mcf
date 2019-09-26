@@ -141,7 +141,7 @@ class PasswordEdit extends Component {
     // Render user password page
     return (
       <div id='workspace'>
-        <div id='workspace-header' className='workspace-header'>
+        <div className='workspace-header'>
           <h2 className='workspace-title workspace-title-padding'>User Edit</h2>
         </div>
         <div id='workspace-body' className='extra-padding'>

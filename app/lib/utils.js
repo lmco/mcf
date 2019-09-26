@@ -63,10 +63,10 @@ module.exports.render = function(req, res, name, params) {
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *
- * @param {(...string|string[])} args - An arbitrary number of strings to be
+ * @param {...string|string[]} args - An arbitrary number of strings to be
  * appended or an array of strings.
  *
- * @return {string} Concatenated args with uid delimiter
+ * @returns {string} Concatenated args with uid delimiter.
  */
 module.exports.createID = function(...args) {
   // If passed in an array of strings, set equal to args
@@ -86,12 +86,11 @@ module.exports.createID = function(...args) {
 };
 
 /**
- * @description Splits a UID on the UID delimiter up and returns an array of
- * UID components.
+ * @description Splits a UID on the UID delimiter up and returns an array of UID components.
  *
  * @param {string} uid - The uid.
  *
- * @return {string[]} Split uid
+ * @returns {string[]} Split uid.
  */
 module.exports.parseID = function(uid) {
   return uid.split(this.ID_DELIMITER);
@@ -100,11 +99,11 @@ module.exports.parseID = function(uid) {
 /**
  * @description Title-cases a string.
  *
- * @param {string} s - The string to be title-cased
+ * @param {string} s - The string to be title-cased.
  * @param {boolean} [keepUpper=false] - Boolean indicating wither or not keep
- * uppercase characters as is
+ * uppercase characters as is.
  *
- * @return {string} The title-cased word
+ * @returns {string} The title-cased word.
  */
 module.exports.toTitleCase = function(s, keepUpper = false) {
   // Check if s NOT string or contains whitespace

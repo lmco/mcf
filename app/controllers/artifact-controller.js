@@ -120,11 +120,11 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);
   helper.checkParamsDataType(['undefined', 'object', 'string'], artifacts, 'Artifacts');
   // Sanitize input parameters
-  const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
+  const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branchID = sani.mongo(branch);
+  const orgID = sani.db(organizationID);
+  const projID = sani.db(projectID);
+  const branchID = sani.db(branch);
 
   // Initialize search query
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
@@ -149,7 +149,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
         }
 
         // Add the search option to the searchQuery
-        searchQuery[o] = sani.mongo(options[o]);
+        searchQuery[o] = sani.db(options[o]);
       }
     });
   }
@@ -203,12 +203,13 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
 
   try {
     // Find the artifacts
-    return await Artifact.find(searchQuery, validatedOptions.fieldsString)
-    .sort(validatedOptions.sort)
-    .skip(validatedOptions.skip)
-    .limit(validatedOptions.limit)
-    .populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+    return await Artifact.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit,
+        skip: validatedOptions.skip,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     console.log(error)
@@ -266,14 +267,14 @@ async function create(requestingUser, organizationID, projectID, branch,
   helper.checkParamsDataType('object', artifacts, 'Artifacts');
 
   // Sanitize input parameters and create function-wide variables
-  const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
+  const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branchID = sani.mongo(branch);
+  const orgID = sani.db(organizationID);
+  const projID = sani.db(projectID);
+  const branchID = sani.db(branch);
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Artifact);
 
   // Define array to store org data
@@ -357,15 +358,16 @@ async function create(requestingUser, organizationID, projectID, branch,
   const searchQuery = { _id: { $in: arrIDs } };
 
   // Check if the artifact already exists
-  const existingArtifact = await Artifact.find(searchQuery).lean();
+  const existingArtifact = await Artifact.find(searchQuery, '_id', { lean: true });
   // Ensure no artifact were found
+  // TODO: Parse out artifact ids for error message
   if (existingArtifact.length > 0) {
     throw new M.OperationError('Artifacts with the following IDs already exist'
       + ` [${existingArtifact.toString()}].`, 'warn');
   }
 
   const artObjects = artsToCreate.map((a) => {
-    const artObj = new Artifact(a);
+    const artObj = Artifact.createDocument(a);
     artObj.project = foundProj._id;
     artObj.branch = foundBranch._id;
     artObj.strategy = M.config.artifact.strategy;
@@ -382,18 +384,13 @@ async function create(requestingUser, organizationID, projectID, branch,
   // Emit the event artifacts-created
   EventEmitter.emit('artifacts-created', createdArtifact);
 
-  let foundArtifacts = null;
-  // If the lean option is supplied
-  if (validOptions.lean) {
-    foundArtifacts = await Artifact.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
-    .populate(validOptions.populateString).lean();
-  }
-  else {
-    foundArtifacts = await Artifact.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
-    .populate(validOptions.populateString);
-  }
 
-  return foundArtifacts;
+  return await Artifact.find({ _id: { $in: arrIDs } },
+    validatedOptions.fieldsString,
+    { populate: validatedOptions.populateString,
+      lean: validatedOptions.lean
+    });
+  // TODO: Entire function needs to be wrapped in a try/catch
 }
 
 /**
@@ -447,14 +444,14 @@ async function update(requestingUser, organizationID, projectID, branch,
   helper.checkParamsDataType('object', artifacts, 'Artifacts');
 
   // Sanitize input parameters and create function-wide variables
-  const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
+  const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branchID = sani.mongo(branch);
+  const orgID = sani.db(organizationID);
+  const projID = sani.db(projectID);
+  const branchID = sani.db(branch);
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Artifact);
 
   // Define array to store org data
@@ -536,7 +533,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   const searchQuery = { _id: { $in: arrIDs } };
 
   // Check if the artifact already exists
-  const foundArtifact = await Artifact.find(searchQuery).lean();
+  const foundArtifact = await Artifact.find(searchQuery, null, { lean: true });
   // Verify the same number of artifacts are found as desired
   if (foundArtifact.length !== arrIDs.length) {
     const foundIDs = foundArtifact.map(u => u._id);
@@ -546,7 +543,7 @@ async function update(requestingUser, organizationID, projectID, branch,
     );
   }
 
-  // Convert artsToupdate to JMI type 2
+  // Convert artsToUpdate to JMI type 2
   const jmiType2 = jmi.convertJMI(1, 2, artsToUpdate);
   const bulkArray = [];
 
@@ -595,19 +592,14 @@ async function update(requestingUser, organizationID, projectID, branch,
   });
   await Artifact.bulkWrite(bulkArray);
 
-  // Emit the event artifacts-updated
-  EventEmitter.emit('artifacts-updated', artsToUpdate);
+  const foundArtifacts = await Artifact.find({ _id: { $in: arrIDs } },
+    validatedOptions.fieldsString,
+    { populate: validatedOptions.populateString,
+      lean: validatedOptions.lean
+    });
 
-  let foundArtifacts = null;
-  // If the lean option is supplied
-  if (validOptions.lean) {
-    foundArtifacts = await Artifact.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
-    .populate(validOptions.populateString).lean();
-  }
-  else {
-    foundArtifacts = await Artifact.find({ _id: { $in: arrIDs } }, validOptions.fieldsString)
-    .populate(validOptions.populateString);
-  }
+  // Emit the event artifacts-updated
+  EventEmitter.emit('artifacts-updated', foundArtifacts);
 
   return foundArtifacts;
 }
@@ -643,10 +635,10 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
 
   // Sanitize input parameters and create function-wide variables
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branchID = sani.mongo(branch);
-  const saniArtifacts = sani.mongo(JSON.parse(JSON.stringify(artifacts)));
+  const orgID = sani.db(organizationID);
+  const projID = sani.db(projectID);
+  const branchID = sani.db(branch);
+  const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
   let artifactsToFind = [];
 
   // Check the type of the artifacts parameter
@@ -691,9 +683,10 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   }
 
   // Find the artifacts to delete
-  const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } }).lean();
+  const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } },
+    null, { lean: true });
   const foundArtifactIDs = await foundArtifacts.map(e => e._id);
-  await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } }).lean();
+  await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } });
   const uniqueIDsObj = {};
 
   // Parse foundIDs and only return unique ones
@@ -704,9 +697,8 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   });
   const uniqueIDs = Object.keys(uniqueIDsObj);
 
-  // TODO: Change the emitter to return artifacts rather than ids
   // Emit the event artifacts-deleted
-  EventEmitter.emit('Artifact-deleted', uniqueIDs);
+  EventEmitter.emit('Artifact-deleted', foundArtifacts);
 
   // Return unique IDs of elements deleted
   return (uniqueIDs);
@@ -743,15 +735,15 @@ async function getBlob(requestingUser, organizationID,
     let options; // TODO: Remove
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    helper.checkParamsDataType(['object', 'string'], artifact, 'Artifacts');
+    helper.checkParamsDataType(['object'], artifact, 'Artifacts');
 
     console.log(artifact)
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniArt = sani.mongo(JSON.parse(JSON.stringify(artifact)));
-    const orgID = sani.mongo(organizationID);
-    const projID = sani.mongo(projectID);
-    const branchID = sani.mongo(branch);
+    const saniArt = sani.db(JSON.parse(JSON.stringify(artifact)));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branchID = sani.db(branch);
 
 
     // Initialize and ensure options are valid
@@ -828,10 +820,10 @@ async function postBlob(requestingUser, organizationID,
 
   // Sanitize input parameters
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const saniArt = sani.mongo(JSON.parse(JSON.stringify(artifact)));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const saniBranchID = sani.mongo(branchID);
+  const saniArt = sani.db(JSON.parse(JSON.stringify(artifact)));
+  const orgID = sani.db(organizationID);
+  const projID = sani.db(projectID);
+  const saniBranchID = sani.db(branchID);
 
   // Initialize and ensure options are valid
   const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
@@ -916,11 +908,11 @@ async function getBlobById(requestingUser, organizationID, projectID, branch,
   helper.checkParams(requestingUser, {}, organizationID, projectID, branch);
 
   // Sanitize input parameters
-  const saniArtifact = sani.mongo(JSON.parse(JSON.stringify(artifact)));
+  const saniArtifact = sani.db(JSON.parse(JSON.stringify(artifact)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branchID = sani.mongo(branch);
+  const orgID = sani.db(organizationID);
+  const projID = sani.db(projectID);
+  const branchID = sani.db(branch);
 
   // Initialize search query
   const searchQuery = { branch: utils.createID(orgID, projID, branchID),

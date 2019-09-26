@@ -43,7 +43,7 @@ const branchID = 'master';
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Open the database connection
@@ -118,6 +118,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies mock POST request to create an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postElement(done) {
   const elemData = testData.elements[0];
@@ -167,8 +169,8 @@ function postElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(createdElement.createdBy).to.equal(adminUser.username);
-    chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdElement.createdBy).to.equal(adminUser._id);
+    chai.expect(createdElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdElement.createdOn).to.not.equal(null);
     chai.expect(createdElement.updatedOn).to.not.equal(null);
     chai.expect(createdElement.archived).to.equal(false);
@@ -190,6 +192,8 @@ function postElement(done) {
 
 /**
  * @description Verifies mock POST request to create multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postElements(done) {
   // Create request object
@@ -247,8 +251,8 @@ function postElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(createdElement.createdBy).to.equal(adminUser.username);
-      chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdElement.createdBy).to.equal(adminUser._id);
+      chai.expect(createdElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdElement.createdOn).to.not.equal(null);
       chai.expect(createdElement.updatedOn).to.not.equal(null);
       chai.expect(createdElement.archived).to.equal(false);
@@ -271,6 +275,8 @@ function postElements(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putElement(done) {
   const elemData = testData.elements[0];
@@ -320,8 +326,8 @@ function putElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
-    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
+    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedElem.createdOn).to.not.equal(null);
     chai.expect(replacedElem.updatedOn).to.not.equal(null);
     chai.expect(replacedElem.archived).to.equal(false);
@@ -343,6 +349,8 @@ function putElement(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putElements(done) {
   // Create request object
@@ -401,8 +409,8 @@ function putElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
-      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
+      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedElem.createdOn).to.not.equal(null);
       chai.expect(replacedElem.updatedOn).to.not.equal(null);
       chai.expect(replacedElem.archived).to.equal(false);
@@ -425,6 +433,8 @@ function putElements(done) {
 
 /**
  * @description Verifies mock GET request to get an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getElement(done) {
   const elemData = testData.elements[0];
@@ -474,8 +484,8 @@ function getElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archived).to.equal(false);
@@ -497,6 +507,8 @@ function getElement(done) {
 
 /**
  * @description Verifies mock GET request to get multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getElements(done) {
   const elemData = [
@@ -557,8 +569,8 @@ function getElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
       chai.expect(foundElement.archived).to.equal(false);
@@ -581,6 +593,8 @@ function getElements(done) {
 
 /**
  * @description Verifies mock GET request to get all elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllElements(done) {
   const elemData = [
@@ -641,8 +655,8 @@ function getAllElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
       chai.expect(foundElement.archived).to.equal(false);
@@ -665,6 +679,8 @@ function getAllElements(done) {
 
 /**
  * @description Verifies mock GET request to search elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function searchElement(done) {
   const elemData = testData.elements[0];
@@ -719,8 +735,8 @@ function searchElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archived).to.equal(false);
@@ -742,6 +758,8 @@ function searchElement(done) {
 
 /**
  * @description Verifies mock PATCH request to update an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchElement(done) {
   const elemData = testData.elements[0];
@@ -795,8 +813,8 @@ function patchElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedElement.createdOn).to.not.equal(null);
     chai.expect(updatedElement.updatedOn).to.not.equal(null);
     chai.expect(updatedElement.archived).to.equal(false);
@@ -818,6 +836,8 @@ function patchElement(done) {
 
 /**
  * @description Verifies mock PATCH request to update multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchElements(done) {
   // Create request object
@@ -884,8 +904,8 @@ function patchElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedElement.createdOn).to.not.equal(null);
       chai.expect(updatedElement.updatedOn).to.not.equal(null);
       chai.expect(updatedElement.archived).to.equal(false);
@@ -908,6 +928,8 @@ function patchElements(done) {
 
 /**
  * @description Verifies mock DELETE request to delete an element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteElement(done) {
   // Create request object
@@ -945,6 +967,8 @@ function deleteElement(done) {
 
 /**
  * @description Verifies mock DELETE request to delete multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteElements(done) {
   // Create request object

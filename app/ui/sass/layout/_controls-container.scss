@@ -1,0 +1,47 @@
+/**
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.sass.layout._controls-container
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description Defines the template for controls container.
+ */
+
+@import '../utils/_variables';
+
+.controls-container {
+  display: flex;
+  grid-area: button;
+  justify-content: flex-end;
+  padding-right: 5px;
+
+  .add-btn {
+    color: $color-secondary;
+    padding-right: 20px;
+  }
+
+  .add-btn:hover {
+    color: darken($color-secondary, 20);
+    cursor: pointer;
+  }
+
+  .delete-btn {
+    color: $color-danger;
+  }
+
+  .delete-btn:hover {
+    color: darken($color-danger, 20);
+    cursor: pointer;
+  }
+
+  .fake-icon {
+    color: transparent;
+  }
+}

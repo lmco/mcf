@@ -115,7 +115,7 @@ async function find(requestingUser, orgs, options) {
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const saniOrgs = (orgs !== undefined)
-      ? sani.mongo(JSON.parse(JSON.stringify(orgs)))
+      ? sani.db(JSON.parse(JSON.stringify(orgs)))
       : undefined;
 
     // Define searchQuery
@@ -144,12 +144,13 @@ async function find(requestingUser, orgs, options) {
             throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
           }
           // Add the search option to the searchQuery
-          searchQuery[o] = sani.mongo(options[o]);
+          searchQuery[o] = sani.db(options[o]);
         }
       });
     }
 
     // If not system admin, add permissions check
+    // TODO: Rewrite using Permissions library
     if (!reqUser.admin) {
       searchQuery[`permissions.${reqUser._id}`] = 'read';
     }
@@ -178,9 +179,12 @@ async function find(requestingUser, orgs, options) {
 
     // Find the orgs
     return await Organization.find(searchQuery, validatedOptions.fieldsString,
-      { limit: validatedOptions.limit, skip: validatedOptions.skip })
-    .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+      { limit: validatedOptions.limit,
+        skip: validatedOptions.skip,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -228,17 +232,13 @@ async function create(requestingUser, orgs, options) {
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType('object', orgs, 'Orgs');
+
     // Create or remove orgs function only: must be admin
-    try {
-      assert.ok(permissions.createOrg(requestingUser) === true, 'User does not have permissions to create orgs.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
+    permissions.createOrg(requestingUser);
 
     // Sanitize input parameters
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
 
     // Initialize and ensure options are valid
     const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -304,7 +304,7 @@ async function create(requestingUser, orgs, options) {
 
 
     // Find any existing, conflicting orgs
-    const foundOrgs = await Organization.find(searchQuery, '_id').lean();
+    const foundOrgs = await Organization.find(searchQuery, '_id', { lean: true });
     // If there are any foundOrgs, there is a conflict
     if (foundOrgs.length > 0) {
       // Get arrays of the foundOrg's ids and names
@@ -316,13 +316,13 @@ async function create(requestingUser, orgs, options) {
     }
 
     // Get all existing users for permissions
-    const foundUsers = await User.find({}).lean();
+    const foundUsers = await User.find({}, null, { lean: true });
 
     // Create array of usernames
     const foundUsernames = foundUsers.map(u => u._id);
     // For each object of org data, create the org object
     const orgObjects = orgsToCreate.map((o) => {
-      const orgObj = new Organization(o);
+      const orgObj = Organization.createDocument(o);
       // Set permissions
       Object.keys(orgObj.permissions).forEach((u) => {
         // If user does not exist, throw an error
@@ -362,8 +362,10 @@ async function create(requestingUser, orgs, options) {
     EventEmitter.emit('orgs-created', orgObjects);
 
     return await Organization.find({ _id: { $in: arrIDs } },
-      validatedOptions.fieldsString).populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+      validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -424,7 +426,7 @@ async function update(requestingUser, orgs, options) {
     helper.checkParamsDataType('object', orgs, 'Orgs');
 
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const duplicateCheck = {};
     let foundOrgs = [];
@@ -486,7 +488,7 @@ async function update(requestingUser, orgs, options) {
 
     try {
       // Find the orgs to update
-      foundOrgs = await Organization.find(searchQuery).populate('projects').lean();
+      foundOrgs = await Organization.find(searchQuery, null, { populate: 'projects', lean: true });
     }
     catch (error) {
       throw new M.DatabaseError(error.message, 'warn');
@@ -494,10 +496,7 @@ async function update(requestingUser, orgs, options) {
 
     // Check that the user has admin permissions
     foundOrgs.forEach((org) => {
-      if (!permissions.updateOrg(reqUser, org)) {
-        throw new M.PermissionError('User does not have permission to update'
-          + ` the org [${org._id}].`, 'warn');
-      }
+      permissions.updateOrg(reqUser, org);
     });
 
     // Verify the same number of orgs are found as desired
@@ -513,7 +512,7 @@ async function update(requestingUser, orgs, options) {
     // Find users if updating permissions
     if (updatingPermissions) {
       try {
-        foundUsers = await User.find({}).find();
+        foundUsers = await User.find({});
       }
       catch (error) {
         throw new M.DatabaseError(error.message, 'warn');
@@ -584,7 +583,7 @@ async function update(requestingUser, orgs, options) {
             Object.keys(updateOrg[key]).forEach((user) => {
               let permValue = updateOrg[key][user];
               // Ensure user is not updating own permissions
-              if (user === reqUser.username) {
+              if (user === reqUser._id) {
                 throw new M.OperationError('User cannot update own permissions.', 'warn');
               }
 
@@ -666,8 +665,10 @@ async function update(requestingUser, orgs, options) {
     // Update all orgs through a bulk write to the database
     await Organization.bulkWrite(bulkArray);
 
-    const foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    const foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
 
     // Emit the event orgs-updated
     EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
@@ -725,7 +726,7 @@ async function createOrReplace(requestingUser, orgs, options) {
 
     // Sanitize input parameters and function-wide variables
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
     const duplicateCheck = {};
     let foundOrgs = [];
     let orgsToLookup = [];
@@ -775,22 +776,18 @@ async function createOrReplace(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the orgs to replace
-    foundOrgs = await Organization.find(searchQuery).lean();
+    foundOrgs = await Organization.find(searchQuery, null, { lean: true });
 
     // Check if there are new orgs
     // Note: if more orgs than found, there must be new orgs
     if (orgsToLookup.length > foundOrgs.length) {
       // Requires global admin to create new orgs
-      assert.ok(permissions.createOrg(reqUser) === true, 'User does not have permissions'
-        + 'to create or replace orgs.');
+      permissions.createOrg(reqUser);
     }
 
     // Check that the user has admin permissions
     foundOrgs.forEach((org) => {
-      if (!permissions.updateOrg(reqUser, org)) {
-        throw new M.PermissionError('User does not have permission to'
-          + ` create or replace the org [${org._id}].`, 'warn');
-      }
+      permissions.updateOrg(reqUser, org);
     });
 
     // If data directory doesn't exist, create it
@@ -808,7 +805,7 @@ async function createOrReplace(requestingUser, orgs, options) {
     });
 
     // Delete orgs from database
-    await Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }).lean();
+    await Organization.deleteMany({ _id: foundOrgs.map(o => o._id) });
 
     // Emit the event orgs-deleted
     EventEmitter.emit('orgs-deleted', foundOrgs);
@@ -881,16 +878,8 @@ async function remove(requestingUser, orgs, options) {
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType(['object', 'string'], orgs, 'Orgs');
 
-    // Only for create or remove orgs: must be an admin
-    try {
-      assert.ok(permissions.deleteOrg(requestingUser) === true, 'User does not have permissions to delete orgs.');
-    }
-    catch (err) {
-      throw new M.DataFormatError(err.message, 'warn');
-    }
-
     // Sanitize input parameters and function-wide variables
-    const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
+    const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
     let searchedIDs = [];
 
     // Define searchQuery and ownedQuery
@@ -914,7 +903,12 @@ async function remove(requestingUser, orgs, options) {
     }
 
     // Find the orgs to delete
-    const foundOrgs = await Organization.find(searchQuery).lean();
+    const foundOrgs = await Organization.find(searchQuery, null, { lean: true });
+
+    foundOrgs.forEach(org => {
+      // Only for create or remove orgs: must be an admin
+      permissions.deleteOrg(requestingUser, org);
+    });
 
     const foundOrgIDs = foundOrgs.map(o => o._id);
     const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
@@ -937,13 +931,13 @@ async function remove(requestingUser, orgs, options) {
     });
 
     // Delete any elements in the org
-    await Element.deleteMany(ownedQuery).lean();
+    await Element.deleteMany(ownedQuery);
     // Delete any branches in the org
-    await Branch.deleteMany(ownedQuery).lean();
+    await Branch.deleteMany(ownedQuery);
     // Delete any projects in the org
-    await Project.deleteMany({ org: { $in: saniOrgs } }).lean();
+    await Project.deleteMany({ org: { $in: saniOrgs } });
     // Delete the orgs
-    const retQuery = await Organization.deleteMany(searchQuery).lean();
+    const retQuery = await Organization.deleteMany(searchQuery);
     // Emit the event orgs-deleted
     EventEmitter.emit('orgs-deleted', foundOrgs);
 

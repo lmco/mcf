@@ -26,6 +26,7 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 // MBEE modules
 const User = M.require('models.user');
 const db = M.require('lib.db');
+const validators = M.require('lib.validators');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -41,7 +42,7 @@ const customValidators = M.config.validators || {};
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests. Open the database connection.
+   * Before: runs before all tests. Open database connection.
    */
   before((done) => {
     db.connect()
@@ -68,11 +69,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject when a username is too short', usernameTooShort);
   it('should reject when a username is too long', usernameTooLong);
   it('should reject with an invalid username', usernameInvalid);
-  it('should reject when a first name is too long', fnameTooLong);
   it('should reject with an invalid first name', fnameInvalid);
-  it('should reject when a last name is too long', lnameTooLong);
   it('should reject with an invalid last name', lnameInvalid);
-  it('should reject when a preferred name is too long', preferredNameTooLong);
   it('should reject with an invalid preferred name', preferredNameInvalid);
   it('should reject if the admin field is not a boolean', adminNotBoolean);
   it('should reject if the provider field is not a string', providerNotString);
@@ -91,11 +89,11 @@ async function usernameTooShort() {
   userData._id = 'ab';
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: _id: '
-    + 'Too few characters in username');
+  await userObject.save().should.eventually.be.rejectedWith('User validation failed: '
+    + `_id: Username length [${userData._id.length}] must not be less than 3 characters.`);
 }
 
 /**
@@ -108,11 +106,12 @@ async function usernameTooLong() {
   userData._id = 'usernamewiththirtysevencharacters1234';
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: _id: '
-    + 'Too many characters in username');
+  await userObject.save().should.eventually.be.rejectedWith('User validation failed: '
+    + `_id: Username length [${userData._id.length}] must not be more than `
+    + `${validators.user.usernameLength} characters.`);
 }
 
 /**
@@ -131,29 +130,11 @@ async function usernameInvalid() {
   userData._id = 'Inva3l!d_UserN&me';
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: _id: Path '
-    + `\`_id\` is invalid (${userData._id}).`);
-}
-
-/**
- * @description Attempts to create a user with a first name that is too long.
- */
-async function fnameTooLong() {
-  const userData = Object.assign({}, testData.users[0]);
-  userData._id = userData.username;
-
-  // Change fname to be too long.
-  userData.fname = 'thisusersfnameisthirtysevencharacters';
-
-  // Create user object
-  const userObject = new User(userData);
-
-  // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: fname: '
-    + 'Too many characters in first name');
+  await userObject.save().should.eventually.be.rejectedWith('User validation failed: _id: '
+    + `Invalid username [${userData._id}].`);
 }
 
 /**
@@ -173,31 +154,13 @@ async function fnameInvalid() {
   userData.fname = 'Inva3l!d_FirstN&me';
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: fname: Path '
-    + `\`fname\` is invalid (${userData.fname}).`);
+  await userObject.save().should.eventually.be.rejectedWith('User validation failed: fname: '
+    + `Invalid first name [${userData.fname}].`);
 }
 
-
-/**
- * @description Attempts to create a user with a last name that is too long.
- */
-async function lnameTooLong() {
-  const userData = Object.assign({}, testData.users[0]);
-  userData._id = userData.username;
-
-  // Change lname to be too long.
-  userData.lname = 'thisuserslnameisthirtysevencharacters';
-
-  // Create user object
-  const userObject = new User(userData);
-
-  // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: lname: '
-    + 'Too many characters in last name');
-}
 
 /**
  * @description Attempts to create a user with an invalid last name.
@@ -216,31 +179,13 @@ async function lnameInvalid() {
   userData.lname = 'Inva3l!d_LastN&me';
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: lname: Path '
-    + `\`lname\` is invalid (${userData.lname}).`);
+  await userObject.save().should.eventually.be.rejectedWith('User validation failed: lname: '
+    + `Invalid last name [${userData.lname}].`);
 }
 
-
-/**
- * @description Attempts to create a user with a preferred name that's too long.
- */
-async function preferredNameTooLong() {
-  const userData = Object.assign({}, testData.users[0]);
-  userData._id = userData.username;
-
-  // Change preferredName to be too long.
-  userData.preferredName = 'apreferrednameisthirtysevencharacters';
-
-  // Create user object
-  const userObject = new User(userData);
-
-  // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: '
-    + 'preferredName: Too many characters in preferred name');
-}
 
 /**
  * @description Attempts to create a user with an invalid preferred name.
@@ -259,11 +204,11 @@ async function preferredNameInvalid() {
   userData.preferredName = 'Inva3l!d_PreferredN&me';
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
   await userObject.save().should.eventually.be.rejectedWith('User validation failed: '
-    + `preferredName: Path \`preferredName\` is invalid (${userData.preferredName}).`);
+    + `preferredName: Invalid preferred name [${userData.preferredName}].`);
 }
 
 
@@ -278,7 +223,7 @@ async function adminNotBoolean() {
   userData.admin = 123;
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
   userObject.save().should.eventually.be.rejectedWith('User validation failed: admin: '
@@ -296,7 +241,7 @@ async function providerNotString() {
   userData.provider = {};
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
   userObject.save().should.eventually.be.rejectedWith('User validation failed: provider: '
@@ -304,13 +249,13 @@ async function providerNotString() {
 }
 
 /**
- * @description Attempts to create a user with no username.
+ * @description Attempts to create a user with no username (_id).
  */
 async function usernameNotProvided() {
   const userData = Object.assign({}, testData.users[0]);
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
   userObject.save().should.eventually.be.rejectedWith('User validation failed: _id: '
@@ -334,9 +279,9 @@ async function emailInvalid() {
   userData.email = 'invalid_email';
 
   // Create user object
-  const userObject = new User(userData);
+  const userObject = User.createDocument(userData);
 
   // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: email: Path '
-    + `\`email\` is invalid (${userData.email}).`);
+  await userObject.save().should.eventually.be.rejectedWith('User validation failed: email: '
+    + `Invalid email [${userData.email}].`);
 }

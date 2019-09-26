@@ -1,7 +1,7 @@
 /**
  * Classification: UNCLASSIFIED
  *
- * @module test.305b-branch-model-tests
+ * @module test.304b-branch-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -26,6 +26,8 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 // MBEE modules
 const Branch = M.require('models.branch');
 const db = M.require('lib.db');
+const utils = M.require('lib.utils');
+const validators = M.require('lib.validators');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -89,11 +91,12 @@ async function idTooShort() {
   branchData._id = '01:01:0';
 
   // Create branch object
-  const branchObject = new Branch(branchData);
+  const branchObject = Branch.createDocument(branchData);
 
   // Expect save() to fail with specific error message
   await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
-    + 'Too few characters in ID');
+    + `Branch ID length [${utils.parseID(branchData._id).pop().length}] must`
+    + ' not be less than 2 characters.');
 }
 
 /**
@@ -105,16 +108,16 @@ async function idTooLong() {
 
   // Change id to be too long.
   branchData._id = '012345678901234567890123456789012345:01234567890123456789'
-    + '0123456789012345:01234567890123456789012345678901234567890123456789012'
-    + '34567890123456789012345678901234567890123456789012345678901234567890123'
-    + '45678901234567890123456789012345678901234567890123456789012';
+    + '0123456789012345:0123456789012345678901234567890123456';
 
   // Create branch object
-  const branchObject = new Branch(branchData);
+  const branchObject = Branch.createDocument(branchData);
 
   // Expect save() to fail with specific error message
   await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
-    + 'Too many characters in ID');
+    + `Branch ID length [${branchData._id.length - validators.project.idLength - 1}]`
+    + ` must not be more than ${validators.branch.idLength - validators.project.idLength - 1}`
+    + ' characters.');
 }
 
 /**
@@ -125,7 +128,7 @@ async function idNotProvided() {
   branchData.project = 'org:proj';
 
   // Create branch object
-  const branchObject = new Branch(branchData);
+  const branchObject = Branch.createDocument(branchData);
 
   // Expect save() to fail with specific error message
   await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
@@ -148,11 +151,11 @@ async function invalidID() {
   branchData._id = 'INVALID_ID';
 
   // Create branch object
-  const branchObject = new Branch(branchData);
+  const branchObject = Branch.createDocument(branchData);
 
   // Expect save() to fail with specific error message
   await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: '
-    + `_id: Path \`_id\` is invalid (${branchData._id})`);
+    + `_id: Invalid branch ID [${branchData._id}].`);
 }
 
 /**
@@ -163,7 +166,7 @@ async function projectNotProvided() {
   branchData._id = `org:proj:${branchData.id}`;
 
   // Create branch object
-  const branchObject = new Branch(branchData);
+  const branchObject = Branch.createDocument(branchData);
 
   // Expect save() to fail with specific error message
   await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: project: '
@@ -187,7 +190,7 @@ async function projectInvalid() {
   branchData.project = 'invalid_project';
 
   // Create branch object
-  const branchObject = new Branch(branchData);
+  const branchObject = Branch.createDocument(branchData);
 
   // Expect save() to fail with specific error message
   await branchObject.save().should.eventually.be.rejectedWith(
@@ -213,7 +216,7 @@ async function sourceInvalid() {
   branchData.source = 'invalid_source';
 
   // Create branch object
-  const branchObject = new Branch(branchData);
+  const branchObject = Branch.createDocument(branchData);
 
   // Expect save() to fail with specific error message
   await branchObject.save().should.eventually.be.rejectedWith(
