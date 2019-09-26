@@ -743,7 +743,7 @@ async function getBlob(requestingUser, organizationID,
     let options; // TODO: Remove
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    helper.checkParamsDataType(['object', 'string'], [artifact], 'Artifacts');
+    helper.checkParamsDataType(['object'], [artifact], 'Artifacts');
 
     console.log(artifact)
     // Sanitize input parameters
