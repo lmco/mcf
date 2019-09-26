@@ -484,10 +484,9 @@ class Model {
         }
       });
     };
-    doc.save = async function() {
+    doc.__proto__.save = async function() {
       return new Promise((resolve, reject) => {
         // Ensure the document is valid
-        console.log(this);
         this.validate();
 
         const putObj = {
@@ -509,7 +508,7 @@ class Model {
         .catch((error) => reject(error));
       });
     };
-    doc.markModified = function(field) {};
+    doc.__proto__.markModified = function(field) {};
 
     return doc;
   }
