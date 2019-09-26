@@ -58,7 +58,7 @@ const permissions = M.require('lib.permissions');
  * @param {(string|string[])} [users] - The users to find. Can either be an
  * array of user ids, a single user id, or not provided, which defaults to every
  * user being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -73,21 +73,21 @@ const permissions = M.require('lib.permissions');
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
  * @param {string} [options.fname] - A string that will search for matches with
- * the user fname field, or first name
+ * the user fname field, or first name.
  * @param {string} [options.lname] - A string that will search for matches with
- * the user lname field, or last name
+ * the user lname field, or last name.
  * @param {string} [options.preferredName] - A string that will search for matches
- * with the user preferredName field
+ * with the user preferredName field.
  * @param {string} [options.email] - A string that will search for matches with
- * the user email field
+ * the user email field.
  * @param {string} [options.createdBy] - A string that will search for matches for
- * users that were created by a specific person
+ * users that were created by a specific person.
  * @param {string} [options.lastModifiedBy] - A string that will search for matches for
- * users that were last modified by a specific person
+ * users that were last modified by a specific person.
  * @param {string} [options.archived] - Search only for archived users.  If false,
  * only returns unarchived users.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - A string that will search for matches for
- * users that were archived by a specific person
+ * users that were archived by a specific person.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
@@ -196,7 +196,7 @@ async function find(requestingUser, users, options) {
  * to the default org prior to being returned from this function.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {(Object|Object[])} users - Either an array of objects containing user
+ * @param {(object|object[])} users - Either an array of objects containing user
  * data or a single object containing user data to create.
  * @param {string} users.username - The username of the user being created.
  * @param {string} [users.password] - The password of the user being created.
@@ -209,9 +209,9 @@ async function find(requestingUser, users, options) {
  * the user will be a system admin.
  * @param {string} [users.provider = 'local'] - The provider which the user is
  * retrieved from.
- * @param {Object} [users.custom] - Any additional key/value pairs for an
+ * @param {object} [users.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -361,7 +361,7 @@ async function create(requestingUser, users, options) {
  * themselves. This function is restricted to system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {(Object|Object[])} users - Either an array of objects containing
+ * @param {(object|object[])} users - Either an array of objects containing
  * updates to users, or a single object containing updates.
  * @param {string} users.id - The ID of the user being updated. Field cannot be
  * updated but is required to find user.
@@ -370,7 +370,7 @@ async function create(requestingUser, users, options) {
  * @param {string} [users.preferredName] - The updated preferred first name of
  * the user.
  * @param {string} [users.email] - The updated email of the user.
- * @param {Object} [users.custom] - The new custom data object. Please note,
+ * @param {object} [users.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
  * @param {boolean} [users.archived = false] - The updated archived field. If true, the
@@ -378,7 +378,7 @@ async function create(requestingUser, users, options) {
  * @param {boolean} [users.admin] - The updated admin field. If true, the
  * user is a system-wide admin. NOTE: Only system-wide admins can update this
  * property.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -582,7 +582,7 @@ async function update(requestingUser, users, options) {
  * This function is restricted to system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {(Object|Object[])} users - Either an array of objects containing
+ * @param {(object|object[])} users - Either an array of objects containing
  * updates to users, or a single object containing updates.
  * @param {string} users.id - The ID of the user being updated. Field cannot be
  * updated but is required to find user.
@@ -591,12 +591,12 @@ async function update(requestingUser, users, options) {
  * @param {string} [users.preferredName] - The updated preferred first name of
  * the user.
  * @param {string} [users.email] - The updated email of the user.
- * @param {Object} [users.custom] - The additions or changes to existing custom
+ * @param {object} [users.custom] - The additions or changes to existing custom
  * data. If the key/value pair already exists, the value will be changed. If the
  * key/value pair does not exist, it will be added.
  * @param {boolean} [users.archived = false] - The updated archived field. If true, the
  * user will not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -739,7 +739,7 @@ async function createOrReplace(requestingUser, users, options) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} users - The users to remove. Can either be an
  * array of user ids or a single user id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
  * @return {Promise} Array of deleted users' usernames.
@@ -871,9 +871,9 @@ async function remove(requestingUser, users, options) {
  * Returns any users that match the text search, in order of the best matches to
  * the worst.  Searches the fname, preferredName, and lname fields.
  *
- * @param {User} requestingUser - The object containing the requesting user
+ * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} query - The text-based query to search the database for.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {boolean} [options.archived] - A parameter that if true, will return
  * search results containing both archived and non-archived users.
  * @param {string[]} [options.populate] - A list of fields to populate on return
@@ -978,7 +978,7 @@ async function search(requestingUser, query, options) {
  * @description Updates a users password given that the old password matches the
  * currently stored password.
  *
- * @param {Object} requestingUser - The object containing the requesting user.
+ * @param {object} requestingUser - The object containing the requesting user.
  * This is the users whose password is being changed.
  * @param {string} oldPassword - The old password to confirm.
  * @param {string} newPassword - THe new password the user would like to set.

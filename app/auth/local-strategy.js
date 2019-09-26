@@ -39,12 +39,12 @@ const EventEmitter = M.require('lib.events');
  *
  * Note: Uses username/password and configuration in config file.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {string} username - Username to authenticate
- * @param {string} password - Password to authenticate
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} username - Username to authenticate.
+ * @param {string} password - Password to authenticate.
  *
- * @returns {Promise} Authenticated user object
+ * @returns {Promise} Authenticated user object.
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -129,11 +129,11 @@ async function handleBasicAuth(req, res, username, password) {
  * @description This function implements handleTokenAuth() in lib/auth.js.
  * Authenticates user with passed in token.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {string} token - User authentication token, encrypted
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} token - User authentication token, encrypted.
  *
- * @returns {Promise} Local user object
+ * @returns {Promise} Local user object.
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -192,9 +192,9 @@ async function handleTokenAuth(req, res, token) {
  * This function generates the session token for user login.
  * Upon successful login, generate token and set to session
  *
- * @param {Object} req - Request express object
- * @param {Object} res - response express object
- * @param {function} next - Callback to express authentication
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Callback to express authentication.
  */
 function doLogin(req, res, next) {
   // Compute token expiration time
@@ -220,7 +220,7 @@ function doLogin(req, res, next) {
  *
  * @param {string} password - Password to validate.
  *
- * @returns {boolean} If password is correctly validated
+ * @returns {boolean} If password is correctly validated.
  */
 function validatePassword(password) {
   // No defined password validator, use default
