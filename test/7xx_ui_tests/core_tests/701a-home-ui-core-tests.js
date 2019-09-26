@@ -21,6 +21,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import chai from 'chai';
+import sinon from 'sinon';
 
 // MBEE components
 import Home from '../../../app/ui/components/home-views/home.jsx';
@@ -35,6 +36,10 @@ import Home from '../../../app/ui/components/home-views/home.jsx';
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
+  beforeEach(() => {
+    sinon.stub(window.location, 'assign');
+    // sinon.stub(window.location,   'replace');
+  });
   it('Renders the home component', homeRender);
 });
 
@@ -47,6 +52,6 @@ function homeRender(done) {
   // Render list component
   const wrapper = mount(<Home />, { attachTo: document.getElementById('main') });
   // Expect component to be in DOM
-  chai.expect(wrapper.exists()).to.equal(true);
+  chai.expect(wrapper.find(Home).length).to.equal(1);
   done();
 }

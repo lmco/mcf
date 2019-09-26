@@ -147,9 +147,8 @@ class ProfileHome extends Component {
                     ? (<React.Fragment>
                       {/* Route to user home page */}
                       <Route exact path="/profile" render={(props) => <Profile {...props}
-                                                                                   admin={true}
-                                                                                   user={this.state.user} />}
-                      />
+                                                                       admin={true}
+                                                                       user={this.state.user} />} />
                       {/* Route to org list page */}
                       <Route exact path={'/profile/orgs'}
                              render={(props) => <OrganizationList {...props}

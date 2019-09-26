@@ -31,10 +31,11 @@ const jqueryUI = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery-ui-di
 
 // MBEE modules
 const mbee = fs.readFileSync(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'), { encoding: "utf-8" });
+const url = 'http://localhost:6233';
 
 // Initialize JSDOM
 const options = {
-  url: 'http://localhost:6233',
+  url: url,
   resources: 'usable',
   runScripts: 'dangerously'
 };
@@ -70,29 +71,10 @@ function copyProps(src, target) {
   });
 }
 
-window.sessionStorage['mbee-user'] = JSON.stringify({
-  "admin": true,
-  "custom": {},
-  "email": "",
-  "fname": "",
-  "lname": "",
-  "preferredName": "",
-  "provider": "local",
-  "username": "admin"
-});
-
 // Globally defining jquery, window, and document
 global.$ = require('jquery')(window);
 global.window = window;
 global.document = window.document;
-
-// const url = 'http://localhost:6233';
-// Object.defineProperty(window, 'location', {
-//   value: {
-//     href: url,
-//   },
-//   writable: true,
-// });
 
 // Exposing global properties if undefined
 const exposedProperties = ['window', 'navigator', 'document'];

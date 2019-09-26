@@ -65,7 +65,6 @@ class Profile extends Component {
   render() {
     // Initialize variables
     const user = this.props.user;
-    console.log(user);
 
     // Render user data in table format
     return (
