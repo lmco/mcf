@@ -36,6 +36,7 @@ module.exports.timeConversions = {
 
 /**
  * The string used as the UID delimiter.
+ *
  * @type {string}
  */
 module.exports.ID_DELIMITER = ':';

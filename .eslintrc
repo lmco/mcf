@@ -854,8 +854,8 @@
       "property": true,
       "returns": true
     }}],
-    /*"jsdoc/newline-after-description": "error", // Recommended
-    "jsdoc/no-types": "off",
+    "jsdoc/newline-after-description": "error", // Recommended
+    /*"jsdoc/no-types": "off",
     "jsdoc/no-undefined-types": "error", // Recommended
     "jsdoc/require-description": ["error", {
       "descriptionStyle": "tag"
