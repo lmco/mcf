@@ -78,7 +78,7 @@ class OrgList extends Component {
     if (!this.props.admin) {
       const username = this.props.user.username;
       projects.forEach(project => {
-        if (project.permissions[username]) {
+        if (project.permissions[username] || project.visibility === 'internal') {
           permissionedProjs.push(project);
         }
       });
