@@ -103,7 +103,10 @@ module.exports = {
   patchArtifact,
   postArtifact,
   deleteArtifact,
-  getArtifactBlob,
+  getBlob,
+  postBlob,
+  deleteBlob,
+  getBlobById,
   invalidRoute
 };
 
@@ -4800,7 +4803,7 @@ async function deleteBranch(req, res) {
 /**
  * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Gets an artifact by its artifact.id, project.id, branch.id and
+ * @description Gets an artifact by its org.id, project.id, branch.id and
  * artifact.id.
  *
  * @param {Object} req - Request express object
@@ -4873,6 +4876,7 @@ async function getArtifact(req, res) {
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
+    console.log(error);
     // If an error was thrown, return it and its status
     returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
@@ -4962,8 +4966,7 @@ async function postArtifact(req, res) {
     // NOTE: create() sanitizes input params
     try {
       const artifact = await ArtifactController.create(req.user, req.params.orgid,
-        req.params.projectid, req.params.branchid, req.body,
-        req.file.buffer, options);
+        req.params.projectid, req.params.branchid, req.body, options);
 
       const artifactsPublicData = sani.html(
         artifact.map(a => publicData.getPublicData(a, 'artifact', options))
@@ -4973,6 +4976,7 @@ async function postArtifact(req, res) {
       return returnResponse(req, res, json, 200);
     }
     catch (error) {
+      console.log(error)
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   });
@@ -5144,23 +5148,168 @@ async function deleteArtifact(req, res) {
 }
 
 /**
- * GET /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/:artifactid/download
+ * GET /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/blob
  *
- * @description Gets an artifact blob by artifact.id, project.id, branch.id,
- * and artifact.id.
+ * @description Gets an artifact blob by org.id, project.id, branch.id,
+ * location, filename.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
  *
  * @return {Buffer} Artifact blob.
  */
-async function getArtifactBlob(req, res) {
+async function getBlob(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  try {
+    const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.artifactid);
+
+    res.header('Content-Disposition', `attachment; filename='${artifact.filename}'`);
+
+    // Return 200: OK and public artifact data
+    return returnResponse(req, res, artifactBlob, 200, `${artifact.contentType}`);
+  }
+  catch (error) {
+    console.log(error)
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/blob
+ *
+ * @description Gets an artifact blob by org.id, project.id, branch.id,
+ * location, filename.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Posted Artifact object.
+ */
+async function postBlob(req, res) {
+  await upload(req, res, async function(err) {
+    let minified = true;
+
+    // Sanity Check: there should always be a user in the request
+    if (!req.user) {
+      M.log.critical('No requesting user available.');
+      const error = new M.ServerError('Request Failed');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      const error = new M.ServerError('Artifact upload failed.', 'warn');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    // Sanity Check: originalname/mimitype are required fields
+    if (!req.file
+      || !req.file.hasOwnProperty('originalname')
+      || !req.file.hasOwnProperty('mimetype')) {
+      const error = new M.DataFormatError('Artifact Blob file must be defined.', 'warn');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    // Extract file meta data
+    req.body.filename = req.file.originalname;
+    req.body.contentType = req.file.mimetype;
+
+    try {
+      const artifact = await ArtifactController.postBlob(req.user, req.params.orgid,
+        req.params.projectid, req.params.branchid, req.body,
+        req.file.buffer);
+
+      // Format JSON
+      const json = formatJSON(artifact, minified);
+      return returnResponse(req, res, json, 200);
+    }
+    catch (error) {
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+  });
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/blob
+ *
+ * @description Gets an artifact blob by org.id, project.id, branch.id,
+ * location, filename.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Object} Deleted Artifact object.
+ */
+async function deleteBlob(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
 
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // If an Project ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('project') && (req.body.project !== req.params.projectid)) {
+    const error = new M.DataFormatError(
+      'Project ID in the body does not match ID in the params.', 'warn'
+    );
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+  // Set project id
+  req.body.project = req.params.projectid;
+
+  try {
+    const artifact = await ArtifactController.getBlob(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.artifactid, options);
+
+    res.header('Content-Disposition', `attachment; filename='${artifact.filename}'`);
+
+    // Return 200: OK and public artifact data
+    return returnResponse(req, res, artifact.blob, 200, `${artifact.contentType}`);
+  }
+  catch (error) {
+    console.log(error)
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid/blob
+ *
+ * @description Gets an artifact blob by its org.id, project.id, branch.id and
+ * artifact.id.
+ *
+ * @param {Object} req - Request express object
+ * @param {Object} res - Response express object
+ *
+ * @return {Buffer} Artifact blob.
+ */
+async function getBlobById(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
   // Define valid option and its parsed type
   const validOptions = {
+    populate: 'array',
+    archived: 'boolean',
+    fields: 'array',
+    minified: 'boolean',
+    includeArchived: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -5179,23 +5328,42 @@ async function getArtifactBlob(req, res) {
     // Error occurred with options, report it
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
   // Set the lean option to true for better performance
   options.lean = true;
 
   try {
     // Find the artifact from it's artifact.id, project.id, and org.id
     // NOTE: find() sanitizes input params
-    const artifact = await ArtifactController.getArtifactBlob(req.user, req.params.orgid,
+    const artifact = await ArtifactController.getBlobById(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
 
-    res.header('Content-Disposition', `attachment; filename='${artifact.filename}'`);
+    // If no artifact found, return 404 error
+    if (artifact.length === 0) {
+      throw new M.NotFoundError(
+        `Artifact [${req.params.artifactid}] not found.`, 'warn'
+      );
+    }
+
+    const publicArtifactData = sani.html(
+      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+    );
+
+    // Format JSON
+    const json = formatJSON(publicArtifactData[0], minified);
 
     // Return 200: OK and public artifact data
-    return returnResponse(req, res, artifact.blob, 200, `${artifact.contentType}`);
+    return returnResponse(req, res, json, 200);
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 

@@ -87,11 +87,14 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should POST an artifact', postArtifact);
-  it('should GET an artifact blob', getArtifactBlob);
-  it('should GET an artifact', getArtifact);
-  it('should PATCH an artifact', patchArtifact);
-  it('should DELETE an artifact', deleteArtifact);
+  // it('should POST an artifact', postArtifact);
+  // it('should GET an artifact', getArtifact);
+  it('should POST an artifact blob', postBlob);
+  it('should GET an artifact blob', getBlob);
+  // it('should GET an artifact blob', getBlobById);
+  // it('should DELETE an artifact', deleteBlob);
+  // it('should PATCH an artifact', patchArtifact);
+  // it('should DELETE an artifact', deleteArtifact);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -121,12 +124,6 @@ async function postArtifact() {
 
   const method = 'POST';
   const req = testUtils.createRequest(adminUser, params, body, method);
-  const artifactPath = path.join(M.root, artData.location, artData.filename);
-  req.file = {
-    originalname: artData.filename,
-    mimetype: artData.contentType,
-    buffer: fs.readFileSync(artifactPath)
-  };
 
   // Set response as empty object
   const res = {};
@@ -145,8 +142,8 @@ async function postArtifact() {
     chai.expect(createdArtifact.project).to.equal(projID);
     chai.expect(createdArtifact.org).to.equal(org.id);
     chai.expect(createdArtifact.location).to.equal(body.location);
+    chai.expect(createdArtifact.filename).to.equal(body.filename);
     chai.expect(createdArtifact.contentType).to.equal(req.file.mimetype);
-    chai.expect(createdArtifact.hash).to.equal(artData.hash);
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
@@ -209,7 +206,6 @@ async function getArtifact() {
     chai.expect(foundArtifact.org).to.equal(org.id);
     chai.expect(foundArtifact.location).to.equal(artData.location);
     chai.expect(foundArtifact.contentType).to.equal(artData.contentType);
-    chai.expect(foundArtifact.hash).to.equal(artData.hash);
     chai.expect(foundArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
@@ -234,51 +230,6 @@ async function getArtifact() {
 
   // GETs an artifact
   await apiController.getArtifact(req, res);
-}
-
-/**
- * @description Verifies mock GET request to get an artifact.
- */
-async function getArtifactBlob() {
-  const artData = testData.artifacts[0];
-  // Create request object
-  const body = {};
-
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    branchid: branchID,
-    artifactid: artData.id
-  };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Check return artifact is of buffer type
-    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
-
-    // Get the file
-    const artifactPath = path.join(M.root, artData.location, artData.filename);
-    const fileData = fs.readFileSync(artifactPath);
-
-    // Deep compare both binaries
-    chai.expect(_data).to.deep.equal(fileData);
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-  // GETs an artifact
-  await apiController.getArtifactBlob(req, res);
 }
 
 /**
@@ -318,7 +269,6 @@ async function patchArtifact() {
     chai.expect(updatedArtifact.org).to.equal(org.id);
     chai.expect(updatedArtifact.location).to.equal(artData.location);
     chai.expect(updatedArtifact.contentType).to.equal('edited_type');
-    chai.expect(updatedArtifact.hash).to.equal(artData.hash);
     chai.expect(updatedArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
@@ -381,4 +331,192 @@ async function deleteArtifact() {
 
   // DELETEs an artifact
   await apiController.deleteArtifact(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an artifact blob by id.
+ */
+async function getBlobById() {
+  const artData = testData.artifacts[0];
+  // Create request object
+  const body = {};
+
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    branchid: branchID,
+    artifactid: artData.id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
+
+    // Get the file
+    const artifactPath = path.join(M.root, artData.location, artData.filename);
+    const fileData = fs.readFileSync(artifactPath);
+
+    // Deep compare both binaries
+    chai.expect(_data).to.deep.equal(fileData);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+  // GETs an artifact
+  await apiController.getBlobById(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an artifact blob by id.
+ */
+async function getBlob() {
+  const artData = testData.artifacts[0];
+  // Create request object
+  const body = {
+    location: artData.location,
+    filename: artData.filename
+  };
+
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    branchid: branchID,
+  };
+
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
+
+    // Get the file
+    const artifactPath = path.join(M.root, artData.location, artData.filename);
+    const fileData = fs.readFileSync(artifactPath);
+
+    // Deep compare both binaries
+    chai.expect(_data).to.deep.equal(fileData);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+  // GETs an artifact
+  await apiController.getBlob(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to post an artifact blob.
+ */
+async function postBlob() {
+  const artData = testData.artifacts[0];
+  // Create request object
+  const body = {
+    location: artData.location,
+    filename: artData.filename
+  };
+
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    branchid: branchID
+  };
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Attach the file to request
+  const artifactPath = path.join(M.root, artData.location, artData.filename);
+  req.file = {
+    originalname: artData.filename,
+    mimetype: artData.contentType,
+    buffer: fs.readFileSync(artifactPath)
+  };
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const postedArtifact = JSON.parse(_data);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+    chai.expect(postedArtifact.project).to.equal(projID);
+    chai.expect(postedArtifact.location).to.equal(artData.location);
+    chai.expect(postedArtifact.filename).to.equal(artData.filename);
+
+    // Ensure the response was logged correctly
+    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+  // GETs an artifact
+  await apiController.postBlob(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to Delete an artifact blob.
+ */
+async function deleteBlob() {
+  const artData = testData.artifacts[0];
+  // Create request object
+  const body = {};
+
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    branchid: branchID,
+    artifactid: artData.id
+  };
+  const method = 'DELETE';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
+
+    // Get the file
+    const artifactPath = path.join(M.root, artData.location, artData.filename);
+    const fileData = fs.readFileSync(artifactPath);
+
+    // Deep compare both binaries
+    chai.expect(_data).to.deep.equal(fileData);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+  // GETs an artifact
+  await apiController.getArtifact(req, res);
 }

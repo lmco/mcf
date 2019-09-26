@@ -19,9 +19,23 @@
 // Note: The export is being done before the import to solve the issues of
 // circular references.
 module.exports = {
-  getArtifactBlob,
-  addArtifactBlob,
-  removeArtifactBlob
+  getBlob,
+  postBlob,
+  putBlob,
+  deleteBlob
+  /*
+
+TODO:
+  Remove hash, use path instead.
+  Removing blobs takes path/filenames
+  remove history, history tracked with branching
+  Add ability to see current directory
+  EAch project has own created artifact space
+
+  listDirectory(path),
+  removeDirectory(directoryName)
+
+   */
 
 };
 
@@ -29,75 +43,99 @@ module.exports = {
 const path = require('path');    // Find directory paths
 const fs = require('fs');        // Access the filesystem
 
+// MBEE modules
+const utils = M.require('lib.utils');
+
 /**
  * @description This function get the artifact blob file
  * from the local file system.
  *
- * @param {String} hashedName - hash name of the file
+ * @param {string} artMetadata - Artifact metadata
  *
  * @returns {buffer} Artifact binary.
  */
-function getArtifactBlob(hashName) {
-  // Create the main artifact path
-  const artifactPath = path.join(M.root, M.config.artifact.path);
-  // Create sub folder path and artifact path
-  // Note: Folder name is the first 2 characters from the generated hash
-  const folderPath = path.join(artifactPath, hashName.substring(0, 2));
-  const filePath = path.join(folderPath, hashName);
+function getBlob(artMetadata) {
   try {
+    // Create artifact path
+    const filePath = createBlobPath(artMetadata);
+
     // Read the artifact file
     // Note: Use sync to ensure file is read before advancing
     return fs.readFileSync(filePath);
   }
   catch (err) {
-    return new M.NotFoundError('Artifact blob not found.', 'warn');
+    throw new M.NotFoundError('Artifact blob not found.', 'warn');
   }
 }
 
 /**
- * @description This function adds the artifact blob file to the local file
- * system.
+ * @description This function writes an artifact blob
+ * to the local file system.
  *
- * @param {string} hashedName - hash name of the file
+ * This function does NOT overwrite existing blob.
+ *
+ * @param {string} artMetadata - Artifact metadata
  * @param {Buffer} artifactBlob - A binary large object artifact
  */
-function addArtifactBlob(hashedName, artifactBlob) {
-  // Create the main artifact path
-  const artifactPath = path.join(M.root, M.config.artifact.path);
-
-  // Set sub folder path and artifact path
-  // Note: Folder name is the first 2 characters from the generated hash
-  const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
-  const filePath = path.join(folderPath, hashedName);
-
-  // Note: Artifact sub folders named based on the first two characters
-  // of blob hash
-  const fullPath = path.join(artifactPath,
-    hashedName.substring(0, 2), hashedName);
+function postBlob(artMetadata, artifactBlob) {
+  // Create artifact path
+  const fullPath = createBlobPath(artMetadata);
 
   // Check if artifact file exist
   if (fs.existsSync(fullPath)) {
     throw new M.DataFormatError('Artifact blob already exist.', 'warn');
   }
 
-  // Creates main artifact directory if not exist
-  createStorageDirectory();
+  // Create storage directory
+  createDirectory('/');
 
-  // Check results
-  if (!fs.existsSync(folderPath)) {
-    // Directory does NOT exist, create it
-    // Note: Use sync to ensure directory created before advancing
-    fs.mkdirSync(folderPath, (error) => {
-      if (error) {
-        throw new M.DataFormatError('Could not create Artifact blob.', 'warn');
-      }
-    });
-  }
+  // Create project directory
+  createDirectory(utils.parseID(artMetadata.project).pop());
+
   // Check if file already exist
-  if (!fs.existsSync(filePath)) {
+  if (!fs.existsSync(fullPath)) {
     try {
       // Write out artifact file, defaults to 666 permission.
-      fs.writeFileSync(filePath, artifactBlob);
+      fs.writeFileSync(fullPath, artifactBlob);
+    }
+    catch (error) {
+      // Log the error
+      M.log.error(error.message);
+
+      // Error occurred, log it
+      throw new M.DataFormatError('Could not create Artifact blob.', 'warn');
+    }
+  }
+}
+
+/**
+ * @description This function writes an artifact blob
+ * to the local file system. Existing files will be overwritten.
+ *
+ *
+ * @param {string} artMetadata - Artifact metadata
+ * @param {Buffer} artifactBlob - A binary large object artifact
+ */
+function putBlob(artMetadata, artifactBlob) {
+  // Create artifact path
+  const fullPath = createBlobPath(artMetadata);
+
+  // Check if artifact file exist
+  if (fs.existsSync(fullPath)) {
+    throw new M.DataFormatError('Artifact blob already exist.', 'warn');
+  }
+
+  // Create storage directory
+  createDirectory('/');
+
+  // Create project directory
+  createDirectory(utils.parseID(artMetadata.project).pop());
+
+  // Check if file already exist
+  if (!fs.existsSync(fullPath)) {
+    try {
+      // Write out artifact file, defaults to 666 permission.
+      fs.writeFileSync(fullPath, artifactBlob);
     }
     catch (error) {
       // Error occurred, log it
@@ -107,42 +145,43 @@ function addArtifactBlob(hashedName, artifactBlob) {
 }
 
 /**
- * @description This function removes the artifact blob file from the
+ * @description This function deletes the artifact blob file from the
  * local file system.
  *
- * @param {string} hashedName - hash name of the file
+ * @param {string} artMetadata - Artifact metadata
  */
-function removeArtifactBlob(hashedName) {
-  // Check hashname for null
-  if (hashedName === null) {
-    // Remote link, return resolve
-    return;
+function deleteBlob(artMetadata) {
+  // Create artifact path
+  const blobPath = createBlobPath(artMetadata);
+  try {
+    // Remove the artifact file
+    // Note: Use sync to ensure file is removed before advancing
+    fs.unlinkSync(blobPath, (error) => {
+      // Check directory NOT exist
+      if (error) {
+        M.log(error);
+        throw error;
+      }
+    });
   }
-  // Create the main artifact path
-  const artifactPath = path.join(M.root, M.config.artifact.path);
-  // Create sub folder path and artifact path
-  // Note: Folder name is the first 2 characters from the generated hash
-  const folderPath = path.join(artifactPath, hashedName.substring(0, 2));
-  const filePath = path.join(folderPath, hashedName);
+  catch (error) {
+    throw new M.DataFormatError('Could not delete artifact blob.', 'warn');
+  }
 
-  // Remove the artifact file
-  // Note: Use sync to ensure file is removed before advancing
-  fs.unlinkSync(filePath, (error) => {
-    // Check directory NOT exist
-    if (error) {
-      throw new M.DataFormatError('Could not remove artifact blob.', 'warn');
-    }
-  });
 
-  // Check if directory is empty
-  fs.readdirSync(folderPath, function(err, files) {
+  // Create project directory path
+  const projDirPath = path.join(M.root, M.config.artifact.path,
+    utils.parseID(artMetadata.project).pop());
+
+  // Check if project directory is empty
+  fs.readdirSync(projDirPath, function(err, files) {
     if (err) {
       M.log.warn(err);
     }
     // Check if empty directory
     if (!files.length) {
       // Directory empty, remove it
-      fs.rmdir(folderPath, (error) => {
+      fs.rmdir(projDirPath, (error) => {
         // Check directory NOT exist
         if (error) {
           throw new M.DataFormatError(error.message, 'warn');
@@ -153,21 +192,74 @@ function removeArtifactBlob(hashedName) {
 }
 
 /**
- * @description This function creates the artifact storage directory if
- * it doesn't exist.
+ * @description This function recursively create directories based on
+ * the input path.
+ *
  */
-function createStorageDirectory() {
-  // Create the main artifact path
-  const artifactPath = path.join(M.root, M.config.artifact.path);
+function createDirectory(pathString) {
+  // Define path separator
+  let separator;
 
-  // Check directory NOT exist
-  if (!fs.existsSync(artifactPath)) {
-    // Directory does NOT exist, create it
-    fs.mkdirSync(artifactPath, (error) => {
-      // Check for errors
-      if (error) {
-        throw new M.DataFormatError(error.message, 'warn');
-      }
-    });
+  // Folder path to create
+  let artifactPath = '';
+
+  // Check for backslash for windows
+  if (pathString.includes('\\')){
+    separator = '\\';
   }
+  // Otherwise, linus base separator
+  else {
+    separator = '/';
+  }
+
+  // Create the root artifact path
+  const rootDir = path.join(M.root, M.config.artifact.path);
+  // Define a running path
+  let runningPath = '';
+
+  // Loop through each directory folder
+  pathString.split(separator).forEach((currDir) => {
+    // Concatenate to running path
+    runningPath = path.join(runningPath, currDir);
+
+    // Attach root directory
+    artifactPath = path.join(rootDir, runningPath);
+
+    // Ensure folder does NOT exist
+    if (!fs.existsSync(artifactPath)) {
+      // Directory does NOT exist, create it
+      fs.mkdirSync(artifactPath, (error) => {
+        // Check for errors
+        if (error) {
+          throw new M.DataFormatError(error.message, 'warn');
+        }
+      });
+    }
+
+  });
+  // Return the create directory path
+  return artifactPath;
+}
+
+/**
+ * @description This function creates the blob path using the local
+ * storage path, location field, and filename.
+ * Handles specific cases to format path and filename consistently
+ * across the artifact strategy.
+ */
+function createBlobPath(artMetadata) {
+  // Get root artifact path
+
+  const artRootPath = path.join(M.root, M.config.artifact.path);
+  // Get project id
+  const projID = utils.parseID(artMetadata.project).pop();
+
+  // Form the blob name, location concat with filename
+  const concatenName = artMetadata.location.replace(/\//g, '.') + artMetadata.filename;
+
+  // Form complete path
+  const blobPath = path.join(artRootPath, projID, concatenName);
+
+  // Return the path
+  return blobPath;
 }

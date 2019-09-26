@@ -24,8 +24,10 @@ module.exports = {
   create,
   update,
   remove,
-  getArtifactBlob
-
+  getBlob,
+  postBlob,
+  deleteBlob,
+  getBlobById
 };
 
 // Node.js Modules
@@ -37,7 +39,6 @@ const Branch = M.require('models.branch');
 const Project = M.require('models.project');
 const Org = M.require('models.organization');
 const EventEmitter = M.require('lib.events');
-const mbeeCrypto = M.require('lib.crypto');
 const sani = M.require('lib.sanitization');
 const validators = M.require('lib.validators');
 const utils = M.require('lib.utils');
@@ -47,16 +48,16 @@ const ArtifactModule = M.require(`artifact.${M.config.artifact.strategy}`);
 const errors = M.require('lib.errors');
 
 // Error Check - Verify ArtifactModule is imported and implements required functions
-if (!ArtifactModule.hasOwnProperty('getArtifactBlob')) {
-  M.log.critical(`Error: Artifact Strategy (${M.config.auth.strategy}) does not implement getArtifactBlob.`);
+if (!ArtifactModule.hasOwnProperty('getBlob')) {
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement getArtifactBlob.`);
   process.exit(0);
 }
-if (!ArtifactModule.hasOwnProperty('addArtifactBlob')) {
-  M.log.critical(`Error: Artifact Strategy (${M.config.auth.strategy}) does not implement addArtifactBlob.`);
+if (!ArtifactModule.hasOwnProperty('postBlob')) {
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement addArtifactBlob.`);
   process.exit(0);
 }
-if (!ArtifactModule.hasOwnProperty('removeArtifactBlob')) {
-  M.log.critical(`Error: Artifact Strategy (${M.config.auth.strategy}) does not implement removeArtifactBlob.`);
+if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement removeArtifactBlob.`);
   process.exit(0);
 }
 
@@ -129,7 +130,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
   // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['getBlob', 'archived', 'populate',
+  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
     'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
 
   // Ensure options are valid
@@ -210,6 +211,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
     .lean(validatedOptions.lean);
   }
   catch (error) {
+    console.log(error)
     throw new M.DatabaseError(error.message, 'warn');
   }
 }
@@ -252,13 +254,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
  * });
  */
 async function create(requestingUser, organizationID, projectID, branch,
-  artifacts, artifactBlob, options) {
-  // Set options if no artifactBlob were provided, but options were
-  if (!Buffer.isBuffer(artifactBlob) === true && typeof artifacts === 'object'
-    && artifacts !== null && !Array.isArray(artifacts)) {
-    options = artifactBlob;   // eslint-disable-line no-param-reassign
-    artifactBlob = undefined; // eslint-disable-line no-param-reassign
-  }
+  artifacts, options) {
   M.log.debug('create(): Start of function');
 
   if (Array.isArray(artifacts)) {
@@ -368,27 +364,11 @@ async function create(requestingUser, organizationID, projectID, branch,
       + ` [${existingArtifact.toString()}].`, 'warn');
   }
 
-  let hashedName = null;
-  // Verify artifactBlob defined
-  if (typeof artifactBlob !== 'undefined') {
-    // Generate hash
-    hashedName = mbeeCrypto.sha256Hash(artifactBlob);
-
-    await ArtifactModule.addArtifactBlob(hashedName, artifactBlob);
-
-    // Define new hash history entry
-    newHistoryEntry = {
-      user: reqUser,
-      updatedOn: Date.now()
-    };
-  }
-
   const artObjects = artsToCreate.map((a) => {
     const artObj = new Artifact(a);
-    artObj.hash = hashedName;
-    artObj.history = [newHistoryEntry];
     artObj.project = foundProj._id;
     artObj.branch = foundBranch._id;
+    artObj.strategy = M.config.artifact.strategy;
     artObj.lastModifiedBy = reqUser._id;
     artObj.createdBy = reqUser._id;
     artObj.updatedOn = Date.now();
@@ -724,11 +704,6 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
   });
   const uniqueIDs = Object.keys(uniqueIDsObj);
 
-  // Loop through artifact history
-  foundArtifacts.forEach((a) => {
-    ArtifactModule.removeArtifactBlob(a.hash);
-  });
-
   // TODO: Change the emitter to return artifacts rather than ids
   // Emit the event artifacts-deleted
   EventEmitter.emit('Artifact-deleted', uniqueIDs);
@@ -738,8 +713,8 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
 }
 
 /**
- * @description This function finds an artifact based on artifact id and
- * returns the blob.
+ * @description This function finds and returns an artifact blob based on project,
+ * location and filename.
  *
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the
@@ -747,38 +722,12 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
  * @param {string} projectID - The project ID of the Project which is being
  * searched for.
  * @param {string} branch - The branch ID
- * @param {(string|string[])} artifacts - The artifacts to find. Can either be
- * an array of artifact ids, a single artifact id, or not provided, which
- * defaults to every artifact in a project being found.
- * @param {Object} [options] - A parameter that provides supported options.
- * @param {string[]} [options.populate] - A list of fields to populate on return
- * of the found objects. By default, no fields are populated.
- * @param {boolean} [options.includeArchived = false] - If true, find
- * results will include archived objects.
- * @param {string[]} [options.fields] - An array of fields to return. By default
- * includes the _id, id, and contains. To NOT include a field, provide a '-' in
- * front.
- * @param {number} [options.limit = 0] - A number that specifies the maximum
- * number of documents to be returned to the user. A limit of 0 is equivalent to
- * setting no limit.
- * @param {number} [options.skip = 0] - A non-negative number that specifies the
- * number of documents to skip returning. For example, if 10 documents are found
- * and skip is 5, the first 5 documents will NOT be returned.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
- * @param {string} [options.sort] - Provide a particular field to sort the results by.
- * You may also add a negative sign in front of the field to indicate sorting in
- * reverse order.
- * @param {string} [options.createdBy] - Search for artifacts with a specific
- * createdBy value.
- * @param {string} [options.lastModifiedBy] - Search for artifacts with a
- * specific lastModifiedBy value.
- * @param {string} [options.archivedBy] - Search for artifacts with a specific
- * archivedBy value.
- * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * @param {Object[]} artifacts - The artifact object to find. Based on project,
+ * location, and filename.
+ * @param {string} [artifacts.filename] - The filename of the artifact.
+ * @param {string} [artifacts.location] - The location of the artifact.
  *
- * @return {Promise} Artifact objects
+ * @return {Promise} Artifact object
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID' ['artifact1'], { populate: 'project' })
@@ -789,26 +738,267 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
  *   M.log.error(error);
  * });
  * */
-async function getArtifactBlob(requestingUser, organizationID,
-  projectID, branch, artifacts, options) {
-  try {
-    const artifact = await find(requestingUser, organizationID,
-      projectID, branch, artifacts, options);
+async function getBlob(requestingUser, organizationID,
+  projectID, branch, artifact) {
+    let options; // TODO: Remove
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    helper.checkParamsDataType(['object', 'string'], artifact, 'Artifacts');
 
-    // If no artifact found, return 404 error
-    if (artifact.length === 0) {
-      throw new M.NotFoundError(
-        `Artifact [${artifacts[0]}] not found.`, 'warn'
-      );
+    console.log(artifact)
+    // Sanitize input parameters
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const saniArt = sani.mongo(JSON.parse(JSON.stringify(artifact)));
+    const orgID = sani.mongo(organizationID);
+    const projID = sani.mongo(projectID);
+    const branchID = sani.mongo(branch);
+
+
+    // Initialize and ensure options are valid
+    const validatedOptions = utils.validateOptions(options, ['archived',
+      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
+
+    // Find the organization
+    const organization = await helper.findAndValidate(Org, orgID, reqUser,
+      validatedOptions.archived);
+
+    // Ensure that the user has at least read permissions on the org
+    if (!reqUser.admin && (!organization.permissions[reqUser._id]
+      || !organization.permissions[reqUser._id].includes('read'))) {
+      throw new M.PermissionError('User does not have permission to get'
+        + ` artifacts on the organization [${orgID}].`, 'warn');
     }
 
-    const retArtObj = JSON.parse(JSON.stringify(artifact[0]));
+    // Find the project
+    const project = await helper.findAndValidate(Project,
+      utils.createID(orgID, projID), reqUser, validatedOptions.archived);
+
+    // Verify the user has read permissions on the project
+    if (!reqUser.admin && (!project.permissions[reqUser._id]
+      || !project.permissions[reqUser._id].includes('read'))) {
+      throw new M.PermissionError('User does not have permission to get'
+        + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
+    }
+
+    // Find the branch, validate it was found and not archived
+    await helper.findAndValidate(Branch, utils.createID(
+      orgID, projID, branchID
+    ), reqUser, validatedOptions.archived);
 
     // Include artifact blob in return obj
-    retArtObj.blob = ArtifactModule.getArtifactBlob(retArtObj.hash);
-    return retArtObj;
+    return ArtifactModule.getBlob(saniArt);
+}
+
+/**
+ * @description This function post an artifact blob based on project,
+ * location and filename.
+ *
+ * @param {User} requestingUser - The requesting user.
+ * @param {string} organizationID - The organization ID for the org the
+ * project belongs to.
+ * @param {string} projectID - The project ID of the Project which is being
+ * searched for.
+ * @param {string} branch - The branch ID
+ * @param {Object[]} artifacts - The artifact object to find. Based on project,
+ * location, and filename.
+ * @param {string} [artifacts.filename] - The filename of the artifact.
+ * @param {string} [artifacts.location] - The location of the artifact.
+ *
+ * @return {Promise} Artifact object
+ *
+ * @example
+ * find({User}, 'orgID', 'projID', 'branchID', {filename: 'icon.png' }, { populate: 'project' })
+ * .then(function(artifacts) {
+ *   // Do something with the found artifacts
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ * */
+async function postBlob(requestingUser, organizationID,
+  projectID, branchID, artifact, artifactBlob, options) {
+  // Ensure artifact blob defined
+  if (!Buffer.isBuffer(artifactBlob) === true) {
+    throw new M.DataFormatError('Artifact blob file is required.', 'warn');
+  }
+
+  // Ensure input parameters are correct type
+  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
+  helper.checkParamsDataType(['undefined', 'object'], [artifact], 'Artifacts');
+
+  // Sanitize input parameters
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const saniArt = sani.mongo(JSON.parse(JSON.stringify(artifact)));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const saniBranchID = sani.mongo(branchID);
+
+  // Initialize and ensure options are valid
+  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
+    'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
+
+  // Validate Artifact metadata
+  validateBlobMeta(artifact);
+
+  // Find the organization
+  const organization = await helper.findAndValidate(Org, orgID, reqUser,
+    validatedOptions.archived);
+
+  // Ensure that the user has at least read permissions on the org
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` post artifacts on the organization [${orgID}].`, 'warn');
+  }
+
+  // Find the project
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+    reqUser, validatedOptions.archived);
+
+  // Verify the user has read permissions on the project
+  if (!reqUser.admin && (!project.permissions[reqUser._id]
+    || !project.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to'
+      + ` post artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
+  }
+
+  // Find the branch, validate it was found and not archived
+  await helper.findAndValidate(Branch, utils.createID(
+    orgID, projID, saniBranchID
+  ), reqUser, validatedOptions.archived);
+
+  // Include project id
+  saniArt.project = projectID;
+
+  // Return artifact object
+  ArtifactModule.postBlob(saniArt, artifactBlob);
+
+  // Return artifact object
+  return saniArt;
+}
+
+/**
+ * @description This function deletes an artifact blob based on project,
+ * location and filename.
+ *
+ * @param {User} requestingUser - The requesting user.
+ * @param {string} organizationID - The organization ID for the org the
+ * project belongs to.
+ * @param {string} projectID - The project ID of the Project which is being
+ * searched for.
+ * @param {string} branch - The branch ID
+ * @param {Object[]} artifacts - The artifact object to find. Based on project,
+ * location, and filename.
+ * @param {string} [artifacts.filename] - The filename of the artifact.
+ * @param {string} [artifacts.location] - The location of the artifact.
+ *
+ * @return {Promise} Artifact id.
+ *
+ * @example
+ * find({User}, 'orgID', 'projID', 'branchID', {location: ''}, { populate: 'project' })
+ * .then(function(artifacts) {
+ *   // Do something with the found artifacts
+ * })
+ * .catch(function(error) {
+ *   M.log.error(error);
+ * });
+ * */
+async function deleteBlob(requestingUser, organizationID,
+                        projectID, branch, artifact, options) {
+
+    // Include artifact blob in return obj
+    return ArtifactModule.deleteBlob(artifact);
+}
+
+async function getBlobById(requestingUser, organizationID, projectID, branch,
+  artifact, options) {
+  // Ensure input parameters are correct type
+  helper.checkParams(requestingUser, {}, organizationID, projectID, branch);
+
+  // Sanitize input parameters
+  const saniArtifact = sani.mongo(JSON.parse(JSON.stringify(artifact)));
+  const reqUser = JSON.parse(JSON.stringify(requestingUser));
+  const orgID = sani.mongo(organizationID);
+  const projID = sani.mongo(projectID);
+  const branchID = sani.mongo(branch);
+
+  // Initialize search query
+  const searchQuery = { branch: utils.createID(orgID, projID, branchID),
+    archived: false };
+
+  // Initialize and ensure options are valid
+  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
+    'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
+
+  // Find the organization
+  const organization = await helper.findAndValidate(Org, orgID, reqUser,
+    validatedOptions.archived);
+
+  // Ensure that the user has at least read permissions on the org
+  if (!reqUser.admin && (!organization.permissions[reqUser._id]
+    || !organization.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to get'
+      + ` artifacts on the organization [${orgID}].`, 'warn');
+  }
+
+  // Find the project
+  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+    reqUser, validatedOptions.archived);
+
+  // Verify the user has read permissions on the project
+  if (!reqUser.admin && (!project.permissions[reqUser._id]
+    || !project.permissions[reqUser._id].includes('read'))) {
+    throw new M.PermissionError('User does not have permission to get'
+      + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
+  }
+
+  // Find the branch, validate it was found and not archived
+  await helper.findAndValidate(Branch, utils.createID(
+    orgID, projID, branchID
+  ), reqUser, validatedOptions.archived);
+
+  // If the archived field is true, remove it from the query
+  if (validatedOptions.archived) {
+    delete searchQuery.archived;
+  }
+
+  // Check the type of the artifact parameter
+  if (typeof saniArtifact === 'string') {
+    // A single artifact id
+    searchQuery._id = utils.createID(orgID, projID, branchID, saniArtifact);
+  }
+  else if (!((typeof saniArtifact === 'object' && saniArtifact !== null)
+    || saniArtifact === undefined)) {
+    // Invalid parameter, throw an error
+    throw new M.DataFormatError('Invalid input for finding artifacts.', 'warn');
+  }
+
+  try {
+    // Find the artifacts
+    const artifactMeta = await Artifact.find(searchQuery, validatedOptions.fieldsString);
+    const blob = ArtifactModule.getBlob(artifactMeta[0]);
+    return blob;
   }
   catch (error) {
-    throw errors.captureError(error.message);
+    throw new M.DatabaseError(error.message, 'warn');
   }
+}
+
+/**
+ * @description This function validates the artifact object metadata
+ * to handle get, post, or remove the blob.
+ * */
+function validateBlobMeta(metadata) {
+  // Define the required blob fields
+  const requiredBlobFields = ['location', 'filename'];
+
+  if (typeof metadata !== 'object') {
+    throw new M.DataFormatError('Artifact must be an object.', 'warn');
+  }
+
+  requiredBlobFields.forEach( (field) => {
+    assert.ok(metadata.hasOwnProperty(field), 'Artifact blob requires'
+      + ` ${field} field.`);
+  });
+
 }

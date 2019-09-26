@@ -104,7 +104,7 @@ const ArtifactSchema = new mongoose.Schema({
   location: {
     type: String
   },
-  hash: {
+  strategy:{
     type: String,
     required: true
   },

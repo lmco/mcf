@@ -4283,14 +4283,32 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
  *         description: Internal Server Error, Failed to GET artifact due to
  *                      server side issue.
  */
-api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid/download')
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/blob')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,
-  APIController.getArtifactBlob
+  APIController.getBlob
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.postBlob
+).delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.deleteBlob
 );
 
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid/blob')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.getBlobById
+);
 /**
  * @swagger
  * /api/users:
