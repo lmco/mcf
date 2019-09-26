@@ -19,11 +19,11 @@
 /* eslint-disable no-unused-vars */
 // NPM modules
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 import chai from 'chai';
 
 // MBEE components
-import Home from '../../app/ui/components/home-views/home.jsx';
+import Home from '../../../app/ui/components/home-views/home.jsx';
 
 /* eslint-enable no-unused-vars */
 
