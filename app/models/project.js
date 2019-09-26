@@ -206,12 +206,12 @@ ProjectSchema.static('getVisibilityLevels', function() {
 ProjectSchema.method('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
 });
-ProjectSchema.statics.getValidPopulateFields = function() {
+ProjectSchema.static('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
-};
+});
 
 
 /* ------------------------( Project Schema Export )------------------------- */
 
 // Export model as "Project"
-module.exports = new db.Model('Project', ProjectSchema);
+module.exports = new db.Model('Project', ProjectSchema, 'projects');

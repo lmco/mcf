@@ -217,6 +217,16 @@ class Model {
   }
 
   /**
+   * @description Unused init function
+   * @async
+   *
+   * @return {Promise<void>}
+   */
+  async init() { // eslint-disable-line class-methods-use-this
+
+  }
+
+  /**
    * @description Performs a large write operation on a collection. Can create,
    * update, or delete multiple documents. Calls the mongoose bulkWrite()
    * function.

@@ -174,4 +174,4 @@ OrganizationSchema.static('getValidPopulateFields', function() {
 /* ----------------------( Organization Schema Export )---------------------- */
 
 // Export model as "Organization"
-module.exports = new db.Model('Organization', OrganizationSchema);
+module.exports = new db.Model('Organization', OrganizationSchema, 'organizations');

@@ -317,4 +317,4 @@ ElementSchema.index({
 
 
 /* ------------------------( Element Schema Export )------------------------- */
-module.exports = new db.Model('Element', ElementSchema);
+module.exports = new db.Model('Element', ElementSchema, 'elements');

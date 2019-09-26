@@ -257,7 +257,7 @@ class Model extends DBModule.Model {
     // Check that expected functions are defined
     const expectedFunctions = ['bulkWrite', 'createDocument', 'countDocuments',
       'deleteIndex', 'deleteMany', 'ensureIndexes', 'find', 'findOne',
-      'getIndexes', 'insertMany', 'updateMany', 'updateOne'];
+      'getIndexes', 'insertMany', 'updateMany', 'updateOne', 'init'];
     expectedFunctions.forEach((f) => {
       // Ensure the parameter is defined
       if (!(f in this)) {
@@ -270,6 +270,17 @@ class Model extends DBModule.Model {
         process.exit(1);
       }
     });
+  }
+
+  /**
+   * @description Runs any asynchronous initialization functions that could not
+   * be run in the constructor.
+   * @async
+   *
+   * @return {Promise<*>}
+   */
+  async init() {
+    return super.init();
   }
 
   /**

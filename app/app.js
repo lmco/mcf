@@ -31,7 +31,12 @@ const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
 const migrate = M.require('lib.migrate');
+const Artifact = M.require('models.artifact');
+const Branch = M.require('models.branch');
+const Element = M.require('models.element');
 const Organization = M.require('models.organization');
+const Project = M.require('models.project');
+const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 
 // Initialize express app and export the object
@@ -43,6 +48,7 @@ module.exports = app;
  * default organization if needed.
  */
 db.connect()
+.then(() => initModels())
 .then(() => migrate.getSchemaVersion())
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
@@ -231,4 +237,20 @@ function createDefaultAdmin() {
     // Catch and reject error
     .catch(error => reject(error));
   });
+}
+
+/**
+ * @description Initializes all models asynchronously.
+ * @async
+ *
+ * @return {Promise<void>}
+ */
+async function initModels() {
+  await Artifact.init();
+  await Branch.init();
+  await Element.init();
+  await Organization.init();
+  await Project.init();
+  await ServerData.init();
+  await User.init();
 }
