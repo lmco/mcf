@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module ui.components.general.custom-data.key-data
  *

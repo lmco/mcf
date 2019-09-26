@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module test.301b-user-model-tests
  *

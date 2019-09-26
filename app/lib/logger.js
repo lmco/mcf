@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.logger
  *
@@ -20,8 +20,9 @@
  *
  * You can the use the logger:
  *   - `log.info('Hello World')`
- *   - `log.error('An error has occurred')`
+ *   - `log.error('An error has occurred')`.
  */
+
 
 // Node modules
 const fs = require('fs');

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module controllers.branch-controller
  *
@@ -88,7 +88,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found branch objects
+ * @returns {Promise} Array of found branch objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', ['branch1', 'branch2'], { populate: 'project' })
@@ -233,7 +233,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created branch objects
+ * @returns {Promise} Array of created branch objects.
  *
  * @example
  * create({User}, 'orgID', 'projID', 'branchID', [{Branch1}, {Branch2}, ...],
@@ -544,7 +544,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated branch objects
+ * @returns {Promise} Array of updated branch objects.
  *
  * @example
  * update({User}, 'orgID', 'projID' [{Updated Branch 1},
@@ -746,7 +746,7 @@ async function update(requestingUser, organizationID, projectID, branches, optio
  * an array of branch ids or a single branch id.
  * @param {object} [options] - A parameter that provides supported options.
  *
- * @return {Promise} Array of deleted branch ids.
+ * @returns {Promise} Array of deleted branch ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', ['branch1', 'branch2'])

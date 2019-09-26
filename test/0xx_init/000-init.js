@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module test.000-init
  *
@@ -76,7 +76,7 @@ describe(M.getModuleName(module.filename), function() {
  * @description Initializes all models asynchronously.
  * @async
  *
- * @return {Promise<void>}
+ * @returns {Promise<void>} Resolves upon successful initiation of models.
  */
 async function initModels() {
   try {

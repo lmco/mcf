@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module scripts.migrations.0.9.3
  *
@@ -11,7 +11,7 @@
  *
  * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @description Migration script for version 0.9.3
+ * @description Migration script for version 0.9.3.
  */
 
 // MBEE modules

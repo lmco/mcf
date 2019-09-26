@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.utils
  *
@@ -232,7 +232,7 @@ module.exports.parseOptions = function(options, validOptions) {
  * @param {object} model - The model of the controller which called this
  * function.
  *
- * @return {object} An object with key/value pairs formatted for use by the
+ * @returns {object} An object with key/value pairs formatted for use by the
  * controllers.
  */
 module.exports.validateOptions = function(options, validOptions, model) {
@@ -449,7 +449,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
  *
  * @param {object} dataStream - The stream object carrying a gzip file.
  *
- * @return {Promise} A promise containing the unzipped data
+ * @returns {Promise} A promise containing the unzipped data.
  */
 module.exports.handleGzip = function(dataStream) {
   // Create the promise to return

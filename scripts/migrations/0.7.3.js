@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module scripts.migrations.0.7.2
  *
@@ -12,7 +12,7 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description Migration script for version 0.7.3
+ * @description Migration script for version 0.7.3.
  */
 
 // MBEE modules

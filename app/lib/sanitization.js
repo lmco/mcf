@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.sanitization
  *
@@ -23,7 +23,7 @@ const db = M.require('lib.db');
  *
  * @param {string} userInput - User input to sanitize.
  *
- * @return {string} Sanitized string
+ * @returns {string} Sanitized string.
  */
 module.exports.sanitize = function(userInput) {
   return module.exports.db(module.exports.html(userInput));

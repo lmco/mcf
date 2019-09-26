@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module db.mongoose-mongodb-strategy
  *
@@ -27,7 +27,7 @@ const MongoStore = require('connect-mongo')(session);
 /**
  * @description Create connection to database.
  *
- * @return {Promise} Resolved promise.
+ * @returns {Promise} Resolved promise.
  */
 function connect() {
   return new Promise((resolve, reject) => {
@@ -84,7 +84,7 @@ function connect() {
 /**
  * @description Closes connection to database.
  *
- * @return {Promise} Resolved promise.
+ * @returns {Promise} Resolved promise.
  */
 function disconnect() {
   return new Promise((resolve, reject) => {
@@ -117,7 +117,7 @@ async function clear() {
  *
  * @param {*} data - User input to be sanitized. May be in any data format.
  *
- * @return {*} Sanitized user input.
+ * @returns {*} Sanitized user input.
  */
 function sanitize(data) {
   if (Array.isArray(data)) {
@@ -221,7 +221,7 @@ class Model {
    * @description Unused init function
    * @async
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>} Returns empty promise upon completion.
    */
   async init() { // eslint-disable-line class-methods-use-this
 
@@ -274,7 +274,7 @@ class Model {
    *   }
    * ]);
    *
-   * @return {Promise<object>} Result of the bulkWrite operation.
+   * @returns {Promise<object>} Result of the bulkWrite operation.
    */
   async bulkWrite(ops, options, cb) {
     return this.model.bulkWrite(ops, options, cb);
@@ -286,7 +286,7 @@ class Model {
    *
    * @param {object} doc - The object to convert to a Document.
    *
-   * @return {Document}
+   * @returns {Document} Returns a database document.
    */
   createDocument(doc) {
     return new this.model(doc); // eslint-disable-line new-cap
@@ -301,7 +301,7 @@ class Model {
    * find query by.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<number>} The number of documents which matched the filter.
+   * @returns {Promise<number>} The number of documents which matched the filter.
    */
   async countDocuments(filter, cb) {
     return this.model.countDocuments(filter, cb);
@@ -314,7 +314,7 @@ class Model {
    *
    * @param {string} name - The name of the index.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return this.model.collection.dropIndex(name);
@@ -330,7 +330,7 @@ class Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} An object denoting the success of the delete
+   * @returns {Promise<object>} An object denoting the success of the delete
    * operation.
    */
   async deleteMany(conditions, options, cb) {
@@ -342,7 +342,7 @@ class Model {
    * schema. Calls the mongoose ensureIndexes() function.
    * @async
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>} Returns an empty promise upon completion.
    */
   async ensureIndexes() {
     return this.model.ensureIndexes();
@@ -381,7 +381,7 @@ class Model {
    * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object[]>} An array containing the found documents, if
+   * @returns {Promise<object[]>} An array containing the found documents, if
    * any.
    */
   async find(filter, projection, options, cb) {
@@ -409,7 +409,7 @@ class Model {
    * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} The found document, if any.
+   * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
     return this.model.findOne(conditions, projection, options, cb);
@@ -420,7 +420,7 @@ class Model {
    * mongoose collection.indexes() function.
    * @async
    *
-   * @return {Promise<object[]>} Array of index objects
+   * @returns {Promise<object[]>} Array of index objects.
    */
   async getIndexes() {
     return this.model.collection.indexes();
@@ -440,7 +440,7 @@ class Model {
    * the documents which are being created.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object[]>} The created documents.
+   * @returns {Promise<object[]>} The created documents.
    */
   async insertMany(docs, options, cb) {
     let useCollection = false;
@@ -503,7 +503,7 @@ class Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} The updated document.
+   * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
     return this.model.updateOne(filter, doc, options, cb);

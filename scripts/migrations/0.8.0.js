@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module scripts.migrations.0.8.0
  *
@@ -11,7 +11,7 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description Migration script for version 0.8.0
+ * @description Migration script for version 0.8.0.
  */
 
 // MBEE modules

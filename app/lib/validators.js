@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.validators
  *
@@ -78,7 +78,7 @@ const project = {
  *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 1 or more
  *   Examples:
- *       - orgid:projid:branchid [valid]
+ *      - orgid:projid:branchid [valid]
  *      - orgid:projid:my-branch [valid]
  *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
  *      - orgid:projid:-branch[invalid - must start with a letter or a number]

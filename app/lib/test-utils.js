@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.test-utils.js
  *
@@ -12,8 +12,8 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Helper function for MBEE test.
- * - Used to create users, organizations, projects, elements in the database.
- * - Assumes database connection already established
+ * Used to create users, organizations, projects, elements in the database.
+ * Assumes database connection already established.
  *
  * This function takes the complexity out of MBEE tests,
  * making MBEE tests easier to read and run.

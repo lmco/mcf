@@ -843,10 +843,12 @@
     ////////////////////////////////////////////////////////////////////////////
     "jsdoc/check-alignment": "error", // Recommended
     "jsdoc/check-examples": "off",
-    //"jsdoc/check-indentation": "error",
+    "jsdoc/check-indentation": "off",  // We frequently use indentation in our jsdocs
     "jsdoc/check-param-names": "error", // Recommended
     "jsdoc/check-syntax": "error",
-    "jsdoc/check-tag-names": "off", //TODO: reevaluate
+    "jsdoc/check-tag-names": ["error", {"definedTags":  [
+      "owner", "swagger","Classification", "memberOf"
+    ]}], //TODO: reevaluate
     "jsdoc/check-types": "error", // Recommended
     "jsdoc/implements-on-classes": "warn", // Recommended
     "jsdoc/match-description": ["error", {"tags": {

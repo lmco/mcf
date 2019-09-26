@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.parse-json
  *
@@ -21,7 +21,7 @@
  *
  * @param {string} inputString - The name of the file to parse.
  *
- * @return {object} valid JSON
+ * @returns {object} Valid JSON.
  */
 module.exports.removeComments = function(inputString) {
   // Ensure inputString is of type string

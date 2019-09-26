@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.jmi-conversions
  *
@@ -28,7 +28,7 @@ const assert = require('assert');
  * @param {string} [unique='id'] - The unique identifier in the batch of
  * elements.
  *
- * @return {object|object[]} The converted JMI.
+ * @returns {object|object[]} The converted JMI.
  */
 module.exports.convertJMI = function(from, to, data, field = '_id', unique = 'id') {
   // Convert JMI type 1 to type 2
@@ -51,7 +51,7 @@ module.exports.convertJMI = function(from, to, data, field = '_id', unique = 'id
  * @param {object[]} data - The data to convert between JMI versions.
  * @param {string} field - The field to parse on.
  *
- * @return {object} The converted JMI type 2 object.
+ * @returns {object} The converted JMI type 2 object.
  */
 function jmi12(data, field) {
   // Error Check: Ensure data is in JMI type 1
@@ -92,7 +92,7 @@ function jmi12(data, field) {
  * @param {string} [unique='id'] - The unique identifier in the batch of
  * elements.
  *
- * @return {object} The converted JMI type 3 object.
+ * @returns {object} The converted JMI type 3 object.
  */
 function jmi13(data, field, unique = 'id') {
   // Ensure that each element has a parent and contain field
@@ -134,7 +134,7 @@ function jmi13(data, field, unique = 'id') {
  * @param {string} [unique='id'] - The unique identifier in the batch of
  * elements.
  *
- * @return {object} Modified JMI2 object which is now in JMI3 format.
+ * @returns {object} Modified JMI2 object which is now in JMI3 format.
  */
 function jmi23(jmi2, unique = 'id') {
   // Create an array for elements with no children

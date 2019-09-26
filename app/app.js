@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module app
  *
@@ -243,7 +243,7 @@ function createDefaultAdmin() {
  * @description Initializes all models asynchronously.
  * @async
  *
- * @return {Promise<void>}
+ * @returns {Promise<void>} Returns an empty promise upon completion.
  */
 async function initModels() {
   await Artifact.init();

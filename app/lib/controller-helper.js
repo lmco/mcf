@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.controller-helper
  *
@@ -100,7 +100,7 @@ module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
  * @param {string} id - The ID of the model being validated.
  * @param {boolean} [archived=false] - Specifies whether or not to allow archived results.
  *
- * @return {object} - an object containing the sanitized input parameters
+ * @returns {object} - An object containing the sanitized input parameters.
  */
 module.exports.findAndValidate = async function(model, id, archived = false) {
   // Perform the find operation on the model
@@ -130,7 +130,7 @@ module.exports.findAndValidate = async function(model, id, archived = false) {
  *
  * @param {string} fields - Field names separated by a ' '.
  *
- * @return {object} - An object containing field names as keys with value of 1.
+ * @returns {object} - An object containing field names as keys with value of 1.
  */
 module.exports.parseFieldsString = function(fields) {
   if (!fields) {

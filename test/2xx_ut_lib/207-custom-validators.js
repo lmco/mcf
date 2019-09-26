@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module  test.207-custom-validators
  *
@@ -15,13 +15,6 @@
  * It is not a comprehensive set of tests and does not test every possible
  * custom validator. This file is meant as a basic sanity check on the initial
  * development of custom validators.
- *
- * This test suite SHOULD ONLY BE RUN MANUALLY! Do not run this with automated
- * CI tests. This is because it is heavily dependant on the configuration and
- * keep both the tests and the configuration up to date with the code is likely
- * unmaintainable. As a result, the string 'MANUAL-' is prepended to the test
- * name below (e.g. see the first arg of the `describe` function) to ensure
- * that is does not automatically get run along with the other tests.
  */
 
 // Node modules

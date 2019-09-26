@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.get-public-data
  *
@@ -29,7 +29,7 @@ const utils = M.require('lib.utils');
  * @param {object} options - A list of options passed in by the user to the API
  * Controller.
  *
- * @return {object} The modified object.
+ * @returns {object} The modified object.
  */
 module.exports.getPublicData = function(object, type, options) {
   // If options is undefined, set it equal to an empty object
@@ -61,7 +61,7 @@ module.exports.getPublicData = function(object, type, options) {
  * @param {object} options - A list of options passed in by the user to the API
  * Controller.
  *
- * @return {object} The public data of the element.
+ * @returns {object} The public data of the element.
  */
 function getElementPublicData(element, options) {
   // Parse the element ID
@@ -342,7 +342,7 @@ function getElementPublicData(element, options) {
  * @param {object} options - A list of options passed in by the user to the API
  * Controller.
  *
- * @return {object} The public data of the branch.
+ * @returns {object} The public data of the branch.
  */
 function getBranchPublicData(branch, options) {
   // Parse the branch ID
@@ -466,7 +466,7 @@ function getBranchPublicData(branch, options) {
  * @param {object} options - A list of options passed in by the user to the API
  * Controller.
  *
- * @return {object} The public data of the project.
+ * @returns {object} The public data of the project.
  */
 function getProjectPublicData(project, options) {
   const permissions = (project.permissions) ? {} : undefined;
@@ -570,7 +570,7 @@ function getProjectPublicData(project, options) {
  * @param {object} options - A list of options passed in by the user to the API
  * Controller.
  *
- * @return {object} The public data of the org.
+ * @returns {object} The public data of the org.
  */
 function getOrgPublicData(org, options) {
   const permissions = (org.permissions) ? {} : undefined;
@@ -688,7 +688,7 @@ function getOrgPublicData(org, options) {
  * @param {object} options - A list of options passed in by the user to the API
  * Controller.
  *
- * @return {object} The public data of the user.
+ * @returns {object} The public data of the user.
  */
 function getUserPublicData(user, options) {
   let createdBy = null;

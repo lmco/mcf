@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module scripts.migration
  *

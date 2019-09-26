@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module lib.db
  *
@@ -80,7 +80,7 @@ async function clear() {
  *
  * @param {*} data - User input to be sanitized. May be in any data format.
  *
- * @return {*} Sanitized user input.
+ * @returns {*} Sanitized user input.
  */
 function sanitize(data) {
   try {
@@ -277,7 +277,7 @@ class Model extends DBModule.Model {
    * be run in the constructor.
    * @async
    *
-   * @return {Promise<*>}
+   * @returns {Promise<void>} Returns an empty promise upon completion.
    */
   async init() {
     return super.init();
@@ -329,7 +329,7 @@ class Model extends DBModule.Model {
    *   }
    * ]);
    *
-   * @return {Promise<object>} Result of the bulkWrite operation.
+   * @returns {Promise<object>} Result of the bulkWrite operation.
    */
   async bulkWrite(ops, options, cb) {
     return super.bulkWrite(ops, options, cb);
@@ -354,7 +354,7 @@ class Model extends DBModule.Model {
    * find query by.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<number>} The number of documents which matched the filter.
+   * @returns {Promise<number>} The number of documents which matched the filter.
    */
   async countDocuments(filter, cb) {
     return super.countDocuments(filter, cb);
@@ -366,7 +366,7 @@ class Model extends DBModule.Model {
    *
    * @param {string} name - The name of the index.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return super.deleteIndex(name);
@@ -381,7 +381,7 @@ class Model extends DBModule.Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} An object denoting the success of the delete
+   * @returns {Promise<object>} An object denoting the success of the delete
    * operation.
    */
   async deleteMany(conditions, options, cb) {
@@ -393,7 +393,7 @@ class Model extends DBModule.Model {
    * schema.
    * @async
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>} Returns an empty promise upon completion.
    */
   async ensureIndexes() {
     return super.ensureIndexes();
@@ -431,7 +431,7 @@ class Model extends DBModule.Model {
    * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object[]>} An array containing the found documents, if
+   * @returns {Promise<object[]>} An array containing the found documents, if
    * any.
    */
   async find(filter, projection, options, cb) {
@@ -458,7 +458,7 @@ class Model extends DBModule.Model {
    * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} The found document, if any.
+   * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
     return super.findOne(conditions, projection, options, cb);
@@ -468,7 +468,7 @@ class Model extends DBModule.Model {
    * @description Returns an array of indexes for the given model.
    * @async
    *
-   * @return {Promise<object[]>} Array of index objects
+   * @returns {Promise<object[]>} Array of index objects.
    */
   async getIndexes() {
     return super.getIndexes();
@@ -487,7 +487,7 @@ class Model extends DBModule.Model {
    * the documents which are being created.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object[]>} The created documents.
+   * @returns {Promise<object[]>} The created documents.
    */
   async insertMany(docs, options, cb) {
     return super.insertMany(docs, options, cb);
@@ -519,7 +519,7 @@ class Model extends DBModule.Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} The updated document.
+   * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
     return super.updateOne(filter, doc, options, cb);

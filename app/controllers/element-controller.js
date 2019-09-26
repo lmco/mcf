@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module controllers.element-controller
  *
@@ -107,7 +107,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found element objects
+ * @returns {Promise} Array of found element objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['elem1', 'elem2'], { populate: 'parent' })
@@ -367,7 +367,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created element objects
+ * @returns {Promise} Array of created element objects.
  *
  * @example
  * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: ['parent'] })
@@ -706,7 +706,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated element objects
+ * @returns {Promise} Array of updated element objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
@@ -1070,7 +1070,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created/replaced element objects
+ * @returns {Promise} Array of created/replaced element objects.
  *
  * @example
  * createOrReplace({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...])
@@ -1304,7 +1304,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted element ids
+ * @returns {Promise} Array of deleted element ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])
@@ -1487,7 +1487,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
- * @return {Promise} Array of found element ids
+ * @returns {Promise} Array of found element ids.
  *
  * @example
  * findElementTree('orgID', 'projID', 'branch', ['elem1', 'elem2',...])
@@ -1568,7 +1568,7 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
  * @param {object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *
- * @return {Promise} Resolved promise to verify element parent.
+ * @returns {Promise} Resolved promise to verify element parent.
  *
  * @example
  * moveElementCheck('orgID', 'projID', 'branch', {Elem1})
@@ -1686,7 +1686,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} An array of found elements.
+ * @returns {Promise} An array of found elements.
  *
  * @example
  * search({User}, 'orgID', 'projID', 'branch', 'find these elements')
@@ -1812,7 +1812,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string} elementID - The element whose parents are being found.
  *
- * @return {string} Array of found element ids
+ * @returns {string} Array of found element ids.
  *
  * @example
  * findElementRootPath('orgID', 'projID', 'branch', 'elem1')
