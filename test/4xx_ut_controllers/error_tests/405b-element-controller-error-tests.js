@@ -1,19 +1,19 @@
 /**
-* Classification: UNCLASSIFIED
-*
-* @module test.405b-element-controller-error-tests
-*
-* @copyright Copyright (C) 2019, Lockheed Martin Corporation
-*
-* @license LMPI - Lockheed Martin Proprietary Information
-*
-* @owner Leah De Laurell <leah.p.delaurell@lmco.com>
-*
-* @author Austin Bieber <austin.j.bieber@lmco.com>
-* @author Phillip Lee <phillip.lee@lmco.com>
-*
-* @description This tests for expected errors within the element controller.
-*/
+ * Classification: UNCLASSIFIED
+ *
+ * @module test.405b-element-controller-error-tests
+ *
+ * @copyright Copyright (C) 2019, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
+ *
+ * @description This tests for expected errors within the element controller.
+ */
 
 // NPM modules
 const chai = require('chai');

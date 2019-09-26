@@ -13,7 +13,7 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This the element tree wrapper, grabbing the
- *  root model element and then the subtree.
+ * root model element and then the subtree.
  */
 
 /* Modified ESLint rules for React. */

@@ -39,6 +39,10 @@
     "M": false
   },
 
+  "plugins": [
+    "jsdoc"
+  ],
+
   "rules": {
 
     ////////////////////////////////////////////////////////////////////////////
@@ -832,6 +836,45 @@
       "classes": true,
       "variables": true
     }],
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// JSDOC
+    ////////////////////////////////////////////////////////////////////////////
+    "jsdoc/check-alignment": "error", // Recommended
+    /*"jsdoc/check-examples": "off",
+    "jsdoc/check-indentation": "error",
+    "jsdoc/check-param-names": "error", // Recommended
+    "jsdoc/check-syntax": "error",
+    "jsdoc/check-tag-names": "off", //TODO: reevaluate
+    "jsdoc/check-types": "error", // Recommended
+    "jsdoc/implements-on-classes": "warn", // Recommended
+    "jsdoc/match-description": ["error", {"tags": {
+      "param": true,
+      "property": true,
+      "returns": true
+    }}],
+    "jsdoc/newline-after-description": "error", // Recommended
+    "jsdoc/no-types": "off",
+    "jsdoc/no-undefined-types": "error", // Recommended
+    "jsdoc/require-description": ["error", {
+      "descriptionStyle": "tag"
+    }],
+    "jsdoc/require-description-complete-sentence": ["error", {"tags": [
+      "param", "property", "returns"
+    ]}],
+    "jsdoc/require-example": "off",
+    "jsdoc/require-hyphen-before-param-description": "error",
+    "jsdoc/require-jsdoc": "error", // Recommended
+    "jsdoc/require-param": "error", // Recommended
+    "jsdoc/require-param-description": "error", // Recommended
+    "jsdoc/require-param-name": "error", // Recommended
+    "jsdoc/require-param-type": "error", // Recommended
+    "jsdoc/require-returns": "error", // Recommended
+    "jsdoc/require-returns-check": "error", // Recommended
+    "jsdoc/require-returns-description": "error", // Recommended
+    "jsdoc/require-returns-type": "error", // Recommended
+    "jsdoc/valid-types": "warn", // Recommended*/
 
 
     ////////////////////////////////////////////////////////////////////////////

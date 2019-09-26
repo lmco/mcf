@@ -1,18 +1,18 @@
 /**
-* Classification: UNCLASSIFIED
-*
-* @module ui.components.project-views.elements.element
-*
-* @copyright Copyright (C) 2018, Lockheed Martin Corporation
-*
-* @license LMPI - Lockheed Martin Proprietary Information
-*
-* @owner Leah De Laurell <leah.p.delaurell@lmco.com>
-*
-* @author Leah De Laurell <leah.p.delaurell@lmco.com>
-*
-* @description This renders the sidebar.
-*/
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.components.project-views.elements.element
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description This renders the sidebar.
+ */
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
