@@ -16,6 +16,9 @@
  * @description Defines the HTTP Rest API interface file. This file tightly
  * couples with the app/api-routes.js file.
  */
+/* eslint-disable jsdoc/match-description */
+// Disabling this rule due to the use of headers for api endpoints
+
 
 // Node.js Modules
 const path = require('path');
@@ -103,10 +106,10 @@ module.exports = {
  * @description This is a utility function that formats an object as JSON.
  * This function is used for formatting all API responses.
  *
- * @param {Object} obj - An object to convert to JSON-formatted string.
- * @param {boolean} [minified = false] - Whether or not to format the object
+ * @param {object} obj - An object to convert to JSON-formatted string.
+ * @param {boolean} [minified=false] - Whether or not to format the object.
  *
- * @returns {string} JSON string of object parameter
+ * @returns {string} JSON string of object parameter.
  */
 function formatJSON(obj, minified = false) {
   // If the object should be minified
@@ -123,12 +126,12 @@ function formatJSON(obj, minified = false) {
  * @description This is a utility function that formats an object as JSON.
  * This function is used for formatting all API responses.
  *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @param {String} message - The response message or error message.
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @param {string} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
  *
- * @returns {Object} res - The response object
+ * @returns {object} The response object.
  */
 function returnResponse(req, res, message, statusCode) {
   if (statusCode === 200) {
@@ -151,7 +154,7 @@ function returnResponse(req, res, message, statusCode) {
  * @description Generates the Swagger specification based on the Swagger JSDoc
  * in the API routes file.
  *
- * @return {Object} swaggerJS object
+ * @return {object} swaggerJS object
  */
 function swaggerSpec() {
   return swaggerJSDoc({
@@ -173,10 +176,10 @@ function swaggerSpec() {
  *
  * @description Returns the swagger JSON specification.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with swagger JSON
+ * @return {object} Response object with swagger JSON
  */
 function swaggerJSON(req, res) {
   // Return swagger specification
@@ -189,10 +192,10 @@ function swaggerJSON(req, res) {
  *
  * @description Returns the login token after AuthController.doLogin().
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with session token
+ * @return {object} Response object with session token
  */
 function login(req, res) {
   const json = formatJSON({ token: req.session.token });
@@ -204,10 +207,10 @@ function login(req, res) {
  *
  * @description Returns 200 status. Used to confirm API is up and running.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with 200 status code
+ * @return {object} Response object with 200 status code
  */
 function test(req, res) {
   res.status(200).send('');
@@ -219,10 +222,10 @@ function test(req, res) {
  *
  * @description Returns the version number as JSON.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with version
+ * @return {object} Response object with version
  */
 function version(req, res) {
   // Create version object
@@ -242,10 +245,10 @@ function version(req, res) {
  *
  * @description Gets an array of all organizations that a user has access to.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with orgs' public data
+ * @return {object} Response object with orgs' public data
  *
  * NOTE: All users are members of the 'default' org, should always have
  * access to at least this organization.
@@ -355,10 +358,10 @@ async function getOrgs(req, res) {
  *
  * @description Creates multiple orgs from an array of objects.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with orgs' public data
+ * @return {object} Response object with orgs' public data
  */
 async function postOrgs(req, res) {
   // Define options
@@ -442,10 +445,10 @@ async function postOrgs(req, res) {
  * @description Creates or replaces multiple orgs from an array of objects.
  * NOTE: this route is reserved for system-wide admins ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with orgs' public data
+ * @return {object} Response object with orgs' public data
  */
 async function putOrgs(req, res) {
   // Define options
@@ -528,10 +531,10 @@ async function putOrgs(req, res) {
  *
  * @description Updates multiple orgs from an array of objects.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with orgs' public data
+ * @return {object} Response object with orgs' public data
  */
 async function patchOrgs(req, res) {
   // Define options
@@ -616,10 +619,10 @@ async function patchOrgs(req, res) {
  * objects.
  * NOTE: This function is system-admin ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with array of deleted org IDs.
+ * @return {object} Response object with array of deleted org IDs.
  */
 async function deleteOrgs(req, res) {
   // Define options
@@ -680,10 +683,10 @@ async function deleteOrgs(req, res) {
  *
  * @description Gets an organization by its id.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with org's public data
+ * @return {object} Response object with org's public data
  */
 async function getOrg(req, res) {
   // Define options
@@ -760,10 +763,10 @@ async function getOrg(req, res) {
  * @description Takes an organization in the request body and an
  * organization ID in the URI and creates the organization.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with org's public data
+ * @return {object} Response object with org's public data
  */
 async function postOrg(req, res) {
   // Define options
@@ -848,10 +851,10 @@ async function postOrg(req, res) {
  * @description Creates or replaces an organization.
  * NOTE: this route is reserved for system-wide admins ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with org's public data
+ * @return {object} Response object with org's public data
  */
 async function putOrg(req, res) {
   // Define options
@@ -935,10 +938,10 @@ async function putOrg(req, res) {
  *
  * @description Updates the specified org.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with updated org
+ * @return {object} Response object with updated org
  */
 async function patchOrg(req, res) {
   // Define options
@@ -1023,11 +1026,11 @@ async function patchOrg(req, res) {
  * @description Takes an orgid in the URI and deletes the corresponding org.
  * NOTE: This function is for system-wide admins ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {function} next - Callback function
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Callback function.
  *
- * @return {Object} Response object with deleted org ID.
+ * @return {object} Response object with deleted org ID.
  */
 async function deleteOrg(req, res, next) {
   // Define options
@@ -1093,10 +1096,10 @@ async function deleteOrg(req, res, next) {
  *
  * @description Gets all projects a user has access to across all orgs.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with projects' public data
+ * @return {object} Response object with projects' public data
  */
 async function getAllProjects(req, res) {
   // Define options
@@ -1187,10 +1190,10 @@ async function getAllProjects(req, res) {
  * @description Gets an array of all projects that a user has access to on
  * a specified org or an array of specified projects on the specified org.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with projects' public data
+ * @return {object} Response object with projects' public data
  */
 async function getProjects(req, res) {
   // Define options and ids
@@ -1299,10 +1302,10 @@ async function getProjects(req, res) {
  *
  * @description This function creates multiple projects.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with created projects.
+ * @return {object} Response object with created projects.
  */
 async function postProjects(req, res) {
   // Define options
@@ -1386,10 +1389,10 @@ async function postProjects(req, res) {
  * @description This function creates/replaces multiple projects.
  * NOTE: this route is reserved for system-wide admins ONLY.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  *
- * @return {Object} Response object with created/replaced projects.
+ * @return {object} Response object with created/replaced projects.
  */
 async function putProjects(req, res) {
   // Define options
@@ -1472,10 +1475,10 @@ async function putProjects(req, res) {
  *
  * @description This function updates multiple projects.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with updated projects.
+ * @return {object} Response object with updated projects.
  */
 async function patchProjects(req, res) {
   // Define options
@@ -1560,10 +1563,10 @@ async function patchProjects(req, res) {
  * array of project objects.
  * NOTE: This function is for system-wide admins ONLY.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with deleted project IDs.
+ * @return {object} Response object with deleted project IDs.
  */
 async function deleteProjects(req, res) {
   // Define options
@@ -1627,10 +1630,10 @@ async function deleteProjects(req, res) {
  *
  * @description Gets a project by its project ID.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with project's public data
+ * @return {object} Response object with project's public data
  */
 async function getProject(req, res) {
   // Define options
@@ -1707,10 +1710,10 @@ async function getProject(req, res) {
  * @description Takes an organization ID and project ID in the URI and project
  * data in the request body, and creates a project.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created project.
+ * @return {object} Response object with created project.
  */
 async function postProject(req, res) {
   // Define options
@@ -1794,10 +1797,10 @@ async function postProject(req, res) {
  * @description  Creates or replaces a project.
  * NOTE: this route is reserved for system-wide admins ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created project.
+ * @return {object} Response object with created project.
  */
 async function putProject(req, res) {
   // Define options
@@ -1881,10 +1884,10 @@ async function putProject(req, res) {
  *
  * @description Updates the project specified in the URI.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with updated project.
+ * @return {object} Response object with updated project.
  */
 async function patchProject(req, res) {
   // Define options
@@ -1969,10 +1972,10 @@ async function patchProject(req, res) {
  * @description Takes an orgid and projectid in the URI and deletes a project.
  * NOTE: This function is for system-wide admins ONLY.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with deleted project ID.
+ * @return {object} Response object with deleted project ID.
  */
 async function deleteProject(req, res) {
   // Define options
@@ -2039,10 +2042,10 @@ async function deleteProject(req, res) {
  *
  * @description Gets multiple users by ID or all users in the system.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with users' public data
+ * @return {object} Response object with users' public data
  */
 async function getUsers(req, res) {
   // Define options
@@ -2144,10 +2147,10 @@ async function getUsers(req, res) {
  * @description Creates multiple users.
  * NOTE: System-wide admin only.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with users' public data
+ * @return {object} Response object with users' public data
  */
 async function postUsers(req, res) {
   // Define options
@@ -2230,10 +2233,10 @@ async function postUsers(req, res) {
  * @description Creates or replaced multiple users. NOTE: This endpoint is
  * reserved for system-wide admins ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with users' public data
+ * @return {object} Response object with users' public data
  */
 async function putUsers(req, res) {
   // Define options
@@ -2316,10 +2319,10 @@ async function putUsers(req, res) {
  * @description Updates multiple users.
  * NOTE: System-wide admin only.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with users' public data
+ * @return {object} Response object with users' public data
  */
 async function patchUsers(req, res) {
   // Define options
@@ -2403,10 +2406,10 @@ async function patchUsers(req, res) {
  * objects.
  * NOTE: This function is system-admin ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with usernames
+ * @return {object} Response object with usernames
  */
 async function deleteUsers(req, res) {
   // Define options
@@ -2463,10 +2466,10 @@ async function deleteUsers(req, res) {
  *
  * @description Gets user by their username.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with user's public data
+ * @return {object} Response object with user's public data
  */
 async function getUser(req, res) {
   // Define options
@@ -2545,10 +2548,10 @@ async function getUser(req, res) {
  * @description Creates a new user.
  * NOTE: System-wide admin only.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created user
+ * @return {object} Response object with created user
  */
 async function postUser(req, res) {
   // Define options
@@ -2632,10 +2635,10 @@ async function postUser(req, res) {
  * @description Creates or replaces a user. NOTE: This endpoint is reserved for
  * system-wide admins ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created user
+ * @return {object} Response object with created user
  */
 async function putUser(req, res) {
   // Define options
@@ -2719,10 +2722,10 @@ async function putUser(req, res) {
  * @description Updates the user.
  * NOTE: System-wide admin only. Non admin can only edit themselves.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with updated user
+ * @return {object} Response object with updated user
  */
 async function patchUser(req, res) {
   // Define options
@@ -2806,10 +2809,10 @@ async function patchUser(req, res) {
  * @description Deletes a user.
  * NOTE: This function is system-admin ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with deleted username
+ * @return {object} Response object with deleted username
  */
 async function deleteUser(req, res) {
   // Define options
@@ -2874,10 +2877,10 @@ async function deleteUser(req, res) {
  *
  * @description Returns the public information of the currently logged in user.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with user's public data
+ * @return {object} Response object with user's public data
  */
 async function whoami(req, res) {
   // Define options
@@ -2929,10 +2932,10 @@ async function whoami(req, res) {
  *
  * @description Does a text based search on users and returns any matches.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with found users
+ * @return {object} Response object with found users
  */
 async function searchUsers(req, res) {
   // Define options and query
@@ -3018,10 +3021,10 @@ async function searchUsers(req, res) {
  *
  * @description Updates a users password.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with updated user public data.
+ * @return {object} Response object with updated user public data.
  */
 async function patchPassword(req, res) {
   // Define options
@@ -3107,10 +3110,10 @@ async function patchPassword(req, res) {
  *
  * @description Gets all elements or get specified elements.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with elements' public data
+ * @return {object} Response object with elements' public data
  */
 async function getElements(req, res) {
   // Define options and ids
@@ -3268,10 +3271,10 @@ async function getElements(req, res) {
  *
  * @description Creates specified elements.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created elements
+ * @return {object} Response object with created elements
  */
 async function postElements(req, res) {
   // Define options
@@ -3356,10 +3359,10 @@ async function postElements(req, res) {
  * @description Creates/replaces specified elements. NOTE: this route is
  * reserved for system-wide admins ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created/replaced elements
+ * @return {object} Response object with created/replaced elements
  */
 async function putElements(req, res) {
   // Define options
@@ -3442,10 +3445,10 @@ async function putElements(req, res) {
  *
  * @description Updates specified elements.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with updated elements
+ * @return {object} Response object with updated elements
  */
 async function patchElements(req, res) {
   // Define options
@@ -3529,9 +3532,9 @@ async function patchElements(req, res) {
  * @description Deletes multiple elements from an array of element IDs or array
  * of element objects.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @return {Object} Response object with element ids.
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ * @return {object} Response object with element ids.
  */
 async function deleteElements(req, res) {
   // Define options
@@ -3591,10 +3594,10 @@ async function deleteElements(req, res) {
  *
  * @description Does a text based search on elements and returns any matches.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with elements
+ * @return {object} Response object with elements
  */
 async function searchElements(req, res) {
   // Define options and query
@@ -3697,10 +3700,10 @@ async function searchElements(req, res) {
  *
  * @description Gets an element.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with element's public data
+ * @return {object} Response object with element's public data
  */
 async function getElement(req, res) {
   // Define options
@@ -3783,10 +3786,10 @@ async function getElement(req, res) {
  *
  * @description Creates an element.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created element
+ * @return {object} Response object with created element
  */
 async function postElement(req, res) {
   // Define options
@@ -3871,10 +3874,10 @@ async function postElement(req, res) {
  * @description Creates or replaces an element. NOTE: this route is reserved
  * for system-wide admins ONLY.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created/replaced element
+ * @return {object} Response object with created/replaced element
  */
 async function putElement(req, res) {
   // Define options
@@ -3958,10 +3961,10 @@ async function putElement(req, res) {
  *
  * @description Updates the specified element.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with updated element
+ * @return {object} Response object with updated element
  */
 async function patchElement(req, res) {
   // Define options
@@ -4045,10 +4048,10 @@ async function patchElement(req, res) {
  *
  * @description Deletes an element.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with deleted element id.
+ * @return {object} Response object with deleted element id.
  */
 async function deleteElement(req, res) {
   // Define options
@@ -4115,10 +4118,10 @@ async function deleteElement(req, res) {
  *
  * @description Gets all branches or get specified branches.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with branches' public data
+ * @return {object} Response object with branches' public data
  */
 async function getBranches(req, res) {
   // Define options and ids
@@ -4227,10 +4230,10 @@ async function getBranches(req, res) {
  *
  * @description This function creates multiple branches.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with created branches.
+ * @return {object} Response object with created branches.
  */
 async function postBranches(req, res) {
   // Define options
@@ -4313,10 +4316,10 @@ async function postBranches(req, res) {
  *
  * @description Updates specified branches.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with updated branches
+ * @return {object} Response object with updated branches
  */
 async function patchBranches(req, res) {
   // Define options
@@ -4400,10 +4403,10 @@ async function patchBranches(req, res) {
  * @description Deletes multiple branches from an array of branch IDs or
  * array of branch objects.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with deleted branch IDs.
+ * @return {object} Response object with deleted branch IDs.
  */
 async function deleteBranches(req, res) {
   // Define options
@@ -4467,10 +4470,10 @@ async function deleteBranches(req, res) {
  *
  * @description Gets a branch by its branch ID.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with branch's public data
+ * @return {object} Response object with branch's public data
  */
 async function getBranch(req, res) {
   // Define options
@@ -4546,10 +4549,10 @@ async function getBranch(req, res) {
  *
  * @description Creates a branch.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with created branch
+ * @return {object} Response object with created branch
  */
 async function postBranch(req, res) {
   // Define options
@@ -4633,10 +4636,10 @@ async function postBranch(req, res) {
  *
  * @description Updates the specified branch.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response object with updated branch
+ * @return {object} Response object with updated branch
  */
 async function patchBranch(req, res) {
   // Define options
@@ -4721,10 +4724,10 @@ async function patchBranch(req, res) {
  * @description Takes an orgid, projectid, and branchid in the URI and
  * deletes a branch.
  *
- * @param {Object} req - request express object
- * @param {Object} res - response express object
+ * @param {object} req - request express object
+ * @param {object} res - response express object
  *
- * @return {Object} Response object with deleted branch ID.
+ * @return {object} Response object with deleted branch ID.
  */
 async function deleteBranch(req, res) {
   // Define options
@@ -4791,10 +4794,10 @@ async function deleteBranch(req, res) {
  * @description Returns an error message if a user tries to access an invalid
  * api route.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  *
- * @return {Object} Response error message
+ * @return {object} Response error message
  */
 function invalidRoute(req, res) {
   const json = 'Invalid Route or Method.';

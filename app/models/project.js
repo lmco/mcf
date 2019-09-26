@@ -71,7 +71,7 @@ const utils = M.require('lib.utils');
  * @property {string} _id - The project's non-unique id.
  * @property {string} org - A reference to the project's organization.
  * @property {string} name - The project's non-unique project name.
- * @property {Object} permissions - An object whose keys identify a
+ * @property {object} permissions - An object whose keys identify a
  * projects's roles. The keys are the users username, and values are arrays of
  * given permissions.
  * @property {string} visibility - The visibility level of a project defining

@@ -63,7 +63,7 @@ function createUser(user) {
  *
  * @params {User} user - The user object to check permission for.
  *
- * @returns {boolean} allows users to read other user objects by default.
+ * @returns {boolean} Allows users to read other user objects by default.
  */
 function readUser(user) {
   return true;
@@ -76,7 +76,7 @@ function readUser(user) {
  * @params {User} user - The user object to check permission for.
  * @params {User} userToUpdate - The user object to updated.
  *
- * @throws {PermissionError}
+ * @throws {PermissionError} - A custom MBEE error.
  */
 function updateUser(user, userToUpdate) {
   try {

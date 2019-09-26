@@ -55,10 +55,10 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @property {string} _id - The organization's unique ID.
  * @property {string} name - The organization's name.
- * @property {Object} permissions - An object whose keys identify an
+ * @property {object} permissions - An object whose keys identify an
  * organization's roles. The keys are usernames and the values are arrays
  * containing the users permissions.
- * @property {Object} custom - JSON used to store additional data.
+ * @property {object} custom - JSON used to store additional data.
  *
  */
 const OrganizationSchema = new db.Schema({
