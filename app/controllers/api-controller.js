@@ -17,6 +17,7 @@
  * couples with the app/api-routes.js file.
  */
 /* eslint-disable jsdoc/match-description */
+// Disabling this rule due to the use of headers for api endpoints
 
 
 // Node.js Modules
