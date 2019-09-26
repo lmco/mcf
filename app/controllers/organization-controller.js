@@ -512,7 +512,7 @@ async function update(requestingUser, orgs, options) {
     // Find users if updating permissions
     if (updatingPermissions) {
       try {
-        foundUsers = await User.find({}).find();
+        foundUsers = await User.find({});
       }
       catch (error) {
         throw new M.DatabaseError(error.message, 'warn');

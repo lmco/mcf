@@ -161,11 +161,6 @@ async function find(requestingUser, organizationID, projects, options) {
       });
     }
 
-    // If not system admin, add permissions check
-    // TODO: Consider updating logic to use permissions library.
-    if (!reqUser.admin) {
-      searchQuery[`permissions.${reqUser._id}`] = 'read';
-    }
     // If the includeArchived field is true, remove archived from the query; return everything
     if (validatedOptions.includeArchived) {
       delete searchQuery.archived;
@@ -173,9 +168,6 @@ async function find(requestingUser, organizationID, projects, options) {
     // If the archived field is true, query only for archived elements
     if (validatedOptions.archived) {
       searchQuery.archived = true;
-    }
-    if (orgID !== null) {
-      searchQuery.org = orgID;
     }
 
     // Check the type of the projects parameter
@@ -193,23 +185,50 @@ async function find(requestingUser, organizationID, projects, options) {
     }
 
     // If the user specifies an organization
-    if (organizationID !== null) {
+    let foundOrg;
+    if (orgID !== null) {
       // Find the organization, validate that it exists and is not archived (unless specified)
-      const foundOrg = await helper.findAndValidate(Organization, orgID,
+      foundOrg = await helper.findAndValidate(Organization, orgID,
         ((options && options.archived) || validatedOptions.includeArchived));
-      // Permissions check
-      permissions.readOrg(reqUser, foundOrg);
+
+      // Find all projects on the provided org, parse after
+      searchQuery.org = orgID;
+    }
+    // If orgID is null, find all projects the user has access to
+    else {
+      searchQuery[`permissions.${reqUser._id}`] = 'read';
     }
 
     // Find the projects
-    // TODO: Consider updating logic to use permissions library.
-    return await Project.find(searchQuery, validatedOptions.fieldsString,
+    let foundProjects = await Project.find(searchQuery,
+      validatedOptions.fieldsString,
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
         sort: validatedOptions.sort,
         populate: validatedOptions.populateString,
         lean: validatedOptions.lean
       });
+
+    // console.log(foundProjects)
+
+    // If searching specific projects, remove projects not in that list
+    if (saniProjects) {
+      // Searched for single project
+      if (typeof saniProjects === 'string') {
+        foundProjects = foundProjects.filter(p => p._id === searchQuery._id);
+      }
+      // Searched for multiple projects
+      else {
+        foundProjects = foundProjects.filter(p => searchQuery._id.$in.includes(p._id));
+      }
+    }
+
+    // Run permissions checks on each of the remaining projects
+    foundProjects.forEach((proj) => {
+      permissions.readProject(reqUser, foundOrg, proj);
+    });
+
+    return foundProjects;
   }
   catch (error) {
     throw errors.captureError(error);
