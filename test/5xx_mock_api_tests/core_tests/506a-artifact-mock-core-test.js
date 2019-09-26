@@ -92,7 +92,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST an artifact blob', postBlob);
   it('should GET an artifact blob', getBlob);
   // it('should GET an artifact blob', getBlobById);
-  // it('should DELETE an artifact', deleteBlob);
+  it('should DELETE an artifact', deleteBlob);
   // it('should PATCH an artifact', patchArtifact);
   // it('should DELETE an artifact', deleteArtifact);
 });
@@ -482,14 +482,17 @@ async function postBlob() {
 async function deleteBlob() {
   const artData = testData.artifacts[0];
   // Create request object
-  const body = {};
+  const body = {
+    location: artData.location,
+    filename: artData.filename
+  };
 
   const params = {
     orgid: org.id,
     projectid: projID,
     branchid: branchID,
-    artifactid: artData.id
   };
+
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -518,5 +521,5 @@ async function deleteBlob() {
     // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
   // GETs an artifact
-  await apiController.getArtifact(req, res);
+  await apiController.deleteBlob(req, res);
 }

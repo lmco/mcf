@@ -5168,12 +5168,12 @@ async function getBlob(req, res) {
 
   try {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, req.params.artifactid);
+      req.params.projectid, req.params.branchid, req.body);
 
-    res.header('Content-Disposition', `attachment; filename='${artifact.filename}'`);
+    res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
 
     // Return 200: OK and public artifact data
-    return returnResponse(req, res, artifactBlob, 200, `${artifact.contentType}`);
+    return returnResponse(req, res, artifactBlob, 200, 'application/octet-stream');
   }
   catch (error) {
     console.log(error)
@@ -5351,15 +5351,8 @@ async function getBlobById(req, res) {
       );
     }
 
-    const publicArtifactData = sani.html(
-      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
-    );
-
-    // Format JSON
-    const json = formatJSON(publicArtifactData[0], minified);
-
     // Return 200: OK and public artifact data
-    return returnResponse(req, res, json, 200);
+    return returnResponse(req, res, artifact, 200);
   }
   catch (error) {
     // If an error was thrown, return it and its status

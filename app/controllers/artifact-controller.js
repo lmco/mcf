@@ -743,7 +743,7 @@ async function getBlob(requestingUser, organizationID,
     let options; // TODO: Remove
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID, branch);
-    helper.checkParamsDataType(['object', 'string'], artifact, 'Artifacts');
+    helper.checkParamsDataType(['object', 'string'], [artifact], 'Artifacts');
 
     console.log(artifact)
     // Sanitize input parameters
@@ -784,6 +784,8 @@ async function getBlob(requestingUser, organizationID,
     await helper.findAndValidate(Branch, utils.createID(
       orgID, projID, branchID
     ), reqUser, validatedOptions.archived);
+
+    saniArt.project = projID;
 
     // Include artifact blob in return obj
     return ArtifactModule.getBlob(saniArt);

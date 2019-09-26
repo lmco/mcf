@@ -248,18 +248,18 @@ function createDirectory(pathString) {
  * across the artifact strategy.
  */
 function createBlobPath(artMetadata) {
-  // Get root artifact path
+    // Get root artifact path
+    const artRootPath = path.join(M.root, M.config.artifact.path);
+    // Get project id
+    const projID = utils.parseID(artMetadata.project).pop();
 
-  const artRootPath = path.join(M.root, M.config.artifact.path);
-  // Get project id
-  const projID = utils.parseID(artMetadata.project).pop();
+    // Form the blob name, location concat with filename
+    const concatenName = artMetadata.location.replace(/\//g, '.') + artMetadata.filename;
 
-  // Form the blob name, location concat with filename
-  const concatenName = artMetadata.location.replace(/\//g, '.') + artMetadata.filename;
+    // Form complete path
+    const blobPath = path.join(artRootPath, projID, concatenName);
 
-  // Form complete path
-  const blobPath = path.join(artRootPath, projID, concatenName);
+    // Return the path
+    return blobPath;
 
-  // Return the path
-  return blobPath;
 }
