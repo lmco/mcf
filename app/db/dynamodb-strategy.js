@@ -77,7 +77,7 @@ class Schema {
         case 'Number': this.definition[key].type = 'N'; break;
         case 'Object': this.definition[key].type = 'M'; break;
         case 'Date': this.definition[key].type = 'N'; break;
-        case 'Boolean': this.definition[key].type = 'N'; break;
+        case 'Boolean': this.definition[key].type = 'BOOL'; break;
         default: this.definition[key].type = 'S'; break;
       }
     });
@@ -208,6 +208,7 @@ class Model {
     this.schema = schema.schema;
     this.definition = schema.definition;
     this.TableName = collection;
+    this.modelName = name;
   }
 
   /**
@@ -421,7 +422,33 @@ class Model {
    * least contain an _id, as well as the methods defined in the schema.
    */
   createDocument(doc) {
-    // return super.createDocument(doc);
+    const def = this.definition;
+    const table = this.TableName;
+    const conn = this.connection;
+    const model = this;
+    doc.save = async function() {
+      return new Promise((resolve, reject) => {
+        const putObj = {
+          TableName: table,
+          Item: {}
+        };
+
+        Object.keys(doc).forEach((key) => {
+          if (def[key]) {
+            putObj.Item[key] = {};
+            putObj.Item[key][def[key].type] = doc[key];
+          }
+        });
+
+        // Save the document
+        conn.putItem(putObj).promise()
+        .then(() => model.findOne({ _id: doc._id }))
+        .then((foundDoc) => resolve(foundDoc))
+        .catch((error) => reject(error));
+      });
+    };
+
+    return doc;
   }
 
   /**
@@ -734,6 +761,34 @@ class Model {
   }
 
   /**
+   * @description Creates or replaces a single item in the specified table in
+   * the DynamoDB database.
+   */
+  async putItem(doc, options) {
+    return new Promise((resolve, reject) => {
+      const putObj = {
+        TableName: this.TableName,
+        ReturnValues: 'ALL_NEW',
+        Item: {}
+      };
+
+      Object.keys(doc).forEach((key) => {
+        if (this.definition[key]) {
+          putObj.Item[key] = {};
+          putObj.Item[key][this.definition[key].type] = doc[key];
+        }
+      });
+
+      // Save the document
+      this.connection.putItem(putObj).promise()
+      .then((createdObj) => {
+        console.log(createdObj);
+      })
+      .catch((error) => reject(error));
+    });
+  }
+
+  /**
    * @description Scans and returns every document in the specified table.
    * @async
    *
@@ -841,6 +896,58 @@ class Model {
    */
   async updateOne(filter, doc, options, cb) {
     return this.updateItem(filter, doc, options);
+  }
+
+  validateDocument(doc) {
+    const keys = Object.keys(doc);
+    // Loop over each valid parameter
+    Object.keys(this.definition).forEach((param) => {
+      // Parameter was defined on the document
+      if (keys.includes(param)) {
+        // Validate type
+        let shouldBeType;
+        switch(param.type) {
+          case 'S':
+            shouldBeType = 'string'; break;
+          case 'N':
+            shouldBeType = 'number'; break;
+          case 'M':
+            shouldBeType = 'object'; break;
+          case 'BOOL':
+            shouldBeType = 'boolean'; break;
+          default:
+            throw new M.DataFormatError(`Invalid DynamoDB type: ${param.type}`)
+        }
+
+        // If not the correct type, throw an error
+        if (typeof doc[param] !== shouldBeType) {
+          throw new M.DataFormatError(`The ${this.modelName} parameter `
+            + `[${param}] is not a ${shouldBeType}.`)
+        }
+
+        // Run validators
+        if (this.definition[param].validate) {
+          this.definition[param].validate.forEach((v) => {
+            if (!v.validator(doc[param])) {
+              throw new M.DataFormatError(v.message);
+            }
+          })
+        }
+      }
+      // If the parameter was not defined on the document
+      else {
+        // If the parameter is required and no default is provided, throw an error
+        if (this.definition[param].required && !this.definition[param].default) {
+          throw new M.DataFormatError(`The ${this.modelName} property ${param}`
+            + ' is required.');
+        }
+
+        // If a default exists
+        if (this.definition[param].default) {
+          doc[param] = this.definition[param].default;
+        }
+      }
+    });
   }
 
 }
