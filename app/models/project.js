@@ -120,12 +120,12 @@ const ProjectSchema = new db.Schema({
     ref: 'Organization',
     index: true,
     required: true,
-    validate: {
+    validate: [{
       validator: function(v) {
         return RegExp(validators.org.id).test(v);
       },
       message: props => `${props.value} is not a valid org ID.`
-    }
+    }]
   },
   name: {
     type: 'String',
@@ -134,7 +134,7 @@ const ProjectSchema = new db.Schema({
   permissions: {
     type: 'Object',
     default: {},
-    validate: {
+    validate: [{
       validator: function(v) {
         let bool = true;
         // If the permissions object is not a JSON object, reject
@@ -152,7 +152,7 @@ const ProjectSchema = new db.Schema({
         return bool;
       },
       message: props => 'The project permissions object is not properly formatted.'
-    }
+    }]
   },
   visibility: {
     type: 'String',
