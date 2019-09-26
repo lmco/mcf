@@ -433,6 +433,10 @@ class Model {
     const conn = this.connection;
     const modelName = this.modelName;
     const model = this;
+
+    /**
+     *
+     */
     doc.__proto__.validate = function() {
       const keys = Object.keys(doc);
       // Loop over each valid parameter
@@ -461,7 +465,7 @@ class Model {
           }
 
           // Run validators
-          if (def[param].validate) {
+          if (def[param].hasOwnProperty('validate')) {
             def[param].validate.forEach((v) => {
               if (!v.validator(doc[param])) {
                 throw new M.DataFormatError(v.message);
@@ -484,6 +488,11 @@ class Model {
         }
       });
     };
+
+    /**
+     *
+     * @return {Promise<*|Promise<unknown>>}
+     */
     doc.__proto__.save = async function() {
       return new Promise((resolve, reject) => {
         // Ensure the document is valid
@@ -501,11 +510,19 @@ class Model {
           }
         });
 
+
+        console.log(putObj)
         // Save the document
         conn.putItem(putObj).promise()
-        .then(() => model.findOne({ _id: doc._id }))
+        .then(() => {
+          console.log('Did I make it here?');
+          return model.findOne({ _id: doc._id })
+        })
         .then((foundDoc) => resolve(foundDoc))
-        .catch((error) => reject(error));
+        .catch((error) => {
+          console.log(error);
+          reject(error)
+        });
       });
     };
     doc.__proto__.markModified = function(field) {};
