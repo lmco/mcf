@@ -46,8 +46,8 @@ const ldapConfig = M.config.auth.ldap;
  * Implement authentication via LDAP using username/password and
  * configuration in config file.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  * @param {string} username - Username to authenticate via LDAP AD
  * @param {string} password - Password to authenticate via LDAP AD
  *
@@ -85,8 +85,8 @@ async function handleBasicAuth(req, res, username, password) {
  * @description This function implements handleTokenAuth() in lib/auth.js.
  * Authenticates user with passed in token.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  * @param {string} token - User authentication token, encrypted
  *
  * @returns {Promise} Local user object
@@ -148,9 +148,9 @@ async function handleTokenAuth(req, res, token) {
  * This function generates the session token for user login.
  * Upon successful login, generate token and set to session
  *
- * @param {Object} req - Request express object
- * @param {Object} res - response express object
- * @param {function} next - Callback to express authentication
+ * @param {object} req - Request express object
+ * @param {object} res - response express object
+ * @param {Function} next - Callback to express authentication
  */
 function doLogin(req, res, next) {
   // Compute token expiration time
@@ -245,7 +245,7 @@ function ldapConnect() {
 /**
  * @description Searches for and resolve a user from LDAP server.
  *
- * @param {Object} ldapClient - LDAP client
+ * @param {object} ldapClient - LDAP client
  * @param {string} username - Username to find LDAP user
  *
  * @returns {Promise} LDAP user information
@@ -329,8 +329,8 @@ function ldapSearch(ldapClient, username) {
 /**
  * @description Validates a users password with LDAP server
  *
- * @param {Object} ldapClient - LDAP client
- * @param {Object} user - LDAP user
+ * @param {object} ldapClient - LDAP client
+ * @param {object} user - LDAP user
  * @param {string} password - Password to verify LDAP user
  *
  * @returns {Promise} Authenticated user's information
@@ -359,7 +359,7 @@ function ldapAuth(ldapClient, user, password) {
 /**
  * @description Synchronizes authenticated user's LDAP information with database.
  *
- * @param {Object} ldapUserObj - LDAP user information
+ * @param {object} ldapUserObj - LDAP user information
  *
  * @returns {Promise} Synchronized user model object
  */

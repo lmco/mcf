@@ -67,7 +67,7 @@ const extensions = M.require('models.plugin.extensions');
  * @property {boolean} admin - Indicates if the user is a global admin.
  * @property {string} provider - Defines the authentication provider for the
  * user.
- * @property {Object} failedLogins - Stores the history of failed login
+ * @property {object} failedLogins - Stores the history of failed login
  * attempts.
  *
  */

@@ -44,7 +44,7 @@ module.exports.encrypt = function encrypt(data) {
  *
  * @param {string} data - Data to be decrypted
  *
- * @return {Object} Decrypted data
+ * @return {object} Decrypted data
  */
 module.exports.decrypt = function decrypt(data) {
   if (data === undefined || data.toString() === '') {
@@ -91,7 +91,7 @@ module.exports.generateToken = function generateToken(data) {
  *
  * @param {string} token - Token to inspect
  *
- * @return {Object} Decrypted token
+ * @return {object} Decrypted token
  */
 module.exports.inspectToken = function inspectToken(token) {
   // Decrypt input and return parsed data

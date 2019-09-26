@@ -842,14 +842,14 @@
     /// JSDOC
     ////////////////////////////////////////////////////////////////////////////
     "jsdoc/check-alignment": "error", // Recommended
-    /*"jsdoc/check-examples": "off",
-    "jsdoc/check-indentation": "error",
+    "jsdoc/check-examples": "off",
+    //"jsdoc/check-indentation": "error",
     "jsdoc/check-param-names": "error", // Recommended
     "jsdoc/check-syntax": "error",
     "jsdoc/check-tag-names": "off", //TODO: reevaluate
     "jsdoc/check-types": "error", // Recommended
     "jsdoc/implements-on-classes": "warn", // Recommended
-    "jsdoc/match-description": ["error", {"tags": {
+    /*"jsdoc/match-description": ["error", {"tags": {
       "param": true,
       "property": true,
       "returns": true

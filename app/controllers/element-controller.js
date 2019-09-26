@@ -65,7 +65,7 @@ const permissions = M.require('lib.permissions');
  * @param {(string|string[])} [elements] - The elements to find. Can either be
  * an array of element ids, a single element id, or not provided, which defaults
  * to every element in a project being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -335,7 +335,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to add elements to.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
  * @param {string} elements.id - The ID of the element being created.
  * @param {string} [elements.name] - The name of the element.
@@ -343,22 +343,22 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * @param {object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -672,7 +672,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to update elements on.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
  * @param {string} elements.id - The ID of the element being updated. Field
  * cannot be updated but is required to find element.
@@ -680,24 +680,24 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
  * update element parents in bulk.
  * @param {string} [elements.source] - The ID of the source element.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - The new custom data object. Please note,
+ * @param {object} [elements.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
  * @param {boolean} [elements.archived = false] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -1038,7 +1038,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to add elements to.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create/replace.
  * @param {string} elements.id - The ID of the element being created/replaced.
  * @param {string} [elements.name] - The name of the element.
@@ -1046,22 +1046,22 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * @param {object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -1301,7 +1301,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {string} branchID - The ID of the branch to remove elements from.
  * @param {(string|string[])} elements - The elements to remove. Can either be
  * an array of element ids or a single element id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
  * @return {Promise} Array of deleted element ids
@@ -1565,7 +1565,7 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
- * @param {Object} element - The element whose parent is being checked. The
+ * @param {object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *
  * @return {Promise} Resolved promise to verify element parent.
@@ -1648,7 +1648,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string} query - The text-based query to search the database for.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include

@@ -19,9 +19,9 @@
 /**
  * @description Log the route and method requested by a user.
  *
- * @param {Object} req - Request object from express
- * @param {Object} res - Response object from express
- * @param {function} next - Callback to express authentication flow.
+ * @param {object} req - Request object from express
+ * @param {object} res - Response object from express
+ * @param {Function} next - Callback to express authentication flow.
  */
 module.exports.logRoute = function logRoute(req, res, next) {
   // Set username to anonymous if req.user is not defined
@@ -34,9 +34,9 @@ module.exports.logRoute = function logRoute(req, res, next) {
 /**
  * @description Log the IP address where the request originated from
  *
- * @param {Object} req - Request object from express
- * @param {Object} res - Response object from express
- * @param {function} next - Callback to express authentication flow.
+ * @param {object} req - Request object from express
+ * @param {object} res - Response object from express
+ * @param {Function} next - Callback to express authentication flow.
  */
 module.exports.logIP = function logIP(req, res, next) {
   let ip = req.ip;
@@ -57,9 +57,9 @@ module.exports.logIP = function logIP(req, res, next) {
  * @description Disables specific user api methods using the configuration
  * server.api.userAPI
  *
- * @param {Object} req - Request object from express
- * @param {Object} res - Response object from express
- * @param {function} next - Callback to express authentication flow.
+ * @param {object} req - Request object from express
+ * @param {object} res - Response object from express
+ * @param {Function} next - Callback to express authentication flow.
  */
 // eslint-disable-next-line consistent-return
 module.exports.disableUserAPI = function disableUserAPI(req, res, next) {
@@ -78,9 +78,9 @@ module.exports.disableUserAPI = function disableUserAPI(req, res, next) {
 /**
  * @description Disables the user patchPassword API endpoint
  *
- * @param {Object} req - Request object from express
- * @param {Object} res - Response object from express
- * @param {function} next - Callback to express authentication flow.
+ * @param {object} req - Request object from express
+ * @param {object} res - Response object from express
+ * @param {Function} next - Callback to express authentication flow.
  */
 // eslint-disable-next-line consistent-return
 module.exports.disableUserPatchPassword = function disableUserPatchPassword(req, res, next) {

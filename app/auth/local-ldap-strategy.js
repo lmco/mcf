@@ -35,8 +35,8 @@ const User = M.require('models.user');
  * the case of a basic auth header or for login form input. Either way
  * the username and password is provided to this function for auth.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  * @param {string} username - Username authenticate via locally or LDAP AD
  * @param {string} password - Password to authenticate via locally or LDAP AD
  *
@@ -74,8 +74,8 @@ async function handleBasicAuth(req, res, username, password) {
  * passed in a session token or bearer token. This particular instance just implements the same
  * tokenAuth provided by the Local Strategy.
  *
- * @param {Object} req - Request object from express
- * @param {Object} res - Response object from express
+ * @param {object} req - Request object from express
+ * @param {object} res - Response object from express
  * @param {string} _token -  Token user is attempting to authenticate with.
  *
  * @returns {Promise} Token authenticated user object
@@ -99,9 +99,9 @@ async function handleTokenAuth(req, res, _token) {
  * application so that users can be authorized via token after logging in. This particular
  * implementation uses the Local Strategy doLogin function.
  *
- * @param {Object} req - Request object from express
- * @param {Object} res - Response object from express
- * @param {function} next - Callback to express authentication flow
+ * @param {object} req - Request object from express
+ * @param {object} res - Response object from express
+ * @param {Function} next - Callback to express authentication flow
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);

@@ -75,7 +75,7 @@ const DatabaseError = class DatabaseError extends CustomError {};
 /**
  * @description Returns an HTTP status code depending on what error is passed in.
  *
- * @param {Object} error - The error to parse and return a status code for.
+ * @param {object} error - The error to parse and return a status code for.
  *
  * @return {number} An HTTP status code.
  */

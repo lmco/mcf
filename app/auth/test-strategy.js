@@ -39,8 +39,8 @@ const utils = M.require('lib.utils');
  *
  * Note: Uses username/password and configuration in config file.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  * @param {string} username - Username to authenticate
  * @param {string} password - Password to authenticate
  *
@@ -79,8 +79,8 @@ function handleBasicAuth(req, res, username, password) {
  * @description This function implements handleTokenAuth() in lib/auth.js.
  * Authenticates user with passed in token.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
  * @param {string} token - User authentication token, encrypted
  *
  * @returns {Promise} Local user object
@@ -142,9 +142,9 @@ function handleTokenAuth(req, res, token) {
  * This function generates the session token for user login.
  * Upon successful login, generate token and set to session
  *
- * @param {Object} req - Request express object
- * @param {Object} res - response express object
- * @param {function} next - Callback to express authentication
+ * @param {object} req - Request express object
+ * @param {object} res - response express object
+ * @param {Function} next - Callback to express authentication
  */
 function doLogin(req, res, next) {
   // Compute token expiration time
