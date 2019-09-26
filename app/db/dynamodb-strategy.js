@@ -426,6 +426,9 @@ class Model {
     const table = this.TableName;
     const conn = this.connection;
     const model = this;
+    doc.validate = async function() {
+
+    }
     doc.save = async function() {
       return new Promise((resolve, reject) => {
         const putObj = {
@@ -906,7 +909,7 @@ class Model {
       if (keys.includes(param)) {
         // Validate type
         let shouldBeType;
-        switch(param.type) {
+        switch (param.type) {
           case 'S':
             shouldBeType = 'string'; break;
           case 'N':
@@ -916,13 +919,13 @@ class Model {
           case 'BOOL':
             shouldBeType = 'boolean'; break;
           default:
-            throw new M.DataFormatError(`Invalid DynamoDB type: ${param.type}`)
+            throw new M.DataFormatError(`Invalid DynamoDB type: ${param.type}`);
         }
 
         // If not the correct type, throw an error
-        if (typeof doc[param] !== shouldBeType) {
+        if (typeof doc[param] !== shouldBeType) { // eslint-disable-line valid-typeof
           throw new M.DataFormatError(`The ${this.modelName} parameter `
-            + `[${param}] is not a ${shouldBeType}.`)
+            + `[${param}] is not a ${shouldBeType}.`);
         }
 
         // Run validators
@@ -931,7 +934,7 @@ class Model {
             if (!v.validator(doc[param])) {
               throw new M.DataFormatError(v.message);
             }
-          })
+          });
         }
       }
       // If the parameter was not defined on the document
