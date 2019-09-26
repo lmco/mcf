@@ -61,7 +61,7 @@ const permissions = M.require('lib.permissions');
  * @param {(string|string[])} [projects] - The projects to find. Can either be
  * an array of project ids, a single project id, or not provided, which defaults
  * to every project being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -92,7 +92,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for projects with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
  * @return {Promise} Array of found project objects
  *
@@ -161,11 +161,6 @@ async function find(requestingUser, organizationID, projects, options) {
       });
     }
 
-    // If not system admin, add permissions check
-    // TODO: Consider updating logic to use permissions library.
-    if (!reqUser.admin) {
-      searchQuery[`permissions.${reqUser._id}`] = 'read';
-    }
     // If the includeArchived field is true, remove archived from the query; return everything
     if (validatedOptions.includeArchived) {
       delete searchQuery.archived;
@@ -173,9 +168,6 @@ async function find(requestingUser, organizationID, projects, options) {
     // If the archived field is true, query only for archived elements
     if (validatedOptions.archived) {
       searchQuery.archived = true;
-    }
-    if (orgID !== null) {
-      searchQuery.org = orgID;
     }
 
     // Check the type of the projects parameter
@@ -193,23 +185,61 @@ async function find(requestingUser, organizationID, projects, options) {
     }
 
     // If the user specifies an organization
-    if (organizationID !== null) {
+    let foundOrg;
+    if (orgID !== null) {
       // Find the organization, validate that it exists and is not archived (unless specified)
-      const foundOrg = await helper.findAndValidate(Organization, orgID,
+      foundOrg = await helper.findAndValidate(Organization, orgID,
         ((options && options.archived) || validatedOptions.includeArchived));
-      // Permissions check
-      permissions.readOrg(reqUser, foundOrg);
+
+      // Find all projects on the provided org, parse after
+      searchQuery.org = orgID;
+    }
+    // If orgID is null, find all projects the user has access to
+    else {
+      // Find all orgs the user has read access on
+      const orgQuery = {};
+      orgQuery[`permissions.${reqUser._id}`] = 'read';
+      const readOrgs = await Organization.find(orgQuery);
+
+      const orgIDs = readOrgs.map(o => o._id);
+      // Project must be internal and in an org the user has access to
+      const internalQuery = { $and: [{ visibility: 'internal' }, { org: orgIDs }] };
+      const permissionsQuery = {};
+      permissionsQuery[`permissions.${reqUser._id}`] = 'read';
+
+      // Add $or to search query, saying user must have read access or must be
+      // internal project within an organization the user has read access on
+      searchQuery.$or = [internalQuery, permissionsQuery];
     }
 
     // Find the projects
-    // TODO: Consider updating logic to use permissions library.
-    return await Project.find(searchQuery, validatedOptions.fieldsString,
+    let foundProjects = await Project.find(searchQuery,
+      validatedOptions.fieldsString,
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
         sort: validatedOptions.sort,
         populate: validatedOptions.populateString,
         lean: validatedOptions.lean
       });
+
+    // If searching specific projects, remove projects not in that list
+    if (saniProjects) {
+      // Searched for single project
+      if (typeof saniProjects === 'string') {
+        foundProjects = foundProjects.filter(p => p._id === searchQuery._id);
+      }
+      // Searched for multiple projects
+      else {
+        foundProjects = foundProjects.filter(p => searchQuery._id.$in.includes(p._id));
+      }
+    }
+
+    // Run permissions checks on each of the remaining projects
+    foundProjects.forEach((proj) => {
+      permissions.readProject(reqUser, foundOrg, proj);
+    });
+
+    return foundProjects;
   }
   catch (error) {
     throw errors.captureError(error);
@@ -224,21 +254,21 @@ async function find(requestingUser, organizationID, projects, options) {
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
- * @param {(Object|Object[])} projects - Either an array of objects containing
+ * @param {(object|object[])} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
  * @param {string} projects.id - The ID of the project being created.
  * @param {string} projects.name - The name of the project.
- * @param {Object} [projects.custom] - The additions or changes to existing
+ * @param {object} [projects.custom] - The additions or changes to existing
  * custom data. If the key/value pair already exists, the value will be changed.
  * If the key/value pair does not exist, it will be added.
  * @param {string} [projects.visibility = 'private'] - The visibility of the
  * project being created. If 'internal', users not in the project but in the
  * owning org will be able to view the project.
- * @param {Object} [projects.permissions] - Any preset permissions on the
+ * @param {object} [projects.permissions] - Any preset permissions on the
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -520,21 +550,21 @@ async function create(requestingUser, organizationID, projects, options) {
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
- * @param {(Object|Object[])} projects - Either an array of objects containing
+ * @param {(object|object[])} projects - Either an array of objects containing
  * updates to projects, or a single object containing updates.
  * @param {string} projects.id - The ID of the project being updated. Field
  * cannot be updated but is required to find project.
  * @param {string} [projects.name] - The updated name of the project.
- * @param {Object} [projects.permissions] - An object of key value pairs, where
+ * @param {object} [projects.permissions] - An object of key value pairs, where
  * the key is the username, and the value is the role which the user is to have
  * in the project. To remove a user from a project, the value must be
  * 'remove_all'.
- * @param {Object} [projects.custom] - The new custom data object. Please note,
+ * @param {object} [projects.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
  * @param {boolean} [projects.archived = false] - The updated archived field. If true,
  * the project will not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -884,21 +914,21 @@ async function update(requestingUser, organizationID, projects, options) {
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
- * @param {(Object|Object[])} projects - Either an array of objects containing
+ * @param {(object|object[])} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
  * @param {string} projects.id - The ID of the project being created.
  * @param {string} projects.name - The name of the project.
- * @param {Object} [projects.custom] - The additions or changes to existing
+ * @param {object} [projects.custom] - The additions or changes to existing
  * custom data. If the key/value pair already exists, the value will be changed.
  * If the key/value pair does not exist, it will be added.
  * @param {string} [projects.visibility = 'private'] - The visibility of the
  * project being created. If 'internal', users not in the project but in the
  * owning org will be able to view the project.
- * @param {Object} [projects.permissions] - Any preset permissions on the
+ * @param {object} [projects.permissions] - Any preset permissions on the
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -1096,7 +1126,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
  * @param {string} organizationID - The ID of the owning organization.
  * @param {(string|string[])} projects - The projects to remove. Can either be
  * an array of project ids or a single project id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
  * @return {Promise} Array of deleted project ids.

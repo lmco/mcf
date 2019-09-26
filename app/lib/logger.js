@@ -201,8 +201,8 @@ winston.addColors(colors);
  * @description Log the response to an HTTP request
  *
  * @param {number} responseLength - The length of the response in bytes.
- * @param {Object} req - Request object from express.
- * @param {Object} res - Response object from express.
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
  */
 function logResponse(responseLength, req, res) {
   // Set username to anonymous if req.user is not defined

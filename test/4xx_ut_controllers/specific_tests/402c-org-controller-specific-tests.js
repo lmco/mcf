@@ -113,7 +113,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Validates that the find results can be populated
+ * @description Validates that the find results can be populated.
  */
 async function optionPopulateFind() {
   try {
@@ -145,7 +145,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results
+ * @description Validates that the find results can be include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -191,7 +191,7 @@ async function optionIncludeArchivedFind() {
 }
 
 /**
- * @description Validates that the find results only return specified fields
+ * @description Validates that the find results only return specified fields.
  */
 async function optionFieldsFind() {
   try {
@@ -225,7 +225,7 @@ async function optionFieldsFind() {
 }
 
 /**
- * @description Validates that the number of find results can be limited
+ * @description Validates that the number of find results can be limited.
  */
 async function optionLimitFind() {
   try {
@@ -245,7 +245,7 @@ async function optionLimitFind() {
 }
 
 /**
- * @description Validates that find results can be skipped over
+ * @description Validates that find results can be skipped over.
  */
 async function optionSkipFind() {
   try {
@@ -271,7 +271,7 @@ async function optionSkipFind() {
 }
 
 /**
- * @description Validates that find results can return raw JSON rather than models
+ * @description Validates that find results can return raw JSON rather than models.
  */
 async function optionLeanFind() {
   try {
@@ -296,36 +296,34 @@ async function optionLeanFind() {
 }
 
 /**
- * @description Validates that the returned search results
- * from findOrg can be sorted
+ * @description Validates that the returned search results from findOrg can be sorted.
  */
-function optionSortFind(done) {
-  // Create the test org objects
-  const testOrg0 = {
-    id: 'testorg000',
-    name: 'b'
-  };
-  const testOrg1 = {
-    id: 'testorg001',
-    name: 'c'
-  };
-  const testOrg2 = {
-    id: 'testorg002',
-    name: 'a'
-  };
-  // Create sort options
-  const sortOption = { sort: 'name' };
-  const sortOptionReverse = { sort: '-name' };
+async function optionSortFind() {
+  try {
+    // Create the test org objects
+    const testOrg0 = {
+      id: 'testorg000',
+      name: 'b'
+    };
+    const testOrg1 = {
+      id: 'testorg001',
+      name: 'c'
+    };
+    const testOrg2 = {
+      id: 'testorg002',
+      name: 'a'
+    };
+    // Create sort options
+    const sortOption = { sort: 'name' };
+    const sortOptionReverse = { sort: '-name' };
 
-  // Create the orgs
-  OrgController.create(adminUser, [testOrg0, testOrg1, testOrg2])
-  .then((createdOrgs) => {
+    // Create the orgs
+    const createdOrgs = await OrgController.create(adminUser, [testOrg0, testOrg1, testOrg2]);
     // Expect createdOrgs array to contain 3 orgs
     chai.expect(createdOrgs.length).to.equal(3);
 
-    return OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id], sortOption);
-  })
-  .then((foundOrgs) => {
+    const foundOrgs = await OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
+      sortOption);
     // Expect to find 3 orgs
     chai.expect(foundOrgs.length).to.equal(3);
 
@@ -338,33 +336,30 @@ function optionSortFind(done) {
     chai.expect(foundOrgs[2].id).to.equal('testorg001');
 
     // Find the orgs and return them sorted in reverse
-    return OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
+    const reverseOrgs = await OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
       sortOptionReverse);
-  })
-  .then((foundOrgs) => {
     // Expect to find 3 orgs
     chai.expect(foundOrgs.length).to.equal(3);
 
     // Validate that the sort option is working
-    chai.expect(foundOrgs[0].name).to.equal('c');
-    chai.expect(foundOrgs[0].id).to.equal('testorg001');
-    chai.expect(foundOrgs[1].name).to.equal('b');
-    chai.expect(foundOrgs[1].id).to.equal('testorg000');
-    chai.expect(foundOrgs[2].name).to.equal('a');
-    chai.expect(foundOrgs[2].id).to.equal('testorg002');
-  })
-  .then(() => OrgController.remove(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id]))
-  .then(() => done())
-  .catch((error) => {
+    chai.expect(reverseOrgs[0].name).to.equal('c');
+    chai.expect(reverseOrgs[0].id).to.equal('testorg001');
+    chai.expect(reverseOrgs[1].name).to.equal('b');
+    chai.expect(reverseOrgs[1].id).to.equal('testorg000');
+    chai.expect(reverseOrgs[2].name).to.equal('a');
+    chai.expect(reverseOrgs[2].id).to.equal('testorg002');
+
+    await OrgController.remove(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id]);
+  }
+  catch (error) {
     M.log.error(error.message);
     // Expect no errors
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }
 
 /**
- * @description Validates that orgs with a specific name can be found
+ * @description Validates that orgs with a specific name can be found.
  */
 async function optionNameFind() {
   try {
@@ -389,7 +384,7 @@ async function optionNameFind() {
 }
 
 /**
- * @description Validates that orgs created by a specific user can be found
+ * @description Validates that orgs created by a specific user can be found.
  */
 async function optionCreatedByFind() {
   try {
@@ -412,7 +407,7 @@ async function optionCreatedByFind() {
 }
 
 /**
- * @description Validates that orgs last modified by a specific user can be found
+ * @description Validates that orgs last modified by a specific user can be found.
  */
 async function optionLastModifiedByFind() {
   try {
@@ -435,7 +430,7 @@ async function optionLastModifiedByFind() {
 }
 
 /**
- * @description Validates that only archived orgs will be returned with the archived option
+ * @description Validates that only archived orgs will be returned with the archived option.
  */
 async function optionArchivedFind() {
   try {
@@ -483,7 +478,7 @@ async function optionArchivedFind() {
 }
 
 /**
- * @description Validates that orgs archived by a specific user can be found
+ * @description Validates that orgs archived by a specific user can be found.
  */
 async function optionArchivedByFind() {
   try {
@@ -513,7 +508,7 @@ async function optionArchivedByFind() {
 }
 
 /**
- * @description Validates that orgs with specific custom data can be found
+ * @description Validates that orgs with specific custom data can be found.
  */
 async function optionCustomFind() {
   try {
@@ -537,7 +532,7 @@ async function optionCustomFind() {
 }
 
 /**
- * @description Validates that the return object from create() can be populated
+ * @description Validates that the return object from create() can be populated.
  */
 async function optionPopulateCreate() {
   try {
@@ -576,7 +571,7 @@ async function optionPopulateCreate() {
 }
 
 /**
- * @description Validates that the create results only return specified fields
+ * @description Validates that the create results only return specified fields.
  */
 async function optionFieldsCreate() {
   try {
@@ -617,7 +612,7 @@ async function optionFieldsCreate() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances
+ * @description Validates that the create results return JSON data rather than model instances.
  */
 async function optionLeanCreate() {
   try {
@@ -652,7 +647,7 @@ async function optionLeanCreate() {
 }
 
 /**
- * @description Validates that the return object from update() can be populated
+ * @description Validates that the return object from update() can be populated.
  */
 async function optionPopulateUpdate() {
   try {
@@ -689,7 +684,7 @@ async function optionPopulateUpdate() {
 }
 
 /**
- * @description Validates that the update results only return specified fields
+ * @description Validates that the update results only return specified fields.
  */
 async function optionFieldsUpdate() {
   try {
@@ -727,7 +722,7 @@ async function optionFieldsUpdate() {
 }
 
 /**
- * @description Validates that the update results return JSON data rather than model instances
+ * @description Validates that the update results return JSON data rather than model instances.
  */
 async function optionLeanUpdate() {
   try {
@@ -759,7 +754,7 @@ async function optionLeanUpdate() {
 }
 
 /**
- * @description Validates that the return object from create() can be populated
+ * @description Validates that the return object from create() can be populated.
  */
 async function optionPopulateReplace() {
   try {
@@ -796,7 +791,7 @@ async function optionPopulateReplace() {
 }
 
 /**
- * @description Validates that the create results only return specified fields
+ * @description Validates that the create results only return specified fields.
  */
 async function optionFieldsReplace() {
   try {
@@ -834,7 +829,7 @@ async function optionFieldsReplace() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances
+ * @description Validates that the create results return JSON data rather than model instances.
  */
 async function optionLeanReplace() {
   try {

@@ -42,7 +42,7 @@ const utils = M.require('lib.utils');
  * @property {string} filename - The filename of the artifact.
  * @property {string} contentType - The file type. E.g: 'png', 'dat'
  * @property {string} location - location of the artifact blob.
- * @property {Object} history - An array of object, tracks artifact's history.
+ * @property {object} history - An array of object, tracks artifact's history.
  * @property {string} hash [history.hash] - Hash string of the stored artifact.
  * @property {string} user [history.user] - User that updated the artifact.
  * @property {Date} updatedOn [history.updatedOn] - Time of update.
@@ -160,4 +160,4 @@ ArtifactSchema.static('getValidPopulateFields', function() {
 /* ----------------------( Artifact Schema Export )---------------------- */
 
 // Export model as "Artifact"
-module.exports = new db.Model('Artifact', ArtifactSchema);
+module.exports = new db.Model('Artifact', ArtifactSchema, 'artifacts');

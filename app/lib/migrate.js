@@ -25,7 +25,7 @@ const Artifact = M.require('models.artifact');
 const Branch = M.require('models.branch');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
-const Project = M.require('models.user');
+const Project = M.require('models.project');
 const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 
@@ -46,13 +46,13 @@ module.exports.migrate = function(args) {
 
     // Prompt the user for input
     prompt(args)
-    .then(() => Artifact.findOne({})) // Ensure artifact model is created
-    .then(() => Branch.findOne({})) // Ensure branch model is created
-    .then(() => Element.findOne({})) // Ensure element model is created
-    .then(() => Organization.findOne({})) // Ensure org model is created
-    .then(() => Project.findOne({})) // Ensure project model is created
-    .then(() => ServerData.findOne({})) // Ensure server data model is created
-    .then(() => User.findOne({})) // Ensure user model is created
+    .then(() => Artifact.init()) // Ensure artifact model is created
+    .then(() => Branch.init()) // Ensure branch model is created
+    .then(() => Element.init()) // Ensure element model is created
+    .then(() => Organization.init()) // Ensure org model is created
+    .then(() => Project.init()) // Ensure project model is created
+    .then(() => ServerData.init()) // Ensure server data model is created
+    .then(() => User.init()) // Ensure user model is created
     // Get the server data documents
     .then(() => ServerData.find({}, null, { lean: true }))
     .then((serverData) => {
@@ -157,7 +157,7 @@ module.exports.migrate = function(args) {
 /**
  * @description Prompts the user for approval to migrate the database
  *
- * @param {string[]} args - Array of command line arguments
+ * @param {string[]} args - Array of command line arguments.
  */
 function prompt(args) {
   return new Promise((resolve) => {
@@ -283,7 +283,7 @@ function sortVersions(versions, order) {
  *
  * @param {string} from - The current version migrating from.
  * @param {string[]} migrations - The list of migrations to run.
- * @param {number} move - Either 1 (migrate up) or -1 (migrate down)
+ * @param {number} move - Either 1 (migrate up) or -1 (migrate down).
  *
  * @return {Promise} Resolved promise.
  */

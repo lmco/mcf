@@ -42,38 +42,34 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Create admin user.
    */
-  before((done) => {
-    // Open the database connection
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((_adminUser) => {
-      // Set global admin user
-      adminUser = _adminUser;
-      done();
-    })
-    .catch((error) => {
+  before(async () => {
+    try {
+      // Open the database connection
+      await db.connect();
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user.
    */
-  after((done) => {
-    // Delete test admin
-    testUtils.removeTestAdmin()
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      // Delete test admin
+      await testUtils.removeTestAdmin();
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute the tests */
@@ -93,6 +89,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies POST /api/orgs/:orgid creates an organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postOrg(done) {
   const orgData = testData.orgs[0];
@@ -131,6 +129,8 @@ function postOrg(done) {
 
 /**
  * @description Verifies POST /api/orgs creates multiple organizations.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postOrgs(done) {
   const orgData = [
@@ -182,6 +182,8 @@ function postOrgs(done) {
 
 /**
  * @description Verifies PUT /api/org/:orgid creates/replaces an organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putOrg(done) {
   const orgData = testData.orgs[0];
@@ -220,6 +222,8 @@ function putOrg(done) {
 
 /**
  * @description Verifies PUT /api/orgs creates/replaces multiple organizations.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putOrgs(done) {
   const orgData = [
@@ -273,6 +277,8 @@ function putOrgs(done) {
 /**
  * @description Verifies GET /api/orgs/:orgid finds and returns the previously
  * created organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getOrg(done) {
   request({
@@ -309,6 +315,8 @@ function getOrg(done) {
 /**
  * @description Verifies GET /api/orgs returns the two organizations to which
  * the user belongs.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getOrgs(done) {
   const orgData = [
@@ -363,6 +371,8 @@ function getOrgs(done) {
 /**
  * @description Verifies GET /api/orgs returns all organizations
  * the user belongs to.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllOrgs(done) {
   const orgData = [
@@ -426,6 +436,8 @@ function getAllOrgs(done) {
 /**
  * @description Verifies PATCH /api/orgs/:orgid updates the provided org fields
  * on an existing organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchOrg(done) {
   request({
@@ -464,6 +476,8 @@ function patchOrg(done) {
 
 /**
  * @description Verifies PATCH /api/orgs updates multiple orgs at the same time.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchOrgs(done) {
   const orgData = [
@@ -520,6 +534,8 @@ function patchOrgs(done) {
 
 /**
  * @description Verifies DELETE /api/orgs/:orgid deletes an organization.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteOrg(done) {
   const orgData = testData.orgs[0];
@@ -545,6 +561,8 @@ function deleteOrg(done) {
 
 /**
  * @description Verifies DELETE /api/orgs deletes multiple organizations.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteOrgs(done) {
   const orgData = [

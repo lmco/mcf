@@ -39,6 +39,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies the API is up and running.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function upTest(done) {
   // Make an API GET request
@@ -59,6 +61,8 @@ function upTest(done) {
 
 /**
  * @description Verifies swagger API documentation is up and running.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function swaggerJSONTest(done) {
   // API GET request swagger documentation

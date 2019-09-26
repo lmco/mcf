@@ -54,7 +54,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.6.0' }]);
       }
 
-      return ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.6.0' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.6.0' } });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -170,7 +170,7 @@ module.exports.up = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.6.0.1' }]);
       }
 
-      return ServerData.updateMany({ _id: serverData[0]._id }, { $set: { version: '0.6.0.1' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.6.0.1' } });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -183,7 +183,7 @@ module.exports.up = function() {
  * updates to the organization collection.
  *
  * @param {Array} orgs - The organizations being updated.
- * @param {Object} jmi2Users - The found users in JMI Type 2 format.
+ * @param {object} jmi2Users - The found users in JMI Type 2 format.
  */
 function sixToSevenOrgHelper(orgs, jmi2Users) {
   return new Promise((resolve, reject) => {
@@ -297,8 +297,8 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
  * updates to the project collection.
  *
  * @param {Array} projects - The projects being updated.
- * @param {Object} jmi2Users - The found users in JMI Type 2 format.
- * @param {Object} jmi2Orgs - The found orgs in JMI Type 2 format.
+ * @param {object} jmi2Users - The found users in JMI Type 2 format.
+ * @param {object} jmi2Orgs - The found orgs in JMI Type 2 format.
  */
 function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
   return new Promise((resolve, reject) => {
@@ -409,9 +409,9 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
  * updates to the element collection.
  *
  * @param {Array} elements - The elements being updated.
- * @param {Object} jmi2Users - The found users in JMI Type 2 format.
- * @param {Object} jmi2Projects - The found projects in JMI Type 2 format.
- * @param {Object} jmi2Elements - The found elements in JMI Type 2 format.
+ * @param {object} jmi2Users - The found users in JMI Type 2 format.
+ * @param {object} jmi2Projects - The found projects in JMI Type 2 format.
+ * @param {object} jmi2Elements - The found elements in JMI Type 2 format.
  */
 function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements) {
   return new Promise((resolve, reject) => {
@@ -529,7 +529,7 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
  * updates to the user collection.
  *
  * @param {Array} users - The users being updated.
- * @param {Object} jmi2Users - The found users in JMI Type 2 format.
+ * @param {object} jmi2Users - The found users in JMI Type 2 format.
  */
 function sixToSevenUserHelper(users, jmi2Users) {
   return new Promise((resolve, reject) => {

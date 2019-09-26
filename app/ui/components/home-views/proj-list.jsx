@@ -1,19 +1,19 @@
 /**
-* Classification: UNCLASSIFIED
-*
-* @module ui.components.home-views.proj-list
-*
-* @copyright Copyright (C) 2018, Lockheed Martin Corporation
-*
-* @license LMPI - Lockheed Martin Proprietary Information
-*
-* @owner Leah De Laurell <leah.p.delaurell@lmco.com>
-*
-* @author Leah De Laurell <leah.p.delaurell@lmco.com>
-*
-* @description This creates the project list rendered under
+ * Classification: UNCLASSIFIED
+ *
+ * @module ui.components.home-views.proj-list
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description This creates the project list rendered under
  * the organization.
-*/
+ */
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */

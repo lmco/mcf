@@ -177,4 +177,4 @@ BranchSchema.static('getValidPopulateFields', function() {
 /* ------------------------( Branch Schema Export )------------------------- */
 
 // Export model as "Branch"
-module.exports = new db.Model('Branch', BranchSchema);
+module.exports = new db.Model('Branch', BranchSchema, 'branches');

@@ -36,6 +36,7 @@ module.exports.timeConversions = {
 
 /**
  * The string used as the UID delimiter.
+ *
  * @type {string}
  */
 module.exports.ID_DELIMITER = ':';
@@ -44,10 +45,10 @@ module.exports.ID_DELIMITER = ':';
  * @description Defines a render utility wrapper for the Express res.render
  * function to define and pass in default options.
  *
- * @param {Object} req - Request object
- * @param {Object} res - Response object
- * @param {string} name - Name of the template to render
- * @param {Object} params - List of parameters to render
+ * @param {object} req - Request object.
+ * @param {object} res - Response object.
+ * @param {string} name - Name of the template to render.
+ * @param {object} params - List of parameters to render.
  */
 module.exports.render = function(req, res, name, params) {
   const opts = params || {};
@@ -63,10 +64,10 @@ module.exports.render = function(req, res, name, params) {
  * @description Creates a colon delimited string from any number of arguments.
  * If any items are not strings or other failure occurs, an error is thrown.
  *
- * @param {(...string|string[])} args - An arbitrary number of strings to be
+ * @param {...string|string[]} args - An arbitrary number of strings to be
  * appended or an array of strings.
  *
- * @return {string} Concatenated args with uid delimiter
+ * @returns {string} Concatenated args with uid delimiter.
  */
 module.exports.createID = function(...args) {
   // If passed in an array of strings, set equal to args
@@ -86,12 +87,11 @@ module.exports.createID = function(...args) {
 };
 
 /**
- * @description Splits a UID on the UID delimiter up and returns an array of
- * UID components.
+ * @description Splits a UID on the UID delimiter up and returns an array of UID components.
  *
  * @param {string} uid - The uid.
  *
- * @return {string[]} Split uid
+ * @returns {string[]} Split uid.
  */
 module.exports.parseID = function(uid) {
   return uid.split(this.ID_DELIMITER);
@@ -100,11 +100,11 @@ module.exports.parseID = function(uid) {
 /**
  * @description Title-cases a string.
  *
- * @param {string} s - The string to be title-cased
+ * @param {string} s - The string to be title-cased.
  * @param {boolean} [keepUpper=false] - Boolean indicating wither or not keep
- * uppercase characters as is
+ * uppercase characters as is.
  *
- * @return {string} The title-cased word
+ * @returns {string} The title-cased word.
  */
 module.exports.toTitleCase = function(s, keepUpper = false) {
   // Check if s NOT string or contains whitespace
@@ -138,8 +138,8 @@ module.exports.toTitleCase = function(s, keepUpper = false) {
  * @description Checks that two objects are equal by stringifying them and
  * comparing the resulting strings.
  *
- * @param {*} a
- * @param {*} b
+ * @param {*} a - The first parameter to be compared.
+ * @param {*} b - The second parameter to be compared.
  */
 module.exports.deepEqual = function(a, b) {
   try {
@@ -159,10 +159,10 @@ module.exports.deepEqual = function(a, b) {
  *       string separated commas are converted to arrays
  *          ex. "createdBy, modifiedBy" => {["createdBy", "modifiedBy"]}
  *
- * @param {Object} options - An optional parameter that provides supported
+ * @param {object} options - An optional parameter that provides supported
  * options.
- * @param {Object} validOptions - An object containing valid option as keys and
- * the object's data type as values. ex. populate: 'array'
+ * @param {object} validOptions - An object containing valid option as keys and
+ * the object's data type as values. ex. populate: 'array'.
  */
 module.exports.parseOptions = function(options, validOptions) {
   // Check option is defined
@@ -225,14 +225,14 @@ module.exports.parseOptions = function(options, validOptions) {
  * @description Validates a list of options and returns the desired response in
  * an object.
  *
- * @param {Object} options - The options object passed into the controller.
- * Should contain key/value pairs where the key is the option and the value is
- * the user input
+ * @param {object} options - The options object passed into the controller. Should
+ * contain key/value pairs where the key is the option and the value is
+ * the user input.
  * @param {string[]} validOptions - An array of valid options for that function.
- * @param {Object} model - The model of the controller which called this
+ * @param {object} model - The model of the controller which called this
  * function.
  *
- * @return {Object} An object with key/value pairs formatted for use by the
+ * @return {object} An object with key/value pairs formatted for use by the
  * controllers.
  */
 module.exports.validateOptions = function(options, validOptions, model) {
@@ -447,7 +447,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
 /**
  * @description Handles a data stream containing gzipped data.
  *
- * @param {Object} dataStream - The stream object carrying a gzip file
+ * @param {object} dataStream - The stream object carrying a gzip file.
  *
  * @return {Promise} A promise containing the unzipped data
  */

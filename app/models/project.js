@@ -71,7 +71,7 @@ const utils = M.require('lib.utils');
  * @property {string} _id - The project's non-unique id.
  * @property {string} org - A reference to the project's organization.
  * @property {string} name - The project's non-unique project name.
- * @property {Object} permissions - An object whose keys identify a
+ * @property {object} permissions - An object whose keys identify a
  * projects's roles. The keys are the users username, and values are arrays of
  * given permissions.
  * @property {string} visibility - The visibility level of a project defining
@@ -206,12 +206,12 @@ ProjectSchema.static('getVisibilityLevels', function() {
 ProjectSchema.method('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
 });
-ProjectSchema.statics.getValidPopulateFields = function() {
+ProjectSchema.static('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
-};
+});
 
 
 /* ------------------------( Project Schema Export )------------------------- */
 
 // Export model as "Project"
-module.exports = new db.Model('Project', ProjectSchema);
+module.exports = new db.Model('Project', ProjectSchema, 'projects');

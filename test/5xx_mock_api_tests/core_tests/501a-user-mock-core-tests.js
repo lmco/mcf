@@ -94,6 +94,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies mock whoami request to get current user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function whoami(done) {
   // Create request object
@@ -128,6 +130,8 @@ function whoami(done) {
 
 /**
  * @description Verifies mock POST request to create a single user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postUser(done) {
   // Create request object
@@ -176,6 +180,8 @@ function postUser(done) {
 
 /**
  * @description Verifies mock POST request to create multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postUsers(done) {
   // Create request object
@@ -236,6 +242,8 @@ function postUsers(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace a single user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putUser(done) {
   // Create request object
@@ -284,6 +292,8 @@ function putUser(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putUsers(done) {
   // Create request object
@@ -345,6 +355,8 @@ function putUsers(done) {
 
 /**
  * @description Verifies mock GET request to find a single user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getUser(done) {
   // Create request object
@@ -393,6 +405,8 @@ function getUser(done) {
 
 /**
  * @description Verifies mock GET request to find multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getUsers(done) {
   // Create request object
@@ -455,6 +469,8 @@ function getUsers(done) {
 
 /**
  * @description Verifies mock GET request to find all users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllUsers(done) {
   // Create request object
@@ -527,6 +543,8 @@ function getAllUsers(done) {
 
 /**
  * @description Verifies mock GET request to search users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function searchUsers(done) {
   // Create request object
@@ -594,6 +612,8 @@ function searchUsers(done) {
 
 /**
  * @description Verifies mock PATCH request to update a single user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUser(done) {
   // Create request object
@@ -646,6 +666,8 @@ function patchUser(done) {
 
 /**
  * @description Verifies mock PATCH request to update multiple users.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUsers(done) {
   // Create request object
@@ -711,6 +733,8 @@ function patchUsers(done) {
 
 /**
  * @description Verifies mock PATCH request to update a users password.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchUserPassword(done) {
   // Create request object
@@ -765,6 +789,8 @@ function patchUserPassword(done) {
 
 /**
  * @description Verifies mock DELETE request to delete a single user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteUser(done) {
   // Create request object
@@ -798,6 +824,8 @@ function deleteUser(done) {
 
 /**
  * @description Verifies mock DELETE request to delete multiple user.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteUsers(done) {
   // Create request object
