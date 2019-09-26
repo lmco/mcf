@@ -196,7 +196,20 @@ async function find(requestingUser, organizationID, projects, options) {
     }
     // If orgID is null, find all projects the user has access to
     else {
-      searchQuery[`permissions.${reqUser._id}`] = 'read';
+      // Find all orgs the user has read access on
+      const orgQuery = {};
+      orgQuery[`permissions.${reqUser._id}`] = 'read';
+      const readOrgs = await Organization.find(orgQuery);
+
+      const orgIDs = readOrgs.map(o => o._id);
+      // Project must be internal and in an org the user has access to
+      const internalQuery = { $and: [{ visibility: 'internal' }, { org: orgIDs }] };
+      const permissionsQuery = {};
+      permissionsQuery[`permissions.${reqUser._id}`] = 'read';
+
+      // Add $or to search query, saying user must have read access or must be
+      // internal project within an organization the user has read access on
+      searchQuery.$or = [internalQuery, permissionsQuery];
     }
 
     // Find the projects
