@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.set-up
+ * @module test.7xx_ui_tests.set-up
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -62,7 +62,12 @@ const scriptMBEE = window.document.createElement('script');
 scriptMBEE.textContent = mbee;
 window.document.body.appendChild(scriptMBEE);
 
-// Copying properties to object
+/**
+ * @description Copying properties to object.
+ *
+ * @param {object} src - The source object.
+ * @param {object} target - The target object.
+ */
 function copyProps(src, target) {
   Object.defineProperties(target, {
     ...Object.getOwnPropertyDescriptors(src),
