@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.7xx_ui_tests.701-app-tests
  *
@@ -21,7 +21,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import chai from 'chai';
-import sinon from 'sinon';
 
 // MBEE components
 import Home from '../../../app/ui/components/home-views/home.jsx';
