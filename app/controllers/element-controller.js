@@ -1513,6 +1513,14 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
   }
 
   // Define nested helper function
+  /**
+   * @description A nested helper function that searches through the subtrees of given
+   * element ids.
+   *
+   * @param {string[]} ids - A list of element IDs to examine.
+   * @returns {Promise<string|Promise<string|*|undefined>>} Returns either a recursive call
+   * to itself or an empty string once there are no more elements to search.
+   */
   async function findElementTreeHelper(ids) {
     try {
       // Find all elements whose parent is in the list of given ids
@@ -1602,6 +1610,14 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
   }
 
   // Define nested helper function
+  /**
+   * @description A nested helper function. Searches the parent of the provided element to
+   * ensure that no circular references are being made.
+   *
+   * @param {Element} e - The element to be examined.
+   * @returns {Promise<string|Promise<string|*|undefined>>} Either throws an error if a
+   * circular reference has been found or returns an empty string.
+   */
   async function findElementParentRecursive(e) {
     const foundElement = await Element.findOne({ _id: e.parent }, null, { lean: true });
     // If foundElement is null, reject with error
@@ -1827,7 +1843,14 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
   // Initialize return object
   let foundElements = [];
 
-  // Define nested helper function
+  /**
+   * @description A nested helper function.  Searches the for parent of the element ID provided.
+   *
+   * @param searchID - The ID of the element to search for.
+   * @returns {Promise<string|string|*>} Returns either a recursive call to itself if the parent of
+   * the element also has a parent, an empty string if the parent of the element is the root, or
+   * throws an error if a circular reference has been found.
+   */
   async function findElementTreeHelper(searchID) {
     try {
       // Find the parent of the element

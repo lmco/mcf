@@ -161,7 +161,11 @@ class Schema extends mongoose.Schema {
    * @param {string} [prefix] - Path to prefix the newly added paths with.
    */
   add(obj, prefix) {
-    // Change each type to the mongoose defined type
+    /**
+     * @description Change each type to the mongoose defined type.
+     *
+     * @param {object} object - Object with paths to add, or another schema.
+     */
     function changeType(object) {
       Object.keys(object).forEach((k) => {
         // If a nested schema, handle each nested parameter

@@ -14,6 +14,7 @@
  * @description Contains necessary functions for the MBEE UI.
  */
 /* eslint-disable jsdoc/require-description-complete-sentence */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // ESLint disabled for client-side JS for now.
 // TODO (jk) - determine long-term approach
