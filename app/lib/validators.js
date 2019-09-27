@@ -14,6 +14,8 @@
  * @description This file defines validators - common regular expressions and
  * helper functions - used to validate data within MBEE.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow lists in descriptions
 
 // MBEE modules
 const utils = require('./utils');
@@ -32,7 +34,7 @@ const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous'];
 
 /**
- * @description Regular Expressions to validate organization data
+ * @description Regular Expressions to validate organization data.
  *
  * id:
  *   - MUST start with a lowercase letter, number or '_'

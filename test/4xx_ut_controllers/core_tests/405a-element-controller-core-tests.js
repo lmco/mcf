@@ -41,7 +41,7 @@ let branchID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Open the database connection
@@ -119,7 +119,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an element using the element controller
+ * @description Creates an element using the element controller.
  */
 function createElement(done) {
   const elemData = testData.elements[0];
@@ -177,7 +177,7 @@ function createElement(done) {
 }
 
 /**
- * @description Creates multiple elements using the element controller
+ * @description Creates multiple elements using the element controller.
  */
 function createElements(done) {
   const elemDataObjects = [
@@ -253,7 +253,7 @@ function createElements(done) {
 }
 
 /**
- * @description Creates or replaces an element using the element controller
+ * @description Creates or replaces an element using the element controller.
  */
 function createOrReplaceElement(done) {
   const elemData = testData.elements[0];
@@ -388,7 +388,7 @@ function createOrReplaceElements(done) {
 }
 
 /**
- * @description Finds an element via the elements controller
+ * @description Finds an element via the elements controller.
  */
 function findElement(done) {
   const elemData = testData.elements[0];
@@ -446,7 +446,7 @@ function findElement(done) {
 }
 
 /**
- * @description Finds multiple elements via the element controller
+ * @description Finds multiple elements via the element controller.
  */
 function findElements(done) {
   const elemDataObjects = [
@@ -521,7 +521,7 @@ function findElements(done) {
 }
 
 /**
- * @description Finds all elements on a given project using the element controller
+ * @description Finds all elements on a given project using the element controller.
  */
 function findAllElements(done) {
   const elemDataObjects = [
@@ -651,7 +651,7 @@ function searchElement(done) {
 }
 
 /**
- * @description Updates an element using the element controller
+ * @description Updates an element using the element controller.
  */
 function updateElement(done) {
   const elemData = testData.elements[0];
@@ -715,7 +715,7 @@ function updateElement(done) {
 }
 
 /**
- * @description Updates multiple elements using the element controller
+ * @description Updates multiple elements using the element controller.
  */
 function updateElements(done) {
   const elemDataObjects = [
@@ -793,7 +793,7 @@ function updateElements(done) {
 }
 
 /**
- * @description Deletes an element using the element controller
+ * @description Deletes an element using the element controller.
  */
 function deleteElement(done) {
   const elemData = testData.elements[0];
@@ -824,7 +824,7 @@ function deleteElement(done) {
 }
 
 /**
- * @description Deletes multiple elements using the element controller
+ * @description Deletes multiple elements using the element controller.
  */
 function deleteElements(done) {
   const elemDataObjects = [

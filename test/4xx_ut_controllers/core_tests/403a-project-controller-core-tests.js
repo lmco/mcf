@@ -15,7 +15,7 @@
  * @description  This tests the Project Controller functionality. These tests
  * are to make sure the code is working as it should or should not be. Especially,
  * when making changes/ updates to the code. The project controller tests create,
- * update, find, and delete projects
+ * update, find, and delete projects.
  */
 
 // NPM modules
@@ -109,7 +109,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a project using the project controller
+ * @description Creates a project using the project controller.
  */
 function createProject(done) {
   const projData = testData.projects[0];
@@ -149,7 +149,7 @@ function createProject(done) {
 }
 
 /**
- * @description Creates multiple projects using the project controller
+ * @description Creates multiple projects using the project controller.
  */
 function createProjects(done) {
   const projDataObjects = [
@@ -201,7 +201,7 @@ function createProjects(done) {
 }
 
 /**
- * @description Creates or replaces a project using the project controller
+ * @description Creates or replaces a project using the project controller.
  */
 function createOrReplaceProject(done) {
   const projData = testData.projects[0];
@@ -294,7 +294,7 @@ function createOrReplaceProjects(done) {
 }
 
 /**
- * @description Finds a project via the project controller
+ * @description Finds a project via the project controller.
  */
 function findProject(done) {
   const projData = testData.projects[0];
@@ -334,7 +334,7 @@ function findProject(done) {
 }
 
 /**
- * @description Finds multiple projects using the project controller
+ * @description Finds multiple projects using the project controller.
  */
 function findProjects(done) {
   const projDataObjects = [
@@ -389,8 +389,7 @@ function findProjects(done) {
 }
 
 /**
- * @description Finds all projects on a given organization using the project
- * controller
+ * @description Finds all projects on a given organization using the project controller.
  */
 function findAllProjects(done) {
   const projDataObjects = [
@@ -443,7 +442,7 @@ function findAllProjects(done) {
 }
 
 /**
- * @description Updates a project using the project controller
+ * @description Updates a project using the project controller.
  */
 function updateProject(done) {
   const projData = testData.projects[0];
@@ -489,7 +488,7 @@ function updateProject(done) {
 }
 
 /**
- * @description Updates multiple projects using the project controller
+ * @description Updates multiple projects using the project controller.
  */
 function updateProjects(done) {
   const projDataObjects = [
@@ -547,7 +546,7 @@ function updateProjects(done) {
 }
 
 /**
- * @description Deletes a project using the project controller
+ * @description Deletes a project using the project controller.
  */
 function deleteProject(done) {
   const projData = testData.projects[0];
@@ -577,7 +576,7 @@ function deleteProject(done) {
 }
 
 /**
- * @description Deletes multiple projects using the project controller
+ * @description Deletes multiple projects using the project controller.
  */
 function deleteProjects(done) {
   const projDataObjects = [

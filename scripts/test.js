@@ -150,7 +150,7 @@ function printHeader() {
 
 /**
  * @description The mocha walk function is responsible for loading .js files into mocha
- * for use during tests
+ * for use during tests.
  */
 function mochaWalk(dir, mochaObj) {
   // Read the current directory and use a callback to filter the results

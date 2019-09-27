@@ -31,7 +31,7 @@ const User = M.require('models.user');
 
 /**
  * @description Handles database migrations from a specific version, to a
- * specific version
+ * specific version.
  *
  * @param {string[]} args - An array of command line arguments.
  */
@@ -155,7 +155,7 @@ module.exports.migrate = function(args) {
 
 
 /**
- * @description Prompts the user for approval to migrate the database
+ * @description Prompts the user for approval to migrate the database.
  *
  * @param {string[]} args - Array of command line arguments.
  */

@@ -19,7 +19,7 @@
 const assert = require('assert');
 
 /**
- * @description Converts data between different JMI types
+ * @description Converts data between different JMI types.
  *
  * @param {number} from - The current JMI version of the data.
  * @param {number} to - The JMI version to convert the data to.
@@ -46,7 +46,7 @@ module.exports.convertJMI = function(from, to, data, field = '_id', unique = 'id
 };
 
 /**
- * @description Converts data between JMI type 1 to type 2
+ * @description Converts data between JMI type 1 to type 2.
  *
  * @param {object[]} data - The data to convert between JMI versions.
  * @param {string} field - The field to parse on.
@@ -85,7 +85,7 @@ function jmi12(data, field) {
 }
 
 /**
- * @description Converts data between JMI type 1 to type 3
+ * @description Converts data between JMI type 1 to type 3.
  *
  * @param {object[]} data - The data to convert between JMI versions.
  * @param {string} field - The field to parse on.
@@ -167,7 +167,7 @@ function jmi23(jmi2, unique = 'id') {
 }
 
 /**
- * @description Helper function for converting JMI 2 to JMI 3
+ * @description Helper function for converting JMI 2 to JMI 3.
  *
  * @param {object} jmi2 - JMI type 2 object.
  * @param {string[]} ids - List of lowest level ids.

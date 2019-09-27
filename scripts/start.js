@@ -41,7 +41,7 @@ const startup = M.require('lib.startup');
 
 
 /**
- * @description Starts the MBEE server using the configuration file
+ * @description Starts the MBEE server using the configuration file.
  */
 function start(args) {
   M.log.debug(`${`+ mbee.js executed as ${process.argv.join(' ')} `

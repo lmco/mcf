@@ -11,9 +11,11 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This file defines the schema strategy for using MBEE with
- * Mongoose and MongoDB.
+ * @description This file defines the schema strategy for using MBEE with Mongoose
+ * and MongoDB.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow chart in description
 
 // Node modules
 const fs = require('fs');
@@ -96,8 +98,7 @@ function disconnect() {
 
 /**
  * @description Clears all contents from the database, equivalent to starting
- * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN
- * PRODUCTION.
+ * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
  */
 async function clear() {
@@ -107,7 +108,7 @@ async function clear() {
 /**
  * @description Sanitizes data which will be used in queries and inserted into
  * the database. If the data contains a $, which is a MongoDB reserved
- * character, the object key/value pair will be deleted
+ * character, the object key/value pair will be deleted.
  *
  * <p> +-------+-----------------+
  * <br>| Input | Sanitized Output|
@@ -218,7 +219,7 @@ class Model {
   }
 
   /**
-   * @description Unused init function
+   * @description Unused init function.
    * @async
    *
    * @returns {Promise<void>} Returns empty promise upon completion.

@@ -11,7 +11,7 @@
  *
  * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @description Defines helper functions used by the controllers
+ * @description Defines helper functions used by the controllers.
  */
 
 // Node modules
@@ -21,13 +21,13 @@ const assert = require('assert');
 const utils = M.require('lib.utils');
 
 /**
- * @description A function that validates the parameters passed to the controllers
+ * @description A function that validates the parameters passed to the controllers.
  *
  * @param {object} requestingUser - The user in the request.
  * @param {object} options - The options passed in with the request.
  * @param {string} [orgID=''] - An optional parameter for the organization ID. For example
- * this would not be used in the Org controller but would be in the Project, Branch, and
- * Element controller.
+ * this would not be used in the Org controller but would be in the Project, Branch, and Element
+ * controller.
  * @param {object} [projID=''] - An optional parameter for the project ID.
  * @param {object} [branchID=''] - An optional parameter for the branch ID.
  *
@@ -52,7 +52,7 @@ module.exports.checkParams = function(requestingUser, options, orgID = '', projI
 };
 
 /**
- * @description A function that validates the parameters passed to the controllers
+ * @description A function that validates the parameters passed to the controllers.
  *
  * @param {object} dataTypes - The allowed data types for this particular operation.
  * @param {object} data - The data to be validated (could be an array of element ids,

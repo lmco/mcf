@@ -35,7 +35,7 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Tests that the get status code function returns all the proper
- * status codes for all MBEE errors
+ * status codes for all MBEE errors.
  */
 function getStatusCode(done) {
   // Create all types of errors and get their status codes
@@ -60,7 +60,7 @@ function getStatusCode(done) {
 
 /**
  * @description Tests that the captureError function creates a new custom error and preserves
- * the stack trace
+ * the stack trace.
  */
 function capturedError(done) {
   // Create an error

@@ -14,6 +14,8 @@
  * @description Removes directories and files created during npm/yarn install,
  * node mbee build, and all log files.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Rule disabled to allow list in description
 
 // Node.js modules
 const { execSync } = require('child_process');

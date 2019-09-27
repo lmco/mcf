@@ -34,7 +34,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Checks to make sure the file is being properly parsed
+ * @description Checks to make sure the file is being properly parsed.
  */
 function parseTest(done) {
   // Initialize test string

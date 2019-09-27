@@ -14,6 +14,8 @@
  *
  * @description Defines sanitization functions.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow table in description
 
 // MBEE modules
 const db = M.require('lib.db');

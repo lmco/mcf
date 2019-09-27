@@ -17,7 +17,8 @@
  * couples with the app/api-routes.js file.
  */
 /* eslint-disable jsdoc/match-description */
-// Disabling this rule due to the use of headers for api endpoints
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabling these rules due to the use of headers for api endpoints
 
 
 // Node.js Modules
@@ -154,7 +155,7 @@ function returnResponse(req, res, message, statusCode) {
  * @description Generates the Swagger specification based on the Swagger JSDoc
  * in the API routes file.
  *
- * @returns {object} swaggerJS object
+ * @returns {object} swaggerJS object.
  */
 function swaggerSpec() {
   return swaggerJSDoc({

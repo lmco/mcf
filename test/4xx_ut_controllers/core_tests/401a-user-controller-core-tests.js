@@ -101,7 +101,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a user using the user controller
+ * @description Creates a user using the user controller.
  */
 function createUser(done) {
   const userData = testData.users[0];
@@ -151,7 +151,7 @@ function createUser(done) {
 }
 
 /**
- * @description Creates multiple users using the user controller
+ * @description Creates multiple users using the user controller.
  */
 function createUsers(done) {
   const userDataObjects = [
@@ -214,7 +214,7 @@ function createUsers(done) {
 }
 
 /**
- * @description Creates or replaces a user using the user controller
+ * @description Creates or replaces a user using the user controller.
  */
 function createOrReplaceUser(done) {
   const userData = testData.users[0];
@@ -264,7 +264,7 @@ function createOrReplaceUser(done) {
 }
 
 /**
- * @description Creates/replaces multiple users using the user controller
+ * @description Creates/replaces multiple users using the user controller.
  */
 function createOrReplaceUsers(done) {
   const userDataObjects = [
@@ -327,7 +327,7 @@ function createOrReplaceUsers(done) {
 }
 
 /**
- * @description Finds a user using the user controller
+ * @description Finds a user using the user controller.
  */
 function findUser(done) {
   const userData = testData.users[0];
@@ -368,7 +368,7 @@ function findUser(done) {
 }
 
 /**
- * @description Finds multiple users using the user controller
+ * @description Finds multiple users using the user controller.
  */
 function findUsers(done) {
   const userDataObjects = [
@@ -422,7 +422,7 @@ function findUsers(done) {
 }
 
 /**
- * @description Finds all users in the database using the user controller
+ * @description Finds all users in the database using the user controller.
  */
 function findAllUsers(done) {
   const userDataObjects = [
@@ -484,8 +484,7 @@ function findAllUsers(done) {
 }
 
 /**
- * @description Finds a user through text based search via the user
- * controller.
+ * @description Finds a user through text based search via the user controller.
  */
 function searchUser(done) {
   const userData = [
@@ -540,7 +539,7 @@ function searchUser(done) {
 
 
 /**
- * @description Updates a user using the user controller
+ * @description Updates a user using the user controller.
  */
 function updateUser(done) {
   const userData = testData.users[0];
@@ -587,7 +586,7 @@ function updateUser(done) {
 }
 
 /**
- * @description Updates multiple users using the user controller
+ * @description Updates multiple users using the user controller.
  */
 function updateUsers(done) {
   const userDataObjects = [
@@ -696,7 +695,7 @@ function updateUserPassword(done) {
 }
 
 /**
- * @description Deletes a user using the user controller
+ * @description Deletes a user using the user controller.
  */
 function deleteUser(done) {
   const userData = testData.users[0];
@@ -734,7 +733,7 @@ function deleteUser(done) {
 }
 
 /**
- * @description Deletes multiple users using the user controller
+ * @description Deletes multiple users using the user controller.
  */
 function deleteUsers(done) {
   const userDataObjects = [

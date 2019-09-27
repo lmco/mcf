@@ -199,7 +199,7 @@ const logger = winston.createLogger({
 winston.addColors(colors);
 
 /**
- * @description Log the response to an HTTP request
+ * @description Log the response to an HTTP request.
  *
  * @param {number} responseLength - The length of the response in bytes.
  * @param {object} req - Request object from express.

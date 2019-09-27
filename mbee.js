@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Classification: UNCLASSIFIED
+ * @Classification UNCLASSIFIED
  *
  * @module mbee.js
  *
@@ -137,7 +137,7 @@ if (config.server.secret === 'RANDOM') {
 }
 
 /**
- * Define the MBEE configuration
+ * Define the MBEE configuration.
  */
 Object.defineProperty(M, 'config', {
   value: config,

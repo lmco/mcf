@@ -38,7 +38,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Tests the html sanitation with html input.
  * Expected to change the html input.
- * Same thing occurring in a test more than once
+ * Same thing occurring in a test more than once.
  */
 function htmlTest(done) {
   const htmlLessThan = sani.html('<script>');

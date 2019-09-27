@@ -1119,8 +1119,8 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
 /**
  * @description This function removes one or many projects as well as the
- * elements that belong to them. This function can be used by system-wide admins
- * ONLY.
+ * elements that belong to them. This function can be used by system-wide
+ * admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.

@@ -101,7 +101,7 @@ function getStatusCode(error) {
 
 /**
  * @description A utility to ensure that all errors get turned into custom errors.
- * To be used on returned errors in .catch statements
+ * To be used on returned errors in .catch statements.
  *
  * @param error - The error to check.
  *

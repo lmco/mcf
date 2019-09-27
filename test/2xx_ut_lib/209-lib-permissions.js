@@ -124,7 +124,7 @@ function verifyAdminPermissions(done) {
 }
 
 /**
- * @description Checks that org permissions are handled as expected
+ * @description Checks that org permissions are handled as expected.
  */
 function verifyOrgPermissions(done) {
   // Test data

@@ -26,8 +26,7 @@ const utils = M.require('lib.utils');
  * being returned.
  * @param {string} type - The type of item that the object is. Can be an org,
  * project, element or user.
- * @param {object} options - A list of options passed in by the user to the API
- * Controller.
+ * @param {object} options - A list of options passed in by the user to the API Controller.
  *
  * @returns {object} The modified object.
  */
@@ -55,11 +54,10 @@ module.exports.getPublicData = function(object, type, options) {
 };
 
 /**
- * @description Returns an elements public data
+ * @description Returns an elements public data.
  *
  * @param {object} element - The raw JSON of the element.
- * @param {object} options - A list of options passed in by the user to the API
- * Controller.
+ * @param {object} options - A list of options passed in by the user to the API Controller.
  *
  * @returns {object} The public data of the element.
  */
@@ -336,11 +334,10 @@ function getElementPublicData(element, options) {
 }
 
 /**
- * @description Returns a branch public data
+ * @description Returns a branch public data.
  *
  * @param {object} branch - The raw JSON of the branch.
- * @param {object} options - A list of options passed in by the user to the API
- * Controller.
+ * @param {object} options - A list of options passed in by the user to the API Controller.
  *
  * @returns {object} The public data of the branch.
  */
@@ -460,11 +457,10 @@ function getBranchPublicData(branch, options) {
 }
 
 /**
- * @description Returns a projects public data
+ * @description Returns a projects public data.
  *
  * @param {object} project - The raw JSON of the project.
- * @param {object} options - A list of options passed in by the user to the API
- * Controller.
+ * @param {object} options - A list of options passed in by the user to the API Controller.
  *
  * @returns {object} The public data of the project.
  */
@@ -564,11 +560,10 @@ function getProjectPublicData(project, options) {
 }
 
 /**
- * @description Returns an orgs public data
+ * @description Returns an orgs public data.
  *
  * @param {object} org - The raw JSON of the org.
- * @param {object} options - A list of options passed in by the user to the API
- * Controller.
+ * @param {object} options - A list of options passed in by the user to the API Controller.
  *
  * @returns {object} The public data of the org.
  */
@@ -682,11 +677,10 @@ function getOrgPublicData(org, options) {
 }
 
 /**
- * @description Returns a users public data
+ * @description Returns a users public data.
  *
  * @param {object} user - The raw JSON of the user.
- * @param {object} options - A list of options passed in by the user to the API
- * Controller.
+ * @param {object} options - A list of options passed in by the user to the API Controller.
  *
  * @returns {object} The public data of the user.
  */

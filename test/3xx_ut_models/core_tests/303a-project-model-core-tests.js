@@ -110,7 +110,7 @@ async function createProject() {
 }
 
 /**
- * @description Finds a previously created project
+ * @description Finds a previously created project.
  */
 async function findProject() {
   let proj;
@@ -129,7 +129,7 @@ async function findProject() {
 }
 
 /**
- * @description Updates a projects name
+ * @description Updates a projects name.
  */
 async function updateProject() {
   try {

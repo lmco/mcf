@@ -878,10 +878,10 @@
     "jsdoc/require-description": ["error", {
       "descriptionStyle": "tag"
     }],
-    /*"jsdoc/require-description-complete-sentence": ["error", {"tags": [
+    "jsdoc/require-description-complete-sentence": ["error", {"tags": [
       "param", "property", "returns"
     ]}],
-    "jsdoc/require-example": "off",
+    /*"jsdoc/require-example": "off",
     "jsdoc/require-hyphen-before-param-description": "error",
     "jsdoc/require-jsdoc": "error", // Recommended
     "jsdoc/require-param": "error", // Recommended

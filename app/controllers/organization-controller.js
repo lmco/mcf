@@ -50,9 +50,9 @@ const permissions = M.require('lib.permissions');
 
 /**
  * @description This function finds one or many organizations. Depending on the
- * given parameters, this function can find a single org by ID, multiple orgs by
- * ID, or all orgs in the system. Only organizations which a user has read
- * access to will be returned.
+ * given parameters, this function can find a single org by ID, multiple orgs by ID,
+ * or all orgs in the system. Only organizations which a user has read access to
+ * will be returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} [orgs] - The organizations to find. Can either be

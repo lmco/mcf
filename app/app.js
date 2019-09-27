@@ -59,7 +59,7 @@ db.connect()
 });
 
 /**
- * @description Initializes the application and exports app.js
+ * @description Initializes the application and exports app.js.
  */
 function initApp() {
   return new Promise((resolve) => {

@@ -120,7 +120,7 @@ function elementHelper() {
 }
 
 /**
- * @description Recursive function for elementHelper()
+ * @description Recursive function for elementHelper().
  */
 function elementHelperRecursive(ids) {
   return new Promise((resolve, reject) => {

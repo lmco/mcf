@@ -1805,7 +1805,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
 /**
  * @description A non-exposed helper function which finds the parent of given
- * element up to and including the root element
+ * element up to and including the root element.
  *
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
@@ -1869,7 +1869,7 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
  * @description A non-exposed helper function that validates the sourceNamespace and/or
  * targetNamespace to ensure that they are formatted properly.  A namespace must contain a
  * org, project, and branch id and cannot reference the same project.  This function also
- * pushes to lists of ids keeping track of source, target, and project references
+ * pushes to lists of ids keeping track of source, target, and project references.
  *
  * @param {object} elem - The element object to validate.
  * @param {number} index - The index of the iteration.
@@ -1970,7 +1970,7 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
 }
 
 /**
- * @description A non-exposed helper function that validates the setting of a source and target
+ * @description A non-exposed helper function that validates the setting of a source and target.
  *
  * @param {object} elem - The element object to validate.
  * @param {number} index - The index of the iteration.
@@ -2002,7 +2002,7 @@ function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
 }
 
 /**
- * @description A non-exposed helper function that validates the parent of an element being created
+ * @description A non-exposed helper function that validates the parent of an element being created.
  *
  * @param {object} elem - The element object to validate.
  * @param {number} index - The index of the iteration.
@@ -2025,7 +2025,7 @@ function elementParentCheck(elem, index, orgID, projID, branchID) {
 }
 
 /**
- * @description A non-exposed helper function that validates the id of an element being created
+ * @description A non-exposed helper function that validates the id of an element being created.
  *
  * @param {object} elem - The element object to validate.
  * @param {number} index - The index of the iteration.

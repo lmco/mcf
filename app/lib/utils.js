@@ -14,6 +14,9 @@
  *
  * @description Defines miscellaneous helper functions.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow lists in descriptions
+
 
 // Node modules
 const assert = require('assert');
@@ -162,7 +165,7 @@ module.exports.deepEqual = function(a, b) {
  * @param {object} options - An optional parameter that provides supported
  * options.
  * @param {object} validOptions - An object containing valid option as keys and
- * the object's data type as values. ex. populate: 'array'.
+ * the object's data type as values. e.g. populate: 'array'.
  */
 module.exports.parseOptions = function(options, validOptions) {
   // Check option is defined

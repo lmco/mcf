@@ -146,7 +146,7 @@ async function handleTokenAuth(req, res, token) {
 /**
  * @description This function implements doLogin() in lib/auth.js.
  * This function generates the session token for user login.
- * Upon successful login, generate token and set to session
+ * Upon successful login, generate token and set to session.
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
@@ -327,7 +327,7 @@ function ldapSearch(ldapClient, username) {
 }
 
 /**
- * @description Validates a users password with LDAP server
+ * @description Validates a users password with LDAP server.
  *
  * @param {object} ldapClient - LDAP client.
  * @param {object} user - LDAP user.

@@ -42,7 +42,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies valid and invalid org IDs
+ * @description Verifies valid and invalid org IDs.
  */
 function verifyOrgID(done) {
   // Skip this test if a custom validator is defined
@@ -62,7 +62,7 @@ function verifyOrgID(done) {
 }
 
 /**
- * @description Verifies valid and invalid project IDs
+ * @description Verifies valid and invalid project IDs.
  */
 function verifyProjectID(done) {
   // Skip this test if a custom validator is defined
@@ -80,7 +80,7 @@ function verifyProjectID(done) {
 }
 
 /**
- * @description Verifies valid and invalid branch IDs
+ * @description Verifies valid and invalid branch IDs.
  */
 function verifyBranchID(done) {
   // Skip this test if a custom validator is defined
@@ -98,7 +98,7 @@ function verifyBranchID(done) {
 }
 
 /**
- * @description Verifies valid and invalid element ids
+ * @description Verifies valid and invalid element ids.
  */
 function verifyElementID(done) {
   // Skip this test if a custom validator is defined
@@ -117,7 +117,7 @@ function verifyElementID(done) {
 }
 
 /**
- * @description Verifies valid and invalid user usernames
+ * @description Verifies valid and invalid user usernames.
  */
 function verifyUserUsername(done) {
   // Skip this test if a custom validator is defined
@@ -138,7 +138,7 @@ function verifyUserUsername(done) {
 }
 
 /**
- * @description Verifies valid and invalid user emails
+ * @description Verifies valid and invalid user emails.
  */
 function verifyUserEmail(done) {
   // Skip this test if a custom validator is defined
@@ -160,7 +160,7 @@ function verifyUserEmail(done) {
 }
 
 /**
- * @description Verifies valid and invalid user first names
+ * @description Verifies valid and invalid user first names.
  */
 function verifyUserFName(done) {
   // Skip this test if a custom validator is defined
@@ -176,7 +176,7 @@ function verifyUserFName(done) {
 }
 
 /**
- * @description Verifies valid and invalid user last names
+ * @description Verifies valid and invalid user last names.
  */
 function verifyUserLName(done) {
   // Skip this test if a custom validator is defined
@@ -191,7 +191,7 @@ function verifyUserLName(done) {
 }
 
 /**
- * @description Verifies valid and invalid url paths
+ * @description Verifies valid and invalid url paths.
  */
 function verifyURLPath(done) {
   // Skip this test if a custom validator is defined
