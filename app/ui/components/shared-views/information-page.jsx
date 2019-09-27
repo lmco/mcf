@@ -1,5 +1,5 @@
 /**
- * @Classification UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.shared-views.information-page
  *

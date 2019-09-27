@@ -1,5 +1,5 @@
 /**
- * @Classification UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.503a-project-mock-core-tests
  *

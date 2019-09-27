@@ -1,5 +1,5 @@
 /**
- * @Classification UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.apps.org-app
  *

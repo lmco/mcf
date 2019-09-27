@@ -1,5 +1,5 @@
 /**
- * @Classification UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module  test.306a-artifact-model-tests
  *

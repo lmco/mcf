@@ -1,5 +1,5 @@
 /**
- * @Classification UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.project-views.search.advanced-search.advanced-search
  *

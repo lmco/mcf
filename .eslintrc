@@ -847,7 +847,7 @@
     "jsdoc/check-param-names": "error", // Recommended
     "jsdoc/check-syntax": "error",
     "jsdoc/check-tag-names": ["error", {"definedTags":  [
-      "owner", "swagger","Classification", "memberOf"
+      "owner", "swagger","classification", "memberOf"
     ]}], //TODO: reevaluate
     "jsdoc/check-types": "error", // Recommended
     "jsdoc/implements-on-classes": "warn", // Recommended

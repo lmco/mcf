@@ -1,7 +1,7 @@
 /* eslint-disable jsdoc/require-description-complete-sentence */
 // The rule is too picky for this file
 /**
- * @Classification UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module models.branch
  *
