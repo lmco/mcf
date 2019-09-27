@@ -30,7 +30,7 @@ const jquery = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery', 'dist
 const jqueryUI = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery-ui-dist', 'jquery-ui.min.js'), { encoding: 'utf-8' });
 
 // MBEE modules
-const mbee = fs.readFileSync(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'), { encoding: "utf-8" });
+const mbee = fs.readFileSync(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'), { encoding: 'utf-8' });
 const url = 'http://localhost:6233';
 
 // Initialize JSDOM
@@ -39,16 +39,16 @@ const options = {
   resources: 'usable',
   runScripts: 'dangerously'
 };
-const html = '<!doctype html>' +
-  '<html lang="en">' +
-  '<head>' +
-  '  <meta charset="utf-8">' +
-  '  <title></title>' +
-  '</head>' +
-  '<body>' +
-  '  <div id="main"></div>' +
-  '</body>' +
-  '</html>';
+const html = '<!doctype html>'
+  + '<html lang="en">'
+  + '<head>'
+  + '  <meta charset="utf-8">'
+  + '  <title></title>'
+  + '</head>'
+  + '<body>'
+  + '  <div id="main"></div>'
+  + '</body>'
+  + '</html>';
 const jsdom = new JSDOM(html, options);
 const { window } = jsdom;
 
@@ -67,7 +67,7 @@ window.document.body.appendChild(scriptMBEE);
 function copyProps(src, target) {
   Object.defineProperties(target, {
     ...Object.getOwnPropertyDescriptors(src),
-    ...Object.getOwnPropertyDescriptors(target),
+    ...Object.getOwnPropertyDescriptors(target)
   });
 }
 
@@ -86,16 +86,16 @@ Object.keys(document.defaultView).forEach((property) => {
 });
 
 global.navigator = {
-  userAgent: 'node.js',
+  userAgent: 'node.js'
 };
 
 // Setting timeout for animation frame
-global.requestAnimationFrame = function (callback) {
+global.requestAnimationFrame = function(callback) {
   return setTimeout(callback, 0);
 };
 
 // Clearing timeout for animation frame
-global.cancelAnimationFrame = function (id) {
+global.cancelAnimationFrame = function(id) {
   clearTimeout(id);
 };
 
