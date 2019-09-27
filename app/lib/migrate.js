@@ -21,7 +21,6 @@ const path = require('path');
 const process = require('process');
 
 // MBEE modules
-const Artifact = M.require('models.artifact');
 const Branch = M.require('models.branch');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
@@ -46,7 +45,6 @@ module.exports.migrate = function(args) {
 
     // Prompt the user for input
     prompt(args)
-    .then(() => Artifact.init()) // Ensure artifact model is created
     .then(() => Branch.init()) // Ensure branch model is created
     .then(() => Element.init()) // Ensure element model is created
     .then(() => Organization.init()) // Ensure org model is created

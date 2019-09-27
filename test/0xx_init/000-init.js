@@ -22,7 +22,6 @@
 const chai = require('chai');
 
 // MBEE modules
-const Artifact = M.require('models.artifact');
 const Branch = M.require('models.branch');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
@@ -80,7 +79,6 @@ describe(M.getModuleName(module.filename), function() {
  */
 async function initModels() {
   try {
-    await Artifact.init();
     await Branch.init();
     await Element.init();
     await Organization.init();

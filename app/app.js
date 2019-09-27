@@ -31,7 +31,6 @@ const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
 const migrate = M.require('lib.migrate');
-const Artifact = M.require('models.artifact');
 const Branch = M.require('models.branch');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
@@ -250,7 +249,6 @@ function createDefaultAdmin() {
  * @returns {Promise<void>} Returns an empty promise upon completion.
  */
 async function initModels() {
-  await Artifact.init();
   await Branch.init();
   await Element.init();
   await Organization.init();
