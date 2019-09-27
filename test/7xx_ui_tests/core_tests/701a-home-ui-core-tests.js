@@ -36,10 +36,6 @@ import Home from '../../../app/ui/components/home-views/home.jsx';
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  beforeEach(() => {
-    sinon.stub(window.location, 'assign');
-    // sinon.stub(window.location,   'replace');
-  });
   it('Renders the home component', homeRender);
 });
 
@@ -49,7 +45,7 @@ describe(M.getModuleName(module.filename), () => {
  * component renders correctly.
  */
 function homeRender(done) {
-  // Render list component
+  // Render home component
   const wrapper = mount(<Home />, { attachTo: document.getElementById('main') });
   // Expect component to be in DOM
   chai.expect(wrapper.find(Home).length).to.equal(1);
