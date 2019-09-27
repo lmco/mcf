@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.db
  *
@@ -32,7 +32,7 @@ requiredFunctions.forEach((fxn) => {
 });
 
 /**
- * @description Connects to the database
+ * @description Connects to the database.
  * @async
  */
 async function connect() {
@@ -45,7 +45,7 @@ async function connect() {
 }
 
 /**
- * @description Disconnects from the database
+ * @description Disconnects from the database.
  * @async
  */
 async function disconnect() {
@@ -59,8 +59,7 @@ async function disconnect() {
 
 /**
  * @description Clears all contents from the database, equivalent to starting
- * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN
- * PRODUCTION.
+ * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
  */
 async function clear() {
@@ -80,7 +79,7 @@ async function clear() {
  *
  * @param {*} data - User input to be sanitized. May be in any data format.
  *
- * @return {*} Sanitized user input.
+ * @returns {*} Sanitized user input.
  */
 function sanitize(data) {
   try {
@@ -92,10 +91,10 @@ function sanitize(data) {
 }
 
 /**
- * @description Defines the Schema class. Schemas define the properties and
- * methods that each instance of a document should have, as well as the static
- * functions which belong on a model. The Schema class is closely based on the
- * Mongoose.js Schema class {@link https://mongoosejs.com/docs/api/schema.html}.
+ * @description Defines the Schema class. Schemas define the properties and methods that each
+ * instance of a document should have, as well as the static functions which belong on a model.
+ * The Schema class is closely based on the Mongoose.js Schema class
+ * {@link https://mongoosejs.com/docs/api/schema.html}.
  */
 class Schema extends DBModule.Schema {
 
@@ -178,12 +177,11 @@ class Schema extends DBModule.Schema {
   }
 
   /**
-   * @description Defines a virtual field for the schema. Virtuals are not
-   * stored in the database and rather are calculated post-find. Virtuals
-   * generally will require a second request to retrieve referenced documents.
-   * Populated virtuals contains a localField and foreignField which must match
-   * for a document to be added to the virtual collection. For example, the
-   * Organization Schema contains a virtual called "projects". This virtual
+   * @description Defines a virtual field for the schema. Virtuals are not stored in the
+   * database and rather are calculated post-find. Virtuals generally will require a second
+   * request to retrieve referenced documents. Populated virtuals contains a localField and
+   * foreignField which must match for a document to be added to the virtual collection. For
+   * example, the Organization Schema contains a virtual called "projects". This virtual
    * returns all projects who "org" field matches the organization's "_id".
    *
    * @param {string} name - The name of the field to be added to the schema
@@ -277,7 +275,7 @@ class Model extends DBModule.Model {
    * be run in the constructor.
    * @async
    *
-   * @return {Promise<*>}
+   * @returns {Promise<void>} Returns an empty promise upon completion.
    */
   async init() {
     return super.init();
@@ -329,7 +327,7 @@ class Model extends DBModule.Model {
    *   }
    * ]);
    *
-   * @return {Promise<object>} Result of the bulkWrite operation.
+   * @returns {Promise<object>} Result of the bulkWrite operation.
    */
   async bulkWrite(ops, options, cb) {
     return super.bulkWrite(ops, options, cb);
@@ -354,7 +352,7 @@ class Model extends DBModule.Model {
    * find query by.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<number>} The number of documents which matched the filter.
+   * @returns {Promise<number>} The number of documents which matched the filter.
    */
   async countDocuments(filter, cb) {
     return super.countDocuments(filter, cb);
@@ -366,7 +364,7 @@ class Model extends DBModule.Model {
    *
    * @param {string} name - The name of the index.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return super.deleteIndex(name);
@@ -381,7 +379,7 @@ class Model extends DBModule.Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} An object denoting the success of the delete
+   * @returns {Promise<object>} An object denoting the success of the delete
    * operation.
    */
   async deleteMany(conditions, options, cb) {
@@ -393,7 +391,7 @@ class Model extends DBModule.Model {
    * schema.
    * @async
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>} Returns an empty promise upon completion.
    */
   async ensureIndexes() {
     return super.ensureIndexes();
@@ -431,7 +429,7 @@ class Model extends DBModule.Model {
    * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object[]>} An array containing the found documents, if
+   * @returns {Promise<object[]>} An array containing the found documents, if
    * any.
    */
   async find(filter, projection, options, cb) {
@@ -458,7 +456,7 @@ class Model extends DBModule.Model {
    * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} The found document, if any.
+   * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
     return super.findOne(conditions, projection, options, cb);
@@ -468,7 +466,7 @@ class Model extends DBModule.Model {
    * @description Returns an array of indexes for the given model.
    * @async
    *
-   * @return {Promise<object[]>} Array of index objects
+   * @returns {Promise<object[]>} Array of index objects.
    */
   async getIndexes() {
     return super.getIndexes();
@@ -487,7 +485,7 @@ class Model extends DBModule.Model {
    * the documents which are being created.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object[]>} The created documents.
+   * @returns {Promise<object[]>} The created documents.
    */
   async insertMany(docs, options, cb) {
     return super.insertMany(docs, options, cb);
@@ -519,7 +517,7 @@ class Model extends DBModule.Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<object>} The updated document.
+   * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
     return super.updateOne(filter, doc, options, cb);
@@ -528,13 +526,12 @@ class Model extends DBModule.Model {
 }
 
 /**
- * @description Defines the Store class. The Store class is used along with
- * express-session to manage sessions. The class MUST extend the node's built in
- * EventEmitter class. Please review the express-session documentation at
+ * @description Defines the Store class. The Store class is used along with express-session
+ * to manage sessions. The class MUST extend the node's built in EventEmitter class. Please
+ * review the express-session documentation at
  * {@link https://github.com/expressjs/session#session-store-implementation}
- * to learn more about the Store implementation. There are many libraries
- * available that support different databases, and a list of those are also
- * available at the link above.
+ * to learn more about the Store implementation. There are many libraries available that
+ * support different databases, and a list of those are also available at the link above.
  */
 class Store extends DBModule.Store {
 

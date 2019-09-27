@@ -1,7 +1,7 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
- * @module test.7xx_ui_tests.setup
+ * @module test.set-up
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,9 +11,8 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This is a helper file that sets up the fake dom
- * that the UI tests will render on along with the scripts needed
- * for the components.
+ * @description This file creates a fake virtual DOM
+ * and configures the enzyme adaptor for UI testing.
  */
 // NPM modules
 const { JSDOM } = require('jsdom');

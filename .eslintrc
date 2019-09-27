@@ -843,10 +843,12 @@
     ////////////////////////////////////////////////////////////////////////////
     "jsdoc/check-alignment": "error", // Recommended
     "jsdoc/check-examples": "off",
-    //"jsdoc/check-indentation": "error",
+    "jsdoc/check-indentation": "off",  // We frequently use indentation in our jsdocs
     "jsdoc/check-param-names": "error", // Recommended
     "jsdoc/check-syntax": "error",
-    "jsdoc/check-tag-names": "off", //TODO: reevaluate
+    "jsdoc/check-tag-names": ["error", {"definedTags":  [
+      "owner", "swagger","classification", "memberOf"
+    ]}], //TODO: reevaluate
     "jsdoc/check-types": "error", // Recommended
     "jsdoc/implements-on-classes": "warn", // Recommended
     "jsdoc/match-description": ["error", {"tags": {
@@ -876,13 +878,13 @@
     "jsdoc/require-description": ["error", {
       "descriptionStyle": "tag"
     }],
-    /*"jsdoc/require-description-complete-sentence": ["error", {"tags": [
+    "jsdoc/require-description-complete-sentence": ["error", {"tags": [
       "param", "property", "returns"
     ]}],
     "jsdoc/require-example": "off",
     "jsdoc/require-hyphen-before-param-description": "error",
     "jsdoc/require-jsdoc": "error", // Recommended
-    "jsdoc/require-param": "error", // Recommended
+    /*"jsdoc/require-param": "error", // Recommended
     "jsdoc/require-param-description": "error", // Recommended
     "jsdoc/require-param-name": "error", // Recommended
     "jsdoc/require-param-type": "error", // Recommended

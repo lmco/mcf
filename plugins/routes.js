@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module plugins.routes
  *
@@ -141,7 +141,7 @@ function loadPlugins() {
  * @description Clones the plugin from a Git repository and places in the
  * appropriate location in the plugins directory.
  *
- * @param {object} data The plugin configuration data.
+ * @param {object} data - The plugin configuration data.
  */
 function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
@@ -184,7 +184,7 @@ function clonePluginFromGitRepo(data) {
  * directory. If the plugin location is already in the local directory, nothing
  * occurs.
  *
- * @param {object} data The plugin configuration data.
+ * @param {object} data - The plugin configuration data.
  */
 function copyPluginFromLocalDir(data) {
   // Remove plugin if it already exists in plugins directory

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.docker
  *
@@ -11,8 +11,11 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description Builds and runs docker containers
+ * @description Builds and runs docker containers.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Rule disabled to allow list in description
+
 
 // Error Check - Check if file was run directly or global M object is undefined
 if (module.parent == null || typeof M === 'undefined') {
@@ -30,8 +33,8 @@ const { spawn, spawnSync } = require('child_process');
  * @description The Docker command can be used to build a Docker image or run a Docker
  * container. It supports the command line arguments:
  * --clean
- * --build`
- * --run`
+ * --build
+ * --run
  */
 function docker(args) {
   // Removes the previous docker build.

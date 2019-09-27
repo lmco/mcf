@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.user-controller
  *
@@ -94,7 +94,7 @@ const permissions = M.require('lib.permissions');
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
  *
- * @return {Promise} Array of found users' public data objects.
+ * @returns {Promise} Array of found users' public data objects.
  *
  * @example
  * find({User}, ['user1', 'user2'], { populate: 'createdBy' })
@@ -220,7 +220,7 @@ async function find(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created users' users' public data objects.
+ * @returns {Promise} Array of created users' users' public data objects.
  *
  * @example
  * create({User}, [{User1}, {User2}, ...], { populate: 'createdBy' })
@@ -387,7 +387,7 @@ async function create(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated users' public data objects.
+ * @returns {Promise} Array of updated users' public data objects.
  *
  * @example
  * update({User}, [{Updated User 1}, {Updated User 2}...], { populate: 'createdBy' })
@@ -605,7 +605,7 @@ async function update(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of users' public data objects.
+ * @returns {Promise} Array of users' public data objects.
  *
  * @example
  * createOrReplace({User}, [{User 1}, {User 2}...], { populate: 'createdBy' })
@@ -742,7 +742,7 @@ async function createOrReplace(requestingUser, users, options) {
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted users' usernames.
+ * @returns {Promise} Array of deleted users' usernames.
  *
  * @example
  * remove({User}, ['user1', 'user2'])
@@ -890,7 +890,7 @@ async function remove(requestingUser, users, options) {
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
  *
- * @return {Promise} An array of found users.
+ * @returns {Promise} An array of found users.
  *
  * @example
  * search({User}, 'query', {'populate':'createdBy'})
@@ -985,7 +985,7 @@ async function search(requestingUser, query, options) {
  * @param {string} confirmPassword - The new password entered a second time
  * to confirm they match.
  *
- * @return {Promise} The updated user public data object.
+ * @returns {Promise} The updated user public data object.
  *
  * @example
  * updatePassword({User}, 'oldPass', 'newPass', 'newPass')

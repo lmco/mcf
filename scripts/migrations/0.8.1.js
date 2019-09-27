@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.migrations.0.8.1
  *
@@ -120,7 +120,7 @@ function elementHelper() {
 }
 
 /**
- * @description Recursive function for elementHelper()
+ * @description Recursive function for elementHelper().
  */
 function elementHelperRecursive(ids) {
   return new Promise((resolve, reject) => {

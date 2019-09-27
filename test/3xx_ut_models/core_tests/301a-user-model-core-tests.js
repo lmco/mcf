@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.301a-user-model-tests
  *
@@ -187,7 +187,7 @@ async function updateUser() {
 }
 
 /**
- * @description Delete a user
+ * @description Delete a user.
  */
 async function deleteUser() {
   // Remove the user

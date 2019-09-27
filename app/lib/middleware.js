@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.middleware
  *
@@ -32,7 +32,7 @@ module.exports.logRoute = function logRoute(req, res, next) {
 };
 
 /**
- * @description Log the IP address where the request originated from
+ * @description Log the IP address where the request originated from.
  *
  * @param {object} req - Request object from express.
  * @param {object} res - Response object from express.
@@ -55,10 +55,10 @@ module.exports.logIP = function logIP(req, res, next) {
 
 /**
  * @description Disables specific user api methods using the configuration
- * server.api.userAPI
+ * server.api.userAPI.
  *
- * @param {object} req - Request object from express
- * @param {object} res - Response object from express
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
  * @param {Function} next - Callback to express authentication flow.
  */
 // eslint-disable-next-line consistent-return
@@ -76,10 +76,10 @@ module.exports.disableUserAPI = function disableUserAPI(req, res, next) {
 };
 
 /**
- * @description Disables the user patchPassword API endpoint
+ * @description Disables the user patchPassword API endpoint.
  *
- * @param {object} req - Request object from express
- * @param {object} res - Response object from express
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
  * @param {Function} next - Callback to express authentication flow.
  */
 // eslint-disable-next-line consistent-return

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.000-init
  *
@@ -64,7 +64,7 @@ describe(M.getModuleName(module.filename), function() {
   });
 
   /**
-   * Execute the tests
+   * Execute the tests.
    */
   it('should initialize the models', initModels);
   it('clean database', cleanDB);
@@ -76,7 +76,7 @@ describe(M.getModuleName(module.filename), function() {
  * @description Initializes all models asynchronously.
  * @async
  *
- * @return {Promise<void>}
+ * @returns {Promise<void>} Resolves upon successful initiation of models.
  */
 async function initModels() {
   try {
@@ -116,7 +116,7 @@ function cleanDB(done) {
 
 
 /**
- * @description Creates the default org if it doesn't already exist
+ * @description Creates the default org if it doesn't already exist.
  */
 function createDefaultOrg(done) {
   Organization.findOne({ _id: M.config.server.defaultOrganizationId })

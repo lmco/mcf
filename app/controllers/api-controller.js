@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.api-controller
  *
@@ -17,7 +17,8 @@
  * couples with the app/api-routes.js file.
  */
 /* eslint-disable jsdoc/match-description */
-// Disabling this rule due to the use of headers for api endpoints
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabling these rules due to the use of headers for api endpoints
 
 
 // Node.js Modules
@@ -154,7 +155,7 @@ function returnResponse(req, res, message, statusCode) {
  * @description Generates the Swagger specification based on the Swagger JSDoc
  * in the API routes file.
  *
- * @return {object} swaggerJS object
+ * @returns {object} swaggerJS object.
  */
 function swaggerSpec() {
   return swaggerJSDoc({
@@ -179,7 +180,7 @@ function swaggerSpec() {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with swagger JSON
+ * @returns {object} Response object with swagger JSON
  */
 function swaggerJSON(req, res) {
   // Return swagger specification
@@ -195,7 +196,7 @@ function swaggerJSON(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with session token
+ * @returns {object} Response object with session token
  */
 function login(req, res) {
   const json = formatJSON({ token: req.session.token });
@@ -210,7 +211,7 @@ function login(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with 200 status code
+ * @returns {object} Response object with 200 status code
  */
 function test(req, res) {
   res.status(200).send('');
@@ -225,7 +226,7 @@ function test(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with version
+ * @returns {object} Response object with version
  */
 function version(req, res) {
   // Create version object
@@ -248,7 +249,7 @@ function version(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with orgs' public data
+ * @returns {object} Response object with orgs' public data
  *
  * NOTE: All users are members of the 'default' org, should always have
  * access to at least this organization.
@@ -361,7 +362,7 @@ async function getOrgs(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with orgs' public data
+ * @returns {object} Response object with orgs' public data
  */
 async function postOrgs(req, res) {
   // Define options
@@ -448,7 +449,7 @@ async function postOrgs(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with orgs' public data
+ * @returns {object} Response object with orgs' public data
  */
 async function putOrgs(req, res) {
   // Define options
@@ -534,7 +535,7 @@ async function putOrgs(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with orgs' public data
+ * @returns {object} Response object with orgs' public data
  */
 async function patchOrgs(req, res) {
   // Define options
@@ -622,7 +623,7 @@ async function patchOrgs(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with array of deleted org IDs.
+ * @returns {object} Response object with array of deleted org IDs.
  */
 async function deleteOrgs(req, res) {
   // Define options
@@ -686,7 +687,7 @@ async function deleteOrgs(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with org's public data
+ * @returns {object} Response object with org's public data
  */
 async function getOrg(req, res) {
   // Define options
@@ -766,7 +767,7 @@ async function getOrg(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with org's public data
+ * @returns {object} Response object with org's public data
  */
 async function postOrg(req, res) {
   // Define options
@@ -854,7 +855,7 @@ async function postOrg(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with org's public data
+ * @returns {object} Response object with org's public data
  */
 async function putOrg(req, res) {
   // Define options
@@ -941,7 +942,7 @@ async function putOrg(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with updated org
+ * @returns {object} Response object with updated org
  */
 async function patchOrg(req, res) {
   // Define options
@@ -1030,7 +1031,7 @@ async function patchOrg(req, res) {
  * @param {object} res - Response express object.
  * @param {Function} next - Callback function.
  *
- * @return {object} Response object with deleted org ID.
+ * @returns {object} Response object with deleted org ID.
  */
 async function deleteOrg(req, res, next) {
   // Define options
@@ -1099,7 +1100,7 @@ async function deleteOrg(req, res, next) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with projects' public data
+ * @returns {object} Response object with projects' public data
  */
 async function getAllProjects(req, res) {
   // Define options
@@ -1193,7 +1194,7 @@ async function getAllProjects(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with projects' public data
+ * @returns {object} Response object with projects' public data
  */
 async function getProjects(req, res) {
   // Define options and ids
@@ -1305,7 +1306,7 @@ async function getProjects(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with created projects.
+ * @returns {object} Response object with created projects.
  */
 async function postProjects(req, res) {
   // Define options
@@ -1392,7 +1393,7 @@ async function postProjects(req, res) {
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
  *
- * @return {object} Response object with created/replaced projects.
+ * @returns {object} Response object with created/replaced projects.
  */
 async function putProjects(req, res) {
   // Define options
@@ -1478,7 +1479,7 @@ async function putProjects(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with updated projects.
+ * @returns {object} Response object with updated projects.
  */
 async function patchProjects(req, res) {
   // Define options
@@ -1566,7 +1567,7 @@ async function patchProjects(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with deleted project IDs.
+ * @returns {object} Response object with deleted project IDs.
  */
 async function deleteProjects(req, res) {
   // Define options
@@ -1633,7 +1634,7 @@ async function deleteProjects(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with project's public data
+ * @returns {object} Response object with project's public data
  */
 async function getProject(req, res) {
   // Define options
@@ -1713,7 +1714,7 @@ async function getProject(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created project.
+ * @returns {object} Response object with created project.
  */
 async function postProject(req, res) {
   // Define options
@@ -1800,7 +1801,7 @@ async function postProject(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created project.
+ * @returns {object} Response object with created project.
  */
 async function putProject(req, res) {
   // Define options
@@ -1887,7 +1888,7 @@ async function putProject(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with updated project.
+ * @returns {object} Response object with updated project.
  */
 async function patchProject(req, res) {
   // Define options
@@ -1975,7 +1976,7 @@ async function patchProject(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with deleted project ID.
+ * @returns {object} Response object with deleted project ID.
  */
 async function deleteProject(req, res) {
   // Define options
@@ -2045,7 +2046,7 @@ async function deleteProject(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with users' public data
+ * @returns {object} Response object with users' public data
  */
 async function getUsers(req, res) {
   // Define options
@@ -2150,7 +2151,7 @@ async function getUsers(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with users' public data
+ * @returns {object} Response object with users' public data
  */
 async function postUsers(req, res) {
   // Define options
@@ -2236,7 +2237,7 @@ async function postUsers(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with users' public data
+ * @returns {object} Response object with users' public data
  */
 async function putUsers(req, res) {
   // Define options
@@ -2322,7 +2323,7 @@ async function putUsers(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with users' public data
+ * @returns {object} Response object with users' public data
  */
 async function patchUsers(req, res) {
   // Define options
@@ -2409,7 +2410,7 @@ async function patchUsers(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with usernames
+ * @returns {object} Response object with usernames
  */
 async function deleteUsers(req, res) {
   // Define options
@@ -2469,7 +2470,7 @@ async function deleteUsers(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with user's public data
+ * @returns {object} Response object with user's public data
  */
 async function getUser(req, res) {
   // Define options
@@ -2551,7 +2552,7 @@ async function getUser(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created user
+ * @returns {object} Response object with created user
  */
 async function postUser(req, res) {
   // Define options
@@ -2638,7 +2639,7 @@ async function postUser(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created user
+ * @returns {object} Response object with created user
  */
 async function putUser(req, res) {
   // Define options
@@ -2725,7 +2726,7 @@ async function putUser(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with updated user
+ * @returns {object} Response object with updated user
  */
 async function patchUser(req, res) {
   // Define options
@@ -2812,7 +2813,7 @@ async function patchUser(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with deleted username
+ * @returns {object} Response object with deleted username
  */
 async function deleteUser(req, res) {
   // Define options
@@ -2880,7 +2881,7 @@ async function deleteUser(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with user's public data
+ * @returns {object} Response object with user's public data
  */
 async function whoami(req, res) {
   // Define options
@@ -2935,7 +2936,7 @@ async function whoami(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with found users
+ * @returns {object} Response object with found users
  */
 async function searchUsers(req, res) {
   // Define options and query
@@ -3024,7 +3025,7 @@ async function searchUsers(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with updated user public data.
+ * @returns {object} Response object with updated user public data.
  */
 async function patchPassword(req, res) {
   // Define options
@@ -3113,7 +3114,7 @@ async function patchPassword(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with elements' public data
+ * @returns {object} Response object with elements' public data
  */
 async function getElements(req, res) {
   // Define options and ids
@@ -3274,7 +3275,7 @@ async function getElements(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created elements
+ * @returns {object} Response object with created elements
  */
 async function postElements(req, res) {
   // Define options
@@ -3362,7 +3363,7 @@ async function postElements(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created/replaced elements
+ * @returns {object} Response object with created/replaced elements
  */
 async function putElements(req, res) {
   // Define options
@@ -3448,7 +3449,7 @@ async function putElements(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with updated elements
+ * @returns {object} Response object with updated elements
  */
 async function patchElements(req, res) {
   // Define options
@@ -3534,7 +3535,7 @@ async function patchElements(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
- * @return {object} Response object with element ids.
+ * @returns {object} Response object with element ids.
  */
 async function deleteElements(req, res) {
   // Define options
@@ -3597,7 +3598,7 @@ async function deleteElements(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with elements
+ * @returns {object} Response object with elements
  */
 async function searchElements(req, res) {
   // Define options and query
@@ -3703,7 +3704,7 @@ async function searchElements(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with element's public data
+ * @returns {object} Response object with element's public data
  */
 async function getElement(req, res) {
   // Define options
@@ -3789,7 +3790,7 @@ async function getElement(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created element
+ * @returns {object} Response object with created element
  */
 async function postElement(req, res) {
   // Define options
@@ -3877,7 +3878,7 @@ async function postElement(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created/replaced element
+ * @returns {object} Response object with created/replaced element
  */
 async function putElement(req, res) {
   // Define options
@@ -3964,7 +3965,7 @@ async function putElement(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with updated element
+ * @returns {object} Response object with updated element
  */
 async function patchElement(req, res) {
   // Define options
@@ -4051,7 +4052,7 @@ async function patchElement(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with deleted element id.
+ * @returns {object} Response object with deleted element id.
  */
 async function deleteElement(req, res) {
   // Define options
@@ -4121,7 +4122,7 @@ async function deleteElement(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with branches' public data
+ * @returns {object} Response object with branches' public data
  */
 async function getBranches(req, res) {
   // Define options and ids
@@ -4233,7 +4234,7 @@ async function getBranches(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with created branches.
+ * @returns {object} Response object with created branches.
  */
 async function postBranches(req, res) {
   // Define options
@@ -4319,7 +4320,7 @@ async function postBranches(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with updated branches
+ * @returns {object} Response object with updated branches
  */
 async function patchBranches(req, res) {
   // Define options
@@ -4406,7 +4407,7 @@ async function patchBranches(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with deleted branch IDs.
+ * @returns {object} Response object with deleted branch IDs.
  */
 async function deleteBranches(req, res) {
   // Define options
@@ -4473,7 +4474,7 @@ async function deleteBranches(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with branch's public data
+ * @returns {object} Response object with branch's public data
  */
 async function getBranch(req, res) {
   // Define options
@@ -4552,7 +4553,7 @@ async function getBranch(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with created branch
+ * @returns {object} Response object with created branch
  */
 async function postBranch(req, res) {
   // Define options
@@ -4639,7 +4640,7 @@ async function postBranch(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response object with updated branch
+ * @returns {object} Response object with updated branch
  */
 async function patchBranch(req, res) {
   // Define options
@@ -4727,7 +4728,7 @@ async function patchBranch(req, res) {
  * @param {object} req - request express object
  * @param {object} res - response express object
  *
- * @return {object} Response object with deleted branch ID.
+ * @returns {object} Response object with deleted branch ID.
  */
 async function deleteBranch(req, res) {
   // Define options
@@ -4797,7 +4798,7 @@ async function deleteBranch(req, res) {
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @return {object} Response error message
+ * @returns {object} Response error message
  */
 function invalidRoute(req, res) {
   const json = 'Invalid Route or Method.';
