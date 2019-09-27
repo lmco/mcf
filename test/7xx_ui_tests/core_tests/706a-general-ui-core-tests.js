@@ -90,7 +90,7 @@ async function keyDataRender(done) {
  */
 async function dividerRender(done) {
   // Render key data component
-   const wrapper = shallow(<Divider />);
+  const wrapper = shallow(<Divider />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
   done();
