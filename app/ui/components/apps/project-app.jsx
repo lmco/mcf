@@ -73,7 +73,7 @@ class ProjectApp extends Component {
         // Verify if admin
         if (data.admin) {
           // Update options to return archived data
-          opt = 'minified=true&archived=true';
+          opt = 'minified=true&includeArchived=true';
         }
 
         // Get project data

@@ -74,7 +74,7 @@ class OrganizationList extends Component {
         // Verify if admin console
         if (this.props.adminPage) {
           // Update options to grab archived data
-          opt = 'populate=projects&archived=true&minified=true';
+          opt = 'populate=projects&includeArchived=true&minified=true';
         }
 
         // Get org data

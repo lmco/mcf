@@ -213,6 +213,11 @@ api.route('/version')
  *         description: Search for orgs last modified by a specific user.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived orgs.  If false, only returns
+ *                      unarchived orgs.  Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: Search for orgs archived by a specific user.
  *         in: query
@@ -1064,6 +1069,11 @@ api.route('/projects')
  *         description: Search for projects last modified by a specific user.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived projects.  If false, only returns
+ *                      unarchived projects.  Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: Search for projects archived by a specific user.
  *         in: query
@@ -1912,6 +1922,11 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         description: Search for branches last modified by a specific user.
  *         in: query
  *         type: string
+ *       - name: archived
+ *         description: Search only for archived branches.  If false, only returns
+ *                      unarchived branches.  Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
  *       - name: archivedBy
  *         description: Search for branches archived by a specific user.
  *         in: query

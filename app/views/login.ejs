@@ -18,7 +18,7 @@
 
 <div id="main">
   <div id="view" class="view">
-    <div class="container" style="max-width: 450px;" onkeypress="triggerModal(event)">
+    <div class="container" style="max-width: 450px;" onkeypress="triggerModal(event, <%=ui.loginModal.on%>) ">
       <% if (err.length) { %>
         <div class="alert alert-danger alert-dismissible fade show" role="alert"
              style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%);">
@@ -28,7 +28,7 @@
           </button>
         </div>
       <% } %>
-      <form id="login-form" action="/login" method="POST" >
+      <form id="login-form" action="/login" method="POST">
         <div class="form-group" >
           <label for="username">Username</label>
           <input id="username" name="username" type="text" class="form-control"
@@ -41,12 +41,11 @@
         <div class="form-group">
           <input id="next" name="next" type="hidden" class="form-control"  value="<%= next %>">
         </div>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#login-warning">
+        <button id="loginBtn" type="button" class="btn btn-primary" onClick="triggerModal(event, <%=ui.loginModal.on%>)">
           Login
         </button>
       </form>
     </div>
-
     <div id="login-warning" class="modal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
@@ -57,7 +56,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <p style="color:#333;">This system is the property of Lockheed Martin and its subsidiaries and affiliates, and is intended for the use of authorized users only. Employees and users of these computing and information resources should have no expectation of privacy with regard to use of these resources. All activities of individuals using this computing system with or without authority, or in excess of their authority, may be monitored and recorded by system personnel or by third parties. Information regarding such monitoring may be provided to law enforcement officials or other third parties for any reason, and/or used for further legal action by this Corporation. Unauthorized use of this system is prohibited and may result in revocation of access, disciplinary action and/or legal action. The Corporation reserves the right to monitor and review user activity, files and electronic messages. Reminder: Information transmitted to a foreign person on this network may be subject to applicable Export Control laws. Contact your Export Coordinator for assistance.</p>
+            <p style="color:#333;"><%= ui.loginModal.message %></p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -75,9 +74,18 @@
 // redirect to the home page.
  %>
 <script>
-function triggerModal(e) {
-  if (e.keyCode == 13) {
+function triggerModal(e, uiLabel) {
+  if (e.keyCode == 13 && uiLabel) {
     $('#login-warning').modal({show: true});
+  }
+  else if (e.keyCode == 13 && !uiLabel){
+    doLogin();
+  }
+  else if (e.target.id === 'loginBtn' && uiLabel) {
+    $('#login-warning').modal({show: true});
+  }
+  else if (e.target.id === 'loginBtn' && !uiLabel) {
+    doLogin();
   }
 }
 function doLogin() {

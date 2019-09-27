@@ -130,6 +130,10 @@ const UserSchema = new mongoose.Schema({
   custom: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
+  },
+  failedlogins: {
+    type: mongoose.Schema.Types.Mixed,
+    default: []
   }
 });
 UserSchema.virtual('name')

@@ -17,6 +17,11 @@
 
 // Node modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Branch = M.require('models.branch');
@@ -110,7 +115,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Creates a branch using the branch model
  */
-function createBranch(done) {
+async function createBranch() {
   // Create new branch object
   const newBranch = new Branch({
     _id: utils.createID(org.id, projID, testData.branches[0].id),
@@ -120,89 +125,53 @@ function createBranch(done) {
   });
 
   // Save branch object to database
-  newBranch.save()
-  .then((createdBranch) => {
-    // Check branch object saved correctly
-    chai.expect(createdBranch._id).to.equal(
-      utils.createID(project._id, testData.branches[0].id)
-    );
-    chai.expect(createdBranch.name).to.equal(testData.branches[0].name);
-    chai.expect(createdBranch.project).to.equal(project._id);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+  const createdBranch = await newBranch.save();
+  // Check branch object saved correctly
+  createdBranch._id.should.equal(utils.createID(project._id, testData.branches[0].id));
+  createdBranch.name.should.equal(testData.branches[0].name);
+  createdBranch.project.should.equal(project._id);
 }
 
 /**
  * @description Find a branch using the branch model
  */
-function findBranch(done) {
+async function findBranch() {
   // Find the branch
-  Branch.findOne({ _id: utils.createID(project._id, testData.branches[0].id) })
-  .then((branch) => {
-    // Verify found branch is correct
-    chai.expect(branch.name).to.equal(testData.branches[0].name);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+  const branch = await Branch.findOne(
+    { _id: utils.createID(project._id, testData.branches[0].id) }
+  );
+  // Verify found branch is correct
+  branch.name.should.equal(testData.branches[0].name);
 }
 
 /**
  * @description Update a branch using the branch model
  */
-function updateBranch(done) {
+async function updateBranch() {
   // Update the branch
-  Branch.findOneAndUpdate(
+  await Branch.findOneAndUpdate(
     { _id: utils.createID(project._id, testData.branches[0].id) },
     { name: `${testData.branches[0]}_edit` }
-  )
+  );
   // Find the updated branch
-  .then(() => Branch.findOne({
-    _id: utils.createID(project._id, testData.branches[0].id) }))
-  .then((branch) => {
-    // Verify the found branch was update successfully
-    chai.expect(branch.name).to.equal(`${testData.branches[0]}_edit`);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+  const branch = await Branch.findOne({
+    _id: utils.createID(project._id, testData.branches[0].id) });
+  // Verify the found branch was update successfully
+  branch.name.should.equal(`${testData.branches[0]}_edit`);
 }
 
 /**
  * @description Delete a branch using the branch model
  */
-function deleteBranch(done) {
+async function deleteBranch() {
   // Create the branch ID to remove
   const branchID = utils.createID(project._id, testData.branches[0].id);
 
   // Find and delete the branch
-  Branch.findOneAndRemove({ _id: branchID })
+  await Branch.findOneAndRemove({ _id: branchID });
 
   // Attempt to find the branch
-  .then(() => Branch.findOne({ _id: branchID }))
-  .then((branch) => {
-    // Expect no branches to be found
-    chai.expect(branch).to.equal(null);
-    done();
-  })
-  .catch((error) => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+  const branch = await Branch.findOne({ _id: branchID });
+  // Expect no branches to be found
+  chai.expect(branch).to.equal(null);
 }

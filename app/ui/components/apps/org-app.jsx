@@ -73,7 +73,7 @@ class OrgApp extends Component {
         // Verify if admin user
         if (data.admin) {
           // Update options to grab archived data
-          opt = 'populate=projects&minified=true&archived=true';
+          opt = 'populate=projects&minified=true&includeArchived=true';
         }
 
         // Get org data

@@ -19,6 +19,11 @@
 
 // Node modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Org = M.require('models.organization');
@@ -97,84 +102,82 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates a project using the project model and saves it to the
  * database.
  */
-function createProject(done) {
+async function createProject() {
   // Create a project model object
   const newProject = new Project({
     _id: utils.createID(org._id, testData.projects[0].id),
     name: testData.projects[0].name,
     org: org._id
   });
-  // Save project model object to database
-  newProject.save()
-  .then(() => done())
-  .catch((error) => {
+  try {
+    // Save project model object to database
+    await newProject.save();
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Finds a previously created project
  */
-function findProject(done) {
-  // Find the project
-  Project.findOne({ _id: utils.createID(org._id, testData.projects[0].id) })
-  .then((proj) => {
-    // Ensure project data is correct
-    chai.expect(proj.name).to.equal(testData.projects[0].name);
-    done();
-  })
-  .catch((error) => {
+async function findProject() {
+  let proj;
+  try {
+    // Find the project
+    proj = await Project.findOne({ _id: utils.createID(org._id, testData.projects[0].id) });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Ensure project data is correct
+  proj._id.should.equal(utils.createID(org._id, testData.projects[0].id));
+  proj.name.should.equal(testData.projects[0].name);
 }
 
 /**
  * @description Updates a projects name
  */
-function updateProject(done) {
-  // Find and update project previously created in createProject test
-  Project.findOneAndUpdate({
-    _id: utils.createID(org._id, testData.projects[0].id) },
-  { name: testData.projects[1].name })
-  // Find previously updated project
-  .then(() => Project.findOne({
-    _id: utils.createID(org._id, testData.projects[0].id)
-  }))
-  .then((proj) => {
-    // Ensure project name was successfully updated
-    chai.expect(proj.name).to.equal(testData.projects[1].name);
-    done();
-  })
-  .catch((error) => {
+async function updateProject() {
+  let proj;
+  try {
+    // Find and update project previously created in createProject test
+    await Project.findOneAndUpdate({
+      _id: utils.createID(org._id, testData.projects[0].id) },
+    { name: testData.projects[1].name });
+    // Find previously updated project
+    proj = await Project.findOne({
+      _id: utils.createID(org._id, testData.projects[0].id)
+    });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Ensure project name was successfully updated
+  proj.name.should.equal(testData.projects[1].name);
 }
 
 /**
  * @description Deletes the project previously created in createProject test.
  */
-function deleteProject(done) {
-  // Find and remove the project previously created in createProject test.
-  Project.findOneAndRemove({ _id: utils.createID(org._id, testData.projects[0].id) })
-  .then(() => Project.find({ _id: utils.createID(org._id, testData.projects[0].id) }))
-  .then((projects) => {
-    // Expect to find no projects
-    chai.expect(projects.length).to.equal(0);
-    done();
-  })
-  .catch((error) => {
+async function deleteProject() {
+  let projects;
+  try {
+    // Find and remove the project previously created in createProject test.
+    await Project.findOneAndRemove({ _id: utils.createID(org._id, testData.projects[0].id) });
+    projects = await Project.find({ _id: utils.createID(org._id, testData.projects[0].id) });
+  }
+  catch (error) {
     M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Expect to find no projects
+  projects.length.should.equal(0);
 }

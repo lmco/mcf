@@ -48,6 +48,7 @@ const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-helper');
+const permissions = M.require('lib.permissions');
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -86,6 +87,8 @@ const helper = M.require('lib.controller-helper');
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for projects with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived projects.  If false,
+ * only returns unarchived projects.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for projects with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
@@ -130,21 +133,25 @@ async function find(requestingUser, organizationID, projects, options) {
   const searchQuery = { archived: false };
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'archived',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Project);
+  const validatedOptions = utils.validateOptions(options, ['populate',
+    'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Project);
 
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['name', 'visibility', 'createdBy',
-      'lastModifiedBy', 'archivedBy'];
+      'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
         // Add the search option to the searchQuery
@@ -154,12 +161,17 @@ async function find(requestingUser, organizationID, projects, options) {
   }
 
   // If not system admin, add permissions check
+  // TODO: Consider updating logic to use permissions library
   if (!reqUser.admin) {
     searchQuery[`permissions.${reqUser._id}`] = 'read';
   }
-  // If the archived field is true, remove it from the query
-  if (validOptions.archived) {
+  // If the includeArchived field is true, remove archived from the query; return everything
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
+  }
+  // If the archived field is true, query only for archived elements
+  if (validatedOptions.archived) {
+    searchQuery.archived = true;
   }
   if (orgID !== null) {
     searchQuery.org = orgID;
@@ -183,31 +195,24 @@ async function find(requestingUser, organizationID, projects, options) {
   if (organizationID !== null) {
     // Find the organization, validate that it exists and is not archived (unless specfified)
     const foundOrg = await helper.findAndValidate(Organization, orgID,
-      validOptions.archived);
+      ((options && options.archived) || validatedOptions.includeArchived));
     // Permissions check
-    if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-      || !foundOrg.permissions[reqUser._id].includes('read'))) {
+    if (!permissions.readOrg(reqUser, foundOrg)) {
       throw new M.PermissionError('User does not have permission to find'
         + ` projects on the organization [${orgID}].`, 'warn');
     }
   }
-  let finishedProjects;
-  // If the lean option is supplied
-  if (validOptions.lean) {
+
+  try {
     // Find the projects
-    finishedProjects = await Project.find(searchQuery, validOptions.fieldsString,
-      { limit: validOptions.limit, skip: validOptions.skip })
-    .sort(validOptions.sort)
-    .populate(validOptions.populateString).lean();
+    return await Project.find(searchQuery, validatedOptions.fieldsString,
+      { limit: validatedOptions.limit, skip: validatedOptions.skip })
+    .sort(validatedOptions.sort)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
   }
-  else {
-    // Find the projects
-    finishedProjects = await Project.find(searchQuery, validOptions.fieldsString,
-      { limit: validOptions.limit, skip: validOptions.skip })
-    .sort(validOptions.sort)
-    .populate(validOptions.populateString);
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
   }
-  return finishedProjects;
 }
 
 /**
@@ -264,7 +269,7 @@ async function create(requestingUser, organizationID, projects, options) {
   let projObjects = [];
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Project);
 
   // Define array to store project data
@@ -329,8 +334,7 @@ async function create(requestingUser, organizationID, projects, options) {
   // Find the organization, validate that it exists and is not archived
   const foundOrg = await helper.findAndValidate(Organization, orgID);
   // Permissions check
-  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-    || !foundOrg.permissions[reqUser._id].includes('write'))) {
+  if (!permissions.createProject(reqUser, foundOrg)) {
     throw new M.PermissionError('User does not have permission to create'
       + ` projects on the organization [${orgID}].`, 'warn');
   }
@@ -393,6 +397,7 @@ async function create(requestingUser, organizationID, projects, options) {
     projObj.createdBy = reqUser._id;
     projObj.updatedOn = Date.now();
     projObj.archivedBy = (projObj.archived) ? reqUser._id : null;
+    projObj.archivedOn = (projObj.archived) ? Date.now() : null;
     return projObj;
   });
 
@@ -452,7 +457,7 @@ async function create(requestingUser, organizationID, projects, options) {
     archivedBy: (p.archived) ? reqUser._id : null
   }));
 
-    // Create a holding bin element for each project
+  // Create a holding bin element for each project
   const elemHoldingBinObj = projObjects.map((p) => new Element({
     _id: utils.createID(p._id, 'master', 'holding_bin'),
     name: 'holding bin',
@@ -467,7 +472,7 @@ async function create(requestingUser, organizationID, projects, options) {
     archivedBy: (p.archived) ? reqUser._id : null
   }));
 
-  // Create a undefined element for each project
+  // Create an undefined element for each project
   const elemUndefinedBinObj = projObjects.map((p) => new Element({
     _id: utils.createID(p._id, 'master', 'undefined'),
     name: 'undefined element',
@@ -489,18 +494,14 @@ async function create(requestingUser, organizationID, projects, options) {
   // Create the elements
   await Element.insertMany(conCatElemObj);
 
-  let foundCreatedProjects;
-  // If the lean option is supplied
-  if (validOptions.lean) {
-    foundCreatedProjects = await Project.find({ _id: { $in: arrIDs } },
-      validOptions.fieldsString).populate(validOptions.populateString).lean();
+  try {
+    return await Project.find({ _id: { $in: arrIDs } },
+      validatedOptions.fieldsString).populate(validatedOptions.populateString)
+    .lean(validatedOptions.lean);
   }
-  else {
-    foundCreatedProjects = await Project.find({ _id: { $in: arrIDs } },
-      validOptions.fieldsString).populate(validOptions.populateString);
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
   }
-
-  return foundCreatedProjects;
 }
 
 /**
@@ -568,7 +569,7 @@ async function update(requestingUser, organizationID, projects, options) {
   let updatingPermissions = false;
 
   // Initialize and ensure options are valid
-  const validOptions = utils.validateOptions(options, ['populate', 'fields',
+  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
     'lean'], Project);
 
   // Check the type of the projects parameter
@@ -622,8 +623,7 @@ async function update(requestingUser, organizationID, projects, options) {
   // Find the organization containing the projects, validate that it exists and is not archived
   const foundOrg = await helper.findAndValidate(Organization, orgID);
   // Permissions check
-  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-    || !foundOrg.permissions[reqUser._id].includes('read'))) {
+  if (!permissions.readOrg(reqUser, foundOrg)) {
     throw new M.PermissionError('User does not have permission to update'
       + ` projects on the organization [${orgID}].`, 'warn');
   }
@@ -633,8 +633,7 @@ async function update(requestingUser, organizationID, projects, options) {
 
   // Check that the user has admin permissions
   foundProjects.forEach((proj) => {
-    if (!reqUser.admin && (!proj.permissions[reqUser._id]
-      || !proj.permissions[reqUser._id].includes('admin'))) {
+    if (!permissions.updateProject(reqUser, foundOrg, proj)) {
       throw new M.PermissionError('User does not have permission to update'
         + ` the project [${utils.parseID(proj._id).pop()}].`, 'warn');
     }
@@ -867,21 +866,16 @@ async function update(requestingUser, organizationID, projects, options) {
     return Element.bulkWrite(bulkArray2);
   }
 
-  let foundUpdatedProjects;
-  // If the lean option is supplied
-  if (validOptions.lean) {
-    foundUpdatedProjects = await Project.find(searchQuery, validOptions.fieldsString)
-    .populate(validOptions.populateString).lean();
+  try {
+    const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString)
+    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+    // Emit the event projects-updated
+    EventEmitter.emit('projects-updated', foundUpdatedProjects);
+    return foundUpdatedProjects;
   }
-  else {
-    foundUpdatedProjects = await Project.find(searchQuery, validOptions.fieldsString)
-    .populate(validOptions.populateString);
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
   }
-
-  // Emit the event projects-updated
-  EventEmitter.emit('projects-updated', foundUpdatedProjects);
-
-  return foundUpdatedProjects;
 }
 
 /**
@@ -985,12 +979,6 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
   // Find the organization containing the projects, validate that it exists and is not archived
   const foundOrg = await helper.findAndValidate(Organization, orgID);
-  // Permissions check
-  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-    || !foundOrg.permissions[reqUser._id].includes('write'))) {
-    throw new M.PermissionError('User does not have permission to create or replace'
-      + ` projects on the organization [${orgID}].`, 'warn');
-  }
 
   // Find the projects to update
   foundProjects = await Project.find(searchQuery).lean();
@@ -998,8 +986,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
   // Check if new projects are being created
   if (projectsToLookUp.length > foundProjects.length) {
     // Ensure the user has at least write access on the organization
-    if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-      || !foundOrg.permissions[reqUser._id].includes('write'))) {
+    if (!permissions.createProject(reqUser, foundOrg)) {
       throw new M.PermissionError('User does not have permission to create'
         + ` projects on the organization [${orgID}].`, 'warn');
     }
@@ -1007,8 +994,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
   // Check that the user has admin permissions
   foundProjects.forEach((proj) => {
-    if (!reqUser.admin && (!proj.permissions[reqUser._id]
-      || !proj.permissions[reqUser._id].includes('admin'))) {
+    if (!permissions.updateProject(reqUser, foundOrg, proj)) {
       throw new M.PermissionError('User does not have permission to create or '
         + `replace the project [${utils.parseID(proj._id).pop()}].`, 'warn');
     }
@@ -1068,20 +1054,15 @@ async function createOrReplace(requestingUser, organizationID, projects, options
       // Reinsert original data
       try {
         await Project.insertMany(foundProjects);
-        await new Promise(async (resInner) => {
-          // Remove the backup file
-          await fs.unlink(path.join(M.root, 'data', orgID,
-            `PUT-backup-projects-${ts}.json`), function(err) {
-            if (err) throw err;
-            else resInner();
-          });
-        });
+        fs.unlinkSync(path.join(M.root, 'data', orgID,
+          `PUT-backup-projects-${ts}.json`));
+
         // Restoration succeeded; pass the original error
         res(error);
       }
-      catch (err) {
+      catch (restoreErr) {
         // Pass a new error that occurred while trying to restore projects
-        res(err);
+        res(restoreErr);
       }
     });
     // Throw whichever error was passed
@@ -1093,12 +1074,12 @@ async function createOrReplace(requestingUser, organizationID, projects, options
     orgID, `PUT-backup-projects-${ts}.json`);
   // Delete the temporary file.
   if (fs.existsSync(filePath)) {
-    await new Promise(function(res, rej) {
-      fs.unlink(filePath, function(err) {
-        if (err) rej(err);
-        else res();
-      });
-    });
+    try {
+      fs.unlinkSync(filePath);
+    }
+    catch (err) {
+      throw errors.captureError(err);
+    }
   }
 
   // Read all of the files in the org directory
@@ -1142,7 +1123,7 @@ async function remove(requestingUser, organizationID, projects, options) {
   helper.checkParamsDataType(['object', 'string'], projects, 'Projects');
   // Remove project function only: must be an admin
   try {
-    assert.ok(requestingUser.admin, 'User does not have permissions to delete projects.');
+    assert.ok(permissions.deleteProject(requestingUser), 'User does not have permissions to delete projects.');
   }
   catch (err) {
     throw new M.DataFormatError(err.message, 'warn');
@@ -1151,7 +1132,6 @@ async function remove(requestingUser, organizationID, projects, options) {
   // Sanitize input parameters and function-wide variables
   const orgID = sani.mongo(organizationID);
   const saniProjects = sani.mongo(JSON.parse(JSON.stringify(projects)));
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
   let searchedIDs = [];
 
   // Define searchQuery and ownedQuery
@@ -1175,13 +1155,7 @@ async function remove(requestingUser, organizationID, projects, options) {
   }
 
   // Find the organization, validate that it was found and not archived
-  const foundOrg = await helper.findAndValidate(Organization, orgID);
-  // Permissions check
-  if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-    || !foundOrg.permissions[reqUser._id].includes('admin'))) {
-    throw new M.PermissionError('User does not have permission to remove'
-      + ` projects on the organization [${orgID}].`, 'warn');
-  }
+  await helper.findAndValidate(Organization, orgID);
 
   // Find the projects to delete
   const foundProjects = await Project.find(searchQuery).lean();

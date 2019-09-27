@@ -343,9 +343,11 @@ async function getOrgs(req, res) {
 
     // Return 200: OK and public org data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -413,10 +415,10 @@ async function postOrgs(req, res) {
     orgData = req.body;
   }
 
-  // Create organizations from org data
-  // NOTE: create() sanitizes orgData
-  OrgController.create(req.user, orgData, options)
-  .then((orgs) => {
+  try {
+    // Create organizations from org data
+    // NOTE: create() sanitizes orgData
+    const orgs = await OrgController.create(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -427,9 +429,11 @@ async function postOrgs(req, res) {
 
     // Return 200: OK and created orgs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -498,10 +502,10 @@ async function putOrgs(req, res) {
     orgData = req.body;
   }
 
-  // Create or replace organizations in org data
-  // NOTE: createOrReplace() sanitizes orgData
-  OrgController.createOrReplace(req.user, orgData, options)
-  .then((orgs) => {
+  try {
+    // Create or replace organizations in org data
+    // NOTE: createOrReplace() sanitizes orgData
+    const orgs = await OrgController.createOrReplace(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -512,9 +516,11 @@ async function putOrgs(req, res) {
 
     // Return 200: OK and created/replaced orgs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -582,10 +588,10 @@ async function patchOrgs(req, res) {
     orgData = req.body;
   }
 
-  // Update the specified orgs
-  // NOTE: update() sanitizes orgData
-  OrgController.update(req.user, orgData, options)
-  .then((orgs) => {
+  try {
+    // Update the specified orgs
+    // NOTE: update() sanitizes orgData
+    const orgs = await OrgController.update(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(o, 'org', options))
@@ -596,9 +602,11 @@ async function patchOrgs(req, res) {
 
     // Return 200: OK and the updated orgs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -660,9 +668,11 @@ async function deleteOrgs(req, res) {
     const json = formatJSON(orgIDs, minified);
 
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -737,9 +747,11 @@ async function getOrg(req, res) {
 
     // Return a 200: OK and the org's public data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -823,9 +835,11 @@ async function postOrg(req, res) {
 
     // Return 200: OK and created org
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -909,9 +923,11 @@ async function putOrg(req, res) {
 
     // Return 200: OK and created org
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -994,9 +1010,11 @@ async function patchOrg(req, res) {
 
     // Return 200: OK and the updated org
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1062,9 +1080,11 @@ async function deleteOrg(req, res, next) {
 
     // Return 200: OK and the deleted org IDs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /* -----------------------( Project API Endpoints )-------------------------- */
@@ -1154,9 +1174,11 @@ async function getAllProjects(req, res) {
 
     // Return 200: OK and public project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1265,9 +1287,11 @@ async function getProjects(req, res) {
 
     // Return 200: OK and public project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1335,10 +1359,11 @@ async function postProjects(req, res) {
     projectData = req.body;
   }
 
-  // Create the specified projects
-  // NOTE: create() sanitizes req.params.orgid and projectData
-  ProjectController.create(req.user, req.params.orgid, projectData, options)
-  .then((projects) => {
+  try {
+    // Create the specified projects
+    // NOTE: create() sanitizes req.params.orgid and projectData
+    const projects = await ProjectController.create(req.user, req.params.orgid, projectData,
+      options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1348,9 +1373,11 @@ async function postProjects(req, res) {
 
     // Return 200: OK and created project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1419,10 +1446,11 @@ async function putProjects(req, res) {
     projectData = req.body;
   }
 
-  // Create or replace the specified projects
-  // NOTE: createOrReplace() sanitizes req.params.orgid and projectData
-  ProjectController.createOrReplace(req.user, req.params.orgid, projectData, options)
-  .then((projects) => {
+  try {
+    // Create or replace the specified projects
+    // NOTE: createOrReplace() sanitizes req.params.orgid and projectData
+    const projects = await ProjectController.createOrReplace(req.user, req.params.orgid,
+      projectData, options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1432,9 +1460,11 @@ async function putProjects(req, res) {
 
     // Return 200: OK and created/replaced project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1502,10 +1532,11 @@ async function patchProjects(req, res) {
     projectData = req.body;
   }
 
-  // Update the specified projects
-  // NOTE: update() sanitizes req.params.orgid projectData
-  ProjectController.update(req.user, req.params.orgid, projectData, options)
-  .then((projects) => {
+  try {
+    // Update the specified projects
+    // NOTE: update() sanitizes req.params.orgid projectData
+    const projects = await ProjectController.update(req.user, req.params.orgid,
+      projectData, options);
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(p, 'project', options))
     );
@@ -1515,9 +1546,11 @@ async function patchProjects(req, res) {
 
     // Return 200: OK and updated project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1582,9 +1615,11 @@ async function deleteProjects(req, res) {
 
     // Return 200: OK and the deleted project IDs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1659,9 +1694,11 @@ async function getProject(req, res) {
 
     // Return 200: OK and public project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1744,9 +1781,11 @@ async function postProject(req, res) {
 
     // Return 200: OK and created project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1830,9 +1869,11 @@ async function putProject(req, res) {
 
     // Return 200: OK and created/replaced project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1915,9 +1956,11 @@ async function patchProject(req, res) {
 
     // Return 200: OK and updated project data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -1983,9 +2026,11 @@ async function deleteProject(req, res) {
 
     // Return 200: OK and the deleted project ID
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /* -----------------------( User API Endpoints )------------------------------*/
@@ -2073,6 +2118,10 @@ async function getUsers(req, res) {
     // Get Users
     // NOTE: find() sanitizes req.usernames
     const users = await UserController.find(req.user, usernames, options);
+
+    // Set the failedlogins parameter to true if the requesting user is an admin
+    if (req.user.admin) options.failedlogins = true;
+
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2082,9 +2131,11 @@ async function getUsers(req, res) {
 
     // Return 200: OK and public user data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2153,10 +2204,10 @@ async function postUsers(req, res) {
     userData = req.body;
   }
 
-  // Create users
-  // NOTE: create() sanitizes userData
-  UserController.create(req.user, userData, options)
-  .then((users) => {
+  try {
+    // Create users
+    // NOTE: create() sanitizes userData
+    const users = await UserController.create(req.user, userData, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2166,9 +2217,11 @@ async function postUsers(req, res) {
 
     // Return 200: OK and public user data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2237,10 +2290,10 @@ async function putUsers(req, res) {
     userData = req.body;
   }
 
-  // Create or replace users
-  // NOTE: createOrReplace() sanitizes userData
-  UserController.createOrReplace(req.user, userData, options)
-  .then((users) => {
+  try {
+    // Create or replace users
+    // NOTE: createOrReplace() sanitizes userData
+    const users = await UserController.createOrReplace(req.user, userData, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2250,9 +2303,11 @@ async function putUsers(req, res) {
 
     // Return 200: OK and public user data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2321,10 +2376,10 @@ async function patchUsers(req, res) {
     userData = req.body;
   }
 
-  // Update the specified users
-  // NOTE: update() sanitizes userData
-  UserController.update(req.user, userData, options)
-  .then((users) => {
+  try {
+    // Update the specified users
+    // NOTE: update() sanitizes userData
+    const users = await UserController.update(req.user, userData, options);
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2334,9 +2389,11 @@ async function patchUsers(req, res) {
 
     // Return 200: OK and the updated users
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2394,9 +2451,11 @@ async function deleteUsers(req, res) {
 
     // Return 200: OK and deleted usernames
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2451,7 +2510,7 @@ async function getUser(req, res) {
   options.lean = true;
 
   try {
-    // Find the member from it's username
+    // Find the member from its username
     // NOTE: find() sanitizes req.params.username
     const users = await UserController.find(req.user, req.params.username, options);
     // If no user found, return 404 error
@@ -2460,6 +2519,9 @@ async function getUser(req, res) {
         `User [${req.params.username}] not found.`, 'warn'
       );
     }
+
+    // Set the failedlogins parameter to true if the requesting user is an admin
+    if (req.user.admin) options.failedlogins = true;
 
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
@@ -2470,9 +2532,11 @@ async function getUser(req, res) {
 
     // Return a 200: OK and the user's public data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2555,9 +2619,11 @@ async function postUser(req, res) {
 
     // Return 200: OK and created user
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2640,9 +2706,11 @@ async function putUser(req, res) {
 
     // Return 200: OK and created/replaced user
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2725,8 +2793,11 @@ async function patchUser(req, res) {
 
     // Return 200: OK and updated user
     return returnResponse(req, res, json, 200);
-  })
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2791,9 +2862,11 @@ async function deleteUser(req, res) {
 
     // Return 200: OK and the deleted username
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -2921,6 +2994,9 @@ async function searchUsers(req, res) {
       throw new M.NotFoundError('No users found.', 'warn');
     }
 
+    // Set the failedlogins parameter to true if the requesting user is an admin
+    if (req.user.admin) options.failedlogins = true;
+
     const usersPublicData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
@@ -2930,9 +3006,11 @@ async function searchUsers(req, res) {
 
     // Return a 200: OK and public user data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3016,9 +3094,11 @@ async function patchPassword(req, res) {
 
     // Returns 200: OK and the updated user's public data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /* -----------------------( Elements API Endpoints )------------------------- */
@@ -3049,6 +3129,7 @@ async function getElements(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
+    lean: 'boolean',
     sort: 'string',
     ids: 'array',
     format: 'string',
@@ -3175,9 +3256,11 @@ async function getElements(req, res) {
 
     // Return a 200: OK and public element data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3246,11 +3329,11 @@ async function postElements(req, res) {
     elementData = req.body;
   }
 
-  // Create the specified elements
-  // NOTE: create() sanitizes input params
-  ElementController.create(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, elementData, options)
-  .then((elements) => {
+  try {
+    // Create the specified elements
+    // NOTE: create() sanitizes input params
+    const elements = await ElementController.create(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3260,9 +3343,11 @@ async function postElements(req, res) {
 
     // Return 200: OK and the new elements
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3331,11 +3416,11 @@ async function putElements(req, res) {
     elementData = req.body;
   }
 
-  // Create or replace the specified elements
-  // NOTE: createOrReplace() sanitizes input params
-  ElementController.createOrReplace(req.user, req.params.orgid,
-    req.params.projectid, req.params.branchid, elementData, options)
-  .then((elements) => {
+  try {
+    // Create or replace the specified elements
+    // NOTE: createOrReplace() sanitizes input params
+    const elements = await ElementController.createOrReplace(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3345,9 +3430,11 @@ async function putElements(req, res) {
 
     // Return 200: OK and the new/replaced elements
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3415,11 +3502,11 @@ async function patchElements(req, res) {
     elementData = req.body;
   }
 
-  // Update the specified elements
-  // NOTE: update() sanitizes input params
-  ElementController.update(req.user, req.params.orgid, req.params.projectid,
-    req.params.branchid, elementData, options)
-  .then((elements) => {
+  try {
+    // Update the specified elements
+    // NOTE: update() sanitizes input params
+    const elements = await ElementController.update(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(e, 'element', options))
     );
@@ -3429,9 +3516,11 @@ async function patchElements(req, res) {
 
     // Return 200: OK and the updated elements
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3490,9 +3579,11 @@ async function deleteElements(req, res) {
 
     // Return 200: OK and the deleted element ids
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3594,9 +3685,11 @@ async function searchElements(req, res) {
 
     // Return a 200: OK and public element data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3678,9 +3771,11 @@ async function getElement(req, res) {
 
     // Return 200: OK and the elements
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3763,9 +3858,11 @@ async function postElement(req, res) {
 
     // Return 200: OK and the created element
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3849,9 +3946,11 @@ async function putElement(req, res) {
 
     // Return 200: OK and the created/replaced element
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -3934,9 +4033,11 @@ async function patchElement(req, res) {
 
     // Return 200: OK and the updated element
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4001,8 +4102,11 @@ async function deleteElement(req, res) {
 
     // Return 200: OK and deleted element ID
     return returnResponse(req, res, json, 200);
-  })
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /* -----------------------( Branches API Endpoints )------------------------- */
@@ -4111,9 +4215,11 @@ async function getBranches(req, res) {
 
     // Return a 200: OK and public branch data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4181,11 +4287,11 @@ async function postBranches(req, res) {
     branchData = req.body;
   }
 
-  // Create the specified branches
-  // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and branchData
-  BranchController.create(req.user, req.params.orgid, req.params.projectid,
-    branchData, options)
-  .then((branches) => {
+  try {
+    // Create the specified branches
+    // NOTE: create() sanitizes req.params.orgid, req.params.projectid, and branchData
+    const branches = await BranchController.create(req.user, req.params.orgid, req.params.projectid,
+      branchData, options);
     const publicBranchData = sani.html(
       branches.map(b => publicData.getPublicData(b, 'branch', options))
     );
@@ -4195,9 +4301,11 @@ async function postBranches(req, res) {
 
     // Return 200: OK and created branch data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4265,11 +4373,11 @@ async function patchBranches(req, res) {
     branchData = req.body;
   }
 
-  // Update the specified branches
-  // NOTE: update() sanitizes input params
-  BranchController.update(req.user, req.params.orgid, req.params.projectid,
-    branchData, options)
-  .then((branches) => {
+  try {
+    // Update the specified branches
+    // NOTE: update() sanitizes input params
+    const branches = await BranchController.update(req.user, req.params.orgid, req.params.projectid,
+      branchData, options);
     const branchesPublicData = sani.html(
       branches.map(b => publicData.getPublicData(b, 'branch', options))
     );
@@ -4279,9 +4387,11 @@ async function patchBranches(req, res) {
 
     // Return 200: OK and the updated branches
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4345,9 +4455,11 @@ async function deleteBranches(req, res) {
 
     // Return 200: OK and the deleted branch IDs
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4422,9 +4534,11 @@ async function getBranch(req, res) {
 
     // Return 200: OK and public branch data
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4507,9 +4621,11 @@ async function postBranch(req, res) {
 
     // Return 200: OK and the created branch
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4592,9 +4708,11 @@ async function patchBranch(req, res) {
 
     // Return 200: OK and the updated branch
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
@@ -4660,9 +4778,11 @@ async function deleteBranch(req, res) {
 
     // Return 200: OK and the deleted branch ID
     return returnResponse(req, res, json, 200);
-  })
-  // If an error was thrown, return it and its status
-  .catch((error) => returnResponse(req, res, error.message, errors.getStatusCode(error)));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**

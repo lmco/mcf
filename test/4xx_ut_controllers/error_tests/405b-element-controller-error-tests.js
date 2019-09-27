@@ -17,6 +17,12 @@
 
 // NPM modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+// Initialize chai should function, used for expecting promise rejections
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const ElementController = M.require('controllers.element-controller');
@@ -139,7 +145,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies that an elements source cannot be updated to its own
  * id.
  */
-function updateSourceToSelf(done) {
+async function updateSourceToSelf() {
   const elemDataObject = testData.elements[6];
 
   // Set source to self
@@ -148,25 +154,17 @@ function updateSourceToSelf(done) {
     source: elemDataObject.id
   };
 
-  // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, branchID, update)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element updated successfully.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal('Element\'s source cannot be self'
-      + ` [${elemDataObject.id}].`);
-    done();
-  });
+  // Attempt to update the element; should be rejected with specific error message
+  await ElementController.update(adminUser, org.id, projID, branchID, update)
+  .should.eventually.be.rejectedWith('Element\'s source cannot be self'
+    + ` [${elemDataObject.id}].`);
 }
 
 /**
  * @description Verifies that an elements target cannot be updated to its own
  * id.
  */
-function updateTargetToSelf(done) {
+async function updateTargetToSelf() {
   const elemDataObject = testData.elements[6];
 
   // Set source to self
@@ -175,25 +173,17 @@ function updateTargetToSelf(done) {
     target: elemDataObject.id
   };
 
-  // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, branchID, update)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element updated successfully.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal('Element\'s target cannot be self'
-      + ` [${elemDataObject.id}].`);
-    done();
-  });
+  // Attempt to update the element; should be rejected with specific error message
+  await ElementController.update(adminUser, org.id, projID, branchID, update)
+  .should.eventually.be.rejectedWith('Element\'s target cannot be self'
+    + ` [${elemDataObject.id}].`);
 }
 
 /**
  * @description Verifies that an elements source cannot be updated to when the
  * desired source does not exist.
  */
-function updateNonExistentSource(done) {
+async function updateNonExistentSource() {
   const elemDataObject = testData.elements[6];
 
   // Set source to self
@@ -202,25 +192,17 @@ function updateNonExistentSource(done) {
     source: 'NonExistentElement'
   };
 
-  // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, branchID, update)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element updated successfully.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal('The source element '
-      + '[NonExistentElement] was not found in the project [project00].');
-    done();
-  });
+  // Attempt to update the element; should be rejected with specific error message
+  await ElementController.update(adminUser, org.id, projID, branchID, update)
+  .should.eventually.be.rejectedWith('The source element '
+    + '[NonExistentElement] was not found in the project [project00].');
 }
 
 /**
  * @description Verifies that an elements target cannot be updated to when the
  * desired target does not exist.
  */
-function updateNonExistentTarget(done) {
+async function updateNonExistentTarget() {
   const elemDataObject = testData.elements[6];
 
   // Set source to self
@@ -229,25 +211,17 @@ function updateNonExistentTarget(done) {
     target: 'NonExistentElement'
   };
 
-  // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, branchID, update)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element updated successfully.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal('The target element '
-      + '[NonExistentElement] was not found in the project [project00].');
-    done();
-  });
+  // Attempt to update the element; should be rejected with specific error message
+  await ElementController.update(adminUser, org.id, projID, branchID, update)
+  .should.eventually.be.rejectedWith('The target element '
+    + '[NonExistentElement] was not found in the project [project00].');
 }
 
 /**
  * @description Verifies that an elements source cannot be updated to when the
  * target is not currently set, and is also not being set.
  */
-function updateSourceWithNoTarget(done) {
+async function updateSourceWithNoTarget() {
   const elemDataObject = testData.elements[4];
 
   // Set source to self
@@ -256,25 +230,17 @@ function updateSourceWithNoTarget(done) {
     source: testData.elements[6].id
   };
 
-  // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, branchID, update)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element updated successfully.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal('If source element is provided, target'
-      + ' element is required.');
-    done();
-  });
+  // Attempt to update the element; should be rejected with specific error message
+  await ElementController.update(adminUser, org.id, projID, branchID, update)
+  .should.eventually.be.rejectedWith('If source element is provided, target'
+    + ' element is required.');
 }
 
 /**
  * @description Verifies that an elements target cannot be updated to when the
  * source is not currently set, and is also not being set.
  */
-function updateTargetWithNoSource(done) {
+async function updateTargetWithNoSource() {
   const elemDataObject = testData.elements[4];
 
   // Set source to self
@@ -283,46 +249,30 @@ function updateTargetWithNoSource(done) {
     target: testData.elements[6].id
   };
 
-  // Attempt to update the element
-  ElementController.update(adminUser, org.id, projID, branchID, update)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element updated successfully.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal('If target element is provided, source'
+  // Attempt to update the element; should be rejected with specific error message
+  await ElementController.update(adminUser, org.id, projID, branchID, update)
+  .should.eventually.be.rejectedWith('If target element is provided, source'
       + ' element is required.');
-    done();
-  });
 }
 
 /**
  * @description Verifies that the tag can not create
  * elements.
  */
-function createInTag(done) {
+async function createInTag() {
   const elementObj = testData.elements[0];
 
-  // Attempt to create an element
-  ElementController.create(adminUser, org.id, projID, tagID, elementObj)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element was successfully created.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal(`[${tagID}] is a tag and does`
-      + ' not allow elements to be created, updated, or deleted.');
-    done();
-  });
+  // Attempt to create an element; should be rejected with specific error message
+  await ElementController.create(adminUser, org.id, projID, tagID, elementObj)
+  .should.eventually.be.rejectedWith(`[${tagID}] is a tag and does`
+    + ' not allow elements to be created, updated, or deleted.');
 }
 
 /**
  * @description Verifies that the tag can not update
  * elements.
  */
-function updateInTag(done) {
+async function updateInTag() {
   // Create the object to update element
   const updateObj = {
     name: 'model_edit',
@@ -330,104 +280,78 @@ function updateInTag(done) {
   };
 
 
-  // Update element via controller
-  ElementController.update(adminUser, org.id, projID, tagID, updateObj)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element was successfully updated.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal(`[${tagID}] is a tag and `
-      + 'does not allow elements to be created, updated, or deleted.');
-    done();
-  });
+  // Update element via controller; should be rejected with specific error message
+  await ElementController.update(adminUser, org.id, projID, tagID, updateObj)
+  .should.eventually.be.rejectedWith(`[${tagID}] is a tag and `
+    + 'does not allow elements to be created, updated, or deleted.');
 }
 
 /**
  * @description Verifies that the tag can not delete
  * elements.
  */
-function deleteInTag(done) {
-  // Attempt deleting an element via controller
-  ElementController.remove(adminUser, org.id, projID, tagID, testData.elements[1].id)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element was successfully deleted.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal(`[${tagID}] is a tag and`
-      + ' does not allow elements to be created, updated, or deleted.');
-    done();
-  });
+async function deleteInTag() {
+  // Attempt deleting an element via controller; should be rejected with specific error message
+  await ElementController.remove(adminUser, org.id, projID, tagID, testData.elements[1].id)
+  .should.eventually.be.rejectedWith(`[${tagID}] is a tag and`
+    + ' does not allow elements to be created, updated, or deleted.');
 }
 
 /**
  * @description Verifies invalid Id PUT call does not delete existing elements.
  */
-function putInvalidId(done) {
+async function putInvalidId() {
   // Create the test element objects
   const testElemObj0 = testData.elements[7];
   const testElemObj1 = testData.elements[8];
   const invalidProjObj = { id: 'INVALID_ID', name: 'element name' };
 
-  ElementController.createOrReplace(adminUser, org.id, projID, branchID,
+  await ElementController.createOrReplace(adminUser, org.id, projID, branchID,
     [testElemObj0, testElemObj1, invalidProjObj])
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element put successfully.'));
-  })
-  .catch((error) => {
-    // Verify the error message
-    chai.expect(error.message).to.equal('Element validation failed: _id: '
-      + 'Path `_id` is invalid (testorg00:project00:master:INVALID_ID).');
+  .should.eventually.be.rejectedWith('Element validation failed: _id: '
+    + 'Path `_id` is invalid (testorg00:project00:master:INVALID_ID).');
 
+  let foundElements;
+  try {
     // Expected error, find valid elements
-    return ElementController.find(adminUser, org.id, projID, branchID,
+    foundElements = await ElementController.find(adminUser, org.id, projID, branchID,
       [testElemObj0.id, testElemObj1.id]);
-  })
-  .then((foundElements) => {
-    // Expect to find 2 elements
-    chai.expect(foundElements.length).to.equal(2);
-    done();
-  })
-  .catch((error) => {
-    chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Expect to find 2 elements
+  foundElements.length.should.equal(2);
 }
 
 /**
  * @description Verifies PUT call without Id does not delete existing elements.
  * Note: This test should fail prior to deletion of existing elements.
  */
-function putWithoutId(done) {
+async function putWithoutId() {
   // Create the test elements
   const testElemObj0 = testData.elements[7];
   const testElemObj1 = testData.elements[8];
   const invalidElemObj = { name: 'missing id' };
 
-  ElementController.createOrReplace(adminUser, org.id, projID, branchID,
+  // Try to put elements; should be rejected with specific error message
+  await ElementController.createOrReplace(adminUser, org.id, projID, branchID,
     [testElemObj0, testElemObj1, invalidElemObj])
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Element put successfully.'));
-  })
-  .catch((error) => {
-    // Expected error, find valid elements
-    ElementController.find(adminUser, org.id, projID, branchID, [testElemObj0.id, testElemObj1.id])
-    .then((foundElems) => {
-      // Verify the error message
-      chai.expect(error.message).to.equal('Element #3 does not have an id.');
+  .should.eventually.be.rejectedWith('Element #3 does not have an id.');
 
-      // Expect to find 2 elements
-      chai.expect(foundElems.length).to.equal(2);
-      done();
-    })
-    .catch((err) => {
-      chai.expect(err.message).to.equal(null);
-      done();
-    });
-  });
+  let foundElems;
+  try {
+    // Expected error, find valid elements
+    foundElems = await ElementController.find(adminUser,
+      org.id, projID, branchID, [testElemObj0.id, testElemObj1.id]);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+  // Expect to find 2 elements
+  foundElems.length.should.equal(2);
 }

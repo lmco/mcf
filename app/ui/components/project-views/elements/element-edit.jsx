@@ -81,7 +81,7 @@ class ElementEdit extends Component {
   getElement() {
     // Initialize variables
     const elementId = this.state.id;
-    const url = `${this.props.url}/elements/${elementId}?minified=true&archived=true`;
+    const url = `${this.props.url}/elements/${elementId}?minified=true&includeArchived=true`;
 
     // Get element data
     $.ajax({

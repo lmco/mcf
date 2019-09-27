@@ -102,19 +102,11 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     ref: 'Organization',
     required: true,
-    set: function(_org) {
-      // Check value undefined
-      if (typeof this.org === 'undefined') {
-        // Return value to set it
-        return _org;
-      }
-      // Check value NOT equal to db value
-      if (_org !== this.org) {
-        // Immutable field, return error
-        throw new M.OperationError('Assigned org cannot be changed.', 'warn');
-      }
-      // No change, return the value
-      return this.org;
+    validate: {
+      validator: function(v) {
+        return RegExp(validators.org.id).test(v);
+      },
+      message: props => `${props.value} is not a valid org ID.`
     }
   },
   name: {

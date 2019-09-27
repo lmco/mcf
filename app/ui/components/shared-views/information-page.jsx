@@ -53,7 +53,7 @@ class InformationPage extends Component {
     if (this.props.branch) {
       const branchId = this.props.match.params.branchid;
       const base = `${this.props.url}/branches/${branchId}`;
-      const url = `${base}?minified=true&archived=true`;
+      const url = `${base}?minified=true&includeArchived=true`;
 
       $.ajax({
         method: 'GET',

@@ -16,6 +16,12 @@
 
 // NPM modules
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+// Use async chai
+chai.use(chaiAsPromised);
+// Initialize chai should function, used for expecting promise rejections
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const BranchController = M.require('controllers.branch-controller');
@@ -103,18 +109,10 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies that master branch can not be deleted
  */
-function deleteMasterBranch(done) {
+async function deleteMasterBranch() {
   const branchID = testData.branches[0].id;
 
-  // Attempt to remove the master branch
-  BranchController.remove(adminUser, org.id, projID, branchID)
-  .then(() => {
-    // Should not succeed, force to fail
-    done(new Error('Branch was successfully deleted.'));
-  })
-  .catch((error) => {
-    // Ensure error message is correct
-    chai.expect(error.message).to.equal(`User cannot delete branch: ${branchID}.`);
-    done();
-  });
+  // Attempt to remove the master branch; should be rejected
+  await BranchController.remove(adminUser, org.id, projID, branchID)
+  .should.eventually.be.rejectedWith(`User cannot delete branch: ${branchID}.`);
 }

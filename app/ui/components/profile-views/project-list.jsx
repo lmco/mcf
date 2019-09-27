@@ -77,7 +77,7 @@ class ProjectList extends Component {
         // Verify if admin console
         if (this.props.adminPage) {
           // Update url to retrieve archived data
-          opt = 'populate=projects&archived=true&minified=true';
+          opt = 'populate=projects&includeArchived=true&minified=true';
         }
 
         // Get project data
