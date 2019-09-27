@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module  test.306a-artifact-model-tests
  *
@@ -48,7 +48,7 @@ const branch = testData.branches[0];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests
+   * Before: runs before all tests.
    */
   before(async () => {
     try {
@@ -62,7 +62,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests
+   * After: runs after all tests.
    */
   after(async () => {
     try {

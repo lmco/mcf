@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.304a-branch-model-tests
  *
@@ -79,7 +79,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a branch using the branch model
+ * @description Creates a branch using the branch model.
  */
 async function createBranch() {
   // Create new branch object
@@ -99,7 +99,7 @@ async function createBranch() {
 }
 
 /**
- * @description Find a branch using the branch model
+ * @description Find a branch using the branch model.
  */
 async function findBranch() {
   // Find the branch
@@ -111,7 +111,7 @@ async function findBranch() {
 }
 
 /**
- * @description Update a branch using the branch model
+ * @description Update a branch using the branch model.
  */
 async function updateBranch() {
   try {
@@ -134,7 +134,7 @@ async function updateBranch() {
 }
 
 /**
- * @description Delete a branch using the branch model
+ * @description Delete a branch using the branch model.
  */
 async function deleteBranch() {
   const branchID = utils.createID(org.id, project.id, testData.branches[0].id);

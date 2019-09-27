@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.305a-element-model-tests
  *
@@ -84,7 +84,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an element using the element model
+ * @description Creates an element using the element model.
  */
 async function createElement() {
   // Create new element object
@@ -109,7 +109,7 @@ async function createElement() {
 }
 
 /**
- * @description Find an element using the element model
+ * @description Find an element using the element model.
  */
 async function findElement() {
   // Find the element
@@ -121,7 +121,7 @@ async function findElement() {
 }
 
 /**
- * @description Update an element using the element model
+ * @description Update an element using the element model.
  */
 async function updateElement() {
   try {
@@ -144,7 +144,7 @@ async function updateElement() {
 }
 
 /**
- * @description Delete an element using the element model
+ * @description Delete an element using the element model.
  */
 async function deleteElement() {
   const elemID = utils.createID(org.id, project.id, branch.id, testData.elements[0].id);

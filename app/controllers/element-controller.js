@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.element-controller
  *
@@ -107,7 +107,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found element objects
+ * @returns {Promise} Array of found element objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['elem1', 'elem2'], { populate: 'parent' })
@@ -367,7 +367,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created element objects
+ * @returns {Promise} Array of created element objects.
  *
  * @example
  * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: ['parent'] })
@@ -706,7 +706,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated element objects
+ * @returns {Promise} Array of updated element objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
@@ -1070,7 +1070,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created/replaced element objects
+ * @returns {Promise} Array of created/replaced element objects.
  *
  * @example
  * createOrReplace({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...])
@@ -1304,7 +1304,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted element ids
+ * @returns {Promise} Array of deleted element ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])
@@ -1487,7 +1487,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
- * @return {Promise} Array of found element ids
+ * @returns {Promise} Array of found element ids.
  *
  * @example
  * findElementTree('orgID', 'projID', 'branch', ['elem1', 'elem2',...])
@@ -1513,6 +1513,14 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
   }
 
   // Define nested helper function
+  /**
+   * @description A nested helper function that searches through the subtrees of given
+   * element ids.
+   *
+   * @param {string[]} ids - A list of element IDs to examine.
+   * @returns {Promise<string|Promise<string|*|undefined>>} Returns either a recursive call
+   * to itself or an empty string once there are no more elements to search.
+   */
   async function findElementTreeHelper(ids) {
     try {
       // Find all elements whose parent is in the list of given ids
@@ -1568,7 +1576,7 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
  * @param {object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *
- * @return {Promise} Resolved promise to verify element parent.
+ * @returns {Promise} Resolved promise to verify element parent.
  *
  * @example
  * moveElementCheck('orgID', 'projID', 'branch', {Elem1})
@@ -1602,6 +1610,14 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
   }
 
   // Define nested helper function
+  /**
+   * @description A nested helper function. Searches the parent of the provided element to
+   * ensure that no circular references are being made.
+   *
+   * @param {Element} e - The element to be examined.
+   * @returns {Promise<string|Promise<string|*|undefined>>} Either throws an error if a
+   * circular reference has been found or returns an empty string.
+   */
   async function findElementParentRecursive(e) {
     const foundElement = await Element.findOne({ _id: e.parent }, null, { lean: true });
     // If foundElement is null, reject with error
@@ -1686,7 +1702,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} An array of found elements.
+ * @returns {Promise} An array of found elements.
  *
  * @example
  * search({User}, 'orgID', 'projID', 'branch', 'find these elements')
@@ -1805,14 +1821,14 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
 /**
  * @description A non-exposed helper function which finds the parent of given
- * element up to and including the root element
+ * element up to and including the root element.
  *
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string} elementID - The element whose parents are being found.
  *
- * @return {string} Array of found element ids
+ * @returns {string} Array of found element ids.
  *
  * @example
  * findElementRootPath('orgID', 'projID', 'branch', 'elem1')
@@ -1827,7 +1843,14 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
   // Initialize return object
   let foundElements = [];
 
-  // Define nested helper function
+  /**
+   * @description A nested helper function.  Searches the for parent of the element ID provided.
+   *
+   * @param searchID - The ID of the element to search for.
+   * @returns {Promise<string|string|*>} Returns either a recursive call to itself if the parent of
+   * the element also has a parent, an empty string if the parent of the element is the root, or
+   * throws an error if a circular reference has been found.
+   */
   async function findElementTreeHelper(searchID) {
     try {
       // Find the parent of the element
@@ -1869,7 +1892,7 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
  * @description A non-exposed helper function that validates the sourceNamespace and/or
  * targetNamespace to ensure that they are formatted properly.  A namespace must contain a
  * org, project, and branch id and cannot reference the same project.  This function also
- * pushes to lists of ids keeping track of source, target, and project references
+ * pushes to lists of ids keeping track of source, target, and project references.
  *
  * @param {object} elem - The element object to validate.
  * @param {number} index - The index of the iteration.
@@ -1970,7 +1993,7 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
 }
 
 /**
- * @description A non-exposed helper function that validates the setting of a source and target
+ * @description A non-exposed helper function that validates the setting of a source and target.
  *
  * @param {object} elem - The element object to validate.
  * @param {number} index - The index of the iteration.
@@ -2002,7 +2025,7 @@ function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
 }
 
 /**
- * @description A non-exposed helper function that validates the parent of an element being created
+ * @description A non-exposed helper function that validates the parent of an element being created.
  *
  * @param {object} elem - The element object to validate.
  * @param {number} index - The index of the iteration.
@@ -2025,7 +2048,7 @@ function elementParentCheck(elem, index, orgID, projID, branchID) {
 }
 
 /**
- * @description A non-exposed helper function that validates the id of an element being created
+ * @description A non-exposed helper function that validates the id of an element being created.
  *
  * @param {object} elem - The element object to validate.
  * @param {number} index - The index of the iteration.

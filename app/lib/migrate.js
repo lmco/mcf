@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.migrate
  *
@@ -31,9 +31,9 @@ const User = M.require('models.user');
 
 /**
  * @description Handles database migrations from a specific version, to a
- * specific version
+ * specific version.
  *
- * @params {string[]} args - An array of command line arguments.
+ * @param {string[]} args - An array of command line arguments.
  */
 module.exports.migrate = function(args) {
   return new Promise((resolve, reject) => {
@@ -155,7 +155,7 @@ module.exports.migrate = function(args) {
 
 
 /**
- * @description Prompts the user for approval to migrate the database
+ * @description Prompts the user for approval to migrate the database.
  *
  * @param {string[]} args - Array of command line arguments.
  */
@@ -185,7 +185,7 @@ function prompt(args) {
  *
  * @param {string} version - The version number to check.
  *
- * @return {boolean} Valid version or not.
+ * @returns {boolean} Valid version or not.
  */
 function validateVersion(version) {
   // Ensure version is a string
@@ -208,8 +208,8 @@ function validateVersion(version) {
  * @param {string} from - The version the user is migrating from.
  * @param {string} to - The version the user is migrating to.
  *
- * @return {number} An integer which represent comparison of versions. The
- * values are as follows: -1 (from > to), 0 (from = to), 1 (from < to)
+ * @returns {number} An integer which represent comparison of versions. The
+ * values are as follows: -1 (from > to), 0 (from = to), 1 (from < to).
  */
 function compareVersions(from, to) {
   // If to is null, upgrading to highest version, return 1
@@ -269,7 +269,7 @@ function compareVersions(from, to) {
  * @param {string[]} versions - A list of versions.
  * @param {number} order - The order of the list.
  *
- * @return {string[]} A list of sorted versions.
+ * @returns {string[]} A list of sorted versions.
  */
 function sortVersions(versions, order) {
   const sorted = versions.sort((a, b) => compareVersions(b, a));
@@ -285,7 +285,7 @@ function sortVersions(versions, order) {
  * @param {string[]} migrations - The list of migrations to run.
  * @param {number} move - Either 1 (migrate up) or -1 (migrate down).
  *
- * @return {Promise} Resolved promise.
+ * @returns {Promise} Resolved promise.
  */
 function runMigrations(from, migrations, move) {
   return new Promise((resolve, reject) => {
