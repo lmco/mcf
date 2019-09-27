@@ -111,46 +111,46 @@ const UserSchema = new db.Schema({
   email: {
     type: 'String',
     default: '',
-    validate: {
+    validate: [{
       validator: function(v) {
         // If the email is invalid and provided, reject
         return !(!RegExp(validators.user.email).test(v) && v);
       },
       message: props => `Invalid email [${props.value}].`
-    }
+    }]
   },
   fname: {
     type: 'String',
     default: '',
-    validate: {
+    validate: [{
       validator: function(v) {
         // If the fname is invalid and provided, reject
         return !(!RegExp(validators.user.fname).test(v) && v);
       },
       message: props => `Invalid first name [${props.value}].`
-    }
+    }]
   },
   preferredName: {
     type: 'String',
     default: '',
-    validate: {
+    validate: [{
       validator: function(v) {
         // If the preferredName is invalid and provided, reject
         return !(!RegExp(validators.user.fname).test(v) && v);
       },
       message: props => `Invalid preferred name [${props.value}].`
-    }
+    }]
   },
   lname: {
     type: 'String',
     default: '',
-    validate: {
+    validate: [{
       validator: function(v) {
         // If the lname is invalid and provided, reject
         return !(!RegExp(validators.user.lname).test(v) && v);
       },
       message: props => `Invalid last name [${props.value}].`
-    }
+    }]
   },
   admin: {
     type: 'Boolean',
@@ -158,11 +158,12 @@ const UserSchema = new db.Schema({
   },
   provider: {
     type: 'String',
-    validate: {
+    validate: [{
       validator: function(v) {
         return validators.user.provider(v);
-      }
-    },
+      },
+      message: props => `Invalid provider [${props.value}].`
+    }],
     default: 'local'
   },
   failedlogins: {

@@ -40,7 +40,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.7.3' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.3' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -66,7 +66,7 @@ module.exports.up = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3.1' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.7.3.1' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.3.1' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -101,7 +101,7 @@ function projectHelper() {
       });
     })
     // Add the projectReferences field to each project
-    .then(() => Project.updateMany({}, { $set: { projectReferences: [] } }))
+    .then(() => Project.updateMany({}, { projectReferences: [] }))
     .then(() => {
       if (fs.existsSync(path.join(M.root, 'data', 'projects-0731.json'))) {
         return new Promise(function(res, rej) {
