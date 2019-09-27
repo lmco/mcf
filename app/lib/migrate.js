@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.migrate
  *
@@ -20,14 +20,19 @@ const fs = require('fs');
 const path = require('path');
 const process = require('process');
 
-// NPM modules
-const mongoose = require('mongoose');
+// MBEE modules
+const Branch = M.require('models.branch');
+const Element = M.require('models.element');
+const Organization = M.require('models.organization');
+const Project = M.require('models.project');
+const ServerData = M.require('models.server-data');
+const User = M.require('models.user');
 
 /**
  * @description Handles database migrations from a specific version, to a
- * specific version
+ * specific version.
  *
- * @params {string[]} args - An array of command line arguments.
+ * @param {string[]} args - An array of command line arguments.
  */
 module.exports.migrate = function(args) {
   return new Promise((resolve, reject) => {
@@ -40,12 +45,18 @@ module.exports.migrate = function(args) {
 
     // Prompt the user for input
     prompt(args)
-    // Get the server_data collection
-    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    .then(() => Branch.init()) // Ensure branch model is created
+    .then(() => Element.init()) // Ensure element model is created
+    .then(() => Organization.init()) // Ensure org model is created
+    .then(() => Project.init()) // Ensure project model is created
+    .then(() => ServerData.init()) // Ensure server data model is created
+    .then(() => User.init()) // Ensure user model is created
+    // Get the server data documents
+    .then(() => ServerData.find({}, null, { lean: true }))
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
 
       // If --to was provided
@@ -142,9 +153,9 @@ module.exports.migrate = function(args) {
 
 
 /**
- * @description Prompts the user for approval to migrate the database
+ * @description Prompts the user for approval to migrate the database.
  *
- * @param {string[]} args - Array of command line arguments
+ * @param {string[]} args - Array of command line arguments.
  */
 function prompt(args) {
   return new Promise((resolve) => {
@@ -172,7 +183,7 @@ function prompt(args) {
  *
  * @param {string} version - The version number to check.
  *
- * @return {boolean} Valid version or not.
+ * @returns {boolean} Valid version or not.
  */
 function validateVersion(version) {
   // Ensure version is a string
@@ -195,8 +206,8 @@ function validateVersion(version) {
  * @param {string} from - The version the user is migrating from.
  * @param {string} to - The version the user is migrating to.
  *
- * @return {number} An integer which represent comparison of versions. The
- * values are as follows: -1 (from > to), 0 (from = to), 1 (from < to)
+ * @returns {number} An integer which represent comparison of versions. The
+ * values are as follows: -1 (from > to), 0 (from = to), 1 (from < to).
  */
 function compareVersions(from, to) {
   // If to is null, upgrading to highest version, return 1
@@ -256,7 +267,7 @@ function compareVersions(from, to) {
  * @param {string[]} versions - A list of versions.
  * @param {number} order - The order of the list.
  *
- * @return {string[]} A list of sorted versions.
+ * @returns {string[]} A list of sorted versions.
  */
 function sortVersions(versions, order) {
   const sorted = versions.sort((a, b) => compareVersions(b, a));
@@ -270,9 +281,9 @@ function sortVersions(versions, order) {
  *
  * @param {string} from - The current version migrating from.
  * @param {string[]} migrations - The list of migrations to run.
- * @param {number} move - Either 1 (migrate up) or -1 (migrate down)
+ * @param {number} move - Either 1 (migrate up) or -1 (migrate down).
  *
- * @return {Promise} Resolved promise.
+ * @returns {Promise} Resolved promise.
  */
 function runMigrations(from, migrations, move) {
   return new Promise((resolve, reject) => {
@@ -335,22 +346,12 @@ function runMigrations(from, migrations, move) {
  */
 module.exports.getSchemaVersion = function() {
   return new Promise((resolve, reject) => {
-    // Get all collections in the DB
-    mongoose.connection.db.collections()
-    .then((collections) => {
-      // Get all collection names
-      const existingCollections = collections.map(c => c.s.name);
-      // Create the server_data collection if it doesn't exist
-      if (!existingCollections.includes('server_data')) {
-        return mongoose.connection.db.createCollection('server_data');
-      }
-    })
     // Get all documents from the server data
-    .then(() => mongoose.connection.db.collection('server_data').find({}).toArray())
+    ServerData.find({}, null, { lean: true })
     .then((serverData) => {
       // Restrict collection to one document
       if (serverData.length > 1) {
-        throw new Error('Cannot have more than one document in the server_data collection.');
+        throw new Error('Cannot have more than one server data document.');
       }
       // No server data found, automatically upgrade versions
       if (serverData.length === 0) {

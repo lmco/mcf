@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.401a-user-controller-core-tests
  *
@@ -77,24 +77,31 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // ------------- Create -------------
   it('should create a user', createUser);
   it('should create multiple users', createUsers);
-  it('should create or replace a user', createOrReplaceUser);
-  it('should create and replace multiple users', createOrReplaceUsers);
+  // -------------- Find --------------
   it('should find a user', findUser);
   it('should find multiple users', findUsers);
   it('should find all users', findAllUsers);
-  it('should find a user through text search', searchUser);
+  // ------------- Update -------------
   it('should update a user', updateUser);
   it('should update multiple users', updateUsers);
+  // ------------- Replace ------------
+  it('should create or replace a user', createOrReplaceUser);
+  it('should create and replace multiple users', createOrReplaceUsers);
+  // --------- Update Password --------
   it('should update a users password', updateUserPassword);
+  // ------------- Search -------------
+  it('should find a user through text search', searchUser);
+  // ------------- Remove -------------
   it('should delete a user', deleteUser);
   it('should delete multiple users', deleteUsers);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a user using the user controller
+ * @description Creates a user using the user controller.
  */
 function createUser(done) {
   const userData = testData.users[0];
@@ -108,7 +115,6 @@ function createUser(done) {
 
     // Verify user created properly
     chai.expect(createdUser._id).to.equal(userData.username);
-    chai.expect(createdUser.username).to.equal(userData.username);
     chai.expect(createdUser.preferredName).to.equal(userData.preferredName);
     chai.expect(createdUser.fname).to.equal(userData.fname);
     chai.expect(createdUser.lname).to.equal(userData.lname);
@@ -119,8 +125,8 @@ function createUser(done) {
     chai.expect(createdUser.password).to.not.equal(userData.password);
 
     // Verify additional properties
-    chai.expect(createdUser.createdBy).to.equal(adminUser.username);
-    chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdUser.createdBy).to.equal(adminUser._id);
+    chai.expect(createdUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdUser.archivedBy).to.equal(null);
     chai.expect(createdUser.createdOn).to.not.equal(null);
     chai.expect(createdUser.updatedOn).to.not.equal(null);
@@ -145,12 +151,13 @@ function createUser(done) {
 }
 
 /**
- * @description Creates multiple users using the user controller
+ * @description Creates multiple users using the user controller.
  */
 function createUsers(done) {
   const userDataObjects = [
     testData.users[1],
-    testData.users[2]
+    testData.users[2],
+    testData.users[3]
   ];
 
   // Create users via controller
@@ -167,7 +174,6 @@ function createUsers(done) {
 
       // Verify user created properly
       chai.expect(createdUser._id).to.equal(userDataObject.username);
-      chai.expect(createdUser.username).to.equal(userDataObject.username);
       chai.expect(createdUser.preferredName).to.equal(userDataObject.preferredName);
       chai.expect(createdUser.fname).to.equal(userDataObject.fname);
       chai.expect(createdUser.lname).to.equal(userDataObject.lname);
@@ -178,8 +184,8 @@ function createUsers(done) {
       chai.expect(createdUser.password).to.not.equal(userDataObject.password);
 
       // Verify additional properties
-      chai.expect(createdUser.createdBy).to.equal(adminUser.username);
-      chai.expect(createdUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdUser.createdBy).to.equal(adminUser._id);
+      chai.expect(createdUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdUser.archivedBy).to.equal(null);
       chai.expect(createdUser.createdOn).to.not.equal(null);
       chai.expect(createdUser.updatedOn).to.not.equal(null);
@@ -208,7 +214,7 @@ function createUsers(done) {
 }
 
 /**
- * @description Creates or replaces a user using the user controller
+ * @description Creates or replaces a user using the user controller.
  */
 function createOrReplaceUser(done) {
   const userData = testData.users[0];
@@ -222,7 +228,6 @@ function createOrReplaceUser(done) {
 
     // Verify user created/replaced properly
     chai.expect(replacedUser._id).to.equal(userData.username);
-    chai.expect(replacedUser.username).to.equal(userData.username);
     chai.expect(replacedUser.preferredName).to.equal(userData.preferredName);
     chai.expect(replacedUser.fname).to.equal(userData.fname);
     chai.expect(replacedUser.lname).to.equal(userData.lname);
@@ -233,8 +238,8 @@ function createOrReplaceUser(done) {
     chai.expect(replacedUser.password).to.not.equal(userData.password);
 
     // Verify additional properties
-    chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedUser.archivedBy).to.equal(null);
     chai.expect(replacedUser.createdOn).to.not.equal(null);
     chai.expect(replacedUser.updatedOn).to.not.equal(null);
@@ -259,7 +264,7 @@ function createOrReplaceUser(done) {
 }
 
 /**
- * @description Creates/replaces multiple users using the user controller
+ * @description Creates/replaces multiple users using the user controller.
  */
 function createOrReplaceUsers(done) {
   const userDataObjects = [
@@ -282,7 +287,6 @@ function createOrReplaceUsers(done) {
 
       // Verify user created/replaced properly
       chai.expect(replacedUser._id).to.equal(userDataObject.username);
-      chai.expect(replacedUser.username).to.equal(userDataObject.username);
       chai.expect(replacedUser.preferredName).to.equal(userDataObject.preferredName);
       chai.expect(replacedUser.fname).to.equal(userDataObject.fname);
       chai.expect(replacedUser.lname).to.equal(userDataObject.lname);
@@ -293,8 +297,8 @@ function createOrReplaceUsers(done) {
       chai.expect(replacedUser.password).to.not.equal(userDataObject.password);
 
       // Verify additional properties
-      chai.expect(replacedUser.createdBy).to.equal(adminUser.username);
-      chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedUser.createdBy).to.equal(adminUser._id);
+      chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedUser.archivedBy).to.equal(null);
       chai.expect(replacedUser.createdOn).to.not.equal(null);
       chai.expect(replacedUser.updatedOn).to.not.equal(null);
@@ -323,7 +327,7 @@ function createOrReplaceUsers(done) {
 }
 
 /**
- * @description Finds a user using the user controller
+ * @description Finds a user using the user controller.
  */
 function findUser(done) {
   const userData = testData.users[0];
@@ -337,7 +341,6 @@ function findUser(done) {
 
     // Verify user created properly
     chai.expect(foundUser._id).to.equal(userData.username);
-    chai.expect(foundUser.username).to.equal(userData.username);
     chai.expect(foundUser.preferredName).to.equal(userData.preferredName);
     chai.expect(foundUser.fname).to.equal(userData.fname);
     chai.expect(foundUser.lname).to.equal(userData.lname);
@@ -348,8 +351,8 @@ function findUser(done) {
     chai.expect(foundUser.password).to.not.equal(userData.password);
 
     // Verify additional properties
-    chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-    chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+    chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundUser.archivedBy).to.equal(null);
     chai.expect(foundUser.createdOn).to.not.equal(null);
     chai.expect(foundUser.updatedOn).to.not.equal(null);
@@ -365,7 +368,7 @@ function findUser(done) {
 }
 
 /**
- * @description Finds multiple users using the user controller
+ * @description Finds multiple users using the user controller.
  */
 function findUsers(done) {
   const userDataObjects = [
@@ -391,7 +394,6 @@ function findUsers(done) {
 
       // Verify user created properly
       chai.expect(foundUser._id).to.equal(userDataObject.username);
-      chai.expect(foundUser.username).to.equal(userDataObject.username);
       chai.expect(foundUser.preferredName).to.equal(userDataObject.preferredName);
       chai.expect(foundUser.fname).to.equal(userDataObject.fname);
       chai.expect(foundUser.lname).to.equal(userDataObject.lname);
@@ -402,8 +404,8 @@ function findUsers(done) {
       chai.expect(foundUser.password).to.not.equal(userDataObject.password);
 
       // Verify additional properties
-      chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundUser.archivedBy).to.equal(null);
       chai.expect(foundUser.createdOn).to.not.equal(null);
       chai.expect(foundUser.updatedOn).to.not.equal(null);
@@ -420,7 +422,7 @@ function findUsers(done) {
 }
 
 /**
- * @description Finds all users in the database using the user controller
+ * @description Finds all users in the database using the user controller.
  */
 function findAllUsers(done) {
   const userDataObjects = [
@@ -445,10 +447,9 @@ function findAllUsers(done) {
       // Ensure user was found
       chai.expect(foundUser).to.not.equal(undefined);
 
-      if (foundUser.username !== adminUser.username) {
+      if (foundUser._id !== adminUser._id) {
         // Verify user created properly
         chai.expect(foundUser._id).to.equal(userDataObject.username);
-        chai.expect(foundUser.username).to.equal(userDataObject.username);
         chai.expect(foundUser.preferredName).to.equal(userDataObject.preferredName);
         chai.expect(foundUser.fname).to.equal(userDataObject.fname);
         chai.expect(foundUser.lname).to.equal(userDataObject.lname);
@@ -459,8 +460,8 @@ function findAllUsers(done) {
         chai.expect(foundUser.password).to.not.equal(userDataObject.password);
 
         // Verify additional properties
-        chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-        chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+        chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+        chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
         chai.expect(foundUser.archivedBy).to.equal(null);
         chai.expect(foundUser.createdOn).to.not.equal(null);
         chai.expect(foundUser.updatedOn).to.not.equal(null);
@@ -469,7 +470,6 @@ function findAllUsers(done) {
       // Admin user special cases
       else {
         chai.expect(foundUser._id).to.equal(userDataObject.username);
-        chai.expect(foundUser.username).to.equal(userDataObject.username);
         chai.expect(foundUser.password).to.not.equal(userDataObject.password);
       }
     });
@@ -484,8 +484,7 @@ function findAllUsers(done) {
 }
 
 /**
- * @description Finds a user through text based search via the user
- * controller.
+ * @description Finds a user through text based search via the user controller.
  */
 function searchUser(done) {
   const userData = [
@@ -502,7 +501,7 @@ function searchUser(done) {
     chai.expect(foundUsers.length).to.equal(userData.length);
 
     // Convert foundUsers to JMI type 2 for easier lookup
-    const jmi2Users = jmi.convertJMI(1, 2, foundUsers, 'username');
+    const jmi2Users = jmi.convertJMI(1, 2, foundUsers, '_id');
     // Loop through each user data object
     userData.forEach((userDataObject) => {
       const foundUser = jmi2Users[userDataObject.username];
@@ -511,7 +510,6 @@ function searchUser(done) {
 
       // Verify expected response
       chai.expect(foundUser._id).to.equal(userDataObject.username);
-      chai.expect(foundUser.username).to.equal(userDataObject.username);
       chai.expect(foundUser.preferredName).to.equal(userDataObject.preferredName);
       chai.expect(foundUser.fname).to.equal(userDataObject.fname);
       chai.expect(foundUser.lname).to.equal(userDataObject.lname);
@@ -522,8 +520,8 @@ function searchUser(done) {
       chai.expect(foundUser.password).to.not.equal(userDataObject.password);
 
       // Verify additional properties
-      chai.expect(foundUser.createdBy).to.equal(adminUser.username);
-      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundUser.createdBy).to.equal(adminUser._id);
+      chai.expect(foundUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundUser.archivedBy).to.equal(null);
       chai.expect(foundUser.createdOn).to.not.equal(null);
       chai.expect(foundUser.updatedOn).to.not.equal(null);
@@ -541,7 +539,7 @@ function searchUser(done) {
 
 
 /**
- * @description Updates a user using the user controller
+ * @description Updates a user using the user controller.
  */
 function updateUser(done) {
   const userData = testData.users[0];
@@ -561,7 +559,6 @@ function updateUser(done) {
 
     // Verify user updated properly
     chai.expect(updatedUser._id).to.equal(userData.username);
-    chai.expect(updatedUser.username).to.equal(userData.username);
     chai.expect(updatedUser.preferredName).to.equal(updateObj.preferredName);
     chai.expect(updatedUser.fname).to.equal(userData.fname);
     chai.expect(updatedUser.lname).to.equal(userData.lname);
@@ -572,8 +569,8 @@ function updateUser(done) {
     chai.expect(updatedUser.password).to.not.equal(userData.password);
 
     // Verify additional properties
-    chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archivedBy).to.equal(null);
     chai.expect(updatedUser.createdOn).to.not.equal(null);
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
@@ -589,7 +586,7 @@ function updateUser(done) {
 }
 
 /**
- * @description Updates multiple users using the user controller
+ * @description Updates multiple users using the user controller.
  */
 function updateUsers(done) {
   const userDataObjects = [
@@ -619,7 +616,6 @@ function updateUsers(done) {
 
       // Verify user updated properly
       chai.expect(updatedUser._id).to.equal(userDataObject.username);
-      chai.expect(updatedUser.username).to.equal(userDataObject.username);
       chai.expect(updatedUser.preferredName).to.equal('Name Updated');
       chai.expect(updatedUser.fname).to.equal(userDataObject.fname);
       chai.expect(updatedUser.lname).to.equal(userDataObject.lname);
@@ -630,8 +626,8 @@ function updateUsers(done) {
       chai.expect(updatedUser.password).to.not.equal(userDataObject.password);
 
       // Verify additional properties
-      chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedUser.archivedBy).to.equal(null);
       chai.expect(updatedUser.createdOn).to.not.equal(null);
       chai.expect(updatedUser.updatedOn).to.not.equal(null);
@@ -665,8 +661,7 @@ function updateUserPassword(done) {
   .then((updatedUser) => {
     // Verify user updated properly
     chai.expect(updatedUser._id).to.equal(userData.username);
-    chai.expect(updatedUser.username).to.equal(userData.username);
-    chai.expect(updatedUser.preferredName).to.equal('Name Updated');
+    chai.expect(updatedUser.preferredName).to.equal(userData.preferredName);
     chai.expect(updatedUser.fname).to.equal(userData.fname);
     chai.expect(updatedUser.lname).to.equal(userData.lname);
     chai.expect(updatedUser.admin).to.equal(userData.admin);
@@ -676,8 +671,8 @@ function updateUserPassword(done) {
     chai.expect(updatedUser.password).to.not.equal(userData.password);
 
     // Verify additional properties
-    chai.expect(updatedUser.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archivedBy).to.equal(null);
     chai.expect(updatedUser.createdOn).to.not.equal(null);
     chai.expect(updatedUser.updatedOn).to.not.equal(null);
@@ -700,7 +695,7 @@ function updateUserPassword(done) {
 }
 
 /**
- * @description Deletes a user using the user controller
+ * @description Deletes a user using the user controller.
  */
 function deleteUser(done) {
   const userData = testData.users[0];
@@ -738,7 +733,7 @@ function deleteUser(done) {
 }
 
 /**
- * @description Deletes multiple users using the user controller
+ * @description Deletes multiple users using the user controller.
  */
 function deleteUsers(done) {
   const userDataObjects = [

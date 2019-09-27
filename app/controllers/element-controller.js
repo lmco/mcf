@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.element-controller
  *
@@ -12,6 +12,7 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description This implements the behavior and logic for elements.
  * It also provides function for interacting with elements.
@@ -64,7 +65,7 @@ const permissions = M.require('lib.permissions');
  * @param {(string|string[])} [elements] - The elements to find. Can either be
  * an array of element ids, a single element id, or not provided, which defaults
  * to every element in a project being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -104,9 +105,9 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found element objects
+ * @returns {Promise} Array of found element objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['elem1', 'elem2'], { populate: 'parent' })
@@ -118,208 +119,209 @@ const permissions = M.require('lib.permissions');
  * });
  */
 async function find(requestingUser, organizationID, projectID, branchID, elements, options) {
-  // Set options if no elements were provided, but options were
-  if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
-    // Note: assumes input param elements is input option param
-    options = elements; // eslint-disable-line no-param-reassign
-    elements = undefined; // eslint-disable-line no-param-reassign
-  }
-
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-  helper.checkParamsDataType(['undefined', 'object', 'string'], elements, 'Elements');
-
-  // Sanitize input parameters and create function-wide variables
-  const saniElements = (elements !== undefined)
-    ? sani.mongo(JSON.parse(JSON.stringify(elements)))
-    : undefined;
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branID = sani.mongo(branchID);
-  let foundElements = [];
-  const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
-
-  // Validate the provided options
-  const validatedOptions = utils.validateOptions(options, ['includeArchived',
-    'populate', 'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
-
-  // Ensure search options are valid
-  if (options) {
-    // Create array of valid search options
-    const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
-
-    // Loop through provided options, look for validSearchOptions
-    Object.keys(options).forEach((o) => {
-      // If the provided option is a valid search option
-      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-        // Ensure the archived search option is a boolean
-        if (o === 'archived' && typeof options[o] !== 'boolean') {
-          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
-        }
-        // Ensure the search option is a string
-        else if (typeof options[o] !== 'string' && o !== 'archived') {
-          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
-        }
-        // If the search option is an element reference
-        if (['parent', 'source', 'target'].includes(o)) {
-          // Make value the concatenated ID
-          options[o] = utils.createID(orgID, projID, branID, options[o]);
-        }
-        // Add the search option to the searchQuery
-        searchQuery[o] = sani.mongo(options[o]);
-      }
-    });
-  }
-
-  // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID,
-    ((options && options.archived) || validatedOptions.includeArchived));
-  // Permissions check
-  if (!permissions.readOrg(reqUser, organization)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` read items on the org ${orgID}.`, 'warn');
-  }
-
-  // Find the project and validate that it was found and not archived (unless specified)
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    ((options && options.archived) || validatedOptions.includeArchived));
-  // Permissions check
-  if (!permissions.readProject(reqUser, organization, project)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` read items on the project ${projID}.`, 'warn');
-  }
-
-  // Find the branch and validate that it was found and not archived (unless specified)
-  await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-    ((options && options.archived) || validatedOptions.includeArchived));
-
-  let elementsToFind = [];
-
-  // Check the type of the elements parameter
-  if (Array.isArray(saniElements)) {
-    // An array of element ids, find all
-    elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branID, e));
-  }
-  else if (typeof saniElements === 'string') {
-    // A single element id
-    elementsToFind = [utils.createID(orgID, projID, branID, saniElements)];
-  }
-  else if (((typeof saniElements === 'object' && saniElements !== null)
-    || saniElements === undefined)) {
-    // Find all elements in the branch
-    elementsToFind = [];
-  }
-  else {
-    // Invalid parameter, throw an error
-    throw new M.DataFormatError('Invalid input for finding elements.', 'warn');
-  }
-
-  // If wanting to find subtree, find subtree ids
-  if (validatedOptions.subtree) {
-    elementsToFind = await findElementTree(orgID, projID, branID, elementsToFind);
-  }
-
-  if (validatedOptions.rootpath) {
-    if (elementsToFind.length > 1) {
-      throw new M.DataFormatError('Can only perform root path search on a single element', 'warn');
+  try {
+    // Set options if no elements were provided, but options were
+    if (typeof elements === 'object' && elements !== null && !Array.isArray(elements)) {
+      // Note: assumes input param elements is input option param
+      options = elements; // eslint-disable-line no-param-reassign
+      elements = undefined; // eslint-disable-line no-param-reassign
     }
-    const elementToFind = elementsToFind[0];
-    elementsToFind = await findElementRootPath(orgID, projID, branID, elementToFind);
-  }
 
-  // If the includeArchived field is true, remove archived from the query; return everything
-  if (validatedOptions.includeArchived) {
-    delete searchQuery.archived;
-  }
-  // If the archived field is true, query only for archived elements
-  if (validatedOptions.archived) {
-    searchQuery.archived = true;
-  }
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
+    helper.checkParamsDataType(['undefined', 'object', 'string'], elements, 'Elements');
 
-  const promises = [];
+    // Sanitize input parameters and create function-wide variables
+    const saniElements = (elements !== undefined)
+      ? sani.db(JSON.parse(JSON.stringify(elements)))
+      : undefined;
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    let foundElements = [];
+    const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
-  // If no IDs provided, find all elements in the branch
-  if (elementsToFind.length === 0) {
-    // Get the number of elements in the branch
-    const elementCount = await Element.countDocuments(searchQuery);
+    // Validate the provided options
+    const validatedOptions = utils.validateOptions(options, ['includeArchived',
+      'populate', 'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
 
-    // If options.limit is defined an is less that 50k or count is less than 50k, find normally
-    if ((validatedOptions.limit > 0 && validatedOptions.limit < 50000) || elementCount < 50000) {
-      // Find the elements
-      foundElements = await Element.find(searchQuery, validatedOptions.fieldsString)
-      .skip(validatedOptions.skip)
-      .limit(validatedOptions.limit)
-      .sort(validatedOptions.sort)
-      .populate(validatedOptions.populateString)
-      .lean(validatedOptions.lean);
+    // Ensure search options are valid
+    if (options) {
+      // Create array of valid search options
+      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+        'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
+
+      // Loop through provided options, look for validSearchOptions
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the archived search option is a boolean
+          if (o === 'archived' && typeof options[o] !== 'boolean') {
+            throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+          }
+          // Ensure the search option is a string
+          else if (typeof options[o] !== 'string' && o !== 'archived') {
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+          }
+          // If the search option is an element reference
+          if (['parent', 'source', 'target'].includes(o)) {
+            // Make value the concatenated ID
+            options[o] = utils.createID(orgID, projID, branID, options[o]);
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.db(options[o]);
+        }
+      });
+    }
+
+    // Find the organization and validate that it was found and not archived (unless specified)
+    const organization = await helper.findAndValidate(Org, orgID,
+      ((options && options.archived) || validatedOptions.includeArchived));
+
+    // Find the project and validate that it was found and not archived (unless specified)
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+      ((options && options.archived) || validatedOptions.includeArchived));
+
+    // Find the branch and validate that it was found and not archived (unless specified)
+    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
+      ((options && options.archived) || validatedOptions.includeArchived));
+
+    // Permissions check
+    permissions.readElement(reqUser, organization, project, branch);
+
+    let elementsToFind = [];
+
+    // Check the type of the elements parameter
+    if (Array.isArray(saniElements)) {
+      // An array of element ids, find all
+      elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branID, e));
+    }
+    else if (typeof saniElements === 'string') {
+      // A single element id
+      elementsToFind = [utils.createID(orgID, projID, branID, saniElements)];
+    }
+    else if (((typeof saniElements === 'object' && saniElements !== null)
+      || saniElements === undefined)) {
+      // Find all elements in the branch
+      elementsToFind = [];
     }
     else {
-      // Define batchLimit, batchSkip and numLoops
-      let batchLimit = 50000;
-      let batchSkip = 0;
-      let numLoops = 0;
+      // Invalid parameter, throw an error
+      throw new M.DataFormatError('Invalid input for finding elements.', 'warn');
+    }
 
-      // Get number of loops = the smallest value divided by 50K
-      if (validatedOptions.limit && validatedOptions.limit !== 0) {
-        numLoops = (elementCount && validatedOptions.limit) / batchLimit;
+    // If wanting to find subtree, find subtree ids
+    if (validatedOptions.subtree) {
+      elementsToFind = await findElementTree(orgID, projID, branID, elementsToFind);
+    }
+
+    if (validatedOptions.rootpath) {
+      if (elementsToFind.length > 1) {
+        throw new M.DataFormatError('Can only perform root path search on a single element', 'warn');
+      }
+      const elementToFind = elementsToFind[0];
+      elementsToFind = await findElementRootPath(orgID, projID, branID, elementToFind);
+    }
+
+    // If the includeArchived field is true, remove archived from the query; return everything
+    if (validatedOptions.includeArchived) {
+      delete searchQuery.archived;
+    }
+    // If the archived field is true, query only for archived elements
+    if (validatedOptions.archived) {
+      searchQuery.archived = true;
+    }
+
+    const promises = [];
+
+    // If no IDs provided, find all elements in the branch
+    if (elementsToFind.length === 0) {
+      // Get the number of elements in the branch
+      const elementCount = await Element.countDocuments(searchQuery);
+
+      // If options.limit is defined an is less that 50k or count is less than 50k, find normally
+      if ((validatedOptions.limit > 0 && validatedOptions.limit < 50000) || elementCount < 50000) {
+        // Find the elements
+        foundElements = await Element.find(searchQuery, validatedOptions.fieldsString,
+          { skip: validatedOptions.skip,
+            limit: validatedOptions.limit,
+            sort: validatedOptions.sort,
+            populate: validatedOptions.populateString,
+            lean: validatedOptions.lean
+          });
       }
       else {
-        numLoops = elementCount / batchLimit;
-      }
+        // Define batchLimit, batchSkip and numLoops
+        let batchLimit = 50000;
+        let batchSkip = 0;
+        let numLoops = 0;
 
-      // Find elements in batches of 50K in smallest number loops possible
-      for (let i = 0; i < numLoops; i++) {
-        // Skip past already found elements
-        batchSkip = i * 50000 + validatedOptions.skip;
-        // Set limit if its a defined option and on last iteration
-        if (validatedOptions.limit > 0
-          && ((elementCount && validatedOptions.limit) / batchLimit) - i < 1) {
-          batchLimit = validatedOptions.limit - i * batchLimit;
+        // Get number of loops = the smallest value divided by 50K
+        if (validatedOptions.limit && validatedOptions.limit !== 0) {
+          numLoops = (elementCount && validatedOptions.limit) / batchLimit;
         }
+        else {
+          numLoops = elementCount / batchLimit;
+        }
+
+        // Find elements in batches of 50K in smallest number loops possible
+        for (let i = 0; i < numLoops; i++) {
+          // Skip past already found elements
+          batchSkip = i * 50000 + validatedOptions.skip;
+          // Set limit if its a defined option and on last iteration
+          if (validatedOptions.limit > 0
+            && ((elementCount && validatedOptions.limit) / batchLimit) - i < 1) {
+            batchLimit = validatedOptions.limit - i * batchLimit;
+          }
+
+          // Add find operation to array of promises
+          promises.push(
+            Element.find(searchQuery, validatedOptions.fieldsString,
+              { skip: batchSkip,
+                limit: batchLimit,
+                sort: validatedOptions.sort,
+                populate: validatedOptions.populateString,
+                lean: validatedOptions.lean
+              })
+            .then((elems) => {
+              foundElements = foundElements.concat(elems);
+            })
+          );
+        }
+      }
+    }
+    else {
+      // Find elements in batches
+      for (let i = 0; i < elementsToFind.length / 50000; i++) {
+        // Split elementIDs list into batches of 50000
+        searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
 
         // Add find operation to array of promises
         promises.push(
-          Element.find(searchQuery, validatedOptions.fieldsString)
-          .skip(batchSkip)
-          .limit(batchLimit)
-          .sort(validatedOptions.sort)
-          .populate(validatedOptions.populateString)
-          .lean(validatedOptions.lean)
+          Element.find(searchQuery, validatedOptions.fieldsString,
+            { skip: validatedOptions.skip,
+              limit: validatedOptions.limit,
+              sort: validatedOptions.sort,
+              populate: validatedOptions.populateString,
+              lean: validatedOptions.lean
+            })
           .then((elems) => {
             foundElements = foundElements.concat(elems);
           })
         );
       }
     }
+
+    // Wait for promises to resolve before returning elements
+    await Promise.all(promises);
+
+    // Return the found elements
+    return foundElements;
   }
-  else {
-    // Find elements in batches
-    for (let i = 0; i < elementsToFind.length / 50000; i++) {
-      // Split elementIDs list into batches of 50000
-      searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
-
-      // Add find operation to array of promises
-      promises.push(
-        Element.find(searchQuery, validatedOptions.fieldsString)
-        .skip(validatedOptions.skip)
-        .limit(validatedOptions.limit)
-        .sort(validatedOptions.sort)
-        .populate(validatedOptions.populateString)
-        .lean(validatedOptions.lean)
-        .then((elems) => {
-          foundElements = foundElements.concat(elems);
-        })
-      );
-    }
+  catch (error) {
+    throw errors.captureError(error);
   }
-
-  // Wait for promises to resolve before returning elements
-  await Promise.all(promises);
-
-  // Return the found elements
-  return foundElements;
 }
 
 /**
@@ -333,7 +335,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to add elements to.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
  * @param {string} elements.id - The ID of the element being created.
  * @param {string} [elements.name] - The name of the element.
@@ -341,22 +343,22 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * @param {object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -365,7 +367,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created element objects
+ * @returns {Promise} Array of created element objects.
  *
  * @example
  * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: ['parent'] })
@@ -377,53 +379,53 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * });
  */
 async function create(requestingUser, organizationID, projectID, branchID, elements, options) {
-  M.log.debug('create(): Start of function');
-
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-  helper.checkParamsDataType('object', elements, 'Elements');
-
-  // Sanitize input parameters and create function-wide variables
-  const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branID = sani.mongo(branchID);
-  const remainingElements = [];
-  let populatedElements = [];
-  const projectRefs = [];
-
-  // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-    'lean'], Element);
-
-  // Define array to store element data
-  let elementsToCreate = [];
-
-  // Check the type of the elements parameter
-  if (Array.isArray(saniElements)) {
-    // elements is an array, create many elements
-    elementsToCreate = saniElements;
-  }
-  else if (typeof saniElements === 'object') {
-    // elements is an object, create a single element
-    elementsToCreate = [saniElements];
-  }
-  else {
-    // elements is not an object or array, throw an error
-    throw new M.DataFormatError('Invalid input for creating elements.', 'warn');
-  }
-
-  // Create array of id's for lookup and array of valid keys
-  const arrIDs = [];
-  const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
-    'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace',
-    'archived'];
-
-  M.log.debug('create(): Before element validation');
-
-  // Validate the element id, parent, source, target, and namespace fields
   try {
+    M.log.debug('create(): Start of function');
+
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
+    helper.checkParamsDataType('object', elements, 'Elements');
+
+    // Sanitize input parameters and create function-wide variables
+    const saniElements = sani.db(JSON.parse(JSON.stringify(elements)));
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    const remainingElements = [];
+    let populatedElements = [];
+    const projectRefs = [];
+
+    // Initialize and ensure options are valid
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Element);
+
+    // Define array to store element data
+    let elementsToCreate = [];
+
+    // Check the type of the elements parameter
+    if (Array.isArray(saniElements)) {
+      // elements is an array, create many elements
+      elementsToCreate = saniElements;
+    }
+    else if (typeof saniElements === 'object') {
+      // elements is an object, create a single element
+      elementsToCreate = [saniElements];
+    }
+    else {
+      // elements is not an object or array, throw an error
+      throw new M.DataFormatError('Invalid input for creating elements.', 'warn');
+    }
+
+    // Create array of id's for lookup and array of valid keys
+    const arrIDs = [];
+    const validElemKeys = ['id', 'name', 'parent', 'source', 'target',
+      'documentation', 'type', 'custom', 'sourceNamespace', 'targetNamespace',
+      'archived'];
+
+    M.log.debug('create(): Before element validation');
+
+    // Validate the element id, parent, source, target, and namespace fields
     let index = 1;
     elementsToCreate.forEach((elem) => {
       // Ensure keys are valid
@@ -442,228 +444,217 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
 
       index++;
     });
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
 
-  M.log.debug('create(): Before JMI2 conversion');
+    M.log.debug('create(): Before JMI2 conversion');
 
-  // Attempt to convert elements to JMI type 2, to see if duplicate ids exist
-  try {
+    // Attempt to convert elements to JMI type 2, to see if duplicate ids exist
     jmi.convertJMI(1, 2, elementsToCreate, '_id');
-  }
-  catch (err) {
-    throw new M.DataFormatError('Cannot create multiple elements with the same ID.', 'warn');
-  }
 
-  // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID);
-  // Permissions check
-  if (!permissions.readOrg(reqUser, organization)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` read items on the org ${orgID}.`, 'warn');
-  }
+    // Find the organization and validate that it was found and not archived
+    const organization = await helper.findAndValidate(Org, orgID);
 
-  // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-  // Permissions check
-  if (!permissions.createElement(reqUser, organization, project)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` create items on the project ${projID}.`, 'warn');
-  }
+    // Find the project and validate that it was found and not archived
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
-  // Find all referenced projects
-  const referencedProjects = await Project.find({ _id: { $in: projectRefs } }).lean();
-
-  // Verify that each project has a visibility of 'internal'
-  referencedProjects.forEach((proj) => {
-    if (proj.visibility !== 'internal') {
-      throw new M.PermissionError(`The project [${utils.parseID(proj._id).pop()}] `
-        + `in the org [${utils.parseID(proj._id)[0]}] does not have a visibility `
-        + ' of internal.', 'warn');
+    // Find the branch and validate that it was found and not archived
+    const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
+    // Check that the branch is is not a tag
+    if (foundBranch.tag) {
+      throw new M.OperationError(`[${branID}] is a tag and `
+        + 'does not allow elements to be created, updated, or deleted.', 'warn');
     }
-  });
 
-  // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
-  // Check that the branch is is not a tag
-  if (foundBranch.tag) {
-    throw new M.OperationError(`[${branID}] is a tag and `
-      + 'does not allow elements to be created, updated, or deleted.', 'warn');
-  }
+    // Permissions check
+    permissions.createElement(reqUser, organization, project, foundBranch);
 
-  M.log.debug('create(): Before finding pre-existing elements');
+    // Find all referenced projects
+    const referencedProjects = await Project.find({ _id: { $in: projectRefs } },
+      null, { lean: true });
 
-  let promises = [];
-  for (let i = 0; i < arrIDs.length / 50000; i++) {
-    // Split arrIDs into batches of 50000
-    const tmpQuery = { _id: { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) } };
-    // Attempt to find any elements with matching _id
-    promises.push(Element.find(tmpQuery, '_id').lean()
-    .then((foundElements) => {
-      if (foundElements.length > 0) {
-        // Get array of the foundElements's ids
-        const foundElementIDs = foundElements.map(e => utils.parseID(e._id).pop());
+    // Verify that each project has a visibility of 'internal'
+    referencedProjects.forEach((proj) => {
+      if (proj.visibility !== 'internal') {
+        throw new M.PermissionError(`The project [${utils.parseID(proj._id).pop()}] `
+          + `in the org [${utils.parseID(proj._id)[0]}] does not have a visibility `
+          + ' of internal.', 'warn');
+      }
+    });
 
-        // There are one or more elements with conflicting IDs
-        throw new M.OperationError('Elements with the following IDs already exist'
+    M.log.debug('create(): Before finding pre-existing elements');
+
+    let promises = [];
+    for (let i = 0; i < arrIDs.length / 50000; i++) {
+      // Split arrIDs into batches of 50000
+      const tmpQuery = { _id: { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) } };
+      // Attempt to find any elements with matching _id
+      promises.push(Element.find(tmpQuery, '_id', { lean: true })
+      .then((foundElements) => {
+        if (foundElements.length > 0) {
+          // Get array of the foundElements's ids
+          const foundElementIDs = foundElements.map(e => utils.parseID(e._id).pop());
+
+          // There are one or more elements with conflicting IDs
+          throw new M.OperationError('Elements with the following IDs already exist'
             + ` [${foundElementIDs.toString()}].`, 'warn');
+        }
+      }));
+    }
+    await Promise.all(promises);
+
+    // For each object of element data, create the element object
+    const elementObjects = elementsToCreate.map((elemObj) => {
+      // Set the project, lastModifiedBy and createdBy
+      elemObj.project = utils.createID(orgID, projID);
+      elemObj.branch = utils.createID(orgID, projID, branID);
+      elemObj.lastModifiedBy = reqUser._id;
+      elemObj.createdBy = reqUser._id;
+      elemObj.updatedOn = Date.now();
+      elemObj.archivedBy = (elemObj.archived) ? reqUser._id : null;
+      elemObj.archivedOn = (elemObj.archived) ? Date.now() : null;
+
+      // Add hidden fields
+      elemObj.$parent = elemObj.parent;
+      elemObj.$source = (elemObj.source) ? elemObj.source : null;
+      elemObj.$target = (elemObj.target) ? elemObj.target : null;
+
+      return elemObj;
+    });
+
+    // Convert elemObjects array to JMI type 2 for easier lookup
+    const jmi2 = jmi.convertJMI(1, 2, elementObjects);
+
+    // Define array of elements that need to be searched for in DB
+    const elementsToFind = [];
+
+    // Loop through each element and set its parent (and source and target)
+    elementObjects.forEach((element) => {
+      // If the element has a parent
+      if (element.$parent) {
+        // If the element's parent is also being created
+        if (jmi2.hasOwnProperty(element.$parent)) {
+          const parentObj = jmi2[element.$parent];
+          element.parent = parentObj._id;
+          element.$parent = null;
+        }
+        else {
+          // Add elements parent to list of elements to search for in DB
+          elementsToFind.push(element.$parent);
+          remainingElements.push(element);
+        }
       }
-    }));
+
+      // If the element has a source
+      if (element.$source) {
+        // If the element's source is also being created
+        if (jmi2.hasOwnProperty(element.$source)) {
+          element.source = element.$source;
+          element.$source = null;
+        }
+        else {
+          // Add elements source to list of elements to search for in DB
+          elementsToFind.push(element.$source);
+          remainingElements.push(element);
+        }
+      }
+
+      // If the element has a target
+      if (element.$target) {
+        // If the element's target is also being created
+        if (jmi2.hasOwnProperty(element.$target)) {
+          element.target = element.$target;
+          element.$target = null;
+        }
+        else {
+          // Add elements target to list of elements to search for in DB
+          elementsToFind.push(element.$target);
+          remainingElements.push(element);
+        }
+      }
+    });
+
+    // Create query for finding elements
+    const findExtraElementsQuery = { _id: { $in: elementsToFind } };
+
+    M.log.debug('create(): Before finding extra elements');
+
+    // Find extra elements, and only return _id for faster lookup
+    const extraElements = await Element.find(findExtraElementsQuery, '_id', { lean: true });
+    // Convert extraElements to JMI type 2 for easier lookup
+    const extraElementsJMI2 = jmi.convertJMI(1, 2, extraElements);
+    // Loop through each remaining element that does not have it's parent,
+    // source, or target set yet
+    remainingElements.forEach((element) => {
+      // If the element has a parent
+      if (element.$parent) {
+        if (extraElementsJMI2[element.$parent]._id) {
+          element.parent = extraElementsJMI2[element.$parent]._id;
+          element.$parent = null;
+        }
+        else {
+          // Parent not found in db, throw an error
+          throw new M.NotFoundError(`Parent element ${element.parent} not found.`, 'warn');
+        }
+      }
+
+      // If the element is a relationship and has a source
+      if (element.$source) {
+        if (extraElementsJMI2[element.$source]._id) {
+          element.source = extraElementsJMI2[element.$source]._id;
+          element.$source = null;
+        }
+        else {
+          // Source not found in db, throw an error
+          throw new M.NotFoundError(`Source element ${element.source} not found.`, 'warn');
+        }
+      }
+
+      // If the element is a relationship and has a target
+      if (element.$target) {
+        if (extraElementsJMI2[element.$target]._id) {
+          element.target = extraElementsJMI2[element.$target]._id;
+          element.$target = null;
+        }
+        else {
+          // Target not found in db, throw an error
+          throw new M.NotFoundError(`Target element ${element.target} not found.`, 'warn');
+        }
+      }
+    });
+
+    M.log.debug('create(): Before insertMany()');
+    const createdElements = await Element.insertMany(elementObjects, { lean: true });
+    M.log.debug('create(): After insertMany()');
+
+    promises = [];
+    const createdIDs = await createdElements.map(e => e._id);
+    // Find elements in batches
+    for (let i = 0; i < createdIDs.length / 50000; i++) {
+      // Split elementIDs list into batches of 50000
+      const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
+
+      // Add find operation to promises array
+      promises.push(Element.find(tmpQuery, validatedOptions.fieldsString,
+        { populate: validatedOptions.populateString,
+          lean: validatedOptions.lean
+        })
+      .then((_foundElements) => {
+        populatedElements = populatedElements.concat(_foundElements);
+      }));
+    }
+
+    // Return when all elements have been found
+    await Promise.all(promises);
+
+    M.log.debug('create(): Before elements-created event emitter');
+
+    // Emit the event elements-created
+    EventEmitter.emit('elements-created', populatedElements);
+
+    return populatedElements;
   }
-  await Promise.all(promises);
-
-  // For each object of element data, create the element object
-  const elementObjects = elementsToCreate.map((elemObj) => {
-    // Set the project, lastModifiedBy and createdBy
-    elemObj.project = utils.createID(orgID, projID);
-    elemObj.branch = utils.createID(orgID, projID, branID);
-    elemObj.lastModifiedBy = reqUser._id;
-    elemObj.createdBy = reqUser._id;
-    elemObj.updatedOn = Date.now();
-    elemObj.archivedBy = (elemObj.archived) ? reqUser._id : null;
-    elemObj.archivedOn = (elemObj.archived) ? Date.now() : null;
-
-    // Add hidden fields
-    elemObj.$parent = elemObj.parent;
-    elemObj.$source = (elemObj.source) ? elemObj.source : null;
-    elemObj.$target = (elemObj.target) ? elemObj.target : null;
-
-    return elemObj;
-  });
-
-  // Convert elemObjects array to JMI type 2 for easier lookup
-  const jmi2 = jmi.convertJMI(1, 2, elementObjects);
-
-  // Define array of elements that need to be searched for in DB
-  const elementsToFind = [];
-
-  // Loop through each element and set its parent (and source and target)
-  elementObjects.forEach((element) => {
-    // If the element has a parent
-    if (element.$parent) {
-      // If the element's parent is also being created
-      if (jmi2.hasOwnProperty(element.$parent)) {
-        const parentObj = jmi2[element.$parent];
-        element.parent = parentObj._id;
-        element.$parent = null;
-      }
-      else {
-        // Add elements parent to list of elements to search for in DB
-        elementsToFind.push(element.$parent);
-        remainingElements.push(element);
-      }
-    }
-
-    // If the element has a source
-    if (element.$source) {
-      // If the element's source is also being created
-      if (jmi2.hasOwnProperty(element.$source)) {
-        element.source = element.$source;
-        element.$source = null;
-      }
-      else {
-        // Add elements source to list of elements to search for in DB
-        elementsToFind.push(element.$source);
-        remainingElements.push(element);
-      }
-    }
-
-    // If the element has a target
-    if (element.$target) {
-      // If the element's target is also being created
-      if (jmi2.hasOwnProperty(element.$target)) {
-        element.target = element.$target;
-        element.$target = null;
-      }
-      else {
-        // Add elements target to list of elements to search for in DB
-        elementsToFind.push(element.$target);
-        remainingElements.push(element);
-      }
-    }
-  });
-
-  // Create query for finding elements
-  const findExtraElementsQuery = { _id: { $in: elementsToFind } };
-
-  M.log.debug('create(): Before finding extra elements');
-
-  // Find extra elements, and only return _id for faster lookup
-  const extraElements = await Element.find(findExtraElementsQuery, '_id').lean();
-  // Convert extraElements to JMI type 2 for easier lookup
-  const extraElementsJMI2 = jmi.convertJMI(1, 2, extraElements);
-  // Loop through each remaining element that does not have it's parent,
-  // source, or target set yet
-  remainingElements.forEach((element) => {
-    // If the element has a parent
-    if (element.$parent) {
-      try {
-        element.parent = extraElementsJMI2[element.$parent]._id;
-        element.$parent = null;
-      }
-      catch (e) {
-        // Parent not found in db, throw an error
-        throw new M.NotFoundError(`Parent element ${element.parent} not found.`, 'warn');
-      }
-    }
-
-    // If the element is a relationship and has a source
-    if (element.$source) {
-      try {
-        element.source = extraElementsJMI2[element.$source]._id;
-        element.$source = null;
-      }
-      catch (e) {
-        // Source not found in db, throw an error
-        throw new M.NotFoundError(`Source element ${element.source} not found.`, 'warn');
-      }
-    }
-
-    // If the element is a relationship and has a target
-    if (element.$target) {
-      try {
-        element.target = extraElementsJMI2[element.$target]._id;
-        element.$target = null;
-      }
-      catch (e) {
-        // Target not found in db, throw an error
-        throw new M.NotFoundError(`Target element ${element.target} not found.`, 'warn');
-      }
-    }
-  });
-
-  M.log.debug('create(): Before insertMany()');
-
-
-  const createdElements = await Element.insertMany(elementObjects, { rawResult: true });
-  M.log.debug('create(): After insertMany()');
-
-  promises = [];
-  const createdIDs = await createdElements.ops.map(e => e._id);
-  // Find elements in batches
-  for (let i = 0; i < createdIDs.length / 50000; i++) {
-    // Split elementIDs list into batches of 50000
-    const tmpQuery = { _id: { $in: createdIDs.slice(i * 50000, i * 50000 + 50000) } };
-
-    // Add find operation to promises array
-    promises.push(Element.find(tmpQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean)
-    .then((_foundElements) => {
-      populatedElements = populatedElements.concat(_foundElements);
-    }));
+  catch (error) {
+    throw errors.captureError(error);
   }
-
-  // Return when all elements have been found
-  await Promise.all(promises);
-
-  M.log.debug('create(): Before elements-created event emitter');
-
-  // Emit the event elements-created
-  EventEmitter.emit('elements-created', populatedElements);
-
-  return populatedElements;
 }
 
 /**
@@ -681,7 +672,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to update elements on.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
  * @param {string} elements.id - The ID of the element being updated. Field
  * cannot be updated but is required to find element.
@@ -689,24 +680,24 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
  * update element parents in bulk.
  * @param {string} [elements.source] - The ID of the source element.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - The new custom data object. Please note,
+ * @param {object} [elements.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
  * @param {boolean} [elements.archived = false] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -715,7 +706,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated element objects
+ * @returns {Promise} Array of updated element objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
@@ -727,102 +718,95 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * });
  */
 async function update(requestingUser, organizationID, projectID, branchID, elements, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-  helper.checkParamsDataType('object', elements, 'Elements');
+  try {
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
+    helper.checkParamsDataType('object', elements, 'Elements');
 
-  // Sanitize input parameters and create function-wide variables
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branID = sani.mongo(branchID);
-  const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
-  let foundElements = [];
-  let elementsToUpdate = [];
-  const duplicateCheck = {};
-  let foundUpdatedElements = [];
-  const arrIDs = [];
-  const sourceTargetIDs = [];
-  const projectRefs = [];
+    // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    const saniElements = sani.db(JSON.parse(JSON.stringify(elements)));
+    let foundElements = [];
+    let elementsToUpdate = [];
+    const duplicateCheck = {};
+    let foundUpdatedElements = [];
+    const arrIDs = [];
+    const sourceTargetIDs = [];
+    const projectRefs = [];
 
-  // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-    'lean'], Element);
+    // Initialize and ensure options are valid
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Element);
 
+    // Find the organization and validate that it was found and not archived
+    const organization = await helper.findAndValidate(Org, orgID);
 
-  // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID);
-  // Permissions check
-  if (!permissions.readOrg(reqUser, organization)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` read items on the org ${orgID}.`, 'warn');
-  }
+    // Find the project and validate that it was found and not archived
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
-  // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-  // Permissions check
-  if (!permissions.updateElement(reqUser, organization, project)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` update items on the project ${projID}.`, 'warn');
-  }
+    // Find the branch and validate that it was found and not archived
+    const foundBranch = await helper.findAndValidate(Branch,
+      utils.createID(orgID, projID, branID));
 
-  // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branID));
-  // Check that the branch is is not a tag
-  if (foundBranch.tag) {
-    throw new M.OperationError(`[${branID}] is a tag and `
-      + 'does not allow elements to be created, updated, or deleted.', 'warn');
-  }
+    // Permissions check
+    permissions.updateElement(reqUser, organization, project, foundBranch);
 
-  const promises = [];
+    // Check that the branch is is not a tag
+    if (foundBranch.tag) {
+      throw new M.OperationError(`[${branID}] is a tag and `
+        + 'does not allow elements to be created, updated, or deleted.', 'warn');
+    }
 
-  // Check the type of the elements parameter
-  if (Array.isArray(saniElements)) {
-    // elements is an array, update many elements
-    elementsToUpdate = saniElements;
+    const promises = [];
 
-    // Ensure element keys are valid to update in bulk
-    const validBulkFields = Element.getValidBulkUpdateFields();
-    validBulkFields.push('id');
-    // For each element
-    elementsToUpdate.forEach((e) => {
-      // For each key
-      promises.push(Object.keys(e).forEach((key) => {
-        // If it can't be updated in bulk,throw an error
-        if (!validBulkFields.includes(key)) {
-          throw new M.OperationError(`Cannot update the field ${key} in bulk.`, 'warn');
+    // Check the type of the elements parameter
+    if (Array.isArray(saniElements)) {
+      // elements is an array, update many elements
+      elementsToUpdate = saniElements;
+
+      // Ensure element keys are valid to update in bulk
+      const validBulkFields = Element.getValidBulkUpdateFields();
+      validBulkFields.push('id');
+      // For each element
+      elementsToUpdate.forEach((e) => {
+        // For each key
+        promises.push(Object.keys(e).forEach((key) => {
+          // If it can't be updated in bulk,throw an error
+          if (!validBulkFields.includes(key)) {
+            throw new M.OperationError(`Cannot update the field ${key} in bulk.`, 'warn');
+          }
+        }));
+      });
+    }
+    else if (typeof saniElements === 'object') {
+      // elements is an object, update a single element
+      elementsToUpdate = [saniElements];
+      // If updating parent, ensure it won't cause a circular reference
+      if (saniElements.hasOwnProperty('parent')) {
+        // The model element is the only element that can't have a parent
+        if (saniElements.id === 'model') {
+          // Throw an error if the user is attempting to give the model a parent
+          if (saniElements.parent !== null) {
+            throw new M.PermissionError('Cannot change root model parent.', 'warn');
+          }
         }
-      }));
-    });
-  }
-  else if (typeof saniElements === 'object') {
-    // elements is an object, update a single element
-    elementsToUpdate = [saniElements];
-    // If updating parent, ensure it won't cause a circular reference
-    if (saniElements.hasOwnProperty('parent')) {
-      // The model element is the only element that can't have a parent
-      if (saniElements.id === 'model') {
-        // Throw an error if the user is trying to give the model a parent
-        if (saniElements.parent !== null) {
-          throw new M.PermissionError('Cannot change root model parent.', 'warn');
+        else {
+          // Turn parent ID into a name-spaced ID
+          saniElements.parent = utils.createID(orgID, projID, branID, saniElements.parent);
+          // Find if a circular reference exists
+          await moveElementCheck(orgID, projID, branID, saniElements);
         }
-      }
-      else {
-        // Turn parent ID into a name-spaced ID
-        saniElements.parent = utils.createID(orgID, projID, branID, saniElements.parent);
-        // Find if a circular reference exists
-        await moveElementCheck(orgID, projID, branID, saniElements);
       }
     }
-  }
-  else {
-    throw new M.DataFormatError('Invalid input for updating elements.', 'warn');
-  }
-  await Promise.all(promises);
+    else {
+      throw new M.DataFormatError('Invalid input for updating elements.', 'warn');
+    }
+    await Promise.all(promises);
 
-  // Create list of ids
-  try {
+    // Create list of ids
     let index = 1;
     elementsToUpdate.forEach((elem) => {
       // Ensure each element has an id and that it's a string
@@ -854,190 +838,194 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
 
       index++;
     });
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
 
-  const referencedProjects2 = await Project.find({ _id: { $in: projectRefs } }).lean();
+    const referencedProjects2 = await Project.find({ _id: { $in: projectRefs } },
+      null, { lean: true });
 
-  // Verify each project reference has a visibility of 'internal'
-  referencedProjects2.forEach((proj) => {
-    if (proj.visibility !== 'internal') {
-      throw new M.PermissionError(`The project [${utils.parseID(proj._id).pop()}] `
-        + `in the org [${utils.parseID(proj._id)[0]}] does not have a visibility `
-        + ' of internal.', 'warn');
-    }
-  });
-
-  const promises2 = [];
-  const searchQuery = { branch: utils.createID(orgID, projID, branID) };
-  const sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
-
-  // Find elements in batches
-  for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
-    // Split elementIDs list into batches of 50000
-    searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
-
-    // Add find operation to promises array
-    promises2.push(Element.find(searchQuery).lean()
-    .then((_foundElements) => {
-      foundElements = foundElements.concat(_foundElements);
-    }));
-  }
-
-  // Continue when all elements have been found
-  await Promise.all(promises2);
-
-  // Verify the same number of elements are found as desired
-  if (foundElements.length !== arrIDs.length) {
-    const foundIDs = foundElements.map(e => e._id);
-    const notFound = arrIDs.filter(e => !foundIDs.includes(e))
-    .map(e => utils.parseID(e).pop());
-    throw new M.NotFoundError(
-      `The following elements were not found: [${notFound.toString()}].`, 'warn'
-    );
-  }
-
-  const foundSourceTarget = await Element.find(sourceTargetQuery).lean();
-
-  // Convert elementsToUpdate to JMI type 2
-  const jmiType2 = jmi.convertJMI(1, 2, elementsToUpdate);
-  // Convert foundSourceTarget to JMI type 2
-  const sourceTargetJMI2 = jmi.convertJMI(1, 2, foundSourceTarget);
-  const bulkArray = [];
-  // Get array of editable parameters
-  const validFields = Element.getValidUpdateFields();
-
-  // For each found element
-  foundElements.forEach((element) => {
-    const updateElement = jmiType2[element._id];
-    // Remove id and _id field from update object
-    delete updateElement.id;
-    delete updateElement._id;
-
-    // If source/target unchanged, remove from update object
-    if (updateElement.hasOwnProperty('source') && updateElement.source === element.source) {
-      delete updateElement.source;
-    }
-
-    if (updateElement.hasOwnProperty('target') && updateElement.target === element.target) {
-      delete updateElement.target;
-    }
-
-    // Error Check: if element is currently archived, it must first be unarchived
-    if (element.archived && (updateElement.archived === undefined
-      || JSON.parse(updateElement.archived) !== false)) {
-      throw new M.OperationError(`Element [${utils.parseID(element._id).pop()}]`
-        + ' is archived. Archived objects cannot be modified.', 'warn');
-    }
-
-    // For each key in the updated object
-    Object.keys(updateElement).forEach((key) => {
-      // Check if the field is valid to update
-      if (!validFields.includes(key)) {
-        throw new M.OperationError(`Element property [${key}] cannot `
-          + 'be changed.', 'warn');
-      }
-
-      // Get validator for field if one exists
-      if (validators.element.hasOwnProperty(key)) {
-        // If validation fails, throw error
-        if (!RegExp(validators.element[key]).test(updateElement[key])) {
-          throw new M.DataFormatError(
-            `Invalid ${key}: [${updateElement[key]}]`, 'warn'
-          );
-        }
-      }
-
-      // If updating the source or target
-      if (key === 'source' || key === 'target') {
-        // If the source/target is the element id, throw error
-        if (updateElement[key] === element._id) {
-          throw new M.OperationError(`Element's ${key} cannot be self`
-            + ` [${utils.parseID(element._id).pop()}].`, 'warn');
-        }
-        // If source/target does not exist, throw error
-        if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
-          throw new M.NotFoundError(`The ${key} element `
-            + `[${utils.parseID(updateElement[key]).pop()}] was not found `
-            + `in the project [${utils.parseID(updateElement[key])[1]}].`, 'warn');
-        }
-        // If updating target but no source provided, throw error
-        if ((updateElement.target && !(element.source || updateElement.source))
-          || (updateElement.source === null && updateElement.target !== null)) {
-          throw new M.DataFormatError('If target element is provided, '
-            + 'source element is required.', 'warn');
-        }
-
-        // If updating source but no target provided, throw error
-        if ((updateElement.source && !(element.target || updateElement.target))
-          || (updateElement.target === null && updateElement.source !== null)) {
-          throw new M.DataFormatError('If source element is provided, '
-            + 'target element is required.', 'warn');
-        }
-      }
-
-      // Set archivedBy if archived field is being changed
-      if (key === 'archived') {
-        const elemID = utils.parseID(element._id).pop();
-        // Error Check: ensure user cannot archive root elements
-        if (Element.getValidRootElements().includes(elemID) && updateElement[key]) {
-          throw new M.OperationError(
-            `User cannot archive the root element: ${elemID}.`, 'warn'
-          );
-        }
-
-        // If the element is being archived
-        if (updateElement[key] && !element[key]) {
-          updateElement.archivedBy = reqUser._id;
-          updateElement.archivedOn = Date.now();
-        }
-        // If the element is being unarchived
-        else if (!updateElement[key] && element[key]) {
-          updateElement.archivedBy = null;
-          updateElement.archivedOn = null;
-        }
+    // Verify each project reference has a visibility of 'internal'
+    referencedProjects2.forEach((proj) => {
+      if (proj.visibility !== 'internal') {
+        throw new M.PermissionError(`The project [${utils.parseID(proj._id).pop()}] `
+          + `in the org [${utils.parseID(proj._id)[0]}] does not have a visibility `
+          + ' of internal.', 'warn');
       }
     });
 
-    // Update lastModifiedBy field and updatedOn
-    updateElement.lastModifiedBy = reqUser._id;
-    updateElement.updatedOn = Date.now();
+    const promises2 = [];
+    const searchQuery = { branch: utils.createID(orgID, projID, branID) };
+    const sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
 
-    // Update the element
-    bulkArray.push({
-      updateOne: {
-        filter: { _id: element._id },
-        update: updateElement
+    // Find elements in batches
+    for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
+      // Split elementIDs list into batches of 50000
+      searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
+
+      // Add find operation to promises array
+      promises2.push(Element.find(searchQuery, null, { lean: true })
+      .then((_foundElements) => {
+        foundElements = foundElements.concat(_foundElements);
+      }));
+    }
+
+    // Continue when all elements have been found
+    await Promise.all(promises2);
+
+    // Verify the same number of elements are found as desired
+    if (foundElements.length !== arrIDs.length) {
+      const foundIDs = foundElements.map(e => e._id);
+      const notFound = arrIDs.filter(e => !foundIDs.includes(e))
+      .map(e => utils.parseID(e).pop());
+      throw new M.NotFoundError(
+        `The following elements were not found: [${notFound.toString()}].`, 'warn'
+      );
+    }
+
+    const foundSourceTarget = await Element.find(sourceTargetQuery, null, { lean: true });
+
+    // Convert elementsToUpdate to JMI type 2
+    const jmiType2 = jmi.convertJMI(1, 2, elementsToUpdate);
+    // Convert foundSourceTarget to JMI type 2
+    const sourceTargetJMI2 = jmi.convertJMI(1, 2, foundSourceTarget);
+    const bulkArray = [];
+    // Get array of editable parameters
+    const validFields = Element.getValidUpdateFields();
+
+    // For each found element
+    foundElements.forEach((element) => {
+      const updateElement = jmiType2[element._id];
+      // Remove id and _id field from update object
+      delete updateElement.id;
+      delete updateElement._id;
+
+      // If source/target unchanged, remove from update object
+      if (updateElement.hasOwnProperty('source') && updateElement.source === element.source) {
+        delete updateElement.source;
       }
+
+      if (updateElement.hasOwnProperty('target') && updateElement.target === element.target) {
+        delete updateElement.target;
+      }
+
+      // Error Check: if element is currently archived, it must first be unarchived
+      if (element.archived && (updateElement.archived === undefined
+        || JSON.parse(updateElement.archived) !== false)) {
+        throw new M.OperationError(`Element [${utils.parseID(element._id).pop()}]`
+          + ' is archived. Archived objects cannot be modified.', 'warn');
+      }
+
+      // For each key in the updated object
+      Object.keys(updateElement).forEach((key) => {
+        // Check if the field is valid to update
+        if (!validFields.includes(key)) {
+          throw new M.OperationError(`Element property [${key}] cannot `
+            + 'be changed.', 'warn');
+        }
+
+        // Get validator for field if one exists
+        if (validators.element.hasOwnProperty(key)) {
+          // If validation fails, throw error
+          if (!RegExp(validators.element[key]).test(updateElement[key])) {
+            throw new M.DataFormatError(
+              `Invalid ${key}: [${updateElement[key]}]`, 'warn'
+            );
+          }
+        }
+
+        // TODO: After database abstraction, look at using the element validator instead
+        // If updating the source or target
+        if (key === 'source' || key === 'target') {
+          // If the source/target is the element id, throw error
+          if (updateElement[key] === element._id) {
+            throw new M.OperationError(`Element's ${key} cannot be self`
+              + ` [${utils.parseID(element._id).pop()}].`, 'warn');
+          }
+          // If source/target does not exist, throw error
+          if (!sourceTargetJMI2[updateElement[key]] && updateElement[key] !== null) {
+            throw new M.NotFoundError(`The ${key} element `
+              + `[${utils.parseID(updateElement[key]).pop()}] was not found `
+              + `in the project [${utils.parseID(updateElement[key])[1]}].`, 'warn');
+          }
+          // If updating target but no source provided, throw error
+          if ((updateElement.target && !(element.source || updateElement.source))
+            || (updateElement.source === null && updateElement.target !== null)) {
+            throw new M.DataFormatError('If target element is provided, '
+              + 'source element is required.', 'warn');
+          }
+
+          // If updating source but no target provided, throw error
+          if ((updateElement.source && !(element.target || updateElement.target))
+            || (updateElement.target === null && updateElement.source !== null)) {
+            throw new M.DataFormatError('If source element is provided, '
+              + 'target element is required.', 'warn');
+          }
+        }
+
+        // Set archivedBy if archived field is being changed
+        if (key === 'archived') {
+          const elemID = utils.parseID(element._id).pop();
+          // Error Check: ensure user cannot archive root elements
+          if (Element.getValidRootElements().includes(elemID) && updateElement[key]) {
+            throw new M.OperationError(
+              `User cannot archive the root element: ${elemID}.`, 'warn'
+            );
+          }
+
+          // If the element is being archived
+          if (updateElement[key] && !element[key]) {
+            updateElement.archivedBy = reqUser._id;
+            updateElement.archivedOn = Date.now();
+          }
+          // If the element is being unarchived
+          else if (!updateElement[key] && element[key]) {
+            updateElement.archivedBy = null;
+            updateElement.archivedOn = null;
+          }
+        }
+      });
+
+      // Update lastModifiedBy field and updatedOn
+      updateElement.lastModifiedBy = reqUser._id;
+      updateElement.updatedOn = Date.now();
+
+      // Update the element
+      bulkArray.push({
+        updateOne: {
+          filter: { _id: element._id },
+          update: updateElement
+        }
+      });
     });
-  });
 
-  // Update all elements through a bulk write to the database
-  await Element.bulkWrite(bulkArray);
+    // Update all elements through a bulk write to the database
+    await Element.bulkWrite(bulkArray);
 
-  const promises3 = [];
-  // Find elements in batches
-  for (let i = 0; i < arrIDs.length / 50000; i++) {
-    // Split arrIDs list into batches of 50000
-    searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
+    const promises3 = [];
+    // Find elements in batches
+    for (let i = 0; i < arrIDs.length / 50000; i++) {
+      // Split arrIDs list into batches of 50000
+      searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
-    // Add find operation to promises array
-    promises3.push(Element.find(searchQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean)
-    .then((_foundElements) => {
-      foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
-    }));
+      // Add find operation to promises array
+      promises3.push(Element.find(searchQuery, validatedOptions.fieldsString,
+        { populate: validatedOptions.populateString,
+          lean: validatedOptions.lean
+        })
+      .then((_foundElements) => {
+        foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
+      }));
+    }
+
+    // Return when all elements have been found
+    await Promise.all(promises3);
+
+    // Emit the event elements-updated
+    EventEmitter.emit('elements-updated', foundUpdatedElements);
+
+    return foundUpdatedElements;
   }
-
-  // Return when all elements have been found
-  await Promise.all(promises3);
-
-  // Emit the event elements-updated
-  EventEmitter.emit('elements-updated', foundUpdatedElements);
-
-  return foundUpdatedElements;
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**
@@ -1050,7 +1038,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to add elements to.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create/replace.
  * @param {string} elements.id - The ID of the element being created/replaced.
  * @param {string} [elements.name] - The name of the element.
@@ -1058,22 +1046,22 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * @param {object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -1082,7 +1070,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created/replaced element objects
+ * @returns {Promise} Array of created/replaced element objects.
  *
  * @example
  * createOrReplace({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...])
@@ -1095,68 +1083,66 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  */
 async function createOrReplace(requestingUser, organizationID, projectID,
   branchID, elements, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-  helper.checkParamsDataType('object', elements, 'Elements');
-
-  // Sanitize input parameters and create function-wide variables
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branID = sani.mongo(branchID);
-  const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
-  const duplicateCheck = {};
-  let foundElements = [];
-  let elementsToLookup = [];
-  let createdElements = [];
-  const ts = Date.now();
-
-  // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID);
-  // Permissions check
-  if (!permissions.readOrg(reqUser, organization)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` read items on the org ${orgID}.`, 'warn');
-  }
-
-  // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-  // Permissions check
-  if (!permissions.updateElement(reqUser, organization, project)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` create or replace items on the project ${projID}.`, 'warn');
-  }
-
-  // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
-  // Check that the branch is is not a tag
-  if (foundBranch.tag) {
-    throw new M.OperationError(`[${branID}] is a tag and `
-      + 'does not allow elements to be created, updated, or deleted.', 'warn');
-  }
-
-  // Check the type of the elements parameter
-  if (Array.isArray(saniElements)) {
-    // elements is an array, create/replace many elements
-    elementsToLookup = saniElements;
-  }
-  else if (typeof saniElements === 'object') {
-    // elements is an object, create/replace a single element
-    elementsToLookup = [saniElements];
-  }
-  else {
-    throw new M.DataFormatError('Invalid input for creating/replacing'
-      + ' elements.', 'warn');
-  }
-
-  // Create list of ids
-  const arrIDs = [];
   try {
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
+    helper.checkParamsDataType('object', elements, 'Elements');
+
+    // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    const saniElements = sani.db(JSON.parse(JSON.stringify(elements)));
+    const duplicateCheck = {};
+    let foundElements = [];
+    let elementsToLookup = [];
+    let createdElements = [];
+    const ts = Date.now();
+
+    // Find the organization and validate that it was found and not archived
+    const organization = await helper.findAndValidate(Org, orgID);
+
+    // Find the project and validate that it was found and not archived
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
+
+    // Find the branch and validate that it was found and not archived
+    const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
+    // Check that the branch is is not a tag
+    if (foundBranch.tag) {
+      throw new M.OperationError(`[${branID}] is a tag and `
+        + 'does not allow elements to be created, updated, or deleted.', 'warn');
+    }
+
+    // Permissions check
+    permissions.updateElement(reqUser, organization, project, foundBranch);
+
+    // Check the type of the elements parameter
+    if (Array.isArray(saniElements)) {
+      // elements is an array, create/replace many elements
+      elementsToLookup = saniElements;
+    }
+    else if (typeof saniElements === 'object') {
+      // elements is an object, create/replace a single element
+      elementsToLookup = [saniElements];
+    }
+    else {
+      throw new M.DataFormatError('Invalid input for creating/replacing'
+        + ' elements.', 'warn');
+    }
+
+    // Create list of ids
+    const arrIDs = [];
     let index = 1;
     elementsToLookup.forEach((elem) => {
-      // Ensure each element has an id and that its a string
-      assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
-      assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
+      try {
+        // Ensure each element has an id and that its a string
+        assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
+        assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
+      }
+      catch (err) {
+        throw new M.DataFormatError(err.message, 'warn');
+      }
       const tmpID = utils.createID(orgID, projID, branID, elem.id);
       // If a duplicate ID, throw an error
       if (duplicateCheck[tmpID]) {
@@ -1169,142 +1155,139 @@ async function createOrReplace(requestingUser, organizationID, projectID,
       arrIDs.push(tmpID);
       index++;
     });
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
 
-  const promises = [];
-  const searchQuery = { branch: utils.createID(orgID, projID, branID) };
+    const promises = [];
+    const searchQuery = { branch: utils.createID(orgID, projID, branID) };
 
-  // Find elements in batches
-  // TODO: Consider changing of loop increment by 50k instead of 1
-  for (let i = 0; i < arrIDs.length / 50000; i++) {
-    // Split arrIDs list into batches of 50000
-    searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
+    // Find elements in batches
+    // TODO: Consider changing of loop increment by 50k instead of 1
+    for (let i = 0; i < arrIDs.length / 50000; i++) {
+      // Split arrIDs list into batches of 50000
+      searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
 
-    // Add find operation to promises array
-    promises.push(Element.find(searchQuery).lean()
-    .then((_foundElements) => {
-      foundElements = foundElements.concat(_foundElements);
-    }));
-  }
-
-  // Return when all elements have been found
-  await Promise.all(promises);
-
-  const foundElementIDs = await foundElements.map(e => e._id);
-
-  // Error Check: ensure user cannot replace root element
-  foundElementIDs.forEach((id) => {
-    if (Element.getValidRootElements().includes(utils.parseID(id).pop())) {
-      throw new M.OperationError(
-        `User cannot replace root element: ${utils.parseID(id).pop()}.`, 'warn'
-      );
+      // Add find operation to promises array
+      promises.push(Element.find(searchQuery, null, { lean: true })
+      .then((_foundElements) => {
+        foundElements = foundElements.concat(_foundElements);
+      }));
     }
-  });
 
-  // Create temporary element data
-  // If data directory doesn't exist, create it
-  if (!fs.existsSync(path.join(M.root, 'data'))) {
-    fs.mkdirSync(path.join(M.root, 'data'));
-  }
+    // Return when all elements have been found
+    await Promise.all(promises);
 
-  // If org directory doesn't exist, create it
-  if (!fs.existsSync(path.join(M.root, 'data', orgID))) {
-    fs.mkdirSync(path.join(M.root, 'data', orgID));
-  }
+    const foundElementIDs = foundElements.map(e => e._id);
 
-  // If project directory doesn't exist, create it
-  if (!fs.existsSync(path.join(M.root, 'data', orgID, projID))) {
-    fs.mkdirSync(path.join(M.root, 'data', orgID, projID));
-  }
-
-  // If branch directory doesn't exist, create it
-  if (!fs.existsSync(path.join(M.root, 'data', orgID, projID, branID))) {
-    fs.mkdirSync(path.join(M.root, 'data', orgID, projID, branID));
-  }
-
-  // Write contents to temporary file
-  await new Promise(function(res, rej) {
-    fs.writeFile(path.join(M.root, 'data', orgID, projID, branID, `PUT-backup-elements-${ts}.json`),
-      JSON.stringify(foundElements), function(err) {
-        if (err) rej(err);
-        else res();
-      });
-  });
-
-  // Delete elements from database
-  await Element.deleteMany({ _id: foundElementIDs }).lean();
-
-  // Emit the event elements-deleted
-  EventEmitter.emit('elements-deleted', foundElements);
-
-
-  // Try block after elements have been deleted but before being replaced
-  // If element creation fails, the old elements will be restored
-  try {
-    // Create new elements
-    createdElements = await create(reqUser, orgID, projID, branID, elementsToLookup, options);
-  }
-  catch (error) {
-    const finalError = await new Promise(async (res) => {
-      // Reinsert original data
-      try {
-        await Element.insertMany(foundElements);
-        fs.unlinkSync(path.join(M.root, 'data', orgID, projID, branID,
-          `PUT-backup-elements-${ts}.json`));
-
-        // Restoration succeeded; pass the original error
-        res(error);
-      }
-      catch (restoreErr) {
-        // Pass the new error that occurred while trying to restore elements
-        res(restoreErr);
+    // Error Check: ensure user cannot replace root element
+    foundElementIDs.forEach((id) => {
+      if (Element.getValidRootElements().includes(utils.parseID(id).pop())) {
+        throw new M.OperationError(
+          `User cannot replace root element: ${utils.parseID(id).pop()}.`, 'warn'
+        );
       }
     });
-    // Throw whichever error was passed
-    throw errors.captureError(finalError);
-  }
 
-  // Code block after elements have been deleted and replaced
+    // Create temporary element data
+    // If data directory doesn't exist, create it
+    if (!fs.existsSync(path.join(M.root, 'data'))) {
+      fs.mkdirSync(path.join(M.root, 'data'));
+    }
 
-  // Create file path to temp data file
-  const filePath = path.join(M.root, 'data', orgID, projID, branID, `PUT-backup-elements-${ts}.json`);
-  // Delete the temporary file.
-  if (fs.existsSync(filePath)) {
+    // If org directory doesn't exist, create it
+    if (!fs.existsSync(path.join(M.root, 'data', orgID))) {
+      fs.mkdirSync(path.join(M.root, 'data', orgID));
+    }
+
+    // If project directory doesn't exist, create it
+    if (!fs.existsSync(path.join(M.root, 'data', orgID, projID))) {
+      fs.mkdirSync(path.join(M.root, 'data', orgID, projID));
+    }
+
+    // If branch directory doesn't exist, create it
+    if (!fs.existsSync(path.join(M.root, 'data', orgID, projID, branID))) {
+      fs.mkdirSync(path.join(M.root, 'data', orgID, projID, branID));
+    }
+
+    // Write contents to temporary file
+    await new Promise(function(res, rej) {
+      fs.writeFile(path.join(M.root, 'data', orgID, projID, branID, `PUT-backup-elements-${ts}.json`),
+        JSON.stringify(foundElements), function(err) {
+          if (err) rej(err);
+          else res();
+        });
+    });
+
+    // Delete elements from database
+    await Element.deleteMany({ _id: foundElementIDs });
+
+    // Emit the event elements-deleted
+    EventEmitter.emit('elements-deleted', foundElements);
+
+
+    // Try block after elements have been deleted but before being replaced
+    // If element creation fails, the old elements will be restored
     try {
+      // Create new elements
+      createdElements = await create(reqUser, orgID, projID, branID, elementsToLookup, options);
+    }
+    catch (error) {
+      const finalError = await new Promise(async (res) => {
+        // Reinsert original data
+        try {
+          await Element.insertMany(foundElements);
+          fs.unlinkSync(path.join(M.root, 'data', orgID, projID, branID,
+            `PUT-backup-elements-${ts}.json`));
+
+          // Restoration succeeded; pass the original error
+          res(error);
+        }
+        catch (restoreErr) {
+          // Pass the new error that occurred while attempting to restore elements
+          M.log.error('Problem occurred while attempting to restore deleted elements after '
+            + 'unsuccessful replace operation');
+          res(restoreErr);
+        }
+      });
+      // Throw whichever error was passed
+      throw finalError;
+    }
+
+    // Code block after elements have been deleted and replaced
+
+    // Create file path to temp data file
+    const filePath = path.join(M.root, 'data', orgID, projID, branID, `PUT-backup-elements-${ts}.json`);
+    // Delete the temporary file.
+    if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
-    catch (err) {
-      throw errors.captureError(err);
+
+    // Read all of the files in the branch directory
+    const existingBranchFiles = fs.readdirSync(path.join(M.root, 'data', orgID, projID, branID));
+
+    // If no files exist in the directory, delete it
+    if (existingBranchFiles.length === 0) {
+      fs.rmdirSync(path.join(M.root, 'data', orgID, projID, branID));
     }
+
+    // Read all of the files in the project directory
+    const existingProjFiles = fs.readdirSync(path.join(M.root, 'data', orgID, projID));
+
+    // If no files exist in the directory, delete it
+    if (existingProjFiles.length === 0) {
+      fs.rmdirSync(path.join(M.root, 'data', orgID, projID));
+    }
+
+    // Read all of the files in the org directory
+    const existingOrgFiles = fs.readdirSync(path.join(M.root, 'data', orgID));
+
+    // If no files exist in the directory, delete it
+    if (existingOrgFiles.length === 0) {
+      fs.rmdirSync(path.join(M.root, 'data', orgID));
+    }
+    return createdElements;
   }
-
-  // Read all of the files in the branch directory
-  const existingBranchFiles = fs.readdirSync(path.join(M.root, 'data', orgID, projID, branID));
-
-  // If no files exist in the directory, delete it
-  if (existingBranchFiles.length === 0) {
-    fs.rmdirSync(path.join(M.root, 'data', orgID, projID, branID));
+  catch (error) {
+    throw errors.captureError(error);
   }
-
-  // Read all of the files in the project directory
-  const existingProjFiles = fs.readdirSync(path.join(M.root, 'data', orgID, projID));
-
-  // If no files exist in the directory, delete it
-  if (existingProjFiles.length === 0) {
-    fs.rmdirSync(path.join(M.root, 'data', orgID, projID));
-  }
-
-  // Read all of the files in the org directory
-  const existingOrgFiles = fs.readdirSync(path.join(M.root, 'data', orgID));
-
-  // If no files exist in the directory, delete it
-  if (existingOrgFiles.length === 0) {
-    fs.rmdirSync(path.join(M.root, 'data', orgID));
-  }
-  return createdElements;
 }
 
 /**
@@ -1318,10 +1301,10 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {string} branchID - The ID of the branch to remove elements from.
  * @param {(string|string[])} elements - The elements to remove. Can either be
  * an array of element ids or a single element id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted element ids
+ * @returns {Promise} Array of deleted element ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])
@@ -1333,168 +1316,166 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * });
  */
 async function remove(requestingUser, organizationID, projectID, branchID, elements, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-  helper.checkParamsDataType(['object', 'string'], elements, 'Elements');
+  try {
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
+    helper.checkParamsDataType(['object', 'string'], elements, 'Elements');
 
-  // Sanitize input parameters and create function-wide variables
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branID = sani.mongo(branchID);
-  const saniElements = sani.mongo(JSON.parse(JSON.stringify(elements)));
-  let elementsToFind = [];
-  let uniqueIDs = [];
+    // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    const saniElements = sani.db(JSON.parse(JSON.stringify(elements)));
+    let elementsToFind = [];
+    let uniqueIDs = [];
 
-  // Check the type of the elements parameter
-  if (Array.isArray(saniElements) && saniElements.length !== 0) {
-    // An array of element ids, remove all
-    elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branID, e));
-  }
-  else if (typeof saniElements === 'string') {
-    // A single element id, remove one
-    elementsToFind = [utils.createID(orgID, projID, branID, saniElements)];
-  }
-  else {
-    // Invalid parameter, throw an error
-    throw new M.DataFormatError('Invalid input for removing elements.', 'warn');
-  }
-
-
-  // Find the organization and validate that it was found and not archived
-  const organization = await helper.findAndValidate(Org, orgID);
-  // Permissions check
-  if (!permissions.readOrg(reqUser, organization)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` read items on the org ${orgID}.`, 'warn');
-  }
-
-  // Find the project and validate that it was found and not archived
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
-  // Permissions check
-  if (!permissions.deleteElement(reqUser, organization, project)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` remove items on the project ${projID}.`, 'warn');
-  }
-
-  // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
-  // Check that the branch is is not a tag
-  if (foundBranch.tag) {
-    throw new M.OperationError(`[${branID}] is a tag and `
-      + 'does not allow elements to be created, updated, or deleted.', 'warn');
-  }
-
-  // Find the elements to delete
-  const foundElements = await Element.find({ _id: { $in: elementsToFind } }).lean();
-  const foundElementIDs = await foundElements.map(e => e._id);
-
-  // Check if all elements were found
-  const notFoundIDs = elementsToFind.filter(e => !foundElementIDs.includes(e));
-  // Some elements not found, throw an error
-  if (notFoundIDs.length > 0) {
-    throw new M.NotFoundError('The following elements were not found: '
-      + `[${notFoundIDs.map(e => utils.parseID(e).pop())}].`, 'warn');
-  }
-
-  // Find all element IDs and their subtree IDs
-  const foundIDs = await findElementTree(orgID, projID, branID, elementsToFind);
-
-  const uniqueIDsObj = {};
-  // Parse foundIDs and only delete unique ones
-  foundIDs.forEach((id) => {
-    if (!uniqueIDsObj[id]) {
-      uniqueIDsObj[id] = id;
+    // Check the type of the elements parameter
+    if (Array.isArray(saniElements) && saniElements.length !== 0) {
+      // An array of element ids, remove all
+      elementsToFind = saniElements.map(e => utils.createID(orgID, projID, branID, e));
     }
-  });
-
-  uniqueIDs = Object.keys(uniqueIDsObj);
-
-  let promises = [];
-  // Error Check: ensure user cannot delete root elements
-  uniqueIDs.forEach((id) => {
-    const elemID = utils.parseID(id).pop();
-    if (Element.getValidRootElements().includes(elemID)) {
-      throw new M.OperationError(
-        `User cannot delete root element: ${elemID}.`, 'warn'
-      );
+    else if (typeof saniElements === 'string') {
+      // A single element id, remove one
+      elementsToFind = [utils.createID(orgID, projID, branID, saniElements)];
     }
-  });
-
-  M.log.debug(`Attempting to delete ${uniqueIDs.length} on the branch ${foundBranch._id}.`);
-  let elementsToDelete = [];
-  // Find all elements to delete in batches of 50K or less
-  for (let i = 0; i < uniqueIDs.length / 50000; i++) {
-    const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
-    // Find batch
-    promises.push(
-      Element.find({ _id: { $in: batchIDs } }).lean()
-      .then((e) => {
-        elementsToDelete = elementsToDelete.concat(e);
-      })
-    );
-  }
-  // Return when all deletes have completed
-  await Promise.all(promises);
-
-  promises = [];
-  // Split elements into batches of 50000 or less
-  for (let i = 0; i < uniqueIDs.length / 50000; i++) {
-    const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
-    // Delete batch
-    promises.push(Element.deleteMany({ _id: { $in: batchIDs } }).lean());
-  }
-  // Return when all deletes have completed
-  await Promise.all(promises);
-
-  // Emit the event elements-deleted
-  EventEmitter.emit('elements-deleted', elementsToDelete);
-
-  // Create query to find all relationships which point to deleted elements
-  const relQuery = {
-    $or: [
-      { source: { $in: uniqueIDs } },
-      { target: { $in: uniqueIDs } }
-    ]
-  };
-
-  // Find all relationships which are now broken
-  const relationships = await Element.find(relQuery).lean();
-  const bulkArray = [];
-  promises = [];
-
-  // For each relationship
-  promises.push(relationships.forEach((rel) => {
-    // If the source no longer exists, set it to the undefined element
-    if (uniqueIDs.includes(rel.source)) {
-      // Reset source to the undefined element
-      rel.source = utils.createID(rel.branch, 'undefined');
+    else {
+      // Invalid parameter, throw an error
+      throw new M.DataFormatError('Invalid input for removing elements.', 'warn');
     }
 
-    // If the target no longer exists, set it to the undefined element
-    if (uniqueIDs.includes(rel.target)) {
-      // Reset target to the undefined element
-      rel.target = utils.createID(rel.branch, 'undefined');
+    // Find the organization and validate that it was found and not archived
+    const organization = await helper.findAndValidate(Org, orgID);
+
+    // Find the project and validate that it was found and not archived
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
+
+    // Find the branch and validate that it was found and not archived
+    const foundBranch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
+    // Check that the branch is is not a tag
+    if (foundBranch.tag) {
+      throw new M.OperationError(`[${branID}] is a tag and `
+        + 'does not allow elements to be created, updated, or deleted.', 'warn');
     }
 
-    bulkArray.push({
-      updateOne: {
-        filter: { _id: rel._id },
-        update: rel
+    // Permissions check
+    permissions.deleteElement(reqUser, organization, project, foundBranch);
+
+    // Find the elements to delete
+    const foundElements = await Element.find({ _id: { $in: elementsToFind } },
+      null, { lean: true });
+    const foundElementIDs = foundElements.map(e => e._id);
+
+    // Check if all elements were found
+    const notFoundIDs = elementsToFind.filter(e => !foundElementIDs.includes(e));
+    // Some elements not found, throw an error
+    if (notFoundIDs.length > 0) {
+      throw new M.NotFoundError('The following elements were not found: '
+        + `[${notFoundIDs.map(e => utils.parseID(e).pop())}].`, 'warn');
+    }
+
+    // Find all element IDs and their subtree IDs
+    const foundIDs = await findElementTree(orgID, projID, branID, elementsToFind);
+
+    const uniqueIDsObj = {};
+    // Parse foundIDs and only delete unique ones
+    foundIDs.forEach((id) => {
+      if (!uniqueIDsObj[id]) {
+        uniqueIDsObj[id] = id;
       }
     });
-  }));
 
-  await Promise.all(promises);
+    uniqueIDs = Object.keys(uniqueIDsObj);
 
-  // If there are relationships to update, make a bulkWrite() call
-  if (bulkArray.length > 0) {
-    // Save relationship changes to database
-    await Element.bulkWrite(bulkArray);
+    let promises = [];
+    // Error Check: ensure user cannot delete root elements
+    uniqueIDs.forEach((id) => {
+      const elemID = utils.parseID(id).pop();
+      if (Element.getValidRootElements().includes(elemID)) {
+        throw new M.OperationError(
+          `User cannot delete root element: ${elemID}.`, 'warn'
+        );
+      }
+    });
+
+    M.log.debug(`Attempting to delete ${uniqueIDs.length} on the branch ${foundBranch._id}.`);
+    let elementsToDelete = [];
+    // Find all elements to delete in batches of 50K or less
+    for (let i = 0; i < uniqueIDs.length / 50000; i++) {
+      const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
+      // Find batch
+      promises.push(
+        Element.find({ _id: { $in: batchIDs } }, null, { lean: true })
+        .then((e) => {
+          elementsToDelete = elementsToDelete.concat(e);
+        })
+      );
+    }
+    // Return when all deletes have completed
+    await Promise.all(promises);
+
+    promises = [];
+    // Split elements into batches of 50000 or less
+    for (let i = 0; i < uniqueIDs.length / 50000; i++) {
+      const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
+      // Delete batch
+      promises.push(Element.deleteMany({ _id: { $in: batchIDs } }));
+    }
+    // Return when all deletes have completed
+    await Promise.all(promises);
+
+    // Emit the event elements-deleted
+    EventEmitter.emit('elements-deleted', elementsToDelete);
+
+    // Create query to find all relationships which point to deleted elements
+    const relQuery = {
+      $or: [
+        { source: { $in: uniqueIDs } },
+        { target: { $in: uniqueIDs } }
+      ]
+    };
+
+    // Find all relationships which are now broken
+    const relationships = await Element.find(relQuery, null, { lean: true });
+    const bulkArray = [];
+    promises = [];
+
+    // For each relationship
+    promises.push(relationships.forEach((rel) => {
+      // If the source no longer exists, set it to the undefined element
+      if (uniqueIDs.includes(rel.source)) {
+        // Reset source to the undefined element
+        rel.source = utils.createID(rel.branch, 'undefined');
+      }
+
+      // If the target no longer exists, set it to the undefined element
+      if (uniqueIDs.includes(rel.target)) {
+        // Reset target to the undefined element
+        rel.target = utils.createID(rel.branch, 'undefined');
+      }
+
+      bulkArray.push({
+        updateOne: {
+          filter: { _id: rel._id },
+          update: rel
+        }
+      });
+    }));
+
+    await Promise.all(promises);
+
+    // If there are relationships to update, make a bulkWrite() call
+    if (bulkArray.length > 0) {
+      // Save relationship changes to database
+      await Element.bulkWrite(bulkArray);
+    }
+
+    // Return unique IDs of elements deleted
+    return uniqueIDs;
   }
-
-  // Return unique IDs of elements deleted
-  return uniqueIDs;
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**
@@ -1506,7 +1487,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
- * @return {Promise} Array of found element ids
+ * @returns {Promise} Array of found element ids.
  *
  * @example
  * findElementTree('orgID', 'projID', 'branch', ['elem1', 'elem2',...])
@@ -1532,10 +1513,18 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
   }
 
   // Define nested helper function
+  /**
+   * @description A nested helper function that searches through the subtrees of given
+   * element ids.
+   *
+   * @param {string[]} ids - A list of element IDs to examine.
+   * @returns {Promise<string|Promise<string|*|undefined>>} Returns either a recursive call
+   * to itself or an empty string once there are no more elements to search.
+   */
   async function findElementTreeHelper(ids) {
     try {
       // Find all elements whose parent is in the list of given ids
-      const elements = await Element.find({ parent: { $in: ids } }, '_id').lean();
+      const elements = await Element.find({ parent: { $in: ids } }, '_id', { lean: true });
       // Get a list of element ids
       const foundIDs = elements.map(e => e._id);
       // Add these elements to the global list of found elements
@@ -1584,10 +1573,10 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
- * @param {Object} element - The element whose parent is being checked. The
+ * @param {object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *
- * @return {Promise} Resolved promise to verify element parent.
+ * @returns {Promise} Resolved promise to verify element parent.
  *
  * @example
  * moveElementCheck('orgID', 'projID', 'branch', {Elem1})
@@ -1621,8 +1610,16 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
   }
 
   // Define nested helper function
+  /**
+   * @description A nested helper function. Searches the parent of the provided element to
+   * ensure that no circular references are being made.
+   *
+   * @param {Element} e - The element to be examined.
+   * @returns {Promise<string|Promise<string|*|undefined>>} Either throws an error if a
+   * circular reference has been found or returns an empty string.
+   */
   async function findElementParentRecursive(e) {
-    const foundElement = await Element.findOne({ _id: e.parent }).lean();
+    const foundElement = await Element.findOne({ _id: e.parent }, null, { lean: true });
     // If foundElement is null, reject with error
     if (!foundElement) {
       throw new M.NotFoundError('Parent element '
@@ -1658,7 +1655,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
 
 /**
  * @description A function which searches elements within a certain project
- * using mongo's built in text search. Returns any elements that match the text
+ * using a text-based search. Returns any elements that match the text
  * search, in order of the best matches to the worst. Searches the _id, name,
  * documentation, parent, source and target fields.
  *
@@ -1667,7 +1664,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string} query - The text-based query to search the database for.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -1703,9 +1700,9 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} An array of found elements.
+ * @returns {Promise} An array of found elements.
  *
  * @example
  * search({User}, 'orgID', 'projID', 'branch', 'find these elements')
@@ -1717,127 +1714,121 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * });
  */
 async function search(requestingUser, organizationID, projectID, branchID, query, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-
-  // Sanitize input parameters and create function-wide variables
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.mongo(organizationID);
-  const projID = sani.mongo(projectID);
-  const branID = sani.mongo(branchID);
-  const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
-
-  // Validate and set the options
-  const validatedOptions = utils.validateOptions(options, ['includeArchived',
-    'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
-
-  // Ensure options are valid
-  if (options) {
-    // Create array of valid search options
-    const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
-      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
-
-    // Loop through provided options
-    Object.keys(options).forEach((o) => {
-      // If the provided option is a valid search option
-      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-        // Ensure the archived search option is a boolean
-        if (o === 'archived' && typeof options[o] !== 'boolean') {
-          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
-        }
-        // Ensure the search option is a string
-        else if (typeof options[o] !== 'string' && o !== 'archived') {
-          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
-        }
-
-        // If the search option is an element reference
-        if (['parent', 'source', 'target'].includes(o)) {
-          // Make value the concatenated ID
-          options[o] = utils.createID(orgID, projID, branID, options[o]);
-        }
-
-        // Add the search option to the searchQuery
-        searchQuery[o] = sani.mongo(options[o]);
-      }
-    });
-  }
-
-  // Find the organization and validate that it was found and not archived (unless specified)
-  const organization = await helper.findAndValidate(Org, orgID,
-    ((options && options.archived) || validatedOptions.includeArchived));
-  // Permissions check
-  if (!permissions.readOrg(reqUser, organization)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` read items on the org ${orgID}.`, 'warn');
-  }
-
-  // Find the project and validate that it was found and not archived (unless specificed)
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    ((options && options.archived) || validatedOptions.includeArchived));
-  // Permissions check
-  if (!permissions.readProject(reqUser, organization, project)) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` read items on the project ${projID}.`, 'warn');
-  }
-
-  // Find the branch and validate that it was found and not archived (unless specificed)
-  await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-    ((options && options.archived) || validatedOptions.includeArchived));
-
-  searchQuery.$text = { $search: query };
-  // If the includeArchived field is true, remove archived from the query; return everything
-  if (validatedOptions.includeArchived) {
-    delete searchQuery.archived;
-  }
-  // If the archived field is true, query only for archived elements
-  if (validatedOptions.archived) {
-    searchQuery.archived = true;
-  }
-
-  // Add sorting by metadata
-  // If no sorting option was specified ($natural is the default) then remove
-  // $natural. $natural does not work with metadata sorting
-  if (validatedOptions.sort.$natural) {
-    validatedOptions.sort = { score: { $meta: 'textScore' } };
-  }
-  else {
-    validatedOptions.sort.score = { $meta: 'textScore' };
-  }
-
-  let projections = {};
-
-  // Check if filters are selected
-  if (validatedOptions.fieldsString) {
-    projections = helper.parseFieldsString(validatedOptions.fieldsString);
-  }
-
-  projections.score = {};
-  projections.score.$meta = 'textScore';
-
   try {
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
+
+    // Sanitize input parameters and create function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+    const branID = sani.db(branchID);
+    const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
+
+    // Validate and set the options
+    const validatedOptions = utils.validateOptions(options, ['includeArchived',
+      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+
+    // Ensure options are valid
+    if (options) {
+      // Create array of valid search options
+      const validSearchOptions = ['parent', 'source', 'target', 'type', 'name',
+        'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
+
+      // Loop through provided options
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the archived search option is a boolean
+          if (o === 'archived' && typeof options[o] !== 'boolean') {
+            throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+          }
+          // Ensure the search option is a string
+          else if (typeof options[o] !== 'string' && o !== 'archived') {
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+          }
+
+          // If the search option is an element reference
+          if (['parent', 'source', 'target'].includes(o)) {
+            // Make value the concatenated ID
+            options[o] = utils.createID(orgID, projID, branID, options[o]);
+          }
+
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.db(options[o]);
+        }
+      });
+    }
+
+    // Find the organization and validate that it was found and not archived (unless specified)
+    const organization = await helper.findAndValidate(Org, orgID,
+      ((options && options.archived) || validatedOptions.includeArchived));
+
+    // Find the project and validate that it was found and not archived (unless specified)
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+      ((options && options.archived) || validatedOptions.includeArchived));
+
+    // Find the branch and validate that it was found and not archived (unless specified)
+    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
+      ((options && options.archived) || validatedOptions.includeArchived));
+
+    // Permissions check
+    permissions.readElement(reqUser, organization, project, branch);
+
+    searchQuery.$text = { $search: query };
+    // If the includeArchived field is true, remove archived from the query; return everything
+    if (validatedOptions.includeArchived) {
+      delete searchQuery.archived;
+    }
+    // If the archived field is true, query only for archived elements
+    if (validatedOptions.archived) {
+      searchQuery.archived = true;
+    }
+
+    // Add sorting by metadata
+    // If no sorting option was specified ($natural is the default) then remove
+    // $natural. $natural does not work with metadata sorting
+    if (validatedOptions.sort.$natural) {
+      validatedOptions.sort = { score: { $meta: 'textScore' } };
+    }
+    else {
+      validatedOptions.sort.score = { $meta: 'textScore' };
+    }
+
+    let projections = {};
+
+    // Check if filters are selected
+    if (validatedOptions.fieldsString) {
+      projections = helper.parseFieldsString(validatedOptions.fieldsString);
+    }
+
+    projections.score = {};
+    projections.score.$meta = 'textScore';
+
     // Search for the elements
-    return await Element.find(searchQuery, projections)
-    .skip(validatedOptions.skip)
-    .limit(validatedOptions.limit)
-    .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+    return await Element.find(searchQuery, projections,
+      { skip: validatedOptions.skip,
+        limit: validatedOptions.limit,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
+    throw errors.captureError(error);
   }
 }
 
 /**
  * @description A non-exposed helper function which finds the parent of given
- * element up to and including the root element
+ * element up to and including the root element.
  *
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string} elementID - The element whose parents are being found.
  *
- * @return {string} Array of found element ids
+ * @returns {string} Array of found element ids.
  *
  * @example
  * findElementRootPath('orgID', 'projID', 'branch', 'elem1')
@@ -1852,11 +1843,18 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
   // Initialize return object
   let foundElements = [];
 
-  // Define nested helper function
+  /**
+   * @description A nested helper function.  Searches the for parent of the element ID provided.
+   *
+   * @param searchID - The ID of the element to search for.
+   * @returns {Promise<string|string|*>} Returns either a recursive call to itself if the parent of
+   * the element also has a parent, an empty string if the parent of the element is the root, or
+   * throws an error if a circular reference has been found.
+   */
   async function findElementTreeHelper(searchID) {
     try {
       // Find the parent of the element
-      const parent = await Element.findOne({ _id: searchID }, { _id: 1, parent: 1 }).lean();
+      const parent = await Element.findOne({ _id: searchID }, 'parent', { lean: true });
       // Ensure the parent was found
       if (!parent) {
         throw new M.DataFormatError('Element or parent not found', 'warn');
@@ -1894,161 +1892,181 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
  * @description A non-exposed helper function that validates the sourceNamespace and/or
  * targetNamespace to ensure that they are formatted properly.  A namespace must contain a
  * org, project, and branch id and cannot reference the same project.  This function also
- * pushes to lists of ids keeping track of source, target, and project references
+ * pushes to lists of ids keeping track of source, target, and project references.
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to or updated on
- * @param {string} projID - The id of the project the element is being posted to or updated on
- * @param {object} projectRefs - A running list of references to other projects on the same org
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to or updated on.
+ * @param {string} projID - The id of the project the element is being posted to or updated on.
+ * @param {object} projectRefs - A running list of references to other projects on the same org.
  * @param {object} sourceTargetIDs - A list of source and target IDs to be queried for to ensure
- * that they exist before being updated
+ * that they exist before being updated.
  */
 function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
   sourceTargetIDs = null) {
-  if (elem.hasOwnProperty('sourceNamespace')) {
-    assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
-    assert.ok(typeof elem.source === 'string', `Element #${index}'s source is not a string.`);
+  try {
+    if (elem.hasOwnProperty('sourceNamespace')) {
+      assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+      assert.ok(typeof elem.source === 'string', `Element #${index}'s source is not a string.`);
 
-    // Ensure the object contains an org, project and branch field
-    assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
-      + ` #${index}'s sourceNamespace is missing an org.`);
-    assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
-      + ` #${index}'s sourceNamespace is missing a project.`);
-    assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
-      + ` #${index}'s sourceNamespace is missing a branch.`);
+      // Ensure the object contains an org, project and branch field
+      assert.ok(elem.sourceNamespace.hasOwnProperty('org'), 'Element'
+        + ` #${index}'s sourceNamespace is missing an org.`);
+      assert.ok(elem.sourceNamespace.hasOwnProperty('project'), 'Element'
+        + ` #${index}'s sourceNamespace is missing a project.`);
+      assert.ok(elem.sourceNamespace.hasOwnProperty('branch'), 'Element'
+        + ` #${index}'s sourceNamespace is missing a branch.`);
 
-    // Ensure the sourceNamespace org is the same org or default org
-    const validOrgs = [orgID, M.config.server.defaultOrganizationId];
-    assert.ok(validOrgs.includes(elem.sourceNamespace.org), 'Element '
-      + `#${index}'s source cannot reference elements outside its org `
-      + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
+      // Ensure the sourceNamespace org is the same org or default org
+      const validOrgs = [orgID, M.config.server.defaultOrganizationId];
+      assert.ok(validOrgs.includes(elem.sourceNamespace.org), 'Element '
+        + `#${index}'s source cannot reference elements outside its org `
+        + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
 
-    if (elem.sourceNamespace.org === orgID && elem.sourceNamespace.project === projID) {
-      throw new M.DataFormatError('Source Namespace cannot reference the same project.', 'warn');
+      if (elem.sourceNamespace.org === orgID && elem.sourceNamespace.project === projID) {
+        throw new M.DataFormatError('Source Namespace cannot reference the same project.', 'warn');
+      }
+
+      // Add project id to projectRefs array. Later we verify these projects
+      // exist and have a visibility of 'internal'.
+      projectRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
+
+      // Change element source to referenced project's id
+      const tmpSource = utils.parseID(elem.source).pop();
+      elem.source = utils.createID(elem.sourceNamespace.org,
+        elem.sourceNamespace.project, elem.sourceNamespace.branch, tmpSource);
+
+      // Delete sourceNamespace, it does not get stored in the database
+      delete elem.sourceNamespace;
+
+      // Remove the last source which has the wrong project
+      if (sourceTargetIDs) {
+        sourceTargetIDs.pop();
+        sourceTargetIDs.push(elem.source);
+      }
     }
 
-    // Add project id to projectRefs array. Later we verify these projects
-    // exist and have a visibility of 'internal'.
-    projectRefs.push(utils.createID(elem.sourceNamespace.org, elem.sourceNamespace.project));
+    if (elem.hasOwnProperty('targetNamespace')) {
+      assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+      assert.ok(typeof elem.target === 'string', `Element #${index}'s target is not a string.`);
 
-    // Change element source to referenced project's id
-    const tmpSource = utils.parseID(elem.source).pop();
-    elem.source = utils.createID(elem.sourceNamespace.org,
-      elem.sourceNamespace.project, elem.sourceNamespace.branch, tmpSource);
+      // Ensure the object contains an org, project and branch field
+      assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
+        + ` #${index}'s targetNamespace is missing an org.`);
+      assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
+        + ` #${index}'s targetNamespace is missing a project.`);
+      assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
+        + ` #${index}'s targetNamespace is missing a branch.`);
 
-    // Delete sourceNamespace, it does not get stored in the database
-    delete elem.sourceNamespace;
+      // Ensure the targetNamespace org is the same org or default org
+      const validOrgs = [orgID, M.config.server.defaultOrganizationId];
+      assert.ok(validOrgs.includes(elem.targetNamespace.org), 'Element '
+        + `#${index}'s target cannot reference elements outside its org `
+        + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
 
-    // Remove the last source which has the wrong project
-    if (sourceTargetIDs) {
-      sourceTargetIDs.pop();
-      sourceTargetIDs.push(elem.source);
+      if (elem.targetNamespace.org === orgID && elem.targetNamespace.project === projID) {
+        throw new M.DataFormatError('Target Namespace cannot reference the same project.', 'warn');
+      }
+
+      // Add project id to projectRefs array. Later we verify these projects
+      // exist and have a visibility of 'internal'.
+      projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
+
+      // Change element target to referenced project's id
+      const tmpTarget = utils.parseID(elem.target).pop();
+      elem.target = utils.createID(elem.targetNamespace.org,
+        elem.targetNamespace.project, elem.targetNamespace.branch, tmpTarget);
+
+      // Delete targetNamespace, it does not get stored in the database
+      delete elem.targetNamespace;
+
+      // Remove the last target which has the wrong project
+      if (sourceTargetIDs) {
+        sourceTargetIDs.pop();
+        sourceTargetIDs.push(elem.target);
+      }
     }
   }
-
-  if (elem.hasOwnProperty('targetNamespace')) {
-    assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
-    assert.ok(typeof elem.target === 'string', `Element #${index}'s target is not a string.`);
-
-    // Ensure the object contains an org, project and branch field
-    assert.ok(elem.targetNamespace.hasOwnProperty('org'), 'Element'
-      + ` #${index}'s targetNamespace is missing an org.`);
-    assert.ok(elem.targetNamespace.hasOwnProperty('project'), 'Element'
-      + ` #${index}'s targetNamespace is missing a project.`);
-    assert.ok(elem.targetNamespace.hasOwnProperty('branch'), 'Element'
-      + ` #${index}'s targetNamespace is missing a branch.`);
-
-    // Ensure the targetNamespace org is the same org or default org
-    const validOrgs = [orgID, M.config.server.defaultOrganizationId];
-    assert.ok(validOrgs.includes(elem.targetNamespace.org), 'Element '
-      + `#${index}'s target cannot reference elements outside its org `
-      + `unless part of the ${M.config.server.defaultOrganizationName} org.`);
-
-    if (elem.targetNamespace.org === orgID && elem.targetNamespace.project === projID) {
-      throw new M.DataFormatError('Target Namespace cannot reference the same project.', 'warn');
-    }
-
-    // Add project id to projectRefs array. Later we verify these projects
-    // exist and have a visibility of 'internal'.
-    projectRefs.push(utils.createID(elem.targetNamespace.org, elem.targetNamespace.project));
-
-    // Change element target to referenced project's id
-    const tmpTarget = utils.parseID(elem.target).pop();
-    elem.target = utils.createID(elem.targetNamespace.org,
-      elem.targetNamespace.project, elem.targetNamespace.branch, tmpTarget);
-
-    // Delete targetNamespace, it does not get stored in the database
-    delete elem.targetNamespace;
-
-    // Remove the last target which has the wrong project
-    if (sourceTargetIDs) {
-      sourceTargetIDs.pop();
-      sourceTargetIDs.push(elem.target);
-    }
+  catch (error) {
+    throw new M.DataFormatError(error.message, 'warn');
   }
 }
 
 /**
- * @description A non-exposed helper function that validates the setting of a source and target
+ * @description A non-exposed helper function that validates the setting of a source and target.
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
  */
 function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
-  // If element has a source, ensure it has a target
-  if (elem.hasOwnProperty('source')) {
-    assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
-    assert.ok(typeof elem.target === 'string',
-      `Element #${index}'s target is not a string.`);
-    elem.source = utils.createID(orgID, projID, branchID, elem.source);
-  }
+  try {
+    // If element has a source, ensure it has a target
+    if (elem.hasOwnProperty('source')) {
+      assert.ok(elem.hasOwnProperty('target'), `Element #${index} is missing a target id.`);
+      assert.ok(typeof elem.target === 'string',
+        `Element #${index}'s target is not a string.`);
+      elem.source = utils.createID(orgID, projID, branchID, elem.source);
+    }
 
-  // If element has a target, ensure it has a source
-  if (elem.hasOwnProperty('target')) {
-    assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
-    assert.ok(typeof elem.source === 'string',
-      `Element #${index}'s source is not a string.`);
-    elem.target = utils.createID(orgID, projID, branchID, elem.target);
+    // If element has a target, ensure it has a source
+    if (elem.hasOwnProperty('target')) {
+      assert.ok(elem.hasOwnProperty('source'), `Element #${index} is missing a source id.`);
+      assert.ok(typeof elem.source === 'string',
+        `Element #${index}'s source is not a string.`);
+      elem.target = utils.createID(orgID, projID, branchID, elem.target);
+    }
+  }
+  catch (error) {
+    throw new M.DataFormatError(error.message, 'warn');
   }
 }
 
 /**
- * @description A non-exposed helper function that validates the parent of an element being created
+ * @description A non-exposed helper function that validates the parent of an element being created.
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
  */
 function elementParentCheck(elem, index, orgID, projID, branchID) {
-  if (!elem.hasOwnProperty('parent') || elem.parent === null || elem.parent === '') {
-    elem.parent = 'model';
+  try {
+    if (!elem.hasOwnProperty('parent') || elem.parent === null || elem.parent === '') {
+      elem.parent = 'model';
+    }
+    assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
+    elem.parent = utils.createID(orgID, projID, branchID, elem.parent);
+    assert.ok(elem.parent !== elem._id, 'Elements parent cannot be self.');
   }
-  assert.ok(typeof elem.parent === 'string', `Element #${index}'s parent is not a string.`);
-  elem.parent = utils.createID(orgID, projID, branchID, elem.parent);
-  assert.ok(elem.parent !== elem._id, 'Elements parent cannot be self.');
+  catch (error) {
+    throw new M.DataFormatError(error.message, 'warn');
+  }
 }
 
 /**
- * @description A non-exposed helper function that validates the id of an element being created
+ * @description A non-exposed helper function that validates the id of an element being created.
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
- * @param {object} arrIDs - An array of element ids being created
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
+ * @param {object} arrIDs - An array of element ids being created.
  */
 function elementIDCheck(elem, index, orgID, projID, branchID, arrIDs) {
-  // Ensure each element has an id and that it's a string
-  assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
-  assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
-  elem.id = utils.createID(orgID, projID, branchID, elem.id);
-  arrIDs.push(elem.id);
-  elem._id = elem.id;
+  try {
+    // Ensure each element has an id and that it's a string
+    assert.ok(elem.hasOwnProperty('id'), `Element #${index} does not have an id.`);
+    assert.ok(typeof elem.id === 'string', `Element #${index}'s id is not a string.`);
+    elem.id = utils.createID(orgID, projID, branchID, elem.id);
+    arrIDs.push(elem.id);
+    elem._id = elem.id;
+  }
+  catch (error) {
+    throw new M.DataFormatError(error.message, 'warn');
+  }
 }

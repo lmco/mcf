@@ -18,7 +18,7 @@
 
 {
   "parserOptions": {
-    "ecmaVersion": 2017,
+    "ecmaVersion": 2018,
     "sourceType": "module",
     "ecmaFeatures": {
       "generators": false,
@@ -38,6 +38,10 @@
   "globals": {
     "M": false
   },
+
+  "plugins": [
+    "jsdoc"
+  ],
 
   "rules": {
 
@@ -832,6 +836,63 @@
       "classes": true,
       "variables": true
     }],
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// JSDOC
+    ////////////////////////////////////////////////////////////////////////////
+    "jsdoc/check-alignment": "error", // Recommended
+    "jsdoc/check-examples": "off",
+    "jsdoc/check-indentation": "off",  // We frequently use indentation in our jsdocs
+    "jsdoc/check-param-names": "error", // Recommended
+    "jsdoc/check-syntax": "error",
+    "jsdoc/check-tag-names": ["error", {"definedTags":  [
+      "owner", "swagger","classification", "memberOf"
+    ]}], //TODO: reevaluate
+    "jsdoc/check-types": "error", // Recommended
+    "jsdoc/implements-on-classes": "warn", // Recommended
+    "jsdoc/match-description": ["error", {"tags": {
+      "param": true,
+      "property": true,
+      "returns": true
+    }}],
+    "jsdoc/newline-after-description": "error", // Recommended
+    "jsdoc/no-types": "off",
+    "jsdoc/no-undefined-types": ["error", {
+      "definedTypes": [
+        "DataFormatError",
+        "AuthorizationError",
+        "PermissionError",
+        "OperationError",
+        "NotFoundError",
+        "BrewingError",
+        "ServerError",
+        "DatabaseError",
+        "User",
+        "Organization",
+        "Project",
+        "Branch",
+        "Element",
+        "Artifact"]
+    }], // Recommended
+    "jsdoc/require-description": ["error", {
+      "descriptionStyle": "tag"
+    }],
+    "jsdoc/require-description-complete-sentence": ["error", {"tags": [
+      "param", "property", "returns"
+    ]}],
+    "jsdoc/require-example": "off",
+    "jsdoc/require-hyphen-before-param-description": "error",
+    "jsdoc/require-jsdoc": "error", // Recommended
+    /*"jsdoc/require-param": "error", // Recommended
+    "jsdoc/require-param-description": "error", // Recommended
+    "jsdoc/require-param-name": "error", // Recommended
+    "jsdoc/require-param-type": "error", // Recommended
+    "jsdoc/require-returns": "error", // Recommended
+    "jsdoc/require-returns-check": "error", // Recommended
+    "jsdoc/require-returns-description": "error", // Recommended
+    "jsdoc/require-returns-type": "error", // Recommended
+    "jsdoc/valid-types": "warn", // Recommended*/
 
 
     ////////////////////////////////////////////////////////////////////////////

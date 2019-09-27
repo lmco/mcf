@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.503a-project-mock-core-tests
  *
@@ -102,6 +102,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies mock POST request to create a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postProject(done) {
   // Create request object
@@ -128,13 +130,13 @@ function postProject(done) {
     chai.expect(createdProj.id).to.equal(projData.id);
     chai.expect(createdProj.name).to.equal(projData.name);
     chai.expect(createdProj.custom).to.deep.equal(projData.custom || {});
-    chai.expect(createdProj.permissions[adminUser.username]).to.equal('admin');
+    chai.expect(createdProj.permissions[adminUser._id]).to.equal('admin');
     chai.expect(createdProj.org).to.equal(org.id);
     chai.expect(createdProj.visibility).to.equal(projData.visibility || 'private');
 
     // Verify additional properties
-    chai.expect(createdProj.createdBy).to.equal(adminUser.username);
-    chai.expect(createdProj.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdProj.createdBy).to.equal(adminUser._id);
+    chai.expect(createdProj.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdProj.createdOn).to.not.equal(null);
     chai.expect(createdProj.updatedOn).to.not.equal(null);
     chai.expect(createdProj.archived).to.equal(false);
@@ -156,6 +158,8 @@ function postProject(done) {
 
 /**
  * @description Verifies mock POST request to create multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postProjects(done) {
   // Create request object
@@ -192,13 +196,13 @@ function postProjects(done) {
       chai.expect(createdProj.id).to.equal(projDataObject.id);
       chai.expect(createdProj.name).to.equal(projDataObject.name);
       chai.expect(createdProj.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(createdProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(createdProj.permissions[adminUser._id]).to.equal('admin');
       chai.expect(createdProj.org).to.equal(org.id);
       chai.expect(createdProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(createdProj.createdBy).to.equal(adminUser.username);
-      chai.expect(createdProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdProj.createdBy).to.equal(adminUser._id);
+      chai.expect(createdProj.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdProj.createdOn).to.not.equal(null);
       chai.expect(createdProj.updatedOn).to.not.equal(null);
       chai.expect(createdProj.archived).to.equal(false);
@@ -221,6 +225,8 @@ function postProjects(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putProject(done) {
   // Create request object
@@ -247,13 +253,13 @@ function putProject(done) {
     chai.expect(replacedProj.id).to.equal(projData.id);
     chai.expect(replacedProj.name).to.equal(projData.name);
     chai.expect(replacedProj.custom).to.deep.equal(projData.custom || {});
-    chai.expect(replacedProj.permissions[adminUser.username]).to.equal('admin');
+    chai.expect(replacedProj.permissions[adminUser._id]).to.equal('admin');
     chai.expect(replacedProj.org).to.equal(org.id);
     chai.expect(replacedProj.visibility).to.equal(projData.visibility || 'private');
 
     // Verify additional properties
-    chai.expect(replacedProj.createdBy).to.equal(adminUser.username);
-    chai.expect(replacedProj.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedProj.createdBy).to.equal(adminUser._id);
+    chai.expect(replacedProj.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedProj.createdOn).to.not.equal(null);
     chai.expect(replacedProj.updatedOn).to.not.equal(null);
     chai.expect(replacedProj.archived).to.equal(false);
@@ -275,6 +281,8 @@ function putProject(done) {
 
 /**
  * @description Verifies mock PUT request to create/replace multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putProjects(done) {
   // Create request object
@@ -312,13 +320,13 @@ function putProjects(done) {
       chai.expect(replacedProj.id).to.equal(projDataObject.id);
       chai.expect(replacedProj.name).to.equal(projDataObject.name);
       chai.expect(replacedProj.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(replacedProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(replacedProj.permissions[adminUser._id]).to.equal('admin');
       chai.expect(replacedProj.org).to.equal(org.id);
       chai.expect(replacedProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(replacedProj.createdBy).to.equal(adminUser.username);
-      chai.expect(replacedProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedProj.createdBy).to.equal(adminUser._id);
+      chai.expect(replacedProj.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedProj.createdOn).to.not.equal(null);
       chai.expect(replacedProj.updatedOn).to.not.equal(null);
       chai.expect(replacedProj.archived).to.equal(false);
@@ -341,6 +349,8 @@ function putProjects(done) {
 
 /**
  * @description Verifies mock GET request to find a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getProject(done) {
   // Create request object
@@ -367,13 +377,13 @@ function getProject(done) {
     chai.expect(foundProj.id).to.equal(projData.id);
     chai.expect(foundProj.name).to.equal(projData.name);
     chai.expect(foundProj.custom).to.deep.equal(projData.custom || {});
-    chai.expect(foundProj.permissions[adminUser.username]).to.equal('admin');
+    chai.expect(foundProj.permissions[adminUser._id]).to.equal('admin');
     chai.expect(foundProj.org).to.equal(org.id);
     chai.expect(foundProj.visibility).to.equal(projData.visibility || 'private');
 
     // Verify additional properties
-    chai.expect(foundProj.createdBy).to.equal(adminUser.username);
-    chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundProj.createdBy).to.equal(adminUser._id);
+    chai.expect(foundProj.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundProj.createdOn).to.not.equal(null);
     chai.expect(foundProj.updatedOn).to.not.equal(null);
     chai.expect(foundProj.archived).to.equal(false);
@@ -395,6 +405,8 @@ function getProject(done) {
 
 /**
  * @description Verifies mock GET request to find multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getProjects(done) {
   // Create request object
@@ -433,13 +445,13 @@ function getProjects(done) {
       chai.expect(foundProj.id).to.equal(projDataObject.id);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(foundProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(foundProj.permissions[adminUser._id]).to.equal('admin');
       chai.expect(foundProj.org).to.equal(org.id);
       chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(foundProj.createdBy).to.equal(adminUser.username);
-      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProj.createdBy).to.equal(adminUser._id);
+      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundProj.createdOn).to.not.equal(null);
       chai.expect(foundProj.updatedOn).to.not.equal(null);
       chai.expect(foundProj.archived).to.equal(false);
@@ -462,6 +474,8 @@ function getProjects(done) {
 
 /**
  * @description Verifies mock GET request to find all projects in an org.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllProjectsOnOrg(done) {
   // Create request object
@@ -501,13 +515,13 @@ function getAllProjectsOnOrg(done) {
       chai.expect(foundProj.id).to.equal(projDataObject.id);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(foundProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(foundProj.permissions[adminUser._id]).to.equal('admin');
       chai.expect(foundProj.org).to.equal(org.id);
       chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(foundProj.createdBy).to.equal(adminUser.username);
-      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundProj.createdBy).to.equal(adminUser._id);
+      chai.expect(foundProj.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundProj.createdOn).to.not.equal(null);
       chai.expect(foundProj.updatedOn).to.not.equal(null);
       chai.expect(foundProj.archived).to.equal(false);
@@ -531,6 +545,8 @@ function getAllProjectsOnOrg(done) {
 /**
  * @description Verifies mock GET request to find all projects a user has access
  * to.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getAllProjects(done) {
   // Create request object
@@ -577,13 +593,13 @@ function getAllProjects(done) {
         chai.expect(foundProj.id).to.equal(projDataObject.id);
         chai.expect(foundProj.name).to.equal(projDataObject.name);
         chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
-        chai.expect(foundProj.permissions[adminUser.username]).to.equal('admin');
+        chai.expect(foundProj.permissions[adminUser._id]).to.equal('admin');
         chai.expect(foundProj.org).to.equal(org.id);
         chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
         // Verify additional properties
-        chai.expect(foundProj.createdBy).to.equal(adminUser.username);
-        chai.expect(foundProj.lastModifiedBy).to.equal(adminUser.username);
+        chai.expect(foundProj.createdBy).to.equal(adminUser._id);
+        chai.expect(foundProj.lastModifiedBy).to.equal(adminUser._id);
         chai.expect(foundProj.createdOn).to.not.equal(null);
         chai.expect(foundProj.updatedOn).to.not.equal(null);
         chai.expect(foundProj.archived).to.equal(false);
@@ -607,6 +623,8 @@ function getAllProjects(done) {
 
 /**
  * @description Verifies mock PATCH request to update a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchProject(done) {
   // Create request object
@@ -637,13 +655,13 @@ function patchProject(done) {
     chai.expect(updatedProj.id).to.equal(projData.id);
     chai.expect(updatedProj.name).to.equal(updateObj.name);
     chai.expect(updatedProj.custom).to.deep.equal(projData.custom || {});
-    chai.expect(updatedProj.permissions[adminUser.username]).to.equal('admin');
+    chai.expect(updatedProj.permissions[adminUser._id]).to.equal('admin');
     chai.expect(updatedProj.org).to.equal(org.id);
     chai.expect(updatedProj.visibility).to.equal(projData.visibility || 'private');
 
     // Verify additional properties
-    chai.expect(updatedProj.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedProj.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedProj.createdOn).to.not.equal(null);
     chai.expect(updatedProj.updatedOn).to.not.equal(null);
     chai.expect(updatedProj.archived).to.equal(false);
@@ -665,6 +683,8 @@ function patchProject(done) {
 
 /**
  * @description Verifies mock PATCH request to update multiple projects.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchProjects(done) {
   // Create request object
@@ -707,13 +727,13 @@ function patchProjects(done) {
       chai.expect(updatedProj.id).to.equal(projDataObject.id);
       chai.expect(updatedProj.name).to.equal('Updated Name');
       chai.expect(updatedProj.custom).to.deep.equal(projDataObject.custom || {});
-      chai.expect(updatedProj.permissions[adminUser.username]).to.equal('admin');
+      chai.expect(updatedProj.permissions[adminUser._id]).to.equal('admin');
       chai.expect(updatedProj.org).to.equal(org.id);
       chai.expect(updatedProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
-      chai.expect(updatedProj.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedProj.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedProj.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedProj.createdOn).to.not.equal(null);
       chai.expect(updatedProj.updatedOn).to.not.equal(null);
       chai.expect(updatedProj.archived).to.equal(false);
@@ -736,6 +756,8 @@ function patchProjects(done) {
 
 /**
  * @description Verifies mock DELETE request to delete a project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteProject(done) {
   // Create request object
@@ -774,6 +796,8 @@ function deleteProject(done) {
 
 /**
  * @description Verifies mock DELETE request to delete multiple project.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteProjects(done) {
   // Create request object

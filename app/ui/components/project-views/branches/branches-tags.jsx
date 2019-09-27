@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.profile-views.profile-home
  *
@@ -374,7 +374,7 @@ class BranchesTags extends Component {
                   branch={this.state.branchSelected}/>
           </ModalBody>
         </Modal>
-        <div id='workspace-header' className='workspace-header header-box-depth'>
+        <div className='workspace-header header-box-depth'>
           <h2 className={btnDisClassName}>Branches / Tags</h2>
           { /* Verify user is an admin or write permissions */}
           {(!displayBtns)

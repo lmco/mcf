@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module plugins.routes
  *
@@ -24,12 +24,13 @@ const express = require('express');
 const pluginRouter = express.Router();
 
 const protectedFileNames = ['routes.js'];
+const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
 
 // Load the plugins
 loadPlugins();
 
 /**
- * Actually loads the plugins by copying them from their source location into
+ * @description Actually loads the plugins by copying them from their source location into
  * the plugins directory, then loops over those plugins to "require" them and
  * use them as part of the plugins routes.
  */
@@ -46,7 +47,8 @@ function loadPlugins() {
       clonePluginFromGitRepo(plugins[k]);
     }
     // Local plugins
-    else if (plugins[k].source.startsWith('/') || plugins[k].source.startsWith('.')) {
+    else if (plugins[k].source.startsWith('/') || plugins[k].source.startsWith('.')
+      || plugins[k].source.startsWith(`\\`)) { // eslint-disable-line
       copyPluginFromLocalDir(plugins[k]);
     }
     // Website downloads
@@ -73,7 +75,7 @@ function loadPlugins() {
     // Removes old plugins
     if (!pluginName.includes(f)) {
       M.log.info(`Removing plugin '${f}' ...`);
-      const c = `rm -rf ${__dirname}/${f}`;
+      const c = `${rmd} ${path.join(__dirname, f)}`;
       const stdout = execSync(c);
       M.log.verbose(stdout.toString());
     }
@@ -81,7 +83,7 @@ function loadPlugins() {
     const pluginPath = path.join(__dirname, f);
     if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
       M.log.info(`Removing invalid plugin '${f}' ...`);
-      const c = `rm -rf ${__dirname}/${f}`;
+      const c = `${rmd} ${path.join(__dirname, f)}`;
       const stdout = execSync(c);
       M.log.verbose(stdout.toString());
       return;
@@ -96,7 +98,7 @@ function loadPlugins() {
     // Install the dependencies
     if (pkg.dependencies) {
       M.log.verbose('Installing plugin dependencies ...');
-      const command = `cd plugins/${namespace}; yarn install`;
+      const command = `cd ${path.join('plugins', namespace)}; yarn install`;
       const stdout = execSync(command);
       M.log.debug(stdout.toString());
       M.log.verbose('Dependencies installed.');
@@ -139,12 +141,11 @@ function loadPlugins() {
  * @description Clones the plugin from a Git repository and places in the
  * appropriate location in the plugins directory.
  *
- * @param {Object} data The plugin configuration data
+ * @param {object} data - The plugin configuration data.
  */
 function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
-  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
-  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
+  const stdoutRmCmd = execSync(`${rmd} ${path.join(M.root, 'plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
   try {
@@ -183,12 +184,11 @@ function clonePluginFromGitRepo(data) {
  * directory. If the plugin location is already in the local directory, nothing
  * occurs.
  *
- * @param {Object} data The plugin configuration data
+ * @param {object} data - The plugin configuration data.
  */
 function copyPluginFromLocalDir(data) {
   // Remove plugin if it already exists in plugins directory
-  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
-  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
+  const stdoutRmCmd = execSync(`${rmd} ${path.join(M.root, 'plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
   // Generate the copy command
@@ -207,12 +207,11 @@ function copyPluginFromLocalDir(data) {
  * directory. If the plugin location is already in the local directory, nothing
  * occurs.
  *
- * @param {Object} data - The plugin configuration data
+ * @param {object} data - The plugin configuration data.
  */
 function downloadPluginFromWebsite(data) {
   // Remove plugin if it already exists in plugins directory
-  const rmDirCmd = (process.platform === 'win32') ? 'rmdir /s' : 'rm -rf';
-  const stdoutRmCmd = execSync(`${rmDirCmd} ${path.join(M.root, 'plugins', data.name)}`);
+  const stdoutRmCmd = execSync(`${rmd} ${path.join(M.root, 'plugins', data.name)}`);
   M.log.verbose(stdoutRmCmd.toString());
 
   // Proxy information
@@ -230,19 +229,19 @@ function downloadPluginFromWebsite(data) {
   // .zip files
   if (data.source.endsWith('.zip')) {
     // Set name and unzip command
-    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.zip`;
+    fileName = `${path.join(M.root, 'plugins', data.name, `${data.name}.zip`)}`;
     unzipCmd = `unzip ${fileName} -d ${dirName}`;
   }
   // .tar.gz files
   else if (data.source.endsWith('.tar.gz')) {
     // Set name and unzip command
-    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.tar.gz`;
+    fileName = `${path.join(M.root, 'plugins', data.name, `${data.name}.tar.gz`)}`;
     unzipCmd = `tar xvzf ${fileName} -C ${dirName}`;
   }
   // .gz files
   else if (data.source.endsWith('.gz')) {
     // Set name and unzip command
-    fileName = `${path.join(M.root, 'plugins', data.name)}/${data.name}.gz`;
+    fileName = `${path.join(M.root, 'plugins', data.name, `${data.name}.gz`)}`;
     unzipCmd = `gunzip -c ${fileName} > ${dirName}`;
   }
   // Other files

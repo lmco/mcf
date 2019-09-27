@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module auth.local-strategy
  *
@@ -39,12 +39,12 @@ const EventEmitter = M.require('lib.events');
  *
  * Note: Uses username/password and configuration in config file.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {string} username - Username to authenticate
- * @param {string} password - Password to authenticate
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} username - Username to authenticate.
+ * @param {string} password - Password to authenticate.
  *
- * @returns {Promise} Authenticated user object
+ * @returns {Promise} Authenticated user object.
  *
  * @example
  * AuthController.handleBasicAuth(req, res, username, password)
@@ -92,12 +92,12 @@ async function handleBasicAuth(req, res, username, password) {
       && user.failedlogins[user.failedlogins.length - 4].timestamp
       > Date.now() - 15 * utils.timeConversions.MINUTES) {
       // Count the number of non-archived admins in the database
-      const admins = await User.find({ admin: true, archived: false }).lean();
+      const admins = await User.find({ admin: true, archived: false }, null, { lean: true });
       // Check if the user is the only admin
       if (user.admin && admins.length === 1) {
         // It is recommended that a listener be registered for this event to notify the proper
         // administrators/authorities
-        EventEmitter.emit('sole-admin-failed-login-exceeded', user.username);
+        EventEmitter.emit('sole-admin-failed-login-exceeded', user._id);
         // Throw a critical error
         throw new M.AuthorizationError('Incorrect login attempts exceeded '
         + 'on only active admin account.', 'critical');
@@ -110,8 +110,8 @@ async function handleBasicAuth(req, res, username, password) {
               'critical');
           }
         });
-        EventEmitter.emit('user-account-locked', user.username);
-        throw new M.AuthorizationError(`Account '${user.username}' has been locked after `
+        EventEmitter.emit('user-account-locked', user._id);
+        throw new M.AuthorizationError(`Account '${user._id}' has been locked after `
           + 'exceeding allowed number of failed login attempts. '
           + 'Please contact your local administrator.', 'warn');
       }
@@ -129,11 +129,11 @@ async function handleBasicAuth(req, res, username, password) {
  * @description This function implements handleTokenAuth() in lib/auth.js.
  * Authenticates user with passed in token.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {string} token - User authentication token, encrypted
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} token - User authentication token, encrypted.
  *
- * @returns {Promise} Local user object
+ * @returns {Promise} Local user object.
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -190,11 +190,11 @@ async function handleTokenAuth(req, res, token) {
 /**
  * @description This function implements doLogin() in lib/auth.js.
  * This function generates the session token for user login.
- * Upon successful login, generate token and set to session
+ * Upon successful login, generate token and set to session.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - response express object
- * @param {function} next - Callback to express authentication
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Callback to express authentication.
  */
 function doLogin(req, res, next) {
   // Compute token expiration time
@@ -204,13 +204,13 @@ function doLogin(req, res, next) {
   // Generate the token
   const token = mbeeCrypto.generateToken({
     type: 'user',
-    username: req.user.username,
+    username: (req.user.username || req.user._id),
     created: (new Date(Date.now())),
     expires: (new Date(Date.now() + timeDelta))
   });
   // Set the session token
   req.session.token = token;
-  M.log.info(`${req.originalUrl} Logged in ${req.user.username}`);
+  M.log.info(`${req.originalUrl} Logged in ${(req.user.username || req.user._id)}`);
   // Callback
   next();
 }
@@ -220,7 +220,7 @@ function doLogin(req, res, next) {
  *
  * @param {string} password - Password to validate.
  *
- * @returns {boolean} If password is correctly validated
+ * @returns {boolean} If password is correctly validated.
  */
 function validatePassword(password) {
   // No defined password validator, use default

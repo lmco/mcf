@@ -1,7 +1,7 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
- * @module test.auth-tests.801-local-strategy
+ * @module test.auth_tests.801-local-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -16,7 +16,7 @@
  * related tracking of such attempts.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
@@ -63,7 +63,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async function() {
     try {
-      await User.deleteOne({ _id: adminUser.username });
+      await User.deleteMany({ _id: adminUser.username });
       await db.disconnect();
     }
     catch (error) {
@@ -82,7 +82,7 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description This function tests that the local-strategy login function logs the time and ip
- * address of a failed login attempt
+ * address of a failed login attempt.
  */
 async function logFailedLogin() {
   if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
@@ -125,7 +125,7 @@ async function logFailedLogin() {
 
 /**
  * @description This function validates that only an admin user can see the failed login fields
- * of a user
+ * of a user.
  */
 async function failedloginsField() {
   if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
@@ -187,7 +187,7 @@ async function failedloginsField() {
 
 /**
  * @description This function tests that a user will be archived after five incorrect login
- * attempts within a 15 minute window
+ * attempts within a 15 minute window.
  */
 async function lockoutUser() {
   if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
@@ -201,6 +201,7 @@ async function lockoutUser() {
   const users = await UserController.create(adminUser, userData);
   const user = users[0];
 
+
   // Create mock request object
   const req = {
     connection: {
@@ -211,14 +212,19 @@ async function lockoutUser() {
   // Create mock response object
   const res = {};
 
+  const promises = [];
   for (let i = 0; i < 4; i++) {
     // Attempt to authenticate user with wrong password
-    // eslint-disable-next-line no-await-in-loop
-    await localAuth.handleBasicAuth(req, res, user._id, 'wrongPassword')
-    .should.eventually.be.rejectedWith('Invalid password.');
+    promises.push(localAuth.handleBasicAuth(req, res, user._id, 'wrongPassword')
+    .should.eventually.be.rejectedWith('Invalid password.'));
   }
+
+  // Wait for login failures to complete
+  await Promise.all(promises);
+
+  // Fail for the 5th time
   await localAuth.handleBasicAuth(req, res, user._id, 'wrongPassword')
-  .should.eventually.be.rejectedWith(`Account '${user.username}' has been locked after `
+  .should.eventually.be.rejectedWith(`Account '${user._id}' has been locked after `
     + 'exceeding allowed number of failed login attempts. '
     + 'Please contact your local administrator.');
 
@@ -228,7 +234,7 @@ async function lockoutUser() {
 
 /**
  * @description This function validates that the only non-archived admin user will NOT be archived
- * if that user enters five incorrect login attempts in fifteen minutes
+ * if that user enters five incorrect login attempts in fifteen minutes.
  */
 async function noAdminLockout() {
   if (M.config.auth.strategy !== 'local-strategy' && M.config.auth.strategy !== 'local-ldap-strategy') {
@@ -239,7 +245,7 @@ async function noAdminLockout() {
   // Skip this test if there are other active admins
   const admins = await User.find({ admin: true, archived: false });
   if (admins.length > 1) {
-    M.log.info('Skipping noAdminLockout test; additional admins found on the database.');
+    M.log.verbose('Skipping noAdminLockout test; additional admins found on the database.');
     this.skip();
   }
   // Create mock request object
@@ -252,12 +258,16 @@ async function noAdminLockout() {
   // Create mock response object
   const res = {};
 
+  const promises = [];
   for (let i = 0; i < 4; i++) {
     // Attempt to authenticate admin user with wrong password
-    // eslint-disable-next-line no-await-in-loop
-    await localAuth.handleBasicAuth(req, res, adminUser._id, 'wrongPassword')
-    .should.eventually.be.rejectedWith('Invalid password.');
+    promises.push(localAuth.handleBasicAuth(req, res, adminUser._id, 'wrongPassword')
+    .should.eventually.be.rejectedWith('Invalid password.'));
   }
+
+  // Wait for promises to complete
+  await Promise.all(promises);
+
   // Expect specific error message for the only active admin user exceeding the login attempts
   await localAuth.handleBasicAuth(req, res, adminUser._id, 'wrongPassword')
   .should.eventually.be.rejectedWith('Incorrect login attempts exceeded '

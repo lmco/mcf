@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.605a-element-api-core-tests
  *
@@ -44,52 +44,41 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Create admin, organization, and project.
    */
-  before((done) => {
-    // Open the database connection
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((user) => {
-      // Set admin global user
-      adminUser = user;
-
+  before(async () => {
+    try {
+      // Open the database connection
+      await db.connect();
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
       // Create org
-      return testUtils.createTestOrg(adminUser);
-    })
-    .then((retOrg) => {
-      org = retOrg;
-
+      org = await testUtils.createTestOrg(adminUser);
       // Create project
-      return testUtils.createTestProject(adminUser, org.id);
-    })
-    .then((retProj) => {
+      const retProj = await testUtils.createTestProject(adminUser, org.id);
       projID = utils.parseID(retProj.id).pop();
-      done();
-    })
-    .catch((error) => {
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error.message).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
-   * After: Delete organization and admin user
+   * After: Delete organization and admin user.
    */
-  after((done) => {
-    // Delete organization
-    testUtils.removeTestOrg(adminUser)
-    // Delete admin user
-    .then(() => testUtils.removeTestAdmin())
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      // Delete organization
+      await testUtils.removeTestOrg(adminUser);
+      // Delete admin user
+      await testUtils.removeTestAdmin();
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute the tests */
@@ -111,6 +100,8 @@ describe(M.getModuleName(module.filename), () => {
  * @description Verifies POST
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * creates a single element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postElement(done) {
   const elemData = testData.elements[0];
@@ -153,8 +144,8 @@ function postElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(createdElement.createdBy).to.equal(adminUser.username);
-    chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdElement.createdBy).to.equal(adminUser._id);
+    chai.expect(createdElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdElement.createdOn).to.not.equal(null);
     chai.expect(createdElement.updatedOn).to.not.equal(null);
     chai.expect(createdElement.archived).to.equal(false);
@@ -169,6 +160,8 @@ function postElement(done) {
 /**
  * @description Verifies POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * creates multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postElements(done) {
   const elemData = [
@@ -225,8 +218,8 @@ function postElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(createdElement.createdBy).to.equal(adminUser.username);
-      chai.expect(createdElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdElement.createdBy).to.equal(adminUser._id);
+      chai.expect(createdElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdElement.createdOn).to.not.equal(null);
       chai.expect(createdElement.updatedOn).to.not.equal(null);
       chai.expect(createdElement.archived).to.equal(false);
@@ -243,6 +236,8 @@ function postElements(done) {
  * @description Verifies PUT
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * creates or replaces a single element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putElement(done) {
   const elemData = testData.elements[0];
@@ -285,8 +280,8 @@ function putElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
-    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
+    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedElem.createdOn).to.not.equal(null);
     chai.expect(replacedElem.updatedOn).to.not.equal(null);
     chai.expect(replacedElem.archived).to.equal(false);
@@ -301,6 +296,8 @@ function putElement(done) {
 /**
  * @description Verifies PUT /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * creates or replaces multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function putElements(done) {
   const elemData = [
@@ -358,8 +355,8 @@ function putElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
-      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
+      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedElem.createdOn).to.not.equal(null);
       chai.expect(replacedElem.updatedOn).to.not.equal(null);
       chai.expect(replacedElem.archived).to.equal(false);
@@ -376,6 +373,8 @@ function putElements(done) {
  * @description Verifies GET
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * finds a single element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getElement(done) {
   const elemData = testData.elements[0];
@@ -417,8 +416,8 @@ function getElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archived).to.equal(false);
@@ -433,6 +432,8 @@ function getElement(done) {
 /**
  * @description Verifies GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * finds multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getElements(done) {
   const elemData = [
@@ -491,8 +492,8 @@ function getElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+      chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
       chai.expect(foundElement.archived).to.equal(false);
@@ -509,6 +510,8 @@ function getElements(done) {
  * @description Verifies GET
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search
  * searches for elements using text based search.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function searchElement(done) {
   const elemData = testData.elements[0];
@@ -554,8 +557,8 @@ function searchElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archived).to.equal(false);
@@ -571,6 +574,8 @@ function searchElement(done) {
  * @description Verifies PATCH
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * updates a single element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchElement(done) {
   const elemData = testData.elements[0];
@@ -617,8 +622,8 @@ function patchElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedElement.createdOn).to.not.equal(null);
     chai.expect(updatedElement.updatedOn).to.not.equal(null);
     chai.expect(updatedElement.archived).to.equal(false);
@@ -633,6 +638,8 @@ function patchElement(done) {
 /**
  * @description Verifies PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * updates multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchElements(done) {
   const elemData = [
@@ -695,8 +702,8 @@ function patchElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedElement.createdOn).to.not.equal(null);
       chai.expect(updatedElement.updatedOn).to.not.equal(null);
       chai.expect(updatedElement.archived).to.equal(false);
@@ -713,6 +720,8 @@ function patchElements(done) {
  * @description Verifies DELETE
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:elementid
  * deletes a single element.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteElement(done) {
   const elemData = testData.elements[0];
@@ -739,6 +748,8 @@ function deleteElement(done) {
 /**
  * @description Verifies DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  * deletes multiple elements.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteElements(done) {
   const elemData = [

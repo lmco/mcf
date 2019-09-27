@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module auth.local-ldap-strategy
  *
@@ -25,6 +25,7 @@ module.exports = {
 };
 
 // MBEE modules
+const errors = M.require('lib.errors');
 const LocalStrategy = M.require('auth.local-strategy');
 const LDAPStrategy = M.require('auth.ldap-strategy');
 const User = M.require('models.user');
@@ -34,54 +35,37 @@ const User = M.require('models.user');
  * the case of a basic auth header or for login form input. Either way
  * the username and password is provided to this function for auth.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
- * @param {string} username - Username authenticate via locally or LDAP AD
- * @param {string} password - Password to authenticate via locally or LDAP AD
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {string} username - Username authenticate via locally or LDAP AD.
+ * @param {string} password - Password to authenticate via locally or LDAP AD.
  *
- * @return {Promise} Authenticated user object
+ * @returns {Promise} Authenticated user object.
  */
-function handleBasicAuth(req, res, username, password) {
-  return new Promise((resolve, reject) => {
+async function handleBasicAuth(req, res, username, password) {
+  try {
     // Search locally for the user
-    User.find({
-      _id: username,
-      archived: false
-    })
-    .exec(async (findUserErr, users) => {
-      // Check for errors
-      if (findUserErr) {
-        return reject(findUserErr);
-      }
-      // If user found and their provider is local,
-      // do local authentication
-      if (users.length === 1 && users[0].provider === 'local') {
-        try {
-          const localUser = await LocalStrategy.handleBasicAuth(req, res, username, password);
-          return resolve(localUser);
-        }
-        catch (localErr) {
-          return reject(localErr);
-        }
-      }
+    const users = await User.find({ _id: username, archived: false });
 
-      // User is not found locally or is found and provider is LDAP
-      // try LDAP authentication
-      else if (users.length === 0 || (users.length === 1 && users[0].provider === 'ldap')) {
-        try {
-          const ldapUser = await LDAPStrategy.handleBasicAuth(req, res, username, password);
-          return resolve(ldapUser);
-        }
-        catch (ldapErr) {
-          return reject(ldapErr);
-        }
-      }
-      else {
-        // More than 1 user found or provider not set to ldap/local
-        return reject(new M.ServerError('More than one user found or invalid provider.', 'error'));
-      }
-    });
-  });
+    // If user found and their provider is local,
+    // do local authentication
+    if (users.length === 1 && users[0].provider === 'local') {
+      return await LocalStrategy.handleBasicAuth(req, res, username, password);
+    }
+
+    // User is not found locally or is found and provider is LDAP
+    // try LDAP authentication
+    else if (users.length === 0 || (users.length === 1 && users[0].provider === 'ldap')) {
+      return await LDAPStrategy.handleBasicAuth(req, res, username, password);
+    }
+    else {
+      // More than 1 user found or provider not set to ldap/local
+      throw new M.ServerError('More than one user found or invalid provider.', 'error');
+    }
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**
@@ -90,11 +74,11 @@ function handleBasicAuth(req, res, username, password) {
  * passed in a session token or bearer token. This particular instance just implements the same
  * tokenAuth provided by the Local Strategy.
  *
- * @param {Object} req - Request object from express
- * @param {Object} res - Response object from express
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
  * @param {string} _token -  Token user is attempting to authenticate with.
  *
- * @returns {Promise} Token authenticated user object
+ * @returns {Promise} Token authenticated user object.
  *
  * @example
  * AuthController.handleTokenAuth(req, res, _token)
@@ -115,9 +99,9 @@ async function handleTokenAuth(req, res, _token) {
  * application so that users can be authorized via token after logging in. This particular
  * implementation uses the Local Strategy doLogin function.
  *
- * @param {Object} req - Request object from express
- * @param {Object} res - Response object from express
- * @param {function} next - Callback to express authentication flow
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
+ * @param {Function} next - Callback to express authentication flow.
  */
 function doLogin(req, res, next) {
   LocalStrategy.doLogin(req, res, next);
@@ -127,10 +111,9 @@ function doLogin(req, res, next) {
  * @description Validates a users password with set rules.
  *
  * @param {string} password - Password to validate.
- * @param {string} provider - the type of authentication strategy
- *                            (ldap, local, etc.)
+ * @param {string} provider - The type of authentication strategy (ldap, local, etc).
  *
- * @returns {boolean} If password is correctly validated
+ * @returns {boolean} If password is correctly validated.
  */
 function validatePassword(password, provider) {
   // Use the appropriate provider rules
