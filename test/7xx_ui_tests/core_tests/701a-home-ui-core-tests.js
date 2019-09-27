@@ -14,7 +14,6 @@
  * @description This tests the app of the home to
  * verify the render works correctly.
  */
-
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 // NPM modules
@@ -35,6 +34,20 @@ import Home from '../../../app/ui/components/home-views/home.jsx';
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
+  // const originalLocation = window.location;
+
+  // beforeEach(() => {
+  //   delete window.location;
+  //
+  //   window.location = {
+  //     href: '',
+  //   };
+  // });
+  //
+  // afterEach(() => {
+  //   window.location = originalLocation;
+  // });
+
   it('Renders the home component', homeRender);
 });
 

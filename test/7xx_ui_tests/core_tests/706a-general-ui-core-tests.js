@@ -16,7 +16,6 @@
  */
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
-
 // NPM modules
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -40,6 +39,20 @@ import SidebarHeader from '../../../app/ui/components/general/sidebar/sidebar-he
  */
 
 describe(M.getModuleName(module.filename), () => {
+  // const originalLocation = window.location;
+  //
+  // beforeEach(() => {
+  //   delete window.location;
+  //
+  //   window.location = {
+  //     href: '',
+  //   };
+  // });
+  //
+  // afterEach(() => {
+  //   window.location = originalLocation;
+  // });
+
   it('Renders the list component', listRender);
   it('Renders the list item component', listItemRender);
   it('Renders the key data component', keyDataRender);

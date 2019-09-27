@@ -37,6 +37,7 @@
     "@fortawesome/fontawesome-free": "^5.7.2",
     "babel-loader": "8.0.6",
     "bootstrap": "^4.3.1",
+    "browser-env": "^3.2.6",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "enzyme": "^3.10.0",

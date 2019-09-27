@@ -90,7 +90,7 @@ Object.keys(document.defaultView).forEach((property) => {
 });
 
 global.navigator = {
-  userAgent: 'node.js'
+  userAgent: 'mocha'
 };
 
 // Setting timeout for animation frame
