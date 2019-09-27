@@ -195,6 +195,7 @@ function createDefaultOrganization() {
 // Create default admin if a global admin does not exist
 function createDefaultAdmin() {
   return new Promise((resolve, reject) => {
+    console.log('Next step')
     // Initialize userCreated
     let userCreated = false;
     // Search for a user who is a global admin
@@ -205,6 +206,7 @@ function createDefaultAdmin() {
         // Global admin already exists, resolve
         return resolve();
       }
+      console.log('Made it here')
       // set userCreated to true
       userCreated = true;
       // No global admin exists, create local user as global admin

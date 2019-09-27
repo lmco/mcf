@@ -67,7 +67,8 @@ class Schema {
       KeySchema: [{
         AttributeName: '_id',
         KeyType: 'HASH'
-      }]
+      }],
+      GlobalSecondaryIndexes: []
     };
     this.definition = definition;
 
@@ -80,15 +81,46 @@ class Schema {
         case 'Boolean': this.definition[key].type = 'BOOL'; break;
         default: this.definition[key].type = 'S'; break;
       }
+
+      // Handle indexes
+      if (this.definition[key].index) {
+        // Create attribute object
+        const attributeObj = {
+          AttributeName: key,
+          AttributeType: this.definition[key].type
+        };
+        this.schema.AttributeDefinitions.push(attributeObj);
+
+        // Create index object
+        const indexObj = {
+          IndexName: `${key}_1`,
+          KeySchema: [
+            {
+              AttributeName: key,
+              KeyType: (this.definition[key].type === 'S') ? 'HASH' : 'RANGE'
+            }
+          ],
+          Projection: {
+            NonKeyAttributes: ['_id'],
+            ProjectionType: 'INCLUDE'
+          }
+        };
+        this.schema.GlobalSecondaryIndexes.push(indexObj);
+      }
     });
+
+    // Remove GlobalSecondaryIndex array if empty
+    if (this.schema.GlobalSecondaryIndexes.length === 0) {
+      this.schema.GlobalSecondaryIndexes = undefined;
+    }
   }
 
   /**
    * @description Adds an object/schema to the current schema.
    *
-   * @param {(Object|Schema)} obj - The object or schema to add to the current
+   * @param {(object|Schema)} obj - The object or schema to add to the current
    * schema.
-   * @param {String} [prefix] - The optional prefix to add to the paths in obj.
+   * @param {string} [prefix] - The optional prefix to add to the paths in obj.
    */
   add(obj, prefix) {
     // return super.add(obj, prefix);
@@ -437,7 +469,7 @@ class Model {
     /**
      *
      */
-    doc.__proto__.validate = function() {
+    doc.__proto__.validateDoc = function() {
       const keys = Object.keys(doc);
       // Loop over each valid parameter
       Object.keys(def).forEach((param) => {
@@ -496,7 +528,7 @@ class Model {
     doc.__proto__.save = async function() {
       return new Promise((resolve, reject) => {
         // Ensure the document is valid
-        this.validate();
+        this.validateDoc();
 
         const putObj = {
           TableName: table,
@@ -504,27 +536,25 @@ class Model {
         };
 
         Object.keys(doc).forEach((key) => {
-          if (def[key]) {
+          if (def.hasOwnProperty(key)) {
             putObj.Item[key] = {};
             putObj.Item[key][def[key].type] = doc[key];
           }
         });
 
 
-        console.log(putObj)
         // Save the document
         conn.putItem(putObj).promise()
-        .then(() => {
-          console.log('Did I make it here?');
-          return model.findOne({ _id: doc._id })
-        })
+        .then(() => model.findOne({ _id: doc._id }))
         .then((foundDoc) => resolve(foundDoc))
-        .catch((error) => {
-          console.log(error);
-          reject(error)
-        });
+        .catch((error) => reject(error));
       });
     };
+
+    /**
+     *
+     * @param field
+     */
     doc.__proto__.markModified = function(field) {};
 
     return doc;
@@ -621,7 +651,7 @@ class Model {
   async find(filter, projection, options, cb) {
     // Find all documents in the table
     if (Object.keys(filter).length === 0) {
-      return this.scan(options);
+      return this.scan({}, projection, options);
     }
     else {
       return this.batchGetItem(filter, projection, options);
@@ -702,11 +732,16 @@ class Model {
             && value.length !== 0) {
             getObj.Key[key] = { SS: value };
           }
+          else if (typeof value === 'boolean') {
+            getObj.Key[key] = { BOOL: value };
+          }
         }
         else {
           M.log.error(`Filter param ${key} not a param on ${this.TableName} model.`);
         }
       });
+
+      console.log(getObj)
 
       // Make the getItem request
       this.connection.getItem(getObj).promise()
@@ -871,13 +906,44 @@ class Model {
    * @description Scans and returns every document in the specified table.
    * @async
    *
-   * @param {Object} options - A list of provided options.
+   * @param {object} filter - A list of fields to query.
+   * @param {string} projection - The specific fields to return.
+   * @param {object} options - A list of provided options.
    *
    * @return {Promise<Object[]>} The found documents.
    */
-  async scan(options) {
+  async scan(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      this.connection.scan({ TableName: this.TableName }, (err, data) => {
+      // Make the projection comma separated instead of space separated
+      const projectionString = (projection) ? projection.split(' ').join(',') : undefined;
+      const scanObj = {
+        ProjectionExpression: projectionString,
+        TableName: this.TableName
+      };
+
+      Object.keys(filter).forEach((key) => {
+        if (!scanObj.ExpressionAttributeValues) {
+          scanObj.ExpressionAttributeValues = [];
+        }
+
+        const attributeObj = {};
+        const value = filter[key];
+
+        // If the value is a string
+        if (typeof value === 'string') {
+          attributeObj[`:${key}`] = { S: value };
+        }
+        // If the value is an array of strings
+        else if (Array.isArray(value) && value.every(v => typeof v === 'string')
+          && value.length !== 0) {
+          attributeObj[`:${key}`] = { SS: value };
+        }
+        else if (typeof value === 'boolean') {
+          attributeObj[`:${key}`] = { BOOL: value };
+        }
+      });
+
+      this.connection.scan(projectionString, (err, data) => {
         if (err) {
           return reject(err);
         }
