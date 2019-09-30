@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.505c-element-mock-specific-tests
  *

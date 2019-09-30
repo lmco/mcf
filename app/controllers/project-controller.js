@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.project-controller
  *
@@ -94,7 +94,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found project objects
+ * @returns {Promise} Array of found project objects.
  *
  * @example
  * find({User}, 'orgID', ['proj1', 'proj2'], { populate: 'org' })
@@ -277,7 +277,7 @@ async function find(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created project objects
+ * @returns {Promise} Array of created project objects.
  *
  * @example
  * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
@@ -573,7 +573,7 @@ async function create(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated project objects
+ * @returns {Promise} Array of updated project objects.
  *
  * @example
  * update({User}, 'orgID', [{Updated Proj 1}, {Updated Proj 2}...], { populate: 'org' })
@@ -937,7 +937,7 @@ async function update(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created project objects
+ * @returns {Promise} Array of created project objects.
  *
  * @example
  * createOrReplace({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
@@ -1119,8 +1119,8 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
 /**
  * @description This function removes one or many projects as well as the
- * elements that belong to them. This function can be used by system-wide admins
- * ONLY.
+ * elements that belong to them. This function can be used by system-wide
+ * admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -1129,7 +1129,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted project ids.
+ * @returns {Promise} Array of deleted project ids.
  *
  * @example
  * remove({User}, 'orgID', ['proj1', 'proj2'])

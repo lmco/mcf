@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module routes
  *
@@ -27,7 +27,7 @@ const Validators = M.require('lib.validators');
 
 /* ---------- Unauthenticated Routes ----------*/
 /**
- * @description This renders the swagger doc page for the API routes
+ * @description This renders the swagger doc page for the API routes.
  */
 router.route('/doc/api')
 .get(Middleware.logRoute, UIController.swaggerDoc);

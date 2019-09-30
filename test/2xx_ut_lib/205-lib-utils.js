@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.205-lib-utils
  *
@@ -38,7 +38,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a uid from valid parameters
+ * @description Creates a uid from valid parameters.
  */
 function validUID(done) {
   try {
@@ -55,7 +55,7 @@ function validUID(done) {
 }
 
 /**
- * @description Creates a uid from invalid parameters
+ * @description Creates a uid from invalid parameters.
  */
 function invalidUID(done) {
   try {
@@ -121,7 +121,7 @@ function validTitleCase(done) {
 }
 
 /**
- * @description Tests an invalid word is NOT title-cased
+ * @description Tests an invalid word is NOT title-cased.
  */
 function invalidTitleCase(done) {
   // Initialize invalid word

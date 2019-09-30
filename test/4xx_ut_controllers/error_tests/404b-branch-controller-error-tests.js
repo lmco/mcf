@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.404b-branch-controller-error-tests
  *
@@ -45,7 +45,7 @@ let projID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Open the database connection
@@ -112,7 +112,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies that master branch can not be deleted
+ * @description Verifies that master branch can not be deleted.
  */
 async function deleteMasterBranch() {
   const branchID = testData.branches[0].id;

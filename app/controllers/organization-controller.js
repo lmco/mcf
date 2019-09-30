@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.organization-controller
  *
@@ -50,9 +50,9 @@ const permissions = M.require('lib.permissions');
 
 /**
  * @description This function finds one or many organizations. Depending on the
- * given parameters, this function can find a single org by ID, multiple orgs by
- * ID, or all orgs in the system. Only organizations which a user has read
- * access to will be returned.
+ * given parameters, this function can find a single org by ID, multiple orgs by ID,
+ * or all orgs in the system. Only organizations which a user has read access to
+ * will be returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} [orgs] - The organizations to find. Can either be
@@ -89,7 +89,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found organization objects
+ * @returns {Promise} Array of found organization objects.
  *
  * @example
  * find({User}, ['org1', 'org2'], { populate: 'createdBy' })
@@ -216,7 +216,7 @@ async function find(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created organization objects
+ * @returns {Promise} Array of created organization objects.
  *
  * @example
  * create({User}, [{Org1}, {Org2}, ...], { populate: 'createdBy' })
@@ -408,7 +408,7 @@ async function create(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated organization objects
+ * @returns {Promise} Array of updated organization objects.
  *
  * @example
  * update({User}, [{Updated Org 1}, {Updated Org 2}...], { populate: 'createdBy' })
@@ -707,7 +707,7 @@ async function update(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of replaced/created organization objects
+ * @returns {Promise} Array of replaced/created organization objects.
  *
  * @example
  * createOrReplace({User}, [{Updated Org 1}, {Updated Org 2}...])
@@ -861,7 +861,7 @@ async function createOrReplace(requestingUser, orgs, options) {
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted organization ids.
+ * @returns {Promise} Array of deleted organization ids.
  *
  * @example
  * remove({User}, ['org1', 'org2'])

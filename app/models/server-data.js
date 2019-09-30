@@ -1,5 +1,7 @@
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow hmtl in description
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module models.server-data
  *

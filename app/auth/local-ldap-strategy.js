@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module auth.local-ldap-strategy
  *
@@ -40,7 +40,7 @@ const User = M.require('models.user');
  * @param {string} username - Username authenticate via locally or LDAP AD.
  * @param {string} password - Password to authenticate via locally or LDAP AD.
  *
- * @return {Promise} Authenticated user object
+ * @returns {Promise} Authenticated user object.
  */
 async function handleBasicAuth(req, res, username, password) {
   try {

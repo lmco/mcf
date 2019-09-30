@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.errors
  *
@@ -77,7 +77,7 @@ const DatabaseError = class DatabaseError extends CustomError {};
  *
  * @param {object} error - The error to parse and return a status code for.
  *
- * @return {number} An HTTP status code.
+ * @returns {number} An HTTP status code.
  */
 function getStatusCode(error) {
   // If not an error, throw an error
@@ -101,7 +101,7 @@ function getStatusCode(error) {
 
 /**
  * @description A utility to ensure that all errors get turned into custom errors.
- * To be used on returned errors in .catch statements
+ * To be used on returned errors in .catch statements.
  *
  * @param error - The error to check.
  *

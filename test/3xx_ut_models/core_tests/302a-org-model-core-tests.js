@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.302a-org-model-tests
  *
@@ -106,7 +106,7 @@ async function createOrg() {
 }
 
 /**
- * @description Finds an organization using the Organization Model
+ * @description Finds an organization using the Organization Model.
  */
 async function findOrg() {
   let org;
@@ -126,7 +126,7 @@ async function findOrg() {
 }
 
 /**
- * @description Updates an organization using the Organization Model
+ * @description Updates an organization using the Organization Model.
  */
 async function updateOrg() {
   try {

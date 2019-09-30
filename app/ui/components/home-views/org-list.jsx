@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.home-views.org-list
  *
@@ -78,7 +78,8 @@ class OrgList extends Component {
     if (!this.props.admin) {
       const username = this.props.user.username;
       projects.forEach(project => {
-        if (project.permissions[username]) {
+        // Checking permissions on project or if internal
+        if (project.permissions[username] || project.visibility === 'internal') {
           permissionedProjs.push(project);
         }
       });

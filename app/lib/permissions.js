@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.permissions
  *
@@ -47,7 +47,7 @@ module.exports = {
 /**
  * @description Verifies if user has permission to create users.
  *
- * @params {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permission for.
  *
  * @throws {PermissionError}
  */
@@ -61,7 +61,7 @@ function createUser(user) {
 /**
  * @description Verifies if user has permission to read other user objects.
  *
- * @params {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permission for.
  *
  * @returns {boolean} Allows users to read other user objects by default.
  */
@@ -73,8 +73,8 @@ function readUser(user) {
 /**
  * @description Verifies if user has permission to update users.
  *
- * @params {User} user - The user object to check permission for.
- * @params {User} userToUpdate - The user object to updated.
+ * @param {User} user - The user object to check permission for.
+ * @param {User} userToUpdate - The user object to updated.
  *
  * @throws {PermissionError} - A custom MBEE error.
  */
@@ -91,7 +91,7 @@ function updateUser(user, userToUpdate) {
 /**
  * @description Verifies if user has permission to delete users.
  *
- * @params {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permission for.
  *
  * @throws {PermissionError}
  */
@@ -105,7 +105,7 @@ function deleteUser(user) {
 /**
  * @description Verifies if user has permission to create an organization.
  *
- * @params {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permission for.
  *
  * @throws {PermissionError}
  */
@@ -119,8 +119,8 @@ function createOrg(user) {
 /**
  * @description Verifies if user has permission to read the organization.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object to read.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object to read.
  *
  * @throws {PermissionError}
  */
@@ -137,8 +137,8 @@ function readOrg(user, org) {
 /**
  * @description Verifies user has permission to update organization object.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object to update.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object to update.
  *
  * @throws {PermissionError}
  */
@@ -159,7 +159,7 @@ function updateOrg(user, org) {
  * @description Verifies if user has permission to delete the
  * organization object.
  *
- * @params {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permission for.
  *
  * @throws {PermissionError}
  */
@@ -173,8 +173,8 @@ function deleteOrg(user) {
 /**
  * @description Verifies if user has permission to create a project within the org.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
  *
  * @throws {PermissionError}
  */
@@ -195,9 +195,9 @@ function createProject(user, org) {
 /**
  * @description Verifies if user has permission to read the project.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project to read.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project to read.
  *
  * @throws {PermissionError}
  */
@@ -225,9 +225,9 @@ function readProject(user, org, project) {
 /**
  * @description Verifies if user has permission to update project object.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project to update.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project to update.
  *
  * @throws {PermissionError}
  */
@@ -236,10 +236,10 @@ function updateProject(user, org, project) {
     if (!user.admin) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to update projects in the org [${org._id}].`);
-      assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to update the project [${project._id}].`);
-      assert.ok(project.permissions[user._id].includes('admin'),
-        `User does not have permission to update the project [${project._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id), 'User does not '
+        + `have permission to update the project [${utils.parseID(project._id).pop()}].`);
+      assert.ok(project.permissions[user._id].includes('admin'), 'User does not'
+        + `have permission to update the project [${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -251,9 +251,9 @@ function updateProject(user, org, project) {
 /**
  * @description Verifies if user has permission to delete the project object.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project to delete.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project to delete.
  *
  * @throws {PermissionError}
  */
@@ -267,10 +267,10 @@ function deleteProject(user, org, project) {
 /**
  * @description Verify if user has permission to create elements in the project.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project to add elements to.
- * @params {Branch} branch - Param not yet supported.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project to add elements to.
+ * @param {Branch} branch - Param not yet supported.
  *
  * @throws {PermissionError}
  */
@@ -278,11 +278,13 @@ function createElement(user, org, project, branch) {
   try {
     if (!user.admin) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
-        `User does not have permission to create items in the org [${project._id}].`);
+        `User does not have permission to create items in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to create items in the project [${project._id}].`);
+        'User does not have permission to create items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to create items in the project [${project._id}].`);
+        'User does not have permission to create items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -295,10 +297,10 @@ function createElement(user, org, project, branch) {
  * @description Verify if user has permission to read elements in the
  * project.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project containing the elements.
- * @params {Branch} branch - Param not yet supported.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the elements.
+ * @param {Branch} branch - Param not yet supported.
  *
  * @throws {PermissionError}
  */
@@ -317,7 +319,7 @@ function readElement(user, org, project, branch) {
   }
   catch (error) {
     throw new M.PermissionError('User does not have permission to find'
-      + ` items in the project [${project._id}].`, 'warn');
+      + ` items in the project [${utils.parseID(project._id).pop()}].`, 'warn');
   }
 }
 
@@ -325,10 +327,10 @@ function readElement(user, org, project, branch) {
 /**
  * @description Verify if user has permission to update project element objects.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project containing the elements.
- * @params {Branch} branch - Param not yet supported.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the elements.
+ * @param {Branch} branch - Param not yet supported.
  *
  * @throws {PermissionError}
  */
@@ -338,9 +340,11 @@ function updateElement(user, org, project, branch) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to update items in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to update items in the project [${project._id}].`);
+        'User does not have permission to update items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to update items in the project [${project._id}].`);
+        'User does not have permission to update items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -352,10 +356,10 @@ function updateElement(user, org, project, branch) {
 /**
  * @description Verify if user has permission to delete the project elements.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project containing the elements.
- * @params {Branch} branch - Param not yet supported.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the elements.
+ * @param {Branch} branch - Param not yet supported.
  *
  * @throws {PermissionError}
  */
@@ -365,9 +369,11 @@ function deleteElement(user, org, project, branch) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to delete items in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to delete items in the project [${project._id}].`);
+        'User does not have permission to delete items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to delete items in the project [${project._id}].`);
+        'User does not have permission to delete items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -379,9 +385,9 @@ function deleteElement(user, org, project, branch) {
 /**
  * @description Verify if user has permission to create branches in the project.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project to add branches to.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project to add branches to.
  *
  * @throws {PermissionError}
  */
@@ -391,9 +397,11 @@ function createBranch(user, org, project) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to create branches in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to create branches in the project [${project._id}].`);
+        'User does not have permission to create branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to create branches in the project [${project._id}].`);
+        'User does not have permission to create branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -405,10 +413,10 @@ function createBranch(user, org, project) {
 /**
  * @description Verify if user has permission to read branches in the project.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project containing the branch.
- * @params {Branch} branch - Param not yet supported.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the branch.
+ * @param {Branch} branch - Param not yet supported.
  *
  * @throws {PermissionError}
  */
@@ -423,7 +431,8 @@ function readBranch(user, org, project, branch) {
       else {
         // User must have read permissions on project.
         assert.ok(project.permissions.hasOwnProperty(user._id),
-          `User does not have permission to get branches in the project [${project._id}].`);
+          'User does not have permission to get branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       }
     }
   }
@@ -436,10 +445,10 @@ function readBranch(user, org, project, branch) {
 /**
  * @description Verify if user has permission to update project branches.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project containing the branch.
- * @params {Branch} branch - Param not yet supported.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the branch.
+ * @param {Branch} branch - Param not yet supported.
  *
  * @throws {PermissionError}
  */
@@ -449,9 +458,11 @@ function updateBranch(user, org, project, branch) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to update branches in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to update branches in the project [${project._id}].`);
+        'User does not have permission to update branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to update branches in the project [${project._id}].`);
+        'User does not have permission to update branches in the project '
+      + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -463,10 +474,10 @@ function updateBranch(user, org, project, branch) {
 /**
  * @description Verify if user has permission to delete the project branches.
  *
- * @params {User} user - The user object to check permission for.
- * @params {Organization} org - The org object containing the project.
- * @params {Project} project - The project containing the elements.
- * @params {Branch} branch - Param not yet supported.
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the elements.
+ * @param {Branch} branch - Param not yet supported.
  *
  * @throws {PermissionError}
  */
@@ -477,9 +488,11 @@ function deleteBranch(user, org, project, branch) {
       assert.ok(org.permissions.hasOwnProperty(user._id),
         `User does not have permission to delete branches in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id),
-        `User does not have permission to delete branches in the project [${project._id}].`);
+        'User does not have permission to delete branches in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       assert.ok(project.permissions[user._id].includes('write'),
-        `User does not have permission to delete branches in the project [${project._id}].`);
+        'User does not have permission to delete branches in the project '
+      + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {

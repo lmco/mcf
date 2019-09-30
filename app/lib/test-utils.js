@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.test-utils.js
  *
@@ -12,8 +12,8 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Helper function for MBEE test.
- * - Used to create users, organizations, projects, elements in the database.
- * - Assumes database connection already established
+ * Used to create users, organizations, projects, elements in the database.
+ * Assumes database connection already established.
  *
  * This function takes the complexity out of MBEE tests,
  * making MBEE tests easier to read and run.
@@ -37,8 +37,7 @@ const testData = require(path.join(M.root, 'test', 'test_data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
 
 /**
- * @description Helper function to create test non-admin user in
- * MBEE tests.
+ * @description Helper function to create test non-admin user in MBEE tests.
  */
 module.exports.createNonAdminUser = function() {
   return new Promise((resolve, reject) => {
@@ -88,8 +87,7 @@ module.exports.createNonAdminUser = function() {
 };
 
 /**
- * @description Helper function to create test admin user in
- * MBEE tests.
+ * @description Helper function to create test admin user in MBEE tests.
  */
 module.exports.createTestAdmin = function() {
   return new Promise((resolve, reject) => {
@@ -138,8 +136,7 @@ module.exports.createTestAdmin = function() {
 };
 
 /**
- * @description Helper function to delete test user in
- * MBEE tests.
+ * @description Helper function to delete test user in MBEE tests.
  */
 module.exports.removeNonAdminUser = function() {
   return new Promise((resolve, reject) => {
@@ -166,8 +163,7 @@ module.exports.removeNonAdminUser = function() {
 };
 
 /**
- * @description Helper function to delete test admin user in
- * MBEE tests.
+ * @description Helper function to delete test admin user in MBEE tests.
  */
 module.exports.removeTestAdmin = function() {
   return new Promise((resolve, reject) => {
@@ -194,8 +190,7 @@ module.exports.removeTestAdmin = function() {
 };
 
 /**
- * @description Helper function to create organization in
- * MBEE tests.
+ * @description Helper function to create organization in MBEE tests.
  */
 module.exports.createTestOrg = function(adminUser) {
   return new Promise((resolve, reject) => {
@@ -214,8 +209,7 @@ module.exports.createTestOrg = function(adminUser) {
 };
 
 /**
- * @description Helper function to remove organization in
- * MBEE tests.
+ * @description Helper function to remove organization in MBEE tests.
  */
 module.exports.removeTestOrg = function() {
   return new Promise((resolve, reject) => {
@@ -236,7 +230,7 @@ module.exports.removeTestOrg = function() {
 };
 
 /**
- * @description Helper function to create project in MBEE tests
+ * @description Helper function to create project in MBEE tests.
  */
 module.exports.createTestProject = function(adminUser, orgID) {
   return new Promise((resolve, reject) => {
@@ -288,7 +282,7 @@ module.exports.createTestProject = function(adminUser, orgID) {
 };
 
 /**
- * @description Helper function to create a tag in MBEE tests
+ * @description Helper function to create a tag in MBEE tests.
  */
 module.exports.createTag = function(adminUser, orgID, projID) {
   return new Promise((resolve, reject) => {
@@ -336,7 +330,7 @@ module.exports.createTag = function(adminUser, orgID, projID) {
 };
 
 /**
- * @description Helper function to import a copy of test data
+ * @description Helper function to import a copy of test data.
  */
 module.exports.importTestData = function(filename) {
   // Clear require cache so a new copy is imported
@@ -386,7 +380,7 @@ module.exports.createRequest = function(user, params, body, method, query = {}) 
 
 /**
  * @description Helper function for setting mock request parameters.  Creates a read
- * stream of a file and gives the stream request-like properties
+ * stream of a file and gives the stream request-like properties.
  *
  * @param {object} user - The user making the request.
  * @param {object} params - Parameters for API req.

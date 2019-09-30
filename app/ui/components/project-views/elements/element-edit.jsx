@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.project-views.elements.element-edit
  *
@@ -13,7 +13,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This renders the element component
+ * @description This renders the element component.
  */
 
 /* Modified ESLint rules for React. */
