@@ -47,8 +47,9 @@ function OrganizationProjects(props) {
       }
     }
     else {
+      const className = project.archived ? 'grayed-out' : '';
       listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
-                      <a href={`/orgs/${org.id}/projects/${project.id}/branches/master/elements`}>
+                      <a href={`/orgs/${org.id}/projects/${project.id}/branches/master/elements`} className={className}>
                         {project.name}
                       </a>
                      </ListItem>);

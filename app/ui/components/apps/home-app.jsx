@@ -78,7 +78,7 @@ class HomeApp extends Component {
         // Get project data
         $.ajax({
           method: 'GET',
-          url: '/api/orgs?populate=projects&minified=true',
+          url: '/api/orgs?populate=projects&minified=true&includeArchived=true',
           statusCode: {
             200: (orgs) => {
               this.setMountedComponentStates(data, orgs);
