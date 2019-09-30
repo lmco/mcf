@@ -44,8 +44,7 @@ export default function mount(component, state = {}) {
     initialEntries: [entry]
   });
   // console.log(entry);
-  // console.log(history);
-
+  console.log(history);
   // const store = initialize(Immutable.from(state), history);
 
   return enzymeMount(

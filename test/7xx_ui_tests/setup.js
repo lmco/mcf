@@ -84,23 +84,25 @@ if (!global.window && !global.document) {
   //   });
   // }
 
+  window.history = {};
+  window.location = {};
   // Globally defining jquery, window, and document
   global.$ = require('jquery')(window);
   global.window = window;
   global.document = window.document;
 
   // Exposing global properties if undefined
-  const exposedProperties = ['window', 'navigator', 'document'];
-  Object.keys(document.defaultView).forEach((property) => {
-    if (typeof global[property] === 'undefined') {
-      exposedProperties.push(property);
-      global[property] = document.defaultView[property];
-    }
-  });
+  // const exposedProperties = ['window', 'document'];
+  // Object.keys(document.defaultView).forEach((property) => {
+  //   if (typeof global[property] === 'undefined') {
+  //     exposedProperties.push(property);
+  //     global[property] = document.defaultView[property];
+  //   }
+  // });
 
-  // global.navigator = {
-  //   userAgent: 'mocha'
-  // };
+  global.navigator = {
+    userAgent: 'mocha'
+  };
 
   // Setting timeout for animation frame
   global.requestAnimationFrame = function(callback) {
