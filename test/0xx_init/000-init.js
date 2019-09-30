@@ -110,10 +110,6 @@ async function initModels() {
 
     // Insert server data
     await ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]);
-
-    // Ensure element and user indexes are created
-    await Element.ensureIndexes();
-    await User.ensureIndexes();
   }
   catch (error) {
     M.log.critical('Failed to initialize models.');
