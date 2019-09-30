@@ -60,6 +60,8 @@ db.connect()
 
 /**
  * @description Initializes the application and exports app.js.
+ *
+ * @returns {Promise<null>} Resolves an empty promise upon completion.
  */
 function initApp() {
   return new Promise((resolve) => {
@@ -131,6 +133,8 @@ function initApp() {
 
 /**
  * @description Creates a default organization if one does not already exist.
+ *
+ * @returns {Promise<null>} Resolves an empty promise upon completion.
  */
 function createDefaultOrganization() {
   return new Promise((resolve, reject) => {
@@ -195,6 +199,8 @@ function createDefaultOrganization() {
 
 /**
  * @description Creates a default admin if a global admin does not already exist.
+ *
+ * @returns {Promise<null>} Resolves an empty promise upon completion.
  */
 function createDefaultAdmin() {
   return new Promise((resolve, reject) => {

@@ -22,6 +22,8 @@ const ServerData = M.require('models.server-data');
 
 /**
  * @description Handles the database migration from 0.9.3 to 0.9.0.
+ *
+ * @returns {Promise<null>} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -46,6 +48,8 @@ module.exports.down = function() {
 
 /**
  * @description Handles the database migration from 0.9.0 to 0.9.3.
+ *
+ * @returns {Promise<null>} Returns an empty promise upon completion.
  */
 module.exports.up = async function() {
   let serverData;

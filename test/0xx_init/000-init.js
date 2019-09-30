@@ -98,29 +98,29 @@ async function initModels() {
  * @description Cleans out the database by removing all items from all
  * collections.
  */
-function cleanDB(done) {
-  db.clear()
-  .then(() => ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]))
-  // Ensure element indexes are created prior to running other tests
-  .then(() => Element.ensureIndexes())
-  // Ensure user indexes are created prior to running other tests
-  .then(() => User.ensureIndexes())
-  .then(() => done())
-  .catch(error => {
+async function cleanDB() {
+  try {
+    await db.clear();
+    await ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]);
+    // Ensure element indexes are created prior to running other tests
+    await Element.ensureIndexes();
+    // Ensure user indexes are created prior to running other tests
+    await User.ensureIndexes();
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error).to.equal(null);
-    done();
-  });
+  }
 }
 
 
 /**
  * @description Creates the default org if it doesn't already exist.
  */
-function createDefaultOrg(done) {
-  Organization.findOne({ _id: M.config.server.defaultOrganizationId })
-  .then((org) => {
+async function createDefaultOrg() {
+  try {
+    const org = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
     // Verify return statement
     chai.expect(org).to.equal(null);
 
@@ -133,13 +133,11 @@ function createDefaultOrg(done) {
     });
 
     // Save the default org
-    return defOrg.save();
-  })
-  .then(() => done())
-  .catch((error) => {
+    await defOrg.save();
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }

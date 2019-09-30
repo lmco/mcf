@@ -21,6 +21,8 @@ const User = M.require('models.user');
 
 /**
  * @description Handles the database migration from 0.7.3 to 0.7.2.
+ *
+ * @returns {Promise<null>} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -47,6 +49,8 @@ module.exports.down = function() {
  * @description Handles the database migration from 0.7.2 to 0.7.3.
  * If the username index in the users collection exists, the
  * username index is removed.
+ *
+ * @returns {Promise<null>} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -73,6 +77,8 @@ module.exports.up = function() {
 /**
  * @description Helper function for 0.7.2 to 0.7.3 migration. Handles all
  * updates to the users collection.
+ *
+ * @returns {Promise<null>} Returns an empty promise upon completion.
  */
 function twoToThreeUserHelper() {
   return new Promise((resolve, reject) => {

@@ -57,6 +57,10 @@ const validators = M.require('lib.validators');
  * --all
  *
  * If NO arguments given, defaults to `--all`
+ *
+ * @param {string} _args - Additional options to pass into the build function.
+ *
+ * @returns {Promise<void>} - Returns an empty promise upon completion.
  */
 function build(_args) {
   M.log.info('Building MBEE ...');

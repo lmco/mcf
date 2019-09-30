@@ -35,6 +35,8 @@ const { spawn, spawnSync } = require('child_process');
  * --clean
  * --build
  * --run
+ *
+ * @param {string} args - Additional options to pass into the docker function.
  */
 function docker(args) {
   // Removes the previous docker build.

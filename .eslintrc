@@ -884,7 +884,7 @@
     "jsdoc/require-example": "off",
     "jsdoc/require-hyphen-before-param-description": "error",
     "jsdoc/require-jsdoc": "error", // Recommended
-    /*"jsdoc/require-param": "error", // Recommended
+    "jsdoc/require-param": "error", // Recommended
     "jsdoc/require-param-description": "error", // Recommended
     "jsdoc/require-param-name": "error", // Recommended
     "jsdoc/require-param-type": "error", // Recommended
@@ -892,7 +892,7 @@
     "jsdoc/require-returns-check": "error", // Recommended
     "jsdoc/require-returns-description": "error", // Recommended
     "jsdoc/require-returns-type": "error", // Recommended
-    "jsdoc/valid-types": "warn", // Recommended*/
+    "jsdoc/valid-types": "warn", // Recommended
 
 
     ////////////////////////////////////////////////////////////////////////////

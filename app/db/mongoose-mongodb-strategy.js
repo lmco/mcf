@@ -100,6 +100,8 @@ function disconnect() {
  * @description Clears all contents from the database, equivalent to starting
  * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
+ *
+ * @returns {Promise<null>} Resolves an empty promise upon completion.
  */
 async function clear() {
   return mongoose.connection.db.dropDatabase();
@@ -159,6 +161,8 @@ class Schema extends mongoose.Schema {
    * @param {object|Schema} obj - Plain object with paths to add, or another
    * schema.
    * @param {string} [prefix] - Path to prefix the newly added paths with.
+   *
+   * @returns {Promise<null>} Resolves an empty promise upon completion.
    */
   add(obj, prefix) {
     /**
@@ -492,6 +496,8 @@ class Model {
    * @param {object} doc - The object containing updates to the found documents.
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
+   *
+   * @returns {Promise<object[]>} The updated objects.
    */
   async updateMany(filter, doc, options, cb) {
     return this.model.updateMany(filter, doc, options, cb);
