@@ -223,13 +223,13 @@ class Model {
   }
 
   /**
-   * @description Unused init function.
+   * @description Ensures all indexes are created.
    * @async
    *
    * @returns {Promise<void>} Returns empty promise upon completion.
    */
-  async init() { // eslint-disable-line class-methods-use-this
-
+  async init() {
+    await this.model.ensureIndexes();
   }
 
   /**
@@ -340,17 +340,6 @@ class Model {
    */
   async deleteMany(conditions, options, cb) {
     return this.model.deleteMany(conditions, options, cb);
-  }
-
-  /**
-   * @description Creates all indexes (if not already created) for the model's
-   * schema. Calls the mongoose ensureIndexes() function.
-   * @async
-   *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
-   */
-  async ensureIndexes() {
-    return this.model.ensureIndexes();
   }
 
   /**
