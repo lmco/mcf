@@ -50,6 +50,24 @@ function disconnect() {
 }
 
 async function clear() {
+  return new Promise((resolve, reject) => {
+    let conn;
+    connect()
+    .then((connection) => {
+      conn = connection;
+      return conn.listTables({}).promise();
+    })
+    .then((tables) => {
+      const promises = [];
+      tables.TableNames.forEach((table) => {
+        promises.push(conn.deleteTable({ TableName: table }).promise());
+      });
+
+      return Promise.all(promises);
+    })
+    .catch((error) => reject(error));
+  });
+
 
 }
 
