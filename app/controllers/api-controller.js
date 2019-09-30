@@ -5227,7 +5227,7 @@ async function postBlob(req, res) {
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/blob
  *
- * @description Gets an artifact blob by org.id, project.id, branch.id,
+ * @description Deletes an artifact blob by org.id, project.id, branch.id,
  * location, filename.
  *
  * @param {Object} req - Request express object

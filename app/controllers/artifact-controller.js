@@ -736,7 +736,7 @@ async function remove(requestingUser, organizationID, projectID, branch, artifac
  * */
 async function getBlob(requestingUser, organizationID,
   projectID, branch, artifact) {
-  let options; // TODO: Remove
+  let options;
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);
   helper.checkParamsDataType(['object'], artifact, 'Artifacts');
@@ -904,7 +904,7 @@ async function postBlob(requestingUser, organizationID,
  * */
 async function deleteBlob(requestingUser, organizationID, projectID,
   branch, artifact) {
-  let options; // TODO: Remove
+  let options;
 
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branch);

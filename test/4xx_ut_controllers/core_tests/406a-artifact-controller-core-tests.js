@@ -31,6 +31,7 @@ let project = null;
 let projectID = null;
 let branchID = null;
 let artifactBlob1 = null;
+
 /* --------------------( Main )-------------------- */
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping

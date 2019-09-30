@@ -46,44 +46,60 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: Connect to database. Create an admin user, organization, and project
    */
-  before(async () => {
-    try {
+  before((done) => {
       // Connect to the database
-      await db.connect();
+      db.connect()
+      // Create test admin
+      .then(() => testUtils.createTestAdmin())
+      .then((_adminUser) => {
+        // Set global admin user
+        adminUser = _adminUser;
 
-      adminUser = await testUtils.createTestAdmin();
-      // Create the organization model object
-      org = await testUtils.createTestOrg(adminUser);
-      const projData = testData.projects[0];
+        // Create organization
+        return testUtils.createTestOrg(adminUser);
+      })
+      .then((retOrg) => {
+        // Set global organization
+        org = retOrg;
 
-      // Create the project model object
-      proj = (await ProjController.create(adminUser, org.id, projData))[0];
-      projID = utils.parseID(proj._id).pop();
-      branchID = testData.branches[0].id;
-    }
-    catch (error) {
-      M.log.error(error);
-      // Expect no error
-      chai.expect(error).to.equal(null);
-    }
+        // Define project data
+        const projData = testData.projects[0];
+
+        // Create project
+        return ProjController.create(adminUser, org.id, projData);
+      })
+      .then((retProj) => {
+        // Set global project
+        proj = retProj;
+        projID = utils.parseID(proj[0].id).pop();
+        branchID = testData.branches[0].id;
+        done();
+      })
+      .catch((error) => {
+        M.log.error(error);
+        // Expect no error
+        chai.expect(error).to.equal(null);
+        done();
+      });
   });
 
   /**
    * After: Remove Organization and project.
    * Close database connection.
    */
-  after(async () => {
-    try {
-      // Remove the org created in before()
-      await testUtils.removeTestOrg();
-      await testUtils.removeTestAdmin();
-      await db.disconnect();
-    }
-    catch (error) {
+  after((done) => {
+    // Remove organization
+    // Note: Projects under organization will also be removed
+    testUtils.removeTestOrg(adminUser)
+    .then(() => testUtils.removeTestAdmin())
+    .then(() => db.disconnect())
+    .then(() => done())
+    .catch((error) => {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-    }
+      done();
+    });
   });
 
   /* Execute tests */
@@ -101,7 +117,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies mock POST request to create an artifact blob.
  */
-async function postArtifact() {
+function postArtifact(done) {
   const artData = testData.artifacts[0];
   const body = {
     id: artData.id,
@@ -162,18 +178,18 @@ async function postArtifact() {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly TODO: address this
-    // /setTimeout(() => testUtils.testResponseLogging(_data.length, req, res), 50);
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // POSTs an artifact
-  await apiController.postArtifact(req, res);
+  apiController.postArtifact(req, res);
 }
 
 /**
  * @description Verifies mock GET request to get an artifact.
  */
-async function getArtifact() {
+function getArtifact(done) {
   const artData = testData.artifacts[0];
   // Create request object
   const body = {};
@@ -225,17 +241,17 @@ async function getArtifact() {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // GETs an artifact
-  await apiController.getArtifact(req, res);
+  apiController.getArtifact(req, res);
 }
 
 /**
  * @description Verifies mock PATCH request to update an artifact.
  */
-async function patchArtifact() {
+function patchArtifact(done) {
   const artData = testData.artifacts[0];
   const params = {
     orgid: org.id,
@@ -288,17 +304,17 @@ async function patchArtifact() {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // PATCHs an artifact
-  await apiController.patchArtifact(req, res);
+  apiController.patchArtifact(req, res);
 }
 
 /**
  * @description Verifies mock DELETE request to delete an artifact.
  */
-async function deleteArtifact() {
+function deleteArtifact(done) {
   const artData = testData.artifacts[0];
   // Create request object
   const body = artData.id;
@@ -326,17 +342,17 @@ async function deleteArtifact() {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
   // DELETEs an artifact
-  await apiController.deleteArtifact(req, res);
+  apiController.deleteArtifact(req, res);
 }
 
 /**
  * @description Verifies mock GET request to get an artifact blob by id.
  */
-async function getBlobById() {
+function getBlobById(done) {
   const artData = testData.artifacts[0];
   // Create request object
   const body = {};
@@ -372,16 +388,16 @@ async function getBlobById() {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
   // GETs an artifact
-  await apiController.getBlobById(req, res);
+  apiController.getBlobById(req, res);
 }
 
 /**
  * @description Verifies mock GET request to get an artifact blob by id.
  */
-async function getBlob() {
+function getBlob(done) {
   const artData = testData.artifacts[0];
   // Create request object
   const body = {
@@ -420,16 +436,16 @@ async function getBlob() {
     chai.expect(_data).to.deep.equal(fileData);
 
     // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
   // GETs an artifact
-  await apiController.getBlob(req, res);
+  apiController.getBlob(req, res);
 }
 
 /**
  * @description Verifies mock POST request to post an artifact blob.
  */
-async function postBlob() {
+function postBlob(done) {
   const artData = testData.artifacts[0];
   // Create request object
   const body = {
@@ -470,16 +486,16 @@ async function postBlob() {
     chai.expect(postedArtifact.filename).to.equal(artData.filename);
 
     // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
   // GETs an artifact
-  await apiController.postBlob(req, res);
+  apiController.postBlob(req, res);
 }
 
 /**
  * @description Verifies mock DELETE request to Delete an artifact blob.
  */
-async function deleteBlob() {
+function deleteBlob(done) {
   const artData = testData.artifacts[0];
   // Create request object
   const body = {
@@ -513,8 +529,8 @@ async function deleteBlob() {
     chai.expect(deletedArtifact.filename).to.equal(artData.filename);
 
     // Ensure the response was logged correctly
-    // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
   // GETs an artifact
-  await apiController.deleteBlob(req, res);
+  apiController.deleteBlob(req, res);
 }
