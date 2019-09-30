@@ -17,6 +17,7 @@
 
 // NPM modules
 const AWS = require('aws-sdk');
+const DynamoDBStore = require('dynamodb-store');
 
 // MBEE modules
 const utils = M.require('lib.utils');
@@ -336,8 +337,13 @@ class Model {
    */
   formatDocument(document, options = {}) {
     Object.keys(document).forEach((field) => {
-      // Change the value of each key from { type: value} to simply the value
-      document[field] = Object.values(document[field])[0];
+      if (Object.keys(document[field])[0] === 'M') {
+        document[field] = this.formatDocument(document[field].M);
+      }
+      else {
+        // Change the value of each key from { type: value} to simply the value
+        document[field] = Object.values(document[field])[0];
+      }
     });
 
     // If the lean option is NOT supplied, add on document functions
@@ -538,12 +544,8 @@ class Model {
           Item: {}
         };
 
-        Object.keys(doc).forEach((key) => {
-          if (def.hasOwnProperty(key)) {
-            putObj.Item[key] = {};
-            putObj.Item[key][def[key].type] = doc[key];
-          }
-        });
+        // Format the document object
+        putObj.Item = model.formatObject(this)
 
         M.log.debug(`DB OPERATION: ${table} putItem`);
         // Save the document
@@ -684,7 +686,30 @@ class Model {
    * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
-    return this.getItem(conditions, projection, options);
+    // Loop through each field in the conditions object
+    let allIndexed = true;
+    Object.keys(conditions).forEach((key) => {
+      // If the field is not indexed, set allIndexed to false
+      if ((!this.definition[key].hasOwnProperty('index')
+        || this.definition[key].index === false)
+        && key !== '_id') {
+        allIndexed = false;
+      }
+    });
+
+    // If all fields are indexes, use getItem
+    if (allIndexed) {
+      return this.getItem(conditions, projection, options);
+    }
+    else {
+      const result = await this.scan(conditions, projection, options);
+      if (Array.isArray(result) && result.length !== 0) {
+        return result[0];
+      }
+      else {
+        return null;
+      }
+    }
   }
 
   /**
@@ -745,7 +770,6 @@ class Model {
         }
       });
 
-      console.log(getObj)
       M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
       // Make the getItem request
       this.connection.getItem(getObj).promise()
@@ -892,12 +916,8 @@ class Model {
         Item: {}
       };
 
-      Object.keys(doc).forEach((key) => {
-        if (this.definition[key]) {
-          putObj.Item[key] = {};
-          putObj.Item[key][this.definition[key].type] = doc[key];
-        }
-      });
+      putObj.Item = this.formatObject(doc);
+      console.log(putObj)
 
       M.log.debug(`DB OPERATION: ${this.TableName} putItem`);
       // Save the document
@@ -907,6 +927,55 @@ class Model {
       })
       .catch((error) => reject(error));
     });
+  }
+
+  /**
+   * @description Formats a document or query to support DynamoDB's structure.
+   *
+   * @param {object} obj - The object to format.
+   *
+   * @returns {object} The formatted object.
+   */
+  formatObject(obj) {
+    const returnObj = {};
+
+    Object.keys(obj).forEach((key) => {
+      switch (typeof obj[key]) {
+        case 'string': returnObj[key] = { S: obj[key] }; break;
+        case 'number': returnObj[key] = { N: obj[key] }; break;
+        case 'boolean': returnObj[key] = { BOOL: obj[key] }; break;
+        case 'object': {
+          // If the object is an array, call recursively
+          if (Array.isArray(obj[key])) {
+            // Handle an array of strings
+            if (obj[key].every(v => typeof v === 'string')) {
+              if (obj[key].length !== 0) {
+                returnObj[key] = { SS: obj[key] };
+              }
+            }
+            // Handle an array of numbers
+            else if (obj[key].every(v => typeof v === 'number')) {
+              returnObj[key] = { NS: obj[key] };
+            }
+            // Handle all other arrays
+            else {
+              returnObj[key] = { L: this.formatObject(obj[key]) };
+            }
+          }
+          else if (obj[key] === null) {
+            // TODO: Do something?
+          }
+          else {
+            returnObj[key] = { M: this.formatObject(obj[key]) };
+          }
+          break;
+        }
+        default:
+          throw new M.DataFormatError(`Unsupported type ${key}.`);
+      }
+    });
+
+    return returnObj;
   }
 
   /**
@@ -930,38 +999,49 @@ class Model {
 
       Object.keys(filter).forEach((key) => {
         if (!scanObj.ExpressionAttributeValues) {
-          scanObj.ExpressionAttributeValues = [];
+          scanObj.ExpressionAttributeValues = {};
         }
 
-        const attributeObj = {};
         const value = filter[key];
 
         // If the value is a string
         if (typeof value === 'string') {
-          attributeObj[`:${key}`] = { S: value };
+          scanObj.ExpressionAttributeValues[`:${key}`] = { S: value };
         }
         // If the value is an array of strings
         else if (Array.isArray(value) && value.every(v => typeof v === 'string')
           && value.length !== 0) {
-          attributeObj[`:${key}`] = { SS: value };
+          scanObj.ExpressionAttributeValues[`:${key}`] = { SS: value };
         }
         else if (typeof value === 'boolean') {
-          attributeObj[`:${key}`] = { BOOL: value };
+          scanObj.ExpressionAttributeValues[`:${key}`] = { BOOL: value };
+        }
+
+        if (!scanObj.FilterExpression) {
+          scanObj.FilterExpression = `${key} = :${key}`;
+        }
+        else {
+          scanObj.FilterExpression += `, ${key} = :${key}`;
         }
       });
 
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
-      this.connection.scan(projectionString, (err, data) => {
-        if (err) {
-          return reject(err);
-        }
-        else {
-          return resolve(this.formatDocuments(data.Items, options));
-        }
-      });
+      this.connection.scan(scanObj).promise()
+      .then((data) => resolve(this.formatDocuments(data.Items, options)))
+      .catch((error) => reject(error));
     });
   }
 
+  /**
+   * @description Updates a single item in the database, matched by the fields
+   * in the filter, and updated with the changes in doc.
+   *
+   * @param {object} filter - The query used to find the document.
+   * @param {object} doc - An object containing changes to the found document.
+   * @param {object} options - An object containing options.
+   *
+   * @returns {Promise<*|Promise<unknown>>}
+   */
   async updateItem(filter, doc, options) {
     return new Promise((resolve, reject) => {
       const updateObj = {
@@ -1054,121 +1134,19 @@ class Model {
 
 }
 
-/**
- * @description Defines the Store class. The Store class is used along with
- * express-session to manage sessions. The class MUST extend the node's built in
- * EventEmitter class. Please review the express-session documentation at
- * {@link https://github.com/expressjs/session#session-store-implementation}
- * to learn more about the Store implementation. There are many libraries
- * available that support different databases, and a list of those are also
- * available at the link above.
- */
-class Store {
+class Store extends DynamoDBStore {
 
   constructor(options) {
-    // super(options);
-    //
-    // if (!(this instanceof events)) {
-    //   M.log.critical('The Store class must extend the Node.js EventEmitter '
-    //     + 'class!');
-    //   process.exit(1);
-    // }
-    //
-    // // Check that expected functions are defined
-    // const expectedFunctions = ['destroy', 'get', 'set'];
-    // expectedFunctions.forEach((f) => {
-    //   // Ensure the parameter is defined
-    //   if (!(f in this)) {
-    //     M.log.critical(`The Store function ${f} is not defined!`);
-    //     process.exit(1);
-    //   }
-    //   // Ensure it is a function
-    //   if (typeof this[f] !== 'function') {
-    //     M.log.critical(`The Store function ${f} is not a function!`);
-    //     process.exit(1);
-    //   }
-    // });
-  }
-
-  /**
-   * @description An optional function used to get all sessions in the store
-   * as an array.
-   *
-   * @param {function} cb - The callback to run, should be called as
-   * cb(error, sessions).
-   */
-  all(cb) {
-    // return super.all(cb);
-  }
-
-  /**
-   * @description A required function which deletes a given session from the
-   * store.
-   *
-   * @param {String} sid - The ID of the session to delete.
-   * @param {function} cb - The callback to run, should be called as cb(error).
-   */
-  destroy(sid, cb) {
-    // return super.destroy(sid, cb);
-  }
-
-  /**
-   * @description An optional function which deletes all sessions from the
-   * store.
-   *
-   * @param {function} cb - The callback to run, should be called as cb(error).
-   */
-  clear(cb) {
-    // return super.clear(cb);
-  }
-
-  /**
-   * @description An optional function which gets the count of all session in
-   * the store.
-   *
-   * @param {function} cb - The callback to run, should be called as
-   * cb(error, len).
-   */
-  length(cb) {
-    // return super.length(cb);
-  }
-
-  /**
-   * @description A required function which gets the specified session from the
-   * store.
-   *
-   * @param {String} sid - The ID of the session to retrieve.
-   * @param {function} cb - The callback to run, should be called as
-   * cb(error, session). The session argument should be the session if found,
-   * otherwise null or undefined if not found.
-   */
-  get(sid, cb) {
-    // return super.get(sid, cb);
-  }
-
-  /**
-   * @description A required function which upserts a given session into the
-   * store.
-   *
-   * @param {String} sid - The ID of the session to upsert.
-   * @param {Object} session - The session object to upsert.
-   * @param {function} cb - The callback to run, should be called as cb(error).
-   */
-  set(sid, session, cb) {
-    // return super.set(sid, session, cb);
-  }
-
-  /**
-   * @description An optional yet recommended function which "touches" a given
-   * session. This function is used to reset the idle timer on an active session
-   * which may be potentially deleted.
-   *
-   * @param {String} sid - The ID of the session to "touch".
-   * @param {Object} session - The session to "touch".
-   * @param {function} cb - The callback to run, should be called as cb(error).
-   */
-  touch(sid, session, cb) {
-    // return super.touch(sid, session, cb);
+    const obj = {
+      dynamoConfig: {
+        accessKeyId: 'fake',
+        secretAccessKey: 'alsofake',
+        region: 'US',
+        endpoint: 'http://localhost:8000'
+      },
+      ttl: utils.timeConversions[M.config.auth.session.units] * M.config.auth.session.expires
+    };
+    super(obj);
   }
 
 }

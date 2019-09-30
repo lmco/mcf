@@ -152,7 +152,6 @@ function createDefaultOrganization() {
       if (org !== null) {
         // Default organization exists, prune user permissions to only include
         // users currently in the database.
-        console.log(org);
         Object.keys(org.permissions).forEach((user) => {
           if (!userIDs.includes(user)) {
             delete org.permissions.user;
@@ -199,7 +198,6 @@ function createDefaultOrganization() {
  */
 function createDefaultAdmin() {
   return new Promise((resolve, reject) => {
-    console.log('Next step')
     // Initialize userCreated
     let userCreated = false;
     // Search for a user who is a global admin
@@ -210,7 +208,7 @@ function createDefaultAdmin() {
         // Global admin already exists, resolve
         return resolve();
       }
-      console.log('Made it here')
+
       // set userCreated to true
       userCreated = true;
       // No global admin exists, create local user as global admin
