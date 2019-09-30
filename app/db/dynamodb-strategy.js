@@ -229,11 +229,11 @@ class Model {
    * @description Class constructor. Calls parent constructor, and ensures that
    * each of the required functions is defined in the parent class.
    *
-   * @param {String} name - The name of the model being created. This name is
+   * @param {string} name - The name of the model being created. This name is
    * used to create the collection name in the database.
    * @param {Schema} schema - The schema which is being turned into a model.
    * Should be an instance of the Schema class.
-   * @param {String} [collection] - Optional name of the collection in the
+   * @param {string} [collection] - Optional name of the collection in the
    * database, if not provided the name should be used.
    */
   constructor(name, schema, collection) {
@@ -247,7 +247,7 @@ class Model {
    * @description Creates a table if it does not already exist in the database.
    * @async
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    */
   async init() {
     // Create connection to the database
@@ -262,9 +262,9 @@ class Model {
 
   /**
    * @description Creates a table in the database based on the local schema and
-   * TableName variables.
+   * tableName variables.
    *
-   * @return {Promise<*|Promise<unknown>>}
+   * @returns {Promise}
    */
   async createTable() {
     return new Promise((resolve, reject) => {
@@ -272,6 +272,7 @@ class Model {
       this.schema.TableName = this.TableName;
       this.schema.BillingMode = 'PAY_PER_REQUEST';
 
+      M.log.debug(`DB OPERATION: ${this.TableName} createTable`);
       // Create the actual table
       this.connection.createTable(this.schema, (err) => {
         // If an error occurred, reject it
@@ -290,10 +291,11 @@ class Model {
    * @description Finds and returns an object containing a list of existing
    * table's names in the database.
    *
-   * @return {Promise<Object>} An object containing table names.
+   * @returns {Promise<object>} An object containing table names.
    */
   async listTables() {
     return new Promise((resolve, reject) => {
+      M.log.debug(`DB OPERATION: listTables`);
       // Find all tables
       this.connection.listTables({}).promise()
       .then((tables) => resolve(tables))
@@ -308,10 +310,10 @@ class Model {
    * @description Formats documents to return them in the proper format
    * expected in controllers.
    *
-   * @param {Object[]} documents -  The documents to properly format
-   * @param {Object} options - The options supplied to the function.
+   * @param {object[]} documents -  The documents to properly format.
+   * @param {object} options - The options supplied to the function.
    *
-   * @return {Object[]} - Modified documents.
+   * @returns {object[]} - Modified documents.
    */
   formatDocuments(documents, options) {
     // Loop through each document
@@ -327,10 +329,10 @@ class Model {
    * @description Formats a single document and returns it in the proper format
    * expected in the controllers.
    *
-   * @param {Object} document -  The documents to properly format
-   * @param {Object} options - The options supplied to the function.
+   * @param {object} document -  The documents to properly format.
+   * @param {object} options - The options supplied to the function.
    *
-   * @return {Object} - Modified documents.
+   * @returns {object} - Modified documents.
    */
   formatDocument(document, options = {}) {
     Object.keys(document).forEach((field) => {
@@ -388,6 +390,7 @@ class Model {
 
       // If there are actually query parameters
       if (batchGetObj.RequestItems[this.TableName].Keys.length > 0) {
+        M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
         // Make the batchGetItem request
         this.connection.batchGetItem(batchGetObj)
         .promise()
@@ -405,24 +408,24 @@ class Model {
    * update, or delete multiple documents.
    * @async
    *
-   * @param {Object[]} ops - An array of objects detailing what operations to
+   * @param {object[]} ops - An array of objects detailing what operations to
    * perform the data required for those operations.
-   * @param {Object} [ops.insertOne] - Specified an insertOne operation.
-   * @param {Object} [ops.insertOne.document] - The document to create, for
+   * @param {object} [ops.insertOne] - Specified an insertOne operation.
+   * @param {object} [ops.insertOne.document] - The document to create, for
    * insertOne.
-   * @param {Object} [ops.updateOne] - Specifies an updateOne operation.
-   * @param {Object} [ops.updateOne.filter] - An object containing parameters to
+   * @param {object} [ops.updateOne] - Specifies an updateOne operation.
+   * @param {object} [ops.updateOne.filter] - An object containing parameters to
    * filter the find query by, for updateOne.
-   * @param {Object} [ops.updateOne.update] - An object containing updates to
+   * @param {object} [ops.updateOne.update] - An object containing updates to
    * the matched document from the updateOne filter.
-   * @param {Object} [ops.deleteOne] - Specifies a deleteOne operation.
-   * @param {Object} [ops.deleteOne.filter] - An object containing parameters to
+   * @param {object} [ops.deleteOne] - Specifies a deleteOne operation.
+   * @param {object} [ops.deleteOne.filter] - An object containing parameters to
    * filter the find query by, for deleteOne.
-   * @param {Object} [ops.deleteMany] - Specifies a deleteMany operation.
-   * @param {Object} [ops.deleteMany.filter] - An object containing parameters
+   * @param {object} [ops.deleteMany] - Specifies a deleteMany operation.
+   * @param {object} [ops.deleteMany.filter] - An object containing parameters
    * to filter the find query by, for deleteMany.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
    * @example
    * await bulkWrite([
@@ -446,7 +449,7 @@ class Model {
    *   }
    * ]);
    *
-   * @return {Promise<Object>} Result of the bulkWrite operation.
+   * @returns {Promise<object>} Result of the bulkWrite operation.
    */
   async bulkWrite(ops, options, cb) {
     // return super.bulkWrite(ops, options, cb);
@@ -455,7 +458,7 @@ class Model {
   /**
    * @description Creates a document based on the model's schema.
    *
-   * @param {Object} doc - The JSON to be converted into a document. Should
+   * @param {object} doc - The JSON to be converted into a document. Should
    * roughly align with the model's schema. Each document created should at
    * least contain an _id, as well as the methods defined in the schema.
    */
@@ -469,7 +472,7 @@ class Model {
     /**
      *
      */
-    doc.__proto__.validateDoc = function() {
+    doc.__proto__.validateDoc = function() { // eslint-disable-line no-proto
       const keys = Object.keys(doc);
       // Loop over each valid parameter
       Object.keys(def).forEach((param) => {
@@ -525,7 +528,7 @@ class Model {
      *
      * @return {Promise<*|Promise<unknown>>}
      */
-    doc.__proto__.save = async function() {
+    doc.__proto__.save = async function() { // eslint-disable-line no-proto
       return new Promise((resolve, reject) => {
         // Ensure the document is valid
         this.validateDoc();
@@ -542,7 +545,7 @@ class Model {
           }
         });
 
-
+        M.log.debug(`DB OPERATION: ${table} putItem`);
         // Save the document
         conn.putItem(putObj).promise()
         .then(() => model.findOne({ _id: doc._id }))
@@ -555,7 +558,7 @@ class Model {
      *
      * @param field
      */
-    doc.__proto__.markModified = function(field) {};
+    doc.__proto__.markModified = function(field) {}; // eslint-disable-line no-proto
 
     return doc;
   }
@@ -564,11 +567,11 @@ class Model {
    * @description Counts the number of documents that matches a filter.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Number>} The number of documents which matched the filter.
+   * @returns {Promise<number>} The number of documents which matched the filter.
    */
   async countDocuments(filter, cb) {
     // return super.countDocuments(filter, cb);
@@ -578,9 +581,9 @@ class Model {
    * @description Deletes the specified index from the database.
    * @async
    *
-   * @param {String} name - The name of the index.
+   * @param {string} name - The name of the index.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<*>}
    */
   async deleteIndex(name) {
     // return super.deleteIndex(name);
@@ -590,12 +593,12 @@ class Model {
    * @description Deletes any documents that match the provided conditions.
    * @async
    *
-   * @param {Object} conditions - An object containing parameters to filter the
+   * @param {object} conditions - An object containing parameters to filter the
    * find query by, and thus delete documents by.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} An object denoting the success of the delete
+   * @returns {Promise<object>} An object denoting the success of the delete
    * operation.
    */
   async deleteMany(conditions, options, cb) {
@@ -607,7 +610,7 @@ class Model {
    * schema.
    * @async
    *
-   * @return {Promise<void>}
+   * @returns {Promise<*>}
    */
   async ensureIndexes() {
     // return super.ensureIndexes();
@@ -617,35 +620,35 @@ class Model {
    * @description Finds multiple documents based on the filter provided.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {(Object|String)} [projection] - Specifies the fields to return in
+   * @param {(object|string)} [projection] - Specifies the fields to return in
    * the documents that match the filter. To return all fields, omit this
    * parameter.
-   * @param {Object} [options] - An object containing options.
-   * @param {Object} [options.sort] - An object specifying the order by which
+   * @param {object} [options] - An object containing options.
+   * @param {object} [options.sort] - An object specifying the order by which
    * to sort and return the documents. Keys are fields by which to sort, and
    * values are the sort order where 1 is ascending and -1 is descending. It is
    * possible to sort by metadata by providing the key $meta and a non-numerical
    * value. This is used primarily for text based search.
-   * @param {Number} [options.limit] - Limits the number of documents returned.
+   * @param {number} [options.limit] - Limits the number of documents returned.
    * A limit of 0 is equivalent to setting no limit and a negative limit is not
    * supported.
-   * @param {Number} [options.skip] - Skips a specified number of documents that
+   * @param {number} [options.skip] - Skips a specified number of documents that
    * matched the query. Given 10 documents match with a skip of 5, only the
    * final 5 documents would be returned. A skip value of 0 is equivalent to not
    * skipping any documents. A negative skip value is not supported.
-   * @param {String} [options.populate] - A space separated list of fields to
+   * @param {string} [options.populate] - A space separated list of fields to
    * populate of return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object[]>} An array containing the found documents, if
+   * @returns {Promise<object[]>} An array containing the found documents, if
    * any.
    */
   async find(filter, projection, options, cb) {
@@ -662,23 +665,23 @@ class Model {
    * @description Finds a single document based on the filter provided.
    * @async
    *
-   * @param {Object} conditions - An object containing parameters to filter the
+   * @param {object} conditions - An object containing parameters to filter the
    * find query by.
-   * @param {(Object|String)} [projection] - Specifies the fields to return in
+   * @param {(object|string)} [projection] - Specifies the fields to return in
    * the document that matches the filter. To return all fields, omit this
    * parameter.
-   * @param {Object} [options] - An object containing options.
-   * @param {String} [options.populate] - A space separated list of fields to
+   * @param {object} [options] - An object containing options.
+   * @param {string} [options.populate] - A space separated list of fields to
    * populate of return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} The found document, if any.
+   * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
     return this.getItem(conditions, projection, options);
@@ -688,10 +691,11 @@ class Model {
    * @description Returns an array of indexes for the given model.
    * @async
    *
-   * @return {Promise<Object[]>} Array of index objects
+   * @returns {Promise<object[]>} Array of index objects.
    */
   async getIndexes() {
     return new Promise((resolve, reject) => {
+      M.log.debug(`DB OPERATION: ${this.TableName} describeTable`);
       this.connection.describeTable({ TableName: this.TableName }).promise()
       .then((table) => {
         return resolve(table.Table.KeySchema);
@@ -742,7 +746,7 @@ class Model {
       });
 
       console.log(getObj)
-
+      M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
       // Make the getItem request
       this.connection.getItem(getObj).promise()
       .then((foundItem) => {
@@ -763,16 +767,16 @@ class Model {
    * @description Inserts any number of documents into the database.
    * @async
    *
-   * @param {Object[]} docs - An array of documents to insert.
-   * @param {Object} [options] - An object containing options.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {object[]} docs - An array of documents to insert.
+   * @param {object} [options] - An object containing options.
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {Boolean} [options.skipValidation] - If true, will not validate
+   * @param {boolean} [options.skipValidation] - If true, will not validate
    * the documents which are being created.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object[]>} The created documents.
+   * @returns {Promise<object[]>} The created documents.
    */
   async insertMany(docs, options, cb) {
     return new Promise((resolve, reject) => {
@@ -789,7 +793,7 @@ class Model {
           batchGetObj.RequestItems[this.TableName].Keys.push(
             { _id: { S: doc._id } });
         });
-
+        M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
         promises.push(
           this.connection.batchGetItem(batchGetObj).promise()
           .then((foundDocs) => {
@@ -834,6 +838,7 @@ class Model {
               batchWriteObj.RequestItems[this.TableName].push(putObj);
             });
 
+            M.log.debug(`DB OPERATION: ${this.TableName} batchWriteItem`);
             promises2.push(
               this.connection.batchWriteItem(batchWriteObj).promise()
             );
@@ -856,6 +861,7 @@ class Model {
             batchGetObj.RequestItems[this.TableName].Keys.push({ _id: { S: doc._id } });
           });
 
+          M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
           promises3.push(
             this.connection.batchGetItem(batchGetObj).promise()
             .then((foundDocs) => {
@@ -893,6 +899,7 @@ class Model {
         }
       });
 
+      M.log.debug(`DB OPERATION: ${this.TableName} putItem`);
       // Save the document
       this.connection.putItem(putObj).promise()
       .then((createdObj) => {
@@ -910,7 +917,7 @@ class Model {
    * @param {string} projection - The specific fields to return.
    * @param {object} options - A list of provided options.
    *
-   * @return {Promise<Object[]>} The found documents.
+   * @returns {Promise<object[]>} The found documents.
    */
   async scan(filter, projection, options) {
     return new Promise((resolve, reject) => {
@@ -943,6 +950,7 @@ class Model {
         }
       });
 
+      M.log.debug(`DB OPERATION: ${this.TableName} scan`);
       this.connection.scan(projectionString, (err, data) => {
         if (err) {
           return reject(err);
@@ -1004,6 +1012,7 @@ class Model {
         }
       });
 
+      M.log.debug(`DB OPERATION: ${this.TableName} updateItem`);
       // Update the single item
       this.connection.updateItem(updateObj).promise()
       .then((updatedItem) => resolve(this.formatDocument(updatedItem.Attributes, options)))
@@ -1016,11 +1025,11 @@ class Model {
    * changes in the provided doc.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {Object} doc - The object containing updates to the found documents.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} doc - The object containing updates to the found documents.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    */
   async updateMany(filter, doc, options, cb) {
    // return this.updateItem(filter, doc, options);
@@ -1031,13 +1040,13 @@ class Model {
    * is updated with the doc provided.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {Object} doc - The object containing updates to the found document.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} doc - The object containing updates to the found document.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} The updated document.
+   * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
     return this.updateItem(filter, doc, options);
