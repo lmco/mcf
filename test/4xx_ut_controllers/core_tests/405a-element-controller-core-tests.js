@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.405a-element-controller-core-tests
  *
@@ -41,7 +41,7 @@ let branchID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Open the database connection
@@ -97,23 +97,29 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // ------------- Create -------------
   it('should create an element', createElement);
   it('should create multiple elements', createElements);
-  it('should create or replace an element', createOrReplaceElement);
-  it('should create or replace multiple elements', createOrReplaceElements);
+  // -------------- Find --------------
   it('should find an element', findElement);
   it('should find multiple elements', findElements);
   it('should find all elements', findAllElements);
-  it('should find an element through text search', searchElement);
+  // ------------- Update -------------
   it('should update an element', updateElement);
   it('should update multiple elements', updateElements);
+  // ------------- Replace ------------
+  it('should create or replace an element', createOrReplaceElement);
+  it('should create or replace multiple elements', createOrReplaceElements);
+  // ------------- Search -------------
+  it('should find an element through text search', searchElement);
+  // ------------- Remove -------------
   it('should delete an element', deleteElement);
   it('should delete multiple elements', deleteElements);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an element using the element controller
+ * @description Creates an element using the element controller.
  */
 function createElement(done) {
   const elemData = testData.elements[0];
@@ -154,8 +160,8 @@ function createElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(createdElem.createdBy).to.equal(adminUser.username);
-    chai.expect(createdElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdElem.createdBy).to.equal(adminUser._id);
+    chai.expect(createdElem.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdElem.archivedBy).to.equal(null);
     chai.expect(createdElem.createdOn).to.not.equal(null);
     chai.expect(createdElem.updatedOn).to.not.equal(null);
@@ -171,7 +177,7 @@ function createElement(done) {
 }
 
 /**
- * @description Creates multiple elements using the element controller
+ * @description Creates multiple elements using the element controller.
  */
 function createElements(done) {
   const elemDataObjects = [
@@ -179,7 +185,8 @@ function createElements(done) {
     testData.elements[2],
     testData.elements[3],
     testData.elements[4],
-    testData.elements[5]
+    testData.elements[5],
+    testData.elements[6]
   ];
 
   // Create elements via controller
@@ -228,8 +235,8 @@ function createElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(createdElem.createdBy).to.equal(adminUser.username);
-      chai.expect(createdElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdElem.createdBy).to.equal(adminUser._id);
+      chai.expect(createdElem.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdElem.archivedBy).to.equal(null);
       chai.expect(createdElem.createdOn).to.not.equal(null);
       chai.expect(createdElem.updatedOn).to.not.equal(null);
@@ -246,7 +253,7 @@ function createElements(done) {
 }
 
 /**
- * @description Creates or replaces an element using the element controller
+ * @description Creates or replaces an element using the element controller.
  */
 function createOrReplaceElement(done) {
   const elemData = testData.elements[0];
@@ -287,8 +294,8 @@ function createOrReplaceElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
-    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
+    chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedElem.archivedBy).to.equal(null);
     chai.expect(replacedElem.createdOn).to.not.equal(null);
     chai.expect(replacedElem.updatedOn).to.not.equal(null);
@@ -363,8 +370,8 @@ function createOrReplaceElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(replacedElem.createdBy).to.equal(adminUser.username);
-      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
+      chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedElem.archivedBy).to.equal(null);
       chai.expect(replacedElem.createdOn).to.not.equal(null);
       chai.expect(replacedElem.updatedOn).to.not.equal(null);
@@ -381,7 +388,7 @@ function createOrReplaceElements(done) {
 }
 
 /**
- * @description Finds an element via the elements controller
+ * @description Finds an element via the elements controller.
  */
 function findElement(done) {
   const elemData = testData.elements[0];
@@ -422,8 +429,8 @@ function findElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.archivedBy).to.equal(null);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
@@ -439,7 +446,7 @@ function findElement(done) {
 }
 
 /**
- * @description Finds multiple elements via the element controller
+ * @description Finds multiple elements via the element controller.
  */
 function findElements(done) {
   const elemDataObjects = [
@@ -496,8 +503,8 @@ function findElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(foundElem.createdBy).to.equal(adminUser.username);
-      chai.expect(foundElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElem.createdBy).to.equal(adminUser._id);
+      chai.expect(foundElem.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundElem.archivedBy).to.equal(null);
       chai.expect(foundElem.createdOn).to.not.equal(null);
       chai.expect(foundElem.updatedOn).to.not.equal(null);
@@ -514,7 +521,7 @@ function findElements(done) {
 }
 
 /**
- * @description Finds all elements on a given project using the element controller
+ * @description Finds all elements on a given project using the element controller.
  */
 function findAllElements(done) {
   const elemDataObjects = [
@@ -568,8 +575,8 @@ function findAllElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(foundElem.createdBy).to.equal(adminUser.username);
-      chai.expect(foundElem.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundElem.createdBy).to.equal(adminUser._id);
+      chai.expect(foundElem.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundElem.archivedBy).to.equal(null);
       chai.expect(foundElem.createdOn).to.not.equal(null);
       chai.expect(foundElem.updatedOn).to.not.equal(null);
@@ -627,8 +634,8 @@ function searchElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(foundElement.createdBy).to.equal(adminUser.username);
-    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundElement.createdBy).to.equal(adminUser._id);
+    chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.archivedBy).to.equal(null);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
@@ -644,7 +651,7 @@ function searchElement(done) {
 }
 
 /**
- * @description Updates an element using the element controller
+ * @description Updates an element using the element controller.
  */
 function updateElement(done) {
   const elemData = testData.elements[0];
@@ -691,8 +698,8 @@ function updateElement(done) {
     }
 
     // Verify additional properties
-    chai.expect(updatedElem.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedElem.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedElem.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedElem.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedElem.archivedBy).to.equal(null);
     chai.expect(updatedElem.createdOn).to.not.equal(null);
     chai.expect(updatedElem.updatedOn).to.not.equal(null);
@@ -708,7 +715,7 @@ function updateElement(done) {
 }
 
 /**
- * @description Updates multiple elements using the element controller
+ * @description Updates multiple elements using the element controller.
  */
 function updateElements(done) {
   const elemDataObjects = [
@@ -768,8 +775,8 @@ function updateElements(done) {
       }
 
       // Verify additional properties
-      chai.expect(updatedElement.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedElement.archivedBy).to.equal(null);
       chai.expect(updatedElement.createdOn).to.not.equal(null);
       chai.expect(updatedElement.updatedOn).to.not.equal(null);
@@ -786,7 +793,7 @@ function updateElements(done) {
 }
 
 /**
- * @description Deletes an element using the element controller
+ * @description Deletes an element using the element controller.
  */
 function deleteElement(done) {
   const elemData = testData.elements[0];
@@ -817,7 +824,7 @@ function deleteElement(done) {
 }
 
 /**
- * @description Deletes multiple elements using the element controller
+ * @description Deletes multiple elements using the element controller.
  */
 function deleteElements(done) {
   const elemDataObjects = [

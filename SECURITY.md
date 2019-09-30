@@ -10,7 +10,6 @@
   - [Configuration JSON File](#configuration-json-file)
   - [HTTPS](#https)
   - [Server Secret Key](#server-secret-key)
-  - [MongoDB](#mongodb)
   - [Authentication](#authentication)
 
 
@@ -208,14 +207,14 @@ any plugins being installed on an MBEE instance.
 
 Below are the default ports necessary for running an MBEE instance and what those
 ports are used for. The HTTP and HTTPS ports are adjustable in the configuration
-file. The MongoDB port can be adjusted on deployment, see 
-[MongoDB section below](#mongodb) for more detail. 
+file, and the database port can be adjusted on deployment and in the 
+configuration file.
 
 | Port   | Purpose           |
 |:-------|:----------------- |
 | 9080   | MBEE HTTP port    |
 | 9443   | MBEE HTTPS port   |
-| 27017  | MongoDB           |
+| 27017  | Database          |
 
 
 ### Configuration JSON File
@@ -289,98 +288,6 @@ special case of a random key. When the `server.secret` field is set to `RANDOM`,
 MBEE will use a randomly generated string as the secret key. This key is
 generated on server startup and will change with each restart of the server.
 This means that a restart of the server will invalidate session tokens.
-
-### MongoDB
-
-**MongoDB Authentication**
-The `db` section of the configuration JSON file defines how MBEE will connect
-to the MongoDB database. **MongoDB by default does not run securely.** By
-default, MongoDB does not require authentication. To enable authentication on
-MongoDB you must first run the server without authentication enabled (we
-recommend doing this in an isolated environment). To do this, run
-`mongod --dbpath=./db`, where `./db` is the path to your database.
-
-> You can run MongoDB from whatever directory you like, but you must ensure the
-> directory containing the database contents has appropriate permissions
-> settings for your environment.
-
-With MongoDB running, you can add an admin user as follows:
-
-```
-use admin
-db.createUser(
-  {
-    user: "admin",
-    pwd: "admin",
-    roles: [{
-        role: "userAdminAnyDatabase",
-        db: "admin"
-    }]
-  }
-)
-```
-
-The `use admin` command creates the admin database, then `db.createUser` is used
-to create your admin user. To create a database and user for MBEE, you can
-run the following:
-
-```
-use <YOUR_MBEE_DB>
-db.createUser({
-    user: "<YOUR_MBEE_USERNAME>",
-    pwd: "<YOUR_MBEE_PASSWORD>",
-    roles: [{
-        role: "readWrite",
-        db: "<YOUR_MBEE_DB>"
-    }]
-})
-```
-
-In this case, `<YOUR_MBEE_DB>` is the name of the MBEE database,
-`<YOUR_MBEE_USERNAME>` is the name of your database user, and
-`<YOUR_MBEE_PASSWORD>` is the password to use for your MBEE user.
-
-> This goes without saying, but don't use easy to guess usernames and passwords.
-
-Once authentication is configured, you can stop MongoDB and re-run it with the
-`--auth` flag. For example:
-
-```
-mongod --auth --dbpath=./db
-```
-
-**SSL**
-To enable SSL on MongoDB, you need a valid SSL certificate in `PEM` format and
-a CA file for that certificate if necessary. To enable SSL, run MongoDB with
-the following flags:
-
-```
-mongod --sslMode requireSSL \
-       --sslPEMKeyFile /path/to/your/certificate.pem \
-       --sslCAFile /path/to/your/certificateAuthority.pem \
-       --sslAllowConnectionsWithoutCertificates
-```
-
-**Other Useful Security-Related Flags**
-The `--bind_ip` flag can be used to tell MongoDB what interfaces to listen on.
-For example `--bind_ip 0.0.0.0` will listen on all interfaces where
-`--bind_ip 127.0.0.1` will only listen on localhost.
-
-The `--logpath=/path/to/your/log/file.log` can be used to specify the MongoDB
-log file.
-
-**Recommendations**
-Consider running MongoDB in the following way:
-
-```
-mongod --sslMode requireSSL \
-       --sslPEMKeyFile /path/to/your/certificate.pem \
-       --sslCAFile /path/to/your/ca.pem \
-       --sslAllowConnectionsWithoutCertificates \
-       --bind_ip YOUR.IP.ADDRESS.HERE \
-       --auth --dbpath=/path/to/your/db \
-       --fork --logpath=/path/to/your/log/file.log
-```
 
 ### Authentication
 

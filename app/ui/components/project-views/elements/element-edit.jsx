@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.project-views.elements.element-edit
  *
@@ -13,7 +13,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This renders the element component
+ * @description This renders the element component.
  */
 
 /* Modified ESLint rules for React. */
@@ -247,7 +247,7 @@ class ElementEdit extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the parent field
+   * @description This function is called when the ElementSelector for the parent field
    * changes.
    */
   parentSelectHandler(_id) {
@@ -284,7 +284,7 @@ class ElementEdit extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the source field
+   * @description This function is called when the ElementSelector for the source field
    * changes.
    */
   sourceSelectHandler(_id, project) {
@@ -304,7 +304,7 @@ class ElementEdit extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the target field
+   * @description This function is called when the ElementSelector for the target field
    * changes.
    */
   targetSelectHandler(_id, project) {
@@ -324,7 +324,7 @@ class ElementEdit extends Component {
   }
 
   /**
-   * Renders the component
+   * @description Renders the component.
    */
   render() {
     // // Initialize variables

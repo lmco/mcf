@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.auth
  *
@@ -41,9 +41,9 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  * This function implements different types of authentication according to
  * the strategy set up in the configuration file.
  *
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {function} next - Callback to express authentication
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {Function} next - Callback to express authentication.
  */
 async function authenticate(req, res, next) {
   // Extract authorization metadata
@@ -116,7 +116,7 @@ async function authenticate(req, res, next) {
         // Handle Basic Authentication
         const user = await AuthModule.handleBasicAuth(req, res, username, password);
         // Successfully authenticated basic auth!
-        M.log.info(`Authenticated [${user.username}] via Basic Auth`);
+        M.log.info(`Authenticated [${user._id}] via Basic Auth`);
 
         // Set user req object
         req.user = user;
@@ -160,7 +160,7 @@ async function authenticate(req, res, next) {
         // Handle Token Authentication
         const user = await AuthModule.handleTokenAuth(req, res, token);
         // Successfully authenticated token auth!
-        M.log.info(`Authenticated [${user.username}] via Token Auth`);
+        M.log.info(`Authenticated [${user._id}] via Token Auth`);
 
         // Set user req object
         req.user = user;
@@ -206,7 +206,7 @@ async function authenticate(req, res, next) {
       // Handle Token Authentication
       const user = await AuthModule.handleTokenAuth(req, res, token);
       // Successfully authenticated token session!
-      M.log.info(`Authenticated [${user.username}] via Session Token Auth`);
+      M.log.info(`Authenticated [${user._id}] via Session Token Auth`);
 
       // Set user req object
       req.user = user;
@@ -246,7 +246,7 @@ async function authenticate(req, res, next) {
       // Handle Basic Authentication
       const user = await AuthModule.handleBasicAuth(req, res, username, password);
       // Successfully authenticate credentials!
-      M.log.info(`Authenticated [${user.username}] via Form Input`);
+      M.log.info(`Authenticated [${user._id}] via Form Input`);
 
       // Set user req object
       req.user = user;
@@ -283,11 +283,11 @@ async function authenticate(req, res, next) {
  * Note: If validatePassword() function is NOT defined in custom strategy then
  * validation will fail.
  *
- * @param {string} password - Password to validate
- * @param {string} provider - the type of authentication strategy (ldap, local,
- * etc.)
+ * @param {string} password - Password to validate.
+ * @param {string} provider - The type of authentication strategy (ldap, local,
+ * etc).
  *
- * @returns {boolean} If password is correctly validated
+ * @returns {boolean} If password is correctly validated.
  */
 function validatePassword(password, provider) {
   // Check if custom validate password rules exist in auth strategy

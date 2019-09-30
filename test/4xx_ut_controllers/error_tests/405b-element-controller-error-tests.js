@@ -1,19 +1,19 @@
 /**
-* Classification: UNCLASSIFIED
-*
-* @module test.405b-element-controller-error-tests
-*
-* @copyright Copyright (C) 2019, Lockheed Martin Corporation
-*
-* @license LMPI - Lockheed Martin Proprietary Information
-*
-* @owner Leah De Laurell <leah.p.delaurell@lmco.com>
-*
-* @author Austin Bieber <austin.j.bieber@lmco.com>
-* @author Phillip Lee <phillip.lee@lmco.com>
-*
-* @description This tests for expected errors within the element controller.
-*/
+ * @classification UNCLASSIFIED
+ *
+ * @module test.405b-element-controller-error-tests
+ *
+ * @copyright Copyright (C) 2019, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
+ *
+ * @description This tests for expected errors within the element controller.
+ */
 
 // NPM modules
 const chai = require('chai');
@@ -122,6 +122,11 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // -------------- Find --------------
+  // ------------- Create -------------
+  it('should reject creating elements to a tag '
+    + 'saying elements cannot be created.', createInTag);
+  // ------------- Update -------------
   it('should reject an update saying a source cannot be set to self', updateSourceToSelf);
   it('should reject an update saying a target cannot be set to self', updateTargetToSelf);
   it('should reject an update saying a source cannot be found', updateNonExistentSource);
@@ -130,14 +135,15 @@ describe(M.getModuleName(module.filename), () => {
     + ' updating a source', updateSourceWithNoTarget);
   it('should reject an update saying a source is required when'
     + ' updating a target', updateTargetWithNoSource);
-  it('should reject creating elements to a tag '
-    + 'saying elements cannot be created.', createInTag);
   it('should reject updating elements to a tag '
     + 'saying elements cannot be update.', updateInTag);
-  it('should reject deleting elements in a tag '
-    + 'saying elements cannot be deleted.', deleteInTag);
+  // ------------- Replace ------------
   it('should reject put elements with invalid id', putInvalidId);
   it('should reject put elements without id', putWithoutId);
+  // ------------- Remove -------------
+  it('should reject deleting elements in a tag '
+    + 'saying elements cannot be deleted.', deleteInTag);
+  // ------------- Search -------------
 });
 
 /* --------------------( Tests )-------------------- */
@@ -304,12 +310,12 @@ async function putInvalidId() {
   // Create the test element objects
   const testElemObj0 = testData.elements[7];
   const testElemObj1 = testData.elements[8];
-  const invalidProjObj = { id: 'INVALID_ID', name: 'element name' };
+  const invalidElemObj = { id: 'INVALID_ID', name: 'element name' };
 
   await ElementController.createOrReplace(adminUser, org.id, projID, branchID,
-    [testElemObj0, testElemObj1, invalidProjObj])
+    [testElemObj0, testElemObj1, invalidElemObj])
   .should.eventually.be.rejectedWith('Element validation failed: _id: '
-    + 'Path `_id` is invalid (testorg00:project00:master:INVALID_ID).');
+    + `Invalid element ID [${invalidElemObj.id}].`);
 
   let foundElements;
   try {

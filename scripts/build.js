@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.build
  *
@@ -14,6 +14,8 @@
  *
  * @description Creates the necessary static assets used by the MBEE UI.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Rule disabled to allow list in description
 
 // Error Check - Check if file was run directly or global M object is undefined
 if (module.parent == null || typeof M === 'undefined') {
@@ -35,12 +37,13 @@ const concat = require('gulp-concat');
 const minify = require('gulp-minify');
 const sass = require('gulp-sass');
 const markdown = require('gulp-markdown');
+const rename = require('gulp-rename');
 const webpack = require('webpack');
 const validators = M.require('lib.validators');
 
 /**
  * @description Builds the MBEE static assets by:
- * - Copying dependencies to their final location,
+ * - Copying dependencies to their final location
  * - Compiling Sass into CSS
  * - Building Javascript libraries into client-side code
  * - Building JSDoc documentation.
@@ -166,6 +169,12 @@ function build(_args) {
     M.log.info('  + Building flight manual ...');
     gulp.src('./doc/**/*.md')
     .pipe(markdown())
+    .pipe(gulp.dest('build/fm'));
+
+    // Add database configuration README as an appendix
+    gulp.src('./app/db/*.md')
+    .pipe(markdown())
+    .pipe(rename('appendix-C-database-configuration.html'))
     .pipe(gulp.dest('build/fm'));
   }
 

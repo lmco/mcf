@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.organization-controller
  *
@@ -50,15 +50,15 @@ const permissions = M.require('lib.permissions');
 
 /**
  * @description This function finds one or many organizations. Depending on the
- * given parameters, this function can find a single org by ID, multiple orgs by
- * ID, or all orgs in the system. Only organizations which a user has read
- * access to will be returned.
+ * given parameters, this function can find a single org by ID, multiple orgs by ID,
+ * or all orgs in the system. Only organizations which a user has read access to
+ * will be returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} [orgs] - The organizations to find. Can either be
  * an array of org ids, a single org id, or not provided, which defaults to
  * every org being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -87,9 +87,9 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for orgs with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found organization objects
+ * @returns {Promise} Array of found organization objects.
  *
  * @example
  * find({User}, ['org1', 'org2'], { populate: 'createdBy' })
@@ -101,89 +101,93 @@ const permissions = M.require('lib.permissions');
  * });
  */
 async function find(requestingUser, orgs, options) {
-  // Set options if no orgs were provided, but options were
-  if (typeof orgs === 'object' && orgs !== null && !Array.isArray(orgs)) {
-    options = orgs; // eslint-disable-line no-param-reassign
-    orgs = undefined; // eslint-disable-line no-param-reassign
-  }
-
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options);
-  helper.checkParamsDataType(['undefined', 'object', 'string'], orgs, 'Orgs');
-
-  // Sanitize input parameters
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const saniOrgs = (orgs !== undefined)
-    ? sani.mongo(JSON.parse(JSON.stringify(orgs)))
-    : undefined;
-
-  // Define searchQuery
-  const searchQuery = { archived: false };
-
-  // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['populate',
-    'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
-
-  // Ensure options are valid
-  if (options) {
-    // Create array of valid search options
-    const validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archived',
-      'archivedBy'];
-
-    // Loop through provided options, look for validSearchOptions
-    Object.keys(options).forEach((o) => {
-      // If the provided option is a valid search option
-      if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
-        // Ensure the archived search option is a boolean
-        if (o === 'archived' && typeof options[o] !== 'boolean') {
-          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
-        }
-        // Ensure the search option is a string
-        else if (typeof options[o] !== 'string' && o !== 'archived') {
-          throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
-        }
-        // Add the search option to the searchQuery
-        searchQuery[o] = sani.mongo(options[o]);
-      }
-    });
-  }
-
-  // If not system admin, add permissions check
-  if (!reqUser.admin) {
-    searchQuery[`permissions.${reqUser._id}`] = 'read';
-  }
-  // If the includeArchived field is true, remove archived from the query; return everything
-  if (validatedOptions.includeArchived) {
-    delete searchQuery.archived;
-  }
-  // If the archived field is true, query only for archived elements
-  if (validatedOptions.archived) {
-    searchQuery.archived = true;
-  }
-
-  // Check the type of the orgs parameter
-  if (Array.isArray(orgs) && orgs.every(o => typeof o === 'string')) {
-    // An array of org ids, find all
-    searchQuery._id = { $in: saniOrgs };
-  }
-  else if (typeof orgs === 'string') {
-    // A single org id
-    searchQuery._id = saniOrgs;
-  }
-  else if (!((typeof orgs === 'object' && orgs !== null) || orgs === undefined)) {
-    // Invalid parameter, throw an error
-    throw new M.DataFormatError('Invalid input for finding organizations.', 'warn');
-  }
-
   try {
+    // Set options if no orgs were provided, but options were
+    if (typeof orgs === 'object' && orgs !== null && !Array.isArray(orgs)) {
+      options = orgs; // eslint-disable-line no-param-reassign
+      orgs = undefined; // eslint-disable-line no-param-reassign
+    }
+
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options);
+    helper.checkParamsDataType(['undefined', 'object', 'string'], orgs, 'Orgs');
+
+    // Sanitize input parameters
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const saniOrgs = (orgs !== undefined)
+      ? sani.db(JSON.parse(JSON.stringify(orgs)))
+      : undefined;
+
+    // Define searchQuery
+    const searchQuery = { archived: false };
+
+    // Initialize and ensure options are valid
+    const validatedOptions = utils.validateOptions(options, ['populate',
+      'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
+
+    // Ensure options are valid
+    if (options) {
+      // Create array of valid search options
+      const validSearchOptions = ['name', 'createdBy', 'lastModifiedBy', 'archived',
+        'archivedBy'];
+
+      // Loop through provided options, look for validSearchOptions
+      Object.keys(options).forEach((o) => {
+        // If the provided option is a valid search option
+        if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+          // Ensure the archived search option is a boolean
+          if (o === 'archived' && typeof options[o] !== 'boolean') {
+            throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+          }
+          // Ensure the search option is a string
+          else if (typeof options[o] !== 'string' && o !== 'archived') {
+            throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
+          }
+          // Add the search option to the searchQuery
+          searchQuery[o] = sani.db(options[o]);
+        }
+      });
+    }
+
+    // If not system admin, add permissions check
+    // TODO: Rewrite using Permissions library
+    if (!reqUser.admin) {
+      searchQuery[`permissions.${reqUser._id}`] = 'read';
+    }
+    // If the includeArchived field is true, remove archived from the query; return everything
+    if (validatedOptions.includeArchived) {
+      delete searchQuery.archived;
+    }
+    // If the archived field is true, query only for archived elements
+    if (validatedOptions.archived) {
+      searchQuery.archived = true;
+    }
+
+    // Check the type of the orgs parameter
+    if (Array.isArray(orgs) && orgs.every(o => typeof o === 'string')) {
+      // An array of org ids, find all
+      searchQuery._id = { $in: saniOrgs };
+    }
+    else if (typeof orgs === 'string') {
+      // A single org id
+      searchQuery._id = saniOrgs;
+    }
+    else if (!((typeof orgs === 'object' && orgs !== null) || orgs === undefined)) {
+      // Invalid parameter, throw an error
+      throw new M.DataFormatError('Invalid input for finding organizations.', 'warn');
+    }
+
     // Find the orgs
     return await Organization.find(searchQuery, validatedOptions.fieldsString,
-      { limit: validatedOptions.limit, skip: validatedOptions.skip })
-    .sort(validatedOptions.sort)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
+      { limit: validatedOptions.limit,
+        skip: validatedOptions.skip,
+        sort: validatedOptions.sort,
+        populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
+    throw errors.captureError(error);
   }
 }
 
@@ -194,16 +198,16 @@ async function find(requestingUser, orgs, options) {
  * given orgs.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {(Object|Object[])} orgs - Either an array of objects containing org
+ * @param {(object|object[])} orgs - Either an array of objects containing org
  * data or a single object containing org data to create.
  * @param {string} orgs.id - The ID of the org being created.
  * @param {string} orgs.name - The organization name.
- * @param {Object} [orgs.custom] - Any additional key/value pairs for an object.
+ * @param {object} [orgs.custom] - Any additional key/value pairs for an object.
  * Must be proper JSON form.
- * @param {Object} [orgs.permissions] - Any preset permissions on the org. Keys
+ * @param {object} [orgs.permissions] - Any preset permissions on the org. Keys
  * should be usernames and values should be the highest permissions the user
  * has. NOTE: The requesting user gets added as an admin by default.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -212,7 +216,7 @@ async function find(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created organization objects
+ * @returns {Promise} Array of created organization objects.
  *
  * @example
  * create({User}, [{Org1}, {Org2}, ...], { populate: 'createdBy' })
@@ -224,61 +228,62 @@ async function find(requestingUser, orgs, options) {
  * });
  */
 async function create(requestingUser, orgs, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options);
-  helper.checkParamsDataType('object', orgs, 'Orgs');
-  // Create or remove orgs function only: must be admin
   try {
-    assert.ok(permissions.createOrg(requestingUser) === true, 'User does not have permissions to create orgs.');
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options);
+    helper.checkParamsDataType('object', orgs, 'Orgs');
 
-  // Sanitize input parameters
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
+    // Create or remove orgs function only: must be admin
+    permissions.createOrg(requestingUser);
 
-  // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-    'lean'], Organization);
+    // Sanitize input parameters
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
 
-  // Define array to store org data
-  let orgsToCreate = [];
+    // Initialize and ensure options are valid
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Organization);
 
-  // Check the type of the orgs parameter
-  if (Array.isArray(saniOrgs)) {
-    // orgs is an array, create many orgs
-    orgsToCreate = saniOrgs;
-  }
-  else if (typeof saniOrgs === 'object') {
-    // orgs is an object, create a single org
-    orgsToCreate = [saniOrgs];
-  }
-  else {
-    // orgs is not an object or array, throw an error
-    throw new M.DataFormatError('Invalid input for creating organizations.', 'warn');
-  }
+    // Define array to store org data
+    let orgsToCreate = [];
 
-  // Create array of id's for lookup and array of valid keys
-  const arrIDs = [];
-  const validOrgKeys = ['id', 'name', 'custom', 'permissions', 'archived'];
+    // Check the type of the orgs parameter
+    if (Array.isArray(saniOrgs)) {
+      // orgs is an array, create many orgs
+      orgsToCreate = saniOrgs;
+    }
+    else if (typeof saniOrgs === 'object') {
+      // orgs is an object, create a single org
+      orgsToCreate = [saniOrgs];
+    }
+    else {
+      // orgs is not an object or array, throw an error
+      throw new M.DataFormatError('Invalid input for creating organizations.', 'warn');
+    }
 
-  // Check that each org has an id, and add to arrIDs
-  try {
+    // Create array of id's for lookup and array of valid keys
+    const arrIDs = [];
+    const validOrgKeys = ['id', 'name', 'custom', 'permissions', 'archived'];
+
+    // Check that each org has an id, and add to arrIDs
     let index = 1;
     orgsToCreate.forEach((org) => {
-      // Ensure keys are valid
-      Object.keys(org).forEach((k) => {
-        assert.ok(validOrgKeys.includes(k), `Invalid key [${k}].`);
-      });
+      try {
+        // Ensure keys are valid
+        Object.keys(org).forEach((k) => {
+          assert.ok(validOrgKeys.includes(k), `Invalid key [${k}].`);
+        });
 
-      // Ensure each org has an id and that its a string
-      assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
-      assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
-      // Check if org with same ID is already being created
-      assert.ok(!arrIDs.includes(org.id), 'Multiple orgs with the same ID '
+        // Ensure each org has an id and that its a string
+        assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
+        assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+        // Check if org with same ID is already being created
+        assert.ok(!arrIDs.includes(org.id), 'Multiple orgs with the same ID '
           + `[${org.id}] cannot be created.`);
+      }
+      catch (error) {
+        throw new M.DataFormatError(error.message, 'warn');
+      }
       arrIDs.push(org.id);
       // Set the _id equal to the id
       org._id = org.id;
@@ -293,80 +298,77 @@ async function create(requestingUser, orgs, options) {
 
       index++;
     });
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
 
-  // Create searchQuery to search for any existing, conflicting orgs
-  const searchQuery = { _id: { $in: arrIDs } };
+    // Create searchQuery to search for any existing, conflicting orgs
+    const searchQuery = { _id: { $in: arrIDs } };
 
 
-  // Find any existing, conflicting orgs
-  const foundOrgs = await Organization.find(searchQuery, '_id').lean();
-  // If there are any foundOrgs, there is a conflict
-  if (foundOrgs.length > 0) {
-    // Get arrays of the foundOrg's ids and names
-    const foundOrgIDs = foundOrgs.map(o => o._id);
+    // Find any existing, conflicting orgs
+    const foundOrgs = await Organization.find(searchQuery, '_id', { lean: true });
+    // If there are any foundOrgs, there is a conflict
+    if (foundOrgs.length > 0) {
+      // Get arrays of the foundOrg's ids and names
+      const foundOrgIDs = foundOrgs.map(o => o._id);
 
-    // There are one or more orgs with conflicting IDs
-    throw new M.OperationError('Orgs with the following IDs already exist'
-      + ` [${foundOrgIDs.toString()}].`, 'warn');
-  }
+      // There are one or more orgs with conflicting IDs
+      throw new M.OperationError('Orgs with the following IDs already exist'
+        + ` [${foundOrgIDs.toString()}].`, 'warn');
+    }
 
-  // Get all existing users for permissions
-  const foundUsers = await User.find({}).lean();
+    // Get all existing users for permissions
+    const foundUsers = await User.find({}, null, { lean: true });
 
-  // Create array of usernames
-  const foundUsernames = foundUsers.map(u => u._id);
-  // For each object of org data, create the org object
-  const orgObjects = orgsToCreate.map((o) => {
-    const orgObj = new Organization(o);
-    // Set permissions
-    Object.keys(orgObj.permissions).forEach((u) => {
-      // If user does not exist, throw an error
-      if (!foundUsernames.includes(u)) {
-        throw new M.NotFoundError(`User [${u}] not found.`, 'warn');
-      }
+    // Create array of usernames
+    const foundUsernames = foundUsers.map(u => u._id);
+    // For each object of org data, create the org object
+    const orgObjects = orgsToCreate.map((o) => {
+      const orgObj = Organization.createDocument(o);
+      // Set permissions
+      Object.keys(orgObj.permissions).forEach((u) => {
+        // If user does not exist, throw an error
+        if (!foundUsernames.includes(u)) {
+          throw new M.NotFoundError(`User [${u}] not found.`, 'warn');
+        }
 
-      const permission = orgObj.permissions[u];
+        const permission = orgObj.permissions[u];
 
-      // Change permission level to array of permissions
-      switch (permission) {
-        case 'read':
-          orgObj.permissions[u] = ['read'];
-          break;
-        case 'write':
-          orgObj.permissions[u] = ['read', 'write'];
-          break;
-        case 'admin':
-          orgObj.permissions[u] = ['read', 'write', 'admin'];
-          break;
-        default:
-          throw new M.DataFormatError(`Invalid permission [${permission}].`, 'warn');
-      }
+        // Change permission level to array of permissions
+        switch (permission) {
+          case 'read':
+            orgObj.permissions[u] = ['read'];
+            break;
+          case 'write':
+            orgObj.permissions[u] = ['read', 'write'];
+            break;
+          case 'admin':
+            orgObj.permissions[u] = ['read', 'write', 'admin'];
+            break;
+          default:
+            throw new M.DataFormatError(`Invalid permission [${permission}].`, 'warn');
+        }
+      });
+      orgObj.lastModifiedBy = reqUser._id;
+      orgObj.createdBy = reqUser._id;
+      orgObj.updatedOn = Date.now();
+      orgObj.archivedBy = (orgObj.archived) ? reqUser._id : null;
+      orgObj.archivedOn = (orgObj.archived) ? Date.now() : null;
+      return orgObj;
     });
-    orgObj.lastModifiedBy = reqUser._id;
-    orgObj.createdBy = reqUser._id;
-    orgObj.updatedOn = Date.now();
-    orgObj.archivedBy = (orgObj.archived) ? reqUser._id : null;
-    orgObj.archivedOn = (orgObj.archived) ? Date.now() : null;
-    return orgObj;
-  });
 
-  // Create the organizations
-  await Organization.insertMany(orgObjects);
+    // Create the organizations
+    await Organization.insertMany(orgObjects);
 
-  // Emit the event orgs-created
-  EventEmitter.emit('orgs-created', orgObjects);
+    // Emit the event orgs-created
+    EventEmitter.emit('orgs-created', orgObjects);
 
-  try {
     return await Organization.find({ _id: { $in: arrIDs } },
-      validatedOptions.fieldsString).populate(validatedOptions.populateString)
-    .lean(validatedOptions.lean);
+      validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
   }
   catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
+    throw errors.captureError(error);
   }
 }
 
@@ -384,20 +386,20 @@ async function create(requestingUser, orgs, options) {
  * restricted to admins of orgs and system-wide admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {(Object|Object[])} orgs - Either an array of objects containing
+ * @param {(object|object[])} orgs - Either an array of objects containing
  * updates to organizations, or a single object containing updates.
  * @param {string} orgs.id - The ID of the org being updated. Field cannot be
  * updated but is required to find org.
  * @param {string} [orgs.name] - The updated name of the organization.
- * @param {Object} [orgs.permissions] - An object of key value pairs, where the
+ * @param {object} [orgs.permissions] - An object of key value pairs, where the
  * key is the username, and the value is the role which the user is to have in
  * the org. To remove a user from an org, the value must be 'remove_all'.
- * @param {Object} [orgs.custom] - The new custom data object. Please note,
+ * @param {object} [orgs.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
  * @param {boolean} [orgs.archived = false] - The updated archived field. If true, the
  * org will not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -406,7 +408,7 @@ async function create(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated organization objects
+ * @returns {Promise} Array of updated organization objects.
  *
  * @example
  * update({User}, [{Updated Org 1}, {Updated Org 2}...], { populate: 'createdBy' })
@@ -418,262 +420,263 @@ async function create(requestingUser, orgs, options) {
  * });
  */
 async function update(requestingUser, orgs, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options);
-  helper.checkParamsDataType('object', orgs, 'Orgs');
-
-  // Sanitize input parameters and function-wide variables
-  const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const duplicateCheck = {};
-  let foundOrgs = [];
-  let orgsToUpdate = [];
-  let existingUsers = [];
-  let updatingPermissions = false;
-
-  // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-    'lean'], Organization);
-
-  // Check the type of the orgs parameter
-  if (Array.isArray(saniOrgs)) {
-    // orgs is an array, update many orgs
-    orgsToUpdate = saniOrgs;
-  }
-  else if (typeof saniOrgs === 'object') {
-    // orgs is an object, update a single org
-    orgsToUpdate = [saniOrgs];
-  }
-  else {
-    throw new M.DataFormatError('Invalid input for updating organizations.', 'warn');
-  }
-
-  // Create list of ids
-  const arrIDs = [];
   try {
-    let index = 1;
-    orgsToUpdate.forEach((org) => {
-      // Ensure each org has an id and that its a string
-      assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
-      assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
-      // If a duplicate ID, throw an error
-      if (duplicateCheck[org.id]) {
-        throw new M.OperationError('Multiple objects with the same ID '
-          + `[${org.id}] exist in the update.`, 'warn');
-      }
-      else {
-        duplicateCheck[org.id] = org.id;
-      }
-      arrIDs.push(org.id);
-      // Set the _id equal to the id
-      org._id = org.id;
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options);
+    helper.checkParamsDataType('object', orgs, 'Orgs');
 
-      // Check if updating user permissions
-      if (org.hasOwnProperty('permissions')) {
-        updatingPermissions = true;
-      }
+    // Sanitize input parameters and function-wide variables
+    const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const duplicateCheck = {};
+    let foundOrgs = [];
+    let orgsToUpdate = [];
+    let existingUsers = [];
+    let updatingPermissions = false;
 
-      index++;
-    });
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
+    // Initialize and ensure options are valid
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
+      'lean'], Organization);
 
-  // Create searchQuery
-  const searchQuery = { _id: { $in: arrIDs } };
-
-  try {
-    // Find the orgs to update
-    foundOrgs = await Organization.find(searchQuery).populate('projects').lean();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-
-  // Check that the user has admin permissions
-  foundOrgs.forEach((org) => {
-    if (!permissions.updateOrg(reqUser, org)) {
-      throw new M.PermissionError('User does not have permission to update'
-        + ` the org [${org._id}].`, 'warn');
+    // Check the type of the orgs parameter
+    if (Array.isArray(saniOrgs)) {
+      // orgs is an array, update many orgs
+      orgsToUpdate = saniOrgs;
     }
-  });
+    else if (typeof saniOrgs === 'object') {
+      // orgs is an object, update a single org
+      orgsToUpdate = [saniOrgs];
+    }
+    else {
+      throw new M.DataFormatError('Invalid input for updating organizations.', 'warn');
+    }
 
-  // Verify the same number of orgs are found as desired
-  if (foundOrgs.length !== arrIDs.length) {
-    const foundIDs = foundOrgs.map(o => o._id);
-    const notFound = arrIDs.filter(o => !foundIDs.includes(o));
-    throw new M.NotFoundError(
-      `The following orgs were not found: [${notFound.toString()}].`, 'warn'
-    );
-  }
-
-  let foundUsers;
-  // Find users if updating permissions
-  if (updatingPermissions) {
+    // Create list of ids
+    const arrIDs = [];
     try {
-      foundUsers = await User.find({}).find();
+      let index = 1;
+      orgsToUpdate.forEach((org) => {
+        // Ensure each org has an id and that its a string
+        assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
+        assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+        // If a duplicate ID, throw an error
+        if (duplicateCheck[org.id]) {
+          throw new M.OperationError('Multiple objects with the same ID '
+            + `[${org.id}] exist in the update.`, 'warn');
+        }
+        else {
+          duplicateCheck[org.id] = org.id;
+        }
+        arrIDs.push(org.id);
+        // Set the _id equal to the id
+        org._id = org.id;
+
+        // Check if updating user permissions
+        if (org.hasOwnProperty('permissions')) {
+          updatingPermissions = true;
+        }
+
+        index++;
+      });
+    }
+    catch (err) {
+      throw new M.DataFormatError(err.message, 'warn');
+    }
+
+    // Create searchQuery
+    const searchQuery = { _id: { $in: arrIDs } };
+
+    try {
+      // Find the orgs to update
+      foundOrgs = await Organization.find(searchQuery, null, { populate: 'projects', lean: true });
     }
     catch (error) {
       throw new M.DatabaseError(error.message, 'warn');
     }
-  }
-  else {
-    // Return an empty array if not updating permissions
-    foundUsers = [];
-  }
-  // Set existing users
-  existingUsers = foundUsers.map(u => u._id);
 
-  // Convert orgsToUpdate to JMI type 2
-  const jmiType2 = jmi.convertJMI(1, 2, orgsToUpdate);
-  const bulkArray = [];
-  // Get array of editable parameters
-  const validFields = Organization.getValidUpdateFields();
+    // Check that the user has admin permissions
+    foundOrgs.forEach((org) => {
+      permissions.updateOrg(reqUser, org);
+    });
 
-  // For each found org
-  foundOrgs.forEach((org) => {
-    const updateOrg = jmiType2[org._id];
-    // Remove id and _id field from update object
-    delete updateOrg.id;
-    delete updateOrg._id;
-
-    // Error Check: ensure the org being updated is not the default org
-    if (org._id === M.config.server.defaultOrganizationId) {
-      // orgID is default, reject error
-      throw new M.OperationError('Cannot update the default org.', 'warn');
+    // Verify the same number of orgs are found as desired
+    if (foundOrgs.length !== arrIDs.length) {
+      const foundIDs = foundOrgs.map(o => o._id);
+      const notFound = arrIDs.filter(o => !foundIDs.includes(o));
+      throw new M.NotFoundError(
+        `The following orgs were not found: [${notFound.toString()}].`, 'warn'
+      );
     }
 
-    // Error Check: if org is currently archived, it must first be unarchived
-    if (org.archived && (updateOrg.archived === undefined
-      || JSON.parse(updateOrg.archived) !== false)) {
-      throw new M.OperationError(`Organization [${org._id}] is archived. `
+    let foundUsers;
+    // Find users if updating permissions
+    if (updatingPermissions) {
+      try {
+        foundUsers = await User.find({});
+      }
+      catch (error) {
+        throw new M.DatabaseError(error.message, 'warn');
+      }
+    }
+    else {
+      // Return an empty array if not updating permissions
+      foundUsers = [];
+    }
+    // Set existing users
+    existingUsers = foundUsers.map(u => u._id);
+
+    // Convert orgsToUpdate to JMI type 2
+    const jmiType2 = jmi.convertJMI(1, 2, orgsToUpdate);
+    const bulkArray = [];
+    // Get array of editable parameters
+    const validFields = Organization.getValidUpdateFields();
+
+    // For each found org
+    foundOrgs.forEach((org) => {
+      const updateOrg = jmiType2[org._id];
+      // Remove id and _id field from update object
+      delete updateOrg.id;
+      delete updateOrg._id;
+
+      // Error Check: ensure the org being updated is not the default org
+      if (org._id === M.config.server.defaultOrganizationId) {
+        // orgID is default, reject error
+        throw new M.OperationError('Cannot update the default org.', 'warn');
+      }
+
+      // Error Check: if org is currently archived, it must first be unarchived
+      if (org.archived && (updateOrg.archived === undefined
+        || JSON.parse(updateOrg.archived) !== false)) {
+        throw new M.OperationError(`Organization [${org._id}] is archived. `
           + 'Archived objects cannot be modified.', 'warn');
-    }
+      }
 
-    // For each key in the updated object
-    Object.keys(updateOrg).forEach((key) => {
-      // Check if the field is valid to update
-      if (!validFields.includes(key)) {
-        throw new M.OperationError(`Organization property [${key}] cannot `
+      // For each key in the updated object
+      Object.keys(updateOrg).forEach((key) => {
+        // Check if the field is valid to update
+        if (!validFields.includes(key)) {
+          throw new M.OperationError(`Organization property [${key}] cannot `
             + 'be changed.', 'warn');
-      }
-
-      // Get validator for field if one exists
-      if (validators.org.hasOwnProperty(key)) {
-        // If validation fails, throw error
-        if (!RegExp(validators.org[key]).test(updateOrg[key])) {
-          throw new M.DataFormatError(
-            `Invalid ${key}: [${updateOrg[key]}]`, 'warn'
-          );
-        }
-      }
-
-      // If the type of field is mixed
-      if (Organization.schema.obj[key]
-        && Organization.schema.obj[key].type.schemaName === 'Mixed') {
-        // Only objects should be passed into mixed data
-        if (typeof updateOrg !== 'object') {
-          throw new M.DataFormatError(`${key} must be an object`, 'warn');
         }
 
-        // If the user is updating permissions
-        if (key === 'permissions') {
-          // Loop through each user provided
-          Object.keys(updateOrg[key]).forEach((user) => {
-            let permValue = updateOrg[key][user];
-            // Ensure user is not updating own permissions
-            if (user === reqUser.username) {
-              throw new M.OperationError('User cannot update own permissions.', 'warn');
-            }
-
-            // If user does not exist, throw an error
-            if (!existingUsers.includes(user)) {
-              throw new M.NotFoundError(`User [${user}] not found.`, 'warn');
-            }
-
-            // Value must be an string containing highest permissions
-            if (typeof permValue !== 'string') {
-              throw new M.DataFormatError(`Permission for ${user} must be a string.`, 'warn');
-            }
-
-            // Lowercase the permission value
-            permValue = permValue.toLowerCase();
-
-            // Set stored permissions value based on provided permValue
-            switch (permValue) {
-              case 'read':
-                org.permissions[user] = ['read'];
-                break;
-              case 'write':
-                org.permissions[user] = ['read', 'write'];
-                break;
-              case 'admin':
-                org.permissions[user] = ['read', 'write', 'admin'];
-                break;
-              case 'remove_all':
-                // If user is still on a project within the org, throw error
-                org.projects.forEach((p) => {
-                  if (p.permissions.hasOwnProperty(user)) {
-                    throw new M.OperationError('User must be removed from '
-                      + `the project [${utils.parseID(p._id).pop()}] prior`
-                      + ` to being removed from the org [${org._id}].`, 'warn');
-                  }
-                });
-                delete org.permissions[user];
-                break;
-              // Default case, invalid permission
-              default:
-                throw new M.DataFormatError(
-                  `${permValue} is not a valid permission`, 'warn'
-                );
-            }
-          });
-
-          // Copy permissions from org to update object
-          updateOrg.permissions = org.permissions;
+        // Get validator for field if one exists
+        if (validators.org.hasOwnProperty(key)) {
+          // If validation fails, throw error
+          if (!RegExp(validators.org[key]).test(updateOrg[key])) {
+            throw new M.DataFormatError(
+              `Invalid ${key}: [${updateOrg[key]}]`, 'warn'
+            );
+          }
         }
-      }
-      // Set archivedBy if archived field is being changed
-      else if (key === 'archived') {
-        // If the org is being archived
-        if (updateOrg[key] && !org[key]) {
-          updateOrg.archivedBy = reqUser._id;
-          updateOrg.archivedOn = Date.now();
+
+        // If the type of field is mixed
+        if (Organization.schema.obj[key]
+          && Organization.schema.obj[key].type.schemaName === 'Mixed') {
+          // Only objects should be passed into mixed data
+          if (typeof updateOrg !== 'object') {
+            throw new M.DataFormatError(`${key} must be an object`, 'warn');
+          }
+
+          // If the user is updating permissions
+          if (key === 'permissions') {
+            // Loop through each user provided
+            Object.keys(updateOrg[key]).forEach((user) => {
+              let permValue = updateOrg[key][user];
+              // Ensure user is not updating own permissions
+              if (user === reqUser._id) {
+                throw new M.OperationError('User cannot update own permissions.', 'warn');
+              }
+
+              // If user does not exist, throw an error
+              if (!existingUsers.includes(user)) {
+                throw new M.NotFoundError(`User [${user}] not found.`, 'warn');
+              }
+
+              // Value must be an string containing highest permissions
+              if (typeof permValue !== 'string') {
+                throw new M.DataFormatError(`Permission for ${user} must be a string.`, 'warn');
+              }
+
+              // Lowercase the permission value
+              permValue = permValue.toLowerCase();
+
+              // Set stored permissions value based on provided permValue
+              switch (permValue) {
+                case 'read':
+                  org.permissions[user] = ['read'];
+                  break;
+                case 'write':
+                  org.permissions[user] = ['read', 'write'];
+                  break;
+                case 'admin':
+                  org.permissions[user] = ['read', 'write', 'admin'];
+                  break;
+                case 'remove_all':
+                  // If user is still on a project within the org, throw error
+                  org.projects.forEach((p) => {
+                    if (p.permissions.hasOwnProperty(user)) {
+                      throw new M.OperationError('User must be removed from '
+                        + `the project [${utils.parseID(p._id).pop()}] prior`
+                        + ` to being removed from the org [${org._id}].`, 'warn');
+                    }
+                  });
+                  delete org.permissions[user];
+                  break;
+                // Default case, invalid permission
+                default:
+                  throw new M.DataFormatError(
+                    `${permValue} is not a valid permission`, 'warn'
+                  );
+              }
+            });
+
+            // Copy permissions from org to update object
+            updateOrg.permissions = org.permissions;
+          }
         }
-        // If the org is being unarchived
-        else if (!updateOrg[key] && org[key]) {
-          updateOrg.archivedBy = null;
-          updateOrg.archivedOn = null;
+        // Set archivedBy if archived field is being changed
+        else if (key === 'archived') {
+          // If the org is being archived
+          if (updateOrg[key] && !org[key]) {
+            updateOrg.archivedBy = reqUser._id;
+            updateOrg.archivedOn = Date.now();
+          }
+          // If the org is being unarchived
+          else if (!updateOrg[key] && org[key]) {
+            updateOrg.archivedBy = null;
+            updateOrg.archivedOn = null;
+          }
         }
-      }
+      });
+
+      // Update lastModifiedBy field and updatedOn
+      updateOrg.lastModifiedBy = reqUser._id;
+      updateOrg.updatedOn = Date.now();
+
+      // Update the org
+      bulkArray.push({
+        updateOne: {
+          filter: { _id: org._id },
+          update: updateOrg
+        }
+      });
     });
 
-    // Update lastModifiedBy field and updatedOn
-    updateOrg.lastModifiedBy = reqUser._id;
-    updateOrg.updatedOn = Date.now();
+    // Update all orgs through a bulk write to the database
+    await Organization.bulkWrite(bulkArray);
 
-    // Update the org
-    bulkArray.push({
-      updateOne: {
-        filter: { _id: org._id },
-        update: updateOrg
-      }
-    });
-  });
+    const foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString,
+        lean: validatedOptions.lean
+      });
 
-  // Update all orgs through a bulk write to the database
-  await Organization.bulkWrite(bulkArray);
-
-  try {
-    const foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString)
-    .populate(validatedOptions.populateString).lean(validatedOptions.lean);
     // Emit the event orgs-updated
     EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
+
     return foundUpdatedOrgs;
   }
   catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
+    throw errors.captureError(error);
   }
 }
 
@@ -682,20 +685,20 @@ async function update(requestingUser, orgs, options) {
  * ids already exist, this function updates those orgs.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {(Object|Object[])} orgs - Either an array of objects containing
+ * @param {(object|object[])} orgs - Either an array of objects containing
  * updates/new data for organizations, or a single object containing updates.
  * @param {string} orgs.id - The ID of the org being updated/created. Field
  * cannot be updated but is required to find/created org.
  * @param {string} [orgs.name] - The updated/new name of the organization.
- * @param {Object} [orgs.permissions] - An object of key value pairs, where the
+ * @param {object} [orgs.permissions] - An object of key value pairs, where the
  * key is the username, and the value is the role which the user is to have in
  * the org.
- * @param {Object} [orgs.custom] - The additions or changes to existing custom
+ * @param {object} [orgs.custom] - The additions or changes to existing custom
  * data. If the key/value pair already exists, the value will be changed. If the
  * key/value pair does not exist, it will be added.
  * @param {boolean} [orgs.archived = false] - The archived field. If true, the org will
  * not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -704,7 +707,7 @@ async function update(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of replaced/created organization objects
+ * @returns {Promise} Array of replaced/created organization objects.
  *
  * @example
  * createOrReplace({User}, [{Updated Org 1}, {Updated Org 2}...])
@@ -716,41 +719,47 @@ async function update(requestingUser, orgs, options) {
  * });
  */
 async function createOrReplace(requestingUser, orgs, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options);
-  helper.checkParamsDataType('object', orgs, 'Orgs');
-
-  // Sanitize input parameters and function-wide variables
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
-  const duplicateCheck = {};
-  let foundOrgs = [];
-  let orgsToLookup = [];
-  let createdOrgs = [];
-  const ts = Date.now();
-
-  // Check the type of the orgs parameter
-  if (Array.isArray(saniOrgs)) {
-    // orgs is an array, update many orgs
-    orgsToLookup = saniOrgs;
-  }
-  else if (typeof saniOrgs === 'object') {
-    // orgs is an object, update a single org
-    orgsToLookup = [saniOrgs];
-  }
-  else {
-    throw new M.DataFormatError('Invalid input for creating/replacing '
-      + 'organizations.', 'warn');
-  }
-
-  // Create list of ids
-  const arrIDs = [];
   try {
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options);
+    helper.checkParamsDataType('object', orgs, 'Orgs');
+
+    // Sanitize input parameters and function-wide variables
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
+    const duplicateCheck = {};
+    let foundOrgs = [];
+    let orgsToLookup = [];
+    let createdOrgs = [];
+    const ts = Date.now();
+
+    // Check the type of the orgs parameter
+    if (Array.isArray(saniOrgs)) {
+      // orgs is an array, update many orgs
+      orgsToLookup = saniOrgs;
+    }
+    else if (typeof saniOrgs === 'object') {
+      // orgs is an object, update a single org
+      orgsToLookup = [saniOrgs];
+    }
+    else {
+      throw new M.DataFormatError('Invalid input for creating/replacing '
+        + 'organizations.', 'warn');
+    }
+
+    // Create list of ids
+    const arrIDs = [];
+
     let index = 1;
     orgsToLookup.forEach((org) => {
-      // Ensure each org has an id and that its a string
-      assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
-      assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+      try {
+        // Ensure each org has an id and that its a string
+        assert.ok(org.hasOwnProperty('id'), `Org #${index} does not have an id.`);
+        assert.ok(typeof org.id === 'string', `Org #${index}'s id is not a string.`);
+      }
+      catch (error) {
+        throw new M.DataFormatError(error.message, 'warn');
+      }
       // If a duplicate ID, throw an error
       if (duplicateCheck[org.id]) {
         throw new M.DataFormatError(`Multiple objects with the same ID [${org.id}]`
@@ -762,96 +771,83 @@ async function createOrReplace(requestingUser, orgs, options) {
       arrIDs.push(org.id);
       index++;
     });
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
 
-  // Create searchQuery
-  const searchQuery = { _id: { $in: arrIDs } };
+    // Create searchQuery
+    const searchQuery = { _id: { $in: arrIDs } };
 
-  // Find the orgs to replace
-  foundOrgs = await Organization.find(searchQuery).lean();
+    // Find the orgs to replace
+    foundOrgs = await Organization.find(searchQuery, null, { lean: true });
 
-  // Check if there are new orgs
-  // Note: if more orgs than found, there must be new orgs
-  if (orgsToLookup.length > foundOrgs.length) {
-    // Requires global admin to create new orgs
-    assert.ok(permissions.createOrg(reqUser) === true, 'User does not have permissions'
-      + 'to create or replace orgs.');
-  }
-
-  // Check that the user has admin permissions
-  foundOrgs.forEach((org) => {
-    if (!permissions.updateOrg(reqUser, org)) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` create or replace the org [${org._id}].`, 'warn');
+    // Check if there are new orgs
+    // Note: if more orgs than found, there must be new orgs
+    if (orgsToLookup.length > foundOrgs.length) {
+      // Requires global admin to create new orgs
+      permissions.createOrg(reqUser);
     }
-  });
 
-  // If data directory doesn't exist, create it
-  if (!fs.existsSync(path.join(M.root, 'data'))) {
-    fs.mkdirSync(path.join(M.root, 'data'));
-  }
-
-  // Write contents to temporary file
-  await new Promise(async function(res) {
-    await fs.writeFile(path.join(M.root, 'data', `PUT-backup-orgs-${ts}.json`),
-      JSON.stringify(foundOrgs), function(err) {
-        if (err) throw errors.captureError(err);
-        else res();
-      });
-  });
-  try {
-    // Delete orgs from database
-    await Organization.deleteMany({ _id: foundOrgs.map(o => o._id) }).lean();
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
-
-  // Emit the event orgs-deleted
-  EventEmitter.emit('orgs-deleted', foundOrgs);
-
-  // Code block after original orgs have been deleted but before they have been replaced
-  // If creation of new orgs fails, it will restore the previous orgs
-  try {
-    // Create the new orgs
-    createdOrgs = await create(reqUser, orgsToLookup, options);
-  }
-  catch (error) {
-    const finalError = await new Promise(async (res) => {
-      // Reinsert original data
-      try {
-        await Organization.insertMany(foundOrgs);
-        fs.unlinkSync(path.join(M.root, 'data',
-          `PUT-backup-orgs-${ts}.json`));
-
-        // Restoration succeeded; pass the original error
-        res(error);
-      }
-      catch (restoreErr) {
-        // Pass the new error that occurred while trying to restore orgs
-        res(restoreErr);
-      }
+    // Check that the user has admin permissions
+    foundOrgs.forEach((org) => {
+      permissions.updateOrg(reqUser, org);
     });
-    // Throw whichever error was passed
-    throw errors.captureError(finalError);
-  }
 
-  // Delete the temporary file.
-  const filePath = path.join(M.root, 'data',
-    `PUT-backup-orgs-${ts}.json`);
-  if (fs.existsSync(filePath)) {
+    // If data directory doesn't exist, create it
+    if (!fs.existsSync(path.join(M.root, 'data'))) {
+      fs.mkdirSync(path.join(M.root, 'data'));
+    }
+
+    // Write contents to temporary file
+    await new Promise(async function(res) {
+      await fs.writeFile(path.join(M.root, 'data', `PUT-backup-orgs-${ts}.json`),
+        JSON.stringify(foundOrgs), function(err) {
+          if (err) throw errors.captureError(err);
+          else res();
+        });
+    });
+
+    // Delete orgs from database
+    await Organization.deleteMany({ _id: foundOrgs.map(o => o._id) });
+
+    // Emit the event orgs-deleted
+    EventEmitter.emit('orgs-deleted', foundOrgs);
+
+    // Code block after original orgs have been deleted but before they have been replaced
+    // If creation of new orgs fails, it will restore the previous orgs
     try {
+      // Create the new orgs
+      createdOrgs = await create(reqUser, orgsToLookup, options);
+    }
+    catch (error) {
+      const finalError = await new Promise(async (res) => {
+        // Reinsert original data
+        try {
+          await Organization.insertMany(foundOrgs);
+          fs.unlinkSync(path.join(M.root, 'data',
+            `PUT-backup-orgs-${ts}.json`));
+
+          // Restoration succeeded; pass the original error
+          res(error);
+        }
+        catch (restoreErr) {
+          // Pass the new error that occurred while trying to restore orgs
+          res(restoreErr);
+        }
+      });
+      // Throw whichever error was passed
+      throw finalError;
+    }
+
+    // Delete the temporary file.
+    const filePath = path.join(M.root, 'data',
+      `PUT-backup-orgs-${ts}.json`);
+    if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
-    catch (err) {
-      throw errors.captureError(err);
-    }
-  }
 
-  return createdOrgs;
+    return createdOrgs;
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**
@@ -862,10 +858,10 @@ async function createOrReplace(requestingUser, orgs, options) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} orgs - The organizations to remove. Can either be
  * an array of org ids or a single org id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted organization ids.
+ * @returns {Promise} Array of deleted organization ids.
  *
  * @example
  * remove({User}, ['org1', 'org2'])
@@ -877,74 +873,71 @@ async function createOrReplace(requestingUser, orgs, options) {
  * });
  */
 async function remove(requestingUser, orgs, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options);
-  helper.checkParamsDataType(['object', 'string'], orgs, 'Orgs');
-
-  // Only for create or remove orgs: must be an admin
   try {
-    assert.ok(permissions.deleteOrg(requestingUser) === true, 'User does not have permissions to delete orgs.');
-  }
-  catch (err) {
-    throw new M.DataFormatError(err.message, 'warn');
-  }
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options);
+    helper.checkParamsDataType(['object', 'string'], orgs, 'Orgs');
 
-  // Sanitize input parameters and function-wide variables
-  const saniOrgs = sani.mongo(JSON.parse(JSON.stringify(orgs)));
-  let searchedIDs = [];
+    // Sanitize input parameters and function-wide variables
+    const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
+    let searchedIDs = [];
 
-  // Define searchQuery and ownedQuery
-  const searchQuery = {};
-  const ownedQuery = {};
+    // Define searchQuery and ownedQuery
+    const searchQuery = {};
+    const ownedQuery = {};
 
-  // Check the type of the orgs parameter
-  if (Array.isArray(saniOrgs)) {
-    // An array of org ids, remove all
-    searchedIDs = saniOrgs;
-    searchQuery._id = { $in: saniOrgs };
-  }
-  else if (typeof saniOrgs === 'string') {
-    // A single org id
-    searchedIDs = [saniOrgs];
-    searchQuery._id = saniOrgs;
-  }
-  else {
-    // Invalid parameter, throw an error
-    throw new M.DataFormatError('Invalid input for removing organizations.', 'warn');
-  }
-
-  // Find the orgs to delete
-  const foundOrgs = await Organization.find(searchQuery).lean();
-
-  const foundOrgIDs = foundOrgs.map(o => o._id);
-  const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
-  ownedQuery._id = { $in: regexIDs };
-
-  // Check if all orgs were found
-  const notFoundIDs = searchedIDs.filter(o => !foundOrgIDs.includes(o));
-  // Some orgs not found, throw an error
-  if (notFoundIDs.length > 0) {
-    throw new M.NotFoundError('The following orgs were not found: '
-      + `[${notFoundIDs}].`, 'warn');
-  }
-
-  // Check that user can remove each org
-  foundOrgs.forEach((org) => {
-    // If trying to delete the default org, throw an error
-    if (org._id === M.config.server.defaultOrganizationId) {
-      throw new M.OperationError('The default organization cannot be deleted.', 'warn');
+    // Check the type of the orgs parameter
+    if (Array.isArray(saniOrgs)) {
+      // An array of org ids, remove all
+      searchedIDs = saniOrgs;
+      searchQuery._id = { $in: saniOrgs };
     }
-  });
+    else if (typeof saniOrgs === 'string') {
+      // A single org id
+      searchedIDs = [saniOrgs];
+      searchQuery._id = saniOrgs;
+    }
+    else {
+      // Invalid parameter, throw an error
+      throw new M.DataFormatError('Invalid input for removing organizations.', 'warn');
+    }
 
-  try {
+    // Find the orgs to delete
+    const foundOrgs = await Organization.find(searchQuery, null, { lean: true });
+
+    foundOrgs.forEach(org => {
+      // Only for create or remove orgs: must be an admin
+      permissions.deleteOrg(requestingUser, org);
+    });
+
+    const foundOrgIDs = foundOrgs.map(o => o._id);
+    const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
+    ownedQuery._id = { $in: regexIDs };
+
+    // Check if all orgs were found
+    const notFoundIDs = searchedIDs.filter(o => !foundOrgIDs.includes(o));
+    // Some orgs not found, throw an error
+    if (notFoundIDs.length > 0) {
+      throw new M.NotFoundError('The following orgs were not found: '
+        + `[${notFoundIDs}].`, 'warn');
+    }
+
+    // Check that user can remove each org
+    foundOrgs.forEach((org) => {
+      // If trying to delete the default org, throw an error
+      if (org._id === M.config.server.defaultOrganizationId) {
+        throw new M.OperationError('The default organization cannot be deleted.', 'warn');
+      }
+    });
+
     // Delete any elements in the org
-    await Element.deleteMany(ownedQuery).lean();
+    await Element.deleteMany(ownedQuery);
     // Delete any branches in the org
-    await Branch.deleteMany(ownedQuery).lean();
+    await Branch.deleteMany(ownedQuery);
     // Delete any projects in the org
-    await Project.deleteMany({ org: { $in: saniOrgs } }).lean();
+    await Project.deleteMany({ org: { $in: saniOrgs } });
     // Delete the orgs
-    const retQuery = await Organization.deleteMany(searchQuery).lean();
+    const retQuery = await Organization.deleteMany(searchQuery);
     // Emit the event orgs-deleted
     EventEmitter.emit('orgs-deleted', foundOrgs);
 
@@ -952,9 +945,10 @@ async function remove(requestingUser, orgs, options) {
     if (retQuery.n !== foundOrgs.length) {
       M.log.error(`Some of the following orgs were not deleted [${saniOrgs.toString()}].`);
     }
+
+    return foundOrgs.map(o => o._id);
   }
   catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
+    throw errors.captureError(errors);
   }
-  return foundOrgs.map(o => o._id);
 }

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.404a-branch-controller-core-tests
  *
@@ -40,7 +40,7 @@ let projID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Open the database connection
@@ -95,21 +95,25 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
+  // ------------- Create -------------
   it('should create a branch', createBranch);
   it('should create multiple branches', createBranches);
   it('should create a tag', createTag);
+  // -------------- Find --------------
   it('should find a branch', findBranch);
   it('should find multiple branches', findBranches);
   it('should find all branches', findAllBranches);
+  // ------------- Update -------------
   it('should update a branch', updateBranch);
   it('should update multiple branches', updateBranches);
+  // ------------- Remove -------------
   it('should delete a branch', deleteBranch);
   it('should delete multiple branches', deleteBranches);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an branch using the branch controller
+ * @description Creates an branch using the branch controller.
  */
 function createBranch(done) {
   const branchData = testData.branches[1];
@@ -130,8 +134,8 @@ function createBranch(done) {
     chai.expect(createdBranch.tag).to.equal(branchData.tag);
 
     // Verify additional properties
-    chai.expect(createdBranch.createdBy).to.equal(adminUser.username);
-    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdBranch.createdBy).to.equal(adminUser._id);
+    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdBranch.archivedBy).to.equal(null);
     chai.expect(createdBranch.createdOn).to.not.equal(null);
     chai.expect(createdBranch.updatedOn).to.not.equal(null);
@@ -147,7 +151,7 @@ function createBranch(done) {
 }
 
 /**
- * @description Creates multiple branches using the branch controller
+ * @description Creates multiple branches using the branch controller.
  */
 function createBranches(done) {
   const branchDataObjects = [
@@ -179,8 +183,8 @@ function createBranches(done) {
       chai.expect(createdBranch.project).to.equal(utils.createID(org.id, projID));
 
       // Verify additional properties
-      chai.expect(createdBranch.createdBy).to.equal(adminUser.username);
-      chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(createdBranch.createdBy).to.equal(adminUser._id);
+      chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdBranch.archivedBy).to.equal(null);
       chai.expect(createdBranch.createdOn).to.not.equal(null);
       chai.expect(createdBranch.updatedOn).to.not.equal(null);
@@ -218,8 +222,8 @@ function createTag(done) {
     chai.expect(createdBranch.tag).to.equal(branchData.tag);
 
     // Verify additional properties
-    chai.expect(createdBranch.createdBy).to.equal(adminUser.username);
-    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdBranch.createdBy).to.equal(adminUser._id);
+    chai.expect(createdBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdBranch.archivedBy).to.equal(null);
     chai.expect(createdBranch.createdOn).to.not.equal(null);
     chai.expect(createdBranch.updatedOn).to.not.equal(null);
@@ -235,7 +239,7 @@ function createTag(done) {
 }
 
 /**
- * @description Finds an branch via the branch controller
+ * @description Finds an branch via the branch controller.
  */
 function findBranch(done) {
   const branchData = testData.branches[1];
@@ -255,7 +259,7 @@ function findBranch(done) {
     chai.expect(foundBranch.project).to.equal(utils.createID(org.id, projID));
 
     // Verify additional properties
-    chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundBranch.archivedBy).to.equal(null);
     chai.expect(foundBranch.createdOn).to.not.equal(null);
     chai.expect(foundBranch.updatedOn).to.not.equal(null);
@@ -271,7 +275,7 @@ function findBranch(done) {
 }
 
 /**
- * @description Finds multiple branches via the branch controller
+ * @description Finds multiple branches via the branch controller.
  */
 function findBranches(done) {
   const branchDataObjects = [
@@ -306,8 +310,8 @@ function findBranches(done) {
       chai.expect(foundBranch.project).to.equal(utils.createID(org.id, projID));
 
       // Verify additional properties
-      chai.expect(foundBranch.createdBy).to.equal(adminUser.username);
-      chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(foundBranch.createdBy).to.equal(adminUser._id);
+      chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundBranch.archivedBy).to.equal(null);
       chai.expect(foundBranch.createdOn).to.not.equal(null);
       chai.expect(foundBranch.updatedOn).to.not.equal(null);
@@ -324,8 +328,7 @@ function findBranches(done) {
 }
 
 /**
- * @description Finds all branches on a given project using the branch
- * controller
+ * @description Finds all branches on a given project using the branch controller.
  */
 function findAllBranches(done) {
   const branchDataObjects = [
@@ -360,8 +363,8 @@ function findAllBranches(done) {
 
       // Verify additional properties
       if (branchID !== utils.createID(org.id, projID, 'master')) {
-        chai.expect(foundBranch.createdBy).to.equal(adminUser.username);
-        chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser.username);
+        chai.expect(foundBranch.createdBy).to.equal(adminUser._id);
+        chai.expect(foundBranch.lastModifiedBy).to.equal(adminUser._id);
       }
       chai.expect(foundBranch.archivedBy).to.equal(null);
       chai.expect(foundBranch.createdOn).to.not.equal(null);
@@ -379,7 +382,7 @@ function findAllBranches(done) {
 }
 
 /**
- * @description Updates a branch using the branch controller
+ * @description Updates a branch using the branch controller.
  */
 function updateBranch(done) {
   const branchData = testData.branches[1];
@@ -405,8 +408,8 @@ function updateBranch(done) {
     chai.expect(updatedBranch.project).to.equal(utils.createID(org.id, projID));
 
     // Verify additional properties
-    chai.expect(updatedBranch.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedBranch.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedBranch.archivedBy).to.equal(null);
     chai.expect(updatedBranch.createdOn).to.not.equal(null);
     chai.expect(updatedBranch.updatedOn).to.not.equal(null);
@@ -422,7 +425,7 @@ function updateBranch(done) {
 }
 
 /**
- * @description Updates multiple branches using the branch controller
+ * @description Updates multiple branches using the branch controller.
  */
 function updateBranches(done) {
   const branchDataObjects = [
@@ -460,8 +463,8 @@ function updateBranches(done) {
       chai.expect(updatedBranch.project).to.equal(utils.createID(org.id, projID));
 
       // Verify additional properties
-      chai.expect(updatedBranch.createdBy).to.equal(adminUser.username);
-      chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser.username);
+      chai.expect(updatedBranch.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedBranch.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedBranch.archivedBy).to.equal(null);
       chai.expect(updatedBranch.createdOn).to.not.equal(null);
       chai.expect(updatedBranch.updatedOn).to.not.equal(null);
@@ -478,7 +481,7 @@ function updateBranches(done) {
 }
 
 /**
- * @description Deletes a branch using the branch controller
+ * @description Deletes a branch using the branch controller.
  */
 function deleteBranch(done) {
   const branchData = testData.branches[1];
@@ -509,7 +512,7 @@ function deleteBranch(done) {
 
 
 /**
- * @description Deletes multiple branches using the branch controller
+ * @description Deletes multiple branches using the branch controller.
  */
 function deleteBranches(done) {
   const branchDataObjects = [

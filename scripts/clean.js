@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.clean
  *
@@ -14,10 +14,15 @@
  * @description Removes directories and files created during npm/yarn install,
  * node mbee build, and all log files.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Rule disabled to allow list in description
 
 // Node.js modules
 const { execSync } = require('child_process');
 const path = require('path');
+
+const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
+const rmf = (process.platform === 'win32') ? 'DEL /S /Q' : 'rm -rf';
 
 // Error Check - Check if file was run directly or global M object is undefined
 if (module.parent == null || typeof M === 'undefined') {
@@ -42,7 +47,7 @@ if (module.parent == null || typeof M === 'undefined') {
  * If NO flags are provided, defaults to `--all`
  */
 function clean(_args) {
-  const root = path.join(__dirname, '../');
+  const root = path.join(__dirname, '..');
 
   // eslint-disable-next-line no-console
   console.log('Cleaning MBEE...');
@@ -52,17 +57,17 @@ function clean(_args) {
 
   // Clean logs
   if (args.length === 0 || args.includes('--all')) {
-    execSync(`rm -rf ${root}/build ${root}/logs`);
+    execSync(`${rmd} ${path.join(root, 'build')} ${path.join(root, 'logs')}`);
   }
 
   // Clean data
   if (args.includes('--all') || args.includes('--data')) {
-    execSync(`rm -rf ${root}/data/*`);
+    execSync(`${rmf} ${path.join(root, 'data', '*')}`);
   }
 
   // Clean node_modules
   if (args.includes('--all') || args.includes('--node-modules')) {
-    execSync(`rm -rf ${root}/node_modules`);
+    execSync(`${rmd} ${path.join(root, 'node_modules')}`);
   }
 
   // eslint-disable-next-line no-console

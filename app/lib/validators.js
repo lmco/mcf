@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.validators
  *
@@ -14,6 +14,8 @@
  * @description This file defines validators - common regular expressions and
  * helper functions - used to validate data within MBEE.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow lists in descriptions
 
 // MBEE modules
 const utils = require('./utils');
@@ -23,15 +25,16 @@ const customValidators = M.config.validators || {};
 
 // This ID is used as the common regex for other ID fields in this module
 const id = customValidators.id || '([_a-z0-9])([-_a-z0-9.]){0,}';
+const idLength = customValidators.id_length || 36;
 
 // A list of reserved keywords which cannot be used in ids
-module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
+const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous'];
 
 /**
- * @description Regular Expressions to validate organization data
+ * @description Regular Expressions to validate organization data.
  *
  * id:
  *   - MUST start with a lowercase letter, number or '_'
@@ -43,8 +46,9 @@ module.exports.reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
  *     - f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
  *     - myOrg [invalid - uses uppercase letter]
  */
-module.exports.org = {
-  id: customValidators.org_id || `^${id}$`
+const org = {
+  id: customValidators.org_id || `^${id}$`,
+  idLength: customValidators.org_id_length || idLength
 };
 
 /**
@@ -62,8 +66,10 @@ module.exports.org = {
  *      - -project [invalid - must start with a letter or a number]
  *      - myProject [invalid - cannot use uppercase characters]
  */
-module.exports.project = {
-  id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`
+const project = {
+  id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`,
+  idLength: org.idLength + utils.ID_DELIMITER.length
+  + (customValidators.project_id_length ? customValidators.project_id_length : idLength)
 };
 
 /**
@@ -74,15 +80,17 @@ module.exports.project = {
  *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 1 or more
  *   Examples:
- *       - orgid:projid:branchid [valid]
+ *      - orgid:projid:branchid [valid]
  *      - orgid:projid:my-branch [valid]
  *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
  *      - orgid:projid:-branch[invalid - must start with a letter or a number]
  *      - orgid:projid:myBranch [invalid - cannot use uppercase characters]
  *      - my-branch [invalid - must contain org and proj segments]
  */
-module.exports.branch = {
-  id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+const branch = {
+  id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  idLength: project.idLength + utils.ID_DELIMITER.length
+    + (customValidators.branch_id_length ? customValidators.branch_id_length : idLength)
 };
 
 /**
@@ -100,8 +108,10 @@ module.exports.branch = {
  *      - orgid:projid:branchid:myElement [invalid - cannot use uppercase characters]
  *      - my-element [invalid - must contain org, proj, and branch segments]
  */
-module.exports.element = {
-  id: customValidators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`
+const element = {
+  id: customValidators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  idLength: branch.idLength + utils.ID_DELIMITER.length
+  + (customValidators.element_id_length ? customValidators.element_id_length : idLength)
 };
 
 /**
@@ -117,8 +127,9 @@ module.exports.element = {
  *   - MUST start with a lowercase letter or uppercase letter
  *   - MUST only contain lowercase letters, uppercase letters, '-', or whitespace
  */
-module.exports.user = {
+const user = {
   username: customValidators.user_username || '^([a-z])([a-z0-9_]){0,}$',
+  usernameLength: customValidators.user_username_length || idLength,
   email: customValidators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
   fname: customValidators.user_fname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
   lname: customValidators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
@@ -137,7 +148,18 @@ module.exports.user = {
  *     - /login [valid]
  *     - https://lockheedmartin.com [invalid - cannot use external URLs]
  */
-module.exports.url = {
+const url = {
   // starts with one and only one '/'
   next: customValidators.url_next || '^(\/)(?!\/)' // eslint-disable-line no-useless-escape
+};
+
+
+module.exports = {
+  reserved,
+  org,
+  project,
+  branch,
+  element,
+  user,
+  url
 };
