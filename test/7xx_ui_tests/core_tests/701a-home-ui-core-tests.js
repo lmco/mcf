@@ -18,7 +18,7 @@
 /* eslint-disable no-unused-vars */
 // NPM modules
 import React from 'react';
-import { mount } from 'enzyme';
+import mount from './../mount.js';
 import chai from 'chai';
 
 // MBEE components
@@ -58,7 +58,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function homeRender(done) {
   // Render home component
-  const wrapper = mount(<Home />, { attachTo: document.getElementById('main') });
+  const wrapper = mount(<Home />);
   // Expect component to be in DOM
   chai.expect(wrapper.find(Home).length).to.equal(1);
   done();

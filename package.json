@@ -49,6 +49,7 @@
     "gulp-markdown": "^5.0.0",
     "gulp-minify": "^3.1.0",
     "gulp-sass": "^4.0.1",
+    "history": "^4.10.1",
     "jquery": "^3.3.1",
     "jquery-ui-dist": "^1.12.1",
     "jsdoc": "^3.5.5",
