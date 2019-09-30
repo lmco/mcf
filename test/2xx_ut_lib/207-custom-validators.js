@@ -57,8 +57,12 @@ function verifyDefaultValidator(done) {
 function verifyCustomValidator(done) {
   if (!M.config.validators) this.skip();
   const A = validators.element.id;
-  const B = M.config.validators.id;
-  const C = `^${B}${utils.ID_DELIMITER}${B}${utils.ID_DELIMITER}${B}$`;
-  chai.expect(A).to.equal(C);
+  Object.keys(M.config.validators).forEach((key) => {
+    if (key.id) {
+      const B = key.id;
+      const C = `^${B}${utils.ID_DELIMITER}${B}${utils.ID_DELIMITER}${B}$`;
+      chai.expect(A).to.equal(C);
+    }
+  });
   done();
 }
