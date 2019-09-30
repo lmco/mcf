@@ -36,7 +36,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.7.0' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.7.0' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.0' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -62,7 +62,7 @@ module.exports.up = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.7.1' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.7.1' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.1' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));

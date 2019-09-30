@@ -104,7 +104,7 @@ const OrganizationSchema = new db.Schema({
   permissions: {
     type: 'Object',
     default: {},
-    validate: {
+    validate: [{
       validator: function(v) {
         let bool = true;
         // If the permissions object is not a JSON object, reject
@@ -122,7 +122,7 @@ const OrganizationSchema = new db.Schema({
         return bool;
       },
       message: props => 'The organization permissions object is not properly formatted.'
-    }
+    }]
   }
 });
 

@@ -281,8 +281,8 @@ class Model extends DBModule.Model {
 
     // Check that expected functions are defined
     const expectedFunctions = ['bulkWrite', 'createDocument', 'countDocuments',
-      'deleteIndex', 'deleteMany', 'ensureIndexes', 'find', 'findOne',
-      'getIndexes', 'insertMany', 'updateMany', 'updateOne', 'init'];
+      'deleteIndex', 'deleteMany', 'find', 'findOne', 'getIndexes',
+      'insertMany', 'updateMany', 'updateOne', 'init'];
     expectedFunctions.forEach((f) => {
       // Ensure the parameter is defined
       if (!(f in this)) {
@@ -414,17 +414,6 @@ class Model extends DBModule.Model {
    */
   async deleteMany(conditions, options, cb) {
     return super.deleteMany(conditions, options, cb);
-  }
-
-  /**
-   * @description Creates all indexes (if not already created) for the model's
-   * schema.
-   * @async
-   *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
-   */
-  async ensureIndexes() {
-    return super.ensureIndexes();
   }
 
   /**

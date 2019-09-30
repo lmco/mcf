@@ -66,37 +66,18 @@ describe(M.getModuleName(module.filename), function() {
   /**
    * Execute the tests.
    */
-  it('should initialize the models', initModels);
   it('clean database', cleanDB);
+  it('should initialize the models', initModels);
   it('should create the default org if it doesn\'t exist', createDefaultOrg);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Initializes all models asynchronously.
- * @async
- *
- * @returns {Promise<void>} Resolves upon successful initiation of models.
- */
-async function initModels() {
-  try {
-    await Artifact.init();
-    await Branch.init();
-    await Element.init();
-    await Organization.init();
-    await Project.init();
-    await ServerData.init();
-    await User.init();
-  }
-  catch (error) {
-    M.log.critical('Failed to initialize models.');
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Cleans out the database by removing all items from all
  * collections.
+ *
+ * @returns {Promise<void>} Resolves upon successful deletion of all contents
+ * from the database.
  */
 async function cleanDB() {
   try {
@@ -114,6 +95,33 @@ async function cleanDB() {
   }
 }
 
+/**
+ * @description Initializes all models asynchronously. Adds the single server
+ * data document to the database, and ensures the element and user indexes are
+ * created for 4xx search tests.
+ * @async
+ *
+ * @returns {Promise<void>} Resolves upon successful initiation of models.
+ */
+async function initModels() {
+  try {
+    // Initialize all models
+    await Artifact.init();
+    await Branch.init();
+    await Element.init();
+    await Organization.init();
+    await Project.init();
+    await ServerData.init();
+    await User.init();
+
+    // Insert server data
+    await ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]);
+  }
+  catch (error) {
+    M.log.critical('Failed to initialize models.');
+    chai.expect(error.message).to.equal(null);
+  }
+}
 
 /**
  * @description Creates the default org if it doesn't already exist.
