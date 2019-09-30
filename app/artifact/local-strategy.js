@@ -23,20 +23,6 @@ module.exports = {
   postBlob,
   putBlob,
   deleteBlob
-  /*
-
-TODO:
-  Remove hash, use path instead.
-  Removing blobs takes path/filenames
-  remove history, history tracked with branching
-  Add ability to see current directory
-  EAch project has own created artifact space
-
-  listDirectory(path),
-  removeDirectory(directoryName)
-
-   */
-
 };
 
 // Node.js Modules
@@ -92,26 +78,22 @@ function postBlob(artMetadata, artifactBlob) {
   // Create project directory
   createDirectory(utils.parseID(artMetadata.project).pop());
 
-  // Check if file already exist
-  if (!fs.existsSync(fullPath)) {
-    try {
-      // Write out artifact file, defaults to 666 permission.
-      fs.writeFileSync(fullPath, artifactBlob);
-    }
-    catch (error) {
-      // Log the error
-      M.log.error(error.message);
+  try {
+    // Write out artifact file, defaults to 666 permission.
+    fs.writeFileSync(fullPath, artifactBlob);
+  }
+  catch (error) {
+    // Log the error
+    M.log.error(error.message);
 
-      // Error occurred, log it
-      throw new M.DataFormatError('Could not create Artifact blob.', 'warn');
-    }
+    // Error occurred, log it
+    throw new M.DataFormatError('Could not create Artifact blob.', 'warn');
   }
 }
 
 /**
  * @description This function writes an artifact blob
  * to the local file system. Existing files will be overwritten.
- *
  *
  * @param {string} artMetadata - Artifact metadata
  * @param {Buffer} artifactBlob - A binary large object artifact
@@ -120,32 +102,24 @@ function putBlob(artMetadata, artifactBlob) {
   // Create artifact path
   const fullPath = createBlobPath(artMetadata);
 
-  // Check if artifact file exist
-  if (fs.existsSync(fullPath)) {
-    throw new M.DataFormatError('Artifact blob already exist.', 'warn');
-  }
-
   // Create storage directory
   createDirectory('/');
 
   // Create project directory
   createDirectory(utils.parseID(artMetadata.project).pop());
 
-  // Check if file already exist
-  if (!fs.existsSync(fullPath)) {
-    try {
-      // Write out artifact file, defaults to 666 permission.
-      fs.writeFileSync(fullPath, artifactBlob);
-    }
-    catch (error) {
-      // Error occurred, log it
-      throw new M.DataFormatError('Could not create Artifact blob.', 'warn');
-    }
+  try {
+    // Write out artifact file, defaults to 666 permission.
+    fs.writeFileSync(fullPath, artifactBlob);
+  }
+  catch (error) {
+    // Error occurred, log it
+    throw new M.DataFormatError('Could not create Artifact blob.', 'warn');
   }
 }
 
 /**
- * @description This function deletes the artifact blob file from the
+ * @description This function deletes an artifact blob file from the
  * local file system.
  *
  * @param {string} artMetadata - Artifact metadata
@@ -165,6 +139,9 @@ function deleteBlob(artMetadata) {
     });
   }
   catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new M.DataFormatError('Artifact blob does not exist.', 'warn');
+    }
     throw new M.DataFormatError('Could not delete artifact blob.', 'warn');
   }
 
@@ -204,7 +181,7 @@ function createDirectory(pathString) {
   let artifactPath = '';
 
   // Check for backslash for windows
-  if (pathString.includes('\\')){
+  if (pathString.includes('\\')) {
     separator = '\\';
   }
   // Otherwise, linus base separator
@@ -235,7 +212,6 @@ function createDirectory(pathString) {
         }
       });
     }
-
   });
   // Return the create directory path
   return artifactPath;
@@ -248,18 +224,18 @@ function createDirectory(pathString) {
  * across the artifact strategy.
  */
 function createBlobPath(artMetadata) {
-    // Get root artifact path
-    const artRootPath = path.join(M.root, M.config.artifact.path);
-    // Get project id
-    const projID = utils.parseID(artMetadata.project).pop();
+  // Get root artifact path
+  const artRootPath = path.join(M.root, M.config.artifact.path);
 
-    // Form the blob name, location concat with filename
-    const concatenName = artMetadata.location.replace(/\//g, '.') + artMetadata.filename;
+  // Get project id
+  const projID = utils.parseID(artMetadata.project).pop();
 
-    // Form complete path
-    const blobPath = path.join(artRootPath, projID, concatenName);
+  // Form the blob name, location concat with filename
+  const concatenName = artMetadata.location.replace(/\//g, '.') + artMetadata.filename;
 
-    // Return the path
-    return blobPath;
+  // Form complete path
+  const blobPath = path.join(artRootPath, projID, concatenName);
 
+  // Return the path
+  return blobPath;
 }

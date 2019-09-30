@@ -29,7 +29,8 @@ const idLength = customValidators.id_length || 36;
 const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
-  'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous'];
+  'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
+  'blob'];
 
 /**
  * @description Regular Expressions to validate organization data

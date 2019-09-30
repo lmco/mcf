@@ -87,14 +87,14 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  // it('should POST an artifact', postArtifact);
-  // it('should GET an artifact', getArtifact);
+  it('should POST an artifact', postArtifact);
+  it('should GET an artifact', getArtifact);
   it('should POST an artifact blob', postBlob);
   it('should GET an artifact blob', getBlob);
-  // it('should GET an artifact blob', getBlobById);
+  it('should GET an artifact blob', getBlobById);
   it('should DELETE an artifact', deleteBlob);
-  // it('should PATCH an artifact', patchArtifact);
-  // it('should DELETE an artifact', deleteArtifact);
+  it('should PATCH an artifact', patchArtifact);
+  it('should DELETE an artifact', deleteArtifact);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -107,7 +107,7 @@ async function postArtifact() {
     id: artData.id,
     name: artData.name,
     filename: artData.filename,
-    contentType: path.extname(artData.filename),
+    contentType: artData.contentType,
     project: projID,
     branch: branchID,
     location: artData.location,
@@ -143,14 +143,14 @@ async function postArtifact() {
     chai.expect(createdArtifact.org).to.equal(org.id);
     chai.expect(createdArtifact.location).to.equal(body.location);
     chai.expect(createdArtifact.filename).to.equal(body.filename);
-    chai.expect(createdArtifact.contentType).to.equal(req.file.mimetype);
+    chai.expect(createdArtifact.contentType).to.equal(artData.contentType);
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
 
     // Verify additional properties
-    chai.expect(createdArtifact.createdBy).to.equal(adminUser.username);
-    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdArtifact.createdOn).to.not.equal(null);
     chai.expect(createdArtifact.updatedOn).to.not.equal(null);
     chai.expect(createdArtifact.archived).to.equal(false);
@@ -211,8 +211,8 @@ async function getArtifact() {
     );
 
     // Verify additional properties
-    chai.expect(foundArtifact.createdBy).to.equal(adminUser.username);
-    chai.expect(foundArtifact.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(foundArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(foundArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundArtifact.createdOn).to.not.equal(null);
     chai.expect(foundArtifact.updatedOn).to.not.equal(null);
     chai.expect(foundArtifact.archived).to.equal(false);
@@ -274,8 +274,8 @@ async function patchArtifact() {
     );
 
     // Verify additional properties
-    chai.expect(updatedArtifact.createdBy).to.equal(adminUser.username);
-    chai.expect(updatedArtifact.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(updatedArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedArtifact.createdOn).to.not.equal(null);
     chai.expect(updatedArtifact.updatedOn).to.not.equal(null);
     chai.expect(updatedArtifact.archived).to.equal(false);
@@ -392,7 +392,7 @@ async function getBlob() {
   const params = {
     orgid: org.id,
     projectid: projID,
-    branchid: branchID,
+    branchid: branchID
   };
 
   const method = 'GET';
@@ -406,6 +406,9 @@ async function getBlob() {
 
   // Verifies the response data
   res.send = function send(_data) {
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
     // Check return artifact is of buffer type
     chai.expect(Buffer.isBuffer(_data)).to.equal(true);
 
@@ -415,9 +418,6 @@ async function getBlob() {
 
     // Deep compare both binaries
     chai.expect(_data).to.deep.equal(fileData);
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
     // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -490,7 +490,7 @@ async function deleteBlob() {
   const params = {
     orgid: org.id,
     projectid: projID,
-    branchid: branchID,
+    branchid: branchID
   };
 
   const method = 'DELETE';
@@ -504,18 +504,13 @@ async function deleteBlob() {
 
   // Verifies the response data
   res.send = function send(_data) {
-    // Check return artifact is of buffer type
-    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
-
-    // Get the file
-    const artifactPath = path.join(M.root, artData.location, artData.filename);
-    const fileData = fs.readFileSync(artifactPath);
-
-    // Deep compare both binaries
-    chai.expect(_data).to.deep.equal(fileData);
+    const deletedArtifact = JSON.parse(_data);
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
+    chai.expect(deletedArtifact.project).to.equal(projID);
+    chai.expect(deletedArtifact.location).to.equal(artData.location);
+    chai.expect(deletedArtifact.filename).to.equal(artData.filename);
 
     // Ensure the response was logged correctly
     // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);

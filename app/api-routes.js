@@ -3889,6 +3889,81 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
 
 /**
  * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/blob:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns an artifact Blob. Requesting user must have read access
+ *                  on the project to find an artifact.
+ *     produces:
+ *       - application/octet-stream
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the searched artifact.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to element not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/blob')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.getBlob
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.postBlob
+).delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.deleteBlob
+);
+
+/**
+ * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}:
  *   get:
  *     tags:
@@ -4227,81 +4302,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   APIController.deleteArtifact
 );
 
-/**
- * @swagger
- * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}/download:
- *   get:
- *     tags:
- *       - artifacts
- *     description: Returns an artifact Blob. Requesting user must have read access
- *                  on the project to find an artifact.
- *     produces:
- *       - application/octet-stream
- *     parameters:
- *       - name: orgid
- *         description: The ID of the organization containing the specified
- *                      project.
- *         in: path
- *         required: true
- *         type: string
- *       - name: projectid
- *         description: The ID of the project containing the specified branch.
- *         in: path
- *         required: true
- *         type: string
- *       - name: branchid
- *         description: The ID of the branch containing the searched artifact.
- *         in: path
- *         required: true
- *         type: string
- *       - name: artifactid
- *         description: The artifact ID.
- *         in: URI
- *         required: true
- *         type: string
- *       - name: archived
- *         description: If true, archived objects will be also be searched
- *                      through.
- *         in: query
- *         type: boolean
- *     responses:
- *       200:
- *         description: OK, Succeeded to GET artifact, returns artifact public
- *                      data.
- *       400:
- *         description: Bad Request, Failed to GET artifact due to invalid data.
- *       401:
- *         description: Unauthorized, Failed to GET artifact due to not being
- *                      logged in.
- *       403:
- *         description: Forbidden, Failed to GET artifact due to not having
- *                      permissions.
- *       404:
- *         description: Not Found, Failed to GET artifact due to element not
- *                      existing.
- *       500:
- *         description: Internal Server Error, Failed to GET artifact due to
- *                      server side issue.
- */
-api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/blob')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  AuthController.doLogin,
-  APIController.getBlob
-)
-.post(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  AuthController.doLogin,
-  APIController.postBlob
-).delete(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  AuthController.doLogin,
-  APIController.deleteBlob
-);
-
 api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid/blob')
 .get(
   AuthController.authenticate,
@@ -4309,6 +4309,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   AuthController.doLogin,
   APIController.getBlobById
 );
+
 /**
  * @swagger
  * /api/users:

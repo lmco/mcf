@@ -4876,7 +4876,6 @@ async function getArtifact(req, res) {
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
-    console.log(error);
     // If an error was thrown, return it and its status
     returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
@@ -4939,18 +4938,6 @@ async function postArtifact(req, res) {
     // Set the lean option to true for better performance
     options.lean = true;
 
-    // Sanity Check: originalname/mimitype are required fields
-    if (!req.file
-      || !Object.prototype.hasOwnProperty.call(req.file, 'originalname')
-      || !Object.prototype.hasOwnProperty.call(req.file, 'mimetype')) {
-      const error = new M.DataFormatError('File not defined.', 'warn');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
-
-    // Extract file meta data
-    req.body.filename = req.file.originalname;
-    req.body.contentType = req.file.mimetype;
-
     // If artifact ID was provided in the body, ensure it matches artifact ID in params
     if (Object.prototype.hasOwnProperty.call('id') && (req.params.artifactid !== req.body.id)) {
       const error = new M.DataFormatError(
@@ -4976,7 +4963,6 @@ async function postArtifact(req, res) {
       return returnResponse(req, res, json, 200);
     }
     catch (error) {
-      console.log(error)
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   });
@@ -5170,13 +5156,13 @@ async function getBlob(req, res) {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.body);
 
+    // Set filename
     res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
 
     // Return 200: OK and public artifact data
     return returnResponse(req, res, artifactBlob, 200, 'application/octet-stream');
   }
   catch (error) {
-    console.log(error)
     // If an error was thrown, return it and its status
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
@@ -5195,8 +5181,6 @@ async function getBlob(req, res) {
  */
 async function postBlob(req, res) {
   await upload(req, res, async function(err) {
-    let minified = true;
-
     // Sanity Check: there should always be a user in the request
     if (!req.user) {
       M.log.critical('No requesting user available.');
@@ -5227,6 +5211,9 @@ async function postBlob(req, res) {
         req.params.projectid, req.params.branchid, req.body,
         req.file.buffer);
 
+      // Set minified to true
+      const minified = true;
+
       // Format JSON
       const json = formatJSON(artifact, minified);
       return returnResponse(req, res, json, 200);
@@ -5249,10 +5236,6 @@ async function postBlob(req, res) {
  * @return {Object} Deleted Artifact object.
  */
 async function deleteBlob(req, res) {
-  // Define options
-  // Note: Undefined if not set
-  let options;
-
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
@@ -5260,27 +5243,22 @@ async function deleteBlob(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // If an Project ID was provided in the body, ensure it matches the ID in params
-  if (req.body.hasOwnProperty('project') && (req.body.project !== req.params.projectid)) {
-    const error = new M.DataFormatError(
-      'Project ID in the body does not match ID in the params.', 'warn'
-    );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-  // Set project id
-  req.body.project = req.params.projectid;
-
   try {
-    const artifact = await ArtifactController.getBlob(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, req.params.artifactid, options);
+    const artifact = await ArtifactController.deleteBlob(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body);
 
-    res.header('Content-Disposition', `attachment; filename='${artifact.filename}'`);
+    res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
+
+    // Set minified to true
+    const minified = true;
+
+    // Format JSON
+    const json = formatJSON(artifact, minified);
 
     // Return 200: OK and public artifact data
-    return returnResponse(req, res, artifact.blob, 200, `${artifact.contentType}`);
+    return returnResponse(req, res, json, 200);
   }
   catch (error) {
-    console.log(error)
     // If an error was thrown, return it and its status
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
@@ -5301,7 +5279,6 @@ async function getBlobById(req, res) {
   // Define options
   // Note: Undefined if not set
   let options;
-  let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -5329,30 +5306,20 @@ async function getBlobById(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Check options for minified
-  if (options.hasOwnProperty('minified')) {
-    minified = options.minified;
-    delete options.minified;
-  }
-
   // Set the lean option to true for better performance
   options.lean = true;
 
   try {
     // Find the artifact from it's artifact.id, project.id, and org.id
     // NOTE: find() sanitizes input params
-    const artifact = await ArtifactController.getBlobById(req.user, req.params.orgid,
+    const artifactBlob = await ArtifactController.getBlobById(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
 
-    // If no artifact found, return 404 error
-    if (artifact.length === 0) {
-      throw new M.NotFoundError(
-        `Artifact [${req.params.artifactid}] not found.`, 'warn'
-      );
-    }
+    // Set filename
+    res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
 
     // Return 200: OK and public artifact data
-    return returnResponse(req, res, artifact, 200);
+    return returnResponse(req, res, artifactBlob, 200, 'application/octet-stream');
   }
   catch (error) {
     // If an error was thrown, return it and its status

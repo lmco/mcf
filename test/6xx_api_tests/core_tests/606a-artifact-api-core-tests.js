@@ -90,7 +90,10 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should POST an artifact', postArtifact);
   it('should GET an artifact', getArtifact);
-  it('should GET an artifact', getArtifactBlob);
+  it('should POST an artifact blob', postBlob);
+  it('should GET an artifact blob', getBlob);
+  it('should GET an artifact blob', getBlobById);
+  it('should DELETE an artifact', deleteBlob);
   it('should PATCH an artifact', patchArtifact);
   it('should DELETE an artifact', deleteArtifact);
 });
@@ -104,24 +107,11 @@ function postArtifact(done) {
   artData.project = projID;
   artData.branch = branchID;
 
-  const artifactPath = path.join(
-    M.root, artData.location, artData.filename
-  );
-
   const options = {
     method: 'POST',
     url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}`,
-    headers: testUtils.getHeaders('multipart/form-data'),
-    formData: {
-      id: artData.id,
-      file: {
-        value: fs.createReadStream(artifactPath),
-        options: {
-          filename: artifactPath,
-          contentType: null
-        }
-      }
-    }
+    headers: testUtils.getHeaders(),
+    body: JSON.stringify(artData)
   };
 
   request(options, (err, response, body) => {
@@ -141,8 +131,8 @@ function postArtifact(done) {
     chai.expect(createdArtifact.hash).to.equal(artData.hash);
 
     // Verify additional properties
-    chai.expect(createdArtifact.createdBy).to.equal(adminUser.username);
-    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdArtifact.createdOn).to.not.equal(null);
     chai.expect(createdArtifact.updatedOn).to.not.equal(null);
     chai.expect(createdArtifact.archived).to.equal(false);
@@ -185,8 +175,8 @@ function getArtifact(done) {
     chai.expect(createdArtifact.hash).to.equal(artData.hash);
 
     // Verify additional properties
-    chai.expect(createdArtifact.createdBy).to.equal(adminUser.username);
-    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdArtifact.createdOn).to.not.equal(null);
     chai.expect(createdArtifact.updatedOn).to.not.equal(null);
     chai.expect(createdArtifact.archived).to.equal(false);
@@ -194,42 +184,6 @@ function getArtifact(done) {
     // Verify specific fields not returned
     chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-    done();
-  });
-}
-
-/**
- * @description Verifies GET request to get an artifact blob.
- */
-function getArtifactBlob(done) {
-  const artData = testData.artifacts[0];
-  artData.project = projID;
-  artData.branch = branchID;
-
-  const options = {
-    method: 'GET',
-    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}/download`,
-    headers: testUtils.getHeaders(),
-    encoding: null
-  };
-
-  request(options, (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-
-    // Check return artifact is of buffer type
-    chai.expect(Buffer.isBuffer(body)).to.equal(true);
-
-    // Get the file
-    const artifactPath = path.join(M.root, artData.location, artData.filename);
-    const fileData = fs.readFileSync(artifactPath);
-
-    // Deep compare both binaries
-    chai.expect(body).to.deep.equal(fileData);
-
     done();
   });
 }
@@ -270,8 +224,8 @@ function patchArtifact(done) {
     chai.expect(createdArtifact.hash).to.equal(artData.hash);
 
     // Verify additional properties
-    chai.expect(createdArtifact.createdBy).to.equal(adminUser.username);
-    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser.username);
+    chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdArtifact.createdOn).to.not.equal(null);
     chai.expect(createdArtifact.updatedOn).to.not.equal(null);
     chai.expect(createdArtifact.archived).to.equal(false);
@@ -306,6 +260,158 @@ function deleteArtifact(done) {
     const deletedArtifact = JSON.parse(body);
     // Verify artifact created properly
     chai.expect(deletedArtifact).to.equal(artData.id);
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET request to get an artifact blob.
+ */
+function getBlob(done) {
+  const artData = testData.artifacts[0];
+  artData.project = projID;
+  artData.branch = branchID;
+
+  const reqBody = {
+    location: artData.location,
+    filename: artData.filename
+  };
+  const options = {
+    method: 'GET',
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/${branchID}/artifacts/blob`,
+    headers: testUtils.getHeaders(),
+    body: JSON.stringify(reqBody),
+    encoding: null
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(body)).to.equal(true);
+
+    // Get the file
+    const artifactPath = path.join(M.root, artData.location, artData.filename);
+    const fileData = fs.readFileSync(artifactPath);
+
+    // Deep compare both binaries
+    chai.expect(body).to.deep.equal(fileData);
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST request to post an artifact blob.
+ */
+function postBlob(done) {
+  const artData = testData.artifacts[0];
+  artData.project = projID;
+  artData.branch = branchID;
+
+  const artifactPath = path.join(
+    M.root, artData.location, artData.filename
+  );
+
+  const options = {
+    method: 'POST',
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/${branchID}/artifacts/blob`,
+    headers: testUtils.getHeaders('multipart/form-data'),
+    formData: {
+      location: artData.location,
+      file: {
+        value: fs.createReadStream(artifactPath),
+        options: {
+          filename: artifactPath,
+          contentType: null
+        }
+      }
+    }
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const postedBlob = JSON.parse(body);
+    // Verify artifact created properly
+    chai.expect(postedBlob.project).to.equal(projID);
+    chai.expect(postedBlob.location).to.equal(artData.location);
+    chai.expect(postedBlob.filename).to.equal(artData.filename);
+
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE request to delete an artifact blob.
+ */
+function deleteBlob(done) {
+  const artData = testData.artifacts[0];
+  artData.project = projID;
+  artData.branch = branchID;
+
+  const reqBody = {
+    location: artData.location,
+    filename: artData.filename
+  };
+  const options = {
+    method: 'DELETE',
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/${branchID}/artifacts/blob`,
+    headers: testUtils.getHeaders(),
+    body: JSON.stringify(reqBody)
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const postedBlob = JSON.parse(body);
+    // Verify artifact created properly
+    chai.expect(postedBlob.project).to.equal(projID);
+    chai.expect(postedBlob.location).to.equal(artData.location);
+    chai.expect(postedBlob.filename).to.equal(artData.filename);
+
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET request to get an artifact blob by id.
+ */
+function getBlobById(done) {
+  const artData = testData.artifacts[0];
+  artData.project = projID;
+  artData.branch = branchID;
+
+  const options = {
+    method: 'GET',
+    url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}/blob`,
+    headers: testUtils.getHeaders(),
+    encoding: null
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(body)).to.equal(true);
+
+    // Get the file
+    const artifactPath = path.join(M.root, artData.location, artData.filename);
+    const fileData = fs.readFileSync(artifactPath);
+
+    // Deep compare both binaries
+    chai.expect(body).to.deep.equal(fileData);
     done();
   });
 }

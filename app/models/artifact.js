@@ -116,7 +116,7 @@ const ArtifactSchema = new db.Schema({
   location: {
     type: 'String'
   },
-  strategy:{
+  strategy: {
     type: 'String',
     required: true
   }

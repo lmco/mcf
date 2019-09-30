@@ -58,7 +58,8 @@ describe(M.getModuleName(module.filename), () => {
 
       // Get png test file
       const artifactPath = path.join(
-        M.root, testData.artifacts[0].location, testData.artifacts[0].filename);
+        M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+      );
 
       // Get the test file
       artifactBlob1 = await fs.readFileSync(artifactPath);
@@ -95,7 +96,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should get an artifact blob', getBlob);
   it('should delete an artifact', deleteBlob);
   it('should delete an artifact', deleteArtifact);
-
 });
 
 /* --------------------( Tests )-------------------- */
@@ -103,6 +103,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates an artifact via controller.
  */
 async function createArtifact() {
+  // Define test data
   const artData = {
     id: testData.artifacts[0].id,
     name: testData.artifacts[0].name,
@@ -129,8 +130,8 @@ async function createArtifact() {
       utils.createID(org.id, projectID, branchID)
     );
     chai.expect(createdArtifact[0].location).to.equal(
-      testData.artifacts[0].location);
-
+      testData.artifacts[0].location
+    );
   }
   catch (error) {
     M.log.error(error);
@@ -143,6 +144,7 @@ async function createArtifact() {
  * @description Finds an existing artifact.
  */
 async function getArtifact() {
+  // Define test data
   const artData = [testData.artifacts[0].id];
   try {
     // Find the artifact previously uploaded.
@@ -169,7 +171,6 @@ async function getArtifact() {
     chai.expect(foundArtifact[0].location).to.equal(
       testData.artifacts[0].location
     );
-
   }
   catch (error) {
     M.log.error(error);
@@ -182,6 +183,7 @@ async function getArtifact() {
  * @description Finds an existing artifact and updates its metadata.
  */
 async function updateArtifact() {
+  // Define test data
   const artData = {
     id: testData.artifacts[0].id,
     filename: testData.artifacts[2].filename,
@@ -215,7 +217,6 @@ async function updateArtifact() {
       utils.createID(org.id, projectID, branchID)
     );
     chai.expect(updatedArtifact[0].location).to.equal(testData.artifacts[2].location);
-
   }
   catch (error) {
     M.log.error(error);
@@ -224,15 +225,14 @@ async function updateArtifact() {
   }
 }
 
-
-
 /**
  * @description Finds and deletes an artifact.
  */
 async function deleteArtifact() {
-  try {
-    const artifactID = testData.artifacts[0].id;
+  // Define test data
+  const artifactID = testData.artifacts[0].id;
 
+  try {
     // Find and delete the artifact
     const deletedArtifact = await ArtifactController.remove(adminUser,
       org.id, projectID, branchID, artifactID);
@@ -256,19 +256,14 @@ async function deleteArtifact() {
  * @description Post an artifact blob via controller.
  */
 async function postBlob() {
-  // Get png test file
-  const artifactPath = path.join(
-    M.root, testData.artifacts[0].location, testData.artifacts[0].filename
-  );
-
-  // Get the test file
-  const artifactBlob1 = await fs.readFileSync(artifactPath);
+  // Define test data
   const artData = {
     filename: testData.artifacts[0].filename,
     project: project._id,
     branch: branchID,
     location: testData.artifacts[0].location
   };
+
   try {
     const createdArtifact = await ArtifactController.postBlob(adminUser, org.id,
       projectID, branchID, artData, artifactBlob1);
@@ -276,7 +271,7 @@ async function postBlob() {
     chai.expect(createdArtifact.filename).to.equal(
       testData.artifacts[0].filename
     );
-    chai.expect(createdArtifact.project).to.equal(project._id);
+    chai.expect(createdArtifact.project).to.equal(projectID);
     chai.expect(createdArtifact.branch).to.equal(branchID);
     chai.expect(createdArtifact.location).to.equal(
       testData.artifacts[0].location
@@ -327,7 +322,7 @@ async function deleteBlob() {
       project: projectID,
       location: testData.artifacts[0].location,
       filename: testData.artifacts[0].filename
-    }
+    };
 
     // Find and delete the artifact
     await ArtifactController.deleteBlob(adminUser,
@@ -359,7 +354,6 @@ async function getBlobByID() {
 
     // Deep compare both binaries
     chai.expect(artifactBlob).to.deep.equal(artifactBlob1);
-
   }
   catch (error) {
     M.log.error(error);
@@ -367,4 +361,3 @@ async function getBlobByID() {
     chai.expect(error).to.equal(null);
   }
 }
-
