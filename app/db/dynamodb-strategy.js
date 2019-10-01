@@ -818,29 +818,7 @@ class Model {
         ProjectionExpression: projectionString
       };
 
-      // Loop through each field in the filter
-      Object.keys(filter).forEach((key) => {
-        // If the filter parameter is a field on the schema
-        if (Object.keys(this.definition).includes(key)) {
-          const value = filter[key];
-
-          // If the value is a string
-          if (typeof value === 'string') {
-            getObj.Key[key] = { S: value };
-          }
-          // If the value is an array of strings
-          else if (Array.isArray(value) && value.every(v => typeof v === 'string')
-            && value.length !== 0) {
-            getObj.Key[key] = { SS: value };
-          }
-          else if (typeof value === 'boolean') {
-            getObj.Key[key] = { BOOL: value };
-          }
-        }
-        else {
-          M.log.error(`Filter param ${key} not a param on ${this.TableName} model.`);
-        }
-      });
+      getObj.Key = this.formatObject(filter);
 
       M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
       // Make the getItem request
@@ -856,7 +834,9 @@ class Model {
           return resolve(this.formatDocument(foundItem.Item, options));
         }
       })
-      .catch((error) => reject(error));
+      .catch((error) => {
+        return reject(error)
+      });
     });
   }
 
