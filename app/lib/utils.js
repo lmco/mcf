@@ -52,6 +52,8 @@ module.exports.ID_DELIMITER = ':';
  * @param {object} res - Response object.
  * @param {string} name - Name of the template to render.
  * @param {object} params - List of parameters to render.
+ *
+ * @returns {Function} Returns the response render function with the name and options.
  */
 module.exports.render = function(req, res, name, params) {
   const opts = params || {};
@@ -143,6 +145,8 @@ module.exports.toTitleCase = function(s, keepUpper = false) {
  *
  * @param {*} a - The first parameter to be compared.
  * @param {*} b - The second parameter to be compared.
+ *
+ * @returns {boolean} Returns whether the parameters do or do not share deep equality.
  */
 module.exports.deepEqual = function(a, b) {
   try {
@@ -166,6 +170,8 @@ module.exports.deepEqual = function(a, b) {
  * options.
  * @param {object} validOptions - An object containing valid option as keys and
  * the object's data type as values. e.g. populate: 'array'.
+ *
+ * @returns {object} Returns the parsed options object.
  */
 module.exports.parseOptions = function(options, validOptions) {
   // Check option is defined

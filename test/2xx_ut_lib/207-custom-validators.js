@@ -40,21 +40,19 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies username validator is the default when a custom
  * validator is not specified in the config file.
- *
  */
-function verifyDefaultValidator(done) {
+async function verifyDefaultValidator() {
   if (M.config.validators) this.skip();
   const A = validators.user.username;
   const B = '^([a-z])([a-z0-9_]){0,}$';
   chai.expect(A).to.equal(B);
-  done();
 }
 
 /**
  * @description Verifies the ID validator is overwritten with a UUID validator
  * that is specified in the config file.
  */
-function verifyCustomValidator(done) {
+async function verifyCustomValidator() {
   if (!M.config.validators) this.skip();
   const A = validators.element.id;
   Object.keys(M.config.validators).forEach((key) => {
@@ -64,5 +62,4 @@ function verifyCustomValidator(done) {
       chai.expect(A).to.equal(C);
     }
   });
-  done();
 }

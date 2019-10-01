@@ -1846,7 +1846,7 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
   /**
    * @description A nested helper function.  Searches the for parent of the element ID provided.
    *
-   * @param searchID - The ID of the element to search for.
+   * @param {string} searchID - The ID of the element to search for.
    * @returns {Promise<string|string|*>} Returns either a recursive call to itself if the parent of
    * the element also has a parent, an empty string if the parent of the element is the root, or
    * throws an error if a circular reference has been found.
