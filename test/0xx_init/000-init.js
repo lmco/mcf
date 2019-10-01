@@ -66,20 +66,41 @@ describe(M.getModuleName(module.filename), function() {
   /**
    * Execute the tests.
    */
-  it('should initialize the models', initModels);
   it('clean database', cleanDB);
+  it('should initialize the models', initModels);
   it('should create the default org if it doesn\'t exist', createDefaultOrg);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Initializes all models asynchronously.
+ * @description Cleans out the database by removing all items from all
+ * collections.
+ *
+ * @returns {Promise} Resolves upon successful deletion of all contents
+ * from the database.
+ */
+async function cleanDB() {
+  try {
+    await db.clear();
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+  }
+}
+
+/**
+ * @description Initializes all models asynchronously. Adds the single server
+ * data document to the database, and ensures the element and user indexes are
+ * created for 4xx search tests.
  * @async
  *
- * @returns {Promise<void>} Resolves upon successful initiation of models.
+ * @returns {Promise} Resolves upon successful initiation of models.
  */
 async function initModels() {
   try {
+    // Initialize all models
     await Artifact.init();
     await Branch.init();
     await Element.init();
@@ -87,6 +108,9 @@ async function initModels() {
     await Project.init();
     await ServerData.init();
     await User.init();
+
+    // Insert server data
+    await ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]);
   }
   catch (error) {
     M.log.critical('Failed to initialize models.');
@@ -95,32 +119,11 @@ async function initModels() {
 }
 
 /**
- * @description Cleans out the database by removing all items from all
- * collections.
- */
-function cleanDB(done) {
-  db.clear()
-  .then(() => ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]))
-  // Ensure element indexes are created prior to running other tests
-  .then(() => Element.ensureIndexes())
-  // Ensure user indexes are created prior to running other tests
-  .then(() => User.ensureIndexes())
-  .then(() => done())
-  .catch(error => {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-    done();
-  });
-}
-
-
-/**
  * @description Creates the default org if it doesn't already exist.
  */
-function createDefaultOrg(done) {
-  Organization.findOne({ _id: M.config.server.defaultOrganizationId })
-  .then((org) => {
+async function createDefaultOrg() {
+  try {
+    const org = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
     // Verify return statement
     chai.expect(org).to.equal(null);
 
@@ -133,13 +136,11 @@ function createDefaultOrg(done) {
     });
 
     // Save the default org
-    return defOrg.save();
-  })
-  .then(() => done())
-  .catch((error) => {
+    await defOrg.save();
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }

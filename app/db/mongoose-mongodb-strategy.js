@@ -100,6 +100,8 @@ function disconnect() {
  * @description Clears all contents from the database, equivalent to starting
  * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 async function clear() {
   return mongoose.connection.db.dropDatabase();
@@ -159,6 +161,8 @@ class Schema extends mongoose.Schema {
    * @param {object|Schema} obj - Plain object with paths to add, or another
    * schema.
    * @param {string} [prefix] - Path to prefix the newly added paths with.
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   add(obj, prefix) {
     /**
@@ -223,13 +227,13 @@ class Model {
   }
 
   /**
-   * @description Unused init function.
+   * @description Ensures all indexes are created.
    * @async
    *
-   * @returns {Promise<void>} Returns empty promise upon completion.
+   * @returns {Promise} Returns empty promise upon completion.
    */
-  async init() { // eslint-disable-line class-methods-use-this
-
+  async init() {
+    await this.model.ensureIndexes();
   }
 
   /**
@@ -319,7 +323,7 @@ class Model {
    *
    * @param {string} name - The name of the index.
    *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return this.model.collection.dropIndex(name);
@@ -340,17 +344,6 @@ class Model {
    */
   async deleteMany(conditions, options, cb) {
     return this.model.deleteMany(conditions, options, cb);
-  }
-
-  /**
-   * @description Creates all indexes (if not already created) for the model's
-   * schema. Calls the mongoose ensureIndexes() function.
-   * @async
-   *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
-   */
-  async ensureIndexes() {
-    return this.model.ensureIndexes();
   }
 
   /**
@@ -492,6 +485,8 @@ class Model {
    * @param {object} doc - The object containing updates to the found documents.
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
+   *
+   * @returns {Promise<object[]>} The updated objects.
    */
   async updateMany(filter, doc, options, cb) {
     return this.model.updateMany(filter, doc, options, cb);

@@ -34,6 +34,8 @@ requiredFunctions.forEach((fxn) => {
 /**
  * @description Connects to the database.
  * @async
+ *
+ * @returns {Function} The connect function of the implemented database strategy.
  */
 async function connect() {
   try {
@@ -47,6 +49,8 @@ async function connect() {
 /**
  * @description Disconnects from the database.
  * @async
+ *
+ * @returns {Function} The disconnect function of the implemented database strategy.
  */
 async function disconnect() {
   try {
@@ -61,6 +65,8 @@ async function disconnect() {
  * @description Clears all contents from the database, equivalent to starting
  * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
+ *
+ * @returns {Function} The clear function of the implemented database strategy.
  */
 async function clear() {
   try {
@@ -133,6 +139,9 @@ class Schema extends DBModule.Schema {
    * @param {(object|Schema)} obj - The object or schema to add to the current
    * schema.
    * @param {string} [prefix] - The optional prefix to add to the paths in obj.
+   *
+   * @returns {Function} Calls super on the add function of the implemented
+   * database strategy's schema.
    */
   add(obj, prefix) {
     return super.add(obj, prefix);
@@ -143,6 +152,9 @@ class Schema extends DBModule.Schema {
    *
    * @param {Function} cb - A callback function to run.
    * @param {object} [options] - A object containing options.
+   *
+   * @returns {Function} Calls super on the plugin function of the implemented
+   * database strategy's schema.
    */
   plugin(cb, options) {
     return super.plugin(cb, options);
@@ -157,6 +169,9 @@ class Schema extends DBModule.Schema {
    * where 1 defines an ascending index, -1 a descending index, and 'text'
    * defines a text index.
    * @param {object} [options] - An object containing options.
+   *
+   * @returns {Function} Calls super on the index function of the implemented
+   * database strategy's schema.
    */
   index(fields, options) {
     return super.index(fields, options);
@@ -171,6 +186,9 @@ class Schema extends DBModule.Schema {
    * @param {object} [options] - An object containing options.
    * @param {Function} cb - The callback function to run prior to the event
    * occurring.
+   *
+   * @returns {Function} Calls super on the pre function of the implemented
+   * database strategy's schema.
    */
   pre(methodName, options, cb) {
     return super.pre(methodName, options, cb);
@@ -196,6 +214,9 @@ class Schema extends DBModule.Schema {
    * @param {(boolean|Function)} [options.justOne] - If true, the virtual should
    * only return a single document. If false, the virtual will be an array of
    * documents.
+   *
+   * @returns {Function} Calls super on the virtual function of the implemented
+   * database strategy's schema.
    */
   virtual(name, options) {
     return super.virtual(name, options);
@@ -207,6 +228,9 @@ class Schema extends DBModule.Schema {
    *
    * @param {string} name - The name of the static function.
    * @param {Function} fn - The function to be added to the model.
+   *
+   * @returns {Function} Calls super on the static function of the implemented
+   * database strategy's schema.
    */
   static(name, fn) {
     return super.static(name, fn);
@@ -218,6 +242,9 @@ class Schema extends DBModule.Schema {
    *
    * @param {string} name - The name of the non-static function.
    * @param {Function} fn - The function to be added to the model.
+   *
+   * @returns {Function} Calls super on the method function of the implemented
+   * database strategy's schema.
    */
   method(name, fn) {
     return super.method(name, fn);
@@ -254,8 +281,8 @@ class Model extends DBModule.Model {
 
     // Check that expected functions are defined
     const expectedFunctions = ['bulkWrite', 'createDocument', 'countDocuments',
-      'deleteIndex', 'deleteMany', 'ensureIndexes', 'find', 'findOne',
-      'getIndexes', 'insertMany', 'updateMany', 'updateOne', 'init'];
+      'deleteIndex', 'deleteMany', 'find', 'findOne', 'getIndexes',
+      'insertMany', 'updateMany', 'updateOne', 'init'];
     expectedFunctions.forEach((f) => {
       // Ensure the parameter is defined
       if (!(f in this)) {
@@ -275,7 +302,7 @@ class Model extends DBModule.Model {
    * be run in the constructor.
    * @async
    *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async init() {
     return super.init();
@@ -339,6 +366,9 @@ class Model extends DBModule.Model {
    * @param {object} doc - The JSON to be converted into a document. Should
    * roughly align with the model's schema. Each document created should at
    * least contain an _id, as well as the methods defined in the schema.
+   *
+   * @returns {Function} Calls the createDocument function of the implemented
+   * database strategy's model schema.
    */
   createDocument(doc) {
     return super.createDocument(doc);
@@ -364,7 +394,7 @@ class Model extends DBModule.Model {
    *
    * @param {string} name - The name of the index.
    *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return super.deleteIndex(name);
@@ -384,17 +414,6 @@ class Model extends DBModule.Model {
    */
   async deleteMany(conditions, options, cb) {
     return super.deleteMany(conditions, options, cb);
-  }
-
-  /**
-   * @description Creates all indexes (if not already created) for the model's
-   * schema.
-   * @async
-   *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
-   */
-  async ensureIndexes() {
-    return super.ensureIndexes();
   }
 
   /**
@@ -501,6 +520,8 @@ class Model extends DBModule.Model {
    * @param {object} doc - The object containing updates to the found documents.
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
+   *
+   * @returns {Promise<object[]>} The updated documents.
    */
   async updateMany(filter, doc, options, cb) {
     return super.updateMany(filter, doc, options, cb);
@@ -566,6 +587,8 @@ class Store extends DBModule.Store {
    *
    * @param {Function} cb - The callback to run, should be called as
    * cb(error, sessions).
+   *
+   * @returns {Promise<object[]>} An array of all the sessions in the store.
    */
   all(cb) {
     return super.all(cb);
@@ -577,6 +600,8 @@ class Store extends DBModule.Store {
    *
    * @param {string} sid - The ID of the session to delete.
    * @param {Function} cb - The callback to run, should be called as cb(error).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   destroy(sid, cb) {
     return super.destroy(sid, cb);
@@ -587,6 +612,8 @@ class Store extends DBModule.Store {
    * store.
    *
    * @param {Function} cb - The callback to run, should be called as cb(error).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   clear(cb) {
     return super.clear(cb);
@@ -598,6 +625,8 @@ class Store extends DBModule.Store {
    *
    * @param {Function} cb - The callback to run, should be called as
    * cb(error, len).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   length(cb) {
     return super.length(cb);
@@ -611,6 +640,8 @@ class Store extends DBModule.Store {
    * @param {Function} cb - The callback to run, should be called as
    * cb(error, session). The session argument should be the session if found,
    * otherwise null or undefined if not found.
+   *
+   * @returns {Promise<object>} The specified session from the store.
    */
   get(sid, cb) {
     return super.get(sid, cb);
@@ -623,6 +654,8 @@ class Store extends DBModule.Store {
    * @param {string} sid - The ID of the session to upsert.
    * @param {object} session - The session object to upsert.
    * @param {Function} cb - The callback to run, should be called as cb(error).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   set(sid, session, cb) {
     return super.set(sid, session, cb);
@@ -636,6 +669,8 @@ class Store extends DBModule.Store {
    * @param {string} sid - The ID of the session to "touch".
    * @param {object} session - The session to "touch".
    * @param {Function} cb - The callback to run, should be called as cb(error).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   touch(sid, session, cb) {
     return super.touch(sid, session, cb);

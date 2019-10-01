@@ -110,6 +110,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Creates a project using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createProject(done) {
   const projData = testData.projects[0];
@@ -150,6 +152,8 @@ function createProject(done) {
 
 /**
  * @description Creates multiple projects using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createProjects(done) {
   const projDataObjects = [
@@ -202,6 +206,8 @@ function createProjects(done) {
 
 /**
  * @description Creates or replaces a project using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrReplaceProject(done) {
   const projData = testData.projects[0];
@@ -241,8 +247,9 @@ function createOrReplaceProject(done) {
 }
 
 /**
- * @description Creates or replaces multiple projects using the project
- * controller.
+ * @description Creates or replaces multiple projects using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrReplaceProjects(done) {
   const projDataObjects = [
@@ -295,6 +302,8 @@ function createOrReplaceProjects(done) {
 
 /**
  * @description Finds a project via the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findProject(done) {
   const projData = testData.projects[0];
@@ -335,6 +344,8 @@ function findProject(done) {
 
 /**
  * @description Finds multiple projects using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findProjects(done) {
   const projDataObjects = [
@@ -390,6 +401,8 @@ function findProjects(done) {
 
 /**
  * @description Finds all projects on a given organization using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findAllProjects(done) {
   const projDataObjects = [
@@ -443,6 +456,8 @@ function findAllProjects(done) {
 
 /**
  * @description Updates a project using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateProject(done) {
   const projData = testData.projects[0];
@@ -489,6 +504,8 @@ function updateProject(done) {
 
 /**
  * @description Updates multiple projects using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateProjects(done) {
   const projDataObjects = [
@@ -547,6 +564,8 @@ function updateProjects(done) {
 
 /**
  * @description Deletes a project using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteProject(done) {
   const projData = testData.projects[0];
@@ -577,6 +596,8 @@ function deleteProject(done) {
 
 /**
  * @description Deletes multiple projects using the project controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteProjects(done) {
   const projDataObjects = [

@@ -49,6 +49,8 @@ const validators = M.require('lib.validators');
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function home(req, res) {
   // Sanity check: confirm req.user exists
@@ -106,6 +108,8 @@ function profile(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function organization(req, res) {
   // Sanity check: confirm req.user exists
@@ -125,6 +129,8 @@ function organization(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function project(req, res) {
   // Sanity check: confirm req.user exists
@@ -174,6 +180,8 @@ function flightManual(req, res) {
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc
  * in the API routes file.
+ *
+ * @returns {Function} The swaggerJSDoc function.
  */
 function swaggerSpec() {
   return swaggerJSDoc({
@@ -194,6 +202,8 @@ function swaggerSpec() {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function swaggerDoc(req, res) {
   return utils.render(req, res, 'swagger', {
@@ -209,6 +219,8 @@ function swaggerDoc(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function showAboutPage(req, res) {
   return utils.render(req, res, 'about', {
@@ -229,6 +241,8 @@ function showAboutPage(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function showLoginPage(req, res) {
   let next = '';
@@ -299,6 +313,8 @@ function logout(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function notFound(req, res) {
   // render the 404 not found page
