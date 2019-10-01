@@ -67,14 +67,9 @@ class ProjectApp extends Component {
       else {
         // Set user data
         this.setState({ user: data });
-        // Initialize options
-        let opt = 'minified=true';
 
-        // Verify if admin
-        if (data.admin) {
-          // Update options to return archived data
-          opt = 'minified=true&includeArchived=true';
-        }
+        // Initialize options
+        const opt = 'minified=true&includeArchived=true';
 
         // Get project data
         $.ajax({
@@ -97,8 +92,17 @@ class ProjectApp extends Component {
                 // Set permissions
                 this.setState({ permissions: perm });
               }
-              // Set states
-              this.setState({ project: project });
+
+              // Verify the user has admin permissions on project if it is archived
+              if (project.archived && ((perm === 'write') || (perm === 'read'))) {
+                // Do not display the project information for non-perm user
+                this.setState({ project: null });
+                this.setState({ error: `Project [${project.id}] not found.`})
+              }
+              else {
+                // Set states
+                this.setState({ project: project });
+              }
             },
             401: (error) => {
               // Throw error and set state

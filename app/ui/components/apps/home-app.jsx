@@ -49,7 +49,6 @@ class HomeApp extends Component {
       orgs: [],
       admin: false,
       write: false,
-      writePermOrgs: null,
       displayOrgs: {},
       error: null
     };
@@ -129,7 +128,6 @@ class HomeApp extends Component {
     if (writePermOrgs.length > 0) {
       // Set write states
       this.setState({ write: true });
-      this.setState({ writePermOrgs: writePermOrgs });
     }
 
     // Verify user is admin
@@ -208,8 +206,10 @@ class HomeApp extends Component {
 
         const showProj = (this.state.displayOrgs[org.id]);
 
+        // Verify if system admin
         if (!this.state.user.admin) {
-          if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
+          // Verify admin permission on org
+          if (org.permissions[username] === 'admin') {
             return (<OrgList org={org} key={`org-key-${org.id}`}
                              user={this.state.user}
                              write={this.state.write}
@@ -217,7 +217,17 @@ class HomeApp extends Component {
                              showProjs={showProj}
                              onExpandChange={this.onExpandChange}/>);
           }
-          else {
+          // Verify write permissions and not archived org
+          else if (org.permissions[username] === 'write' && !org.archived) {
+            return (<OrgList org={org} key={`org-key-${org.id}`}
+                             user={this.state.user}
+                             write={this.state.write}
+                             admin={this.state.admin}
+                             showProjs={showProj}
+                             onExpandChange={this.onExpandChange}/>);
+          }
+          // Verify read permissions and not archived org
+          else if (org.permissions[username] === 'read' && !org.archived) {
             return (<OrgList org={org} key={`org-key-${org.id}`}
                              user={this.state.user}
                              admin={this.state.admin}
