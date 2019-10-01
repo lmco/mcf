@@ -210,8 +210,6 @@ function login(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
- *
- * @returns {object} Response object with 200 status code
  */
 function test(req, res) {
   res.status(200).send('');

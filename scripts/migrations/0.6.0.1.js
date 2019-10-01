@@ -39,6 +39,8 @@ const jmi = M.require('lib.jmi-conversions');
 /**
  * @description Handles the database migration from 0.6.0.1 to 0.6.0. This drop in
  * versions is currently not supported.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -76,6 +78,8 @@ module.exports.down = function() {
  * passwords due to change in salt when password is hashed. If for some reason a
  * migration fails, any data removed from the database will be added to the
  * ./data directory.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -184,6 +188,8 @@ module.exports.up = function() {
  *
  * @param {Array} orgs - The organizations being updated.
  * @param {object} jmi2Users - The found users in JMI Type 2 format.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function sixToSevenOrgHelper(orgs, jmi2Users) {
   return new Promise((resolve, reject) => {
@@ -299,6 +305,8 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
  * @param {Array} projects - The projects being updated.
  * @param {object} jmi2Users - The found users in JMI Type 2 format.
  * @param {object} jmi2Orgs - The found orgs in JMI Type 2 format.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
   return new Promise((resolve, reject) => {
@@ -412,6 +420,8 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
  * @param {object} jmi2Users - The found users in JMI Type 2 format.
  * @param {object} jmi2Projects - The found projects in JMI Type 2 format.
  * @param {object} jmi2Elements - The found elements in JMI Type 2 format.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements) {
   return new Promise((resolve, reject) => {
@@ -530,6 +540,8 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
  *
  * @param {Array} users - The users being updated.
  * @param {object} jmi2Users - The found users in JMI Type 2 format.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function sixToSevenUserHelper(users, jmi2Users) {
   return new Promise((resolve, reject) => {

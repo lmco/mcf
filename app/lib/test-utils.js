@@ -38,6 +38,8 @@ delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json')
 
 /**
  * @description Helper function to create test non-admin user in MBEE tests.
+ *
+ * @returns {Promise<User>} Returns the newly created user upon completion.
  */
 module.exports.createNonAdminUser = function() {
   return new Promise((resolve, reject) => {
@@ -88,6 +90,8 @@ module.exports.createNonAdminUser = function() {
 
 /**
  * @description Helper function to create test admin user in MBEE tests.
+ *
+ * @returns {Promise<User>} Returns the newly created admin user upon completion.
  */
 module.exports.createTestAdmin = function() {
   return new Promise((resolve, reject) => {
@@ -137,6 +141,8 @@ module.exports.createTestAdmin = function() {
 
 /**
  * @description Helper function to delete test user in MBEE tests.
+ *
+ * @returns {Promise<string>} Returns the id of the deleted user.
  */
 module.exports.removeNonAdminUser = function() {
   return new Promise((resolve, reject) => {
@@ -164,6 +170,8 @@ module.exports.removeNonAdminUser = function() {
 
 /**
  * @description Helper function to delete test admin user in MBEE tests.
+ *
+ * @returns {Promise<User>} Returns the newly created user upon completion.
  */
 module.exports.removeTestAdmin = function() {
   return new Promise((resolve, reject) => {
@@ -191,6 +199,10 @@ module.exports.removeTestAdmin = function() {
 
 /**
  * @description Helper function to create organization in MBEE tests.
+ *
+ * @param {object} adminUser - The admin user to create the org with.
+ *
+ * @returns {Promise<Organization>} Returns the newly created org upon completion.
  */
 module.exports.createTestOrg = function(adminUser) {
   return new Promise((resolve, reject) => {
@@ -210,6 +222,8 @@ module.exports.createTestOrg = function(adminUser) {
 
 /**
  * @description Helper function to remove organization in MBEE tests.
+ *
+ * @returns {Promise<string>} Returns the id of the deleted org.
  */
 module.exports.removeTestOrg = function() {
   return new Promise((resolve, reject) => {
@@ -231,6 +245,11 @@ module.exports.removeTestOrg = function() {
 
 /**
  * @description Helper function to create project in MBEE tests.
+ *
+ * @param {object} adminUser - The admin user to create the project with.
+ * @param {string} orgID - The id of the org to create the project on.
+ *
+ * @returns {Promise<Project>} Returns the newly created project upon completion.
  */
 module.exports.createTestProject = function(adminUser, orgID) {
   return new Promise((resolve, reject) => {
@@ -283,6 +302,12 @@ module.exports.createTestProject = function(adminUser, orgID) {
 
 /**
  * @description Helper function to create a tag in MBEE tests.
+ *
+ * @param {object} adminUser - The admin user to create the branch with.
+ * @param {string} orgID - The org to create the branch on.
+ * @param {string} projID - The project to create the branch on.
+ *
+ * @returns {Promise<Branch>} Returns a tagged branch.
  */
 module.exports.createTag = function(adminUser, orgID, projID) {
   return new Promise((resolve, reject) => {
@@ -331,6 +356,10 @@ module.exports.createTag = function(adminUser, orgID, projID) {
 
 /**
  * @description Helper function to import a copy of test data.
+ *
+ * @param {string} filename - The file to read.
+ *
+ * @returns {object} Returns the imported test data.
  */
 module.exports.importTestData = function(filename) {
   // Clear require cache so a new copy is imported
@@ -438,6 +467,8 @@ module.exports.createResponse = function(res) {
  *
  * @param {string} contentType - The content type. Defaults to application/json.
  * @param {object} user - The requesting user. Must contains a username and password.
+ *
+ * @returns {object} Returns an object containing header key-value pairs.
  */
 module.exports.getHeaders = function(contentType = 'application/json', user = testData.adminUser) {
   const formattedCreds = `${user.username || user._id}:${user.password}`;
@@ -450,6 +481,8 @@ module.exports.getHeaders = function(contentType = 'application/json', user = te
 
 /**
  * @description Helper function for setting the certificate authorities for each request.
+ *
+ * @returns {object} Returns the result of reading the certificate authority file.
  */
 module.exports.readCaFile = function() {
   if (M.config.test.hasOwnProperty('ca')) {

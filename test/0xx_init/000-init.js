@@ -74,9 +74,9 @@ describe(M.getModuleName(module.filename), function() {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Cleans out the database by removing all items from all
- * collections/tables.
+ * collections.
  *
- * @returns {Promise<void>} Resolves upon successful deletion of all contents
+ * @returns {Promise} Resolves upon successful deletion of all contents
  * from the database.
  */
 async function cleanDB() {
@@ -84,8 +84,9 @@ async function cleanDB() {
     await db.clear();
   }
   catch (error) {
-    M.log.critical('Failed to clean the database.');
-    chai.expect(error.message).to.equal(null);
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
   }
 }
 
@@ -95,7 +96,7 @@ async function cleanDB() {
  * created for 4xx search tests.
  * @async
  *
- * @returns {Promise<void>} Resolves upon successful initiation of models.
+ * @returns {Promise} Resolves upon successful initiation of models.
  */
 async function initModels() {
   try {
@@ -117,13 +118,12 @@ async function initModels() {
   }
 }
 
-
 /**
  * @description Creates the default org if it doesn't already exist.
  */
-function createDefaultOrg(done) {
-  Organization.findOne({ _id: M.config.server.defaultOrganizationId })
-  .then((org) => {
+async function createDefaultOrg() {
+  try {
+    const org = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
     // Verify return statement
     chai.expect(org).to.equal(null);
 
@@ -136,13 +136,11 @@ function createDefaultOrg(done) {
     });
 
     // Save the default org
-    return defOrg.save();
-  })
-  .then(() => done())
-  .catch((error) => {
+    await defOrg.save();
+  }
+  catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
-  });
+  }
 }

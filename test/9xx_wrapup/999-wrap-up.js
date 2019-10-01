@@ -79,7 +79,7 @@ async function cleanDB() {
  * data document.
  * @async
  *
- * @returns {Promise<void>} Resolves upon successful insertion of the document.
+ * @returns {Promise} Resolves upon successful insertion of the document.
  */
 async function initServerDataModel() {
   try {
