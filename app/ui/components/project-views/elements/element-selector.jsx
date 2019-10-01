@@ -87,6 +87,8 @@ class ElementSelector extends React.Component {
 
   /**
    * @description This is the click handler used to select an element.
+   *
+   * @param {string} id - The id of the selected element.
    */
   selectElementHandler(id) {
     // Verify id is not self
@@ -143,6 +145,8 @@ class ElementSelector extends React.Component {
 
   /**
    * @description Changes the project.
+   *
+   * @param {object} event - The event trigger.
    */
   handleChange(event) {
     this.setState({ project: event.target.value });

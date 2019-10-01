@@ -25,6 +25,8 @@ const ServerData = M.require('models.server-data');
 
 /**
  * @description Handles the database migration from 0.7.3.1 to 0.7.3.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -50,6 +52,8 @@ module.exports.down = function() {
 /**
  * @description Handles the database migration from 0.7.3 to 0.7.3.1.
  * Adds the field 'projectReferences' to each existing project.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -76,6 +80,8 @@ module.exports.up = function() {
 /**
  * @description Helper function for 0.7.3 to 0.7.3.1 migration. Handles all
  * updates to the project collection.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function projectHelper() {
   return new Promise((resolve, reject) => {

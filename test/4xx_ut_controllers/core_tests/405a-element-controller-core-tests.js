@@ -120,6 +120,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Creates an element using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createElement(done) {
   const elemData = testData.elements[0];
@@ -178,6 +180,8 @@ function createElement(done) {
 
 /**
  * @description Creates multiple elements using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createElements(done) {
   const elemDataObjects = [
@@ -254,6 +258,8 @@ function createElements(done) {
 
 /**
  * @description Creates or replaces an element using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrReplaceElement(done) {
   const elemData = testData.elements[0];
@@ -311,8 +317,9 @@ function createOrReplaceElement(done) {
 }
 
 /**
- * @description Creates or replaces multiple elements using the element
- * controller.
+ * @description Creates or replaces multiple elements using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrReplaceElements(done) {
   const elemDataObjects = [
@@ -389,6 +396,8 @@ function createOrReplaceElements(done) {
 
 /**
  * @description Finds an element via the elements controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findElement(done) {
   const elemData = testData.elements[0];
@@ -447,6 +456,8 @@ function findElement(done) {
 
 /**
  * @description Finds multiple elements via the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findElements(done) {
   const elemDataObjects = [
@@ -522,6 +533,8 @@ function findElements(done) {
 
 /**
  * @description Finds all elements on a given project using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findAllElements(done) {
   const elemDataObjects = [
@@ -593,8 +606,9 @@ function findAllElements(done) {
 }
 
 /**
- * @description Finds an element through text based search via the element
- * controller.
+ * @description Finds an element through text based search via the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function searchElement(done) {
   const elemData = testData.elements[0];
@@ -652,6 +666,8 @@ function searchElement(done) {
 
 /**
  * @description Updates an element using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateElement(done) {
   const elemData = testData.elements[0];
@@ -716,6 +732,8 @@ function updateElement(done) {
 
 /**
  * @description Updates multiple elements using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateElements(done) {
   const elemDataObjects = [
@@ -794,6 +812,8 @@ function updateElements(done) {
 
 /**
  * @description Deletes an element using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteElement(done) {
   const elemData = testData.elements[0];
@@ -825,6 +845,8 @@ function deleteElement(done) {
 
 /**
  * @description Deletes multiple elements using the element controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteElements(done) {
   const elemDataObjects = [
