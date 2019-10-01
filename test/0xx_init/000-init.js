@@ -82,11 +82,6 @@ describe(M.getModuleName(module.filename), function() {
 async function cleanDB() {
   try {
     await db.clear();
-    await ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]);
-    // Ensure element indexes are created prior to running other tests
-    await Element.ensureIndexes();
-    // Ensure user indexes are created prior to running other tests
-    await User.ensureIndexes();
   }
   catch (error) {
     M.log.error(error);
