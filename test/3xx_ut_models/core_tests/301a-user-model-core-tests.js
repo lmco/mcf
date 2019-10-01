@@ -146,21 +146,20 @@ async function getUserPublicData() {
  * authenticated.
  */
 async function verifyValidPassword() {
-  let user;
-  let result;
   try {
     // Find the created user from the previous createUser test.
-    user = await User.findOne({ _id: testData.users[1].username });
+    const user = await User.findOne({ _id: testData.users[1].username });
     // Verify the user's password
-    result = await user.verifyPassword(testData.users[1].password);
+    const result = await user.verifyPassword(testData.users[1].password);
+
+    // expected - verifyPassword() returned true
+    result.should.equal(true);
   }
   catch (error) {
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
   }
-  // expected - verifyPassword() returned true
-  result.should.equal(true);
 }
 
 /**

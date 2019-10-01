@@ -65,6 +65,7 @@ async function clear() {
 
       return Promise.all(promises);
     })
+    .then(() => resolve())
     .catch((error) => reject(error));
   });
 
@@ -90,6 +91,8 @@ class Schema {
       GlobalSecondaryIndexes: []
     };
     this.definition = definition;
+    this.definition.hooks = { pre: [], post: [] };
+    this.definition.methods = [];
 
     Object.keys(this.definition).forEach((key) => {
       switch (this.definition[key].type) {
@@ -180,7 +183,14 @@ class Schema {
    * occurring.
    */
   pre(methodName, options, cb) {
-    // return super.pre(methodName, options, cb);
+    const obj = {};
+    // No options provided
+    if (typeof options === 'function') {
+      cb = options; // eslint-disable-line no-param-reassign
+    }
+
+    obj[methodName] = cb;
+    this.definition.hooks.pre.push(obj);
   }
 
   /**
@@ -224,11 +234,13 @@ class Schema {
    * @description Adds a non-static method to the schema, which later will be an
    * instance method on the model.
    *
-   * @param {String} name - The name of the non-static function.
-   * @param {function} fn - The function to be added to the model.
+   * @param {string} name - The name of the non-static function.
+   * @param {Function} fn - The function to be added to the model.
    */
   method(name, fn) {
-    // return super.method(name, fn);
+    const obj = {};
+    obj[name] = fn;
+    this.definition.methods.push(obj);
   }
 }
 
@@ -416,14 +428,22 @@ class Model {
       if (batchGetObj.RequestItems[this.TableName].Keys.length > 0) {
         M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
         // Make the batchGetItem request
-        this.connection.batchGetItem(batchGetObj)
-        .promise()
+        this.connection.batchGetItem(batchGetObj).promise()
         .then((foundDocs) => resolve(foundDocs.Responses[this.TableName]))
         .catch((error) => reject(error));
       }
       else {
         return resolve([]);
       }
+    });
+  }
+
+  async batchWriteItem(params, options) {
+    return new Promise((resolve, reject) => {
+      connect()
+      .then((conn) => conn.batchWriteItem(params).promise())
+      .then(() => resolve())
+      .catch((error) => reject(error));
     });
   }
 
@@ -487,17 +507,29 @@ class Model {
    * least contain an _id, as well as the methods defined in the schema.
    */
   createDocument(doc) {
+    doc = JSON.parse(JSON.stringify(doc)); // eslint-disable-line no-param-reassign
     const def = this.definition;
     const table = this.TableName;
-    const conn = this.connection;
     const modelName = this.modelName;
     const model = this;
 
     /**
      *
      */
-    doc.__proto__.validateDoc = function() { // eslint-disable-line no-proto
-      const keys = Object.keys(doc);
+    doc.__proto__.validateSync = function(fields) { // eslint-disable-line no-proto
+      let keys;
+      // If fields provided and is an array , set equal to keys
+      if (Array.isArray(fields)) {
+        keys = fields;
+      }
+      // If only a single field is provided, ad to array
+      else if (typeof fields === 'string') {
+        keys = [fields];
+      }
+      else {
+        keys = Object.keys(doc);
+      }
+
       // Loop over each valid parameter
       Object.keys(def).forEach((param) => {
         // Parameter was defined on the document
@@ -555,19 +587,28 @@ class Model {
     doc.__proto__.save = async function() { // eslint-disable-line no-proto
       return new Promise((resolve, reject) => {
         // Ensure the document is valid
-        this.validateDoc();
+        this.validateSync();
+        const promises = [];
+        if ('presave' in this) {
+          promises.push(this.presave());
+        }
+        // If a pre hook is defined, it is run async
+        Promise.all(promises)
+        // Retrieve connection object
+        .then(() => connect())
+        .then((localConn) => {
+          const putObj = {
+            TableName: table,
+            Item: {}
+          };
 
-        const putObj = {
-          TableName: table,
-          Item: {}
-        };
+          // Format the document object
+          putObj.Item = model.formatObject(this);
 
-        // Format the document object
-        putObj.Item = model.formatObject(this)
-
-        M.log.debug(`DB OPERATION: ${table} putItem`);
-        // Save the document
-        conn.putItem(putObj).promise()
+          M.log.debug(`DB OPERATION: ${table} putItem`);
+          // Save the document
+          return localConn.putItem(putObj).promise();
+        })
         .then(() => model.findOne({ _id: doc._id }))
         .then((foundDoc) => resolve(foundDoc))
         .catch((error) => reject(error));
@@ -579,6 +620,20 @@ class Model {
      * @param field
      */
     doc.__proto__.markModified = function(field) {}; // eslint-disable-line no-proto
+
+    // Add on methods
+    if (Array.isArray(def.methods)) {
+      def.methods.forEach((method) => {
+        doc.__proto__[Object.keys(method)[0]] = Object.values(method)[0]; // eslint-disable-line
+      });
+    }
+
+    // Add on pre-hooks
+    if (Array.isArray(def.hooks.pre)) {
+      def.hooks.pre.forEach((hook) => {
+        doc.__proto__[`pre${Object.keys(hook)[0]}`] = Object.values(hook)[0]; // eslint-disable-line
+      });
+    }
 
     return doc;
   }
@@ -622,18 +677,17 @@ class Model {
    * operation.
    */
   async deleteMany(conditions, options, cb) {
-    // return super.deleteMany(conditions, options, cb);
-  }
+    // Create batchWriteObj
+    const batchWriteObj = { RequestItems: {} };
 
-  /**
-   * @description Creates all indexes (if not already created) for the model's
-   * schema.
-   * @async
-   *
-   * @returns {Promise<*>}
-   */
-  async ensureIndexes() {
-    // return super.ensureIndexes();
+    // Set table and DeleteRequest object
+    batchWriteObj.RequestItems[this.TableName] = [{ DeleteRequest: { Key: {} } }];
+
+    // Format the conditions to align with DynamoDB format
+    batchWriteObj.RequestItems[this.TableName][0].DeleteRequest.Key = this.formatObject(conditions);
+
+    // Call batchWriteItem
+    await this.batchWriteItem(batchWriteObj, options);
   }
 
   /**
@@ -790,7 +844,8 @@ class Model {
 
       M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
       // Make the getItem request
-      this.connection.getItem(getObj).promise()
+      connect()
+      .then((connection) => connection.getItem(getObj).promise())
       .then((foundItem) => {
         // If no document is found, return null
         if (Object.keys(foundItem).length === 0) {
@@ -1112,7 +1167,8 @@ class Model {
 
       M.log.debug(`DB OPERATION: ${this.TableName} updateItem`);
       // Update the single item
-      this.connection.updateItem(updateObj).promise()
+      connect()
+      .then((connection) => connection.updateItem(updateObj).promise())
       .then((updatedItem) => resolve(this.formatDocument(updatedItem.Attributes, options)))
       .catch((error) => reject(error));
     });
