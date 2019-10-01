@@ -111,6 +111,7 @@ class OrgList extends Component {
     const orgId = this.props.org.id;
     let icon;
     let projects;
+    let  archiveProj = false;
 
     if (this.props.showProjs) {
       icon = 'fas fa-angle-down';
@@ -119,13 +120,17 @@ class OrgList extends Component {
       icon = 'fas fa-angle-right';
     }
 
+    if (this.props.org.archived) {
+      archiveProj = true;
+    }
     // Loop through project-views in each org
     if (this.state.projects) {
       projects = this.state.projects.map(
         project => (<ProjList project={project}
                               admin={this.props.admin}
                               key={`proj-key-${project.id}`}
-                              orgid={this.props.org.id}/>)
+                              orgid={this.props.org.id}
+                              archiveProj={archiveProj}/>)
       );
     }
 

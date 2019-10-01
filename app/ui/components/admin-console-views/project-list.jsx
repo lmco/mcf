@@ -72,13 +72,7 @@ class ProjectList extends Component {
         this.setState({ user: data });
         // Initialize url data
         const base = '/api/orgs';
-        let opt = 'populate=projects&minified=true';
-
-        // Verify if admin console
-        if (this.props.adminPage) {
-          // Update url to retrieve archived data
-          opt = 'populate=projects&includeArchived=true&minified=true';
-        }
+        const opt = 'populate=projects&includeArchived=true&minified=true';
 
         // Get project data
         $.ajax({
