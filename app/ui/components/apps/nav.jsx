@@ -151,10 +151,12 @@ class MbeeNav extends Component {
                         <i className='fas fa-user-circle'/>
                       </DropdownToggle>
                       <DropdownMenu right>
+                        {/*<DropdownItem disable={true}>*/}
+                          {/*{`${this.state.user.fname}  ${this.state.user.lname}`}*/}
+                          {/*{`@${this.state.user.username}`}*/}
+                        {/*</DropdownItem>*/}
+                        <DropdownItem href='/'>Home</DropdownItem>
                         <DropdownItem href='/profile'>Profile</DropdownItem>
-                        <DropdownItem divider />
-                        <DropdownItem href='/profile/orgs'>Your Organizations</DropdownItem>
-                        <DropdownItem href='/profile/projects'>Your Projects</DropdownItem>
                         <DropdownItem href='/about'>About</DropdownItem>
                         <DropdownItem divider />
                         {(!this.state.user.admin)
