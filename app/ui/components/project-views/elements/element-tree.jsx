@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.project-views.elements.element-tree
  *
@@ -13,7 +13,7 @@
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
  * @description This the element tree wrapper, grabbing the
- *  root model element and then the subtree.
+ * root model element and then the subtree.
  */
 
 /* Modified ESLint rules for React. */
@@ -47,7 +47,7 @@ class ElementTree extends Component {
   }
 
   /**
-   * This is also considered the refresh function for root
+   * @description This is also considered the refresh function for root
    * element. When an element is deleted or created the
    * elements will be updated.
    */

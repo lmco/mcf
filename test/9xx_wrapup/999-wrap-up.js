@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.999-wrap-up
  *
@@ -55,6 +55,7 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   it('clean database', cleanDB);
+  it('should initialize the server data model', initServerDataModel);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -65,10 +66,28 @@ describe(M.getModuleName(module.filename), () => {
 async function cleanDB() {
   try {
     await db.clear();
+  }
+  catch (error) {
+    M.log.critical('Failed to clean the database.');
+    // Expect no error
+    chai.expect(error).to.equal(null);
+  }
+}
+
+/**
+ * @description Initializes the server data model and inserts the single server
+ * data document.
+ * @async
+ *
+ * @returns {Promise} Resolves upon successful insertion of the document.
+ */
+async function initServerDataModel() {
+  try {
+    await ServerData.init();
     await ServerData.insertMany({ _id: 'server_data', version: M.schemaVersion });
   }
   catch (error) {
-    M.log.error(error);
+    M.log.critical('Failed to insert server data document.');
     // Expect no error
     chai.expect(error).to.equal(null);
   }

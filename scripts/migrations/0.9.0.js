@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.migrations.0.9.0
  *
@@ -11,7 +11,7 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description Migration script for version 0.9.0
+ * @description Migration script for version 0.9.0.
  */
 
 // MBEE modules
@@ -19,6 +19,8 @@ const ServerData = M.require('models.server-data');
 
 /**
  * @description Handles the database migration from 0.9.0 to 0.8.2.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -34,7 +36,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.8.2' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.8.2' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.8.2' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -43,6 +45,8 @@ module.exports.down = function() {
 
 /**
  * @description Handles the database migration from 0.8.2 to 0.9.0.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -58,7 +62,7 @@ module.exports.up = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.9.0' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.9.0' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.9.0' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));

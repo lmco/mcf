@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.validators
  *
@@ -14,6 +14,8 @@
  * @description This file defines validators - common regular expressions and
  * helper functions - used to validate data within MBEE.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow lists in descriptions
 
 // MBEE modules
 const utils = require('./utils');
@@ -33,7 +35,7 @@ const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'blob'];
 
 /**
- * @description Regular Expressions to validate organization data
+ * @description Regular Expressions to validate organization data.
  *
  * id:
  *   - MUST start with a lowercase letter, number or '_'
@@ -79,7 +81,7 @@ const project = {
  *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 1 or more
  *   Examples:
- *       - orgid:projid:branchid [valid]
+ *      - orgid:projid:branchid [valid]
  *      - orgid:projid:my-branch [valid]
  *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
  *      - orgid:projid:-branch[invalid - must start with a letter or a number]

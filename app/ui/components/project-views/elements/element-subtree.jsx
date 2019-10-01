@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.project-views.elements.element-subtree
  *
@@ -60,7 +60,7 @@ class ElementSubtree extends Component {
   }
 
   /**
-   * Toggle the element sub tree
+   * @description Toggle the element sub tree.
    */
   handleElementToggle() {
     this.setState({ elementWindow: !this.state.elementWindow });
@@ -144,7 +144,7 @@ class ElementSubtree extends Component {
   }
 
   /**
-   * Toggle the element to display it's children
+   * @description Toggle the element to display it's children.
    */
   toggleCollapse() {
     if (this.props.unsetCheckbox) {
@@ -175,7 +175,7 @@ class ElementSubtree extends Component {
   }
 
   /**
-   * When an element is deleted, created, or updates the parent
+   * @description When an element is deleted, created, or updates the parent
    * the elements will be updated.
    */
   refresh() {
@@ -208,7 +208,7 @@ class ElementSubtree extends Component {
   }
 
   /**
-   * When an element is clicked, parses the ID and call the passed in
+   * @description When an element is clicked, parses the ID and call the passed in
    * click handler function.
    */
   handleClick() {

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.element-controller
  *
@@ -65,7 +65,7 @@ const permissions = M.require('lib.permissions');
  * @param {(string|string[])} [elements] - The elements to find. Can either be
  * an array of element ids, a single element id, or not provided, which defaults
  * to every element in a project being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -105,9 +105,9 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found element objects
+ * @returns {Promise} Array of found element objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['elem1', 'elem2'], { populate: 'parent' })
@@ -335,7 +335,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to add elements to.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create.
  * @param {string} elements.id - The ID of the element being created.
  * @param {string} [elements.name] - The name of the element.
@@ -343,22 +343,22 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * @param {object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -367,7 +367,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created element objects
+ * @returns {Promise} Array of created element objects.
  *
  * @example
  * create({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...], { populate: ['parent'] })
@@ -672,7 +672,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to update elements on.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * updates to elements, or a single object containing updates.
  * @param {string} elements.id - The ID of the element being updated. Field
  * cannot be updated but is required to find element.
@@ -680,24 +680,24 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} [elements.parent] - The ID of the new elements parent. Cannot
  * update element parents in bulk.
  * @param {string} [elements.source] - The ID of the source element.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - The updated documentation of the
  * element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - The new custom data object. Please note,
+ * @param {object} [elements.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
  * @param {boolean} [elements.archived = false] - The updated archived field. If true,
  * the element will not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -706,7 +706,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated element objects
+ * @returns {Promise} Array of updated element objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem22}...], { populate: 'parent' })
@@ -1038,7 +1038,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to add elements to.
- * @param {(Object|Object[])} elements - Either an array of objects containing
+ * @param {(object|object[])} elements - Either an array of objects containing
  * element data or a single object containing element data to create/replace.
  * @param {string} elements.id - The ID of the element being created/replaced.
  * @param {string} [elements.name] - The name of the element.
@@ -1046,22 +1046,22 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * element.
  * @param {string} [elements.source] - The ID of the source element. If
  * provided, the parameter target is required.
- * @param {Object} [elements.sourceNamespace] - The optional namespace of the
+ * @param {object} [elements.sourceNamespace] - The optional namespace of the
  * source element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.target] - The ID of the target element. If
  * provided, the parameter source is required.
- * @param {Object} [elements.targetNamespace] - The optional namespace of the
+ * @param {object} [elements.targetNamespace] - The optional namespace of the
  * target element, if the element is not part of the project. Must include the
  * key/value pairs 'org', 'project' and 'branch'. The organization must be the
  * same as relationships org.
  * @param {string} [elements.documentation] - Any additional text
  * documentation about an element.
  * @param {string} [elements.type] - An optional type string.
- * @param {Object} [elements.custom] - Any additional key/value pairs for an
+ * @param {object} [elements.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -1070,7 +1070,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created/replaced element objects
+ * @returns {Promise} Array of created/replaced element objects.
  *
  * @example
  * createOrReplace({User}, 'orgID', 'projID', 'branch', [{Elem1}, {Elem2}, ...])
@@ -1301,10 +1301,10 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {string} branchID - The ID of the branch to remove elements from.
  * @param {(string|string[])} elements - The elements to remove. Can either be
  * an array of element ids or a single element id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted element ids
+ * @returns {Promise} Array of deleted element ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])
@@ -1487,7 +1487,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string[]} elementIDs - The elements whose subtrees are being found.
  *
- * @return {Promise} Array of found element ids
+ * @returns {Promise} Array of found element ids.
  *
  * @example
  * findElementTree('orgID', 'projID', 'branch', ['elem1', 'elem2',...])
@@ -1513,6 +1513,14 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
   }
 
   // Define nested helper function
+  /**
+   * @description A nested helper function that searches through the subtrees of given
+   * element ids.
+   *
+   * @param {string[]} ids - A list of element IDs to examine.
+   * @returns {Promise<string|Promise<string|*|undefined>>} Returns either a recursive call
+   * to itself or an empty string once there are no more elements to search.
+   */
   async function findElementTreeHelper(ids) {
     try {
       // Find all elements whose parent is in the list of given ids
@@ -1565,10 +1573,10 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
- * @param {Object} element - The element whose parent is being checked. The
+ * @param {object} element - The element whose parent is being checked. The
  * .parent parameter should be the new, desired parent.
  *
- * @return {Promise} Resolved promise to verify element parent.
+ * @returns {Promise} Resolved promise to verify element parent.
  *
  * @example
  * moveElementCheck('orgID', 'projID', 'branch', {Elem1})
@@ -1602,6 +1610,14 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
   }
 
   // Define nested helper function
+  /**
+   * @description A nested helper function. Searches the parent of the provided element to
+   * ensure that no circular references are being made.
+   *
+   * @param {Element} e - The element to be examined.
+   * @returns {Promise<string|Promise<string|*|undefined>>} Either throws an error if a
+   * circular reference has been found or returns an empty string.
+   */
   async function findElementParentRecursive(e) {
     const foundElement = await Element.findOne({ _id: e.parent }, null, { lean: true });
     // If foundElement is null, reject with error
@@ -1648,7 +1664,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string} query - The text-based query to search the database for.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -1684,9 +1700,9 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {string} [options.archivedBy] - Search for elements with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} An array of found elements.
+ * @returns {Promise} An array of found elements.
  *
  * @example
  * search({User}, 'orgID', 'projID', 'branch', 'find these elements')
@@ -1805,14 +1821,14 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
 /**
  * @description A non-exposed helper function which finds the parent of given
- * element up to and including the root element
+ * element up to and including the root element.
  *
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branchID - The ID of the branch to find elements from.
  * @param {string} elementID - The element whose parents are being found.
  *
- * @return {string} Array of found element ids
+ * @returns {string} Array of found element ids.
  *
  * @example
  * findElementRootPath('orgID', 'projID', 'branch', 'elem1')
@@ -1827,7 +1843,14 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
   // Initialize return object
   let foundElements = [];
 
-  // Define nested helper function
+  /**
+   * @description A nested helper function.  Searches the for parent of the element ID provided.
+   *
+   * @param {string} searchID - The ID of the element to search for.
+   * @returns {Promise<string|string|*>} Returns either a recursive call to itself if the parent of
+   * the element also has a parent, an empty string if the parent of the element is the root, or
+   * throws an error if a circular reference has been found.
+   */
   async function findElementTreeHelper(searchID) {
     try {
       // Find the parent of the element
@@ -1869,15 +1892,15 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
  * @description A non-exposed helper function that validates the sourceNamespace and/or
  * targetNamespace to ensure that they are formatted properly.  A namespace must contain a
  * org, project, and branch id and cannot reference the same project.  This function also
- * pushes to lists of ids keeping track of source, target, and project references
+ * pushes to lists of ids keeping track of source, target, and project references.
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to or updated on
- * @param {string} projID - The id of the project the element is being posted to or updated on
- * @param {object} projectRefs - A running list of references to other projects on the same org
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to or updated on.
+ * @param {string} projID - The id of the project the element is being posted to or updated on.
+ * @param {object} projectRefs - A running list of references to other projects on the same org.
  * @param {object} sourceTargetIDs - A list of source and target IDs to be queried for to ensure
- * that they exist before being updated
+ * that they exist before being updated.
  */
 function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
   sourceTargetIDs = null) {
@@ -1970,13 +1993,13 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
 }
 
 /**
- * @description A non-exposed helper function that validates the setting of a source and target
+ * @description A non-exposed helper function that validates the setting of a source and target.
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
  */
 function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
   try {
@@ -2002,13 +2025,13 @@ function sourceAndTargetValidator(elem, index, orgID, projID, branchID) {
 }
 
 /**
- * @description A non-exposed helper function that validates the parent of an element being created
+ * @description A non-exposed helper function that validates the parent of an element being created.
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
  */
 function elementParentCheck(elem, index, orgID, projID, branchID) {
   try {
@@ -2025,14 +2048,14 @@ function elementParentCheck(elem, index, orgID, projID, branchID) {
 }
 
 /**
- * @description A non-exposed helper function that validates the id of an element being created
+ * @description A non-exposed helper function that validates the id of an element being created.
  *
- * @param {object} elem - The element object to validate
- * @param {number} index - The index of the iteration
- * @param {string} orgID - The id of the organization the element is being posted to
- * @param {string} projID - The id of the project the element is being posted to
- * @param {string} branchID - The id of the branch the element is being posted to
- * @param {object} arrIDs - An array of element ids being created
+ * @param {object} elem - The element object to validate.
+ * @param {number} index - The index of the iteration.
+ * @param {string} orgID - The id of the organization the element is being posted to.
+ * @param {string} projID - The id of the project the element is being posted to.
+ * @param {string} branchID - The id of the branch the element is being posted to.
+ * @param {object} arrIDs - An array of element ids being created.
  */
 function elementIDCheck(elem, index, orgID, projID, branchID, arrIDs) {
   try {

@@ -1,5 +1,7 @@
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow hmtl in description
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module models.server-data
  *
@@ -29,8 +31,8 @@ const db = M.require('lib.db');
  *
  * @description Defines the Server Data Schema
  *
- * @property {String} _id - The server data unique ID.
- * @property {String} version - The current schemaVersion of the database.
+ * @property {string} _id - The server data unique ID.
+ * @property {string} version - The current schemaVersion of the database.
  */
 const ServerDataSchema = new db.Schema({
   _id: {

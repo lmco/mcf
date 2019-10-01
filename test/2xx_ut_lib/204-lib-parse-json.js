@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module  test.204-lib-parse-json
  *
@@ -34,9 +34,9 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Checks to make sure the file is being properly parsed
+ * @description Checks to make sure the file is being properly parsed.
  */
-function parseTest(done) {
+async function parseTest() {
   // Initialize test string
   const testString = '// This is a test file which is used to check and make sure that all comments\n'
     + '// are being parsed out of the file and are resolving in the application as\n'
@@ -86,5 +86,4 @@ function parseTest(done) {
     // Expect no error
     chai.expect(true).to.equal(false);
   }
-  done();
 }

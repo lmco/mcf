@@ -1,5 +1,7 @@
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow html in description
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module models.project
  *
@@ -71,7 +73,7 @@ const utils = M.require('lib.utils');
  * @property {string} _id - The project's non-unique id.
  * @property {string} org - A reference to the project's organization.
  * @property {string} name - The project's non-unique project name.
- * @property {Object} permissions - An object whose keys identify a
+ * @property {object} permissions - An object whose keys identify a
  * projects's roles. The keys are the users username, and values are arrays of
  * given permissions.
  * @property {string} visibility - The visibility level of a project defining
@@ -120,12 +122,12 @@ const ProjectSchema = new db.Schema({
     ref: 'Organization',
     index: true,
     required: true,
-    validate: {
+    validate: [{
       validator: function(v) {
         return RegExp(validators.org.id).test(v);
       },
       message: props => `${props.value} is not a valid org ID.`
-    }
+    }]
   },
   name: {
     type: 'String',
@@ -134,7 +136,7 @@ const ProjectSchema = new db.Schema({
   permissions: {
     type: 'Object',
     default: {},
-    validate: {
+    validate: [{
       validator: function(v) {
         let bool = true;
         // If the permissions object is not a JSON object, reject
@@ -152,7 +154,7 @@ const ProjectSchema = new db.Schema({
         return bool;
       },
       message: props => 'The project permissions object is not properly formatted.'
-    }
+    }]
   },
   visibility: {
     type: 'String',

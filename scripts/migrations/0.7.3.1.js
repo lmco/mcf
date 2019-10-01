@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.migrations.0.7.3.1
  *
@@ -25,6 +25,8 @@ const ServerData = M.require('models.server-data');
 
 /**
  * @description Handles the database migration from 0.7.3.1 to 0.7.3.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -40,7 +42,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.7.3' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.3' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -50,6 +52,8 @@ module.exports.down = function() {
 /**
  * @description Handles the database migration from 0.7.3 to 0.7.3.1.
  * Adds the field 'projectReferences' to each existing project.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -66,7 +70,7 @@ module.exports.up = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3.1' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.7.3.1' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.3.1' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -76,6 +80,8 @@ module.exports.up = function() {
 /**
  * @description Helper function for 0.7.3 to 0.7.3.1 migration. Handles all
  * updates to the project collection.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function projectHelper() {
   return new Promise((resolve, reject) => {
@@ -101,7 +107,7 @@ function projectHelper() {
       });
     })
     // Add the projectReferences field to each project
-    .then(() => Project.updateMany({}, { $set: { projectReferences: [] } }))
+    .then(() => Project.updateMany({}, { projectReferences: [] }))
     .then(() => {
       if (fs.existsSync(path.join(M.root, 'data', 'projects-0731.json'))) {
         return new Promise(function(res, rej) {

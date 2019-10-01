@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.clean
  *
@@ -14,6 +14,8 @@
  * @description Removes directories and files created during npm/yarn install,
  * node mbee build, and all log files.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Rule disabled to allow list in description
 
 // Node.js modules
 const { execSync } = require('child_process');
@@ -43,6 +45,8 @@ if (module.parent == null || typeof M === 'undefined') {
  * --all
  *
  * If NO flags are provided, defaults to `--all`
+ *
+ * @param {string} _args - Additional options to pass into the clean function.
  */
 function clean(_args) {
   const root = path.join(__dirname, '..');

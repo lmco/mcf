@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.migrations.0.8.1
  *
@@ -31,6 +31,8 @@ const utils = M.require('lib.utils');
 
 /**
  * @description Handles the database migration from 0.8.1 to 0.8.0.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -46,7 +48,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.8.0' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.8.0' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.8.0' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -58,6 +60,8 @@ module.exports.down = function() {
  * Modifies element IDs to include the branch ID. New format should look like
  * orgid:projectid:branchid:elementid. Adds a master branch for every project
  * which already exists in the database.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -75,7 +79,7 @@ module.exports.up = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.8.1' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.8.1' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.8.1' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -85,6 +89,8 @@ module.exports.up = function() {
 /**
  * @description Helper function for 0.8.0 to 0.8.1 migration. Handles all
  * updates to the element collection.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function elementHelper() {
   return new Promise((resolve, reject) => {
@@ -120,7 +126,11 @@ function elementHelper() {
 }
 
 /**
- * @description Recursive function for elementHelper()
+ * @description Recursive function for elementHelper().
+ *
+ * @param {string} ids - The ids of elements to search.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function elementHelperRecursive(ids) {
   return new Promise((resolve, reject) => {
@@ -247,6 +257,8 @@ function elementHelperRecursive(ids) {
 /**
  * @description Helper function for 0.8.0 to 0.8.1 migration. Handles all
  * updates to the branch collection.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function branchHelper() {
   return new Promise((resolve, reject) => {

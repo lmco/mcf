@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.404a-branch-controller-core-tests
  *
@@ -40,7 +40,7 @@ let projID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Open the database connection
@@ -113,7 +113,9 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an branch using the branch controller
+ * @description Creates an branch using the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createBranch(done) {
   const branchData = testData.branches[1];
@@ -151,7 +153,9 @@ function createBranch(done) {
 }
 
 /**
- * @description Creates multiple branches using the branch controller
+ * @description Creates multiple branches using the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createBranches(done) {
   const branchDataObjects = [
@@ -202,6 +206,8 @@ function createBranches(done) {
 
 /**
  * @description Verifies that a tag can be created.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createTag(done) {
   const branchData = testData.branches[7];
@@ -239,7 +245,9 @@ function createTag(done) {
 }
 
 /**
- * @description Finds an branch via the branch controller
+ * @description Finds an branch via the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findBranch(done) {
   const branchData = testData.branches[1];
@@ -275,7 +283,9 @@ function findBranch(done) {
 }
 
 /**
- * @description Finds multiple branches via the branch controller
+ * @description Finds multiple branches via the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findBranches(done) {
   const branchDataObjects = [
@@ -328,8 +338,9 @@ function findBranches(done) {
 }
 
 /**
- * @description Finds all branches on a given project using the branch
- * controller
+ * @description Finds all branches on a given project using the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findAllBranches(done) {
   const branchDataObjects = [
@@ -383,7 +394,9 @@ function findAllBranches(done) {
 }
 
 /**
- * @description Updates a branch using the branch controller
+ * @description Updates a branch using the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateBranch(done) {
   const branchData = testData.branches[1];
@@ -426,7 +439,9 @@ function updateBranch(done) {
 }
 
 /**
- * @description Updates multiple branches using the branch controller
+ * @description Updates multiple branches using the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateBranches(done) {
   const branchDataObjects = [
@@ -482,7 +497,9 @@ function updateBranches(done) {
 }
 
 /**
- * @description Deletes a branch using the branch controller
+ * @description Deletes a branch using the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteBranch(done) {
   const branchData = testData.branches[1];
@@ -513,7 +530,9 @@ function deleteBranch(done) {
 
 
 /**
- * @description Deletes multiple branches using the branch controller
+ * @description Deletes multiple branches using the branch controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteBranches(done) {
   const branchDataObjects = [

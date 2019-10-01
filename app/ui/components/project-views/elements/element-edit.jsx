@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.project-views.elements.element-edit
  *
@@ -13,7 +13,7 @@
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description This renders the element component
+ * @description This renders the element component.
  */
 
 /* Modified ESLint rules for React. */
@@ -247,8 +247,10 @@ class ElementEdit extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the parent field
+   * @description This function is called when the ElementSelector for the parent field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
    */
   parentSelectHandler(_id) {
     this.setState({ parent: _id });
@@ -284,8 +286,11 @@ class ElementEdit extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the source field
+   * @description This function is called when the ElementSelector for the source field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
+   * @param {object} project - The current project.
    */
   sourceSelectHandler(_id, project) {
     // Verify if project was provided
@@ -304,8 +309,11 @@ class ElementEdit extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the target field
+   * @description This function is called when the ElementSelector for the target field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
+   * @param {object} project - The current project.
    */
   targetSelectHandler(_id, project) {
     // Verify if project was provided
@@ -324,7 +332,9 @@ class ElementEdit extends Component {
   }
 
   /**
-   * Renders the component
+   * @description Renders the component.
+   *
+   * @returns {object} Page content.
    */
   render() {
     // // Initialize variables

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module plugins.routes
  *
@@ -30,7 +30,7 @@ const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
 loadPlugins();
 
 /**
- * Actually loads the plugins by copying them from their source location into
+ * @description Actually loads the plugins by copying them from their source location into
  * the plugins directory, then loops over those plugins to "require" them and
  * use them as part of the plugins routes.
  */
@@ -141,7 +141,7 @@ function loadPlugins() {
  * @description Clones the plugin from a Git repository and places in the
  * appropriate location in the plugins directory.
  *
- * @param {Object} data The plugin configuration data
+ * @param {object} data - The plugin configuration data.
  */
 function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
@@ -184,7 +184,7 @@ function clonePluginFromGitRepo(data) {
  * directory. If the plugin location is already in the local directory, nothing
  * occurs.
  *
- * @param {Object} data The plugin configuration data
+ * @param {object} data - The plugin configuration data.
  */
 function copyPluginFromLocalDir(data) {
   // Remove plugin if it already exists in plugins directory
@@ -207,7 +207,7 @@ function copyPluginFromLocalDir(data) {
  * directory. If the plugin location is already in the local directory, nothing
  * occurs.
  *
- * @param {Object} data - The plugin configuration data
+ * @param {object} data - The plugin configuration data.
  */
 function downloadPluginFromWebsite(data) {
   // Remove plugin if it already exists in plugins directory

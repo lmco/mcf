@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.branch-controller
  *
@@ -54,7 +54,7 @@ const permissions = M.require('lib.permissions');
  * @param {(string|string[])} [branches] - The branches to find. Can either be
  * an array of branch ids, a single branch id, or not provided, which defaults
  * to every branch being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -87,9 +87,9 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for branches with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found branch objects
+ * @returns {Promise} Array of found branch objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', ['branch1', 'branch2'], { populate: 'project' })
@@ -217,15 +217,15 @@ async function find(requestingUser, organizationID, projectID, branches, options
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {(Object|Object[])} branches - Either an array of objects containing
+ * @param {(object|object[])} branches - Either an array of objects containing
  * branch data or a single object containing branch data to create.
  * @param {string} [branches.id] - The ID of the branch being created.
  * @param {string} [branches.name] - The name of the branch.
- * @param {string} [branches.tag] = false - If the branch is a tag, the value
+ * @param {string} [branches.tag = false] - If the branch is a tag, the value
  * should be set to true. This will hinder all create, update, and deletes of
  * elements on the branch.
- * @param {Object} [branches.custom] - The custom data of the branch.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [branches.custom] - The custom data of the branch.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -234,7 +234,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created branch objects
+ * @returns {Promise} Array of created branch objects.
  *
  * @example
  * create({User}, 'orgID', 'projID', 'branchID', [{Branch1}, {Branch2}, ...],
@@ -526,17 +526,17 @@ async function create(requestingUser, organizationID, projectID, branches, optio
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {(Object|Object[])} branches - Either an array of objects containing
+ * @param {(object|object[])} branches - Either an array of objects containing
  * updates to branches, or a single object containing updates.
  * @param {string} branches.id - The ID of the branch being updated. Field
  * cannot be updated but is required to find branch.
  * @param {string} [branches.name] - The updated name of the branch.
- * @param {Object} [branches.custom] - The new custom data object. Please note,
+ * @param {object} [branches.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
  * @param {boolean} [branches.archived = false] - The updated archived field. If true,
  * the branch will not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -545,7 +545,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated branch objects
+ * @returns {Promise} Array of updated branch objects.
  *
  * @example
  * update({User}, 'orgID', 'projID' [{Updated Branch 1},
@@ -745,9 +745,9 @@ async function update(requestingUser, organizationID, projectID, branches, optio
  * @param {string} projectID - The ID of the owning project.
  * @param {(string|string[])} branches - The branches to remove. Can either be
  * an array of branch ids or a single branch id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  *
- * @return {Promise} Array of deleted branch ids.
+ * @returns {Promise} Array of deleted branch ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', ['branch1', 'branch2'])

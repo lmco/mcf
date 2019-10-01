@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.build
  *
@@ -14,6 +14,8 @@
  *
  * @description Creates the necessary static assets used by the MBEE UI.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Rule disabled to allow list in description
 
 // Error Check - Check if file was run directly or global M object is undefined
 if (module.parent == null || typeof M === 'undefined') {
@@ -41,7 +43,7 @@ const validators = M.require('lib.validators');
 
 /**
  * @description Builds the MBEE static assets by:
- * - Copying dependencies to their final location,
+ * - Copying dependencies to their final location
  * - Compiling Sass into CSS
  * - Building Javascript libraries into client-side code
  * - Building JSDoc documentation.
@@ -55,6 +57,10 @@ const validators = M.require('lib.validators');
  * --all
  *
  * If NO arguments given, defaults to `--all`
+ *
+ * @param {string} _args - Additional options to pass into the build function.
+ *
+ * @returns {Promise} - Returns an empty promise upon completion.
  */
 function build(_args) {
   M.log.info('Building MBEE ...');

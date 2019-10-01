@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.402a-org-controller-core-tests
  *
@@ -96,7 +96,9 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an organization using the org controller
+ * @description Creates an organization using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrg(done) {
   const orgData = testData.orgs[0];
@@ -135,7 +137,9 @@ function createOrg(done) {
 }
 
 /**
- * @description Creates multiple organizations using the org controller
+ * @description Creates multiple organizations using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrgs(done) {
   const orgDataObjects = [
@@ -184,7 +188,9 @@ function createOrgs(done) {
 }
 
 /**
- * @description Creates or replaces an organization using the org controller
+ * @description Creates or replaces an organization using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrReplaceOrg(done) {
   const orgData = testData.orgs[0];
@@ -223,8 +229,9 @@ function createOrReplaceOrg(done) {
 }
 
 /**
- * @description Creates and replaces multiple organizations using the org
- * controller.
+ * @description Creates and replaces multiple organizations using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrReplaceOrgs(done) {
   const orgDataObjects = [
@@ -273,7 +280,9 @@ function createOrReplaceOrgs(done) {
 }
 
 /**
- * @description Finds an organization using the org controller
+ * @description Finds an organization using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findOrg(done) {
   const orgData = testData.orgs[0];
@@ -312,7 +321,9 @@ function findOrg(done) {
 }
 
 /**
- * @description Finds multiple organizations using the org controller
+ * @description Finds multiple organizations using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findOrgs(done) {
   const orgDataObjects = [
@@ -364,8 +375,9 @@ function findOrgs(done) {
 }
 
 /**
- * @description Finds all organizations the user has access to using the org
- * controller
+ * @description Finds all organizations the user has access to using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findAllOrgs(done) {
   const orgDataObjects = [
@@ -428,7 +440,9 @@ function findAllOrgs(done) {
 }
 
 /**
- * @description Updates an organization using the org controller
+ * @description Updates an organization using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateOrg(done) {
   const orgData = testData.orgs[0];
@@ -473,7 +487,9 @@ function updateOrg(done) {
 }
 
 /**
- * @description Updates multiple organizations using the org controller
+ * @description Updates multiple organizations using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateOrgs(done) {
   const orgDataObjects = [
@@ -528,7 +544,9 @@ function updateOrgs(done) {
 }
 
 /**
- * @description Deletes an organization using the org controller
+ * @description Deletes an organization using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteOrg(done) {
   const orgData = testData.orgs[0];
@@ -560,7 +578,9 @@ function deleteOrg(done) {
 }
 
 /**
- * @description Deletes multiple organizations using the org controller
+ * @description Deletes multiple organizations using the org controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteOrgs(done) {
   const orgDataObjects = [

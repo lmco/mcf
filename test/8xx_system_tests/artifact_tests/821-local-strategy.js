@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * Classification: UNCLASSIFIED.
  *
  * @module test.artifact_tests.821-local-strategy
  *
@@ -39,7 +39,7 @@ let project = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before(async () => {
     // Get test file

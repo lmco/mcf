@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.logger
  *
@@ -20,8 +20,9 @@
  *
  * You can the use the logger:
  *   - `log.info('Hello World')`
- *   - `log.error('An error has occurred')`
+ *   - `log.error('An error has occurred')`.
  */
+
 
 // Node modules
 const fs = require('fs');
@@ -198,11 +199,11 @@ const logger = winston.createLogger({
 winston.addColors(colors);
 
 /**
- * @description Log the response to an HTTP request
+ * @description Log the response to an HTTP request.
  *
  * @param {number} responseLength - The length of the response in bytes.
- * @param {Object} req - Request object from express.
- * @param {Object} res - Response object from express.
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
  */
 function logResponse(responseLength, req, res) {
   // Set username to anonymous if req.user is not defined

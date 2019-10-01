@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.lint
  *
@@ -11,7 +11,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
- * @description Runs the linter
+ * @description Runs the linter.
  */
 
 // Error Check - Check if file was run directly or global M object is undefined
@@ -28,6 +28,8 @@ const { spawn } = require('child_process');
 
 /**
  * @description Runs ESLint against the primary Javascript directories.
+ *
+ * @param {string} _args - Additional options to pass into the lint function.
  */
 function lint(_args) {
   // Set default lint files and include additional args

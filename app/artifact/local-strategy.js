@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * Classification: UNCLASSIFIED.
  *
  * @module artifact.local-strategy
  *
@@ -36,12 +36,12 @@ const utils = M.require('lib.utils');
  * @description This function get the artifact blob file
  * from the local file system.
  *
- * @param {string} artMetadata - Artifact metadata
+ * @param {string} artMetadata - Artifact metadata.
  * @param {string} [artMetadata.filename] - The filename of the artifact.
  * @param {string} [artMetadata.location] - The location of the artifact.
  * @param {string} [artMetadata.project] - The project of artifact blob.
  *
- * @returns {buffer} Artifact binary.
+ * @returns {Buffer} Blob - Artifact binary.
  */
 function getBlob(artMetadata) {
   try {
@@ -50,7 +50,8 @@ function getBlob(artMetadata) {
 
     // Read the artifact file
     // Note: Use sync to ensure file is read before advancing
-    return fs.readFileSync(filePath);
+    const blob = fs.readFileSync(filePath);
+    return blob;
   }
   catch (err) {
     throw new M.NotFoundError('Artifact blob not found.', 'warn');
@@ -63,11 +64,11 @@ function getBlob(artMetadata) {
  *
  * This function does NOT overwrite existing blob.
  *
- * @param {string} artMetadata - Artifact metadata
+ * @param {string} artMetadata - Artifact metadata.
  * @param {string} [artMetadata.filename] - The filename of the artifact.
  * @param {string} [artMetadata.location] - The location of the artifact.
  * @param {string} [artMetadata.project] - The project of artifact blob.
- * @param {Buffer} artifactBlob - A binary large object artifact
+ * @param {Buffer} artifactBlob - A binary large object artifact.
  */
 function postBlob(artMetadata, artifactBlob) {
   // Create artifact path
@@ -101,11 +102,11 @@ function postBlob(artMetadata, artifactBlob) {
  * @description This function writes an artifact blob
  * to the local file system. Existing files will be overwritten.
  *
- * @param {string} artMetadata - Artifact metadata
+ * @param {string} artMetadata - Artifact metadata.
  * @param {string} [artMetadata.filename] - The filename of the artifact.
  * @param {string} [artMetadata.location] - The location of the artifact.
  * @param {string} [artMetadata.project] - The project of artifact blob.
- * @param {Buffer} artifactBlob - A binary large object artifact
+ * @param {Buffer} artifactBlob - A binary large object artifact.
  */
 function putBlob(artMetadata, artifactBlob) {
   // Create artifact path
@@ -131,7 +132,7 @@ function putBlob(artMetadata, artifactBlob) {
  * @description This function deletes an artifact blob file from the
  * local file system.
  *
- * @param {string} artMetadata - Artifact metadata
+ * @param {string} artMetadata - Artifact metadata.
  * @param {string} [artMetadata.filename] - The filename of the artifact.
  * @param {string} [artMetadata.location] - The location of the artifact.
  * @param {string} [artMetadata.project] - The project of artifact blob.
@@ -184,6 +185,9 @@ function deleteBlob(artMetadata) {
  * @description This function recursively create directories based on
  * the input path.
  *
+ * @param {string} pathString - The full directory path.
+ *
+ * @returns {string} ArtifactPath - returns the created path.
  */
 function createDirectory(pathString) {
   // Define path separator
@@ -234,6 +238,10 @@ function createDirectory(pathString) {
  * storage path, location field, and filename.
  * Handles specific cases to format path and filename consistently
  * across the artifact strategy.
+ *
+ * @param {object} artMetadata - Object containing location, file, and project.
+ *
+ * @returns {string} BlobPath - The blob file path.
  */
 function createBlobPath(artMetadata) {
   // Get root artifact path

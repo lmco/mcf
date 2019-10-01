@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module db.mongoose-mongodb-strategy
  *
@@ -11,9 +11,11 @@
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @description This file defines the schema strategy for using MBEE with
- * Mongoose and MongoDB.
+ * @description This file defines the schema strategy for using MBEE with Mongoose
+ * and MongoDB.
  */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow chart in description
 
 // Node modules
 const fs = require('fs');
@@ -27,7 +29,7 @@ const MongoStore = require('connect-mongo')(session);
 /**
  * @description Create connection to database.
  *
- * @return {Promise} Resolved promise.
+ * @returns {Promise} Resolved promise.
  */
 function connect() {
   return new Promise((resolve, reject) => {
@@ -84,7 +86,7 @@ function connect() {
 /**
  * @description Closes connection to database.
  *
- * @return {Promise} Resolved promise.
+ * @returns {Promise} Resolved promise.
  */
 function disconnect() {
   return new Promise((resolve, reject) => {
@@ -96,9 +98,10 @@ function disconnect() {
 
 /**
  * @description Clears all contents from the database, equivalent to starting
- * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN
- * PRODUCTION.
+ * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 async function clear() {
   return mongoose.connection.db.dropDatabase();
@@ -107,7 +110,7 @@ async function clear() {
 /**
  * @description Sanitizes data which will be used in queries and inserted into
  * the database. If the data contains a $, which is a MongoDB reserved
- * character, the object key/value pair will be deleted
+ * character, the object key/value pair will be deleted.
  *
  * <p> +-------+-----------------+
  * <br>| Input | Sanitized Output|
@@ -117,7 +120,7 @@ async function clear() {
  *
  * @param {*} data - User input to be sanitized. May be in any data format.
  *
- * @return {*} Sanitized user input.
+ * @returns {*} Sanitized user input.
  */
 function sanitize(data) {
   if (Array.isArray(data)) {
@@ -155,12 +158,18 @@ class Schema extends mongoose.Schema {
    * @description Overrides the mongoose.Schema add function to properly handle
    * the special mongoose types.
    *
-   * @param {Object|Schema} obj - Plain object with paths to add, or another
+   * @param {object|Schema} obj - Plain object with paths to add, or another
    * schema.
-   * @param {String} [prefix] - Path to prefix the newly added paths with.
+   * @param {string} [prefix] - Path to prefix the newly added paths with.
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   add(obj, prefix) {
-    // Change each type to the mongoose defined type
+    /**
+     * @description Change each type to the mongoose defined type.
+     *
+     * @param {object} object - Object with paths to add, or another schema.
+     */
     function changeType(object) {
       Object.keys(object).forEach((k) => {
         // If a nested schema, handle each nested parameter
@@ -198,11 +207,11 @@ class Model {
    * it in a variable called "model", in addition to the schema and model name.
    * Adds static functions from schema onto class.
    *
-   * @param {String} name - The name of the model being created. This name is
+   * @param {string} name - The name of the model being created. This name is
    * used to create the collection name in the database.
    * @param {Schema} schema - The schema which is being turned into a model.
    * Should be an instance of the Schema class.
-   * @param {String} [collection] - Optional name of the collection in the
+   * @param {string} [collection] - Optional name of the collection in the
    * database, if not provided the name should be used.
    */
   constructor(name, schema, collection) {
@@ -218,13 +227,13 @@ class Model {
   }
 
   /**
-   * @description Unused init function
+   * @description Ensures all indexes are created.
    * @async
    *
-   * @return {Promise<void>}
+   * @returns {Promise} Returns empty promise upon completion.
    */
-  async init() { // eslint-disable-line class-methods-use-this
-
+  async init() {
+    await this.model.ensureIndexes();
   }
 
   /**
@@ -233,24 +242,24 @@ class Model {
    * function.
    * @async
    *
-   * @param {Object[]} ops - An array of objects detailing what operations to
+   * @param {object[]} ops - An array of objects detailing what operations to
    * perform the data required for those operations.
-   * @param {Object} [ops.insertOne] - Specified an insertOne operation.
-   * @param {Object} [ops.insertOne.document] - The document to create, for
+   * @param {object} [ops.insertOne] - Specified an insertOne operation.
+   * @param {object} [ops.insertOne.document] - The document to create, for
    * insertOne.
-   * @param {Object} [ops.updateOne] - Specifies an updateOne operation.
-   * @param {Object} [ops.updateOne.filter] - An object containing parameters to
+   * @param {object} [ops.updateOne] - Specifies an updateOne operation.
+   * @param {object} [ops.updateOne.filter] - An object containing parameters to
    * filter the find query by, for updateOne.
-   * @param {Object} [ops.updateOne.update] - An object containing updates to
+   * @param {object} [ops.updateOne.update] - An object containing updates to
    * the matched document from the updateOne filter.
-   * @param {Object} [ops.deleteOne] - Specifies a deleteOne operation.
-   * @param {Object} [ops.deleteOne.filter] - An object containing parameters to
+   * @param {object} [ops.deleteOne] - Specifies a deleteOne operation.
+   * @param {object} [ops.deleteOne.filter] - An object containing parameters to
    * filter the find query by, for deleteOne.
-   * @param {Object} [ops.deleteMany] - Specifies a deleteMany operation.
-   * @param {Object} [ops.deleteMany.filter] - An object containing parameters
+   * @param {object} [ops.deleteMany] - Specifies a deleteMany operation.
+   * @param {object} [ops.deleteMany.filter] - An object containing parameters
    * to filter the find query by, for deleteMany.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
    * @example
    * await bulkWrite([
@@ -274,7 +283,7 @@ class Model {
    *   }
    * ]);
    *
-   * @return {Promise<Object>} Result of the bulkWrite operation.
+   * @returns {Promise<object>} Result of the bulkWrite operation.
    */
   async bulkWrite(ops, options, cb) {
     return this.model.bulkWrite(ops, options, cb);
@@ -284,9 +293,9 @@ class Model {
    * @description Creates a mongoose Document based on the model's schema.
    * Creates a new instance of the mongoose Model.
    *
-   * @param {Object} doc - The object to convert to a Document.
+   * @param {object} doc - The object to convert to a Document.
    *
-   * @return {Document}
+   * @returns {Document} Returns a database document.
    */
   createDocument(doc) {
     return new this.model(doc); // eslint-disable-line new-cap
@@ -297,11 +306,11 @@ class Model {
    * the mongoose countDocuments() function.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Number>} The number of documents which matched the filter.
+   * @returns {Promise<number>} The number of documents which matched the filter.
    */
   async countDocuments(filter, cb) {
     return this.model.countDocuments(filter, cb);
@@ -312,9 +321,9 @@ class Model {
    * mongoose collection.dropIndex() function.
    * @async
    *
-   * @param {String} name - The name of the index.
+   * @param {string} name - The name of the index.
    *
-   * @return {Promise<void>}
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return this.model.collection.dropIndex(name);
@@ -325,12 +334,12 @@ class Model {
    * Calls the mongoose deleteMany() function.
    * @async
    *
-   * @param {Object} conditions - An object containing parameters to filter the
+   * @param {object} conditions - An object containing parameters to filter the
    * find query by, and thus delete documents by.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} An object denoting the success of the delete
+   * @returns {Promise<object>} An object denoting the success of the delete
    * operation.
    */
   async deleteMany(conditions, options, cb) {
@@ -338,50 +347,39 @@ class Model {
   }
 
   /**
-   * @description Creates all indexes (if not already created) for the model's
-   * schema. Calls the mongoose ensureIndexes() function.
-   * @async
-   *
-   * @return {Promise<void>}
-   */
-  async ensureIndexes() {
-    return this.model.ensureIndexes();
-  }
-
-  /**
    * @description Finds multiple documents based on the filter provided. Calls
    * the mongoose find() function.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {(Object|String)} [projection] - Specifies the fields to return in
+   * @param {(object|string)} [projection] - Specifies the fields to return in
    * the documents that match the filter. To return all fields, omit this
    * parameter.
-   * @param {Object} [options] - An object containing options.
-   * @param {Object} [options.sort] - An object specifying the order by which
+   * @param {object} [options] - An object containing options.
+   * @param {object} [options.sort] - An object specifying the order by which
    * to sort and return the documents. Keys are fields by which to sort, and
    * values are the sort order where 1 is ascending and -1 is descending. It is
    * possible to sort by metadata by providing the key $meta and a non-numerical
    * value. This is used primarily for text based search.
-   * @param {Number} [options.limit] - Limits the number of documents returned.
+   * @param {number} [options.limit] - Limits the number of documents returned.
    * A limit of 0 is equivalent to setting no limit and a negative limit is not
    * supported.
-   * @param {Number} [options.skip] - Skips a specified number of documents that
+   * @param {number} [options.skip] - Skips a specified number of documents that
    * matched the query. Given 10 documents match with a skip of 5, only the
    * final 5 documents would be returned. A skip value of 0 is equivalent to not
    * skipping any documents. A negative skip value is not supported.
-   * @param {String} [options.populate] - A space separated list of fields to
+   * @param {string} [options.populate] - A space separated list of fields to
    * populate of return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object[]>} An array containing the found documents, if
+   * @returns {Promise<object[]>} An array containing the found documents, if
    * any.
    */
   async find(filter, projection, options, cb) {
@@ -393,23 +391,23 @@ class Model {
    * the mongoose findOne() function.
    * @async
    *
-   * @param {Object} conditions - An object containing parameters to filter the
+   * @param {object} conditions - An object containing parameters to filter the
    * find query by.
-   * @param {(Object|String)} [projection] - Specifies the fields to return in
+   * @param {(object|string)} [projection] - Specifies the fields to return in
    * the document that matches the filter. To return all fields, omit this
    * parameter.
-   * @param {Object} [options] - An object containing options.
-   * @param {String} [options.populate] - A space separated list of fields to
+   * @param {object} [options] - An object containing options.
+   * @param {string} [options.populate] - A space separated list of fields to
    * populate of return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} The found document, if any.
+   * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
     return this.model.findOne(conditions, projection, options, cb);
@@ -420,7 +418,7 @@ class Model {
    * mongoose collection.indexes() function.
    * @async
    *
-   * @return {Promise<Object[]>} Array of index objects
+   * @returns {Promise<object[]>} Array of index objects.
    */
   async getIndexes() {
     return this.model.collection.indexes();
@@ -431,16 +429,16 @@ class Model {
    * mongoose insertMany() function.
    * @async
    *
-   * @param {Object[]} docs - An array of documents to insert.
-   * @param {Object} [options] - An object containing options.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {object[]} docs - An array of documents to insert.
+   * @param {object} [options] - An object containing options.
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {Boolean} [options.skipValidation] - If true, will not validate
+   * @param {boolean} [options.skipValidation] - If true, will not validate
    * the documents which are being created.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object[]>} The created documents.
+   * @returns {Promise<object[]>} The created documents.
    */
   async insertMany(docs, options, cb) {
     let useCollection = false;
@@ -482,11 +480,13 @@ class Model {
    * changes in the provided doc. Calls the mongoose updateMany() function.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {Object} doc - The object containing updates to the found documents.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} doc - The object containing updates to the found documents.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
+   *
+   * @returns {Promise<object[]>} The updated objects.
    */
   async updateMany(filter, doc, options, cb) {
     return this.model.updateMany(filter, doc, options, cb);
@@ -497,13 +497,13 @@ class Model {
    * is updated with the doc provided. Calls the mongoose updateOne() function.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {Object} doc - The object containing updates to the found document.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} doc - The object containing updates to the found document.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} The updated document.
+   * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
     return this.model.updateOne(filter, doc, options, cb);

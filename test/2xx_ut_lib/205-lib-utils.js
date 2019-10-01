@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.205-lib-utils
  *
@@ -38,77 +38,69 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a uid from valid parameters
+ * @description Creates a uid from valid parameters.
  */
-function validUID(done) {
+async function validUID() {
   try {
     const uid = utils.createID('org', 'project', 'branch', 'element');
     chai.expect(uid).to.equal('org:project:branch:element');
-    done();
   }
   catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
   }
 }
 
 /**
- * @description Creates a uid from invalid parameters
+ * @description Creates a uid from invalid parameters.
  */
-function invalidUID(done) {
+async function invalidUID() {
   try {
     utils.createID('org', 'project', 'master', 9);
     chai.expect(true).to.equal(false);
-    done();
   }
   catch (error) {
     chai.expect(error.message).to.equal('Argument is not a string.');
-    done();
   }
 }
 
 /**
  * @description Parse a valid uid. Checks array element exist.
  */
-function parseValidUID(done) {
+async function parseValidUID() {
   try {
     const uid = utils.parseID('org:project:element');
     chai.expect(uid).to.include('org');
     chai.expect(uid).to.include('project');
     chai.expect(uid).to.include('element');
-    done();
   }
   catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
   }
 }
 
 /**
  * @description Parse a valid uid and get the 2nd element.
  */
-function parseValidUIDSecondElement(done) {
+async function parseValidUIDSecondElement() {
   try {
     const project = utils.parseID('org:project:element')[2];
     chai.expect(project).to.equal('element');
-    done();
   }
   catch (error) {
     M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
-    done();
   }
 }
 
 /**
  * @description Test a valid word is title-cased.
  */
-function validTitleCase(done) {
+async function validTitleCase() {
   // Initialize valid word
   const word = 'heLLo156';
 
@@ -117,13 +109,12 @@ function validTitleCase(done) {
 
   // Expect word to be title-cased
   chai.expect(titleCased).to.equal('Hello156');
-  done();
 }
 
 /**
- * @description Tests an invalid word is NOT title-cased
+ * @description Tests an invalid word is NOT title-cased.
  */
-function invalidTitleCase(done) {
+async function invalidTitleCase() {
   // Initialize invalid word
   const word = '123 Goodbye';
 
@@ -132,5 +123,4 @@ function invalidTitleCase(done) {
 
   // Expect the word to NOT have changed
   chai.expect(titleCased).to.equal(word);
-  done();
 }

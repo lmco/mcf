@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module script.migrations.0.6.0.1
  *
@@ -39,6 +39,8 @@ if (M.config.db.strategy !== 'mongoose-mongodb-strategy') {
 /**
  * @description Handles the database migration from 0.6.0.1 to 0.6.0. This drop in
  * versions is currently not supported.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -54,7 +56,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.6.0' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.6.0' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.6.0' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -76,6 +78,8 @@ module.exports.down = function() {
  * passwords due to change in salt when password is hashed. If for some reason a
  * migration fails, any data removed from the database will be added to the
  * ./data directory.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -170,7 +174,7 @@ module.exports.up = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.6.0.1' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.6.0.1' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.6.0.1' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -183,7 +187,9 @@ module.exports.up = function() {
  * updates to the organization collection.
  *
  * @param {Array} orgs - The organizations being updated.
- * @param {Object} jmi2Users - The found users in JMI Type 2 format.
+ * @param {object} jmi2Users - The found users in JMI Type 2 format.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function sixToSevenOrgHelper(orgs, jmi2Users) {
   return new Promise((resolve, reject) => {
@@ -297,8 +303,10 @@ function sixToSevenOrgHelper(orgs, jmi2Users) {
  * updates to the project collection.
  *
  * @param {Array} projects - The projects being updated.
- * @param {Object} jmi2Users - The found users in JMI Type 2 format.
- * @param {Object} jmi2Orgs - The found orgs in JMI Type 2 format.
+ * @param {object} jmi2Users - The found users in JMI Type 2 format.
+ * @param {object} jmi2Orgs - The found orgs in JMI Type 2 format.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
   return new Promise((resolve, reject) => {
@@ -409,9 +417,11 @@ function sixToSevenProjectHelper(projects, jmi2Users, jmi2Orgs) {
  * updates to the element collection.
  *
  * @param {Array} elements - The elements being updated.
- * @param {Object} jmi2Users - The found users in JMI Type 2 format.
- * @param {Object} jmi2Projects - The found projects in JMI Type 2 format.
- * @param {Object} jmi2Elements - The found elements in JMI Type 2 format.
+ * @param {object} jmi2Users - The found users in JMI Type 2 format.
+ * @param {object} jmi2Projects - The found projects in JMI Type 2 format.
+ * @param {object} jmi2Elements - The found elements in JMI Type 2 format.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements) {
   return new Promise((resolve, reject) => {
@@ -529,7 +539,9 @@ function sixToSevenElementHelper(elements, jmi2Users, jmi2Projects, jmi2Elements
  * updates to the user collection.
  *
  * @param {Array} users - The users being updated.
- * @param {Object} jmi2Users - The found users in JMI Type 2 format.
+ * @param {object} jmi2Users - The found users in JMI Type 2 format.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function sixToSevenUserHelper(users, jmi2Users) {
   return new Promise((resolve, reject) => {

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.test-utils.js
  *
@@ -12,8 +12,8 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Helper function for MBEE test.
- * - Used to create users, organizations, projects, elements in the database.
- * - Assumes database connection already established
+ * Used to create users, organizations, projects, elements in the database.
+ * Assumes database connection already established.
  *
  * This function takes the complexity out of MBEE tests,
  * making MBEE tests easier to read and run.
@@ -37,8 +37,9 @@ const testData = require(path.join(M.root, 'test', 'test_data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
 
 /**
- * @description Helper function to create test non-admin user in
- * MBEE tests.
+ * @description Helper function to create test non-admin user in MBEE tests.
+ *
+ * @returns {Promise<User>} Returns the newly created user upon completion.
  */
 module.exports.createNonAdminUser = function() {
   return new Promise((resolve, reject) => {
@@ -88,8 +89,9 @@ module.exports.createNonAdminUser = function() {
 };
 
 /**
- * @description Helper function to create test admin user in
- * MBEE tests.
+ * @description Helper function to create test admin user in MBEE tests.
+ *
+ * @returns {Promise<User>} Returns the newly created admin user upon completion.
  */
 module.exports.createTestAdmin = function() {
   return new Promise((resolve, reject) => {
@@ -138,8 +140,9 @@ module.exports.createTestAdmin = function() {
 };
 
 /**
- * @description Helper function to delete test user in
- * MBEE tests.
+ * @description Helper function to delete test user in MBEE tests.
+ *
+ * @returns {Promise<string>} Returns the id of the deleted user.
  */
 module.exports.removeNonAdminUser = function() {
   return new Promise((resolve, reject) => {
@@ -166,8 +169,9 @@ module.exports.removeNonAdminUser = function() {
 };
 
 /**
- * @description Helper function to delete test admin user in
- * MBEE tests.
+ * @description Helper function to delete test admin user in MBEE tests.
+ *
+ * @returns {Promise<User>} Returns the newly created user upon completion.
  */
 module.exports.removeTestAdmin = function() {
   return new Promise((resolve, reject) => {
@@ -194,8 +198,11 @@ module.exports.removeTestAdmin = function() {
 };
 
 /**
- * @description Helper function to create organization in
- * MBEE tests.
+ * @description Helper function to create organization in MBEE tests.
+ *
+ * @param {object} adminUser - The admin user to create the org with.
+ *
+ * @returns {Promise<Organization>} Returns the newly created org upon completion.
  */
 module.exports.createTestOrg = function(adminUser) {
   return new Promise((resolve, reject) => {
@@ -214,8 +221,9 @@ module.exports.createTestOrg = function(adminUser) {
 };
 
 /**
- * @description Helper function to remove organization in
- * MBEE tests.
+ * @description Helper function to remove organization in MBEE tests.
+ *
+ * @returns {Promise<string>} Returns the id of the deleted org.
  */
 module.exports.removeTestOrg = function() {
   return new Promise((resolve, reject) => {
@@ -236,7 +244,12 @@ module.exports.removeTestOrg = function() {
 };
 
 /**
- * @description Helper function to create project in MBEE tests
+ * @description Helper function to create project in MBEE tests.
+ *
+ * @param {object} adminUser - The admin user to create the project with.
+ * @param {string} orgID - The id of the org to create the project on.
+ *
+ * @returns {Promise<Project>} Returns the newly created project upon completion.
  */
 module.exports.createTestProject = function(adminUser, orgID) {
   return new Promise((resolve, reject) => {
@@ -288,7 +301,13 @@ module.exports.createTestProject = function(adminUser, orgID) {
 };
 
 /**
- * @description Helper function to create a tag in MBEE tests
+ * @description Helper function to create a tag in MBEE tests.
+ *
+ * @param {object} adminUser - The admin user to create the branch with.
+ * @param {string} orgID - The org to create the branch on.
+ * @param {string} projID - The project to create the branch on.
+ *
+ * @returns {Promise<Branch>} Returns a tagged branch.
  */
 module.exports.createTag = function(adminUser, orgID, projID) {
   return new Promise((resolve, reject) => {
@@ -336,7 +355,11 @@ module.exports.createTag = function(adminUser, orgID, projID) {
 };
 
 /**
- * @description Helper function to import a copy of test data
+ * @description Helper function to import a copy of test data.
+ *
+ * @param {string} filename - The file to read.
+ *
+ * @returns {object} Returns the imported test data.
  */
 module.exports.importTestData = function(filename) {
   // Clear require cache so a new copy is imported
@@ -354,13 +377,13 @@ module.exports.importTestData = function(filename) {
 /**
  * @description Helper function for setting mock request parameters.
  *
- * @param {Object} user - The user making the request
- * @param {Object} params - Parameters for API req
- * @param {Object} body - Body for API req
- * @param {string} method - API method of req
- * @param {Object} [query] - query options for API req
+ * @param {object} user - The user making the request.
+ * @param {object} params - Parameters for API req.
+ * @param {object} body - Body for API req.
+ * @param {string} method - API method of req.
+ * @param {object} [query] - Query options for API req.
  *
- * @returns {Object} req - Request Object
+ * @returns {object} Request object.
  */
 module.exports.createRequest = function(user, params, body, method, query = {}) {
   // Error-Check
@@ -386,17 +409,17 @@ module.exports.createRequest = function(user, params, body, method, query = {}) 
 
 /**
  * @description Helper function for setting mock request parameters.  Creates a read
- * stream of a file and gives the stream request-like properties
+ * stream of a file and gives the stream request-like properties.
  *
- * @param {Object} user - The user making the request
- * @param {Object} params - Parameters for API req
- * @param {Object} body - Body for API req
- * @param {string} method - API method of req
- * @param {Object} [query] - query options for API req
- * @param {string} filepath - The path to the file to create the read stream of
- * @param {Object} headers - Headers for the API req
+ * @param {object} user - The user making the request.
+ * @param {object} params - Parameters for API req.
+ * @param {object} body - Body for API req.
+ * @param {string} method - API method of req.
+ * @param {object} [query] - Query options for API req.
+ * @param {string} filepath - The path to the file to create the read stream of.
+ * @param {object} headers - Headers for the API req.
  *
- * @returns {Object} req - Request Object
+ * @returns {object} Request object.
  */
 module.exports.createReadStreamRequest = function(user, params, body, method, query = {},
   filepath, headers) {
@@ -425,7 +448,7 @@ module.exports.createReadStreamRequest = function(user, params, body, method, qu
 /**
  * @description Helper function for setting mock response status and header.
  *
- * @param {Object} res - Response Object
+ * @param {object} res - Response Object.
  */
 module.exports.createResponse = function(res) {
   // Verifies the response code: 200 OK
@@ -444,6 +467,8 @@ module.exports.createResponse = function(res) {
  *
  * @param {string} contentType - The content type. Defaults to application/json.
  * @param {object} user - The requesting user. Must contains a username and password.
+ *
+ * @returns {object} Returns an object containing header key-value pairs.
  */
 module.exports.getHeaders = function(contentType = 'application/json', user = testData.adminUser) {
   const formattedCreds = `${user.username || user._id}:${user.password}`;
@@ -456,6 +481,8 @@ module.exports.getHeaders = function(contentType = 'application/json', user = te
 
 /**
  * @description Helper function for setting the certificate authorities for each request.
+ *
+ * @returns {object} Returns the result of reading the certificate authority file.
  */
 module.exports.readCaFile = function() {
   if (M.config.test.hasOwnProperty('ca')) {
@@ -468,9 +495,9 @@ module.exports.readCaFile = function() {
  * expects the res and req objects to be the mock objects created in those tests.
  *
  * @param {number} responseLength - The length of the response in bytes.
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @param {function} done - The callback function to mark the end of the test.
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @param {Function} done - The callback function to mark the end of the test.
  */
 module.exports.testResponseLogging = async function(responseLength, req, res, done) {
   // Get the log file path

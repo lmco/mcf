@@ -1,3 +1,21 @@
+/**
+ * @classification UNCLASSIFIED
+ *
+ * @module ui.js.mbee
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ *
+ * @description Contains necessary functions for the MBEE UI.
+ */
+/* eslint-disable jsdoc/require-description-complete-sentence */
+/* eslint-disable jsdoc/require-jsdoc */
+
 // ESLint disabled for client-side JS for now.
 // TODO (jk) - determine long-term approach
 /* eslint-disabled */
@@ -64,13 +82,13 @@ function mbeeWhoAmI(callback) {
 
 /**
  * @description Given an API parameter string, converts to Proper Case. Conversely, given a Proper
- *              Case string will convert to an API parameter string.
+ * Case string will convert to an API parameter string.
  * e.g. createdBy -> Created By, lastModifiedBy -> Last Modified By
  *
  * @param {string} param - API parameter string.
- * @param {string} caseType - Case to convert to. e.g 'Proper Case' vs 'API Parameter Format'
+ * @param {string} caseType - Case to convert to e.g 'Proper Case' vs 'API Parameter Format'.
  *
- * @return {string} - Converted case string.
+ * @returns {string} - Converted case string.
  */
 // eslint-disable-next-line no-unused-vars
 function convertCase(param, caseType) {
@@ -102,7 +120,7 @@ function convertCase(param, caseType) {
  *
  * @param {string} encodedString - HTML encoded string.
  *
- * @return {string} - decoded string.
+ * @returns {string} - Decoded string.
  */
 // eslint-disable-next-line no-unused-vars
 function decodeHTML(encodedString) {

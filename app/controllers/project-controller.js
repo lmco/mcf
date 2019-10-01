@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.project-controller
  *
@@ -62,7 +62,7 @@ const permissions = M.require('lib.permissions');
  * @param {(string|string[])} [projects] - The projects to find. Can either be
  * an array of project ids, a single project id, or not provided, which defaults
  * to every project being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
@@ -93,9 +93,9 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.archivedBy] - Search for projects with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found project objects
+ * @returns {Promise} Array of found project objects.
  *
  * @example
  * find({User}, 'orgID', ['proj1', 'proj2'], { populate: 'org' })
@@ -255,21 +255,21 @@ async function find(requestingUser, organizationID, projects, options) {
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
- * @param {(Object|Object[])} projects - Either an array of objects containing
+ * @param {(object|object[])} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
  * @param {string} projects.id - The ID of the project being created.
  * @param {string} projects.name - The name of the project.
- * @param {Object} [projects.custom] - The additions or changes to existing
+ * @param {object} [projects.custom] - The additions or changes to existing
  * custom data. If the key/value pair already exists, the value will be changed.
  * If the key/value pair does not exist, it will be added.
  * @param {string} [projects.visibility = 'private'] - The visibility of the
  * project being created. If 'internal', users not in the project but in the
  * owning org will be able to view the project.
- * @param {Object} [projects.permissions] - Any preset permissions on the
+ * @param {object} [projects.permissions] - Any preset permissions on the
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -278,7 +278,7 @@ async function find(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created project objects
+ * @returns {Promise} Array of created project objects.
  *
  * @example
  * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
@@ -551,21 +551,21 @@ async function create(requestingUser, organizationID, projects, options) {
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
- * @param {(Object|Object[])} projects - Either an array of objects containing
+ * @param {(object|object[])} projects - Either an array of objects containing
  * updates to projects, or a single object containing updates.
  * @param {string} projects.id - The ID of the project being updated. Field
  * cannot be updated but is required to find project.
  * @param {string} [projects.name] - The updated name of the project.
- * @param {Object} [projects.permissions] - An object of key value pairs, where
+ * @param {object} [projects.permissions] - An object of key value pairs, where
  * the key is the username, and the value is the role which the user is to have
  * in the project. To remove a user from a project, the value must be
  * 'remove_all'.
- * @param {Object} [projects.custom] - The new custom data object. Please note,
+ * @param {object} [projects.custom] - The new custom data object. Please note,
  * updating the custom data object completely replaces the old custom data
  * object.
  * @param {boolean} [projects.archived = false] - The updated archived field. If true,
  * the project will not be able to be found until unarchived.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -574,7 +574,7 @@ async function create(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated project objects
+ * @returns {Promise} Array of updated project objects.
  *
  * @example
  * update({User}, 'orgID', [{Updated Proj 1}, {Updated Proj 2}...], { populate: 'org' })
@@ -915,21 +915,21 @@ async function update(requestingUser, organizationID, projects, options) {
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
- * @param {(Object|Object[])} projects - Either an array of objects containing
+ * @param {(object|object[])} projects - Either an array of objects containing
  * project data or a single object containing project data to create.
  * @param {string} projects.id - The ID of the project being created.
  * @param {string} projects.name - The name of the project.
- * @param {Object} [projects.custom] - The additions or changes to existing
+ * @param {object} [projects.custom] - The additions or changes to existing
  * custom data. If the key/value pair already exists, the value will be changed.
  * If the key/value pair does not exist, it will be added.
  * @param {string} [projects.visibility = 'private'] - The visibility of the
  * project being created. If 'internal', users not in the project but in the
  * owning org will be able to view the project.
- * @param {Object} [projects.permissions] - Any preset permissions on the
+ * @param {object} [projects.permissions] - Any preset permissions on the
  * project. Keys should be usernames and values should be the highest
  * permissions the user has. NOTE: The requesting user gets added as an admin by
  * default.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return of
  * the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default
@@ -938,7 +938,7 @@ async function update(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created project objects
+ * @returns {Promise} Array of created project objects.
  *
  * @example
  * createOrReplace({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
@@ -1120,17 +1120,17 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
 /**
  * @description This function removes one or many projects as well as the
- * elements that belong to them. This function can be used by system-wide admins
- * ONLY.
+ * elements that belong to them. This function can be used by system-wide
+ * admins ONLY.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {(string|string[])} projects - The projects to remove. Can either be
  * an array of project ids or a single project id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted project ids.
+ * @returns {Promise} Array of deleted project ids.
  *
  * @example
  * remove({User}, 'orgID', ['proj1', 'proj2'])

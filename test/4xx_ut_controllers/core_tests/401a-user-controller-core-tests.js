@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module test.401a-user-controller-core-tests
  *
@@ -101,7 +101,9 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a user using the user controller
+ * @description Creates a user using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createUser(done) {
   const userData = testData.users[0];
@@ -151,7 +153,9 @@ function createUser(done) {
 }
 
 /**
- * @description Creates multiple users using the user controller
+ * @description Creates multiple users using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createUsers(done) {
   const userDataObjects = [
@@ -214,7 +218,9 @@ function createUsers(done) {
 }
 
 /**
- * @description Creates or replaces a user using the user controller
+ * @description Creates or replaces a user using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrReplaceUser(done) {
   const userData = testData.users[0];
@@ -264,7 +270,9 @@ function createOrReplaceUser(done) {
 }
 
 /**
- * @description Creates/replaces multiple users using the user controller
+ * @description Creates/replaces multiple users using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function createOrReplaceUsers(done) {
   const userDataObjects = [
@@ -327,7 +335,9 @@ function createOrReplaceUsers(done) {
 }
 
 /**
- * @description Finds a user using the user controller
+ * @description Finds a user using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findUser(done) {
   const userData = testData.users[0];
@@ -368,7 +378,9 @@ function findUser(done) {
 }
 
 /**
- * @description Finds multiple users using the user controller
+ * @description Finds multiple users using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findUsers(done) {
   const userDataObjects = [
@@ -422,7 +434,9 @@ function findUsers(done) {
 }
 
 /**
- * @description Finds all users in the database using the user controller
+ * @description Finds all users in the database using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function findAllUsers(done) {
   const userDataObjects = [
@@ -484,8 +498,9 @@ function findAllUsers(done) {
 }
 
 /**
- * @description Finds a user through text based search via the user
- * controller.
+ * @description Finds a user through text based search via the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function searchUser(done) {
   const userData = [
@@ -540,7 +555,9 @@ function searchUser(done) {
 
 
 /**
- * @description Updates a user using the user controller
+ * @description Updates a user using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateUser(done) {
   const userData = testData.users[0];
@@ -587,7 +604,9 @@ function updateUser(done) {
 }
 
 /**
- * @description Updates multiple users using the user controller
+ * @description Updates multiple users using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateUsers(done) {
   const userDataObjects = [
@@ -646,6 +665,8 @@ function updateUsers(done) {
 
 /**
  * @description Updates a users password using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function updateUserPassword(done) {
   const userData = testData.users[0];
@@ -696,7 +717,9 @@ function updateUserPassword(done) {
 }
 
 /**
- * @description Deletes a user using the user controller
+ * @description Deletes a user using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteUser(done) {
   const userData = testData.users[0];
@@ -734,7 +757,9 @@ function deleteUser(done) {
 }
 
 /**
- * @description Deletes multiple users using the user controller
+ * @description Deletes multiple users using the user controller.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function deleteUsers(done) {
   const userDataObjects = [

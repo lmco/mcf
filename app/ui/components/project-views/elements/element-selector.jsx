@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.project-views.elements.element-selector
  *
@@ -77,7 +77,7 @@ class ElementSelector extends React.Component {
   }
 
   /**
-   * Toggle the state of the modal.
+   * @description Toggle the state of the modal.
    */
   toggle() {
     this.setState(prevState => ({
@@ -86,7 +86,9 @@ class ElementSelector extends React.Component {
   }
 
   /**
-   * This is the click handler used to select an element.
+   * @description This is the click handler used to select an element.
+   *
+   * @param {string} id - The id of the selected element.
    */
   selectElementHandler(id) {
     // Verify id is not self
@@ -108,7 +110,7 @@ class ElementSelector extends React.Component {
   }
 
   /**
-   * Confirms and finalizes the element selection. Then closes the modal.
+   * @description Confirms and finalizes the element selection. Then closes the modal.
    */
   select() {
     this.setState({ selectedElement: this.state.selectedElementPreview });
@@ -133,7 +135,7 @@ class ElementSelector extends React.Component {
   }
 
   /**
-   * Resets the selectedElementPreview state
+   * @description Resets the selectedElementPreview state.
    */
   clear() {
     this.setState({
@@ -142,7 +144,9 @@ class ElementSelector extends React.Component {
   }
 
   /**
-   * Changes the project
+   * @description Changes the project.
+   *
+   * @param {object} event - The event trigger.
    */
   handleChange(event) {
     this.setState({ project: event.target.value });

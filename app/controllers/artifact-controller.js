@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * Classification: UNCLASSIFIED.
  *
  * @module controllers.artifact-controller
  *
@@ -67,11 +67,11 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the project belongs to.
  * @param {string} projectID - The project ID of the Project which is being searched for.
- * @param {string} branch - The branch ID
+ * @param {string} branch - The branch ID.
  * @param {(string|string[])} artifacts - The artifacts to find. Can either be
  * an array of artifact ids, a single artifact id, or not provided, which defaults
  * to every artifact in a project being found.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {boolean} [options.archived = false] - If true, find results will include
@@ -96,9 +96,9 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  * @param {string} [options.archivedBy] - Search for artifacts with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
- * dot notation for the keys. Ex: custom.hello = 'world'
+ * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @return {Promise} Array of found artifact objects
+ * @returns {Promise} Array of found artifact objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['artifact1', 'artifact2'], { populate: 'project' })
@@ -224,16 +224,15 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to add artifacts to.
- * @param {(Object|Object[])} artifacts - Either an array of objects containing
+ * @param {(object|object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to create.
- * @param {Buffer} artifactBlob - Buffer containing the artifact blob
  * @param {string} artifacts.id - The ID of the artifact being created.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
  * @param {string} [artifacts.contentType] - File type.
- * @param {Object} [artifacts.custom] - Any additional key/value pairs for an
+ * @param {object} [artifacts.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return.
@@ -242,7 +241,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of created artifact objects
+ * @returns {Promise} Array of created artifact objects.
  *
  * @example
  * create({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['filename'] })
@@ -399,15 +398,15 @@ async function create(requestingUser, organizationID, projectID, branch,
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
  * @param {string} branch - The ID of the branch to add artifacts to.
- * @param {(Object|Object[])} artifacts - Either an array of objects containing
+ * @param {(object|object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to update.
  * @param {string} artifacts.id - The ID of the artifact being updated.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
  * @param {string} [artifacts.contentType] - File type.
- * @param {Object} [artifacts.custom] - Any additional key/value pairs for an
+ * @param {object} [artifacts.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return.
@@ -416,7 +415,7 @@ async function create(requestingUser, organizationID, projectID, branch,
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @return {Promise} Array of updated artifact objects
+ * @returns {Promise} Array of updated artifact objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['filename'] })
@@ -605,10 +604,10 @@ async function update(requestingUser, organizationID, projectID, branch,
  * @param {string} branch - The ID of the branch to remove artifacts from.
  * @param {(string|string[])} artifacts - The artifacts to remove. Can either be
  * an array of artifact ids or a single artifact id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @return {Promise} Array of deleted artifact ids
+ * @returns {Promise} Array of deleted artifact ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['art1', 'art2'])
@@ -709,13 +708,13 @@ async function remove(requestingUser, organizationID, projectID, branch,
  * project belongs to.
  * @param {string} projectID - The project ID of the Project which is being
  * searched for.
- * @param {string} branch - The branch ID
- * @param {Object} artifact - The artifact object to find. Based on project,
+ * @param {string} branch - The branch ID.
+ * @param {object} artifact - The artifact object to find. Based on project,
  * location, and filename.
  * @param {string} [artifact.filename] - The filename of the artifact.
  * @param {string} [artifact.location] - The location of the artifact.
  *
- * @return {Promise} Artifact Blob object
+ * @returns {Promise} Artifact Blob object.
  */
 async function getBlob(requestingUser, organizationID,
   projectID, branch, artifact) {
@@ -780,24 +779,26 @@ async function getBlob(requestingUser, organizationID,
  * project belongs to.
  * @param {string} projectID - The project ID of the Project which is being
  * searched for.
- * @param {string} branch - The branch ID
- * @param {Object} artifact - The artifact object to find. Based on project,
+ * @param {string} branch - The branch ID.
+ * @param {object} artifact - The artifact object to find. Based on project,
  * location, and filename.
  * @param {string} [artifact.filename] - The filename of the artifact.
  * @param {string} [artifact.location] - The location of the artifact.
+ * @param {Buffer} artifactBlob - A binary large object artifact.
  *
- * @return {Promise} Artifact object that contains location, filename,
+ * @returns {Promise} Artifact object that contains location, filename,
  * and project.
  */
 async function postBlob(requestingUser, organizationID,
-  projectID, branchID, artifact, artifactBlob, options) {
+  projectID, branch, artifact, artifactBlob) {
+  let options;
   // Ensure artifact blob is buffer type
   if (Buffer.isBuffer(artifactBlob) === false) {
     throw new M.DataFormatError('Artifact blob file is required.', 'warn');
   }
 
   // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
+  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
   helper.checkParamsDataType('object', artifact, 'Artifacts');
 
   // Sanitize input parameters
@@ -805,7 +806,7 @@ async function postBlob(requestingUser, organizationID,
   const saniArt = sani.db(JSON.parse(JSON.stringify(artifact)));
   const orgID = sani.db(organizationID);
   const projID = sani.db(projectID);
-  const saniBranchID = sani.db(branchID);
+  const saniBranchID = sani.db(branch);
 
   // Initialize and ensure options are valid
   const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
@@ -861,12 +862,12 @@ async function postBlob(requestingUser, organizationID,
  * @param {string} projectID - The project ID of the Project which is being
  * searched for.
  * @param {string} branch - The branch ID.
- * @param {Object[]} artifact - The artifact object to find. Based on project,
+ * @param {object[]} artifact - The artifact object to find. Based on project,
  * location, and filename.
  * @param {string} [artifact.filename] - The filename of the artifact.
  * @param {string} [artifact.location] - The location of the artifact.
  *
- * @return {Promise} Artifact object that contains location, filename,
+ * @returns {Promise} Artifact object that contains location, filename,
  * and project.
  */
 async function deleteBlob(requestingUser, organizationID, projectID,
@@ -935,15 +936,15 @@ async function deleteBlob(requestingUser, organizationID, projectID,
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the project belongs to.
  * @param {string} projectID - The project ID of the Project which is being searched for.
- * @param {string} branch - The branch ID
+ * @param {string} branch - The branch ID.
  * @param {string} artifact - An artifact id.
- * @param {Object} [options] - A parameter that provides supported options.
+ * @param {object} [options] - A parameter that provides supported options.
  * @param {boolean} [options.archived = false] - If true, find results will include
  * archived objects.
  * @param {boolean} [options.includeArchived = false] - If true, find results will include
  * archived objects.
  *
- * @return {Promise} Artifact Blob
+ * @returns {Promise} Artifact Blob.
  */
 async function getBlobById(requestingUser, organizationID, projectID, branch,
   artifact, options) {
@@ -1022,18 +1023,20 @@ async function getBlobById(requestingUser, organizationID, projectID, branch,
 /**
  * @description This function validates the artifact object metadata.
  * Ensures fields such as 'location' and 'filename' are defined.
+ *
+ * @param {object} artMetadata - Object containing location, file, and project.
  */
-function validateBlobMeta(metadata) {
+function validateBlobMeta(artMetadata) {
   // Define the required blob fields
   const requiredBlobFields = ['location', 'filename'];
 
-  if (typeof metadata !== 'object') {
+  if (typeof artMetadata !== 'object') {
     throw new M.DataFormatError('Artifact must be an object.', 'warn');
   }
 
   requiredBlobFields.forEach((field) => {
     try {
-      assert.ok(metadata.hasOwnProperty(field), 'Artifact blob requires'
+      assert.ok(artMetadata.hasOwnProperty(field), 'Artifact blob requires'
         + ` ${field} field.`);
     }
     catch (error) {

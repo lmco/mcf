@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module controllers.ui-controller
  *
@@ -47,8 +47,10 @@ const validators = M.require('lib.validators');
 /**
  * @description Renders the home page.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function home(req, res) {
   // Sanity check: confirm req.user exists
@@ -66,8 +68,8 @@ function home(req, res) {
 /**
  * @description Renders the admin console.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  */
 function adminConsole(req, res) {
   // Sanity check: confirm req.user exists
@@ -85,8 +87,8 @@ function adminConsole(req, res) {
 /**
  * @description Renders the current user's page.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  */
 function profile(req, res) {
   // Sanity check: confirm req.user exists
@@ -104,8 +106,10 @@ function profile(req, res) {
 /**
  * @description Renders the organization page.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function organization(req, res) {
   // Sanity check: confirm req.user exists
@@ -123,8 +127,10 @@ function organization(req, res) {
 /**
  * @description Renders the project page.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function project(req, res) {
   // Sanity check: confirm req.user exists
@@ -142,8 +148,8 @@ function project(req, res) {
 /**
  * @description Renders the flight manual.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  */
 function flightManual(req, res) {
   // Read the flight manual sections from the doc directory
@@ -174,6 +180,8 @@ function flightManual(req, res) {
 /**
  * @description Generates the Swagger specification based on the Swagger JSDoc
  * in the API routes file.
+ *
+ * @returns {Function} The swaggerJSDoc function.
  */
 function swaggerSpec() {
   return swaggerJSDoc({
@@ -192,8 +200,10 @@ function swaggerSpec() {
 /**
  * @description Renders the swagger doc.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function swaggerDoc(req, res) {
   return utils.render(req, res, 'swagger', {
@@ -207,8 +217,10 @@ function swaggerDoc(req, res) {
  * signed in. Therefore, this function has some logic to identify whether
  * or not the user is logged in.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function showAboutPage(req, res) {
   return utils.render(req, res, 'about', {
@@ -227,8 +239,10 @@ function showAboutPage(req, res) {
  * to tell the login process where to redirect the user after a successful
  * login.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function showLoginPage(req, res) {
   let next = '';
@@ -251,8 +265,8 @@ function showLoginPage(req, res) {
  * are called. This function should only get called once login was
  * successful. It handles the appropriate redirect for the user.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  */
 function login(req, res) {
   // make sure the passed in "next" parameter is valid
@@ -276,8 +290,8 @@ function login(req, res) {
  * @description Logs out the user by un-setting the req.user object and the
  * req.session.token object.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
  */
 function logout(req, res) {
   // Sanity check: confirm req.user exists
@@ -297,8 +311,10 @@ function logout(req, res) {
 /**
  * @description This is  for pages that were not found.
  *
- * @param {Object} req - Request express object
- * @param {Object} res - Response express object
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ *
+ * @returns {Function} The response express object's render function.
  */
 function notFound(req, res) {
   // render the 404 not found page

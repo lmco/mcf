@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module lib.db
  *
@@ -32,8 +32,10 @@ requiredFunctions.forEach((fxn) => {
 });
 
 /**
- * @description Connects to the database
+ * @description Connects to the database.
  * @async
+ *
+ * @returns {Function} The connect function of the implemented database strategy.
  */
 async function connect() {
   try {
@@ -45,8 +47,10 @@ async function connect() {
 }
 
 /**
- * @description Disconnects from the database
+ * @description Disconnects from the database.
  * @async
+ *
+ * @returns {Function} The disconnect function of the implemented database strategy.
  */
 async function disconnect() {
   try {
@@ -59,9 +63,10 @@ async function disconnect() {
 
 /**
  * @description Clears all contents from the database, equivalent to starting
- * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN
- * PRODUCTION.
+ * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
+ *
+ * @returns {Function} The clear function of the implemented database strategy.
  */
 async function clear() {
   try {
@@ -80,7 +85,7 @@ async function clear() {
  *
  * @param {*} data - User input to be sanitized. May be in any data format.
  *
- * @return {*} Sanitized user input.
+ * @returns {*} Sanitized user input.
  */
 function sanitize(data) {
   try {
@@ -92,10 +97,10 @@ function sanitize(data) {
 }
 
 /**
- * @description Defines the Schema class. Schemas define the properties and
- * methods that each instance of a document should have, as well as the static
- * functions which belong on a model. The Schema class is closely based on the
- * Mongoose.js Schema class {@link https://mongoosejs.com/docs/api/schema.html}.
+ * @description Defines the Schema class. Schemas define the properties and methods that each
+ * instance of a document should have, as well as the static functions which belong on a model.
+ * The Schema class is closely based on the Mongoose.js Schema class
+ * {@link https://mongoosejs.com/docs/api/schema.html}.
  */
 class Schema extends DBModule.Schema {
 
@@ -103,9 +108,9 @@ class Schema extends DBModule.Schema {
    * @description Class constructor. Calls the parent constructor and ensures
    * that the parent class defined the required functions.
    *
-   * @param {Object} definition - The parameters and functions which define the
+   * @param {object} definition - The parameters and functions which define the
    * schema.
-   * @param {Object} [options] - A object containing valid options.
+   * @param {object} [options] - A object containing valid options.
    */
   constructor(definition, options) {
     // Call parent constructor
@@ -131,9 +136,12 @@ class Schema extends DBModule.Schema {
   /**
    * @description Adds an object/schema to the current schema.
    *
-   * @param {(Object|Schema)} obj - The object or schema to add to the current
+   * @param {(object|Schema)} obj - The object or schema to add to the current
    * schema.
-   * @param {String} [prefix] - The optional prefix to add to the paths in obj.
+   * @param {string} [prefix] - The optional prefix to add to the paths in obj.
+   *
+   * @returns {Function} Calls super on the add function of the implemented
+   * database strategy's schema.
    */
   add(obj, prefix) {
     return super.add(obj, prefix);
@@ -142,8 +150,11 @@ class Schema extends DBModule.Schema {
   /**
    * @description Registers a plugin for the schema.
    *
-   * @param {function} cb - A callback function to run.
-   * @param {Object} [options] - A object containing options.
+   * @param {Function} cb - A callback function to run.
+   * @param {object} [options] - A object containing options.
+   *
+   * @returns {Function} Calls super on the plugin function of the implemented
+   * database strategy's schema.
    */
   plugin(cb, options) {
     return super.plugin(cb, options);
@@ -153,11 +164,14 @@ class Schema extends DBModule.Schema {
    * @description Defines an index for the schema. Can support adding compound
    * or text indexes.
    *
-   * @param {Object} fields - A object containing the key/values pairs where the
+   * @param {object} fields - A object containing the key/values pairs where the
    * keys are the fields to add indexes to, and the values define the index type
    * where 1 defines an ascending index, -1 a descending index, and 'text'
    * defines a text index.
-   * @param {Object} [options] - An object containing options.
+   * @param {object} [options] - An object containing options.
+   *
+   * @returns {Function} Calls super on the index function of the implemented
+   * database strategy's schema.
    */
   index(fields, options) {
     return super.index(fields, options);
@@ -167,37 +181,42 @@ class Schema extends DBModule.Schema {
    * @description Defines a function to be run prior to a certain event
    * occurring.
    *
-   * @param {(String|RegExp)} methodName - The event to run the callback
+   * @param {(string|RegExp)} methodName - The event to run the callback
    * function before.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} cb - The callback function to run prior to the event
+   * @param {object} [options] - An object containing options.
+   * @param {Function} cb - The callback function to run prior to the event
    * occurring.
+   *
+   * @returns {Function} Calls super on the pre function of the implemented
+   * database strategy's schema.
    */
   pre(methodName, options, cb) {
     return super.pre(methodName, options, cb);
   }
 
   /**
-   * @description Defines a virtual field for the schema. Virtuals are not
-   * stored in the database and rather are calculated post-find. Virtuals
-   * generally will require a second request to retrieve referenced documents.
-   * Populated virtuals contains a localField and foreignField which must match
-   * for a document to be added to the virtual collection. For example, the
-   * Organization Schema contains a virtual called "projects". This virtual
+   * @description Defines a virtual field for the schema. Virtuals are not stored in the
+   * database and rather are calculated post-find. Virtuals generally will require a second
+   * request to retrieve referenced documents. Populated virtuals contains a localField and
+   * foreignField which must match for a document to be added to the virtual collection. For
+   * example, the Organization Schema contains a virtual called "projects". This virtual
    * returns all projects who "org" field matches the organization's "_id".
    *
-   * @param {String} name - The name of the field to be added to the schema
+   * @param {string} name - The name of the field to be added to the schema
    * post-find.
-   * @param {Object} [options] - An object containing options.
-   * @param {(String|Model)} [options.ref] - The name of the model which the
+   * @param {object} [options] - An object containing options.
+   * @param {(string|Model)} [options.ref] - The name of the model which the
    * virtual references.
-   * @param {(String|Function)} [options.localField] - The field on the current
+   * @param {(string|Function)} [options.localField] - The field on the current
    * schema which is being used to match the foreignField.
-   * @param {(String|Function)} [options.foreignField] - The field on the
+   * @param {(string|Function)} [options.foreignField] - The field on the
    * referenced schema which is being used to match the localField.
    * @param {(boolean|Function)} [options.justOne] - If true, the virtual should
    * only return a single document. If false, the virtual will be an array of
    * documents.
+   *
+   * @returns {Function} Calls super on the virtual function of the implemented
+   * database strategy's schema.
    */
   virtual(name, options) {
     return super.virtual(name, options);
@@ -207,8 +226,11 @@ class Schema extends DBModule.Schema {
    * @description Adds a static method to the schema. This method should later
    * be an accessible static method on the model.
    *
-   * @param {String} name - The name of the static function.
-   * @param {function} fn - The function to be added to the model.
+   * @param {string} name - The name of the static function.
+   * @param {Function} fn - The function to be added to the model.
+   *
+   * @returns {Function} Calls super on the static function of the implemented
+   * database strategy's schema.
    */
   static(name, fn) {
     return super.static(name, fn);
@@ -218,8 +240,11 @@ class Schema extends DBModule.Schema {
    * @description Adds a non-static method to the schema, which later will be an
    * instance method on the model.
    *
-   * @param {String} name - The name of the non-static function.
-   * @param {function} fn - The function to be added to the model.
+   * @param {string} name - The name of the non-static function.
+   * @param {Function} fn - The function to be added to the model.
+   *
+   * @returns {Function} Calls super on the method function of the implemented
+   * database strategy's schema.
    */
   method(name, fn) {
     return super.method(name, fn);
@@ -243,11 +268,11 @@ class Model extends DBModule.Model {
    * @description Class constructor. Calls parent constructor, and ensures that
    * each of the required functions is defined in the parent class.
    *
-   * @param {String} name - The name of the model being created. This name is
+   * @param {string} name - The name of the model being created. This name is
    * used to create the collection name in the database.
    * @param {Schema} schema - The schema which is being turned into a model.
    * Should be an instance of the Schema class.
-   * @param {String} [collection] - Optional name of the collection in the
+   * @param {string} [collection] - Optional name of the collection in the
    * database, if not provided the name should be used.
    */
   constructor(name, schema, collection) {
@@ -256,8 +281,8 @@ class Model extends DBModule.Model {
 
     // Check that expected functions are defined
     const expectedFunctions = ['bulkWrite', 'createDocument', 'countDocuments',
-      'deleteIndex', 'deleteMany', 'ensureIndexes', 'find', 'findOne',
-      'getIndexes', 'insertMany', 'updateMany', 'updateOne', 'init'];
+      'deleteIndex', 'deleteMany', 'find', 'findOne', 'getIndexes',
+      'insertMany', 'updateMany', 'updateOne', 'init'];
     expectedFunctions.forEach((f) => {
       // Ensure the parameter is defined
       if (!(f in this)) {
@@ -277,7 +302,7 @@ class Model extends DBModule.Model {
    * be run in the constructor.
    * @async
    *
-   * @return {Promise<*>}
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async init() {
     return super.init();
@@ -288,24 +313,24 @@ class Model extends DBModule.Model {
    * update, or delete multiple documents.
    * @async
    *
-   * @param {Object[]} ops - An array of objects detailing what operations to
+   * @param {object[]} ops - An array of objects detailing what operations to
    * perform the data required for those operations.
-   * @param {Object} [ops.insertOne] - Specified an insertOne operation.
-   * @param {Object} [ops.insertOne.document] - The document to create, for
+   * @param {object} [ops.insertOne] - Specified an insertOne operation.
+   * @param {object} [ops.insertOne.document] - The document to create, for
    * insertOne.
-   * @param {Object} [ops.updateOne] - Specifies an updateOne operation.
-   * @param {Object} [ops.updateOne.filter] - An object containing parameters to
+   * @param {object} [ops.updateOne] - Specifies an updateOne operation.
+   * @param {object} [ops.updateOne.filter] - An object containing parameters to
    * filter the find query by, for updateOne.
-   * @param {Object} [ops.updateOne.update] - An object containing updates to
+   * @param {object} [ops.updateOne.update] - An object containing updates to
    * the matched document from the updateOne filter.
-   * @param {Object} [ops.deleteOne] - Specifies a deleteOne operation.
-   * @param {Object} [ops.deleteOne.filter] - An object containing parameters to
+   * @param {object} [ops.deleteOne] - Specifies a deleteOne operation.
+   * @param {object} [ops.deleteOne.filter] - An object containing parameters to
    * filter the find query by, for deleteOne.
-   * @param {Object} [ops.deleteMany] - Specifies a deleteMany operation.
-   * @param {Object} [ops.deleteMany.filter] - An object containing parameters
+   * @param {object} [ops.deleteMany] - Specifies a deleteMany operation.
+   * @param {object} [ops.deleteMany.filter] - An object containing parameters
    * to filter the find query by, for deleteMany.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
    * @example
    * await bulkWrite([
@@ -329,7 +354,7 @@ class Model extends DBModule.Model {
    *   }
    * ]);
    *
-   * @return {Promise<Object>} Result of the bulkWrite operation.
+   * @returns {Promise<object>} Result of the bulkWrite operation.
    */
   async bulkWrite(ops, options, cb) {
     return super.bulkWrite(ops, options, cb);
@@ -338,9 +363,12 @@ class Model extends DBModule.Model {
   /**
    * @description Creates a document based on the model's schema.
    *
-   * @param {Object} doc - The JSON to be converted into a document. Should
+   * @param {object} doc - The JSON to be converted into a document. Should
    * roughly align with the model's schema. Each document created should at
    * least contain an _id, as well as the methods defined in the schema.
+   *
+   * @returns {Function} Calls the createDocument function of the implemented
+   * database strategy's model schema.
    */
   createDocument(doc) {
     return super.createDocument(doc);
@@ -350,11 +378,11 @@ class Model extends DBModule.Model {
    * @description Counts the number of documents that matches a filter.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Number>} The number of documents which matched the filter.
+   * @returns {Promise<number>} The number of documents which matched the filter.
    */
   async countDocuments(filter, cb) {
     return super.countDocuments(filter, cb);
@@ -364,9 +392,9 @@ class Model extends DBModule.Model {
    * @description Deletes the specified index from the database.
    * @async
    *
-   * @param {String} name - The name of the index.
+   * @param {string} name - The name of the index.
    *
-   * @return {Promise<void>}
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return super.deleteIndex(name);
@@ -376,12 +404,12 @@ class Model extends DBModule.Model {
    * @description Deletes any documents that match the provided conditions.
    * @async
    *
-   * @param {Object} conditions - An object containing parameters to filter the
+   * @param {object} conditions - An object containing parameters to filter the
    * find query by, and thus delete documents by.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} An object denoting the success of the delete
+   * @returns {Promise<object>} An object denoting the success of the delete
    * operation.
    */
   async deleteMany(conditions, options, cb) {
@@ -389,49 +417,38 @@ class Model extends DBModule.Model {
   }
 
   /**
-   * @description Creates all indexes (if not already created) for the model's
-   * schema.
-   * @async
-   *
-   * @return {Promise<void>}
-   */
-  async ensureIndexes() {
-    return super.ensureIndexes();
-  }
-
-  /**
    * @description Finds multiple documents based on the filter provided.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {(Object|String)} [projection] - Specifies the fields to return in
+   * @param {(object|string)} [projection] - Specifies the fields to return in
    * the documents that match the filter. To return all fields, omit this
    * parameter.
-   * @param {Object} [options] - An object containing options.
-   * @param {Object} [options.sort] - An object specifying the order by which
+   * @param {object} [options] - An object containing options.
+   * @param {object} [options.sort] - An object specifying the order by which
    * to sort and return the documents. Keys are fields by which to sort, and
    * values are the sort order where 1 is ascending and -1 is descending. It is
    * possible to sort by metadata by providing the key $meta and a non-numerical
    * value. This is used primarily for text based search.
-   * @param {Number} [options.limit] - Limits the number of documents returned.
+   * @param {number} [options.limit] - Limits the number of documents returned.
    * A limit of 0 is equivalent to setting no limit and a negative limit is not
    * supported.
-   * @param {Number} [options.skip] - Skips a specified number of documents that
+   * @param {number} [options.skip] - Skips a specified number of documents that
    * matched the query. Given 10 documents match with a skip of 5, only the
    * final 5 documents would be returned. A skip value of 0 is equivalent to not
    * skipping any documents. A negative skip value is not supported.
-   * @param {String} [options.populate] - A space separated list of fields to
+   * @param {string} [options.populate] - A space separated list of fields to
    * populate of return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object[]>} An array containing the found documents, if
+   * @returns {Promise<object[]>} An array containing the found documents, if
    * any.
    */
   async find(filter, projection, options, cb) {
@@ -442,23 +459,23 @@ class Model extends DBModule.Model {
    * @description Finds a single document based on the filter provided.
    * @async
    *
-   * @param {Object} conditions - An object containing parameters to filter the
+   * @param {object} conditions - An object containing parameters to filter the
    * find query by.
-   * @param {(Object|String)} [projection] - Specifies the fields to return in
+   * @param {(object|string)} [projection] - Specifies the fields to return in
    * the document that matches the filter. To return all fields, omit this
    * parameter.
-   * @param {Object} [options] - An object containing options.
-   * @param {String} [options.populate] - A space separated list of fields to
+   * @param {object} [options] - An object containing options.
+   * @param {string} [options.populate] - A space separated list of fields to
    * populate of return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} The found document, if any.
+   * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
     return super.findOne(conditions, projection, options, cb);
@@ -468,7 +485,7 @@ class Model extends DBModule.Model {
    * @description Returns an array of indexes for the given model.
    * @async
    *
-   * @return {Promise<Object[]>} Array of index objects
+   * @returns {Promise<object[]>} Array of index objects.
    */
   async getIndexes() {
     return super.getIndexes();
@@ -478,16 +495,16 @@ class Model extends DBModule.Model {
    * @description Inserts any number of documents into the database.
    * @async
    *
-   * @param {Object[]} docs - An array of documents to insert.
-   * @param {Object} [options] - An object containing options.
-   * @param {Boolean} [options.lean] - If false (by default), every document
+   * @param {object[]} docs - An array of documents to insert.
+   * @param {object} [options] - An object containing options.
+   * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {Boolean} [options.skipValidation] - If true, will not validate
+   * @param {boolean} [options.skipValidation] - If true, will not validate
    * the documents which are being created.
-   * @param {function} [cb] - A callback function to run.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object[]>} The created documents.
+   * @returns {Promise<object[]>} The created documents.
    */
   async insertMany(docs, options, cb) {
     return super.insertMany(docs, options, cb);
@@ -498,11 +515,13 @@ class Model extends DBModule.Model {
    * changes in the provided doc.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {Object} doc - The object containing updates to the found documents.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} doc - The object containing updates to the found documents.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
+   *
+   * @returns {Promise<object[]>} The updated documents.
    */
   async updateMany(filter, doc, options, cb) {
     return super.updateMany(filter, doc, options, cb);
@@ -513,13 +532,13 @@ class Model extends DBModule.Model {
    * is updated with the doc provided.
    * @async
    *
-   * @param {Object} filter - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {Object} doc - The object containing updates to the found document.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} [cb] - A callback function to run.
+   * @param {object} doc - The object containing updates to the found document.
+   * @param {object} [options] - An object containing options.
+   * @param {Function} [cb] - A callback function to run.
    *
-   * @return {Promise<Object>} The updated document.
+   * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
     return super.updateOne(filter, doc, options, cb);
@@ -528,13 +547,12 @@ class Model extends DBModule.Model {
 }
 
 /**
- * @description Defines the Store class. The Store class is used along with
- * express-session to manage sessions. The class MUST extend the node's built in
- * EventEmitter class. Please review the express-session documentation at
+ * @description Defines the Store class. The Store class is used along with express-session
+ * to manage sessions. The class MUST extend the node's built in EventEmitter class. Please
+ * review the express-session documentation at
  * {@link https://github.com/expressjs/session#session-store-implementation}
- * to learn more about the Store implementation. There are many libraries
- * available that support different databases, and a list of those are also
- * available at the link above.
+ * to learn more about the Store implementation. There are many libraries available that
+ * support different databases, and a list of those are also available at the link above.
  */
 class Store extends DBModule.Store {
 
@@ -567,8 +585,10 @@ class Store extends DBModule.Store {
    * @description An optional function used to get all sessions in the store
    * as an array.
    *
-   * @param {function} cb - The callback to run, should be called as
+   * @param {Function} cb - The callback to run, should be called as
    * cb(error, sessions).
+   *
+   * @returns {Promise<object[]>} An array of all the sessions in the store.
    */
   all(cb) {
     return super.all(cb);
@@ -578,8 +598,10 @@ class Store extends DBModule.Store {
    * @description A required function which deletes a given session from the
    * store.
    *
-   * @param {String} sid - The ID of the session to delete.
-   * @param {function} cb - The callback to run, should be called as cb(error).
+   * @param {string} sid - The ID of the session to delete.
+   * @param {Function} cb - The callback to run, should be called as cb(error).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   destroy(sid, cb) {
     return super.destroy(sid, cb);
@@ -589,7 +611,9 @@ class Store extends DBModule.Store {
    * @description An optional function which deletes all sessions from the
    * store.
    *
-   * @param {function} cb - The callback to run, should be called as cb(error).
+   * @param {Function} cb - The callback to run, should be called as cb(error).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   clear(cb) {
     return super.clear(cb);
@@ -599,8 +623,10 @@ class Store extends DBModule.Store {
    * @description An optional function which gets the count of all session in
    * the store.
    *
-   * @param {function} cb - The callback to run, should be called as
+   * @param {Function} cb - The callback to run, should be called as
    * cb(error, len).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   length(cb) {
     return super.length(cb);
@@ -610,10 +636,12 @@ class Store extends DBModule.Store {
    * @description A required function which gets the specified session from the
    * store.
    *
-   * @param {String} sid - The ID of the session to retrieve.
-   * @param {function} cb - The callback to run, should be called as
+   * @param {string} sid - The ID of the session to retrieve.
+   * @param {Function} cb - The callback to run, should be called as
    * cb(error, session). The session argument should be the session if found,
    * otherwise null or undefined if not found.
+   *
+   * @returns {Promise<object>} The specified session from the store.
    */
   get(sid, cb) {
     return super.get(sid, cb);
@@ -623,9 +651,11 @@ class Store extends DBModule.Store {
    * @description A required function which upserts a given session into the
    * store.
    *
-   * @param {String} sid - The ID of the session to upsert.
-   * @param {Object} session - The session object to upsert.
-   * @param {function} cb - The callback to run, should be called as cb(error).
+   * @param {string} sid - The ID of the session to upsert.
+   * @param {object} session - The session object to upsert.
+   * @param {Function} cb - The callback to run, should be called as cb(error).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   set(sid, session, cb) {
     return super.set(sid, session, cb);
@@ -636,9 +666,11 @@ class Store extends DBModule.Store {
    * session. This function is used to reset the idle timer on an active session
    * which may be potentially deleted.
    *
-   * @param {String} sid - The ID of the session to "touch".
-   * @param {Object} session - The session to "touch".
-   * @param {function} cb - The callback to run, should be called as cb(error).
+   * @param {string} sid - The ID of the session to "touch".
+   * @param {object} session - The session to "touch".
+   * @param {Function} cb - The callback to run, should be called as cb(error).
+   *
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   touch(sid, session, cb) {
     return super.touch(sid, session, cb);

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * Classification: UNCLASSIFIED.
  *
  * @module  test.406a-artifact-model-tests
  *
@@ -41,7 +41,7 @@ let artifactBlob1 = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests
+   * Before: runs before all tests.
    */
   before(async () => {
     try {
@@ -73,7 +73,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests
+   * After: runs after all tests.
    */
   after(async () => {
     try {

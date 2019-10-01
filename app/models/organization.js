@@ -1,5 +1,7 @@
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow html in description
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module models.organization
  *
@@ -55,10 +57,10 @@ const extensions = M.require('models.plugin.extensions');
  *
  * @property {string} _id - The organization's unique ID.
  * @property {string} name - The organization's name.
- * @property {Object} permissions - An object whose keys identify an
+ * @property {object} permissions - An object whose keys identify an
  * organization's roles. The keys are usernames and the values are arrays
  * containing the users permissions.
- * @property {Object} custom - JSON used to store additional data.
+ * @property {object} custom - JSON used to store additional data.
  *
  */
 const OrganizationSchema = new db.Schema({
@@ -102,7 +104,7 @@ const OrganizationSchema = new db.Schema({
   permissions: {
     type: 'Object',
     default: {},
-    validate: {
+    validate: [{
       validator: function(v) {
         let bool = true;
         // If the permissions object is not a JSON object, reject
@@ -120,7 +122,7 @@ const OrganizationSchema = new db.Schema({
         return bool;
       },
       message: props => 'The organization permissions object is not properly formatted.'
-    }
+    }]
   }
 });
 

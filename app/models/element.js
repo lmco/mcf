@@ -1,5 +1,7 @@
+/* eslint-disable jsdoc/require-description-complete-sentence */
+// Disabled to allow html in description
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module models.element
  *
@@ -131,36 +133,36 @@ const ElementSchema = new db.Schema({
     type: 'String',
     required: true,
     ref: 'Project',
-    validate: {
+    validate: [{
       validator: function(v) {
         return RegExp(validators.project.id).test(v);
       },
       message: props => `${props.value} is not a valid project ID.`
-    }
+    }]
   },
   branch: {
     type: 'String',
     required: true,
     ref: 'Branch',
     index: true,
-    validate: {
+    validate: [{
       validator: function(v) {
         return RegExp(validators.branch.id).test(v);
       },
       message: props => `${props.value} is not a valid branch ID.`
-    }
+    }]
   },
   parent: {
     type: 'String',
     ref: 'Element',
     default: null,
     index: true,
-    validate: {
+    validate: [{
       validator: function(v) {
         return RegExp(validators.element.id).test(v) || (v === null);
       },
       message: props => `${props.value} is not a valid parent ID.`
-    }
+    }]
   },
   source: {
     type: 'String',

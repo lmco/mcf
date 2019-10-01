@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module mbee.js
  *
@@ -137,7 +137,7 @@ if (config.server.secret === 'RANDOM') {
 }
 
 /**
- * Define the MBEE configuration
+ * Define the MBEE configuration.
  */
 Object.defineProperty(M, 'config', {
   value: config,
@@ -193,6 +193,10 @@ Object.freeze(M);
 // Invoke main
 main();
 
+/**
+ * @description The main function that takes in arguments and either starts the MBEE server
+ * or runs one of the custom MBEE scripts.
+ */
 function main() {
   // Set argument commands for use in configuration lib and main function
   // Example: node mbee.js <subcommand> <opts>

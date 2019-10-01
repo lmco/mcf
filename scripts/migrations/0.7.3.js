@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module scripts.migrations.0.7.2
  *
@@ -12,7 +12,7 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description Migration script for version 0.7.3
+ * @description Migration script for version 0.7.3.
  */
 
 // MBEE modules
@@ -21,6 +21,8 @@ const User = M.require('models.user');
 
 /**
  * @description Handles the database migration from 0.7.3 to 0.7.2.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -36,7 +38,7 @@ module.exports.down = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.7.2' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.7.2' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.2' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -47,6 +49,8 @@ module.exports.down = function() {
  * @description Handles the database migration from 0.7.2 to 0.7.3.
  * If the username index in the users collection exists, the
  * username index is removed.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -63,7 +67,7 @@ module.exports.up = function() {
         return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3' }]);
       }
 
-      return ServerData.updateOne({ _id: serverData[0]._id }, { $set: { version: '0.7.3' } });
+      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.3' });
     })
     .then(() => resolve())
     .catch((error) => reject(error));
@@ -73,6 +77,8 @@ module.exports.up = function() {
 /**
  * @description Helper function for 0.7.2 to 0.7.3 migration. Handles all
  * updates to the users collection.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function twoToThreeUserHelper() {
   return new Promise((resolve, reject) => {

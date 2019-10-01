@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module app
  *
@@ -59,7 +59,9 @@ db.connect()
 });
 
 /**
- * @description Initializes the application and exports app.js
+ * @description Initializes the application and exports app.js.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 function initApp() {
   return new Promise((resolve) => {
@@ -129,7 +131,11 @@ function initApp() {
   });
 }
 
-// Create default organization if it does not exist
+/**
+ * @description Creates a default organization if one does not already exist.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
+ */
 function createDefaultOrganization() {
   return new Promise((resolve, reject) => {
     // Initialize createdOrg
@@ -191,7 +197,11 @@ function createDefaultOrganization() {
   });
 }
 
-// Create default admin if a global admin does not exist
+/**
+ * @description Creates a default admin if a global admin does not already exist.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
+ */
 function createDefaultAdmin() {
   return new Promise((resolve, reject) => {
     // Initialize userCreated
@@ -243,7 +253,7 @@ function createDefaultAdmin() {
  * @description Initializes all models asynchronously.
  * @async
  *
- * @return {Promise<void>}
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 async function initModels() {
   await Artifact.init();

@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * Classification: UNCLASSIFIED.
  *
  * @module test.506a-artifact-mock-core-tests
  *
@@ -44,7 +44,7 @@ let branchID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project
+   * After: Connect to database. Create an admin user, organization, and project.
    */
   before((done) => {
     // Connect to the database
@@ -116,6 +116,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Verifies mock POST request to create an artifact blob.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postArtifact(done) {
   const artData = testData.artifacts[0];
@@ -188,6 +190,8 @@ function postArtifact(done) {
 
 /**
  * @description Verifies mock GET request to get an artifact.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getArtifact(done) {
   const artData = testData.artifacts[0];
@@ -250,6 +254,8 @@ function getArtifact(done) {
 
 /**
  * @description Verifies mock PATCH request to update an artifact.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function patchArtifact(done) {
   const artData = testData.artifacts[0];
@@ -313,6 +319,8 @@ function patchArtifact(done) {
 
 /**
  * @description Verifies mock DELETE request to delete an artifact.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteArtifact(done) {
   const artData = testData.artifacts[0];
@@ -351,6 +359,8 @@ function deleteArtifact(done) {
 
 /**
  * @description Verifies mock GET request to get an artifact blob.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getBlob(done) {
   const artData = testData.artifacts[0];
@@ -399,6 +409,8 @@ function getBlob(done) {
 
 /**
  * @description Verifies mock GET request to get an artifact blob by id.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function getBlobById(done) {
   const artData = testData.artifacts[0];
@@ -444,6 +456,8 @@ function getBlobById(done) {
 
 /**
  * @description Verifies mock POST request to post an artifact blob.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function postBlob(done) {
   const artData = testData.artifacts[0];
@@ -494,6 +508,8 @@ function postBlob(done) {
 
 /**
  * @description Verifies mock DELETE request to Delete an artifact blob.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function deleteBlob(done) {
   const artData = testData.artifacts[0];

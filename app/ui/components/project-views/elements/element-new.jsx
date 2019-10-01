@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module ui.components.elements.element-new
  *
@@ -135,16 +135,21 @@ class ElementNew extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the parent field
+   * @description This function is called when the ElementSelector for the parent field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
    */
   parentSelectHandler(_id) {
     this.setState({ parent: _id });
   }
 
   /**
-   * This function is called when the ElementSelector for the source field
+   * @description This function is called when the ElementSelector for the source field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
+   * @param {string} project - The current project.
    */
   sourceSelectHandler(_id, project) {
     // Verify if project was provided
@@ -163,8 +168,11 @@ class ElementNew extends Component {
   }
 
   /**
-   * This function is called when the ElementSelector for the target field
+   * @description This function is called when the ElementSelector for the target field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
+   * @param {object} project - The current project.
    */
   targetSelectHandler(_id, project) {
     // Verify if project was provided
