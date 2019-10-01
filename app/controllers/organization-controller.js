@@ -34,6 +34,7 @@ const fs = require('fs');
 const path = require('path');
 
 // MBEE Modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
@@ -911,6 +912,7 @@ async function remove(requestingUser, orgs, options) {
     });
 
     const foundOrgIDs = foundOrgs.map(o => o._id);
+    // Find document ids starting with org ID follow by a colon
     const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
     ownedQuery._id = { $in: regexIDs };
 
@@ -932,6 +934,8 @@ async function remove(requestingUser, orgs, options) {
 
     // Delete any elements in the org
     await Element.deleteMany(ownedQuery);
+    // Delete any artifacts in the org
+    await Artifact.deleteMany(ownedQuery);
     // Delete any branches in the org
     await Branch.deleteMany(ownedQuery);
     // Delete any projects in the org

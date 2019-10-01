@@ -36,6 +36,7 @@ const fs = require('fs');
 const path = require('path');
 
 // MBEE Modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
@@ -1195,6 +1196,9 @@ async function remove(requestingUser, organizationID, projects, options) {
 
     // Delete any elements in the project
     await Element.deleteMany(ownedQuery);
+
+    // Delete any artifacts in the project
+    await Artifact.deleteMany(ownedQuery);
 
     // Delete any branches in the project
     await Branch.deleteMany(ownedQuery);

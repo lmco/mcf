@@ -47,40 +47,40 @@ describe(M.getModuleName(module.filename), () => {
    * After: Connect to database. Create an admin user, organization, and project
    */
   before((done) => {
-      // Connect to the database
-      db.connect()
-      // Create test admin
-      .then(() => testUtils.createTestAdmin())
-      .then((_adminUser) => {
-        // Set global admin user
-        adminUser = _adminUser;
+    // Connect to the database
+    db.connect()
+    // Create test admin
+    .then(() => testUtils.createTestAdmin())
+    .then((_adminUser) => {
+      // Set global admin user
+      adminUser = _adminUser;
 
-        // Create organization
-        return testUtils.createTestOrg(adminUser);
-      })
-      .then((retOrg) => {
-        // Set global organization
-        org = retOrg;
+      // Create organization
+      return testUtils.createTestOrg(adminUser);
+    })
+    .then((retOrg) => {
+      // Set global organization
+      org = retOrg;
 
-        // Define project data
-        const projData = testData.projects[0];
+      // Define project data
+      const projData = testData.projects[0];
 
-        // Create project
-        return ProjController.create(adminUser, org.id, projData);
-      })
-      .then((retProj) => {
-        // Set global project
-        proj = retProj;
-        projID = utils.parseID(proj[0].id).pop();
-        branchID = testData.branches[0].id;
-        done();
-      })
-      .catch((error) => {
-        M.log.error(error);
-        // Expect no error
-        chai.expect(error).to.equal(null);
-        done();
-      });
+      // Create project
+      return ProjController.create(adminUser, org.id, projData);
+    })
+    .then((retProj) => {
+      // Set global project
+      proj = retProj;
+      projID = utils.parseID(proj[0].id).pop();
+      branchID = testData.branches[0].id;
+      done();
+    })
+    .catch((error) => {
+      M.log.error(error);
+      // Expect no error
+      chai.expect(error).to.equal(null);
+      done();
+    });
   });
 
   /**
@@ -107,7 +107,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET an artifact', getArtifact);
   it('should POST an artifact blob', postBlob);
   it('should GET an artifact blob', getBlob);
-  it('should GET an artifact blob', getBlobById);
+  it('should GET an artifact blob by ID', getBlobById);
   it('should DELETE an artifact', deleteBlob);
   it('should PATCH an artifact', patchArtifact);
   it('should DELETE an artifact', deleteArtifact);
@@ -350,52 +350,7 @@ function deleteArtifact(done) {
 }
 
 /**
- * @description Verifies mock GET request to get an artifact blob by id.
- */
-function getBlobById(done) {
-  const artData = testData.artifacts[0];
-  // Create request object
-  const body = {};
-
-  const params = {
-    orgid: org.id,
-    projectid: projID,
-    branchid: branchID,
-    artifactid: artData.id
-  };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Check return artifact is of buffer type
-    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
-
-    // Get the file
-    const artifactPath = path.join(M.root, artData.location, artData.filename);
-    const fileData = fs.readFileSync(artifactPath);
-
-    // Deep compare both binaries
-    chai.expect(_data).to.deep.equal(fileData);
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-  // GETs an artifact
-  apiController.getBlobById(req, res);
-}
-
-/**
- * @description Verifies mock GET request to get an artifact blob by id.
+ * @description Verifies mock GET request to get an artifact blob.
  */
 function getBlob(done) {
   const artData = testData.artifacts[0];
@@ -440,6 +395,51 @@ function getBlob(done) {
   };
   // GETs an artifact
   apiController.getBlob(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an artifact blob by id.
+ */
+function getBlobById(done) {
+  const artData = testData.artifacts[0];
+  // Create request object
+  const body = {};
+
+  const params = {
+    orgid: org.id,
+    projectid: projID,
+    branchid: branchID,
+    artifactid: artData.id
+  };
+  const method = 'GET';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(_data)).to.equal(true);
+
+    // Get the file
+    const artifactPath = path.join(M.root, artData.location, artData.filename);
+    const fileData = fs.readFileSync(artifactPath);
+
+    // Deep compare both binaries
+    chai.expect(_data).to.deep.equal(fileData);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+  // GETs an artifact
+  apiController.getBlobById(req, res);
 }
 
 /**

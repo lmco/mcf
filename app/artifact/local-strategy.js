@@ -37,6 +37,9 @@ const utils = M.require('lib.utils');
  * from the local file system.
  *
  * @param {string} artMetadata - Artifact metadata
+ * @param {string} [artMetadata.filename] - The filename of the artifact.
+ * @param {string} [artMetadata.location] - The location of the artifact.
+ * @param {string} [artMetadata.project] - The project of artifact blob.
  *
  * @returns {buffer} Artifact binary.
  */
@@ -61,6 +64,9 @@ function getBlob(artMetadata) {
  * This function does NOT overwrite existing blob.
  *
  * @param {string} artMetadata - Artifact metadata
+ * @param {string} [artMetadata.filename] - The filename of the artifact.
+ * @param {string} [artMetadata.location] - The location of the artifact.
+ * @param {string} [artMetadata.project] - The project of artifact blob.
  * @param {Buffer} artifactBlob - A binary large object artifact
  */
 function postBlob(artMetadata, artifactBlob) {
@@ -96,6 +102,9 @@ function postBlob(artMetadata, artifactBlob) {
  * to the local file system. Existing files will be overwritten.
  *
  * @param {string} artMetadata - Artifact metadata
+ * @param {string} [artMetadata.filename] - The filename of the artifact.
+ * @param {string} [artMetadata.location] - The location of the artifact.
+ * @param {string} [artMetadata.project] - The project of artifact blob.
  * @param {Buffer} artifactBlob - A binary large object artifact
  */
 function putBlob(artMetadata, artifactBlob) {
@@ -123,6 +132,9 @@ function putBlob(artMetadata, artifactBlob) {
  * local file system.
  *
  * @param {string} artMetadata - Artifact metadata
+ * @param {string} [artMetadata.filename] - The filename of the artifact.
+ * @param {string} [artMetadata.location] - The location of the artifact.
+ * @param {string} [artMetadata.project] - The project of artifact blob.
  */
 function deleteBlob(artMetadata) {
   // Create artifact path

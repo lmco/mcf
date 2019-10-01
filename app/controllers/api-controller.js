@@ -4803,8 +4803,7 @@ async function deleteBranch(req, res) {
 /**
  * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Gets an artifact by its org.id, project.id, branch.id and
- * artifact.id.
+ * @description Gets one or many artifacts.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -4884,8 +4883,7 @@ async function getArtifact(req, res) {
 /**
  * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Takes an organization ID, project ID, and artifact ID in the URI
- * along with the request body to create an artifact.
+ * @description Creates one or many artifacts.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -4971,9 +4969,7 @@ async function postArtifact(req, res) {
 /**
  * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Updates the artifact specified in the URI. Takes an org id,
- * project id, and artifact id in the URI and updated properties of the artifact
- * in the request body.
+ * @description Updates one or many artifacts.
  *
  * @param {Object} req - Request express object
  * @param {Object} res - Response express object
@@ -5073,8 +5069,8 @@ async function patchArtifact(req, res) {
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Takes an orgid, projectid, artifactid in the URI along with delete
- * options in the body and deletes the corresponding artifact.
+ * @description Deletes one or many artifacts.
+ *
  * NOTE: This function is system-admin ONLY.
  *
  * @param {Object} req - Request express object
@@ -5171,7 +5167,7 @@ async function getBlob(req, res) {
 /**
  * POST /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/blob
  *
- * @description Gets an artifact blob by org.id, project.id, branch.id,
+ * @description Post an artifact blob by org.id, project.id, branch.id,
  * location, filename.
  *
  * @param {Object} req - Request express object
@@ -5282,10 +5278,7 @@ async function getBlobById(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    populate: 'array',
     archived: 'boolean',
-    fields: 'array',
-    minified: 'boolean',
     includeArchived: 'boolean'
   };
 
@@ -5305,9 +5298,6 @@ async function getBlobById(req, res) {
     // Error occurred with options, report it
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Find the artifact from it's artifact.id, project.id, and org.id

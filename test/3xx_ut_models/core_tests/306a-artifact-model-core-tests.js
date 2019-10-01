@@ -179,7 +179,7 @@ async function updateArtifact() {
 }
 
 /**
- * @description Finds and deletes an artifact.
+ * @description Finds and deletes an exisiting artifact.
  */
 async function deleteArtifact() {
   const artID = utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id);

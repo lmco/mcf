@@ -101,7 +101,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an artifact via controller.
+ * @description Creates an artifact.
  */
 async function createArtifact() {
   // Define test data
@@ -254,7 +254,7 @@ async function deleteArtifact() {
 }
 
 /**
- * @description Post an artifact blob via controller.
+ * @description Post an artifact blob.
  */
 async function postBlob() {
   // Define test data
@@ -313,7 +313,6 @@ async function getBlob() {
   }
 }
 
-
 /**
  * @description Finds and deletes an artifact blob.
  */
@@ -341,7 +340,7 @@ async function deleteBlob() {
 }
 
 /**
- * @description Finds an existing artifact.
+ * @description Finds an existing artifact blob via id.
  */
 async function getBlobByID() {
   const artData = testData.artifacts[0].id;
