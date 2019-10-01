@@ -601,7 +601,7 @@ class Store extends DBModule.Store {
    * @param {string} sid - The ID of the session to delete.
    * @param {Function} cb - The callback to run, should be called as cb(error).
    *
-   * @returns {Promise<null>} Resolves an empty promise upon completion.
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   destroy(sid, cb) {
     return super.destroy(sid, cb);
@@ -613,7 +613,7 @@ class Store extends DBModule.Store {
    *
    * @param {Function} cb - The callback to run, should be called as cb(error).
    *
-   * @returns {Promise<null>} Resolves an empty promise upon completion.
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   clear(cb) {
     return super.clear(cb);
@@ -626,7 +626,7 @@ class Store extends DBModule.Store {
    * @param {Function} cb - The callback to run, should be called as
    * cb(error, len).
    *
-   * @returns {Promise<null>} Resolves an empty promise upon completion.
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   length(cb) {
     return super.length(cb);
@@ -655,7 +655,7 @@ class Store extends DBModule.Store {
    * @param {object} session - The session object to upsert.
    * @param {Function} cb - The callback to run, should be called as cb(error).
    *
-   * @returns {Promise<null>} Resolves an empty promise upon completion.
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   set(sid, session, cb) {
     return super.set(sid, session, cb);
@@ -670,7 +670,7 @@ class Store extends DBModule.Store {
    * @param {object} session - The session to "touch".
    * @param {Function} cb - The callback to run, should be called as cb(error).
    *
-   * @returns {Promise<null>} Resolves an empty promise upon completion.
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   touch(sid, session, cb) {
     return super.touch(sid, session, cb);

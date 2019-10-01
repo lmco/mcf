@@ -32,7 +32,7 @@ const utils = M.require('lib.utils');
 /**
  * @description Handles the database migration from 0.8.1 to 0.8.0.
  *
- * @returns {Promise<null>} Returns an empty promise upon completion.
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -61,7 +61,7 @@ module.exports.down = function() {
  * orgid:projectid:branchid:elementid. Adds a master branch for every project
  * which already exists in the database.
  *
- * @returns {Promise<null>} Returns an empty promise upon completion.
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -90,7 +90,7 @@ module.exports.up = function() {
  * @description Helper function for 0.8.0 to 0.8.1 migration. Handles all
  * updates to the element collection.
  *
- * @returns {Promise<null>} Returns an empty promise upon completion.
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function elementHelper() {
   return new Promise((resolve, reject) => {
@@ -130,7 +130,7 @@ function elementHelper() {
  *
  * @param {string} ids - The ids of elements to search.
  *
- * @returns {Promise<null>} Returns an empty promise upon completion.
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function elementHelperRecursive(ids) {
   return new Promise((resolve, reject) => {
@@ -258,7 +258,7 @@ function elementHelperRecursive(ids) {
  * @description Helper function for 0.8.0 to 0.8.1 migration. Handles all
  * updates to the branch collection.
  *
- * @returns {Promise<null>} Returns an empty promise upon completion.
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function branchHelper() {
   return new Promise((resolve, reject) => {

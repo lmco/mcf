@@ -101,7 +101,7 @@ function disconnect() {
  * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
  *
- * @returns {Promise<null>} Resolves an empty promise upon completion.
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 async function clear() {
   return mongoose.connection.db.dropDatabase();
@@ -162,7 +162,7 @@ class Schema extends mongoose.Schema {
    * schema.
    * @param {string} [prefix] - Path to prefix the newly added paths with.
    *
-   * @returns {Promise<null>} Resolves an empty promise upon completion.
+   * @returns {Promise} Resolves an empty promise upon completion.
    */
   add(obj, prefix) {
     /**
