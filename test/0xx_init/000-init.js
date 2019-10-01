@@ -76,7 +76,7 @@ describe(M.getModuleName(module.filename), function() {
  * @description Cleans out the database by removing all items from all
  * collections.
  *
- * @returns {Promise<void>} Resolves upon successful deletion of all contents
+ * @returns {Promise} Resolves upon successful deletion of all contents
  * from the database.
  */
 async function cleanDB() {
@@ -96,7 +96,7 @@ async function cleanDB() {
  * created for 4xx search tests.
  * @async
  *
- * @returns {Promise<void>} Resolves upon successful initiation of models.
+ * @returns {Promise} Resolves upon successful initiation of models.
  */
 async function initModels() {
   try {

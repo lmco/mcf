@@ -230,7 +230,7 @@ class Model {
    * @description Ensures all indexes are created.
    * @async
    *
-   * @returns {Promise<void>} Returns empty promise upon completion.
+   * @returns {Promise} Returns empty promise upon completion.
    */
   async init() {
     await this.model.ensureIndexes();
@@ -323,7 +323,7 @@ class Model {
    *
    * @param {string} name - The name of the index.
    *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return this.model.collection.dropIndex(name);

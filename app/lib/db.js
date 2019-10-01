@@ -302,7 +302,7 @@ class Model extends DBModule.Model {
    * be run in the constructor.
    * @async
    *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async init() {
     return super.init();
@@ -394,7 +394,7 @@ class Model extends DBModule.Model {
    *
    * @param {string} name - The name of the index.
    *
-   * @returns {Promise<void>} Returns an empty promise upon completion.
+   * @returns {Promise} Returns an empty promise upon completion.
    */
   async deleteIndex(name) {
     return super.deleteIndex(name);

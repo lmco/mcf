@@ -253,7 +253,7 @@ function createDefaultAdmin() {
  * @description Initializes all models asynchronously.
  * @async
  *
- * @returns {Promise<void>} Returns an empty promise upon completion.
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 async function initModels() {
   await Artifact.init();
