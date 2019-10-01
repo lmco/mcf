@@ -197,11 +197,11 @@ class HomeApp extends Component {
   render() {
     // Initialize variables
     let titleClass = 'workspace-title workspace-title-padding';
-    let list;
+    const list = [];
 
     // Loop through all orgs
     if (this.state.orgs.length > 0) {
-      list = this.state.orgs.map(org => {
+      this.state.orgs.forEach(org => {
         const username = this.state.user.username;
 
         const showProj = (this.state.displayOrgs[org.id]);
@@ -210,7 +210,7 @@ class HomeApp extends Component {
         if (!this.state.user.admin) {
           // Verify admin permission on org
           if (org.permissions[username] === 'admin') {
-            return (<OrgList org={org} key={`org-key-${org.id}`}
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
                              user={this.state.user}
                              write={this.state.write}
                              admin={this.state.admin}
@@ -219,7 +219,7 @@ class HomeApp extends Component {
           }
           // Verify write permissions and not archived org
           else if (org.permissions[username] === 'write' && !org.archived) {
-            return (<OrgList org={org} key={`org-key-${org.id}`}
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
                              user={this.state.user}
                              write={this.state.write}
                              admin={this.state.admin}
@@ -228,7 +228,7 @@ class HomeApp extends Component {
           }
           // Verify read permissions and not archived org
           else if (org.permissions[username] === 'read' && !org.archived) {
-            return (<OrgList org={org} key={`org-key-${org.id}`}
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
                              user={this.state.user}
                              admin={this.state.admin}
                              showProjs={showProj}
@@ -236,7 +236,7 @@ class HomeApp extends Component {
           }
         }
         else {
-          return (<OrgList org={org} key={`org-key-${org.id}`}
+          list.push(<OrgList org={org} key={`org-key-${org.id}`}
                            user={this.state.user}
                            write={this.state.write}
                            admin={this.state.admin}

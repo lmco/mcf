@@ -97,7 +97,7 @@ class ProjectApp extends Component {
               if (project.archived && ((perm === 'write') || (perm === 'read'))) {
                 // Do not display the project information for non-perm user
                 this.setState({ project: null });
-                this.setState({ error: `Project [${project.id}] not found.`})
+                this.setState({ error: `Project [${project.id}] not found.` });
               }
               else {
                 // Set states

@@ -126,8 +126,8 @@ class ProfileApp extends Component {
                   {/* Verify if user is view their own profile, then return their info  */}
                   {(otherUser === null)
                     ? (<Route exact path="/profile" render={(props) => <ProfileHome {...props}
-                                                                      admin={true}
-                                                                      user={this.state.user} /> } />)
+                                                                    admin={true}
+                                                                    user={this.state.user} /> } />)
                     : (<Route path={`/profile/${this.props.match.params.username}`}
                               render={(props) => <ProfileHome {...props}
                                                                admin={user.admin}

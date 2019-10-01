@@ -96,7 +96,6 @@ class ProjectList extends Component {
   }
 
   setMountedComponentStates(user, orgs) {
-
     // Add event listener for window resizing
     window.addEventListener('resize', this.handleResize);
     // Handle initial size of window
@@ -139,8 +138,10 @@ class ProjectList extends Component {
       const permProjects = [];
       const archiveProj = org.archived;
       let className;
+
+      // Verify if org is archived
       if (archiveProj) {
-        className = 'archived-link'
+        className = 'archived-link';
       }
       // Verify there are projects in the org
       if (projects.length < 1) {

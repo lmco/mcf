@@ -48,7 +48,7 @@ class AdminConsole extends Component {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI((err, data) => {
       if (!data.admin) {
-        this.setState({ error: `Page does not exist.` })
+        this.setState({ error: 'Page does not exist.' });
       }
       else if (err) {
         // Set error state

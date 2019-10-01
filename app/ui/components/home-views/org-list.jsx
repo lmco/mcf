@@ -111,7 +111,7 @@ class OrgList extends Component {
     const orgId = this.props.org.id;
     let icon;
     let projects;
-    let  archiveProj = false;
+    let archiveProj = false;
 
     if (this.props.showProjs) {
       icon = 'fas fa-angle-down';

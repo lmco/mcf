@@ -68,7 +68,7 @@ class OrgApp extends Component {
         // Set user data
         this.setState({ user: data });
         // Initialize options
-        let opt = 'populate=projects&minified=true&includeArchived=true';
+        const opt = 'populate=projects&minified=true&includeArchived=true';
 
         // Get org data
         $.ajax({
@@ -123,7 +123,7 @@ class OrgApp extends Component {
     if (org.archived && ((perm === 'write') || (perm === 'read'))) {
       // Do not display the org information for non-perm user
       this.setState({ org: null });
-      this.setState({ error: `Organization [${org.id}] not found.`})
+      this.setState({ error: `Organization [${org.id}] not found.` });
     }
     else {
       // Set the org state
