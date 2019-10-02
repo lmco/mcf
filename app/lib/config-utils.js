@@ -273,6 +273,7 @@ module.exports.validate = function(config) {
   // ----------------------------- Verfiy validators ----------------------------- //
   if (config.validators) test(config, 'validators', 'object');
   if (config.validators.id) test(config, 'validators.id', 'string');
+  if (config.validators.id_length) test(config, 'validators.id_length', 'string');
   if (config.validators.org_id) test(config, 'validators', 'string');
   if (config.validators.project_id) test(config, 'validators', 'string');
   if (config.validators.element_id) test(config, 'validators', 'string');
@@ -282,9 +283,6 @@ module.exports.validate = function(config) {
   if (config.validators.user_lname) test(config, 'validators', 'string');
   if (config.validators.user_provider) test(config, 'validators', 'string');
   if (config.validators.url_next) test(config, 'validators', 'string');
-  if (config.validators.artifact_id) test(config, 'validators', 'string');
-  if (config.validators.artifact_filename) test(config, 'validators', 'string');
-  if (config.validators.webhook_id) test(config, 'validators', 'string');
 };
 
 /**
