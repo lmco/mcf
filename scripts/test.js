@@ -58,7 +58,7 @@ function test(_args) {
   // Add default grep command to define which tests to run
   if (!_args.includes('--grep') && !_args.includes('--all')) {
     _args.push('--grep');
-    _args.push('^[1-5]');
+    _args.push('^[1-57]');
   }
 
   // Test everything if --all was specified

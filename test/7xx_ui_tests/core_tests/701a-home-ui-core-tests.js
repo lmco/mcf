@@ -18,8 +18,9 @@
 /* eslint-disable no-unused-vars */
 // NPM modules
 import React from 'react';
-import mount from './../mount.js';
 import chai from 'chai';
+import { mount } from 'enzyme';
+import sinon from 'sinon';
 
 // MBEE components
 import Home from '../../../app/ui/components/home-views/home.jsx';
@@ -34,27 +35,27 @@ import Home from '../../../app/ui/components/home-views/home.jsx';
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  // const originalLocation = window.location;
+  let stub;
 
-  // beforeEach(() => {
-  //   delete window.location;
-  //
-  //   window.location = {
-  //     href: '',
-  //   };
-  // });
-  //
-  // afterEach(() => {
-  //   window.location = originalLocation;
-  // });
+  beforeEach(function() {
+    // Create stub for ajax call
+    stub = sinon.stub($, 'ajax');
+  });
+
+  afterEach(function() {
+    // Restore ajax calls
+    stub.restore();
+  });
 
   it('Renders the home component', homeRender);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Mount the list component to verify
+ * @description Mount the home component to verify
  * component renders correctly.
+ *
+ * @param {Function} done - The mocha callback.
  */
 function homeRender(done) {
   // Render home component

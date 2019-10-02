@@ -31,13 +31,8 @@ const url = 'http://localhost:6233';
 
 // Simulate window if we're running in Node.js
 if (!global.window && !global.document) {
-  console.log('i was hit');
   // Initialize JSDOM
   const options = {
-    beforeParse(win) {
-      win.scrollTo = () => {
-      };
-    },
     pretendToBeVisual: false,
     url: url,
     resources: 'usable',
@@ -71,37 +66,21 @@ if (!global.window && !global.document) {
   app.id = 'main';
   window.document.body.appendChild(app);
 
-  // /**
-  //  * @description Copying properties to object.
-  //  *
-  //  * @param {object} src - The source object.
-  //  * @param {object} target - The target object.
-  //  */
-  // function copyProps(src, target) {
-  //   Object.defineProperties(target, {
-  //     ...Object.getOwnPropertyDescriptors(src),
-  //     ...Object.getOwnPropertyDescriptors(target)
-  //   });
-  // }
-
-  window.history = {};
-  window.location = {};
   // Globally defining jquery, window, and document
-  global.$ = require('jquery')(window);
   global.window = window;
   global.document = window.document;
 
   // Exposing global properties if undefined
-  // const exposedProperties = ['window', 'document'];
-  // Object.keys(document.defaultView).forEach((property) => {
-  //   if (typeof global[property] === 'undefined') {
-  //     exposedProperties.push(property);
-  //     global[property] = document.defaultView[property];
-  //   }
-  // });
+  const exposedProperties = ['window', 'document'];
+  Object.keys(document.defaultView).forEach((property) => {
+    if (typeof global[property] === 'undefined') {
+      exposedProperties.push(property);
+      global[property] = document.defaultView[property];
+    }
+  });
 
   global.navigator = {
-    userAgent: 'mocha'
+    userAgent: 'node.js'
   };
 
   // Setting timeout for animation frame
@@ -118,7 +97,6 @@ if (!global.window && !global.document) {
     ...Object.getOwnPropertyDescriptors(global),
     ...Object.getOwnPropertyDescriptors(window)
   });
-  // copyProps(window, global);
 }
 
 // Configure enzyme adaptor
