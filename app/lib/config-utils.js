@@ -23,16 +23,6 @@ const path = require('path');
 
 
 /**
- * @description Generates the error statement for an improperly formatted config file and forces
- * the process to exit.
- *
- * @param {string} message - The error message.
- */
-function configError(message) {
-  throw new M.ServerError(`Problem with configuration file: ${message}`, 'critical');
-}
-
-/**
  * @description A helper function to simplify testing the existence and types of config keys.
  *
  * @param {object} config - The json object version of the config file.
@@ -51,28 +41,28 @@ function test(config, key, type) {
 
   // Test that the field exists.
   if (field === undefined) {
-    configError(`"${key}" is not defined.`);
+    throw new Error(`Configuration file: "${key}" is not defined.`);
   }
 
   // Test that the field is the correct type.
   if (type === 'object') {
     if (typeof field !== 'object' || field === null) {
-      configError(`"${key}" is not an object.`);
+      throw new Error(`Configuration file: "${key}" is not an object.`);
     }
   }
   else if (type === 'Array') {
     if (!Array.isArray(field)) {
-      configError(`"${key}" is not an array.`);
+      throw new Error(`Configuration file: "${key}" is not an array.`);
     }
   }
   else if (type === 'number') {
     const num = parseInt(field, 10);
     // eslint-disable-next-line no-restricted-globals
-    if (isNaN(num)) configError(`"${key}" is not a number.`);
+    if (isNaN(num)) throw new Error(`Configuration file: "${key}" is not a number.`);
   }
   // eslint-disable-next-line valid-typeof
   else if (typeof field !== type) {
-    configError(`"${key}" is not a ${type}.`);
+    throw new Error(`Configuration file: "${key}" is not a ${type}.`);
   }
 }
 
@@ -88,11 +78,16 @@ module.exports.validate = function(config) {
   test(config, 'auth.strategy', 'string');
   const authStrategies = 'local-strategy, ldap-strategy, local-ldap-strategy, test-strategy';
   if (!authStrategies.includes(config.auth.strategy)) {
-    configError(`${config.auth.strategy} in "auth.strategy" is not a valid authentication strategy.`);
+    throw new Error(`Configuration file: ${config.auth.strategy} in "auth.strategy" is not a valid`
+    + 'authentication strategy.');
   }
   const stratFiles = fs.readdirSync(path.join(M.root, 'app', 'auth'))
   .filter((file) => file.includes(config.auth.strategy));
-  if (stratFiles.length === 0) configError(`auth strategy file ${config.auth.strategy} not found in app/auth directory.`);
+  if (stratFiles.length === 0) {
+    throw new Error(
+      `Configuration file: Auth strategy file ${config.auth.strategy} not found in app/auth directory.`
+    );
+  }
 
   if (config.auth.strategy.includes('ldap')) {
     test(config, 'auth.ldap', 'object');
@@ -103,10 +98,14 @@ module.exports.validate = function(config) {
     if (config.auth.ldap.ca) {
       test(config, 'auth.ldap.ca', 'Array');
       config.auth.ldap.ca.forEach((ca) => {
-        if (typeof ca !== 'string') configError('One or more items in "auth.ldap.ca" is not a string.');
+        if (typeof ca !== 'string') {
+          throw new Error('Configuration file: One or more items in "auth.ldap.ca" is not a string.');
+        }
         const caFile = fs.readdirSync(path.join(M.root, 'certs'))
         .filter((file) => ca.includes(file));
-        if (caFile.length === 0) configError(`CA file ${ca} not found in certs directory.`);
+        if (caFile.length === 0) {
+          throw new Error(`Configuration file: CA file ${ca} not found in certs directory.`);
+        }
       });
     }
 
@@ -139,7 +138,9 @@ module.exports.validate = function(config) {
   // Ensure that the db strategy exists
   const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
   .filter((file) => file.includes(config.db.strategy));
-  if (!dbFiles) configError(`db strategy file ${config.db.strategy} not found in app/db directory.`);
+  if (!dbFiles) {
+    throw new Error(`Configuration file: DB strategy file ${config.db.strategy} not found in app/db directory.`);
+  }
 
   // Test optional fields
   if (config.db.username) test(config, 'db.username', 'string');
@@ -151,7 +152,9 @@ module.exports.validate = function(config) {
     test(config, 'db.ca', 'string');
     const caFile = fs.readdirSync(path.join(M.root, 'certs'))
     .filter((file) => config.db.ca.includes(file));
-    if (caFile.length === 0) configError(`CA file ${config.db.ca} not found in certs directory.`);
+    if (caFile.length === 0) {
+      throw new Error(`Configuration file: CA file ${config.db.ca} not found in certs directory.`);
+    }
   }
 
 
@@ -181,7 +184,9 @@ module.exports.validate = function(config) {
     const Dockerfile = dockerPaths[dockerPaths.length - 1];
     const findDockerfile = fs.readdirSync(dockerPath)
     .filter((file) => file === Dockerfile);
-    if (findDockerfile.length === 0) configError(`Dockerfile ${Dockerfile} not found in config directory.`);
+    if (findDockerfile.length === 0) {
+      throw new Error(`Configuration file: Dockerfile ${Dockerfile} not found in specified directory.`);
+    }
   }
 
 

@@ -115,7 +115,7 @@ async function rejectInvalidConfigTest() {
     configUtils.validate(invalidConfig);
   }
   catch (error) {
-    error.message.should.equal('Problem with configuration file: "auth" is not defined.');
+    error.message.should.equal('Configuration file: "auth" is not defined.');
   }
 
   // Test rejection if auth is not an object
@@ -124,7 +124,7 @@ async function rejectInvalidConfigTest() {
     configUtils.validate(invalidConfig);
   }
   catch (error) {
-    error.message.should.equal('Problem with configuration file: "auth" is not an object.');
+    error.message.should.equal('Configuration file: "auth" is not an object.');
   }
 
   // Test rejection if auth is empty
@@ -133,7 +133,7 @@ async function rejectInvalidConfigTest() {
     configUtils.validate(invalidConfig);
   }
   catch (error) {
-    error.message.should.equal('Problem with configuration file: "auth.strategy" is not defined.');
+    error.message.should.equal('Configuration file: "auth.strategy" is not defined.');
   }
 
   // Test rejection if db is not defined
@@ -142,7 +142,7 @@ async function rejectInvalidConfigTest() {
     configUtils.validate(invalidConfig);
   }
   catch (error) {
-    error.message.should.equal('Problem with configuration file: "db" is not defined.');
+    error.message.should.equal('Configuration file: "db" is not defined.');
   }
 
   // Test rejection if log is not defined
@@ -151,7 +151,7 @@ async function rejectInvalidConfigTest() {
     configUtils.validate(invalidConfig);
   }
   catch (error) {
-    error.message.should.equal('Problem with configuration file: "log" is not defined.');
+    error.message.should.equal('Configuration file: "log" is not defined.');
   }
 
   // Test rejection if server is not defined
@@ -160,7 +160,7 @@ async function rejectInvalidConfigTest() {
     configUtils.validate(invalidConfig);
   }
   catch (error) {
-    error.message.should.equal('Problem with configuration file: "server" is not defined.');
+    error.message.should.equal('Configuration file: "server" is not defined.');
   }
 
   // Test rejection if test is not defined
@@ -169,6 +169,6 @@ async function rejectInvalidConfigTest() {
     configUtils.validate(invalidConfig);
   }
   catch (error) {
-    error.message.should.equal('Problem with configuration file: "test" is not defined.');
+    error.message.should.equal('Configuration file: "test" is not defined.');
   }
 }

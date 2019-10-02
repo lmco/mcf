@@ -128,14 +128,6 @@ const stripComments = configUtils.removeComments(configContent);
 // Parse configuration string into JSON object
 const config = JSON.parse(stripComments);
 
-// Check if config secret is RANDOM
-if (config.server.secret === 'RANDOM') {
-  // Config state is RANDOM, generate and set config secret
-  const random1 = Math.random().toString(36).substring(2, 15);
-  const random2 = Math.random().toString(36).substring(2, 15);
-  config.server.secret = random1 + random2;
-}
-
 /**
  * Define the MBEE configuration.
  */
@@ -189,7 +181,16 @@ try {
   configUtils.validate(config);
 }
 catch (error) {
+  M.log.critical(error.message);
   process.exit(-1);
+}
+
+// Check if config secret is RANDOM
+if (config.server.secret === 'RANDOM') {
+  // Config state is RANDOM, generate and set config secret
+  const random1 = Math.random().toString(36).substring(2, 15);
+  const random2 = Math.random().toString(36).substring(2, 15);
+  config.server.secret = random1 + random2;
 }
 
 // Make the M object read only and its properties cannot be changed or removed.
