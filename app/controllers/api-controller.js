@@ -4894,85 +4894,78 @@ async function getArtifact(req, res) {
  * @returns {object} Response object with created artifact
  */
 async function postArtifact(req, res) {
-  await upload(req, res, async function(err) {
-    // Define options
-    // Note: Undefined if not set
-    let options;
-    let minified = false;
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
 
-    // Define valid option and its parsed type
-    const validOptions = {
-      populate: 'array',
-      fields: 'array',
-      minified: 'boolean'
-    };
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
 
-    // Sanity Check: there should always be a user in the request
-    if (!req.user) {
-      M.log.critical('No requesting user available.');
-      const error = new M.ServerError('Request Failed');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading.
-      const error = new M.ServerError('Artifact upload failed.', 'warn');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 
-    // Attempt to parse query options
-    try {
-      // Extract options from request query
-      options = utils.parseOptions(req.query, validOptions);
-    }
-    catch (error) {
-      // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
 
-    // Check options for minified
-    if (options.hasOwnProperty('minified')) {
-      minified = options.minified;
-      delete options.minified;
-    }
+  // Set the lean option to true for better performance
+  options.lean = true;
 
-    // Set the lean option to true for better performance
-    options.lean = true;
+  // If artifact ID was provided in the body, ensure it matches artifact ID in params
+  if (Object.prototype.hasOwnProperty.call('id')
+    && (req.params.artifactid !== req.body.id)) {
+    const error = new M.DataFormatError(
+      'Artifact ID in the body does not match ID in the params.', 'warn'
+    );
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 
-    // If artifact ID was provided in the body, ensure it matches artifact ID in params
-    if (Object.prototype.hasOwnProperty.call('id') && (req.params.artifactid !== req.body.id)) {
-      const error = new M.DataFormatError(
-        'Artifact ID in the body does not match ID in the params.', 'warn'
-      );
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Set the artifact ID in the body equal req.params.orgid
+  req.body.id = req.params.artifactid;
 
-    // Set the artifact ID in the body equal req.params.orgid
-    req.body.id = req.params.artifactid;
+  // Create artifact with provided parameters
+  // NOTE: create() sanitizes input params
+  try {
+    const artifact = await ArtifactController.create(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body, options);
 
-    // Create artifact with provided parameters
-    // NOTE: create() sanitizes input params
-    try {
-      const artifact = await ArtifactController.create(req.user, req.params.orgid,
-        req.params.projectid, req.params.branchid, req.body, options);
-
-      const artifactsPublicData = sani.html(
-        artifact.map(a => publicData.getPublicData(a, 'artifact', options))
-      );
-      // Format JSON
-      const json = formatJSON(artifactsPublicData[0], minified);
-      return returnResponse(req, res, json, 200);
-    }
-    catch (error) {
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
-  });
+    const artifactsPublicData = sani.html(
+      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+    );
+    // Format JSON
+    const json = formatJSON(artifactsPublicData[0], minified);
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
  * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Updates one or many artifacts.
+ * @description Updates a single artifact.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
@@ -4980,101 +4973,89 @@ async function postArtifact(req, res) {
  * @returns {object} Response object with updated artifact
  */
 async function patchArtifact(req, res) {
-  await upload(req, res, async function(err) {
-    // Define options
-    // Note: Undefined if not set
-    let options;
-    let minified = false;
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
 
-    // Define valid option and its parsed type
-    const validOptions = {
-      populate: 'array',
-      fields: 'array',
-      minified: 'boolean'
-    };
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
 
-    // Sanity Check: there should always be a user in the request
-    if (!req.user) {
-      M.log.critical('No requesting user available.');
-      const error = new M.ServerError('Request Failed');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 
-    // Attempt to parse query options
-    try {
-      // Extract options from request query
-      options = utils.parseOptions(req.query, validOptions);
-    }
-    catch (error) {
-      // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 
-    // Check options for minified
-    if (options.hasOwnProperty('minified')) {
-      minified = options.minified;
-      delete options.minified;
-    }
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
 
-    // Set the lean option to true for better performance
-    options.lean = true;
+  // Set the lean option to true for better performance
+  options.lean = true;
 
-    // Check file is defined
-    if (req.hasOwnProperty('file')) {
-      const error = new M.DataFormatError(
-        'Cannot update artifact blob. Use create/replace.', 'warn'
-      );
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 
-    // Singular api: should not accept arrays
-    if (Array.isArray(req.body)) {
-      const error = new M.DataFormatError('Input cannot be an array', 'warn');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Sanitize body
+  req.body = JSON.parse(JSON.stringify(req.body));
 
-    // Sanitize body
-    req.body = JSON.parse(JSON.stringify(req.body));
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (Object.prototype.hasOwnProperty.call('id')
+    && (req.params.artifactid !== req.body.id)) {
+    const error = new M.DataFormatError(
+      'Artifact ID in the body does not match ID in the params.', 'warn'
+    );
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 
-    // If an ID was provided in the body, ensure it matches the ID in params
-    if (req.hasOwnProperty('body') && req.body.hasOwnProperty('id')
-      && (req.body.id !== req.params.artifactid)) {
-      const error = new M.DataFormatError(
-        'Artifact ID in the body does not match ID in the params.', 'warn'
-      );
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+  // Set the artifact ID in the body equal req.params.orgid
+  req.body.id = req.params.artifactid;
 
-    // Set the artifact ID in the body equal req.params.orgid
-    req.body.id = req.params.artifactid;
+  try {
+    // Update the specified artifact
+    // NOTE: update() sanitizes input params
+    const artifact = await ArtifactController.update(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body, options);
 
-    try {
-      // Update the specified artifact
-      // NOTE: update() sanitizes input params
-      const artifact = await ArtifactController.update(req.user, req.params.orgid,
-        req.params.projectid, req.params.branchid, req.body, options);
+    const artifactsPublicData = sani.html(
+      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+    );
 
-      const artifactsPublicData = sani.html(
-        artifact.map(a => publicData.getPublicData(a, 'artifact', options))
-      );
-
-      // Format JSON
-      const json = formatJSON(artifactsPublicData[0], minified);
-      return returnResponse(req, res, json, 200);
-    }
-    catch (error) {
-      // If an error was thrown, return it and its status
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
-  });
+    // Format JSON
+    const json = formatJSON(artifactsPublicData[0], minified);
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
  * @description Deletes one or many artifacts.
- *
- * NOTE: This function is system-admin ONLY.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
