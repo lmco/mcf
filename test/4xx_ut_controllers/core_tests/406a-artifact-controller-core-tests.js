@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED.
+ * @classification UNCLASSIFIED
  *
  * @module  test.406a-artifact-model-tests
  *
