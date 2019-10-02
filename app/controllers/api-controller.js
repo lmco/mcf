@@ -262,6 +262,7 @@ async function getOrgs(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
+    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
@@ -1107,6 +1108,7 @@ async function getAllProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
+    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
@@ -1201,6 +1203,7 @@ async function getProjects(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
+    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
@@ -2050,6 +2053,7 @@ async function getUsers(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
+    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
@@ -2938,6 +2942,7 @@ async function searchUsers(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
+    archived: 'boolean',
     includeArchived: 'boolean',
     limit: 'number',
     skip: 'number',
@@ -3117,6 +3122,7 @@ async function getElements(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
+    archived: 'boolean',
     includeArchived: 'boolean',
     subtree: 'boolean',
     fields: 'array',
@@ -3599,6 +3605,7 @@ async function searchElements(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
+    archived: 'boolean',
     includeArchived: 'boolean',
     limit: 'number',
     fields: 'array',
@@ -4121,6 +4128,7 @@ async function getBranches(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
+    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     limit: 'number',
