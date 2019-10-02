@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.7xx_ui_tests.701-app-tests
+ * @module test.7xx_ui_tests.701-home-ui-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

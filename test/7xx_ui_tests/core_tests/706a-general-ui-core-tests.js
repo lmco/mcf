@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.700-general-component-mount-tests
+ * @module test.7xx_ui_tests.706-general-ui-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
