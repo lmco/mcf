@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED.
+ * @classification UNCLASSIFIED
  *
  * @module test.606a-artifact-api-core-tests
  *
