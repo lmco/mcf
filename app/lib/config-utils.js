@@ -76,7 +76,7 @@ module.exports.validate = function(config) {
   // ----------------------------- Verify auth ----------------------------- //
   test(config, 'auth', 'object');
   test(config, 'auth.strategy', 'string');
-  const authStrategies = 'local-strategy, ldap-strategy, local-ldap-strategy, test-strategy';
+  const authStrategies = 'local-strategy, ldap-strategy, local-ldap-strategy';
   if (!authStrategies.includes(config.auth.strategy)) {
     throw new Error(`Configuration file: ${config.auth.strategy} in "auth.strategy" is not a valid`
     + 'authentication strategy.');
@@ -138,13 +138,13 @@ module.exports.validate = function(config) {
   // Ensure that the db strategy exists
   const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
   .filter((file) => file.includes(config.db.strategy));
-  if (!dbFiles) {
+  if (dbFiles.length === 0) {
     throw new Error(`Configuration file: DB strategy file ${config.db.strategy} not found in app/db directory.`);
   }
 
   // Test optional fields
-  if (config.db.username) test(config, 'db.username', 'string');
-  if (config.db.password) test(config, 'db.password', 'string');
+  if (config.db.username !== undefined) test(config, 'db.username', 'string');
+  if (config.db.password !== undefined) test(config, 'db.password', 'string');
   if (config.db.ssl !== undefined) test(config, 'db.ssl', 'boolean');
 
   // If ssl is enabled, validate the ca file
