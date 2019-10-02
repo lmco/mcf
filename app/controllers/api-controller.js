@@ -5072,7 +5072,7 @@ async function patchArtifact(req, res) {
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Deletes one or many artifacts.
+ * @description Deletes a single artifact.
  *
  * NOTE: This function is system-admin ONLY.
  *
