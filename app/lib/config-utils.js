@@ -280,6 +280,8 @@ module.exports.validate = function(config) {
     if (config.validators.org_id_length) test(config, 'validators.id_length', 'string');
     if (config.validators.project_id) test(config, 'validators', 'string');
     if (config.validators.project_id_length) test(config, 'validators.id_length', 'string');
+    if (config.validators.branch_id) test(config, 'validators', 'string');
+    if (config.validators.branch_id_length) test(config, 'validators.id_length', 'string');
     if (config.validators.element_id) test(config, 'validators', 'string');
     if (config.validators.element_id_length) test(config, 'validators', 'string');
     if (config.validators.user_username) test(config, 'validators', 'string');
