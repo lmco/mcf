@@ -177,10 +177,12 @@ const ElementSchema = new db.Schema({
     }, {
       validator: function(v) {
         // If source is provided
-        if (v) {
+        if (v && v !== 'null') {
           // Reject if target is null
           return this.target;
         }
+
+        return true;
       },
       message: props => 'Target is required if source is provided.'
     }]
@@ -198,10 +200,12 @@ const ElementSchema = new db.Schema({
     }, {
       validator: function(v) {
         // If target is provided
-        if (v) {
+        if (v && v !== 'null') {
           // Reject if source is null
           return this.source;
         }
+
+        return true;
       },
       message: props => 'Source is required if target is provided.'
     }]

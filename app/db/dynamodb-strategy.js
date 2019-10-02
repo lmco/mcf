@@ -93,6 +93,7 @@ class Schema {
     this.definition = definition;
     this.definition.hooks = { pre: [], post: [] };
     this.definition.methods = [];
+    this.definition.statics = [];
 
     Object.keys(this.definition).forEach((key) => {
       switch (this.definition[key].type) {
@@ -223,11 +224,13 @@ class Schema {
    * @description Adds a static method to the schema. This method should later
    * be an accessible static method on the model.
    *
-   * @param {String} name - The name of the static function.
-   * @param {function} fn - The function to be added to the model.
+   * @param {string} name - The name of the static function.
+   * @param {Function} fn - The function to be added to the model.
    */
   static(name, fn) {
-    // return super.static(name, fn);
+    const obj = {};
+    obj[name] = fn;
+    this.definition.statics.push(obj);
   }
 
   /**
@@ -272,6 +275,13 @@ class Model {
     this.definition = schema.definition;
     this.TableName = collection;
     this.modelName = name;
+
+    // Add on methods
+    if (Array.isArray(this.definition.statics)) {
+      this.definition.statics.forEach((method) => {
+        this[Object.keys(method)[0]] = Object.values(method)[0]; // eslint-disable-line
+      });
+    }
   }
 
   /**
@@ -570,20 +580,29 @@ class Model {
               throw new M.DataFormatError(`Invalid DynamoDB type: ${def[param].type}`);
           }
 
-          // If not the correct type, throw an error
-          if (typeof doc[param] !== shouldBeType // eslint-disable-line valid-typeof
-            && !(shouldBeType === 'string' && doc[param] === null)) {
-            throw new M.DataFormatError(`The ${modelName} parameter `
-              + `[${param}] is not a ${shouldBeType}.`);
-          }
-
           // Run validators
           if (def[param].hasOwnProperty('validate')) {
             def[param].validate.forEach((v) => {
               if (!v.validator(doc[param])) {
-                throw new M.DataFormatError(v.message(doc));
+                throw new M.DataFormatError(`${modelName} validation failed: `
+                + `${param}: ${v.message({ value: doc[param] })}`);
               }
             });
+          }
+
+          // If not the correct type, throw an error
+          if (typeof doc[param] !== shouldBeType // eslint-disable-line valid-typeof
+            && !(shouldBeType === 'string' && doc[param] === null)) {
+            throw new M.DataFormatError(`${modelName} validation failed: `
+              + `${param}: Cast to ${utils.toTitleCase(shouldBeType)} failed `
+              + `for value "${JSON.stringify(doc[param])}" at path "${param}"`);
+          }
+
+          // If not in enum list, throw an error
+          if (def[param].hasOwnProperty('enum') && !def[param].enum.includes(doc[param])) {
+            throw new M.DataFormatError(`${modelName} validation failed: `
+              + `${param}: \`${doc[param]}\` is not a valid enum value for path`
+              + ` \`${param}\`.`);
           }
 
           // Handle special case where the field should be a string, and defaults to null
@@ -602,8 +621,13 @@ class Model {
         }
         // If the parameter is required and no default is provided, throw an error
         else if (def[param].required && !def[param].default) {
-          throw new M.DataFormatError(`The ${modelName} property ${param}`
-            + ' is required.');
+          let message = `Path \`${param}\` is required.`;
+          // If required is an array, grab the error message (second entry)
+          if (Array.isArray(def[param].required) && def[param].required.length === 2) {
+            message = def[param].required[1];
+          }
+          throw new M.DataFormatError(`${modelName} validation failed: `
+            + `${param}: ${message}`);
         }
       });
     };
