@@ -200,7 +200,7 @@ function createDirectory(pathString) {
   if (pathString.includes('\\')) {
     separator = '\\';
   }
-  // Otherwise, linus base separator
+  // Otherwise, linux base separator
   else {
     separator = '/';
   }
