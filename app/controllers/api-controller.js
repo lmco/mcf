@@ -4886,7 +4886,7 @@ async function getArtifact(req, res) {
 /**
  * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Creates one or many artifacts.
+ * @description Creates a single artifact.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
