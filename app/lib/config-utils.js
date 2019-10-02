@@ -68,7 +68,8 @@ function test(config, key, type) {
 
 /**
  * @description This function checks every field in the config to validate that it is formatted
- * properly.
+ * properly. It will also search for specified strategy, Dockerfile, and CA files to validate
+ * that they exist.
  *
  * @param {object} config - The configuration settings object.
  */
