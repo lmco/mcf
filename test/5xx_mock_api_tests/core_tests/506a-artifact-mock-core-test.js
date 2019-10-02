@@ -12,7 +12,7 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE artifacts.
+ * GET, POST, PATCH, and DELETE artifacts and blobs.
  */
 
 // NPM modules
@@ -105,7 +105,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies mock POST request to create an artifact blob.
+ * @description Verifies mock POST request to create an artifact document.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -526,7 +526,7 @@ function getBlobById(done) {
 }
 
 /**
- * @description Verifies mock DELETE request to Delete an artifact blob.
+ * @description Verifies mock DELETE request to delete an artifact blob.
  *
  * @param {Function} done - The mocha callback.
  */
