@@ -1,0 +1,275 @@
+/**
+ * @classification UNCLASSIFIED
+ *
+ * @module lib.config-utils
+ *
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
+ *
+ * @license LMPI - Lockheed Martin Proprietary Information
+ *
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ *
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ *
+ * @description Validates that the configuration file is formatted properly.
+ */
+
+// Node Modules
+const fs = require('fs');
+const path = require('path');
+
+
+/**
+ * @description Generates the error statement for an improperly formatted config file and forces
+ * the process to exit.
+ *
+ * @param {string} message - The error message.
+ */
+function configError(message) {
+  // eslint-disable-next-line no-console
+  console.log(`Problem with configuration file: ${message}`);
+  process.exit(-1);
+}
+
+/**
+ * @description A helper function to simplify testing the types of config keys.
+ *
+ * @param {object} config - The json object version of the config file.
+ * @param {string} key - The key of the config to test.
+ * @param {string} type - The type that this key should be.
+ */
+function test(config, key, type) {
+  const keys = key.split('.');
+
+  // Get the field from an arbitrary depth of key nesting
+  let field = config;
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    field = field[k];
+  }
+
+  // Test that the field exists.
+  if (field === undefined) {
+    configError(`"${key}" is not specified.`);
+  }
+
+  // Test that the field is the correct type.
+  if (type === 'object') {
+    if (typeof field !== 'object' || field === null) {
+      configError(`"${key}" is not an object.`);
+    }
+  }
+  else if (type === 'Array') {
+    if (!Array.isArray(field)) {
+      configError(`"${key}" is not an array.`);
+    }
+  }
+  else if (type === 'number') {
+    const num = parseInt(field, 10);
+    // eslint-disable-next-line no-restricted-globals
+    if (isNaN(num)) configError(`"${key}" is not a number.`);
+  }
+  // eslint-disable-next-line valid-typeof
+  else if (typeof field !== type) {
+    configError(`"${key}" is not a ${type}.`);
+  }
+}
+
+/**
+ * @description This function checks every field in the config to validate that it is formatted
+ * properly.
+ *
+ * @param {object} config - The configuration settings object.
+ */
+module.exports.validate = function(config) {
+  // ----------------------------- Verify auth ----------------------------- //
+  test(config, 'auth', 'object');
+
+  test(config, 'auth.strategy', 'string');
+  const authStrategies = 'local-strategy, ldap-strategy, local-ldap-strategy, test-strategy';
+  if (!authStrategies.includes(config.auth.strategy)) {
+    configError(`${config.auth.strategy} in "auth.strategy" is not a valid authentication strategy.`);
+  }
+  const stratFiles = fs.readdirSync(path.join(M.root, 'app', 'auth'))
+  .filter((file) => file.includes(config.db.strategy));
+  if (!stratFiles) configError(`auth strategy file ${config.db.strategy} not found in app/auth directory.`);
+
+  if (config.auth.strategy.includes('ldap')) {
+    test(config, 'auth.ldap', 'object');
+    test(config, 'auth.ldap.url', 'string');
+    test(config, 'auth.ldap.port', 'number');
+
+    // Check that the ca files exist
+    if (config.auth.ldap.ca) {
+      test(config, 'auth.ldap.ca', 'Array');
+      config.auth.ldap.ca.forEach((ca) => {
+        if (typeof ca !== 'string') configError('One or more items in "auth.ldap.ca" is not a string.');
+        const caFile = fs.readdirSync(path.join(M.root, 'certs'))
+        .filter((file) => ca.includes(file));
+        if (caFile.length === 0) configError(`CA file ${ca} not found in certs directory.`);
+      });
+    }
+
+    test(config, 'auth.ldap.bind_dn', 'string');
+    test(config, 'auth.ldap.bind_dn_pass', 'string');
+    test(config, 'auth.ldap.base', 'string');
+    test(config, 'auth.ldap.filter', 'string');
+    test(config, 'auth.ldap.attributes', 'object');
+    test(config, 'auth.ldap.attributes.username', 'string');
+    test(config, 'auth.ldap.attributes.firstName', 'string');
+    test(config, 'auth.ldap.attributes.preferredName', 'string');
+    test(config, 'auth.ldap.attributes.lastName', 'string');
+    test(config, 'auth.ldap.attributes.email', 'string');
+  }
+  test(config, 'auth.token', 'object');
+  test(config, 'auth.token.expires', 'number');
+  test(config, 'auth.token.units', 'string');
+  test(config, 'auth.session', 'object');
+  test(config, 'auth.session.expires', 'number');
+  test(config, 'auth.session.units', 'string');
+
+
+  // ----------------------------- Verify db ----------------------------- //
+  test(config, 'db', 'object');
+  test(config, 'db.url', 'string');
+  test(config, 'db.port', 'number');
+  test(config, 'db.name', 'string');
+  test(config, 'db.strategy', 'string');
+
+  // Ensure that the db strategy exists
+  const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
+  .filter((file) => file.includes(config.db.strategy));
+  if (!dbFiles) configError(`db strategy file ${config.db.strategy} not found in app/db directory.`);
+
+  // Test optional fields
+  if (config.db.username) test(config, 'db.username', 'string');
+  if (config.db.password) test(config, 'db.password', 'string');
+  if (config.db.ssl !== undefined) test(config, 'db.ssl', 'boolean');
+
+  // If ssl is enabled, validate the ca file
+  if (config.db.ssl) {
+    test(config, 'db.ca', 'string');
+    const caFile = fs.readdirSync(path.join(M.root, 'certs'))
+    .filter((file) => config.db.ca.includes(file));
+    if (caFile.length === 0) configError(`CA file ${config.db.ca} not found in certs directory.`);
+  }
+
+
+  // ----------------------------- Verify docker ----------------------------- //
+  if (config.docker) {
+    test(config, 'docker.image', 'object');
+    test(config, 'docker.image.name', 'string');
+    test(config, 'docker.container', 'object');
+    test(config, 'docker.container.name', 'string');
+    test(config, 'docker.db', 'object');
+    test(config, 'docker.db.enabled', 'boolean');
+    if (config.docker.db.enabled) test(config, 'docker.db.port', 'number');
+    test(config, 'docker.http', 'object');
+    test(config, 'docker.http.enabled', 'boolean');
+    if (config.docker.http.enabled) test(config, 'docker.http.port', 'number');
+    test(config, 'docker.https', 'object');
+    test(config, 'docker.https.enabled', 'boolean');
+    if (config.docker.https.enabled) test(config, 'docker.https.port', 'number');
+
+    // Ensure the Dockerfile exists
+    test(config, 'docker.Dockerfile', 'string');
+    const dockerPaths = config.docker.Dockerfile.split('/');
+    let dockerPath = M.root;
+    for (let i = 0; i < (dockerPaths.length - 1); i++) {
+      dockerPath = path.join(dockerPath, dockerPaths[i]);
+    }
+    const Dockerfile = dockerPaths[dockerPaths.length - 1];
+    const findDockerfile = fs.readdirSync(dockerPath)
+    .filter((file) => file === Dockerfile);
+    if (findDockerfile.length === 0) configError(`Dockerfile ${Dockerfile} not found in config directory.`);
+  }
+
+
+  // ----------------------------- Verify log ----------------------------- //
+  test(config, 'log', 'object');
+  test(config, 'log.level', 'string');
+  test(config, 'log.file', 'string');
+  test(config, 'log.error_file', 'string');
+  test(config, 'log.debug_file', 'string');
+  test(config, 'log.colorize', 'boolean');
+
+
+  // ----------------------------- Verify server ----------------------------- //
+  test(config, 'server', 'object');
+  test(config, 'server.defaultAdminUsername', 'string');
+  test(config, 'server.defaultAdminPassword', 'string');
+  test(config, 'server.defaultOrganizationId', 'string');
+  test(config, 'server.defaultOrganizationName', 'string');
+  test(config, 'server.http', 'object');
+  test(config, 'server.http.enabled', 'boolean');
+  if (config.server.http.enabled) test(config, 'server.http.port', 'number');
+  test(config, 'server.https', 'object');
+  test(config, 'server.https.enabled', 'boolean');
+  if (config.server.https.enabled) test(config, 'server.http.port', 'number');
+  test(config, 'server.api', 'object');
+  test(config, 'server.api.enabled', 'boolean');
+  if (config.server.api.enabled) {
+    test(config, 'server.api.json', 'object');
+    test(config, 'server.api.json.indent', 'number');
+    test(config, 'server.api.userAPI', 'object');
+    test(config, 'server.api.userAPI.get', 'boolean');
+    test(config, 'server.api.userAPI.post', 'boolean');
+    test(config, 'server.api.userAPI.patch', 'boolean');
+    test(config, 'server.api.userAPI.put', 'boolean');
+    test(config, 'server.api.userAPI.patchPassword', 'boolean');
+    test(config, 'server.api.userAPI.delete', 'boolean');
+  }
+  test(config, 'server.plugins', 'object');
+  test(config, 'server.ui', 'object');
+  test(config, 'server.ui.enabled', 'boolean');
+  if (config.server.ui.enabled) {
+    test(config, 'server.ui.mode', 'string');
+    test(config, 'server.ui.banner', 'object');
+    test(config, 'server.ui.banner.on', 'boolean');
+    if (config.server.ui.banner.on) {
+      test(config, 'server.ui.banner.message', 'string');
+      test(config, 'server.ui.banner.color', 'string');
+      test(config, 'server.ui.banner.background', 'string');
+      test(config, 'server.ui.banner.bold', 'boolean');
+      test(config, 'server.ui.banner.border', 'string');
+    }
+    test(config, 'server.ui.loginModal', 'object');
+    test(config, 'server.ui.loginModal.on', 'boolean');
+    if (config.server.ui.loginModal.on) {
+      test(config, 'server.ui.loginModal.message', 'string');
+    }
+  }
+  test(config, 'server.secret', 'string');
+
+
+  // ----------------------------- Verfiy test ----------------------------- //
+  test(config, 'test', 'object');
+  test(config, 'test.url', 'string');
+};
+
+/**
+ * @description This function removes comments from a string separated by new
+ * line characters to convert commented JSON to valid JSON.
+ *
+ * @param {string} inputString - The name of the file to parse.
+ *
+ * @returns {object} Valid JSON.
+ */
+module.exports.removeComments = function(inputString) {
+  // Ensure inputString is of type string
+  if (typeof inputString !== 'string') {
+    throw new M.DataFormatError('Value is not a string.', 'warn');
+  }
+
+  // Attempt to read file into array separated by each newline character.
+  const arrStringSep = inputString.split('\n');
+
+  // Remove all array elements that start with '//', the JS comment identifier
+  const arrCommRem = arrStringSep.filter(line => !RegExp(/^ *\/\//).test(line));
+
+  // Join the array into a single string separated by new line characters
+  // Return the now-valid JSON
+  return arrCommRem.join('\n');
+};

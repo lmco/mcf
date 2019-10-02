@@ -118,15 +118,17 @@ Object.defineProperty(M, 'root', {
 });
 
 // Load the parseJSON library module.
-const parseJSON = M.require('lib.parse-json');
+const configUtils = M.require('lib.config-utils');
 // Set configuration file path
 const configPath = path.join(M.root, 'config', `${M.env}.cfg`);
 // Read configuration file
 const configContent = fs.readFileSync(configPath).toString();
 // Remove comments from configuration string
-const stripComments = parseJSON.removeComments(configContent);
+const stripComments = configUtils.removeComments(configContent);
 // Parse configuration string into JSON object
 const config = JSON.parse(stripComments);
+// Validate the config file
+configUtils.validate(config);
 
 // Check if config secret is RANDOM
 if (config.server.secret === 'RANDOM') {
