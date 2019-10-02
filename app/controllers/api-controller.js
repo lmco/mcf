@@ -143,7 +143,7 @@ function formatJSON(obj, minified = false) {
  * @param {object} res - The response object.
  * @param {string} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
- * @param {string} contentType - The content type for the response.
+ * @param {string} [contentType = "application/json"] - The content type for the response.
  *
  * @returns {object} The response object.
  */
@@ -4806,7 +4806,7 @@ async function deleteBranch(req, res) {
 /**
  * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Gets one or many artifacts.
+ * @description Gets a single artifact by ID.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
@@ -4855,7 +4855,7 @@ async function getArtifact(req, res) {
   options.lean = true;
 
   try {
-    // Find the artifact from it's artifact.id, project.id, and org.id
+    // Find the artifact from it's artifact.id, branch.id, project.id, and org.id
     // NOTE: find() sanitizes input params
     const artifact = await ArtifactController.find(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
@@ -4886,7 +4886,7 @@ async function getArtifact(req, res) {
 /**
  * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Creates one or many artifacts.
+ * @description Creates a single artifact.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
@@ -5055,7 +5055,7 @@ async function patchArtifact(req, res) {
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Deletes one or many artifacts.
+ * @description Deletes a single artifact.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
