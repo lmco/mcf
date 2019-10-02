@@ -17,9 +17,11 @@
 
 // Node modules
 const chai = require('chai');
+const should = chai.should(); // eslint-disable-line no-unused-vars
+
 
 // MBEE modules
-const parseJSON = M.require('lib.parse-json');
+const configUtils = M.require('lib.config-utils');
 
 /* --------------------( Main )-------------------- */
 /**
@@ -30,6 +32,8 @@ const parseJSON = M.require('lib.parse-json');
  */
 describe(M.getModuleName(module.filename), () => {
   it('Should parse the configuration file', parseTest);
+  it('Should validate the configuration file', validateTest);
+  it('Should reject an invalid configuration file', rejectInvalidConfigTest);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -73,7 +77,7 @@ async function parseTest() {
     + '}';
 
   // Remove comments from test string
-  const parseString = parseJSON.removeComments(testString);
+  const parseString = configUtils.removeComments(testString);
   // Expect parseString to equal confirmString
   chai.expect(parseString).to.equal(confirmString);
 
@@ -85,5 +89,86 @@ async function parseTest() {
     M.log.error(err);
     // Expect no error
     chai.expect(true).to.equal(false);
+  }
+}
+
+/**
+ * @description Checks to make sure validate function is working.
+ */
+async function validateTest() {
+  try {
+    configUtils.validate(M.config);
+  }
+  catch (error) {
+    should.not.exist(error);
+  }
+}
+
+/**
+ * @description Checks to make sure validate function rejects invalid config objects.
+ */
+async function rejectInvalidConfigTest() {
+  const invalidConfig = {};
+
+  // Test rejection if auth is not defined
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Problem with configuration file: "auth" is not defined.');
+  }
+
+  // Test rejection if auth is not an object
+  invalidConfig.auth = 'not an object';
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Problem with configuration file: "auth" is not an object.');
+  }
+
+  // Test rejection if auth is empty
+  invalidConfig.auth = {};
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Problem with configuration file: "auth.strategy" is not defined.');
+  }
+
+  // Test rejection if db is not defined
+  invalidConfig.auth = M.config.auth;
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Problem with configuration file: "db" is not defined.');
+  }
+
+  // Test rejection if log is not defined
+  invalidConfig.db = M.config.db;
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Problem with configuration file: "log" is not defined.');
+  }
+
+  // Test rejection if server is not defined
+  invalidConfig.log = M.config.log;
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Problem with configuration file: "server" is not defined.');
+  }
+
+  // Test rejection if test is not defined
+  invalidConfig.server = M.config.server;
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Problem with configuration file: "test" is not defined.');
   }
 }

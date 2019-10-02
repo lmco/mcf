@@ -29,9 +29,7 @@ const path = require('path');
  * @param {string} message - The error message.
  */
 function configError(message) {
-  // eslint-disable-next-line no-console
-  console.log(`Problem with configuration file: ${message}`);
-  process.exit(-1);
+  throw new M.ServerError(`Problem with configuration file: ${message}`, 'critical');
 }
 
 /**
@@ -53,7 +51,7 @@ function test(config, key, type) {
 
   // Test that the field exists.
   if (field === undefined) {
-    configError(`"${key}" is not specified.`);
+    configError(`"${key}" is not defined.`);
   }
 
   // Test that the field is the correct type.
@@ -87,15 +85,14 @@ function test(config, key, type) {
 module.exports.validate = function(config) {
   // ----------------------------- Verify auth ----------------------------- //
   test(config, 'auth', 'object');
-
   test(config, 'auth.strategy', 'string');
   const authStrategies = 'local-strategy, ldap-strategy, local-ldap-strategy, test-strategy';
   if (!authStrategies.includes(config.auth.strategy)) {
     configError(`${config.auth.strategy} in "auth.strategy" is not a valid authentication strategy.`);
   }
   const stratFiles = fs.readdirSync(path.join(M.root, 'app', 'auth'))
-  .filter((file) => file.includes(config.db.strategy));
-  if (!stratFiles) configError(`auth strategy file ${config.db.strategy} not found in app/auth directory.`);
+  .filter((file) => file.includes(config.auth.strategy));
+  if (stratFiles.length === 0) configError(`auth strategy file ${config.auth.strategy} not found in app/auth directory.`);
 
   if (config.auth.strategy.includes('ldap')) {
     test(config, 'auth.ldap', 'object');

@@ -127,8 +127,6 @@ const configContent = fs.readFileSync(configPath).toString();
 const stripComments = configUtils.removeComments(configContent);
 // Parse configuration string into JSON object
 const config = JSON.parse(stripComments);
-// Validate the config file
-configUtils.validate(config);
 
 // Check if config secret is RANDOM
 if (config.server.secret === 'RANDOM') {
@@ -184,6 +182,14 @@ if (installComplete) {
       value: M.require('lib.errors').DatabaseError
     }
   });
+}
+
+// Validate the config file
+try {
+  configUtils.validate(config);
+}
+catch (error) {
+  process.exit(-1);
 }
 
 // Make the M object read only and its properties cannot be changed or removed.
