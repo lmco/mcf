@@ -187,7 +187,7 @@ function deleteBlob(artMetadata) {
  *
  * @param {string} pathString - The full directory path.
  *
- * @returns {string} ArtifactPath - returns the created path.
+ * @returns {string} Returns the created path.
  */
 function createDirectory(pathString) {
   // Define path separator
