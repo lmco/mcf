@@ -76,7 +76,7 @@ module.exports.validate = function(config) {
   // ----------------------------- Verify auth ----------------------------- //
   test(config, 'auth', 'object');
   test(config, 'auth.strategy', 'string');
-  const authStrategies = 'local-strategy, ldap-strategy, local-ldap-strategy';
+  const authStrategies = ['local-strategy', 'ldap-strategy', 'local-ldap-strategy'];
   if (!authStrategies.includes(config.auth.strategy)) {
     throw new Error(`Configuration file: ${config.auth.strategy} in "auth.strategy" is not a valid`
     + 'authentication strategy.');
@@ -197,7 +197,7 @@ module.exports.validate = function(config) {
   // ----------------------------- Verify log ----------------------------- //
   test(config, 'log', 'object');
   test(config, 'log.level', 'string');
-  const logLevels = 'info verbose debug warn error critical';
+  const logLevels = ['info', 'verbose', 'debug', 'warn', 'error', 'critical'];
   if (!logLevels.includes(config.log.level)) {
     throw new Error(`Configuration file: ${config.log.level} in "log.level" is not a valid`
       + 'log level.');
