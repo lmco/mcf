@@ -48,7 +48,6 @@ class Home extends Component {
       orgs: [],
       admin: false,
       write: false,
-      writePermOrgs: null,
       displayOrgs: {},
       error: null
     };
@@ -77,7 +76,7 @@ class Home extends Component {
         // Get project data
         $.ajax({
           method: 'GET',
-          url: '/api/orgs?populate=projects&minified=true',
+          url: '/api/orgs?populate=projects&minified=true&includeArchived=true',
           statusCode: {
             200: (orgs) => {
               this.setMountedComponentStates(data, orgs);
@@ -128,7 +127,6 @@ class Home extends Component {
     if (writePermOrgs.length > 0) {
       // Set write states
       this.setState({ write: true });
-      this.setState({ writePermOrgs: writePermOrgs });
     }
 
     // Verify user is admin
@@ -198,39 +196,51 @@ class Home extends Component {
   render() {
     // Initialize variables
     let titleClass = 'workspace-title workspace-title-padding';
-    let list;
+    const list = [];
 
     // Loop through all orgs
     if (this.state.orgs.length > 0) {
-      list = this.state.orgs.map(org => {
+      this.state.orgs.forEach(org => {
         const username = this.state.user.username;
 
         const showProj = (this.state.displayOrgs[org.id]);
 
+        // Verify if system admin
         if (!this.state.user.admin) {
-          if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
-            return (<OrgList org={org} key={`org-key-${org.id}`}
+          // Verify admin permission on org
+          if (org.permissions[username] === 'admin') {
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
+                               user={this.state.user}
+                               write={this.state.write}
+                               admin={this.state.admin}
+                               showProjs={showProj}
+                               onExpandChange={this.onExpandChange}/>);
+          }
+          // Verify write permissions and not archived org
+          else if (org.permissions[username] === 'write' && !org.archived) {
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
+                               user={this.state.user}
+                               write={this.state.write}
+                               admin={this.state.admin}
+                               showProjs={showProj}
+                               onExpandChange={this.onExpandChange}/>);
+          }
+          // Verify read permissions and not archived org
+          else if (org.permissions[username] === 'read' && !org.archived) {
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
+                               user={this.state.user}
+                               admin={this.state.admin}
+                               showProjs={showProj}
+                               onExpandChange={this.onExpandChange}/>);
+          }
+        }
+        else {
+          list.push(<OrgList org={org} key={`org-key-${org.id}`}
                              user={this.state.user}
                              write={this.state.write}
                              admin={this.state.admin}
                              showProjs={showProj}
                              onExpandChange={this.onExpandChange}/>);
-          }
-          else {
-            return (<OrgList org={org} key={`org-key-${org.id}`}
-                             user={this.state.user}
-                             admin={this.state.admin}
-                             showProjs={showProj}
-                             onExpandChange={this.onExpandChange}/>);
-          }
-        }
-        else {
-          return (<OrgList org={org} key={`org-key-${org.id}`}
-                           user={this.state.user}
-                           write={this.state.write}
-                           admin={this.state.admin}
-                           showProjs={showProj}
-                           onExpandChange={this.onExpandChange}/>);
         }
       });
     }
@@ -257,8 +267,8 @@ class Home extends Component {
           </ModalBody>
         </Modal>
         { /* Display the list of projects */ }
-        <div id='workspace' ref={this.ref}>
-          <div id='workspace-header' className='workspace-header home-header'>
+        <div className='home-space' ref={this.ref}>
+          <div className='workspace-header home-header'>
             <h2 className={titleClass}>Organizations</h2>
             { /* Verify user is an admin */ }
             {(!this.state.admin)
@@ -293,13 +303,13 @@ class Home extends Component {
                     type='button'
                     name='expand'
                     onClick={this.handleExpandCollapse}>
-              [ + ]
+              [ Expand ]
             </Button>
             <Button id='btn-collapse'
                     type='button'
                     name='collapse'
                     onClick={this.handleExpandCollapse}>
-              [ - ]
+              [ Collapse ]
             </Button>
           </InputGroup>
           { /* Verify there are projects */ }

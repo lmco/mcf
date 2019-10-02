@@ -66,13 +66,7 @@ class OrgHome extends Component {
         // Set user data
         this.setState({ user: data });
         // Initialize options
-        let opt = 'populate=projects&minified=true';
-
-        // Verify if admin user
-        if (data.admin) {
-          // Update options to grab archived data
-          opt = 'populate=projects&minified=true&includeArchived=true';
-        }
+        const opt = 'populate=projects&minified=true&includeArchived=true';
 
         // Get org data
         $.ajax({
@@ -123,8 +117,16 @@ class OrgHome extends Component {
       this.setState({ write: true });
     }
 
-    // Set the org state
-    this.setState({ org: org });
+    // Verify the user has admin permissions on org if it is archived
+    if (org.archived && ((perm === 'write') || (perm === 'read'))) {
+      // Do not display the org information for non-perm user
+      this.setState({ org: null });
+      this.setState({ error: `Organization [${org.id}] not found.` });
+    }
+    else {
+      // Set the org state
+      this.setState({ org: org });
+    }
   }
 
   // Define handle toggle

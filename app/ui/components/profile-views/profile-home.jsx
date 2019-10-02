@@ -11,7 +11,7 @@
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @description This renders the routes for profile page.
+ * @description This renders a user's page.
  */
 
 /* Modified ESLint rules for React. */
@@ -25,8 +25,6 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import Profile from '../profile-views/profile.jsx';
-import OrganizationList from '../profile-views/organization-list.jsx';
-import ProjectList from '../profile-views/project-list.jsx';
 
 // Define component
 class ProfileHome extends Component {
@@ -117,24 +115,6 @@ class ProfileHome extends Component {
                          title='Information'
                          icon='fas fa-info'
                          routerLink={routerLink} />
-            {/* Verify it is not a different users profile, do not return */}
-            {/* Org or project page for other user profile */}
-            {/* NOTE: Orgs and projects are split in two ternary operators */}
-            {/* due to abnormal rendering when in a react fragment */}
-            {(otherUser !== null)
-              ? ''
-              : (<SidebarLink id='Organization'
-                              title='Organizations'
-                              icon='fas fa-box'
-                              routerLink='/profile/orgs'/>)
-            }
-            {(otherUser !== null)
-              ? ''
-              : (<SidebarLink id='Project'
-                              title='Projects'
-                              icon='fas fa-boxes'
-                              routerLink='/profile/projects'/>)
-            }
           </Sidebar>
           { /* Verify user data exists */ }
           { // Display loading page or error page if user data is loading or failed to load
@@ -144,25 +124,14 @@ class ProfileHome extends Component {
                 <Switch>
                   {/* Verify if user is view their own profile, then return their info  */}
                   {(otherUser === null)
-                    ? (<React.Fragment>
-                      {/* Route to user home page */}
-                      <Route exact path="/profile" render={(props) => <Profile {...props}
-                                                                       admin={true}
-                                                                       user={this.state.user} />} />
-                      {/* Route to org list page */}
-                      <Route exact path={'/profile/orgs'}
-                             render={(props) => <OrganizationList {...props}
-                                                                  user={this.state.user} /> }/>
-                      {/* Route to project list page */}
-                      <Route exact path={'/profile/projects'}
-                             render={(props) => <ProjectList {...props}
-                                                             user={this.state.user} /> } />
-                    </React.Fragment>)
+                    ? (<Route exact path="/profile" render={(props) => <Profile {...props}
+                                                                  admin={true}
+                                                                  user={this.state.user} /> } />)
                     : (<Route path={`/profile/${this.props.match.params.username}`}
                               render={(props) => <Profile {...props}
-                                                              admin={user.admin}
-                                                              viewingUser={user}
-                                                              user={otherUser} /> } />)
+                                                          admin={user.admin}
+                                                          viewingUser={user}
+                                                          user={otherUser} /> } />)
 
                   }
                 </Switch>

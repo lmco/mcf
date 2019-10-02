@@ -83,7 +83,7 @@ class Profile extends Component {
           </ModalBody>
         </Modal>
         <div id='workspace'>
-          <div id='workspace-header' className='workspace-header header-box-depth'>
+          <div className='workspace-header header-box-depth'>
             <h2 className='workspace-title'>
               {user.fname} {user.lname}
             </h2>
@@ -93,8 +93,8 @@ class Profile extends Component {
                 : (<Button className='btn'
                            outline color="secondary"
                            onClick={this.handleToggle}>
-                    Edit
-                  </Button>)
+                  Edit
+                </Button>)
               }
             </div>
           </div>
