@@ -5286,8 +5286,11 @@ async function getBlobById(req, res) {
   try {
     // Find the artifact from it's artifact.id, project.id, and org.id
     // NOTE: find() sanitizes input params
-    const artifactBlob = await ArtifactController.getBlobById(req.user, req.params.orgid,
+    const artMetadata = await ArtifactController.find(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
+
+    const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, artMetadata[0]);
 
     // Set filename
     res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);

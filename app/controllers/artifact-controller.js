@@ -26,8 +26,7 @@ module.exports = {
   remove,
   getBlob,
   postBlob,
-  deleteBlob,
-  getBlobById
+  deleteBlob
 };
 
 // Node.js Modules
@@ -926,98 +925,6 @@ async function deleteBlob(requestingUser, organizationID, projectID,
 
   // Return Artifact obj
   return saniArt;
-}
-
-/**
- * @description This function finds an artifact blob based on the artifact id.
- * Note: The artifact metadata (project, location and filename) is used to locate
- * the artifact blob.
- *
- * @param {User} requestingUser - The requesting user.
- * @param {string} organizationID - The organization ID for the org the project belongs to.
- * @param {string} projectID - The project ID of the Project which is being searched for.
- * @param {string} branch - The branch ID.
- * @param {string} artifact - An artifact id.
- * @param {object} [options] - A parameter that provides supported options.
- * @param {boolean} [options.archived = false] - If true, find results will include
- * archived objects.
- * @param {boolean} [options.includeArchived = false] - If true, find results will include
- * archived objects.
- *
- * @returns {Promise} Artifact Blob.
- */
-async function getBlobById(requestingUser, organizationID, projectID, branch,
-  artifact, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, {}, organizationID, projectID, branch);
-  helper.checkParamsDataType('string', artifact, 'Artifacts');
-
-  // Sanitize input parameters
-  const saniArtifact = sani.db(JSON.parse(JSON.stringify(artifact)));
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const orgID = sani.db(organizationID);
-  const projID = sani.db(projectID);
-  const branchID = sani.db(branch);
-
-  // Initialize search query
-  const searchQuery = { branch: utils.createID(orgID, projID, branchID),
-    archived: false };
-
-  // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['archived', 'includeArchived'], Artifact);
-
-  // Find the organization
-  const organization = await helper.findAndValidate(Org, orgID, reqUser,
-    validatedOptions.archived);
-
-  // Ensure that the user has at least read permissions on the org
-  if (!reqUser.admin && (!organization.permissions[reqUser._id]
-    || !organization.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to get'
-      + ` artifacts on the organization [${orgID}].`, 'warn');
-  }
-
-  // Find the project
-  const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    reqUser, validatedOptions.archived);
-
-  // Verify the user has read permissions on the project
-  if (!reqUser.admin && (!project.permissions[reqUser._id]
-    || !project.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to get'
-      + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
-  }
-
-  // Find the branch, validate it was found and not archived
-  await helper.findAndValidate(Branch, utils.createID(
-    orgID, projID, branchID
-  ), reqUser, validatedOptions.archived);
-
-  // If the archived field is true, remove it from the query
-  if (validatedOptions.archived) {
-    delete searchQuery.archived;
-  }
-
-  // Check the type of the artifact parameter
-  if (typeof saniArtifact === 'string') {
-    // A single artifact id
-    searchQuery._id = utils.createID(orgID, projID, branchID, saniArtifact);
-  }
-  else if (!((typeof saniArtifact === 'object' && saniArtifact !== null)
-    || saniArtifact === undefined)) {
-    // Invalid parameter, throw an error
-    throw new M.DataFormatError('Invalid input for finding artifacts.', 'warn');
-  }
-
-  try {
-    // Find the artifacts
-    const artifactMeta = await Artifact.find(searchQuery, validatedOptions.fieldsString);
-    const blob = ArtifactModule.getBlob(artifactMeta[0]);
-    return blob;
-  }
-  catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
-  }
 }
 
 /**

@@ -92,7 +92,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should create an artifact', createArtifact);
   it('should get an artifact', getArtifact);
   it('should post an artifact blob', postBlob);
-  it('should get an artifact blob by ID', getBlobByID);
   it('should update an artifact file', updateArtifact);
   it('should get an artifact blob', getBlob);
   it('should delete an artifact', deleteBlob);
@@ -336,28 +335,5 @@ async function deleteBlob() {
   catch (error) {
     // Expect Artifact not found error
     chai.expect(error.message).to.equal('Artifact blob not found.');
-  }
-}
-
-/**
- * @description Finds an existing artifact blob via id.
- */
-async function getBlobByID() {
-  const artData = testData.artifacts[0].id;
-  try {
-    // Find the artifact previously uploaded.
-    const artifactBlob = await ArtifactController.getBlobById(adminUser, org.id,
-      projectID, branchID, artData);
-
-    // Check return artifact is of buffer type
-    chai.expect(Buffer.isBuffer(artifactBlob)).to.equal(true);
-
-    // Deep compare both binaries
-    chai.expect(artifactBlob).to.deep.equal(artifactBlob1);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
   }
 }
