@@ -241,6 +241,7 @@ async function deleteArtifact() {
     // Check that 1 artifact was deleted
     chai.expect(deletedArtifact.length).to.equal(1);
 
+// Attempt to find the deleted artifact
     const foundArtifact = await ArtifactController.find(adminUser, org.id,
       projectID, branchID, [artifactID]);
 
