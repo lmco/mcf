@@ -374,6 +374,17 @@ class Model {
         // Change the value of each key from { type: value} to simply the value
         document[field] = Object.values(document[field])[0];
       }
+
+      // Handle the special case where the type is a string, it defaults to null,
+      // and the value in the database is the string null. This was done to work
+      // around the existence of a NULL type in DynamoDB
+      if (this.definition[field].hasOwnProperty('default')
+        && this.definition[field].default === null
+        && this.definition[field].type === 'S'
+        && document[field] === 'null') {
+        // Set value equal to null
+        document[field] = null;
+      }
     });
 
     // If the lean option is NOT supplied, add on document functions
@@ -532,6 +543,12 @@ class Model {
 
       // Loop over each valid parameter
       Object.keys(def).forEach((param) => {
+        // If a default exists and the value isn't set
+        if (def[param].default && !keys.includes(param)) {
+          // Set the value equal to th default
+          doc[param] = def[param].default;
+        }
+
         // Parameter was defined on the document
         if (keys.includes(param)) {
           // Validate type
@@ -550,7 +567,8 @@ class Model {
           }
 
           // If not the correct type, throw an error
-          if (typeof doc[param] !== shouldBeType) { // eslint-disable-line valid-typeof
+          if (typeof doc[param] !== shouldBeType // eslint-disable-line valid-typeof
+            && !(shouldBeType === 'string' && doc[param] === null)) {
             throw new M.DataFormatError(`The ${modelName} parameter `
               + `[${param}] is not a ${shouldBeType}.`);
           }
@@ -559,23 +577,29 @@ class Model {
           if (def[param].hasOwnProperty('validate')) {
             def[param].validate.forEach((v) => {
               if (!v.validator(doc[param])) {
-                throw new M.DataFormatError(v.message);
+                throw new M.DataFormatError(v.message(doc));
               }
             });
           }
-        }
-        // If the parameter was not defined on the document
-        else {
-          // If the parameter is required and no default is provided, throw an error
-          if (def[param].required && !def[param].default) {
-            throw new M.DataFormatError(`The ${modelName} property ${param}`
-              + ' is required.');
-          }
 
-          // If a default exists
-          if (def[param].default) {
-            doc[param] = def[param].default;
+          // Handle special case where the field should be a string, and defaults to null
+          if (shouldBeType === 'string' && def[param].hasOwnProperty('default')
+            && def[param].default === null) {
+            // The string null is a reserved keyword for string fields with null defaults
+            if (doc[param] === 'null') {
+              throw new M.DataFormatError('The string \'null\' is a reserved '
+                + `keyword for the parameter [${param}].`);
+            }
+            // Set the value to the string null
+            else {
+              doc[param] = 'null';
+            }
           }
+        }
+        // If the parameter is required and no default is provided, throw an error
+        else if (def[param].required && !def[param].default) {
+          throw new M.DataFormatError(`The ${modelName} property ${param}`
+            + ' is required.');
         }
       });
     };
@@ -1016,7 +1040,8 @@ class Model {
             }
           }
           else if (obj[key] === null) {
-            // TODO: Do something?
+            // TODO: Should we explicitly handle this case or not?
+            // returnObj[key] = { NULL: true };
           }
           else {
             returnObj[key] = { M: this.formatObject(obj[key]) };

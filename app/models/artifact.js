@@ -112,23 +112,7 @@ const ArtifactSchema = new db.Schema({
   },
   location: {
     type: 'String'
-  },
-  history: [{
-    hash: {
-      type: 'String',
-      required: true
-    },
-    user: {
-      type: 'String',
-      ref: 'User',
-      required: true
-    },
-    updatedOn: {
-      type: 'Date',
-      default: Date.now(),
-      required: true
-    }
-  }]
+  }
 });
 
 /* ---------------------------( Model Plugin )---------------------------- */
