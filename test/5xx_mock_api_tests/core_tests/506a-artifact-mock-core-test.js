@@ -507,7 +507,7 @@ function postBlob(done) {
 }
 
 /**
- * @description Verifies mock DELETE request to Delete an artifact blob.
+ * @description Verifies mock DELETE request to delete an artifact blob.
  *
  * @param {Function} done - The mocha callback.
  */
