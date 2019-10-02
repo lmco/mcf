@@ -71,7 +71,7 @@ describe(M.getModuleName(module.filename), function() {
   it('clean database', cleanDB);
   it('should initialize the models', initModels);
   it('should create the default org if it doesn\'t exist', createDefaultOrg);
-  it('should clear artifact storage folder', clearArtifactStorage);
+  it('should clear local artifact storage folder', clearArtifactStorage);
 });
 
 /* --------------------( Tests )-------------------- */
