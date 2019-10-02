@@ -115,7 +115,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies mock POST request to create an artifact blob.
+ * @description Verifies mock POST request to create an artifact document.
  *
  * @param {Function} done - The mocha callback.
  */
