@@ -214,13 +214,13 @@ module.exports.validate = function(config) {
   if (config.server.api.enabled) {
     test(config, 'server.api.json', 'object');
     test(config, 'server.api.json.indent', 'number');
-    test(config, 'server.api.userAPI', 'object');
-    test(config, 'server.api.userAPI.get', 'boolean');
-    test(config, 'server.api.userAPI.post', 'boolean');
-    test(config, 'server.api.userAPI.patch', 'boolean');
-    test(config, 'server.api.userAPI.put', 'boolean');
-    test(config, 'server.api.userAPI.patchPassword', 'boolean');
-    test(config, 'server.api.userAPI.delete', 'boolean');
+    if (config.server.api.userAPI) test(config, 'server.api.userAPI', 'object');
+    if (config.server.api.userAPI.get) test(config, 'server.api.userAPI.get', 'boolean');
+    if (config.server.api.userAPI.post) test(config, 'server.api.userAPI.post', 'boolean');
+    if (config.server.api.userAPI.patch) test(config, 'server.api.userAPI.patch', 'boolean');
+    if (config.server.api.userAPI.put) test(config, 'server.api.userAPI.put', 'boolean');
+    if (config.server.api.userAPI.patchPassword) test(config, 'server.api.userAPI.patchPassword', 'boolean');
+    if (config.server.api.userAPI.delete) test(config, 'server.api.userAPI.delete', 'boolean');
   }
   test(config, 'server.plugins', 'object');
   test(config, 'server.ui', 'object');
