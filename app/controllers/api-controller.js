@@ -4940,7 +4940,7 @@ async function postArtifact(req, res) {
     options.lean = true;
 
     // If artifact ID was provided in the body, ensure it matches artifact ID in params
-    if (Object.prototype.hasOwnProperty.call('id') && (req.params.artifactid !== req.body.id)) {
+    if (req.body.hasOwnProperty('id') && (req.params.artifactid !== req.body.id)) {
       const error = new M.DataFormatError(
         'Artifact ID in the body does not match ID in the params.', 'warn'
       );
