@@ -378,7 +378,8 @@ class Model {
       // Handle the special case where the type is a string, it defaults to null,
       // and the value in the database is the string null. This was done to work
       // around the existence of a NULL type in DynamoDB
-      if (this.definition[field].hasOwnProperty('default')
+      if (this.definition[field]
+        && this.definition[field].hasOwnProperty('default')
         && this.definition[field].default === null
         && this.definition[field].type === 'S'
         && document[field] === 'null') {
@@ -518,7 +519,10 @@ class Model {
    * least contain an _id, as well as the methods defined in the schema.
    */
   createDocument(doc) {
+    // Create a copy of the JSON
     doc = JSON.parse(JSON.stringify(doc)); // eslint-disable-line no-param-reassign
+    // Reset the prototypes
+    doc.__proto__ = {}; // eslint-disable-line no-proto
     const def = this.definition;
     const table = this.TableName;
     const modelName = this.modelName;
