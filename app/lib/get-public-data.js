@@ -131,7 +131,7 @@ function getArtifactPublicData(artifact, options) {
       project = getProjectPublicData(artifact.project, {});
     }
     else {
-      project = utils.parseID(artifact.project)[1];
+      project = idParts[1];
     }
   }
 
