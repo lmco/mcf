@@ -11,7 +11,7 @@
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description This implements an artifact strategy for remote
+ * @description This implements an artifact strategy for local
  * artifact storage. This should be the default artifact strategy for MBEE.
  */
 
