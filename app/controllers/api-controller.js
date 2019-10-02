@@ -143,7 +143,7 @@ function formatJSON(obj, minified = false) {
  * @param {object} res - The response object.
  * @param {string} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
- * @param {string} contentType - The content type for the response.
+ * @param {string} [contentType = "application/json"] - The content type for the response.
  *
  * @returns {object} The response object.
  */
