@@ -41,7 +41,7 @@ const utils = M.require('lib.utils');
  * @param {string} [artMetadata.location] - The location of the artifact.
  * @param {string} [artMetadata.project] - The project of artifact blob.
  *
- * @returns {Buffer} Blob - Artifact binary.
+ * @returns {Buffer} Artifact binary.
  */
 function getBlob(artMetadata) {
   try {
@@ -50,8 +50,7 @@ function getBlob(artMetadata) {
 
     // Read the artifact file
     // Note: Use sync to ensure file is read before advancing
-    const blob = fs.readFileSync(filePath);
-    return blob;
+    return fs.readFileSync(filePath);
   }
   catch (err) {
     throw new M.NotFoundError('Artifact blob not found.', 'warn');
@@ -79,23 +78,8 @@ function postBlob(artMetadata, artifactBlob) {
     throw new M.DataFormatError('Artifact blob already exist.', 'warn');
   }
 
-  // Create storage directory
-  createDirectory('/');
-
-  // Create project directory
-  createDirectory(utils.parseID(artMetadata.project).pop());
-
-  try {
-    // Write out artifact file, defaults to 666 permission.
-    fs.writeFileSync(fullPath, artifactBlob);
-  }
-  catch (error) {
-    // Log the error
-    M.log.error(error.message);
-
-    // Error occurred, log it
-    throw new M.DataFormatError('Could not create Artifact blob.', 'warn');
-  }
+  // Replace the Blob
+  putBlob(artMetadata, artifactBlob);
 }
 
 /**
@@ -152,6 +136,7 @@ function deleteBlob(artMetadata) {
     });
   }
   catch (error) {
+    // Check for specific error, blob not exist
     if (error.code === 'ENOENT') {
       throw new M.DataFormatError('Artifact blob does not exist.', 'warn');
     }
@@ -164,7 +149,7 @@ function deleteBlob(artMetadata) {
     utils.parseID(artMetadata.project).pop());
 
   // Check if project directory is empty
-  fs.readdirSync(projDirPath, function(err, files) {
+  fs.readdirSync(projDirPath, (err, files) => {
     if (err) {
       M.log.warn(err);
     }
@@ -187,7 +172,7 @@ function deleteBlob(artMetadata) {
  *
  * @param {string} pathString - The full directory path.
  *
- * @returns {string} ArtifactPath - returns the created path.
+ * @returns {string} Returns the created path.
  */
 function createDirectory(pathString) {
   // Define path separator
