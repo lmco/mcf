@@ -304,13 +304,13 @@ class HomeApp extends Component {
                     type='button'
                     name='expand'
                     onClick={this.handleExpandCollapse}>
-              [ + ]
+              [ Expand ]
             </Button>
             <Button id='btn-collapse'
                     type='button'
                     name='collapse'
                     onClick={this.handleExpandCollapse}>
-              [ - ]
+              [ Collapse ]
             </Button>
           </InputGroup>
           { /* Verify there are projects */ }
