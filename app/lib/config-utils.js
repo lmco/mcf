@@ -13,7 +13,8 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description Validates that the configuration file is formatted properly.
+ * @description Provides utilites for handling .cfg files, specifically removing comments and
+ * validating the format.
  */
 
 // Node Modules
