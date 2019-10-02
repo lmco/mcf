@@ -130,30 +130,34 @@ module.exports.validate = function(config) {
 
   // ----------------------------- Verify db ----------------------------- //
   test(config, 'db', 'object');
-  test(config, 'db.url', 'string');
-  test(config, 'db.port', 'number');
-  test(config, 'db.name', 'string');
   test(config, 'db.strategy', 'string');
 
-  // Ensure that the db strategy exists
-  const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
-  .filter((file) => file.includes(config.db.strategy));
-  if (dbFiles.length === 0) {
-    throw new Error(`Configuration file: DB strategy file ${config.db.strategy} not found in app/db directory.`);
-  }
+  // Test supported database
+  if (config.db.strategy === 'mongoose-mongodb-strategy') {
+    test(config, 'db.url', 'string');
+    test(config, 'db.port', 'number');
+    test(config, 'db.name', 'string');
 
-  // Test optional fields
-  if (config.db.username !== undefined) test(config, 'db.username', 'string');
-  if (config.db.password !== undefined) test(config, 'db.password', 'string');
-  if (config.db.ssl !== undefined) test(config, 'db.ssl', 'boolean');
+    // Ensure that the db strategy exists
+    const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
+    .filter((file) => file.includes(config.db.strategy));
+    if (dbFiles.length === 0) {
+      throw new Error(`Configuration file: DB strategy file ${config.db.strategy} not found in app/db directory.`);
+    }
 
-  // If ssl is enabled, validate the ca file
-  if (config.db.ssl) {
-    test(config, 'db.ca', 'string');
-    const caFile = fs.readdirSync(path.join(M.root, 'certs'))
-    .filter((file) => config.db.ca.includes(file));
-    if (caFile.length === 0) {
-      throw new Error(`Configuration file: CA file ${config.db.ca} not found in certs directory.`);
+    // Test optional fields
+    if (config.db.username !== undefined) test(config, 'db.username', 'string');
+    if (config.db.password !== undefined) test(config, 'db.password', 'string');
+    if (config.db.ssl !== undefined) test(config, 'db.ssl', 'boolean');
+
+    // If ssl is enabled, validate the ca file
+    if (config.db.ssl) {
+      test(config, 'db.ca', 'string');
+      const caFile = fs.readdirSync(path.join(M.root, 'certs'))
+      .filter((file) => config.db.ca.includes(file));
+      if (caFile.length === 0) {
+        throw new Error(`Configuration file: CA file ${config.db.ca} not found in certs directory.`);
+      }
     }
   }
 
@@ -193,6 +197,11 @@ module.exports.validate = function(config) {
   // ----------------------------- Verify log ----------------------------- //
   test(config, 'log', 'object');
   test(config, 'log.level', 'string');
+  const logLevels = 'info verbose debug warn error critical';
+  if (!logLevels.includes(config.log.level)) {
+    throw new Error(`Configuration file: ${config.log.level} in "log.level" is not a valid`
+      + 'log level.');
+  }
   test(config, 'log.file', 'string');
   test(config, 'log.error_file', 'string');
   test(config, 'log.debug_file', 'string');
@@ -225,6 +234,15 @@ module.exports.validate = function(config) {
     if (config.server.api.userAPI.delete) test(config, 'server.api.userAPI.delete', 'boolean');
   }
   test(config, 'server.plugins', 'object');
+  test(config, 'server.plugins.enabled', 'boolean');
+  if (config.server.plugins.enabled) {
+    test(config, 'server.plugins.plugins', 'object');
+    Object.keys(config.server.plugins.plugins).forEach((pluginName) => {
+      test(config, `server.plugins.plugins.${pluginName}`, 'object');
+      test(config, `server.plugins.plugins.${pluginName}.title`, 'string');
+      test(config, `server.plugins.plugins.${pluginName}.source`, 'string');
+    });
+  }
   test(config, 'server.ui', 'object');
   test(config, 'server.ui.enabled', 'boolean');
   if (config.server.ui.enabled) {
@@ -250,6 +268,23 @@ module.exports.validate = function(config) {
   // ----------------------------- Verfiy test ----------------------------- //
   test(config, 'test', 'object');
   test(config, 'test.url', 'string');
+
+
+  // ----------------------------- Verfiy validators ----------------------------- //
+  if (config.validators) test(config, 'validators', 'object');
+  if (config.validators.id) test(config, 'validators.id', 'string');
+  if (config.validators.org_id) test(config, 'validators', 'string');
+  if (config.validators.project_id) test(config, 'validators', 'string');
+  if (config.validators.element_id) test(config, 'validators', 'string');
+  if (config.validators.user_username) test(config, 'validators', 'string');
+  if (config.validators.user_email) test(config, 'validators', 'string');
+  if (config.validators.user_fname) test(config, 'validators', 'string');
+  if (config.validators.user_lname) test(config, 'validators', 'string');
+  if (config.validators.user_provider) test(config, 'validators', 'string');
+  if (config.validators.url_next) test(config, 'validators', 'string');
+  if (config.validators.artifact_id) test(config, 'validators', 'string');
+  if (config.validators.artifact_filename) test(config, 'validators', 'string');
+  if (config.validators.webhook_id) test(config, 'validators', 'string');
 };
 
 /**
