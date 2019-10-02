@@ -76,7 +76,7 @@ function postBlob(artMetadata, artifactBlob) {
 
   // Check if artifact file exist
   if (fs.existsSync(fullPath)) {
-    throw new M.DataFormatError('Artifact blob already exist.', 'warn');
+    throw new M.DataFormatError('Artifact blob already exists.', 'warn');
   }
 
   // Create storage directory
