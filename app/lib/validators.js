@@ -32,7 +32,7 @@ const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
-  'blob'];
+  'blob', 'artifact', 'artifacts'];
 
 /**
  * @description Regular Expressions to validate organization data.
