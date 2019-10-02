@@ -72,8 +72,9 @@ async function clear() {
 
 }
 
-function sanitize() {
-
+// TODO: Figure out which fields need to be sanitized
+function sanitize(data) {
+  return data;
 }
 
 class Schema {
@@ -449,9 +450,11 @@ class Model {
       // If there are actually query parameters
       if (batchGetObj.RequestItems[this.TableName].Keys.length > 0) {
         M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
+        connect()
         // Make the batchGetItem request
-        this.connection.batchGetItem(batchGetObj).promise()
-        .then((foundDocs) => resolve(foundDocs.Responses[this.TableName]))
+        .then((conn) => conn.batchGetItem(batchGetObj).promise())
+        .then((foundDocs) => resolve(this.formatDocuments(
+          foundDocs.Responses[this.TableName], options)))
         .catch((error) => reject(error));
       }
       else {
@@ -537,6 +540,15 @@ class Model {
     const table = this.TableName;
     const modelName = this.modelName;
     const model = this;
+
+    // Set defaults
+    Object.keys(def).forEach((param) => {
+      // If a default exists and the value isn't set
+      if (def[param].default && !Object.keys(doc).includes(param)) {
+        // Set the value equal to th default
+        doc[param] = def[param].default;
+      }
+    });
 
     /**
      *
@@ -943,10 +955,12 @@ class Model {
         }
         else {
           const promises2 = [];
-          let createdDocs = [];
+          // Format and validate documents
+          const formattedDocs = docs.map(d => this.createDocument(d))
+          .forEach((d => d.validateSync()));
           // Loop through all docs in batches of 25
-          for (let i = 0; i < docs.length / 25; i++) {
-            const batch = docs.slice(i * 25, i * 25 + 25);
+          for (let i = 0; i < formattedDocs.length / 25; i++) {
+            const batch = formattedDocs.slice(i * 25, i * 25 + 25);
             const batchWriteObj = {
               RequestItems: {}
             };
