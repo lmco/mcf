@@ -1,7 +1,7 @@
 /**
- * Classification: UNCLASSIFIED.
+ * @classification UNCLASSIFIED
  *
- * @module  test.406a-artifact-model-tests
+ * @module test.406a-artifact-model-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -109,7 +109,7 @@ async function createArtifact() {
     name: testData.artifacts[0].name,
     filename: testData.artifacts[0].filename,
     contentType: path.extname(testData.artifacts[0].filename),
-    project: project._id,
+    project: projectID,
     branch: branchID,
     location: testData.artifacts[0].location
   };
@@ -240,6 +240,7 @@ async function deleteArtifact() {
     // Check that 1 artifact was deleted
     chai.expect(deletedArtifact.length).to.equal(1);
 
+// Attempt to find the deleted artifact
     const foundArtifact = await ArtifactController.find(adminUser, org.id,
       projectID, branchID, [artifactID]);
 

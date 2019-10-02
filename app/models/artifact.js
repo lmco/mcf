@@ -48,7 +48,7 @@ const utils = M.require('lib.utils');
  * @property {string} branch - A reference to an artifact's branch.
  * @property {string} filename - The filename of the artifact.
  * @property {string} contentType - The file type. E.g: 'png', 'dat'
- * @property {string} location - location of the artifact blob.
+ * @property {string} location - The location of the artifact blob.
  *
  */
 const ArtifactSchema = new db.Schema({

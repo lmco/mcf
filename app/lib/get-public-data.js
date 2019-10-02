@@ -57,7 +57,7 @@ module.exports.getPublicData = function(object, type, options) {
 };
 
 /**
- * @description Returns an artifact public data.
+ * @description Returns an artifacts public data.
  *
  * @param {object} artifact - The raw JSON of the artifact.
  * @param {object} options - A list of options passed in by the user to
@@ -131,7 +131,7 @@ function getArtifactPublicData(artifact, options) {
       project = getProjectPublicData(artifact.project, {});
     }
     else {
-      project = utils.parseID(artifact.project)[1];
+      project = idParts[1];
     }
   }
 
