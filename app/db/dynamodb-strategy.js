@@ -376,10 +376,10 @@ class Model {
    *
    * @returns {object} - Modified documents.
    */
-  formatDocument(document, options = {}) {
+  formatDocument(document, options = {}, recurse = false) {
     Object.keys(document).forEach((field) => {
       if (Object.keys(document[field])[0] === 'M') {
-        document[field] = this.formatDocument(document[field].M);
+        document[field] = this.formatDocument(document[field].M, {}, true);
       }
       else {
         // Change the value of each key from { type: value} to simply the value
@@ -400,7 +400,7 @@ class Model {
     });
 
     // If the lean option is NOT supplied, add on document functions
-    if (!options.lean) {
+    if (!options.lean && !recurse) {
       document = this.createDocument(document); // eslint-disable-line no-param-reassign
     }
 
@@ -936,7 +936,8 @@ class Model {
         });
         M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
         promises.push(
-          this.connection.batchGetItem(batchGetObj).promise()
+          connect()
+          .then((conn) => conn.batchGetItem(batchGetObj).promise())
           .then((foundDocs) => {
             foundDocuments = foundDocuments.concat(foundDocs.Responses[this.TableName]);
           })
@@ -950,14 +951,14 @@ class Model {
       .then(() => {
         // If documents with matching _ids exist, throw an error
         if (foundDocuments.length > 0) {
-          return reject(new M.DatabaseError('Documents already exists with '
+          return reject(new M.DatabaseError('Documents already exist with '
             + 'matching _ids.', 'warn'));
         }
         else {
           const promises2 = [];
           // Format and validate documents
           const formattedDocs = docs.map(d => this.createDocument(d))
-          .forEach((d => d.validateSync()));
+          formattedDocs.forEach(d => d.validateSync());
           // Loop through all docs in batches of 25
           for (let i = 0; i < formattedDocs.length / 25; i++) {
             const batch = formattedDocs.slice(i * 25, i * 25 + 25);
@@ -983,7 +984,8 @@ class Model {
 
             M.log.debug(`DB OPERATION: ${this.TableName} batchWriteItem`);
             promises2.push(
-              this.connection.batchWriteItem(batchWriteObj).promise()
+              connect()
+              .then((conn) => conn.batchWriteItem(batchWriteObj).promise())
             );
           }
 
@@ -1006,9 +1008,12 @@ class Model {
 
           M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
           promises3.push(
-            this.connection.batchGetItem(batchGetObj).promise()
+            connect()
+            .then((conn) => conn.batchGetItem(batchGetObj).promise())
             .then((foundDocs) => {
-              foundDocuments = foundDocuments.concat(foundDocs.Responses[this.TableName]);
+              foundDocuments = foundDocuments.concat(
+                this.formatDocuments(foundDocs.Responses[this.TableName], options)
+              );
             })
             .catch((error) => {
               return reject(error);
