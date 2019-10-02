@@ -3992,7 +3992,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/blob')
  *         type: string
  *       - name: artifactid
  *         description: The artifact ID.
- *         in: URI
+ *         in: path
  *         required: true
  *         type: string
  *       - name: populate
@@ -4070,26 +4070,28 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/blob')
  *         in: path
  *         required: true
  *         type: string
- *       - name: file
- *         in: formData
- *         description: file to upload
- *         required: true
- *         type: file
- *       - name: name
- *         in: formData
- *         description: Artifact name.
+ *       - name: body
+ *         description: The object containing the new artifact data.
+ *         in: body
  *         required: false
- *         type: string
- *       - name: location
- *         in: formData
- *         description: Artifact location.
- *         required: false
- *         type: string
- *       - name: custom
- *         in: formData
- *         description: Artifact custom data.
- *         required: false
- *         type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the artifact. If provided, it must
+ *                      match the artifact ID provided in the path.
+ *             name:
+ *               type: string
+ *             contentType: string
+ *             filename:
+ *               type: string
+ *               description: Blob file name associated with this artifact.
+ *             location:
+ *               type: string
+ *               description: Blob storage location.
+ *             custom:
+ *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -4302,6 +4304,84 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   APIController.deleteArtifact
 );
 
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}/blob:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns an artifact public data on a specified branch.
+ *                  Requesting user must have read access on the project to find
+ *                  an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the searched artifact.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: includeArchived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to element not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ */
 api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid/blob')
 .get(
   AuthController.authenticate,
