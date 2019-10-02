@@ -18,13 +18,9 @@
  * in local or remote database. The location of storage depends on the
  * Artifact strategy being used. This is set in the configuration file.</p>
  *
- * <h4>Artifact MetaData</h4>
- * <p>This controller directs and stores any metadata of artifacts in the
- * database. (Ex. artifact IDs, user, and filename.)</p>
- *
- * <h4>Artifact Blob</h4>
- * <p> Binary large object, aka Blob, are the actual binary file. This
- * controller stores blobs based on the artifact strategy.</p>
+ * Note: Binary large object, aka Blob, are the actual binary file. This
+ * controller stores blobs based on the artifact strategy.
+ * </p>
  *
  */
 
@@ -49,6 +45,7 @@ const utils = M.require('lib.utils');
  * @property {string} filename - The filename of the artifact.
  * @property {string} contentType - The file type. E.g: 'png', 'dat'
  * @property {string} location - The location of the artifact blob.
+ * @property {string} strategy - The strategy used for storing artifact blob.
  *
  */
 const ArtifactSchema = new db.Schema({

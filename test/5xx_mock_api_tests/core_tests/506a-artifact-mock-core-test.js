@@ -16,7 +16,9 @@
  */
 
 // NPM modules
-const chai = require('chai');
+const chai = require('chai'); // Test framework
+
+// Node modules
 const fs = require('fs');     // Access the filesystem
 const path = require('path'); // Find directory paths
 
@@ -31,6 +33,7 @@ const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
+let orgID = null;
 let proj = null;
 let projID = null;
 let branchID = null;
@@ -61,17 +64,18 @@ describe(M.getModuleName(module.filename), () => {
     .then((retOrg) => {
       // Set global organization
       org = retOrg;
-
+      orgID = org.id;
+      
       // Define project data
       const projData = testData.projects[0];
 
       // Create project
-      return ProjController.create(adminUser, org.id, projData);
+      return testUtils.createTestProject(adminUser, orgID);
     })
     .then((retProj) => {
       // Set global project
       proj = retProj;
-      projID = utils.parseID(proj[0].id).pop();
+      projID = utils.parseID(proj._id).pop();
       branchID = testData.branches[0].id;
       done();
     })
@@ -133,7 +137,7 @@ function postArtifact(done) {
   };
 
   const params = {
-    orgid: org.id,
+    orgid: orgID,
     projectid: projID,
     branchid: branchID,
     artifactid: body.id
@@ -158,7 +162,7 @@ function postArtifact(done) {
     chai.expect(createdArtifact.name).to.equal(body.name);
     chai.expect(createdArtifact.branch).to.equal(branchID);
     chai.expect(createdArtifact.project).to.equal(projID);
-    chai.expect(createdArtifact.org).to.equal(org.id);
+    chai.expect(createdArtifact.org).to.equal(orgID);
     chai.expect(createdArtifact.location).to.equal(body.location);
     chai.expect(createdArtifact.filename).to.equal(body.filename);
     chai.expect(createdArtifact.contentType).to.equal(artData.contentType);
@@ -199,7 +203,7 @@ function getArtifact(done) {
   const body = {};
 
   const params = {
-    orgid: org.id,
+    orgid: orgID,
     projectid: projID,
     branchid: branchID,
     artifactid: artData.id
@@ -223,7 +227,7 @@ function getArtifact(done) {
     chai.expect(foundArtifact.name).to.equal(artData.name);
     chai.expect(foundArtifact.branch).to.equal(branchID);
     chai.expect(foundArtifact.project).to.equal(projID);
-    chai.expect(foundArtifact.org).to.equal(org.id);
+    chai.expect(foundArtifact.org).to.equal(orgID);
     chai.expect(foundArtifact.location).to.equal(artData.location);
     chai.expect(foundArtifact.contentType).to.equal(artData.contentType);
     chai.expect(foundArtifact.custom || {}).to.deep.equal(
@@ -260,7 +264,7 @@ function getArtifact(done) {
 function patchArtifact(done) {
   const artData = testData.artifacts[0];
   const params = {
-    orgid: org.id,
+    orgid: orgID,
     projectid: projID,
     branchid: branchID,
     artifactid: testData.artifacts[0].id
@@ -288,7 +292,7 @@ function patchArtifact(done) {
     chai.expect(updatedArtifact.name).to.equal(artData.name);
     chai.expect(updatedArtifact.project).to.equal(projID);
     chai.expect(updatedArtifact.branch).to.equal(branchID);
-    chai.expect(updatedArtifact.org).to.equal(org.id);
+    chai.expect(updatedArtifact.org).to.equal(orgID);
     chai.expect(updatedArtifact.location).to.equal(artData.location);
     chai.expect(updatedArtifact.contentType).to.equal('edited_type');
     chai.expect(updatedArtifact.custom || {}).to.deep.equal(
@@ -327,7 +331,7 @@ function deleteArtifact(done) {
   // Create request object
   const body = artData.id;
   const params = {
-    orgid: org.id,
+    orgid: orgID,
     projectid: projID,
     branchid: branchID,
     artifactid: artData.id
@@ -371,7 +375,7 @@ function getBlob(done) {
   };
 
   const params = {
-    orgid: org.id,
+    orgid: orgID,
     projectid: projID,
     branchid: branchID
   };
@@ -418,7 +422,7 @@ function getBlobById(done) {
   const body = {};
 
   const params = {
-    orgid: org.id,
+    orgid: orgID,
     projectid: projID,
     branchid: branchID,
     artifactid: artData.id
@@ -468,7 +472,7 @@ function postBlob(done) {
   };
 
   const params = {
-    orgid: org.id,
+    orgid: orgID,
     projectid: projID,
     branchid: branchID
   };
@@ -520,7 +524,7 @@ function deleteBlob(done) {
   };
 
   const params = {
-    orgid: org.id,
+    orgid: orgID,
     projectid: projID,
     branchid: branchID
   };

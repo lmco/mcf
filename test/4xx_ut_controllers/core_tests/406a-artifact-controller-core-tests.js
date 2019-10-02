@@ -12,8 +12,10 @@
  * @description This tests the Artifact Controller functionality.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai'); // Test framework
+
+// Node modules
 const fs = require('fs');     // Access the filesystem
 const path = require('path'); // Find directory paths
 
@@ -27,6 +29,7 @@ const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
+let orgID = null;
 let project = null;
 let projectID = null;
 let branchID = null;
@@ -51,9 +54,11 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = await testUtils.createTestAdmin();
       // Create the organization model object
       org = await testUtils.createTestOrg(adminUser);
+      orgID = org.id;
+
 
       // Create the project model object
-      project = await testUtils.createTestProject(adminUser, org.id);
+      project = await testUtils.createTestProject(adminUser, orgID);
       projectID = utils.parseID(project.id).pop();
       branchID = testData.branches[0].id;
 
@@ -104,34 +109,54 @@ describe(M.getModuleName(module.filename), () => {
  */
 async function createArtifact() {
   // Define test data
-  const artData = {
-    id: testData.artifacts[0].id,
-    name: testData.artifacts[0].name,
-    filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename),
+  const artData = testData.artifacts[0];
+
+  // Define test data
+  const artObj = {
+    id: artData.id,
+    name: artData.name,
+    filename: artData.filename,
+    contentType: path.extname(artData.filename),
     project: projectID,
     branch: branchID,
-    location: testData.artifacts[0].location
+    location: artData.location,
+    strategy: artData.strategy,
+    custom: artData.custom
   };
   try {
-    const createdArtifact = await ArtifactController.create(adminUser, org.id,
-      projectID, branchID, artData);
+    const createdArtifact = await ArtifactController.create(adminUser, orgID,
+      projectID, branchID, artObj);
+
+    // Verify response
     chai.expect(createdArtifact[0]._id).to.equal(
-      utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
+      utils.createID(orgID, projectID, branchID, artData.id)
     );
     chai.expect(createdArtifact[0].filename).to.equal(
-      testData.artifacts[0].filename
+      artData.filename
     );
     chai.expect(createdArtifact[0].contentType).to.equal(
-      path.extname(testData.artifacts[0].filename)
+      path.extname(artData.filename)
     );
     chai.expect(createdArtifact[0].project).to.equal(project._id);
     chai.expect(createdArtifact[0].branch).to.equal(
-      utils.createID(org.id, projectID, branchID)
+      utils.createID(orgID, projectID, branchID)
     );
     chai.expect(createdArtifact[0].location).to.equal(
-      testData.artifacts[0].location
+      artData.location
     );
+    chai.expect(createdArtifact[0].strategy).to.equal(artData.strategy);
+    chai.expect(createdArtifact[0].custom || {}).to.deep.equal(
+      artData.custom
+    );
+
+    // Verify additional properties
+    chai.expect(createdArtifact[0].createdBy).to.equal(adminUser._id);
+    chai.expect(createdArtifact[0].lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(createdArtifact[0].archivedBy).to.equal(null);
+    chai.expect(createdArtifact[0].createdOn).to.not.equal(null);
+    chai.expect(createdArtifact[0].updatedOn).to.not.equal(null);
+    chai.expect(createdArtifact[0].archivedOn).to.equal(null);
+
   }
   catch (error) {
     M.log.error(error);
@@ -145,32 +170,46 @@ async function createArtifact() {
  */
 async function getArtifact() {
   // Define test data
-  const artData = [testData.artifacts[0].id];
+  const artData = testData.artifacts[0];
   try {
     // Find the artifact previously uploaded.
-    const foundArtifact = await ArtifactController.find(adminUser, org.id,
-      projectID, branchID, artData);
+    const foundArtifact = await ArtifactController.find(adminUser, orgID,
+      projectID, branchID, [artData.id]);
+
+    // Verify response
     // Check if artifact found
     chai.expect(foundArtifact.length).to.equal(1);
     chai.expect(foundArtifact[0]._id).to.equal(
-      utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
+      utils.createID(orgID, projectID, branchID, artData.id)
     );
     chai.expect(foundArtifact[0].name).to.equal(
-      testData.artifacts[0].name
+      artData.name
     );
     chai.expect(foundArtifact[0].filename).to.equal(
-      testData.artifacts[0].filename
+      artData.filename
     );
     chai.expect(foundArtifact[0].contentType).to.equal(
-      path.extname(testData.artifacts[0].filename)
+      path.extname(artData.filename)
     );
     chai.expect(foundArtifact[0].project).to.equal(project._id);
     chai.expect(foundArtifact[0].branch).to.equal(
-      utils.createID(org.id, projectID, branchID)
+      utils.createID(orgID, projectID, branchID)
     );
     chai.expect(foundArtifact[0].location).to.equal(
-      testData.artifacts[0].location
+      artData.location
     );
+    chai.expect(foundArtifact[0].strategy).to.equal(artData.strategy);
+    chai.expect(foundArtifact[0].custom || {}).to.deep.equal(
+      artData.custom
+    );
+
+    // Verify additional properties
+    chai.expect(foundArtifact[0].createdBy).to.equal(adminUser._id);
+    chai.expect(foundArtifact[0].lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(foundArtifact[0].archivedBy).to.equal(null);
+    chai.expect(foundArtifact[0].createdOn).to.not.equal(null);
+    chai.expect(foundArtifact[0].updatedOn).to.not.equal(null);
+    chai.expect(foundArtifact[0].archivedOn).to.equal(null);
   }
   catch (error) {
     M.log.error(error);
@@ -184,39 +223,55 @@ async function getArtifact() {
  */
 async function updateArtifact() {
   // Define test data
-  const artData = {
+  const artData = testData.artifacts[0];
+  const artUpdateData = testData.artifacts[2];
+  // Define test data
+  const artObj = {
     id: testData.artifacts[0].id,
-    filename: testData.artifacts[2].filename,
-    name: testData.artifacts[2].name,
-    contentType: path.extname(testData.artifacts[2].filename),
-    location: testData.artifacts[2].location,
+    filename: artUpdateData.filename,
+    name: artUpdateData.name,
+    contentType: path.extname(artUpdateData.filename),
+    location: artUpdateData.location,
     archived: false,
-    custom: {}
+    custom: artUpdateData.custom
 
   };
   try {
-    const updatedArtifact = await ArtifactController.update(adminUser, org.id,
-      projectID, branchID, artData);
+    const updatedArtifact = await ArtifactController.update(adminUser, orgID,
+      projectID, branchID, [artObj]);
 
+    // Verify response
     // Check if artifact found
     chai.expect(updatedArtifact.length).to.equal(1);
     chai.expect(updatedArtifact[0]._id).to.equal(
-      utils.createID(org.id, projectID, branchID, testData.artifacts[0].id)
+      utils.createID(orgID, projectID, branchID, testData.artifacts[0].id)
     );
     chai.expect(updatedArtifact[0].name).to.equal(
-      testData.artifacts[2].name
+      artUpdateData.name
     );
     chai.expect(updatedArtifact[0].filename).to.equal(
-      testData.artifacts[2].filename
+      artUpdateData.filename
     );
     chai.expect(updatedArtifact[0].contentType).to.equal(
-      path.extname(testData.artifacts[2].filename)
+      path.extname(artUpdateData.filename)
     );
     chai.expect(updatedArtifact[0].project).to.equal(project._id);
     chai.expect(updatedArtifact[0].branch).to.equal(
-      utils.createID(org.id, projectID, branchID)
+      utils.createID(orgID, projectID, branchID)
     );
-    chai.expect(updatedArtifact[0].location).to.equal(testData.artifacts[2].location);
+    chai.expect(updatedArtifact[0].location).to.equal(artUpdateData.location);
+    chai.expect(updatedArtifact[0].strategy).to.equal(artData.strategy);
+    chai.expect(updatedArtifact[0].custom || {}).to.deep.equal(
+      artUpdateData.custom
+    );
+
+    // Verify additional properties
+    chai.expect(updatedArtifact[0].createdBy).to.equal(adminUser._id);
+    chai.expect(updatedArtifact[0].lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(updatedArtifact[0].archivedBy).to.equal(null);
+    chai.expect(updatedArtifact[0].createdOn).to.not.equal(null);
+    chai.expect(updatedArtifact[0].updatedOn).to.not.equal(null);
+    chai.expect(updatedArtifact[0].archivedOn).to.equal(null);
   }
   catch (error) {
     M.log.error(error);
@@ -230,20 +285,26 @@ async function updateArtifact() {
  */
 async function deleteArtifact() {
   // Define test data
-  const artifactID = testData.artifacts[0].id;
+  const artData = testData.artifacts[0];
 
   try {
     // Find and delete the artifact
     const deletedArtifact = await ArtifactController.remove(adminUser,
-      org.id, projectID, branchID, artifactID);
+      orgID, projectID, branchID, artData.id);
+
+    // Verify response
+    chai.expect(deletedArtifact[0]).to.equal(
+      utils.createID(orgID, projectID, branchID, artData.id)
+    );
 
     // Check that 1 artifact was deleted
     chai.expect(deletedArtifact.length).to.equal(1);
 
-// Attempt to find the deleted artifact
-    const foundArtifact = await ArtifactController.find(adminUser, org.id,
-      projectID, branchID, [artifactID]);
+    // Attempt to find the deleted artifact
+    const foundArtifact = await ArtifactController.find(adminUser, orgID,
+      projectID, branchID, [artData.id]);
 
+    // Verify response
     chai.expect(foundArtifact.length).to.equal(0);
   }
   catch (error) {
@@ -260,15 +321,16 @@ async function postBlob() {
   // Define test data
   const artData = {
     filename: testData.artifacts[0].filename,
-    project: project._id,
+    project: projectID,
     branch: branchID,
     location: testData.artifacts[0].location
   };
 
   try {
-    const createdArtifact = await ArtifactController.postBlob(adminUser, org.id,
+    const createdArtifact = await ArtifactController.postBlob(adminUser, orgID,
       projectID, branchID, artData, artifactBlob1);
 
+    // Verify response
     chai.expect(createdArtifact.filename).to.equal(
       testData.artifacts[0].filename
     );
@@ -298,8 +360,9 @@ async function getBlob() {
   try {
     // Find the artifact previously uploaded.
     const artifactBlob = await ArtifactController.getBlob(adminUser,
-      org.id, projectID, branchID, artData);
+      orgID, projectID, branchID, artData);
 
+    // Verify response
     // Check return artifact is of buffer type
     chai.expect(Buffer.isBuffer(artifactBlob)).to.equal(true);
 
@@ -326,15 +389,16 @@ async function deleteBlob() {
 
     // Find and delete the artifact
     await ArtifactController.deleteBlob(adminUser,
-      org.id, projectID, branchID, artifact);
+      orgID, projectID, branchID, artifact);
 
-    const foundArtifact = await ArtifactController.getBlob(adminUser, org.id,
-      projectID, branchID, artifact);
+    await ArtifactController.getBlob(adminUser, orgID,
+      projectID, branchID, artifact).should.eventually.be.rejectedWith(
+        'Artifact blob not found.');
 
-    chai.expect(foundArtifact.length).to.equal(0);
   }
   catch (error) {
-    // Expect Artifact not found error
-    chai.expect(error.message).to.equal('Artifact blob not found.');
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
   }
 }
