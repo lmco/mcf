@@ -144,6 +144,7 @@ function getArtifactPublicData(artifact, options) {
     filename: artifact.filename,
     location: artifact.location,
     contentType: artifact.contentType,
+    strategy: artifact.strategy,
     custom: artifact.custom || {},
     createdOn: (artifact.createdOn) ? artifact.createdOn.toString() : undefined,
     createdBy: createdBy,

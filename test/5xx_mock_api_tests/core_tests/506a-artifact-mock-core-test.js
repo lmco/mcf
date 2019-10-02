@@ -49,62 +49,48 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * After: Connect to database. Create an admin user, organization, and project.
    */
-  before((done) => {
-    // Connect to the database
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((_adminUser) => {
-      // Set global admin user
-      adminUser = _adminUser;
+  before(async () => {
+    try {
+      // Connect to the database
+      await db.connect();
 
-      // Create organization
-      return testUtils.createTestOrg(adminUser);
-    })
-    .then((retOrg) => {
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
+
       // Set global organization
-      org = retOrg;
+      org = await testUtils.createTestOrg(adminUser);
       orgID = org.id;
-      
-      // Define project data
-      const projData = testData.projects[0];
 
       // Create project
-      return testUtils.createTestProject(adminUser, orgID);
-    })
-    .then((retProj) => {
-      // Set global project
-      proj = retProj;
+      proj = await testUtils.createTestProject(adminUser, orgID);
       projID = utils.parseID(proj._id).pop();
       branchID = testData.branches[0].id;
-      done();
-    })
-    .catch((error) => {
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Remove Organization and project.
    * Close database connection.
    */
-  after((done) => {
-    // Remove organization
-    // Note: Projects under organization will also be removed
-    testUtils.removeTestOrg(adminUser)
-    .then(() => testUtils.removeTestAdmin())
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
-      M.log.error(error);
+  after(async () => {
+    try {
+      // Remove organization
+      // Note: Projects under organization will also be removed
+      await testUtils.removeTestOrg(adminUser);
+      await testUtils.removeTestAdmin();
+      await db.disconnect();
+    }
+    catch (error) {
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
+
 
   /* Execute tests */
   it('should POST an artifact', postArtifact);
@@ -124,7 +110,10 @@ describe(M.getModuleName(module.filename), () => {
  * @param {Function} done - The mocha callback.
  */
 function postArtifact(done) {
+  // Define artifact metadata
   const artData = testData.artifacts[0];
+
+  // Create request body
   const body = {
     id: artData.id,
     name: artData.name,
@@ -136,12 +125,12 @@ function postArtifact(done) {
     custom: artData.custom
   };
 
+  // Create request params
   const params = {
     orgid: orgID,
     projectid: projID,
     branchid: branchID,
     artifactid: body.id
-
   };
 
   const method = 'POST';
@@ -158,14 +147,15 @@ function postArtifact(done) {
     // Verify response body
     const createdArtifact = JSON.parse(_data);
     // Verify artifact created properly
-    chai.expect(createdArtifact.id).to.equal(body.id);
-    chai.expect(createdArtifact.name).to.equal(body.name);
+    chai.expect(createdArtifact.id).to.equal(artData.id);
+    chai.expect(createdArtifact.name).to.equal(artData.name);
     chai.expect(createdArtifact.branch).to.equal(branchID);
     chai.expect(createdArtifact.project).to.equal(projID);
     chai.expect(createdArtifact.org).to.equal(orgID);
-    chai.expect(createdArtifact.location).to.equal(body.location);
-    chai.expect(createdArtifact.filename).to.equal(body.filename);
+    chai.expect(createdArtifact.location).to.equal(artData.location);
+    chai.expect(createdArtifact.filename).to.equal(artData.filename);
     chai.expect(createdArtifact.contentType).to.equal(artData.contentType);
+    chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
@@ -198,10 +188,13 @@ function postArtifact(done) {
  * @param {Function} done - The mocha callback.
  */
 function getArtifact(done) {
+  // Define artifact metadata
   const artData = testData.artifacts[0];
-  // Create request object
+
+  // Create request body
   const body = {};
 
+  // Create request params
   const params = {
     orgid: orgID,
     projectid: projID,
@@ -229,7 +222,9 @@ function getArtifact(done) {
     chai.expect(foundArtifact.project).to.equal(projID);
     chai.expect(foundArtifact.org).to.equal(orgID);
     chai.expect(foundArtifact.location).to.equal(artData.location);
+    chai.expect(foundArtifact.filename).to.equal(artData.filename);
     chai.expect(foundArtifact.contentType).to.equal(artData.contentType);
+    chai.expect(foundArtifact.strategy).to.equal(artData.strategy);
     chai.expect(foundArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
@@ -262,7 +257,15 @@ function getArtifact(done) {
  * @param {Function} done - The mocha callback.
  */
 function patchArtifact(done) {
+  // Define artifact metadata
   const artData = testData.artifacts[0];
+
+  // Create request body
+  const body = {
+    contentType: 'edited_type'
+  };
+
+  // Create request params
   const params = {
     orgid: orgID,
     projectid: projID,
@@ -270,11 +273,8 @@ function patchArtifact(done) {
     artifactid: testData.artifacts[0].id
   };
 
-  const formData = {
-    contentType: 'edited_type'
-  };
   const method = 'PATCH';
-  const req = testUtils.createRequest(adminUser, params, formData, method);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};
@@ -294,7 +294,9 @@ function patchArtifact(done) {
     chai.expect(updatedArtifact.branch).to.equal(branchID);
     chai.expect(updatedArtifact.org).to.equal(orgID);
     chai.expect(updatedArtifact.location).to.equal(artData.location);
+    chai.expect(updatedArtifact.filename).to.equal(artData.filename);
     chai.expect(updatedArtifact.contentType).to.equal('edited_type');
+    chai.expect(updatedArtifact.strategy).to.equal(artData.strategy);
     chai.expect(updatedArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
@@ -327,9 +329,13 @@ function patchArtifact(done) {
  * @param {Function} done - The mocha callback.
  */
 function deleteArtifact(done) {
+  // Define artifact metadata
   const artData = testData.artifacts[0];
-  // Create request object
+
+  // Create request body
   const body = artData.id;
+
+  // Create request params
   const params = {
     orgid: orgID,
     projectid: projID,
@@ -362,18 +368,76 @@ function deleteArtifact(done) {
 }
 
 /**
- * @description Verifies mock GET request to get an artifact blob.
+ * @description Verifies mock POST request to post an artifact blob.
  *
  * @param {Function} done - The mocha callback.
  */
-function getBlob(done) {
+function postBlob(done) {
+  // Define artifact metadata
   const artData = testData.artifacts[0];
-  // Create request object
+
+  // Create request body
   const body = {
     location: artData.location,
     filename: artData.filename
   };
 
+  // Create request params
+  const params = {
+    orgid: orgID,
+    projectid: projID,
+    branchid: branchID
+  };
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Attach the file to request
+  const artifactPath = path.join(M.root, artData.location, artData.filename);
+  req.file = {
+    originalname: artData.filename,
+    mimetype: artData.contentType,
+    buffer: fs.readFileSync(artifactPath)
+  };
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const postedArtifact = JSON.parse(_data);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+    chai.expect(postedArtifact.project).to.equal(projID);
+    chai.expect(postedArtifact.location).to.equal(artData.location);
+    chai.expect(postedArtifact.filename).to.equal(artData.filename);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+  // GETs an artifact
+  apiController.postBlob(req, res);
+}
+
+/**
+ * @description Verifies mock GET request to get an artifact blob.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function getBlob(done) {
+  // Define artifact metadata
+  const artData = testData.artifacts[0];
+
+  // Create request body
+  const body = {
+    location: artData.location,
+    filename: artData.filename
+  };
+
+  // Create request params
   const params = {
     orgid: orgID,
     projectid: projID,
@@ -417,10 +481,13 @@ function getBlob(done) {
  * @param {Function} done - The mocha callback.
  */
 function getBlobById(done) {
+  // Define artifact metadata
   const artData = testData.artifacts[0];
-  // Create request object
+
+  // Create request body
   const body = {};
 
+  // Create request params
   const params = {
     orgid: orgID,
     projectid: projID,
@@ -459,70 +526,21 @@ function getBlobById(done) {
 }
 
 /**
- * @description Verifies mock POST request to post an artifact blob.
- *
- * @param {Function} done - The mocha callback.
- */
-function postBlob(done) {
-  const artData = testData.artifacts[0];
-  // Create request object
-  const body = {
-    location: artData.location,
-    filename: artData.filename
-  };
-
-  const params = {
-    orgid: orgID,
-    projectid: projID,
-    branchid: branchID
-  };
-  const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Attach the file to request
-  const artifactPath = path.join(M.root, artData.location, artData.filename);
-  req.file = {
-    originalname: artData.filename,
-    mimetype: artData.contentType,
-    buffer: fs.readFileSync(artifactPath)
-  };
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const postedArtifact = JSON.parse(_data);
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-    chai.expect(postedArtifact.project).to.equal(projID);
-    chai.expect(postedArtifact.location).to.equal(artData.location);
-    chai.expect(postedArtifact.filename).to.equal(artData.filename);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-  // GETs an artifact
-  apiController.postBlob(req, res);
-}
-
-/**
  * @description Verifies mock DELETE request to Delete an artifact blob.
  *
  * @param {Function} done - The mocha callback.
  */
 function deleteBlob(done) {
+  // Define artifact metadata
   const artData = testData.artifacts[0];
-  // Create request object
+
+  // Create request body
   const body = {
     location: artData.location,
     filename: artData.filename
   };
 
+  // Create request params
   const params = {
     orgid: orgID,
     projectid: projID,
