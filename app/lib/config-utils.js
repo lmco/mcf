@@ -35,7 +35,7 @@ function configError(message) {
 }
 
 /**
- * @description A helper function to simplify testing the types of config keys.
+ * @description A helper function to simplify testing the existence and types of config keys.
  *
  * @param {object} config - The json object version of the config file.
  * @param {string} key - The key of the config to test.
