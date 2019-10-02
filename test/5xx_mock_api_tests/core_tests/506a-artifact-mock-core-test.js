@@ -12,7 +12,7 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, and DELETE artifacts.
+ * GET, POST, PATCH, and DELETE artifacts and blobs.
  */
 
 // NPM modules
