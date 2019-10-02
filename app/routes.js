@@ -140,26 +140,6 @@ router.route('/profile/:username')
 );
 
 /**
- * @description This renders the user page for logged in users.
- **/
-router.route('/profile/orgs')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.profile
-);
-
-/**
- * @description This renders the user page for logged in users.
- **/
-router.route('/profile/projects')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.profile
-);
-
-/**
  * @description  Logs the user out by unsetting the req.user and req.session.token objects.
  */
 router.route('/logout')

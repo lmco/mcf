@@ -49,7 +49,6 @@ class HomeApp extends Component {
       orgs: [],
       admin: false,
       write: false,
-      writePermOrgs: null,
       displayOrgs: {},
       error: null
     };
@@ -78,7 +77,7 @@ class HomeApp extends Component {
         // Get project data
         $.ajax({
           method: 'GET',
-          url: '/api/orgs?populate=projects&minified=true',
+          url: '/api/orgs?populate=projects&minified=true&includeArchived=true',
           statusCode: {
             200: (orgs) => {
               this.setMountedComponentStates(data, orgs);
@@ -129,7 +128,6 @@ class HomeApp extends Component {
     if (writePermOrgs.length > 0) {
       // Set write states
       this.setState({ write: true });
-      this.setState({ writePermOrgs: writePermOrgs });
     }
 
     // Verify user is admin
@@ -199,26 +197,38 @@ class HomeApp extends Component {
   render() {
     // Initialize variables
     let titleClass = 'workspace-title workspace-title-padding';
-    let list;
+    const list = [];
 
     // Loop through all orgs
     if (this.state.orgs.length > 0) {
-      list = this.state.orgs.map(org => {
+      this.state.orgs.forEach(org => {
         const username = this.state.user.username;
 
         const showProj = (this.state.displayOrgs[org.id]);
 
+        // Verify if system admin
         if (!this.state.user.admin) {
-          if ((org.permissions[username] === 'write') || (org.permissions[username] === 'admin')) {
-            return (<OrgList org={org} key={`org-key-${org.id}`}
+          // Verify admin permission on org
+          if (org.permissions[username] === 'admin') {
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
                              user={this.state.user}
                              write={this.state.write}
                              admin={this.state.admin}
                              showProjs={showProj}
                              onExpandChange={this.onExpandChange}/>);
           }
-          else {
-            return (<OrgList org={org} key={`org-key-${org.id}`}
+          // Verify write permissions and not archived org
+          else if (org.permissions[username] === 'write' && !org.archived) {
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
+                             user={this.state.user}
+                             write={this.state.write}
+                             admin={this.state.admin}
+                             showProjs={showProj}
+                             onExpandChange={this.onExpandChange}/>);
+          }
+          // Verify read permissions and not archived org
+          else if (org.permissions[username] === 'read' && !org.archived) {
+            list.push(<OrgList org={org} key={`org-key-${org.id}`}
                              user={this.state.user}
                              admin={this.state.admin}
                              showProjs={showProj}
@@ -226,7 +236,7 @@ class HomeApp extends Component {
           }
         }
         else {
-          return (<OrgList org={org} key={`org-key-${org.id}`}
+          list.push(<OrgList org={org} key={`org-key-${org.id}`}
                            user={this.state.user}
                            write={this.state.write}
                            admin={this.state.admin}

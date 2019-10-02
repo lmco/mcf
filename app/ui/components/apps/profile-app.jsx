@@ -26,8 +26,6 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import ProfileHome from '../profile-views/profile-home.jsx';
-import OrganizationList from '../profile-views/organization-list.jsx';
-import ProjectList from '../profile-views/project-list.jsx';
 
 // Define component
 class ProfileApp extends Component {
@@ -118,24 +116,6 @@ class ProfileApp extends Component {
                          title='Information'
                          icon='fas fa-info'
                          routerLink={routerLink} />
-           {/* Verify it is not a different users profile, do not return */}
-           {/* Org or project page for other user profile */}
-           {/* NOTE: Orgs and projects are split in two ternary operators */}
-            {/* due to abnormal rendering when in a react fragment */}
-            {(otherUser !== null)
-              ? ''
-              : (<SidebarLink id='Organization'
-                              title='Organizations'
-                              icon='fas fa-box'
-                              routerLink='/profile/orgs'/>)
-            }
-            {(otherUser !== null)
-              ? ''
-              : (<SidebarLink id='Project'
-                              title='Projects'
-                              icon='fas fa-boxes'
-                              routerLink='/profile/projects'/>)
-            }
           </Sidebar>
           { /* Verify user data exists */ }
           { // Display loading page or error page if user data is loading or failed to load
@@ -145,20 +125,9 @@ class ProfileApp extends Component {
                 <Switch>
                   {/* Verify if user is view their own profile, then return their info  */}
                   {(otherUser === null)
-                    ? (<React.Fragment>
-                       {/* Route to user home page */}
-                        <Route exact path="/profile" render={(props) => <ProfileHome {...props}
-                                                                      admin={true}
-                                                                      user={this.state.user} /> } />
-                        {/* Route to org list page */}
-                        <Route exact path={'/profile/orgs'}
-                               render={(props) => <OrganizationList {...props}
-                                                                     user={this.state.user} /> }/>
-                        {/* Route to project list page */}
-                        <Route exact path={'/profile/projects'}
-                               render={(props) => <ProjectList {...props}
-                                                                user={this.state.user} /> } />
-                      </React.Fragment>)
+                    ? (<Route exact path="/profile" render={(props) => <ProfileHome {...props}
+                                                                    admin={true}
+                                                                    user={this.state.user} /> } />)
                     : (<Route path={`/profile/${this.props.match.params.username}`}
                               render={(props) => <ProfileHome {...props}
                                                                admin={user.admin}
