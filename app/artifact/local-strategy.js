@@ -11,7 +11,7 @@
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
- * @description This implements an artifact strategy for remote
+ * @description This implements an artifact strategy for local
  * artifact storage. This should be the default artifact strategy for MBEE.
  */
 
@@ -75,7 +75,7 @@ function postBlob(artMetadata, artifactBlob) {
 
   // Check if artifact file exist
   if (fs.existsSync(fullPath)) {
-    throw new M.DataFormatError('Artifact blob already exist.', 'warn');
+    throw new M.DataFormatError('Artifact blob already exists.', 'warn');
   }
 
   // Replace the Blob
@@ -185,7 +185,7 @@ function createDirectory(pathString) {
   if (pathString.includes('\\')) {
     separator = '\\';
   }
-  // Otherwise, linus base separator
+  // Otherwise, linux base separator
   else {
     separator = '/';
   }
