@@ -206,7 +206,7 @@ function patchArtifact(done) {
   const options = {
     method: 'PATCH',
     url: `${test.url}/api/orgs/${org.id}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}`,
-    headers: testUtils.getHeaders('multipart/form-data'),
+    headers: testUtils.getHeaders(),
     formData: {
       id: artData.id,
       contentType: 'edited_type'
