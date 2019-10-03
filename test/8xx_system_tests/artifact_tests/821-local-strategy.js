@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED.
+ * @classification UNCLASSIFIED
  *
  * @module test.artifact_tests.821-local-strategy
  *
