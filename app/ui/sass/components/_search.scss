@@ -241,6 +241,7 @@
 
 #search-input-box {
   @extend %gray-border;
+  display: flex;
 }
 
 #search-query-input {

@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.admin-console-app
+ * @module ui.components.apps.nav
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -10,8 +10,9 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description This renders the admin console page.
+ * @description This renders the nav bar.
  */
 
 /* Modified ESLint rules for React. */
@@ -19,9 +20,9 @@
 
 // React Modules
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDom from 'react-dom';
 
-import AdminConsoleHome from '../admin-console-views/admin-console-home.jsx';
+import MbeeNav from '../general/nav-bar.jsx';
 
-// Render on main html element
-ReactDOM.render(<AdminConsoleHome />, document.getElementById('main'));
+// Render the navbar on the nav html element
+ReactDom.render(<MbeeNav />, document.getElementById('nav'));

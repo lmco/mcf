@@ -57,6 +57,7 @@
     "react-dom": "^16.8.2",
     "react-router-dom": "^5.0.1",
     "reactstrap": "^8.0.1",
+    "sinon": "^7.5.0",
     "webpack": "^4.39.2"
   },
   "scripts": {

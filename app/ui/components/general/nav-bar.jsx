@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.nav
+ * @module ui.components.general.nav-bar
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -20,7 +20,6 @@
 
 // React Modules
 import React, { Component } from 'react';
-import ReactDom from 'react-dom';
 import {
   Collapse,
   Navbar,
@@ -158,9 +157,9 @@ class MbeeNav extends Component {
                         {(!this.state.user.admin)
                           ? ''
                           : (<React.Fragment>
-                              <DropdownItem href='/admin'> Admin Console</DropdownItem>
-                              <DropdownItem divider />
-                             </React.Fragment>)
+                            <DropdownItem href='/admin'> Admin Console</DropdownItem>
+                            <DropdownItem divider />
+                          </React.Fragment>)
                         }
                         <DropdownItem href='/logout' onClick={this.sessionDestroy}>Log Out</DropdownItem>
                       </DropdownMenu>
@@ -176,7 +175,6 @@ class MbeeNav extends Component {
     );
   }
 
-} /* END MbeeNav Component */
+}
 
-// Render the navbar on the nav html element
-ReactDom.render(<MbeeNav />, document.getElementById('nav'));
+export default MbeeNav;
