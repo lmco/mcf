@@ -39,7 +39,7 @@ let project = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project.
+   * Before: Read in test blobs.
    */
   before(async () => {
     // Get test file
@@ -52,25 +52,17 @@ describe(M.getModuleName(module.filename), () => {
     );
 
     // Get the test file
-    artifactBlob0 = await fs.readFileSync(artifactPath0);
-    artifactBlob1 = await fs.readFileSync(artifactPath1);
+    artifactBlob0 = fs.readFileSync(artifactPath0);
+    artifactBlob1 = fs.readFileSync(artifactPath1);
 
     // Define project obj
     project = testData.projects[0];
   });
 
-  /**
-   * After: Remove Organization and project.
-   * Close database connection.
-   */
-  after(async () => {
-  });
-
   /* Execute the tests */
   it('should post artifact0 blob.', postBlob);
-  it('should get artifact0 blob.', getBlob0);
+  it('should get artifact0 blob.', getBlob);
   it('should put artifact1 blob.', putBlob);
-  it('should get artifact1 blob.', getBlob1);
   it('should delete an artifact1 blob.', deleteBlob);
 });
 
@@ -85,8 +77,9 @@ async function postBlob() {
     location: testData.artifacts[0].location
   };
   try {
-    // Find the artifact previously uploaded.
+    // Upload the blob
     await localStrategy.postBlob(artData, artifactBlob0);
+
   }
   catch (error) {
     M.log.error(error);
@@ -98,7 +91,7 @@ async function postBlob() {
 /**
  * @description Gets artifact0 blob.
  */
-async function getBlob0() {
+async function getBlob() {
   const artData = {
     filename: testData.artifacts[0].filename,
     project: project.id,
@@ -131,30 +124,14 @@ async function putBlob() {
     location: testData.artifacts[0].location
   };
   try {
-    // Find the artifact previously uploaded.
+    // Replace the blob previously uploaded.
     await localStrategy.putBlob(artData, artifactBlob1);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-  }
-}
 
-/**
- * @description Gets artifact1 blob.
- */
-async function getBlob1() {
-  const artData = {
-    filename: testData.artifacts[0].filename,
-    project: project.id,
-    location: testData.artifacts[0].location
-  };
-  try {
-    // Find the artifact previously uploaded.
+    // Validate that put worked
+    // Find the blob previously uploaded.
     const artifactBlob = await localStrategy.getBlob(artData);
 
-    // Check return artifact is of buffer type
+    // Check return blob is of buffer type
     chai.expect(Buffer.isBuffer(artifactBlob)).to.equal(true);
 
     // Deep compare both binaries
@@ -177,8 +154,12 @@ async function deleteBlob() {
     location: testData.artifacts[0].location
   };
   try {
-    // Find the artifact previously uploaded
+    // Delete blob
     await localStrategy.deleteBlob(artData);
+
+    await localStrategy.getBlob(
+      artData).should.eventually.be.rejectedWith(
+        'Artifact blob not found.');
   }
   catch (error) {
     M.log.error(error);

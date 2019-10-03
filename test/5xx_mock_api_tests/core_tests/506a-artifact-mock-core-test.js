@@ -252,122 +252,6 @@ function getArtifact(done) {
 }
 
 /**
- * @description Verifies mock PATCH request to update an artifact.
- *
- * @param {Function} done - The mocha callback.
- */
-function patchArtifact(done) {
-  // Define artifact metadata
-  const artData = testData.artifacts[0];
-
-  // Create request body
-  const body = {
-    contentType: 'edited_type'
-  };
-
-  // Create request params
-  const params = {
-    orgid: orgID,
-    projectid: projID,
-    branchid: branchID,
-    artifactid: testData.artifacts[0].id
-  };
-
-  const method = 'PATCH';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verify response body
-    const updatedArtifact = JSON.parse(_data);
-
-    // Verify artifact created properly
-    chai.expect(updatedArtifact.id).to.equal(artData.id);
-    chai.expect(updatedArtifact.name).to.equal(artData.name);
-    chai.expect(updatedArtifact.project).to.equal(projID);
-    chai.expect(updatedArtifact.branch).to.equal(branchID);
-    chai.expect(updatedArtifact.org).to.equal(orgID);
-    chai.expect(updatedArtifact.location).to.equal(artData.location);
-    chai.expect(updatedArtifact.filename).to.equal(artData.filename);
-    chai.expect(updatedArtifact.contentType).to.equal('edited_type');
-    chai.expect(updatedArtifact.strategy).to.equal(artData.strategy);
-    chai.expect(updatedArtifact.custom || {}).to.deep.equal(
-      artData.custom
-    );
-
-    // Verify additional properties
-    chai.expect(updatedArtifact.createdBy).to.equal(adminUser._id);
-    chai.expect(updatedArtifact.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(updatedArtifact.createdOn).to.not.equal(null);
-    chai.expect(updatedArtifact.updatedOn).to.not.equal(null);
-    chai.expect(updatedArtifact.archived).to.equal(false);
-
-    // Verify specific fields not returned
-    chai.expect(updatedArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
-      '__v', '_id');
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // PATCHs an artifact
-  apiController.patchArtifact(req, res);
-}
-
-/**
- * @description Verifies mock DELETE request to delete an artifact.
- *
- * @param {Function} done - The mocha callback.
- */
-function deleteArtifact(done) {
-  // Define artifact metadata
-  const artData = testData.artifacts[0];
-
-  // Create request body
-  const body = artData.id;
-
-  // Create request params
-  const params = {
-    orgid: orgID,
-    projectid: projID,
-    branchid: branchID,
-    artifactid: artData.id
-  };
-  const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    const artifactid = JSON.parse(_data);
-    chai.expect(artifactid).to.equal(artData.id);
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // DELETEs an artifact
-  apiController.deleteArtifact(req, res);
-}
-
-/**
  * @description Verifies mock POST request to post an artifact blob.
  *
  * @param {Function} done - The mocha callback.
@@ -571,4 +455,120 @@ function deleteBlob(done) {
   };
   // GETs an artifact
   apiController.deleteBlob(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update an artifact.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function patchArtifact(done) {
+  // Define artifact metadata
+  const artData = testData.artifacts[0];
+
+  // Create request body
+  const body = {
+    contentType: 'edited_type'
+  };
+
+  // Create request params
+  const params = {
+    orgid: orgID,
+    projectid: projID,
+    branchid: branchID,
+    artifactid: testData.artifacts[0].id
+  };
+
+  const method = 'PATCH';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const updatedArtifact = JSON.parse(_data);
+
+    // Verify artifact created properly
+    chai.expect(updatedArtifact.id).to.equal(artData.id);
+    chai.expect(updatedArtifact.name).to.equal(artData.name);
+    chai.expect(updatedArtifact.project).to.equal(projID);
+    chai.expect(updatedArtifact.branch).to.equal(branchID);
+    chai.expect(updatedArtifact.org).to.equal(orgID);
+    chai.expect(updatedArtifact.location).to.equal(artData.location);
+    chai.expect(updatedArtifact.filename).to.equal(artData.filename);
+    chai.expect(updatedArtifact.contentType).to.equal('edited_type');
+    chai.expect(updatedArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(updatedArtifact.custom || {}).to.deep.equal(
+      artData.custom
+    );
+
+    // Verify additional properties
+    chai.expect(updatedArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedArtifact.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(updatedArtifact.createdOn).to.not.equal(null);
+    chai.expect(updatedArtifact.updatedOn).to.not.equal(null);
+    chai.expect(updatedArtifact.archived).to.equal(false);
+
+    // Verify specific fields not returned
+    chai.expect(updatedArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
+      '__v', '_id');
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // PATCHs an artifact
+  apiController.patchArtifact(req, res);
+}
+
+/**
+ * @description Verifies mock DELETE request to delete an artifact.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function deleteArtifact(done) {
+  // Define artifact metadata
+  const artData = testData.artifacts[0];
+
+  // Create request body
+  const body = artData.id;
+
+  // Create request params
+  const params = {
+    orgid: orgID,
+    projectid: projID,
+    branchid: branchID,
+    artifactid: artData.id
+  };
+  const method = 'DELETE';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const artifactid = JSON.parse(_data);
+    chai.expect(artifactid).to.equal(artData.id);
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // DELETEs an artifact
+  apiController.deleteArtifact(req, res);
 }
