@@ -419,33 +419,8 @@ class Model {
         ProjectionExpression: projectionString
       };
 
-      // Loop through each field in the filter
-      Object.keys(filter).forEach((key) => {
-        // If the filter parameter is a field on the schema
-        if (Object.keys(this.definition).includes(key)) {
-          const value = filter[key];
-          const getObj = {};
-
-          // If the value is a string
-          if (typeof value === 'string') {
-            getObj[key] = { S: value };
-          }
-          // If the value is an array of strings
-          else if (Array.isArray(value) && value.every(v => typeof v === 'string')
-            && value.length !== 0) {
-            getObj[key] = { SS: value };
-          }
-
-          // If the getObj is populated
-          if (Object.keys(getObj).length > 0) {
-            // Add the get object to the list of keys to search
-            batchGetObj.RequestItems[this.TableName].Keys.push(getObj);
-          }
-        }
-        else {
-          M.log.error(`Filter param ${key} not a param on ${this.TableName} model.`);
-        }
-      });
+      batchGetObj.RequestItems[this.TableName].Keys = this.formatObject(filter);
+      console.log(batchGetObj.RequestItems[this.TableName].Keys)
 
       // If there are actually query parameters
       if (batchGetObj.RequestItems[this.TableName].Keys.length > 0) {
@@ -1051,6 +1026,11 @@ class Model {
       })
       .catch((error) => reject(error));
     });
+  }
+
+  queryArrays(obj) {
+    // INPUT: { _id: { $in: ['id1', 'id2', 'id3'...] } }
+    // OUTPUT [{ _id: { S: 'id1' }}, { _id: { S: 'id2' }}, { _id: { S: 'id3' }}]
   }
 
   /**
