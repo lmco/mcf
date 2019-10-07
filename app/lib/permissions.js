@@ -11,6 +11,7 @@
  *
  * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author James Eckstein <james.eckstein@lmco.com>
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides permission lookup capabilities for MBEE actions.
  */
@@ -27,21 +28,28 @@ module.exports = {
   createProject,
   createUser,
   createBranch,
+  createArtifact,
+  createBlob,
   deleteElement,
   deleteOrg,
   deleteProject,
   deleteUser,
   deleteBranch,
+  deleteArtifact,
+  deleteBlob,
   readElement,
   readOrg,
   readProject,
   readUser,
   readBranch,
+  readArtifact,
+  readBlob,
   updateElement,
   updateOrg,
   updateProject,
   updateUser,
-  updateBranch
+  updateBranch,
+  updateArtifact
 };
 
 /**
@@ -493,6 +501,94 @@ function deleteBranch(user, org, project, branch) {
       assert.ok(project.permissions[user._id].includes('write'),
         'User does not have permission to delete branches in the project '
       + `[${utils.parseID(project._id).pop()}].`);
+    }
+  }
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
+  }
+}
+
+/**
+ * @description Verify if user has permission to read artifacts in the
+ * project.
+ *
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the artifacts.
+ * @param {Branch} branch - Param not yet supported.
+ *
+ * @throws {PermissionError}
+ */
+function readArtifact(user, org, project, branch) {
+  try {
+    if (!user.admin) {
+      if (project.visibility === 'internal') {
+        // User only needs read permissions on the org to read the project.
+        assert.ok(org.permissions.hasOwnProperty(user._id), '');
+      }
+      else if (project.visibility === 'private') {
+        // User must have read permissions on project.
+        assert.ok(project.permissions.hasOwnProperty(user._id), '');
+      }
+    }
+  }
+  catch (error) {
+    throw new M.PermissionError('User does not have permission to find'
+      + ` items in the project [${utils.parseID(project._id).pop()}].`, 'warn');
+  }
+}
+
+
+/**
+ * @description Verify if user has permission to update project artifact objects.
+ *
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the artifacts.
+ * @param {Branch} branch - Param not yet supported.
+ *
+ * @throws {PermissionError}
+ */
+function updateArtifact(user, org, project, branch) {
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to update items in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        'User does not have permission to update items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        'User does not have permission to update items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+    }
+  }
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
+  }
+}
+
+
+/**
+ * @description Verify if user has permission to delete the project artifacts.
+ *
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the artifacts.
+ * @param {Branch} branch - Param not yet supported.
+ *
+ * @throws {PermissionError}
+ */
+function deleteArtifact(user, org, project, branch) {
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to delete items in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        'User does not have permission to delete items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        'User does not have permission to delete items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {

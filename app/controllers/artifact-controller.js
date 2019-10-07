@@ -48,15 +48,15 @@ const errors = M.require('lib.errors');
 
 // Error Check - Verify ArtifactModule is imported and implements required functions
 if (!ArtifactModule.hasOwnProperty('getBlob')) {
-  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement getArtifactBlob.`);
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement getBlob.`);
   process.exit(0);
 }
 if (!ArtifactModule.hasOwnProperty('postBlob')) {
-  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement addArtifactBlob.`);
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement addBlob.`);
   process.exit(0);
 }
 if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
-  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement removeArtifactBlob.`);
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement deleteBlob.`);
   process.exit(0);
 }
 
@@ -254,7 +254,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
 async function create(requestingUser, organizationID, projectID, branch,
   artifacts, options) {
   try {
-    M.log.debug('create(): Start of function');
+    M.log.debug('createArtifact(): Start of function');
 
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID, branch);

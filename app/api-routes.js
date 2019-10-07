@@ -3914,6 +3914,137 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: URI
  *         required: true
  *         type: string
+ *       - name: filename
+ *         in: body
+ *         description: Artifact filename.
+ *         required: true
+ *         type: string
+ *       - name: location
+ *         in: body
+ *         description: Artifact Blob storage location.
+ *         required: true
+ *         type: string
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to element not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ *
+ *   post:
+ *     tags:
+ *       - artifacts
+ *     description: Post an artifact Blob. Requesting user must have read access
+ *                  on the project to post an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: file
+ *         in: formData
+ *         description: File blob to upload.
+ *         required: true
+ *         type: file
+ *       - name: filename
+ *         in: formData
+ *         description: Artifact filename.
+ *         required: true
+ *         type: string
+ *       - name: location
+ *         in: formData
+ *         description: Artifact Blob storage location.
+ *         required: true
+ *         type: string
+ *       - name: archived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to element not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ *
+ *   delete:
+ *     tags:
+ *       - artifacts
+ *     description: Deletes an artifact Blob. Requesting user must have read access
+ *                  on the project to delete an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: filename
+ *         in: body
+ *         description: Artifact filename.
+ *         required: true
+ *         type: string
+ *       - name: location
+ *         in: body
+ *         description: Artifact Blob storage location.
+ *         required: true
+ *         type: string
  *       - name: archived
  *         description: If true, archived objects will be also be searched
  *                      through.
@@ -4305,9 +4436,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
  *   get:
  *     tags:
  *       - artifacts
- *     description: Returns an artifact public data on a specified branch.
- *                  Requesting user must have read access on the project to find
- *                  an artifact.
+ *     description: Returns an artifact Blob via artifact ID. Requesting user must have
+ *                  read access on the project to find an artifact.
  *     produces:
  *       - application/json
  *     parameters:
