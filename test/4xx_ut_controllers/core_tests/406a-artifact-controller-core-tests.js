@@ -99,7 +99,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should post an artifact blob', postBlob);
   it('should update an artifact file', updateArtifact);
   it('should get an artifact blob', getBlob);
-  it('should delete an artifact', deleteBlob);
+  it('should delete an artifact blob', deleteBlob);
   it('should delete an artifact', deleteArtifact);
 });
 
@@ -322,20 +322,18 @@ async function postBlob() {
   const artData = {
     filename: testData.artifacts[0].filename,
     project: projectID,
-    branch: branchID,
     location: testData.artifacts[0].location
   };
 
   try {
     const createdArtifact = await ArtifactController.postBlob(adminUser, orgID,
-      projectID, branchID, artData, artifactBlob1);
+      projectID, artData, artifactBlob1);
 
     // Verify response
     chai.expect(createdArtifact.filename).to.equal(
       testData.artifacts[0].filename
     );
     chai.expect(createdArtifact.project).to.equal(projectID);
-    chai.expect(createdArtifact.branch).to.equal(branchID);
     chai.expect(createdArtifact.location).to.equal(
       testData.artifacts[0].location
     );
@@ -354,13 +352,12 @@ async function getBlob() {
   const artData = {
     filename: testData.artifacts[0].filename,
     project: project._id,
-    branch: branchID,
     location: testData.artifacts[0].location
   };
   try {
     // Find the artifact previously uploaded.
     const artifactBlob = await ArtifactController.getBlob(adminUser,
-      orgID, projectID, branchID, artData);
+      orgID, projectID, artData);
 
     // Verify response
     // Check return artifact is of buffer type
@@ -389,10 +386,10 @@ async function deleteBlob() {
 
     // Find and delete the artifact
     await ArtifactController.deleteBlob(adminUser,
-      orgID, projectID, branchID, artifact);
+      orgID, projectID, artifact);
 
     await ArtifactController.getBlob(adminUser, orgID,
-      projectID, branchID, artifact).should.eventually.be.rejectedWith(
+      projectID, artifact).should.eventually.be.rejectedWith(
         'Artifact blob not found.');
 
   }

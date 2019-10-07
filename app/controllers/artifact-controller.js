@@ -707,7 +707,6 @@ async function remove(requestingUser, organizationID, projectID, branch,
  * project belongs to.
  * @param {string} projectID - The project ID of the Project which is being
  * searched for.
- * @param {string} branch - The branch ID.
  * @param {object} artifact - The artifact object to find. Based on project,
  * location, and filename.
  * @param {string} [artifact.filename] - The filename of the artifact.
@@ -716,10 +715,10 @@ async function remove(requestingUser, organizationID, projectID, branch,
  * @returns {Promise} Artifact Blob object.
  */
 async function getBlob(requestingUser, organizationID,
-  projectID, branch, artifact) {
+  projectID, artifact) {
   let options;
   // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParams(requestingUser, options, organizationID, projectID);
   helper.checkParamsDataType(['object'], artifact, 'Artifacts');
 
   // Sanitize input parameters
@@ -727,7 +726,6 @@ async function getBlob(requestingUser, organizationID,
   const saniArt = sani.db(JSON.parse(JSON.stringify(artifact)));
   const orgID = sani.db(organizationID);
   const projID = sani.db(projectID);
-  const branchID = sani.db(branch);
 
   // Validate Artifact metadata
   validateBlobMeta(saniArt);
@@ -758,11 +756,6 @@ async function getBlob(requestingUser, organizationID,
         + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
   }
 
-  // Find the branch, validate it was found and not archived
-  await helper.findAndValidate(Branch, utils.createID(
-    orgID, projID, branchID
-  ), reqUser, validatedOptions.archived);
-
   saniArt.project = projID;
 
   // Include artifact blob in return obj
@@ -789,7 +782,7 @@ async function getBlob(requestingUser, organizationID,
  * and project.
  */
 async function postBlob(requestingUser, organizationID,
-  projectID, branch, artifact, artifactBlob) {
+  projectID, artifact, artifactBlob) {
   let options;
   // Ensure artifact blob is buffer type
   if (Buffer.isBuffer(artifactBlob) === false) {
@@ -797,7 +790,7 @@ async function postBlob(requestingUser, organizationID,
   }
 
   // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParams(requestingUser, options, organizationID, projectID);
   helper.checkParamsDataType('object', artifact, 'Artifacts');
 
   // Sanitize input parameters
@@ -805,7 +798,6 @@ async function postBlob(requestingUser, organizationID,
   const saniArt = sani.db(JSON.parse(JSON.stringify(artifact)));
   const orgID = sani.db(organizationID);
   const projID = sani.db(projectID);
-  const saniBranchID = sani.db(branch);
 
   // Initialize and ensure options are valid
   const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
@@ -836,11 +828,6 @@ async function postBlob(requestingUser, organizationID,
       + ` post artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
   }
 
-  // Find the branch, validate it was found and not archived
-  await helper.findAndValidate(Branch, utils.createID(
-    orgID, projID, saniBranchID
-  ), reqUser, validatedOptions.archived);
-
   // Include project id
   saniArt.project = projectID;
 
@@ -870,11 +857,11 @@ async function postBlob(requestingUser, organizationID,
  * and project.
  */
 async function deleteBlob(requestingUser, organizationID, projectID,
-  branch, artifact) {
+  artifact) {
   let options;
 
   // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParams(requestingUser, options, organizationID, projectID);
   helper.checkParamsDataType('object', artifact, 'Artifacts');
 
   // Sanitize input parameters
@@ -882,7 +869,6 @@ async function deleteBlob(requestingUser, organizationID, projectID,
   const saniArt = sani.db(JSON.parse(JSON.stringify(artifact)));
   const orgID = sani.db(organizationID);
   const projID = sani.db(projectID);
-  const branchID = sani.db(branch);
 
   // Validate Artifact metadata
   validateBlobMeta(saniArt);
@@ -912,11 +898,6 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     throw new M.PermissionError('User does not have permission to get'
       + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
   }
-
-  // Find the branch, validate it was found and not archived
-  await helper.findAndValidate(Branch, utils.createID(
-    orgID, projID, branchID
-  ), reqUser, validatedOptions.archived);
 
   // Include project id
   saniArt.project = projectID;

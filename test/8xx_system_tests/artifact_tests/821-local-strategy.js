@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED.
+ * @classification UNCLASSIFIED
  *
  * @module test.artifact_tests.821-local-strategy
  *
@@ -78,7 +78,7 @@ async function postBlob() {
   };
   try {
     // Upload the blob
-    await localStrategy.postBlob(artData, artifactBlob0);
+    localStrategy.postBlob(artData, artifactBlob0);
 
   }
   catch (error) {
@@ -99,7 +99,7 @@ async function getBlob() {
   };
   try {
     // Find the artifact previously uploaded.
-    const artifactBlob = await localStrategy.getBlob(artData);
+    const artifactBlob = localStrategy.getBlob(artData);
 
     // Check return artifact is of buffer type
     chai.expect(Buffer.isBuffer(artifactBlob)).to.equal(true);
@@ -129,7 +129,7 @@ async function putBlob() {
 
     // Validate that put worked
     // Find the blob previously uploaded.
-    const artifactBlob = await localStrategy.getBlob(artData);
+    const artifactBlob = localStrategy.getBlob(artData);
 
     // Check return blob is of buffer type
     chai.expect(Buffer.isBuffer(artifactBlob)).to.equal(true);
@@ -153,17 +153,9 @@ async function deleteBlob() {
     project: project.id,
     location: testData.artifacts[0].location
   };
-  try {
-    // Delete blob
-    await localStrategy.deleteBlob(artData);
 
-    await localStrategy.getBlob(
-      artData).should.eventually.be.rejectedWith(
-        'Artifact blob not found.');
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-  }
+  // Delete blob
+  localStrategy.deleteBlob(artData);
+  chai.expect(localStrategy.getBlob.bind(
+    localStrategy,artData)).to.throw('Artifact blob not found.');
 }

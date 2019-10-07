@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED.
+ * @classification UNCLASSIFIED
  *
  * @module test.606a-artifact-api-core-tests
  *
@@ -207,7 +207,6 @@ function getArtifact(done) {
 function postBlob(done) {
   const artData = testData.artifacts[0];
   artData.project = projID;
-  artData.branch = branchID;
 
   const artifactPath = path.join(
     M.root, artData.location, artData.filename
@@ -215,7 +214,7 @@ function postBlob(done) {
 
   const options = {
     method: 'POST',
-    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/blob`,
+    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
     headers: testUtils.getHeaders('multipart/form-data'),
     formData: {
       location: artData.location,
@@ -260,7 +259,7 @@ function getBlob(done) {
   };
   const options = {
     method: 'GET',
-    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/blob`,
+    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
     headers: testUtils.getHeaders(),
     body: JSON.stringify(reqBody),
     encoding: null
@@ -329,7 +328,6 @@ function getBlobById(done) {
 function deleteBlob(done) {
   const artData = testData.artifacts[0];
   artData.project = projID;
-  artData.branch = branchID;
 
   const reqBody = {
     location: artData.location,
@@ -337,7 +335,7 @@ function deleteBlob(done) {
   };
   const options = {
     method: 'DELETE',
-    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/blob`,
+    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
     headers: testUtils.getHeaders(),
     body: JSON.stringify(reqBody)
   };

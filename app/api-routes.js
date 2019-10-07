@@ -3889,7 +3889,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
 
 /**
  * @swagger
- * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/blob:
+ * /api/orgs/{orgid}/projects/{projectid}/artifacts/blob:
  *   get:
  *     tags:
  *       - artifacts
@@ -3906,11 +3906,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: string
  *       - name: projectid
  *         description: The ID of the project containing the specified branch.
- *         in: path
- *         required: true
- *         type: string
- *       - name: branchid
- *         description: The ID of the branch containing the searched artifact.
  *         in: path
  *         required: true
  *         type: string
@@ -3943,7 +3938,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Internal Server Error, Failed to GET artifact due to
  *                      server side issue.
  */
-api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/blob')
+api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,

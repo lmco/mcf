@@ -4822,7 +4822,6 @@ async function getArtifact(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     fields: 'array',
     minified: 'boolean',
     includeArchived: 'boolean'
@@ -5115,9 +5114,9 @@ async function deleteArtifact(req, res) {
 }
 
 /**
- * GET /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/blob
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts/blob
  *
- * @description Gets an artifact blob by org.id, project.id, branch.id,
+ * @description Gets an artifact blob by org.id, project.id,
  * location, filename.
  *
  * @param {object} req - Request express object
@@ -5135,7 +5134,7 @@ async function getBlob(req, res) {
 
   try {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, req.body);
+      req.params.projectid, req.body);
 
     // Set filename
     res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
@@ -5150,9 +5149,9 @@ async function getBlob(req, res) {
 }
 
 /**
- * POST /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/blob
+ * POST /api/orgs/:orgid/projects/:projectid/artifacts/blob
  *
- * @description Post an artifact blob by org.id, project.id, branch.id,
+ * @description Post an artifact blob by org.id, project.id,
  * location, filename.
  *
  * @param {object} req - Request express object
@@ -5189,7 +5188,7 @@ async function postBlob(req, res) {
 
     try {
       const artifact = await ArtifactController.postBlob(req.user, req.params.orgid,
-        req.params.projectid, req.params.branchid, req.body,
+        req.params.projectid, req.body,
         req.file.buffer);
 
       // Set minified to true
@@ -5206,9 +5205,9 @@ async function postBlob(req, res) {
 }
 
 /**
- * DELETE /api/orgs/:orgid/projects/:projectid/branches/branch/artifacts/blob
+ * DELETE /api/orgs/:orgid/projects/:projectid/artifacts/blob
  *
- * @description Deletes an artifact blob by org.id, project.id, branch.id,
+ * @description Deletes an artifact blob by org.id, project.id,
  * location, filename.
  *
  * @param {object} req - Request express object
@@ -5226,7 +5225,7 @@ async function deleteBlob(req, res) {
 
   try {
     const artifact = await ArtifactController.deleteBlob(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, req.body);
+      req.params.projectid, req.body);
 
     res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
 
@@ -5291,7 +5290,7 @@ async function getBlobById(req, res) {
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
 
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, artMetadata[0]);
+      req.params.projectid, artMetadata[0]);
 
     // Set filename
     res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
