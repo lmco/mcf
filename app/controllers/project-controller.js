@@ -203,7 +203,7 @@ async function find(requestingUser, organizationID, projects, options) {
 
       const orgIDs = readOrgs.map(o => o._id);
       // Project must be internal and in an org the user has access to
-      const internalQuery = { $and: [{ visibility: 'internal' }, { org: orgIDs }] };
+      const internalQuery = { visibility: 'internal', org: { $in: orgIDs } };
       const permissionsQuery = {};
       permissionsQuery[`permissions.${reqUser._id}`] = 'read';
 
