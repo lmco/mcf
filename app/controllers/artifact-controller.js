@@ -333,7 +333,7 @@ async function create(requestingUser, organizationID, projectID, branch,
         assert.ok(artifact.hasOwnProperty('id'), `Artifact #${index} does not have an id.`);
         assert.ok(typeof artifact.id === 'string', `Artifact #${index}'s id is not a string.`);
         // Check if art with same ID is already being created
-        assert.ok(!arrIDs.includes(artifact.id), 'Multiple arts with the same ID '
+        assert.ok(!arrIDs.includes(artifact.id), 'Multiple artifacts with the same ID '
           + `[${artifact.id}] cannot be created.`);
 
         artifact.id = utils.createID(orgID, projID, branchID, artifact.id);
