@@ -1028,9 +1028,25 @@ class Model {
     });
   }
 
-  queryArrays(obj) {
+  /**
+   * @description Creates a query to be used in scan, batchGetItem and getItem.
+   *
+   * @param {object} query - The query provided which is to be formatted to work
+   * with DynamoDB.
+   * @param {number} [numDocs=10000] - The maximum number of documents that can
+   * be found with the query. Used specifically when arrays are provided in the
+   * query.
+   *
+   * @returns {object[]} An array of queries to be called.
+   */
+  createQuery(query, numDocs = 1) {
+    // TODO: Mongo specific keys to handle: $in, $or, $and, $text, $search, $regex
+    const returnArray = [];
     // INPUT: { _id: { $in: ['id1', 'id2', 'id3'...] } }
     // OUTPUT [{ _id: { S: 'id1' }}, { _id: { S: 'id2' }}, { _id: { S: 'id3' }}]
+    Object.keys(query).forEach((k) => {
+
+    });
   }
 
   /**
