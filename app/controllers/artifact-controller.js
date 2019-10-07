@@ -216,7 +216,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
 }
 
 /**
- * @description This functions creates one or many artifacts from the provided
+ * @description This function creates one or many artifacts from the provided
  * data.
  *
  * @param {User} requestingUser - The object containing the requesting user.
