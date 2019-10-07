@@ -69,7 +69,7 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  * @param {string} branch - The branch ID.
  * @param {(string|string[])} artifacts - The artifacts to find. Can either be
  * an array of artifact ids, a single artifact id, or not provided, which defaults
- * to every artifact in a project being found.
+ * to every artifact in a branch being found.
  * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
@@ -97,7 +97,7 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @returns {Promise} Array of found artifact objects.
+ * @returns {Promise<object[]>} Array of found artifact objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['artifact1', 'artifact2'], { populate: 'project' })
@@ -129,7 +129,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
   // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
+  const validatedOptions = utils.validateOptions(options, ['includeArchived', 'populate',
     'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
 
   // Ensure options are valid
@@ -181,7 +181,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   ), reqUser, validatedOptions.archived);
 
   // If the archived field is true, remove it from the query
-  if (validatedOptions.archived) {
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
   }
 
@@ -216,7 +216,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
 }
 
 /**
- * @description This functions creates one or many artifacts from the provided
+ * @description This function creates one or many artifacts from the provided
  * data.
  *
  * @param {User} requestingUser - The object containing the requesting user.
@@ -333,7 +333,7 @@ async function create(requestingUser, organizationID, projectID, branch,
         assert.ok(artifact.hasOwnProperty('id'), `Artifact #${index} does not have an id.`);
         assert.ok(typeof artifact.id === 'string', `Artifact #${index}'s id is not a string.`);
         // Check if art with same ID is already being created
-        assert.ok(!arrIDs.includes(artifact.id), 'Multiple arts with the same ID '
+        assert.ok(!arrIDs.includes(artifact.id), 'Multiple artifacts with the same ID '
           + `[${artifact.id}] cannot be created.`);
 
         artifact.id = utils.createID(orgID, projID, branchID, artifact.id);
