@@ -350,7 +350,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     // Create searchQuery to search for any existing, conflicting arts
     const searchQuery = { _id: { $in: arrIDs } };
 
-    // Check if the artifact already exists
+    // Check if the artifacts already exists
     const existingArtifact = await Artifact.find(searchQuery, '_id', { lean: true });
     // Ensure no artifact were found
     if (existingArtifact.length > 0) {
