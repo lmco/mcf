@@ -696,7 +696,6 @@ async function getOrg(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
@@ -1643,7 +1642,6 @@ async function getProject(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
@@ -2479,7 +2477,6 @@ async function getUser(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
@@ -3713,7 +3710,6 @@ async function getElement(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     subtree: 'boolean',
     fields: 'array',
@@ -4483,7 +4479,6 @@ async function getBranch(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'

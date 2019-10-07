@@ -20,7 +20,7 @@
 
 // React Modules
 import React from 'react';
-import { Button, Col, Input, InputGroup } from 'reactstrap';
+import { Button, Container, Row, Col, Input, InputGroup, Form } from 'reactstrap';
 
 /* eslint-enable no-unused-vars */
 
@@ -31,16 +31,16 @@ function AdvancedRow(props) {
     : <Button close className='adv-row-del' disabled={true} style={ { color: 'transparent' } }/>;
 
   return (
-    <div key={props.idx} className='adv-search-row'>
-      <InputGroup className='adv-search-input-group'>
-        <Col className='adv-col' md={3}>
-          <Input type='select' name='criteria'
-                 className='adv-search-select'
-                 value={props.criteria}
-                 onChange={(event) => props.handleChange(props.idx, event)}>
-            {props.options }
-          </Input>
-        </Col>
+    <Row key={props.idx} className='adv-search-row'>
+      <Col md={3}>
+        <Input type='select' name='criteria'
+               className='adv-search-select'
+               value={props.criteria}
+               onChange={(event) => props.handleChange(props.idx, event)}>
+          { props.options }
+        </Input>
+      </Col>
+      <Col className='adv-col'>
         <Input placeholder={props.criteria}
                className='adv-input-field'
                name='value'
@@ -48,8 +48,8 @@ function AdvancedRow(props) {
                onChange={(event) => props.handleChange(props.idx, event)}>
         </Input>
         { btnDeleteRow }
-      </InputGroup>
-    </div>
+      </Col>
+    </Row>
   );
 }
 

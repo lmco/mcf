@@ -32,14 +32,8 @@ function ListItem(props) {
             {props.children}
         </div>
   );
-
-  // Verify router link provided
-  if (props.routerLink) {
-    // Create a navLink item
-    return (<NavLink exact to={props.routerLink}> {listItem} </NavLink>);
-  }
   // Verify href provided
-  else if (props.href) {
+  if (props.href) {
     // Create a href item
     return <a href={props.href} onClick={props.onClick}> {listItem} </a>;
   }
