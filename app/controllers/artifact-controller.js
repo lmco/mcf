@@ -69,7 +69,7 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  * @param {string} branch - The branch ID.
  * @param {(string|string[])} artifacts - The artifacts to find. Can either be
  * an array of artifact ids, a single artifact id, or not provided, which defaults
- * to every artifact in a project being found.
+ * to every artifact in a branch being found.
  * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
