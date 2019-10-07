@@ -181,7 +181,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   ), reqUser, validatedOptions.archived);
 
   // If the archived field is true, remove it from the query
-  if (validatedOptions.archived) {
+  if (validatedOptions.includeArchived) {
     delete searchQuery.archived;
   }
 
