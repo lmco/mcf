@@ -97,7 +97,7 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @returns {Promise} Array of found artifact objects.
+ * @returns {Promise<object[]>} Array of found artifact objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['artifact1', 'artifact2'], { populate: 'project' })
