@@ -75,11 +75,26 @@ class OrgList extends Component {
     const projects = this.props.org.projects;
     const permissionedProjs = [];
 
+    // Verify if system admin
     if (!this.props.admin) {
       const username = this.props.user.username;
       projects.forEach(project => {
-        // Checking permissions on project or if internal
-        if (project.permissions[username] || project.visibility === 'internal') {
+        const perm = project.permissions[username];
+
+        // Verify if admin
+        if (perm === 'admin') {
+          permissionedProjs.push(project);
+        }
+        // Verify if write perms and not archived
+        else if (perm === 'write' && !project.archived) {
+          permissionedProjs.push(project);
+        }
+        // Verify if read perms and not archived
+        else if (perm === 'read' && !project.archived) {
+          permissionedProjs.push(project);
+        }
+        // Verify if project is internal and not archived
+        else if (project.visibility === 'internal' && !project.archived) {
           permissionedProjs.push(project);
         }
       });
@@ -96,6 +111,7 @@ class OrgList extends Component {
     const orgId = this.props.org.id;
     let icon;
     let projects;
+    let archiveProj = false;
 
     if (this.props.showProjs) {
       icon = 'fas fa-angle-down';
@@ -104,13 +120,17 @@ class OrgList extends Component {
       icon = 'fas fa-angle-right';
     }
 
+    if (this.props.org.archived) {
+      archiveProj = true;
+    }
     // Loop through project-views in each org
     if (this.state.projects) {
       projects = this.state.projects.map(
         project => (<ProjList project={project}
                               admin={this.props.admin}
                               key={`proj-key-${project.id}`}
-                              orgid={this.props.org.id}/>)
+                              orgid={this.props.org.id}
+                              archiveProj={archiveProj}/>)
       );
     }
 

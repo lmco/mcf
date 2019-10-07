@@ -210,8 +210,6 @@ function login(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
- *
- * @returns {object} Response object with 200 status code
  */
 function test(req, res) {
   res.status(200).send('');
@@ -698,7 +696,6 @@ async function getOrg(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
@@ -1645,7 +1642,6 @@ async function getProject(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
@@ -2481,7 +2477,6 @@ async function getUser(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'
@@ -3715,7 +3710,6 @@ async function getElement(req, res) {
   // Define valid option type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     subtree: 'boolean',
     fields: 'array',
@@ -4485,7 +4479,6 @@ async function getBranch(req, res) {
   // Define valid option and its parsed type
   const validOptions = {
     populate: 'array',
-    archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
     minified: 'boolean'

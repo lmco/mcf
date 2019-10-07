@@ -71,7 +71,7 @@ class ProjectListItem extends Component {
     let colorClass;
 
     // Verify if archived
-    if (project.archived) {
+    if (project.archived || this.props.archiveProj) {
       // Gray-out the name
       colorClass = 'archived-link';
     }

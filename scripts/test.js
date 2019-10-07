@@ -22,7 +22,7 @@ const Mocha = require('mocha');
 
 require('@babel/register')();        // Transpile react tests to javascript
 require('@babel/polyfill');          // Transpile async await for javascript
-require(path.join(M.root, 'test', 'set-up.jsx'));  // Configuring the JSDOM for react tests
+require(path.join(M.root, 'test', '7xx_ui_tests', 'setup.js'));
 
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
@@ -35,6 +35,8 @@ if (module.parent == null) {
 /**
  * @description Runs the collection of test suites script with Mocha.
  * Any command line accepted by Mocha is valid.
+ *
+ * @param {string} _args - Options from the user for how to run the tests.
  */
 function test(_args) {
   printHeader();
@@ -151,6 +153,9 @@ function printHeader() {
 /**
  * @description The mocha walk function is responsible for loading .js files into mocha
  * for use during tests.
+ *
+ * @param {string} dir - The directory to read.
+ * @param {object} mochaObj - The mocha object storing all the paths to test.
  */
 function mochaWalk(dir, mochaObj) {
   // Read the current directory and use a callback to filter the results

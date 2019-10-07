@@ -32,7 +32,7 @@ function SearchResult(props) {
     const displayValue = (key === 'custom') ? JSON.stringify(props.data[key]) : currentValue;
 
     cols.push(
-      <td key={`row-${index}`}>{displayValue}</td>
+      <td className={`search-col-${index}`} key={`col-${index}`}>{displayValue}</td>
     );
   });
 

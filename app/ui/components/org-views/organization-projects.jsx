@@ -38,17 +38,43 @@ function OrganizationProjects(props) {
   org.projects.forEach(project => {
     if (!props.user.admin) {
       const username = props.user.username;
-      if (project.permissions[username]) {
+      const perm = project.permissions[username];
+      if (perm === 'admin') {
+        listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
+                        <a href={`/orgs/${org.id}/project/${project.id}/branches/master/elements`}>
+                          {project.name}
+                        </a>
+                      </ListItem>);
+      }
+      // Verify write permissions and not archived org
+      else if (perm === 'write' && !project.archived) {
+        listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
+                        <a href={`/orgs/${org.id}/project/${project.id}/branches/master/elements`}>
+                          {project.name}
+                        </a>
+                      </ListItem>);
+      }
+      // Verify read permissions and not archived org
+      else if (perm === 'read' && !project.archived) {
         listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
                         <a href={`/orgs/${org.id}/project/${project.id}/branches/master/elements`}>
                           {project.name}
                         </a>
                        </ListItem>);
       }
+      // Verify if project is internal and not archived
+      else if (project.visibility === 'internal' && !project.archived) {
+        listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
+                        <a href={`/orgs/${org.id}/project/${project.id}/branches/master/elements`}>
+                          {project.name}
+                        </a>
+                      </ListItem>);
+      }
     }
     else {
+      const className = project.archived ? 'grayed-out' : '';
       listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
-                      <a href={`/orgs/${org.id}/projects/${project.id}/branches/master/elements`}>
+                      <a href={`/orgs/${org.id}/projects/${project.id}/branches/master/elements`} className={className}>
                         {project.name}
                       </a>
                      </ListItem>);

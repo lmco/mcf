@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.700-general-component-mount-tests
+ * @module test.7xx_ui_tests.706-general-ui-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -14,22 +14,19 @@
  * @description This tests that the general component mount
  * and render.
  */
-
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
-
 // NPM modules
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import chai from 'chai';
 
 // MBEE components
-import List from '../../app/ui/components/general/list/list.jsx';
-import ListItem from '../../app/ui/components/general/list/list-item.jsx';
-import CustomData from '../../app/ui/components/general/custom-data/custom-data.jsx';
-import KeyData from '../../app/ui/components/general/custom-data/key-data.jsx';
-import Divider from '../../app/ui/components/general/sidebar/divider.jsx';
-import SidebarHeader from '../../app/ui/components/general/sidebar/sidebar-header.jsx';
+import List from '../../../app/ui/components/general/list/list.jsx';
+import ListItem from '../../../app/ui/components/general/list/list-item.jsx';
+import KeyData from '../../../app/ui/components/general/custom-data/key-data.jsx';
+import Divider from '../../../app/ui/components/general/sidebar/divider.jsx';
+import SidebarHeader from '../../../app/ui/components/general/sidebar/sidebar-header.jsx';
 
 /* eslint-enable no-unused-vars */
 
@@ -53,54 +50,69 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Mount the list component to verify
  * component renders correctly.
+ *
+ * @param {Function} done - The mocha callback.
  */
-async function listRender() {
+function listRender(done) {
   // Render list component
-  const wrapper = shallow(<List />);
+  const wrapper = shallow(<List/>);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
+  done();
 }
 
 /**
  * @description Mount the list item component to verify
  * component renders correctly.
+ *
+ * @param {Function} done - The mocha callback.
  */
-async function listItemRender() {
+function listItemRender(done) {
   // Render list item component
   const wrapper = shallow(<ListItem />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
+  done();
 }
 
 /**
  * @description Mount the key data component to verify
  * component renders correctly.
+ *
+ * @param {Function} done - The mocha callback.
  */
-async function keyDataRender() {
+function keyDataRender(done) {
   // Render key data component
   const wrapper = shallow(<KeyData />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
+  done();
 }
 
 /**
  * @description Mount the divider component to verify
  * component renders correctly.
+ *
+ * @param {Function} done - The mocha callback.
  */
-async function dividerRender() {
+function dividerRender(done) {
   // Render key data component
   const wrapper = shallow(<Divider />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
+  done();
 }
 
 /**
  * @description Mount the sidebar header component to
  * verify component renders correctly.
+ *
+ * @param {Function} done - The mocha callback.
  */
-async function sidebarHeaderRender() {
+function sidebarHeaderRender(done) {
   // Render sidebar header component
   const wrapper = shallow(<SidebarHeader />);
   // Expect component to be in DOM
   chai.expect(wrapper.exists()).to.equal(true);
+  done();
 }

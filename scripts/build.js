@@ -57,6 +57,10 @@ const validators = M.require('lib.validators');
  * --all
  *
  * If NO arguments given, defaults to `--all`
+ *
+ * @param {string} _args - Additional options to pass into the build function.
+ *
+ * @returns {Promise} - Returns an empty promise upon completion.
  */
 function build(_args) {
   M.log.info('Building MBEE ...');
@@ -200,7 +204,7 @@ function build(_args) {
         },
         mode: mode,
         entry: {
-          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
+          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav-app.jsx'),
           'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
           'org-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'org-app.jsx'),
           'project-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'project-app.jsx'),
