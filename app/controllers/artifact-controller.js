@@ -129,7 +129,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
 
   // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, ['archived', 'populate',
+  const validatedOptions = utils.validateOptions(options, ['includeArchived', 'populate',
     'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
 
   // Ensure options are valid
