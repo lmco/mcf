@@ -522,7 +522,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Create searchQuery to search for any existing artifacts
   const searchQuery = { _id: { $in: arrIDs } };
 
-  // Check if the artifact already exists
+  // Find existing artifacts
   const foundArtifact = await Artifact.find(searchQuery, null, { lean: true });
   // Verify the same number of artifacts are found as desired
   if (foundArtifact.length !== arrIDs.length) {
