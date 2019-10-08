@@ -414,7 +414,7 @@ async function create(requestingUser, organizationID, projectID, branch,
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of updated artifact objects.
+ * @returns {Promise<object[]>} Array of updated artifact objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['filename'] })
