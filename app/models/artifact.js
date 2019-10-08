@@ -18,7 +18,7 @@
  * in either local or remote databases. The location of storage depends on the
  * Artifact strategy being used. This is set in the configuration file.</p>
  *
- * Note: Binary large object, aka Blob, are the actual binary file. This
+ * Note: The binary large object, aka Blob, is the actual binary file. This
  * controller stores blobs based on the artifact strategy.
  * </p>
  *
