@@ -527,7 +527,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Verify the same number of artifacts are found as desired
   if (foundArtifact.length !== arrIDs.length) {
     const foundIDs = foundArtifact.map(a => a._id);
-    const notFound = arrIDs.filter(u => !foundIDs.includes(u));
+    const notFound = arrIDs.filter(a => !foundIDs.includes(a));
     throw new M.NotFoundError(
       `The following artifacts were not found: [${notFound.toString()}].`, 'warn'
     );
