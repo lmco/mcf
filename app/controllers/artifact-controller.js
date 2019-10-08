@@ -519,7 +519,7 @@ async function update(requestingUser, organizationID, projectID, branch,
     throw new M.DataFormatError(err.message, 'warn');
   }
 
-  // Create searchQuery to search for any existing, conflicting arts
+  // Create searchQuery to search for any existing artifacts
   const searchQuery = { _id: { $in: arrIDs } };
 
   // Check if the artifact already exists
