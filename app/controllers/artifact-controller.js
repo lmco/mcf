@@ -355,7 +355,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     // Ensure no artifacts were found
     if (existingArtifact.length > 0) {
       // Get array of found artifact's IDs
-      const foundArtifactID = existingArtifact.map(u => u._id);
+      const foundArtifactID = existingArtifact.map(a => a._id);
 
       throw new M.OperationError('Artifacts with the following IDs already exist'
         + ` [${foundArtifactID.toString()}].`, 'warn');
