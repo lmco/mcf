@@ -763,7 +763,7 @@ async function getBlob(requestingUser, organizationID,
 }
 
 /**
- * @description This function post an artifact blob based on project,
+ * @description This function posts an artifact blob based on project,
  * location and filename.
  *
  * @param {User} requestingUser - The requesting user.
