@@ -692,7 +692,7 @@ async function remove(requestingUser, organizationID, projectID, branch,
   const uniqueIDs = Object.keys(uniqueIDsObj);
 
   // Emit the event artifacts-deleted
-  EventEmitter.emit('Artifact-deleted', foundArtifacts);
+  EventEmitter.emit('artifacts-deleted', foundArtifacts);
 
   // Return unique IDs of elements deleted
   return (uniqueIDs);
