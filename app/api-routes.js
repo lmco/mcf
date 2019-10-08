@@ -3909,11 +3909,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         in: path
  *         required: true
  *         type: string
- *       - name: artifactid
- *         description: The artifact ID.
- *         in: URI
- *         required: true
- *         type: string
  *       - name: filename
  *         in: body
  *         description: Artifact filename.

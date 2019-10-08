@@ -45,6 +45,7 @@ const helper = M.require('lib.controller-helper');
 const jmi = M.require('lib.jmi-conversions');
 const ArtifactModule = M.require(`artifact.${M.config.artifact.strategy}`);
 const errors = M.require('lib.errors');
+const permissions = M.require('lib.permissions');
 
 // Error Check - Verify ArtifactModule is imported and implements required functions
 if (!ArtifactModule.hasOwnProperty('getBlob')) {
@@ -66,15 +67,15 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the project belongs to.
  * @param {string} projectID - The project ID of the Project which is being searched for.
- * @param {string} branch - The branch ID.
+* @param {string} branchID - The branch ID.
  * @param {(string|string[])} artifacts - The artifacts to find. Can either be
  * an array of artifact ids, a single artifact id, or not provided, which defaults
  * to every artifact in a branch being found.
  * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {boolean} [options.archived = false] - If true, find results will include
- * archived objects.
+ * @param {boolean} [options.includeArchived = false] - If true, find results will
+ * include archived objects.
  * @param {string[]} [options.fields] - An array of fields to return. To NOT include
  * a field, provide a '-' in front.
  * @param {number} [options.limit = 0] - A number that specifies the maximum
@@ -108,7 +109,7 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  *   M.log.error(error);
  * });
  */
-async function find(requestingUser, organizationID, projectID, branch, artifacts, options) {
+async function find(requestingUser, organizationID, projectID, branchID, artifacts, options) {
   // Set options if no artifacts were provided, but options were
   if (typeof artifacts === 'object' && artifacts !== null && !Array.isArray(artifacts)) {
     options = artifacts; // eslint-disable-line no-param-reassign
@@ -116,17 +117,17 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   }
 
   // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
   helper.checkParamsDataType(['undefined', 'object', 'string'], artifacts, 'Artifacts');
   // Sanitize input parameters
   const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   const orgID = sani.db(organizationID);
   const projID = sani.db(projectID);
-  const branchID = sani.db(branch);
+  const branID = sani.db(branchID);
 
   // Initialize search query
-  const searchQuery = { branch: utils.createID(orgID, projID, branchID), archived: false };
+  const searchQuery = { branch: utils.createID(orgID, projID, branID), archived: false };
 
   // Initialize and ensure options are valid
   const validatedOptions = utils.validateOptions(options, ['includeArchived', 'populate',
@@ -157,28 +158,17 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
   const organization = await helper.findAndValidate(Org, orgID, reqUser,
     validatedOptions.archived);
 
-  // Ensure that the user has at least read permissions on the org
-  if (!reqUser.admin && (!organization.permissions[reqUser._id]
-    || !organization.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to get'
-      + ` artifacts on the organization [${orgID}].`, 'warn');
-  }
-
   // Find the project
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
     reqUser, validatedOptions.archived);
 
-  // Verify the user has read permissions on the project
-  if (!reqUser.admin && (!project.permissions[reqUser._id]
-    || !project.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to get'
-      + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
-  }
-
   // Find the branch, validate it was found and not archived
-  await helper.findAndValidate(Branch, utils.createID(
-    orgID, projID, branchID
+  const branch = await helper.findAndValidate(Branch, utils.createID(
+    orgID, projID, branID
   ), reqUser, validatedOptions.archived);
+
+  // Permissions check
+  permissions.readArtifact(reqUser, organization, project, branch);
 
   // If the archived field is true, remove it from the query
   if (validatedOptions.includeArchived) {
@@ -211,7 +201,7 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
       });
   }
   catch (error) {
-    throw new M.DatabaseError(error.message, 'warn');
+    throw errors.captureError(error);
   }
 }
 
@@ -251,13 +241,13 @@ async function find(requestingUser, organizationID, projectID, branch, artifacts
  *   M.log.error(error);
  * });
  */
-async function create(requestingUser, organizationID, projectID, branch,
+async function create(requestingUser, organizationID, projectID, branchID,
   artifacts, options) {
   try {
-    M.log.debug('createArtifact(): Start of function');
+    M.log.debug('ArtifactController.create(): Start of function');
 
     // Ensure input parameters are correct type
-    helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+    helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
     helper.checkParamsDataType('object', artifacts, 'Artifacts');
 
     // Sanitize input parameters and create function-wide variables
@@ -265,7 +255,7 @@ async function create(requestingUser, organizationID, projectID, branch,
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
     const orgID = sani.db(organizationID);
     const projID = sani.db(projectID);
-    const branchID = sani.db(branch);
+    const branID = sani.db(branchID);
 
     // Initialize and ensure options are valid
     const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -274,8 +264,8 @@ async function create(requestingUser, organizationID, projectID, branch,
     // Define array to store org data
     let artsToCreate = [];
     const arrIDs = [];
-    const validArtKeys = ['strategy', 'id', 'name', 'project', 'branch',
-      'filename', 'contentType', 'location', 'custom'];
+    const validArtKeys = Artifact.getValidUpdateFields();
+    validArtKeys.push('id');
 
     // Check parameter type
     if (Array.isArray(saniArtifacts)) {
@@ -292,33 +282,20 @@ async function create(requestingUser, organizationID, projectID, branch,
     }
 
     // Find the organization and validate that it was found and not archived
-    const foundOrg = await helper.findAndValidate(Org, orgID, reqUser);
-    // Permissions check
-    if (!reqUser.admin && (!foundOrg.permissions[reqUser._id]
-      || !foundOrg.permissions[reqUser._id].includes('read'))) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` read items on the org ${orgID}.`, 'warn');
-    }
+    const organization = await helper.findAndValidate(Org, orgID, reqUser);
 
     // Find the project and validate that it was found and not archived
-    const foundProj = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
-    // Permissions check
-    if (!reqUser.admin && (!foundProj.permissions[reqUser._id]
-      || !foundProj.permissions[reqUser._id].includes('write'))) {
-      throw new M.PermissionError('User does not have permission to'
-        + ` create items on the project ${projID}.`, 'warn');
-    }
+    const project = await helper.findAndValidate(Project,
+      utils.createID(orgID, projID), reqUser);
 
     // Find the branch and validate that it was found and not archived
-    const foundBranch = await helper.findAndValidate(Branch,
-      utils.createID(orgID, projID, branchID), reqUser);
-    // Check that the branch is is not a tag
-    if (foundBranch.tag) {
-      throw new M.OperationError(`[${branchID}] is a tag and `
-        + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
-    }
+    const branch = await helper.findAndValidate(Branch,
+      utils.createID(orgID, projID, branID), reqUser);
 
-    M.log.debug('create(): Before finding pre-existing artifact');
+    // Permissions check
+    permissions.createArtifact(reqUser, organization, project, branch);
+
+    M.log.debug('ArtifactController.create(): Before finding pre-existing artifact');
 
     // Check that each art has an id, and add to arrIDs
     try {
@@ -363,21 +340,23 @@ async function create(requestingUser, organizationID, projectID, branch,
 
     const artObjects = artsToCreate.map((a) => {
       const artObj = Artifact.createDocument(a);
-      artObj.project = foundProj._id;
-      artObj.branch = foundBranch._id;
+      artObj.project = project._id;
+      artObj.branch = branch._id;
       artObj.strategy = M.config.artifact.strategy;
       artObj.lastModifiedBy = reqUser._id;
       artObj.createdBy = reqUser._id;
       artObj.updatedOn = Date.now();
       artObj.archivedBy = (a.archived) ? reqUser._id : null;
+      artObj.archivedOn = (artObj.archived) ? Date.now() : null;
+
       return artObj;
     });
 
     // Save artifact object to the database
-    const createdArtifact = await Artifact.insertMany(artObjects);
+    const createdArtifacts = await Artifact.insertMany(artObjects);
 
     // Emit the event artifacts-created
-    EventEmitter.emit('artifacts-created', createdArtifact);
+    EventEmitter.emit('artifacts-created', createdArtifacts);
 
     return await Artifact.find({ _id: { $in: arrIDs } },
       validatedOptions.fieldsString,
@@ -396,13 +375,16 @@ async function create(requestingUser, organizationID, projectID, branch,
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to add artifacts to.
+ * @param {string} branchID - The ID of the branch to add artifacts to.
  * @param {(object|object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to update.
  * @param {string} artifacts.id - The ID of the artifact being updated.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
- * @param {string} [artifacts.contentType] - File type.
+ * @param {string} [artifacts.contentType] - File blob type.
+ * @param {string} [artifacts.location] - The file blob location.
+ * @param {string} [artifacts.archived = false] - The updated archived field. If true,
+ * the artifact will not be able to be found until unarchived.
  * @param {object} [artifacts.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {object} [options] - A parameter that provides supported options.
@@ -425,12 +407,12 @@ async function create(requestingUser, organizationID, projectID, branch,
  *   M.log.error(error);
  * });
  */
-async function update(requestingUser, organizationID, projectID, branch,
+async function update(requestingUser, organizationID, projectID, branchID,
   artifacts, options) {
-  M.log.debug('update(): Start of function');
+  M.log.debug('ArtifactController.update(): Start of function');
 
   // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
   helper.checkParamsDataType('object', artifacts, 'Artifacts');
 
   // Sanitize input parameters and create function-wide variables
@@ -438,7 +420,7 @@ async function update(requestingUser, organizationID, projectID, branch,
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   const orgID = sani.db(organizationID);
   const projID = sani.db(projectID);
-  const branchID = sani.db(branch);
+  const branID = sani.db(branchID);
 
   // Initialize and ensure options are valid
   const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -447,8 +429,8 @@ async function update(requestingUser, organizationID, projectID, branch,
   // Define array to store org data
   let artsToUpdate = [];
   const arrIDs = [];
-  const validArtKeys = ['id', 'filename', 'contentType', 'name', 'custom',
-    'archived', 'location'];
+  const validArtKeys = Artifact.getValidUpdateFields();
+  validArtKeys.push('id');
 
   // Check parameter type
   if (Array.isArray(saniArtifacts)) {
@@ -465,33 +447,19 @@ async function update(requestingUser, organizationID, projectID, branch,
   }
   // Find organization, validate found and not archived
   const organization = await helper.findAndValidate(Org, orgID, reqUser);
-  // Permissions check
-  if (!reqUser.admin && (!organization.permissions[reqUser._id]
-    || !organization.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` update items on the org ${orgID}.`, 'warn');
-  }
 
   // Find project, validate found and not archived
-  const foundProj = await helper.findAndValidate(Project,
+  const project = await helper.findAndValidate(Project,
     utils.createID(orgID, projID), reqUser);
-  // Permissions check
-  if (!reqUser.admin && (!foundProj.permissions[reqUser._id]
-    || !foundProj.permissions[reqUser._id].includes('write'))) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` update items on the project ${projID}.`, 'warn');
-  }
 
   // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
-  // Check that the branch is is not a tag
-  if (foundBranch.tag) {
-    throw new M.OperationError(`[${branchID}] is a tag and `
-      + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
-  }
+  const branch = await helper.findAndValidate(Branch,
+    utils.createID(orgID, projID, branID), reqUser);
 
-  M.log.debug('update(): Before finding pre-existing artifact');
+  // Permissions check
+  permissions.updateArtifact(reqUser, organization, project, branch);
+
+  M.log.debug('ArtifactController.update(): Before finding pre-existing artifact');
 
   // Check that each artifact has an id, and add to arrIDs
   try {
@@ -600,7 +568,7 @@ async function update(requestingUser, organizationID, projectID, branch,
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branch - The ID of the branch to remove artifacts from.
+ * @param {string} branchID - The ID of the branch to remove artifacts from.
  * @param {(string|string[])} artifacts - The artifacts to remove. Can either be
  * an array of artifact ids or a single artifact id.
  * @param {object} [options] - A parameter that provides supported options.
@@ -617,17 +585,17 @@ async function update(requestingUser, organizationID, projectID, branch,
  *   M.log.error(error);
  * });
  */
-async function remove(requestingUser, organizationID, projectID, branch,
+async function remove(requestingUser, organizationID, projectID, branchID,
   artifacts, options) {
   // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID, branch);
+  helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
   helper.checkParamsDataType(['object', 'string'], artifacts, 'Artifacts');
 
   // Sanitize input parameters and create function-wide variables
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   const orgID = sani.db(organizationID);
   const projID = sani.db(projectID);
-  const branchID = sani.db(branch);
+  const branID = sani.db(branchID);
   const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
   let artifactsToFind = [];
 
@@ -635,12 +603,12 @@ async function remove(requestingUser, organizationID, projectID, branch,
   if (Array.isArray(saniArtifacts) && saniArtifacts.length !== 0) {
     // An array of artifact ids, remove all
     artifactsToFind = saniArtifacts.map(
-      e => utils.createID(orgID, projID, branchID, e)
+      e => utils.createID(orgID, projID, branID, e)
     );
   }
   else if (typeof saniArtifacts === 'string') {
     // A single artifact id, remove one
-    artifactsToFind = [utils.createID(orgID, projID, branchID, saniArtifacts)];
+    artifactsToFind = [utils.createID(orgID, projID, branID, saniArtifacts)];
   }
   else {
     // Invalid parameter, throw an error
@@ -649,32 +617,18 @@ async function remove(requestingUser, organizationID, projectID, branch,
 
   // Find the organization and validate that it was found and not archived
   const organization = await helper.findAndValidate(Org, orgID, reqUser);
-  // Permissions check
-  if (!reqUser.admin && (!organization.permissions[reqUser._id]
-    || !organization.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` remove items on the org ${orgID}.`, 'warn');
-  }
 
   // Find the project and validate that it was found and not archived
   const project = await helper.findAndValidate(Project,
     utils.createID(orgID, projID), reqUser);
 
-  // Permissions check
-  if (!reqUser.admin && (!project.permissions[reqUser._id]
-    || !project.permissions[reqUser._id].includes('write'))) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` remove items on the project ${projID}.`, 'warn');
-  }
-
   // Find the branch and validate that it was found and not archived
-  const foundBranch = await helper.findAndValidate(Branch,
-    utils.createID(orgID, projID, branchID), reqUser);
-  // Check that the branch is is not a tag
-  if (foundBranch.tag) {
-    throw new M.OperationError(`[${branchID}] is a tag and `
-      + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
-  }
+  const branch = await helper.findAndValidate(Branch,
+    utils.createID(orgID, projID, branID), reqUser);
+
+  // Permissions check
+  permissions.deleteArtifact(reqUser, organization, project, branch);
+
 
   // Find the artifacts to delete
   const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } },
@@ -738,23 +692,12 @@ async function getBlob(requestingUser, organizationID,
   const organization = await helper.findAndValidate(Org, orgID, reqUser,
     validatedOptions.archived);
 
-  // Ensure that the user has at least read permissions on the org
-  if (!reqUser.admin && (!organization.permissions[reqUser._id]
-      || !organization.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to get'
-        + ` artifacts on the organization [${orgID}].`, 'warn');
-  }
-
   // Find the project
   const project = await helper.findAndValidate(Project,
     utils.createID(orgID, projID), reqUser, validatedOptions.archived);
 
-  // Verify the user has read permissions on the project
-  if (!reqUser.admin && (!project.permissions[reqUser._id]
-      || !project.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to get'
-        + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
-  }
+  // Permissions check
+  permissions.readBlob(reqUser, organization, project);
 
   saniArt.project = projID;
 
@@ -771,7 +714,7 @@ async function getBlob(requestingUser, organizationID,
  * project belongs to.
  * @param {string} projectID - The project ID of the Project which is being
  * searched for.
- * @param {string} branch - The branch ID.
+* @param {string} branchID - The branch ID.
  * @param {object} artifact - The artifact object to find. Based on project,
  * location, and filename.
  * @param {string} [artifact.filename] - The filename of the artifact.
@@ -810,23 +753,12 @@ async function postBlob(requestingUser, organizationID,
   const organization = await helper.findAndValidate(Org, orgID, reqUser,
     validatedOptions.archived);
 
-  // Ensure that the user has at least read permissions on the org
-  if (!reqUser.admin && (!organization.permissions[reqUser._id]
-    || !organization.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` post artifacts on the organization [${orgID}].`, 'warn');
-  }
-
   // Find the project
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
     reqUser, validatedOptions.archived);
 
-  // Verify the user has read permissions on the project
-  if (!reqUser.admin && (!project.permissions[reqUser._id]
-    || !project.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to'
-      + ` post artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
-  }
+  // Permissions check
+  permissions.createBlob(reqUser, organization, project);
 
   // Include project id
   saniArt.project = projectID;
@@ -847,7 +779,7 @@ async function postBlob(requestingUser, organizationID,
  * project belongs to.
  * @param {string} projectID - The project ID of the Project which is being
  * searched for.
- * @param {string} branch - The branch ID.
+* @param {string} branchID - The branch ID.
  * @param {object[]} artifact - The artifact object to find. Based on project,
  * location, and filename.
  * @param {string} [artifact.filename] - The filename of the artifact.
@@ -881,23 +813,12 @@ async function deleteBlob(requestingUser, organizationID, projectID,
   const organization = await helper.findAndValidate(Org, orgID, reqUser,
     validatedOptions.archived);
 
-  // Ensure that the user has at least read permissions on the org
-  if (!reqUser.admin && (!organization.permissions[reqUser._id]
-    || !organization.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to get'
-      + ` artifacts on the organization [${orgID}].`, 'warn');
-  }
-
   // Find the project
   const project = await helper.findAndValidate(Project,
     utils.createID(orgID, projID), reqUser, validatedOptions.archived);
 
-  // Verify the user has read permissions on the project
-  if (!reqUser.admin && (!project.permissions[reqUser._id]
-    || !project.permissions[reqUser._id].includes('read'))) {
-    throw new M.PermissionError('User does not have permission to get'
-      + ` artifacts on the project [${utils.parseID(projID).pop()}].`, 'warn');
-  }
+  // Permissions check
+  permissions.deleteBlob(reqUser, organization, project);
 
   // Include project id
   saniArt.project = projectID;

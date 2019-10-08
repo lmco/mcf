@@ -120,7 +120,6 @@ async function createArtifact() {
     project: projectID,
     branch: branchID,
     location: artData.location,
-    strategy: artData.strategy,
     custom: artData.custom
   };
   try {

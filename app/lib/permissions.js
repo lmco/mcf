@@ -65,7 +65,6 @@ function createUser(user) {
   }
 }
 
-
 /**
  * @description Verifies if user has permission to read other user objects.
  *
@@ -76,7 +75,6 @@ function createUser(user) {
 function readUser(user) {
   return true;
 }
-
 
 /**
  * @description Verifies if user has permission to update users.
@@ -95,7 +93,6 @@ function updateUser(user, userToUpdate) {
   }
 }
 
-
 /**
  * @description Verifies if user has permission to delete users.
  *
@@ -109,7 +106,6 @@ function deleteUser(user) {
   }
 }
 
-
 /**
  * @description Verifies if user has permission to create an organization.
  *
@@ -122,7 +118,6 @@ function createOrg(user) {
     throw new M.PermissionError('User does not have permission to create orgs.', 'warn');
   }
 }
-
 
 /**
  * @description Verifies if user has permission to read the organization.
@@ -140,7 +135,6 @@ function readOrg(user, org) {
     throw new M.PermissionError(`User does not have permission to find the org [${org._id}].`, 'warn');
   }
 }
-
 
 /**
  * @description Verifies user has permission to update organization object.
@@ -162,7 +156,6 @@ function updateOrg(user, org) {
   }
 }
 
-
 /**
  * @description Verifies if user has permission to delete the
  * organization object.
@@ -176,7 +169,6 @@ function deleteOrg(user) {
     throw new M.PermissionError('User does not have permission to delete orgs.', 'warn');
   }
 }
-
 
 /**
  * @description Verifies if user has permission to create a project within the org.
@@ -198,7 +190,6 @@ function createProject(user, org) {
       + ` projects in the org [${org._id}].`, 'warn');
   }
 }
-
 
 /**
  * @description Verifies if user has permission to read the project.
@@ -229,7 +220,6 @@ function readProject(user, org, project) {
   }
 }
 
-
 /**
  * @description Verifies if user has permission to update project object.
  *
@@ -255,7 +245,6 @@ function updateProject(user, org, project) {
   }
 }
 
-
 /**
  * @description Verifies if user has permission to delete the project object.
  *
@@ -270,7 +259,6 @@ function deleteProject(user, org, project) {
     throw new M.PermissionError('User does not have permissions to delete projects.', 'warn');
   }
 }
-
 
 /**
  * @description Verify if user has permission to create elements in the project.
@@ -299,7 +287,6 @@ function createElement(user, org, project, branch) {
     throw new M.PermissionError(error.message, 'warn');
   }
 }
-
 
 /**
  * @description Verify if user has permission to read elements in the
@@ -331,7 +318,6 @@ function readElement(user, org, project, branch) {
   }
 }
 
-
 /**
  * @description Verify if user has permission to update project element objects.
  *
@@ -359,7 +345,6 @@ function updateElement(user, org, project, branch) {
     throw new M.PermissionError(error.message, 'warn');
   }
 }
-
 
 /**
  * @description Verify if user has permission to delete the project elements.
@@ -389,7 +374,6 @@ function deleteElement(user, org, project, branch) {
   }
 }
 
-
 /**
  * @description Verify if user has permission to create branches in the project.
  *
@@ -416,7 +400,6 @@ function createBranch(user, org, project) {
     throw new M.PermissionError(error.message, 'warn');
   }
 }
-
 
 /**
  * @description Verify if user has permission to read branches in the project.
@@ -449,7 +432,6 @@ function readBranch(user, org, project, branch) {
   }
 }
 
-
 /**
  * @description Verify if user has permission to update project branches.
  *
@@ -478,7 +460,6 @@ function updateBranch(user, org, project, branch) {
   }
 }
 
-
 /**
  * @description Verify if user has permission to delete the project branches.
  *
@@ -501,6 +482,35 @@ function deleteBranch(user, org, project, branch) {
       assert.ok(project.permissions[user._id].includes('write'),
         'User does not have permission to delete branches in the project '
       + `[${utils.parseID(project._id).pop()}].`);
+    }
+  }
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
+  }
+}
+
+
+/**
+ * @description Verify if user has permission to create artifacts in the project.
+ *
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project to add artifacts to.
+ * @param {Branch} branch - Param not yet supported.
+ *
+ * @throws {PermissionError}
+ */
+function createArtifact(user, org, project, branch) {
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to create items in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        'User does not have permission to create items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        'User does not have permission to create items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
     }
   }
   catch (error) {
@@ -538,7 +548,6 @@ function readArtifact(user, org, project, branch) {
   }
 }
 
-
 /**
  * @description Verify if user has permission to update project artifact objects.
  *
@@ -567,7 +576,6 @@ function updateArtifact(user, org, project, branch) {
   }
 }
 
-
 /**
  * @description Verify if user has permission to delete the project artifacts.
  *
@@ -579,6 +587,90 @@ function updateArtifact(user, org, project, branch) {
  * @throws {PermissionError}
  */
 function deleteArtifact(user, org, project, branch) {
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to delete items in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        'User does not have permission to delete items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        'User does not have permission to delete items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+    }
+  }
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
+  }
+}
+
+/**
+ * @description Verify if user has permission to create artifact blob
+ * in the project.
+ *
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project to add artifact blob to.
+ *
+ * @throws {PermissionError}
+ */
+function createBlob(user, org, project) {
+  try {
+    if (!user.admin) {
+      assert.ok(org.permissions.hasOwnProperty(user._id),
+        `User does not have permission to create items in the org [${org._id}].`);
+      assert.ok(project.permissions.hasOwnProperty(user._id),
+        'User does not have permission to create items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+      assert.ok(project.permissions[user._id].includes('write'),
+        'User does not have permission to create items in the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+    }
+  }
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
+  }
+}
+
+/**
+ * @description Verify if user has permission to read blob in the
+ * project.
+ *
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the artifact blob.
+ *
+ * @throws {PermissionError}
+ */
+function readBlob(user, org, project) {
+  try {
+    if (!user.admin) {
+      if (project.visibility === 'internal') {
+        // User only needs read permissions on the org to read the project.
+        assert.ok(org.permissions.hasOwnProperty(user._id), '');
+      }
+      else if (project.visibility === 'private') {
+        // User must have read permissions on project.
+        assert.ok(project.permissions.hasOwnProperty(user._id), '');
+      }
+    }
+  }
+  catch (error) {
+    throw new M.PermissionError('User does not have permission to find'
+      + ` items in the project [${utils.parseID(project._id).pop()}].`, 'warn');
+  }
+}
+
+/**
+ * @description Verify if user has permission to delete the project blob.
+ *
+ * @param {User} user - The user object to check permission for.
+ * @param {Organization} org - The org object containing the project.
+ * @param {Project} project - The project containing the artifact blob.
+ *
+ * @throws {PermissionError}
+ */
+function deleteBlob(user, org, project) {
   try {
     if (!user.admin) {
       assert.ok(org.permissions.hasOwnProperty(user._id),

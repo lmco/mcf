@@ -4877,6 +4877,7 @@ async function getArtifact(req, res) {
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
+    console.log(error)
     // If an error was thrown, return it and its status
     returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
