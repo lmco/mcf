@@ -606,7 +606,7 @@ async function update(requestingUser, organizationID, projectID, branch,
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @returns {Promise} Array of deleted artifact ids.
+ * @returns {Promise<string[]>} Array of deleted artifact ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['art1', 'art2'])
