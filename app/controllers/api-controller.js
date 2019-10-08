@@ -4877,9 +4877,8 @@ async function getArtifact(req, res) {
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
-    console.log(error)
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4941,7 +4940,7 @@ async function postArtifact(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Set the artifact ID in the body equal req.params.orgid
+  // Set the artifact ID in the body equal req.params.artifactid
   req.body.id = req.params.artifactid;
 
   // Create artifact with provided parameters
@@ -5029,7 +5028,7 @@ async function patchArtifact(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Set the artifact ID in the body equal req.params.orgid
+  // Set the artifact ID in the body equal req.params.artifactid
   req.body.id = req.params.artifactid;
 
   try {
@@ -5110,7 +5109,7 @@ async function deleteArtifact(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5263,7 +5262,6 @@ async function getBlobById(req, res) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    archived: 'boolean',
     includeArchived: 'boolean'
   };
 
@@ -5285,11 +5283,25 @@ async function getBlobById(req, res) {
   }
 
   try {
+    // Add additional options
+    options.fields = ['location', 'filename'];
+
     // Find the artifact from it's artifact.id, project.id, and org.id
     // NOTE: find() sanitizes input params
     const artMetadata = await ArtifactController.find(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
 
+    // Ensure only a single blob found
+    if (artMetadata.length > 1) {
+      throw new M.DataFormatError(
+        `More then 1 blob found. [${req.params.artifactid}]`, 'warn'
+      );
+    }
+    else if (artMetadata.length === 0){
+      throw new M.NotFoundError(
+        `No artifact blob found. [${req.params.artifactid}]`, 'warn'
+      );
+    }
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
       req.params.projectid, artMetadata[0]);
 
@@ -5301,7 +5313,7 @@ async function getBlobById(req, res) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 

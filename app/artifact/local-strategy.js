@@ -28,9 +28,11 @@ module.exports = {
 // Node.js Modules
 const path = require('path');    // Find directory paths
 const fs = require('fs');        // Access the filesystem
+const assert = require('assert');
 
 // MBEE modules
 const utils = M.require('lib.utils');
+const errors = M.require('lib.errors');
 
 /**
  * @description This function get the artifact blob file
@@ -45,6 +47,9 @@ const utils = M.require('lib.utils');
  */
 function getBlob(artMetadata) {
   try {
+    // Validate metadata
+    validateBlobMeta(artMetadata)
+
     // Create artifact path
     const filePath = createBlobPath(artMetadata);
 
@@ -70,6 +75,9 @@ function getBlob(artMetadata) {
  * @param {Buffer} artifactBlob - A binary large object artifact.
  */
 function postBlob(artMetadata, artifactBlob) {
+  // Validate metadata
+  validateBlobMeta(artMetadata)
+
   // Create artifact path
   const fullPath = createBlobPath(artMetadata);
 
@@ -93,6 +101,9 @@ function postBlob(artMetadata, artifactBlob) {
  * @param {Buffer} artifactBlob - A binary large object artifact.
  */
 function putBlob(artMetadata, artifactBlob) {
+  // Validate metadata
+  validateBlobMeta(artMetadata)
+
   // Create artifact path
   const fullPath = createBlobPath(artMetadata);
 
@@ -122,6 +133,9 @@ function putBlob(artMetadata, artifactBlob) {
  * @param {string} [artMetadata.project] - The project of artifact blob.
  */
 function deleteBlob(artMetadata) {
+  // Validate metadata
+  validateBlobMeta(artMetadata)
+
   // Create artifact path
   const blobPath = createBlobPath(artMetadata);
   try {
@@ -243,4 +257,28 @@ function createBlobPath(artMetadata) {
 
   // Return the path
   return blobPath;
+}
+
+/**
+ * @description This function validates the artifact object metadata.
+ * Ensures fields such as 'location' and 'filename' are defined.
+ *
+ * @param {object} artMetadata - Object containing location, file, and project.
+ */
+function validateBlobMeta(artMetadata) {
+  try {
+    // Define the required blob fields
+    const requiredBlobFields = ['location', 'filename'];
+
+    if (typeof artMetadata !== 'object') {
+      throw new M.DataFormatError('Artifact metadata must be an object.', 'warn');  }
+
+    requiredBlobFields.forEach((field) => {
+      assert.ok(artMetadata.hasOwnProperty(field), 'Artifact metadata requires'
+        + ` ${field} field.`);
+    });
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }

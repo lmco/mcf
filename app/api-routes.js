@@ -3919,7 +3919,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Artifact Blob storage location.
  *         required: true
  *         type: string
- *       - name: archived
+ *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
  *                      through.
  *         in: query
@@ -3958,7 +3958,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project containing the specified branch.
+ *         description: The ID of the project containing the specified artifact.
  *         in: path
  *         required: true
  *         type: string
@@ -4194,7 +4194,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *       - name: body
  *         description: The object containing the new artifact data.
  *         in: body
- *         required: false
+ *         required: true
  *         schema:
  *           type: object
  *           properties:
@@ -4306,7 +4306,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *               type: object
  *               description: NOTE when updating the custom data, the object
  *                            is completely replaced.
- *             includeArchived:
+ *             archived:
  *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -4457,25 +4457,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
  *         in: path
  *         required: true
  *         type: string
- *       - name: populate
- *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      project, branch]
- *         in: query
- *         type: string
- *         required: false
  *       - name: includeArchived
  *         description: If true, archived objects will be also be searched
  *                      through.
  *         in: query
  *         type: boolean
- *       - name: fields
- *         description: Comma separated list of specific fields to return. By
- *                      default the id field is returned. To specifically NOT
- *                      include a field, include a '-' in front of the field
- *                      (-name).
- *         in: query
- *         type: string
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified
@@ -4506,7 +4492,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  AuthController.doLogin,
   APIController.getBlobById
 );
 
