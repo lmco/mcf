@@ -712,7 +712,7 @@ async function remove(requestingUser, organizationID, projectID, branch,
  * @param {string} [artifact.filename] - The filename of the artifact.
  * @param {string} [artifact.location] - The location of the artifact.
  *
- * @returns {Promise} Artifact Blob object.
+ * @returns {Promise<Buffer>} Artifact Blob object.
  */
 async function getBlob(requestingUser, organizationID,
   projectID, artifact) {
