@@ -15,10 +15,10 @@
  *
  * @description
  * <p>This module defines the artifact data model. Artifacts are objects stored
- * in local or remote database. The location of storage depends on the
+ * in either local or remote databases. The location of storage depends on the
  * Artifact strategy being used. This is set in the configuration file.</p>
  *
- * Note: Binary large object, aka Blob, are the actual binary file. This
+ * Note: The binary large object, aka Blob, is the actual binary file. This
  * controller stores blobs based on the artifact strategy.
  * </p>
  *
@@ -45,7 +45,7 @@ const utils = M.require('lib.utils');
  * @property {string} filename - The filename of the artifact.
  * @property {string} contentType - The file type. E.g: 'png', 'dat'
  * @property {string} location - The location of the artifact blob.
- * @property {string} strategy - The strategy used for storing artifact blob.
+ * @property {string} strategy - The strategy used for storing artifact blobs.
  *
  */
 const ArtifactSchema = new db.Schema({

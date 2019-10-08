@@ -3905,7 +3905,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         required: true
  *         type: string
  *       - name: projectid
- *         description: The ID of the project containing the specified branch.
+ *         description: The ID of the project containing the artifact blob.
  *         in: path
  *         required: true
  *         type: string
