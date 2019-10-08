@@ -772,8 +772,8 @@ async function getBlob(requestingUser, organizationID,
  * @param {string} projectID - The project ID of the Project which is being
  * searched for.
  * @param {string} branch - The branch ID.
- * @param {object} artifact - The artifact object to find. Based on project,
- * location, and filename.
+ * @param {object} artifact - Metadata containing parameters for creating
+and storing the artifact blob.
  * @param {string} [artifact.filename] - The filename of the artifact.
  * @param {string} [artifact.location] - The location of the artifact.
  * @param {Buffer} artifactBlob - A binary large object artifact.
