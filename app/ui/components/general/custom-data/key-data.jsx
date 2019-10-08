@@ -81,6 +81,7 @@ class KeyData extends Component {
         }
         else {
           // Display the data
+          /* eslint-disable-next-line no-undef */
           nests.push(<span className='last-element'>{decodeHTML(data)}</span>);
         }
 
@@ -101,6 +102,7 @@ class KeyData extends Component {
         : (<span className='last-element'>false</span>);
     }
     else {
+      /* eslint-disable-next-line no-undef */
       nestedData = (<span className='last-element'>{decodeHTML(custom)}</span>);
     }
 
