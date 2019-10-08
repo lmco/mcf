@@ -4048,7 +4048,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Forbidden, Failed to DELETE artifact due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to DELETE artifact due to element not
+ *         description: Not Found, Failed to DELETE artifact due to artifact not
  *                      existing.
  *       500:
  *         description: Internal Server Error, Failed to DELETE artifact due to
