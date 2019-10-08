@@ -778,7 +778,7 @@ and storing the artifact blob.
  * @param {string} [artifact.location] - The location of the artifact.
  * @param {Buffer} artifactBlob - A binary large object artifact.
  *
- * @returns {Promise} Artifact object that contains location, filename,
+ * @returns {Promise<object>} Artifact object that contains location, filename,
  * and project.
  */
 async function postBlob(requestingUser, organizationID,
