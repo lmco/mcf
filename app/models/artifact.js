@@ -15,7 +15,7 @@
  *
  * @description
  * <p>This module defines the artifact data model. Artifacts are objects stored
- * in local or remote database. The location of storage depends on the
+ * in either local or remote databases. The location of storage depends on the
  * Artifact strategy being used. This is set in the configuration file.</p>
  *
  * Note: Binary large object, aka Blob, are the actual binary file. This
