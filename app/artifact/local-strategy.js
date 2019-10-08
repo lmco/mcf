@@ -35,7 +35,7 @@ const utils = M.require('lib.utils');
 const errors = M.require('lib.errors');
 
 /**
- * @description This function get the artifact blob file
+ * @description This function gets the artifact blob file
  * from the local file system.
  *
  * @param {string} artMetadata - Artifact metadata.
