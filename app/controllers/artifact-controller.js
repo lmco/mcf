@@ -327,12 +327,12 @@ async function create(requestingUser, organizationID, projectID, branchID,
     // Create searchQuery to search for any existing, conflicting arts
     const searchQuery = { _id: { $in: arrIDs } };
 
-    // Check if the artifact already exists
+    // Check if the artifacts already exists
     const existingArtifact = await Artifact.find(searchQuery, '_id', { lean: true });
-    // Ensure no artifact were found
+    // Ensure no artifacts were found
     if (existingArtifact.length > 0) {
-      // Get arrays of the foundUsers's usernames
-      const foundArtifactID = existingArtifact.map(u => u._id);
+      // Get array of found artifact's IDs
+      const foundArtifactID = existingArtifact.map(a => a._id);
 
       throw new M.OperationError('Artifacts with the following IDs already exist'
         + ` [${foundArtifactID.toString()}].`, 'warn');
@@ -487,15 +487,15 @@ async function update(requestingUser, organizationID, projectID, branchID,
     throw new M.DataFormatError(err.message, 'warn');
   }
 
-  // Create searchQuery to search for any existing, conflicting arts
+  // Create searchQuery to search for any existing artifacts
   const searchQuery = { _id: { $in: arrIDs } };
 
-  // Check if the artifact already exists
+  // Find existing artifacts
   const foundArtifact = await Artifact.find(searchQuery, null, { lean: true });
   // Verify the same number of artifacts are found as desired
   if (foundArtifact.length !== arrIDs.length) {
-    const foundIDs = foundArtifact.map(u => u._id);
-    const notFound = arrIDs.filter(u => !foundIDs.includes(u));
+    const foundIDs = foundArtifact.map(a => a._id);
+    const notFound = arrIDs.filter(a => !foundIDs.includes(a));
     throw new M.NotFoundError(
       `The following artifacts were not found: [${notFound.toString()}].`, 'warn'
     );
