@@ -352,7 +352,7 @@ async function create(requestingUser, organizationID, projectID, branch,
 
     // Check if the artifacts already exists
     const existingArtifact = await Artifact.find(searchQuery, '_id', { lean: true });
-    // Ensure no artifact were found
+    // Ensure no artifacts were found
     if (existingArtifact.length > 0) {
       // Get arrays of the foundUsers's usernames
       const foundArtifactID = existingArtifact.map(u => u._id);
