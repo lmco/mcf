@@ -45,7 +45,7 @@ const utils = M.require('lib.utils');
  * @property {string} filename - The filename of the artifact.
  * @property {string} contentType - The file type. E.g: 'png', 'dat'
  * @property {string} location - The location of the artifact blob.
- * @property {string} strategy - The strategy used for storing artifact blob.
+ * @property {string} strategy - The strategy used for storing artifact blobs.
  *
  */
 const ArtifactSchema = new db.Schema({
