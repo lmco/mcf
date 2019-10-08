@@ -218,7 +218,8 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
  * @param {string} artifacts.id - The ID of the artifact being created.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
- * @param {string} [artifacts.contentType] - File type.
+ * @param {string} [artifacts.contentType] - File blob type.
+ * @param {string} [artifacts.location] - The file blob location.
  * @param {object} [artifacts.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {object} [options] - A parameter that provides supported options.
@@ -309,11 +310,11 @@ async function create(requestingUser, organizationID, projectID, branchID,
         // Ensure each art has an id and that its a string
         assert.ok(artifact.hasOwnProperty('id'), `Artifact #${index} does not have an id.`);
         assert.ok(typeof artifact.id === 'string', `Artifact #${index}'s id is not a string.`);
+        artifact.id = utils.createID(orgID, projID, branchID, artifact.id);
         // Check if art with same ID is already being created
         assert.ok(!arrIDs.includes(artifact.id), 'Multiple artifacts with the same ID '
           + `[${artifact.id}] cannot be created.`);
 
-        artifact.id = utils.createID(orgID, projID, branchID, artifact.id);
         // Set the _id equal to the id
         artifact._id = artifact.id;
         arrIDs.push(artifact.id);

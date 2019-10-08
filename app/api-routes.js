@@ -3982,11 +3982,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Artifact Blob storage location.
  *         required: true
  *         type: string
- *       - name: archived
- *         description: If true, archived objects will be also be searched
- *                      through.
- *         in: query
- *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifact, returns artifact public
@@ -4040,11 +4035,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Artifact Blob storage location.
  *         required: true
  *         type: string
- *       - name: archived
- *         description: If true, archived objects will be also be searched
- *                      through.
- *         in: query
- *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifact, returns artifact public
