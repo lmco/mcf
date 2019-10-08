@@ -81,7 +81,7 @@ class KeyData extends Component {
         }
         else {
           // Display the data
-          nests.push(<span className='last-element'>{data}</span>);
+          nests.push(<span className='last-element'>{decodeHTML(data)}</span>);
         }
 
         // Return the array
@@ -101,7 +101,7 @@ class KeyData extends Component {
         : (<span className='last-element'>false</span>);
     }
     else {
-      nestedData = (<span className='last-element'>{custom}</span>);
+      nestedData = (<span className='last-element'>{decodeHTML(custom)}</span>);
     }
 
     return (
