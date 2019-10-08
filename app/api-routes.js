@@ -3984,21 +3984,21 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET artifact, returns artifact public
+ *         description: OK, Succeeded to POST artifact, returns artifact public
  *                      data.
  *       400:
- *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *         description: Bad Request, Failed to POST artifact due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET artifact due to not being
+ *         description: Unauthorized, Failed to POST artifact due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET artifact due to not having
+ *         description: Forbidden, Failed to POST artifact due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET artifact due to element not
+ *         description: Not Found, Failed to POST artifact due to element not
  *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET artifact due to
+ *         description: Internal Server Error, Failed to POST artifact due to
  *                      server side issue.
  *
  *   delete:
@@ -4037,21 +4037,21 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: string
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET artifact, returns artifact public
+ *         description: OK, Succeeded to DELETE artifact, returns artifact public
  *                      data.
  *       400:
- *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *         description: Bad Request, Failed to DELETE artifact due to invalid data.
  *       401:
- *         description: Unauthorized, Failed to GET artifact due to not being
+ *         description: Unauthorized, Failed to DELETE artifact due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to GET artifact due to not having
+ *         description: Forbidden, Failed to DELETE artifact due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET artifact due to element not
+ *         description: Not Found, Failed to DELETE artifact due to element not
  *                      existing.
  *       500:
- *         description: Internal Server Error, Failed to GET artifact due to
+ *         description: Internal Server Error, Failed to DELETE artifact due to
  *                      server side issue.
  */
 api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
