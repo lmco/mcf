@@ -397,7 +397,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of updated artifact objects.
+ * @returns {Promise<object[]>} Array of updated artifact objects.
  *
  * @example
  * update({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['filename'] })
@@ -580,7 +580,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @returns {Promise} Array of deleted artifact ids.
+ * @returns {Promise<string[]>} Array of deleted artifact ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['art1', 'art2'])
@@ -636,7 +636,6 @@ async function remove(requestingUser, organizationID, projectID, branchID,
     // Permissions check
     permissions.deleteArtifact(reqUser, organization, project, branch);
 
-
     // Find the artifacts to delete
     const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } },
       null, { lean: true });
@@ -653,7 +652,7 @@ async function remove(requestingUser, organizationID, projectID, branchID,
     const uniqueIDs = Object.keys(uniqueIDsObj);
 
     // Emit the event artifacts-deleted
-    EventEmitter.emit('artifact-deleted', foundArtifacts);
+    EventEmitter.emit('artifacts-deleted', foundArtifacts);
 
     // Return unique IDs of elements deleted
     return (uniqueIDs);
