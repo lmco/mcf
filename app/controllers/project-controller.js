@@ -835,30 +835,27 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // Create query to find all elements which reference elements on any
     // projects whose visibility was just lowered to 'private'
-    let foundElements = [];
+    let relQuery = {};
 
     // If the selected database supports regex
     if (db.enhancedQueries.regex) {
       const relRegex = `^(${loweredVisibility.join(':)|(')}:)`;
-      const relQuery = {
+      relQuery = {
         project: { $nin: loweredVisibility },
         $or: [
           { source: { $regex: relRegex } },
           { target: { $regex: relRegex } }
         ]
       };
-
-      // Find broken relationships
-      foundElements = await Element.find(relQuery, null,
-        { populate: 'source target', lean: true });
     }
     else {
       // Find elements in batches in case too many found
+      const elemsToFind = [];
       let length = 50000;
       let iteration = 0;
       while (length === 50000) {
         // Find all elements on the modified projects
-        const elemsOnModifed = await Element.find({ $in: loweredVisibility }, // eslint-disable-line
+        const elemsOnModifed = await Element.find({ project: { $in: loweredVisibility } }, // eslint-disable-line
           null, { populate: 'sourceOf targetOf', lean: true, limit: length, skip: iteration });
 
         // For each of the found elements
@@ -867,7 +864,7 @@ async function update(requestingUser, organizationID, projects, options) {
           e.sourceOf.forEach((r) => {
             // If the relationships project is different, add relationship to list
             if (r.project !== e.project) {
-              foundElements.push(r);
+              elemsToFind.push(r);
             }
           });
 
@@ -875,7 +872,7 @@ async function update(requestingUser, organizationID, projects, options) {
           e.targetOf.forEach((r) => {
             // If the relationships project is different, add relationship to list
             if (r.project !== e.project) {
-              foundElements.push(r);
+              elemsToFind.push(r);
             }
           });
         });
@@ -884,10 +881,16 @@ async function update(requestingUser, organizationID, projects, options) {
         length = elemsOnModifed.length;
         iteration += length;
       }
+
+      // Find the elements, and populate the source and target
+      relQuery = { _id: { $in: elemsToFind.map(e => e._id) } };
     }
 
-    const bulkArray2 = [];
+    // Find broken relationships
+    const foundElements = await Element.find(relQuery, null,
+      { populate: 'source target', lean: true });
 
+    const bulkArray2 = [];
     // For each broken relationship
     foundElements.forEach((elem) => {
       // If the source no longer exists, set it to the undefined element

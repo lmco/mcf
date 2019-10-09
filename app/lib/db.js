@@ -49,7 +49,13 @@ requiredParams.forEach((param) => {
   }
 });
 
-// Define enhancedQueries
+/**
+ * @description Defines a list of features which the implemented database
+ * defines. By having these features, queries will be more efficient.
+ *
+ * @property {boolean} regex - Specifies if the implemented database supports
+ * regex in queries.
+ */
 const enhancedQueries = {
   regex: DBModule.enhancedQueries.regex
 };
