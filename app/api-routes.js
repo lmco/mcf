@@ -3996,7 +3996,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                      permissions.
  *       404:
  *         description: Not Found, Failed to POST artifact due to element not
- *                      existing.
  *       500:
  *         description: Internal Server Error, Failed to POST artifact due to
  *                      server side issue.
