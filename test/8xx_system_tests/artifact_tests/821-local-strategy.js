@@ -30,6 +30,7 @@ const localStrategy = M.require('artifact.local-strategy');
 let artifactBlob0 = null;
 let artifactBlob1 = null;
 let project = null;
+let org = null;
 /* --------------------( Main )-------------------- */
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
@@ -55,7 +56,8 @@ describe(M.getModuleName(module.filename), () => {
     artifactBlob0 = fs.readFileSync(artifactPath0);
     artifactBlob1 = fs.readFileSync(artifactPath1);
 
-    // Define project obj
+    // Define org/project obj
+    org = testData.orgs[0];
     project = testData.projects[0];
   });
 
@@ -72,14 +74,30 @@ describe(M.getModuleName(module.filename), () => {
  */
 async function postBlob() {
   const artData = {
+    location: testData.artifacts[0].location,
     filename: testData.artifacts[0].filename,
     project: project.id,
-    location: testData.artifacts[0].location
+    org: org.id
   };
   try {
     // Upload the blob
     localStrategy.postBlob(artData, artifactBlob0);
 
+    // Form the blob name, location concat with filename
+    const concatenName = artData.location.replace(/\//g, '.') + artData.filename;
+
+    // Create artifact path
+    const filePath = path.join(M.root, M.config.artifact.path, org.id,
+      project.id, concatenName);
+
+    // Check file was posted
+    const blob = fs.readFileSync(filePath);
+
+    // Check return artifact is of buffer type
+    chai.expect(Buffer.isBuffer(blob)).to.equal(true);
+
+    // Deep compare both binaries
+    chai.expect(blob).to.deep.equal(artifactBlob0);
   }
   catch (error) {
     M.log.error(error);
@@ -93,9 +111,10 @@ async function postBlob() {
  */
 async function getBlob() {
   const artData = {
+    location: testData.artifacts[0].location,
     filename: testData.artifacts[0].filename,
     project: project.id,
-    location: testData.artifacts[0].location
+    org: org.id
   };
   try {
     // Find the artifact previously uploaded.
@@ -119,9 +138,10 @@ async function getBlob() {
  */
 async function putBlob() {
   const artData = {
+    location: testData.artifacts[0].location,
     filename: testData.artifacts[0].filename,
     project: project.id,
-    location: testData.artifacts[0].location
+    org: org.id
   };
   try {
     // Replace the blob previously uploaded.
@@ -149,9 +169,10 @@ async function putBlob() {
  */
 async function deleteBlob() {
   const artData = {
+    location: testData.artifacts[0].location,
     filename: testData.artifacts[0].filename,
     project: project.id,
-    location: testData.artifacts[0].location
+    org: org.id
   };
 
   // Delete blob
