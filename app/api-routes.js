@@ -4461,7 +4461,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET artifact, returns artifact public
+ *         description: OK, Succeeded to GET artifact, returns artifact blob
  *       400:
  *         description: Bad Request, Failed to GET artifact due to invalid data.
  *       401:
