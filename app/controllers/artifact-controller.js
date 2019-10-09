@@ -706,7 +706,9 @@ async function getBlob(requestingUser, organizationID,
   // Permissions check
   permissions.readBlob(reqUser, organization, project);
 
+  // Include org and project id
   saniArt.project = projID;
+  saniArt.org = orgID;
 
   // Include artifact blob in return obj
   return ArtifactModule.getBlob(saniArt);
@@ -763,8 +765,9 @@ async function postBlob(requestingUser, organizationID,
     // Permissions check
     permissions.createBlob(reqUser, organization, project);
 
-    // Include project id
+    // Include org and project id
     saniArt.project = projectID;
+    saniArt.org = orgID;
 
     // Return artifact object
     ArtifactModule.postBlob(saniArt, artifactBlob);
@@ -825,8 +828,9 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     // Permissions check
     permissions.deleteBlob(reqUser, organization, project);
 
-    // Include project id
+    // Include org and project id
     saniArt.project = projectID;
+    saniArt.org = orgID;
 
     await ArtifactModule.deleteBlob(saniArt);
 

@@ -14,14 +14,11 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description
- * <p>This module defines the artifact data model. Artifacts are objects stored
- * in either local or remote databases. The location of storage depends on the
- * Artifact strategy being used. This is set in the configuration file.</p>
- *
- * Note: The binary large object, aka Blob, is the actual binary file. This
- * controller stores blobs based on the artifact strategy.
+ * <p>This module defines the artifact data model. Artifact data model
+ * represent metadata for Artifact blobs (binary large object).
+ * Filename and Location are two examples of Artifact metadata.
+ * They are used to point and locate artifact blobs.
  * </p>
- *
  */
 
 // MBEE modules

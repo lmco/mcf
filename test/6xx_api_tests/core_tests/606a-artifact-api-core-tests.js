@@ -97,7 +97,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET an artifact', getArtifact);
   it('should POST an artifact blob', postBlob);
   it('should GET an artifact blob', getBlob);
-  it('should GET an artifact blob', getBlobById);
+  it('should GET an artifact blob by ID', getBlobById);
   it('should DELETE an artifact', deleteBlob);
   it('should PATCH an artifact', patchArtifact);
   it('should DELETE an artifact', deleteArtifact);
@@ -253,15 +253,15 @@ function getBlob(done) {
   artData.project = projID;
   artData.branch = branchID;
 
-  const reqBody = {
+  const queryParams = {
     location: artData.location,
     filename: artData.filename
   };
   const options = {
     method: 'GET',
     url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
+    qs: queryParams,
     headers: testUtils.getHeaders(),
-    body: JSON.stringify(reqBody),
     encoding: null
   };
 

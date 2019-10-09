@@ -315,21 +315,20 @@ function getBlob(done) {
   // Define artifact metadata
   const artData = testData.artifacts[0];
 
-  // Create request body
-  const body = {
-    location: artData.location,
-    filename: artData.filename
-  };
-
   // Create request params
   const params = {
     orgid: orgID,
     projectid: projID,
-    branchid: branchID
+    branchid: branchID,
   };
 
+  const query = {
+    location: artData.location,
+    filename: artData.filename
+  }
+
   const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const req = testUtils.createRequest(adminUser, params, {}, method, query);
 
   // Set response as empty object
   const res = {};

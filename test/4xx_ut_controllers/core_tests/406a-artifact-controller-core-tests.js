@@ -379,6 +379,7 @@ async function deleteBlob() {
   try {
     const artifact = {
       project: projectID,
+      org: orgID,
       location: testData.artifacts[0].location,
       filename: testData.artifacts[0].filename
     };

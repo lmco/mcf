@@ -3910,12 +3910,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         required: true
  *         type: string
  *       - name: filename
- *         in: body
+ *         in: query
  *         description: Artifact filename.
  *         required: true
  *         type: string
  *       - name: location
- *         in: body
+ *         in: query
  *         description: Artifact Blob storage location.
  *         required: true
  *         type: string
@@ -3949,6 +3949,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *                  on the project to post an artifact.
  *     produces:
  *       - application/json
+ *     consumes: multipart/form-data
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the specified
@@ -4365,6 +4366,21 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         in: path
  *         required: true
  *         type: string
+ *       - name: org
+ *         description: The object containing the new organization data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - name
+ *           properties:
+ *             filename:
+ *               type: string
+ *               description: The filename of the artifact to delete.
+ *             location:
+ *               type: string
+ *               description: The location of the artifact to delete.
  *       - name: minified
  *         description: If true, the returned JSON is minified. If false, the
  *                      returned JSON is formatted based on the format specified

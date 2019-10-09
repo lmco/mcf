@@ -5046,7 +5046,6 @@ async function patchArtifact(req, res) {
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
-    console.log(error);
     // If an error was thrown, return it and its status
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
@@ -5132,9 +5131,14 @@ async function getBlob(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
+  const body = {
+    location: req.query.location,
+    filename: req.query.filename
+  }
+
   try {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
-      req.params.projectid, req.body);
+      req.params.projectid, body);
 
     // Set filename
     res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
@@ -5170,6 +5174,7 @@ async function postBlob(req, res) {
 
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.
+      M.log.error(err)
       const error = new M.ServerError('Artifact upload failed.', 'warn');
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
@@ -5302,6 +5307,7 @@ async function getBlobById(req, res) {
         `No artifact blob found. [${req.params.artifactid}]`, 'warn'
       );
     }
+
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
       req.params.projectid, artMetadata[0]);
 
