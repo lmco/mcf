@@ -22,6 +22,16 @@ const DynamoDBStore = require('dynamodb-store');
 // MBEE modules
 const utils = M.require('lib.utils');
 
+// Define enhancedQueries
+const enhancedQueries = {
+  regex: true
+};
+
+/**
+ * @description Creates the connection to the DynamoDB instance.
+ *
+ * @returns {Promise<*|Promise<unknown>>}
+ */
 async function connect() {
   return new Promise((resolve, reject) => {
     const dynamoDB = new AWS.DynamoDB({
@@ -1275,6 +1285,7 @@ class Store extends DynamoDBStore {
 
 // Export different classes and functions
 module.exports = {
+  enhancedQueries,
   connect,
   disconnect,
   clear,
