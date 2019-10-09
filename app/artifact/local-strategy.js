@@ -144,7 +144,7 @@ function deleteBlob(artMetadata) {
     fs.unlinkSync(blobPath, (error) => {
       // Check directory NOT exist
       if (error) {
-        M.log(error);
+        M.log.error(error)
         throw error;
       }
     });

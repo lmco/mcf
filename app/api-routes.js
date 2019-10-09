@@ -3926,8 +3926,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         type: boolean
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET artifact, returns artifact public
- *                      data.
+ *         description: OK, Succeeded to GET artifact, returns artifact blob.
  *       400:
  *         description: Bad Request, Failed to GET artifact due to invalid data.
  *       401:
@@ -3995,8 +3994,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         description: Forbidden, Failed to POST artifact due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to POST artifact due to artifact not
- *                      existing.
+ *         description: Not Found, Failed to POST artifact due to branch, project
+ *                      or org not existing
  *       500:
  *         description: Internal Server Error, Failed to POST artifact due to
  *                      server side issue.
@@ -4145,7 +4144,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         description: Forbidden, Failed to GET artifact due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET artifact due to element not
+ *         description: Not Found, Failed to GET artifact due to artifact not
  *                      existing.
  *       500:
  *         description: Internal Server Error, Failed to GET artifact due to
@@ -4461,8 +4460,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET artifact, returns artifact public
- *                      data.
+ *         description: OK, Succeeded to GET artifact, returns artifact blob.
  *       400:
  *         description: Bad Request, Failed to GET artifact due to invalid data.
  *       401:
@@ -4472,7 +4470,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
  *         description: Forbidden, Failed to GET artifact due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET artifact due to element not
+ *         description: Not Found, Failed to GET artifact due to artifact not
  *                      existing.
  *       500:
  *         description: Internal Server Error, Failed to GET artifact due to
