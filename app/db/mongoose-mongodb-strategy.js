@@ -28,7 +28,7 @@ const MongoStore = require('connect-mongo')(session);
 
 // Define enhancedQueries
 const enhancedQueries = {
-  regex: false
+  regex: true
 };
 
 /**
