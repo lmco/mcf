@@ -84,6 +84,10 @@ class OrgHome extends Component {
               // Refresh when session expires
               window.location.reload();
             },
+            403: () => {
+              // Throw error and set state
+              this.setState({ error: 'Organization not found.' });
+            },
             404: (error) => {
               this.setState({ error: error.responseText });
             }

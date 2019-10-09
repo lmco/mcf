@@ -110,7 +110,7 @@ class UserListItem extends Component {
     }
 
     if (this.props.adminLabel && user.admin) {
-      stats = (<StatsList>
+      stats = (<StatsList className='stats-list-member'>
                 <Stat title='Admin'
                       icon='fas fa-check'
                       className={minimizeClass}
@@ -204,7 +204,7 @@ class UserListItem extends Component {
 
       // Return new stat list
       stats = (
-        <StatsList key='statlist-perms'>
+        <StatsList className='stats-list-member' key='statlist-perms'>
           {permChecks}
         </StatsList>);
     }
