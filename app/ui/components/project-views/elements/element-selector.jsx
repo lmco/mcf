@@ -71,7 +71,8 @@ class ElementSelector extends React.Component {
       this.setState({ selectedElementPreview: this.props.currentSelection });
     }
 
-    if (prevProps.differentProject !== this.props.differentProject) {
+    if ((prevProps.differentProject !== this.props.differentProject)
+      && (this.props.differentProject)) {
       this.setState({ project: this.props.differentProject.project });
     }
   }
