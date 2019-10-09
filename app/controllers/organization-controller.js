@@ -39,6 +39,7 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const db = M.require('lib.db');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -884,7 +885,6 @@ async function remove(requestingUser, orgs, options) {
 
     // Define searchQuery and ownedQuery
     const searchQuery = {};
-    const ownedQuery = {};
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs)) {
@@ -911,9 +911,6 @@ async function remove(requestingUser, orgs, options) {
     });
 
     const foundOrgIDs = foundOrgs.map(o => o._id);
-    const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
-    ownedQuery._id = { $in: regexIDs };
-
     // Check if all orgs were found
     const notFoundIDs = searchedIDs.filter(o => !foundOrgIDs.includes(o));
     // Some orgs not found, throw an error
@@ -930,10 +927,16 @@ async function remove(requestingUser, orgs, options) {
       }
     });
 
-    // Delete any elements in the org
-    await Element.deleteMany(ownedQuery);
-    // Delete any branches in the org
-    await Branch.deleteMany(ownedQuery);
+    // Find all projects to delete
+    const projectsToDelete = await Project.find({ org: { $in: saniOrgs } },
+      null, { lean: true });
+
+    const projectIDs = projectsToDelete.map(p => p._id);
+
+    // Delete any elements in the found projects
+    await Element.deleteMany({ project: { $in: projectIDs } });
+    // Delete any branches in the found projects
+    await Branch.deleteMany({ project: { $in: projectIDs } });
     // Delete any projects in the org
     await Project.deleteMany({ org: { $in: saniOrgs } });
     // Delete the orgs
