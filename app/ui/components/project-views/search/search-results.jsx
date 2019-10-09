@@ -18,7 +18,7 @@
 /* eslint-disable no-unused-vars */
 
 import React, { Component } from 'react';
-import { Table, Col, Button } from 'reactstrap';
+import { Table, Row, Button } from 'reactstrap';
 import SearchResult from './search-result.jsx';
 
 /* eslint-enable no-unused-vars */
@@ -41,9 +41,9 @@ class SearchResults extends Component {
 
   // Creates the Headers for the results table
   getHeaders() {
-    const headers = Object.keys(this.props.results[0]);
-    const keys = headers.slice(0, headerLimit);
+    const keys = this.props.headers.slice(0, headerLimit);
     const headerRows = [];
+
     // Build header rows
     keys.forEach((key) => {
       /* eslint-disable-next-line no-undef */
@@ -58,8 +58,7 @@ class SearchResults extends Component {
 
   // Generates the rows of element results
   getRowsData() {
-    const headers = Object.keys(this.props.results[0]);
-    const keys = headers.slice(0, headerLimit);
+    const keys = this.props.headers.slice(0, headerLimit);
     const results = this.props.results;
     const rows = [];
 
@@ -68,9 +67,77 @@ class SearchResults extends Component {
 
     // Build result rows
     for (let index = 0; index < numRows; index++) {
+      // Add element row to table
       rows.push(
-        <tr key={index}>
+        <tr key={index}
+            data-toggle='collapse'
+            data-target={ `#result-${index}` }
+            className='result-row clickable'>
           <SearchResult key={index} data={results[index]} keys={keys}/>
+        </tr>
+      );
+
+      // Create element information as list
+      const result = results[index];
+      const created = result.createdOn.split(' ').splice(0, 4).join(' ');
+      const updated = result.updatedOn.split(' ').splice(0, 4).join(' ');
+
+      // Build rows for expanded element information
+      const elemInfo = (
+        <table id='tbl-elem-info' className='table-width'>
+          <tbody>
+            <tr>
+              <th>Name:</th>
+              <td>{result.name}</td>
+              <th>Type:</th>
+              <td>{result.type}</td>
+              <th>Archived:</th>
+              <td>{ `${result.archived}` }</td>
+            </tr>
+            <tr>
+              <th>Branch:</th>
+              <td>{result.branch}</td>
+              <th>Created By:</th>
+              <td>{result.createdBy}</td>
+              <th>Documentation:</th>
+              <td>{result.documentation}</td>
+            </tr>
+            <tr>
+              <th>Project:</th>
+              <td>{result.project}</td>
+              <th>Created On:</th>
+              <td>{created}</td>
+              <th>Source:</th>
+              <td>{result.source}</td>
+            </tr>
+            <tr>
+              <th>Org:</th>
+              <td>{result.org}</td>
+              <th>Last Modified By:</th>
+              <td>{result.lastModifiedBy}</td>
+              <th>Target:</th>
+              <td>{result.target}</td>
+            </tr>
+            <tr>
+              <th>Parent:</th>
+              <td>{result.parent}</td>
+              <th>Updated On:</th>
+              <td>{updated}</td>
+            </tr>
+          </tbody>
+        </table>
+      );
+
+      // Add element information accordion style row (hidden)
+      rows.push(
+        <tr key={`${index}-data`}>
+          <td colSpan={keys.length} style={{ padding: '0' }}>
+            <Row id={ `result-${index}` } className='collapse' style={{ margin: 0 }}>
+              <div className='results-border'>
+                { elemInfo }
+              </div>
+            </Row>
+          </td>
         </tr>
       );
     }
@@ -83,11 +150,11 @@ class SearchResults extends Component {
     let page = this.props.page;
     let skip;
 
-    if (event.target.name === 'next') {
+    if (event === 'next') {
       skip = (pageLimit * page);
       page += 1;
     }
-    else if (event.target.name === 'prev') {
+    else if (event === 'back') {
       skip = (page > 1) ? ((page - 1) * pageLimit) - pageLimit : 0;
       page -= 1;
     }
@@ -122,17 +189,21 @@ class SearchResults extends Component {
     const results = this.props.results;
 
     const btnPrev = (currentPage > 1)
-      ? <Button id='btn-prev-result-page'
-                name='prev'
-                type='button'
-                onClick={(event) => this.onPageChange(event)}>{'< Prev'}</Button>
+      ? <Button id='btn-back'
+                name='back'
+                onClick={() => this.onPageChange('back')}>
+          <i className='fas fa-arrow-left'/>
+          <span style={{ paddingLeft: '4px' }}>back</span>
+        </Button>
       : '';
 
     const btnNext = (results.length > pageLimit)
-      ? <Button id='btn-next-result-page'
+      ? <Button id='btn-next'
                 name='next'
-                type='button'
-                onClick={(event) => this.onPageChange(event)}>{'Next >'}</Button>
+                onClick={() => this.onPageChange('next')}>
+          <span style={{ paddingRight: '4px' }}>next</span>
+          <i className='fas fa-arrow-right'/>
+        </Button>
       : '';
 
     return (
@@ -145,19 +216,21 @@ class SearchResults extends Component {
 
   render() {
     // If no results yet, render empty div
-    if (!this.props.results) {
+    const results = this.props.results;
+
+    if (!results) {
       return (<div/>);
     }
 
     // If empty search results
-    if (Array.isArray(this.props.results) && this.props.results.length === 0) {
+    if (Array.isArray(results) && results.length === 0) {
       return (<div className='no-results'>No search results found.</div>);
     }
 
     return (
-      <div className='search-container'>
-        <Col id='search-results' sm={10}>
-          <Table striped style={{ margin: '0px' }}>
+      <React.Fragment>
+        <div id='search-results'>
+          <Table id='tbl-results' striped style={{ margin: '0px' }}>
             <thead className='template-item'>
               <tr>
                 { this.getHeaders() }
@@ -168,8 +241,8 @@ class SearchResults extends Component {
             </tbody>
           </Table>
           { this.displayPageButtons() }
-        </Col>
-      </div>
+        </div>
+      </React.Fragment>
     );
   }
 

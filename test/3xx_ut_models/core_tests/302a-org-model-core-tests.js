@@ -109,20 +109,19 @@ async function createOrg() {
  * @description Finds an organization using the Organization Model.
  */
 async function findOrg() {
-  let org;
   try {
     // Find the created organization from the previous createOrg() test
-    org = await Org.findOne({ _id: testData.orgs[0].id });
+    const org = await Org.findOne({ _id: testData.orgs[0].id });
+
+    // Verify correct org is returned
+    org._id.should.equal(testData.orgs[0].id);
+    org.name.should.equal(testData.orgs[0].name);
   }
   catch (error) {
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
   }
-  // Verify correct org is returned
-  org.id.should.equal(testData.orgs[0].id);
-  org._id.should.equal(testData.orgs[0].id);
-  org.name.should.equal(testData.orgs[0].name);
 }
 
 /**

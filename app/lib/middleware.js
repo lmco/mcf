@@ -64,7 +64,7 @@ module.exports.logIP = function logIP(req, res, next) {
 // eslint-disable-next-line consistent-return
 module.exports.disableUserAPI = function disableUserAPI(req, res, next) {
   // Check if the request method is disabled
-  if (!M.config.server.api.userAPI[req.method.toLowerCase()]) {
+  if (M.config.server.api.userAPI[req.method.toLowerCase()] === false) {
     // Create error message '<method> <url> is disabled'
     const message = `${req.method} ${req.originalUrl} is disabled.`;
     // Create custom error 403 Forbidden

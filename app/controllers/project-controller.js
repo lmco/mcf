@@ -48,7 +48,7 @@ const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
-const helper = M.require('lib.controller-helper');
+const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
 
 /**
@@ -204,7 +204,7 @@ async function find(requestingUser, organizationID, projects, options) {
 
       const orgIDs = readOrgs.map(o => o._id);
       // Project must be internal and in an org the user has access to
-      const internalQuery = { $and: [{ visibility: 'internal' }, { org: orgIDs }] };
+      const internalQuery = { visibility: 'internal', org: { $in: orgIDs } };
       const permissionsQuery = {};
       permissionsQuery[`permissions.${reqUser._id}`] = 'read';
 

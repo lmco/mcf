@@ -183,7 +183,7 @@ UserSchema.plugin(extensions);
  * @description Run our pre-defined setters on save.
  * @memberOf UserSchema
  */
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', async function() {
   // Validate the _id field to make sure it exists, since used in hashPassword()
   const errors = this.validateSync('_id');
   if (errors) {
@@ -192,8 +192,7 @@ UserSchema.pre('save', function(next) {
   }
 
   // Hash the user password
-  UserSchema.statics.hashPassword(this);
-  next();
+  this.hashPassword();
 });
 
 /* -----------------------------( User Methods )----------------------------- */
