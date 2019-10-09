@@ -177,7 +177,7 @@ function deleteBlob(artMetadata) {
 }
 
 /**
- * @description This function recursively create directories based on
+ * @description This function recursively creates directories based on
  * the input path.
  *
  * @param {string} pathString - The full directory path.
