@@ -41,6 +41,7 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const db = M.require('lib.db');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -834,18 +835,57 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // Create query to find all elements which reference elements on any
     // projects whose visibility was just lowered to 'private'
-    const relRegex = `^(${loweredVisibility.join(':)|(')}:)`;
-    const relQuery = {
-      project: { $nin: loweredVisibility },
-      $or: [
-        { source: { $regex: relRegex } },
-        { target: { $regex: relRegex } }
-      ]
-    };
+    let foundElements = [];
 
-    // Find broken relationships
-    const foundElements = await Element.find(relQuery, null,
-      { populate: 'source target', lean: true });
+    // If the selected database supports regex
+    if (db.enhancedQueries.regex) {
+      const relRegex = `^(${loweredVisibility.join(':)|(')}:)`;
+      const relQuery = {
+        project: { $nin: loweredVisibility },
+        $or: [
+          { source: { $regex: relRegex } },
+          { target: { $regex: relRegex } }
+        ]
+      };
+
+      // Find broken relationships
+      foundElements = await Element.find(relQuery, null,
+        { populate: 'source target', lean: true });
+    }
+    else {
+      // Find elements in batches in case too many found
+      let length = 50000;
+      let iteration = 0;
+      while (length === 50000) {
+        // Find all elements on the modified projects
+        const elemsOnModifed = await Element.find({ $in: loweredVisibility }, // eslint-disable-line
+          null, { populate: 'sourceOf targetOf', lean: true, limit: length, skip: iteration });
+
+        // For each of the found elements
+        elemsOnModifed.forEach((e) => {
+          // Loop through sourceOf
+          e.sourceOf.forEach((r) => {
+            // If the relationships project is different, add relationship to list
+            if (r.project !== e.project) {
+              foundElements.push(r);
+            }
+          });
+
+          // Loop through targetOf
+          e.targetOf.forEach((r) => {
+            // If the relationships project is different, add relationship to list
+            if (r.project !== e.project) {
+              foundElements.push(r);
+            }
+          });
+        });
+
+        // Set length and iteration
+        length = elemsOnModifed.length;
+        iteration += length;
+      }
+
+    }
 
     const bulkArray2 = [];
 
