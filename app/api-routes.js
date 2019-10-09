@@ -4144,7 +4144,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         description: Forbidden, Failed to GET artifact due to not having
  *                      permissions.
  *       404:
- *         description: Not Found, Failed to GET artifact due to element not
+ *         description: Not Found, Failed to GET artifact due to artifact not
  *                      existing.
  *       500:
  *         description: Internal Server Error, Failed to GET artifact due to
