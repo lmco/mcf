@@ -26,6 +26,11 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
+// Define enhancedQueries
+const enhancedQueries = {
+  regex: true
+};
+
 /**
  * @description Create connection to database.
  *
@@ -520,6 +525,7 @@ class Store extends MongoStore {
 }
 
 module.exports = {
+  enhancedQueries,
   connect,
   disconnect,
   clear,

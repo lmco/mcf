@@ -91,40 +91,38 @@ class SearchResults extends Component {
               <td>{result.name}</td>
               <th>Type:</th>
               <td>{result.type}</td>
-              <th>Last Modified By:</th>
-              <td>{result.lastModified}</td>
+              <th>Archived:</th>
+              <td>{ `${result.archived}` }</td>
             </tr>
             <tr>
               <th>Branch:</th>
               <td>{result.branch}</td>
+              <th>Created By:</th>
+              <td>{result.createdBy}</td>
               <th>Documentation:</th>
               <td>{result.documentation}</td>
-              <th>Archived:</th>
-              <td>{result.archived}</td>
             </tr>
             <tr>
               <th>Project:</th>
               <td>{result.project}</td>
-              <th>Created By:</th>
-              <td>{result.createdBy}</td>
-              <th>Contains:</th>
-              <td>{result.contains}</td>
+              <th>Created On:</th>
+              <td>{created}</td>
+              <th>Source:</th>
+              <td>{result.source}</td>
             </tr>
             <tr>
               <th>Org:</th>
               <td>{result.org}</td>
-              <th>Created On:</th>
-              <td>{created}</td>
-              <th>Source:</th>
-              <td>{result.sourceOf}</td>
+              <th>Last Modified By:</th>
+              <td>{result.lastModifiedBy}</td>
+              <th>Target:</th>
+              <td>{result.target}</td>
             </tr>
             <tr>
               <th>Parent:</th>
               <td>{result.parent}</td>
               <th>Updated On:</th>
               <td>{updated}</td>
-              <th>Target:</th>
-              <td>{result.targetOf}</td>
             </tr>
           </tbody>
         </table>
