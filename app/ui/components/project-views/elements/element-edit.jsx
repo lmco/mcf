@@ -304,6 +304,10 @@ class ElementEdit extends Component {
         }
       });
     }
+    else {
+      // Set the sourceNamespace field to null
+      this.setState({ sourceNamespace: null });
+    }
 
     this.setState({ source: _id });
   }
@@ -326,6 +330,10 @@ class ElementEdit extends Component {
           branch: 'master'
         }
       });
+    }
+    else {
+      // Set the targetNamespace field  to null
+      this.setState({ targetNamespace: null });
     }
 
     this.setState({ target: _id });
