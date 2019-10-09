@@ -99,9 +99,12 @@ class StatsList extends Component {
       );
     }
 
+    // Verify if there is a class name
+    const className = (this.props.className) ? this.props.className : 'stats-list';
+
     // Return the stat list
     return (
-      <div className='stats-list' ref={this.ref}>
+      <div className={className} ref={this.ref}>
         {statsItems}
       </div>
     );

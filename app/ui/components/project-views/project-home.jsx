@@ -67,13 +67,7 @@ class ProjectHome extends Component {
         // Set user data
         this.setState({ user: data });
         // Initialize options
-        let opt = 'minified=true';
-
-        // Verify if admin
-        if (data.admin) {
-          // Update options to return archived data
-          opt = 'minified=true&includeArchived=true';
-        }
+        const opt = 'minified=true&includeArchived=true';
 
         // Get project data
         $.ajax({
@@ -96,8 +90,17 @@ class ProjectHome extends Component {
                 // Set permissions
                 this.setState({ permissions: perm });
               }
-              // Set states
-              this.setState({ project: project });
+
+              // Verify if an archived project and user permissions
+              if (project.archived && !admin && (perm !== 'admin')) {
+                // Return no project with not found error
+                this.setState({ project: null });
+                this.setState({ error: `Project [${project.id}] not found.` });
+              }
+              else {
+                // Set states
+                this.setState({ project: project });
+              }
             },
             401: (error) => {
               // Throw error and set state
@@ -105,6 +108,10 @@ class ProjectHome extends Component {
 
               // Refresh when session expires
               window.location.reload();
+            },
+            403: () => {
+              // Throw error and set state
+              this.setState({ error: 'Project not found.' });
             },
             404: (error) => {
               this.setState({ error: error.responseText });
