@@ -834,21 +834,46 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // Create query to find all elements which reference elements on any
     // projects whose visibility was just lowered to 'private'
-    const relRegex = `^(${loweredVisibility.join(':)|(')}:)`;
-    const relQuery = {
-      project: { $nin: loweredVisibility },
-      $or: [
-        { source: { $regex: relRegex } },
-        { target: { $regex: relRegex } }
-      ]
-    };
+    const elemsToFind = [];
+    let length = 50000;
+    let iteration = 0;
+    while (length === 50000) {
+      // Find all elements on the modified projects
+      const elemsOnModifed = await Element.find({ project: { $in: loweredVisibility } }, // eslint-disable-line
+        null, { populate: 'sourceOf targetOf', lean: true, limit: length, skip: iteration });
+
+      // For each of the found elements
+      elemsOnModifed.forEach((e) => {
+        // Loop through sourceOf
+        e.sourceOf.forEach((r) => {
+          // If the relationships project is different, add relationship to list
+          if (r.project !== e.project) {
+            elemsToFind.push(r);
+          }
+        });
+
+        // Loop through targetOf
+        e.targetOf.forEach((r) => {
+          // If the relationships project is different, add relationship to list
+          if (r.project !== e.project) {
+            elemsToFind.push(r);
+          }
+        });
+      });
+
+      // Set length and iteration
+      length = elemsOnModifed.length;
+      iteration += length;
+    }
+
+    // Find the elements, and populate the source and target
+    const relQuery = { _id: { $in: elemsToFind.map(e => e._id) } };
 
     // Find broken relationships
     const foundElements = await Element.find(relQuery, null,
       { populate: 'source target', lean: true });
 
     const bulkArray2 = [];
-
     // For each broken relationship
     foundElements.forEach((elem) => {
       // If the source no longer exists, set it to the undefined element

@@ -1020,7 +1020,6 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
 
     // Emit the event elements-updated
     EventEmitter.emit('elements-updated', foundUpdatedElements);
-
     return foundUpdatedElements;
   }
   catch (error) {
