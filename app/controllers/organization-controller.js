@@ -39,7 +39,6 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
-const db = M.require('lib.db');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
