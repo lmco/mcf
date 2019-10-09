@@ -279,6 +279,10 @@ function validateBlobMeta(artMetadata) {
       assert.ok(artMetadata.hasOwnProperty(field), 'Artifact metadata requires'
         + ` ${field} field.`);
     });
+
+    // Ensure no '.' in location field
+    assert.ok(!artMetadata.location.includes('.'),
+      'Location field cannot include \'.\'.');
   }
   catch (error) {
     throw errors.captureError(error);

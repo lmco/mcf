@@ -319,9 +319,10 @@ async function deleteArtifact() {
 async function postBlob() {
   // Define test data
   const artData = {
-    filename: testData.artifacts[0].filename,
     project: projectID,
-    location: testData.artifacts[0].location
+    org: orgID,
+    location: testData.artifacts[0].location,
+    filename: testData.artifacts[0].filename
   };
 
   try {
@@ -349,9 +350,10 @@ async function postBlob() {
  */
 async function getBlob() {
   const artData = {
-    filename: testData.artifacts[0].filename,
-    project: project._id,
-    location: testData.artifacts[0].location
+    project: projectID,
+    org: orgID,
+    location: testData.artifacts[0].location,
+    filename: testData.artifacts[0].filename
   };
   try {
     // Find the artifact previously uploaded.
@@ -377,7 +379,7 @@ async function getBlob() {
  */
 async function deleteBlob() {
   try {
-    const artifact = {
+    const artData = {
       project: projectID,
       org: orgID,
       location: testData.artifacts[0].location,
@@ -386,10 +388,10 @@ async function deleteBlob() {
 
     // Find and delete the artifact
     await ArtifactController.deleteBlob(adminUser,
-      orgID, projectID, artifact);
+      orgID, projectID, artData);
 
     await ArtifactController.getBlob(adminUser, orgID,
-      projectID, artifact).should.eventually.be.rejectedWith(
+      projectID, artData).should.eventually.be.rejectedWith(
         'Artifact blob not found.');
 
   }

@@ -4026,12 +4026,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *         required: true
  *         type: string
  *       - name: filename
- *         in: body
+ *         in: query
  *         description: Artifact filename.
  *         required: true
  *         type: string
  *       - name: location
- *         in: body
+ *         in: query
  *         description: Artifact Blob storage location.
  *         required: true
  *         type: string

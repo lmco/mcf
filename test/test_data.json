@@ -219,7 +219,7 @@
       "id": "artifact00",
       "name": "logo image",
       "filename": "logo.png",
-      "location": "/test/test_files/",
+      "location": "/test/test_fil.es/",
       "contentType": "image/png",
       "custom": {
         "custom_key": "custom_value"

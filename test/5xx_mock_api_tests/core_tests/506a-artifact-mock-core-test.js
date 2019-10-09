@@ -417,12 +417,10 @@ function deleteBlob(done) {
   // Define artifact metadata
   const artData = testData.artifacts[0];
 
-  // Create request body
-  const body = {
+  const query = {
     location: artData.location,
     filename: artData.filename
-  };
-
+  }
   // Create request params
   const params = {
     orgid: orgID,
@@ -431,7 +429,7 @@ function deleteBlob(done) {
   };
 
   const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const req = testUtils.createRequest(adminUser, params, {}, method, query);
 
   // Set response as empty object
   const res = {};

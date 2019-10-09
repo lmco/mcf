@@ -5126,14 +5126,14 @@ async function getBlob(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  const body = {
+  const artMetadata = {
     location: req.query.location,
     filename: req.query.filename
   }
 
   try {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
-      req.params.projectid, body);
+      req.params.projectid, artMetadata);
 
     // Set filename
     res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
@@ -5223,11 +5223,14 @@ async function deleteBlob(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
+  const artMetadata = {
+    location: req.query.location,
+    filename: req.query.filename
+  }
+
   try {
     const artifact = await ArtifactController.deleteBlob(req.user, req.params.orgid,
-      req.params.projectid, req.body);
-
-    res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
+      req.params.projectid, artMetadata);
 
     // Set minified to true
     const minified = true;

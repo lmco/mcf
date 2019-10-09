@@ -329,7 +329,7 @@ function deleteBlob(done) {
   const artData = testData.artifacts[0];
   artData.project = projID;
 
-  const reqBody = {
+  const query = {
     location: artData.location,
     filename: artData.filename
   };
@@ -337,7 +337,7 @@ function deleteBlob(done) {
     method: 'DELETE',
     url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
     headers: testUtils.getHeaders(),
-    body: JSON.stringify(reqBody)
+    qs: query
   };
 
   request(options, (err, response, body) => {
