@@ -5289,7 +5289,7 @@ async function getBlobById(req, res) {
     // Add additional options
     options.fields = ['location', 'filename'];
 
-    // Find the artifact from it's artifact.id, project.id, and org.id
+    // Find the artifact from its artifact.id, project.id, and org.id
     // NOTE: find() sanitizes input params
     const artMetadata = await ArtifactController.find(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
