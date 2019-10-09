@@ -884,7 +884,6 @@ async function update(requestingUser, organizationID, projects, options) {
         length = elemsOnModifed.length;
         iteration += length;
       }
-
     }
 
     const bulkArray2 = [];
