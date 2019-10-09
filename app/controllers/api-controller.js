@@ -4849,7 +4849,7 @@ async function getArtifact(req, res) {
   options.lean = true;
 
   try {
-    // Find the artifact from it's artifact.id, branch.id, project.id, and org.id
+    // Find the artifact from its artifact.id, branch.id, project.id, and org.id
     // NOTE: find() sanitizes input params
     const artifact = await ArtifactController.find(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
