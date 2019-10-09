@@ -47,21 +47,21 @@ class EditPage extends Component {
     let visibility;
     let archived;
 
-    if (this.props.org) {
-      name = this.props.org.name;
-      archived = this.props.org.archived;
-      custom = this.props.org.custom;
+    if (props.org) {
+      name = props.org.name;
+      archived = props.org.archived;
+      custom = props.org.custom;
     }
-    else if (this.props.branch) {
-      name = this.props.branch.name;
-      archived = this.props.branch.archived;
-      custom = this.props.branch.custom;
+    else if (props.branch) {
+      name = props.branch.name;
+      archived = props.branch.archived;
+      custom = props.branch.custom;
     }
     else {
-      name = this.props.project.name;
-      archived = this.props.project.archived;
-      custom = this.props.project.custom;
-      visibility = this.props.visibility;
+      name = props.project.name;
+      archived = props.project.archived;
+      custom = props.project.custom;
+      visibility = props.project.visibility;
     }
 
     this.state = {
@@ -227,9 +227,8 @@ class EditPage extends Component {
                     <Input type="select"
                            name="visibility"
                            id="visibility"
-                           value={this.state.visibility || ''}
+                           value={this.state.visibility}
                            onChange={this.handleChange}>
-                      <option>Choose one...</option>
                       <option value='internal'>Internal</option>
                       <option value='private'>Private</option>
                     </Input>
