@@ -225,22 +225,20 @@ module.exports.createTestOrg = function(adminUser) {
  *
  * @returns {Promise<string>} Returns the id of the deleted org.
  */
-module.exports.removeTestOrg = function() {
-  return new Promise((resolve, reject) => {
-    // Create query for deleting items in the orgs
-    const ownedQuery = { _id: { $regex: `^${testData.orgs[0].id}${utils.ID_DELIMITER}` } };
+module.exports.removeTestOrg = async function() {
+  // Find all projects to delete
+  const projectsToDelete = await Project.find({ org: testData.orgs[0].id },
+    null, { lean: true });
+  const projectIDs = projectsToDelete.map(p => p._id);
 
-    // Delete elements
-    Element.deleteMany(ownedQuery)
-    // Delete any branches in the org
-    .then(() => Branch.deleteMany(ownedQuery))
-    // Delete any projects in the org
-    .then(() => Project.deleteMany({ org: testData.orgs[0].id }))
-    // Delete the orgs
-    .then(() => Organization.deleteMany({ _id: testData.orgs[0].id }))
-    .then((org) => resolve(org))
-    .catch((error) => reject(error));
-  });
+  // Delete any elements in the found projects
+  await Element.deleteMany({ project: { $in: projectIDs } });
+  // Delete any branches in the found projects
+  await Branch.deleteMany({ project: { $in: projectIDs } });
+  // Delete any projects in the org
+  await Project.deleteMany({ org: testData.orgs[0].id });
+  // Delete the orgs
+  await Organization.deleteMany({ _id: testData.orgs[0].id });
 };
 
 /**
