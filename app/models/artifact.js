@@ -15,7 +15,7 @@
  *
  * @description
  * <p>This module defines the artifact data model. The artifact data model
- * represent metadata for Artifact blobs (binary large object).
+ * represents metadata for Artifact blobs (binary large object).
  * Filename and Location are two examples of Artifact metadata.
  * They are used to point and locate artifact blobs.
  * </p>
