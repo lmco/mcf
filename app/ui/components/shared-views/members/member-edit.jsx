@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -43,7 +43,7 @@ class MemberEdit extends Component {
       users: null,
       username: '',
       permissions: '',
-      results: [],
+      results: null,
       error: null
     };
 
@@ -72,24 +72,20 @@ class MemberEdit extends Component {
   }
 
   selectUser(username) {
-    const org = this.props.org;
-    const project = this.props.project;
-    // Check if user is a member of the Org or Project
-    const orgMember = (org && org.permissions.hasOwnProperty(username));
-    const projMember = (project && project.permissions.hasOwnProperty(username));
-    let permissions = '';
-
     this.setState({ username: username, results: null });
 
-    // Verify if project provided
-    if (orgMember) {
-      permissions = org.permissions[username];
+    // Verify if org provided
+    if (this.props.org) {
+      if (this.props.org.permissions.hasOwnProperty(username)) {
+        this.setState({ permissions: this.props.org.permissions[username] });
+      }
     }
-    else if (projMember) {
-      permissions = project.permissions[username];
+    else if (this.props.project.permissions.hasOwnProperty(username)) {
+      this.setState({ permissions: this.props.project.permissions[username] });
     }
-
-    this.setState({ permissions: permissions });
+    else {
+      this.setState({ permissions: '' });
+    }
   }
 
   // Define the submit function
@@ -170,19 +166,48 @@ class MemberEdit extends Component {
     .done(data => {
       // Loop through users
       const userOpts = data.map((user) => (
-          <div className='members-dropdown-item' key={`user-${user.username}`}
-               onClick={() => this.selectUser(user.username)}>
-            <span>{user.fname} {user.lname}</span>
-            <span className='member-username'>@{user.username}</span>
-          </div>));
+        <div className='members-dropdown-item' key={`user-${user.username}`}
+             onClick={() => this.selectUser(user.username)}>
+          <span>{user.fname} {user.lname}</span>
+          <span className='member-username'>@{user.username}</span>
+        </div>));
 
       this.setState({
         results: userOpts
       });
     })
     .fail(res => {
-      if (res.status === 404 || res.status === 400) {
+      if (res.status === 400) {
         this.setState({ results: [] });
+      }
+      else if (res.status === 404) {
+        // Try username search endpoint
+        $.ajax({
+          method: 'GET',
+          url: `/api/users/${query}`,
+          statusCode: {
+            401: () => {
+              // Refresh when session expires
+              window.location.reload();
+            }
+          }
+        })
+        .done(data => {
+          const userOpt = (
+            <div className='members-dropdown-item' key={`user-${data.username}`}
+                 onClick={() => this.selectUser(data.username)}>
+              <span>{data.fname} {data.lname}</span>
+              <span className='member-username'>@{data.username}</span>
+            </div>
+          );
+
+          this.setState({ results: [userOpt] });
+        })
+        .fail(response => {
+          if (response.status === 404 || response.status === 400) {
+            this.setState({ results: [] });
+          }
+        });
       }
     });
   }
@@ -212,6 +237,7 @@ class MemberEdit extends Component {
     const org = this.props.org;
     const project = this.props.project;
     const user = this.state.username;
+    const results = this.state.results;
     const title = (org) ? org.name : project.name;
 
     // Check if user is a member of the Org or Project
@@ -222,8 +248,14 @@ class MemberEdit extends Component {
     const header = (orgMember || projMember) ? 'Modify User' : 'Add user';
 
     // Display error if permission is invalid or User not found
-    const notFound = (!orgMember && !projMember && user !== '') ? 'User not found.' : '';
+    const notFound = (results && results.length === 0 && user !== '') ? 'User not found.' : '';
     const error = (this.state.error) ? this.state.error : '';
+
+    const searchResults = (Array.isArray(results) && results.length > 0)
+      ? (<div className='members-dropdown'>
+           {results}
+          </div>)
+      : '';
 
     return (
       <div className='extra-padding'>
@@ -240,8 +272,9 @@ class MemberEdit extends Component {
                    autoComplete='off'
                    placeholder='Search User...'
                    value={this.state.username || ''}
-                   invalid={notFound}
+                   invalid={notFound.length > 0}
                    onChange={this.userChange}/>
+            { searchResults }
             <FormFeedback>
               { notFound }
             </FormFeedback>
@@ -264,7 +297,7 @@ class MemberEdit extends Component {
             </FormGroup>
           </Form>
           {/* Button to submit changes */}
-          <Button onClick={this.onSubmit} disabled={notFound}>{btnTitle}</Button>
+          <Button onClick={this.onSubmit} disabled={notFound.length > 0}>{btnTitle}</Button>
         </React.Fragment>
       </div>
     );

@@ -7,7 +7,7 @@
   "main": "mbee.js",
   "repository": "https://gitlab.us.lmco.com/mbx/mbee/mcf.git",
   "author": "Lockheed Martin",
-  "license": "LMPI",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "body-parser": "^1.18.3",
