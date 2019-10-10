@@ -127,27 +127,27 @@ function postArtifact(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const createdArtifact = JSON.parse(body);
+    const postedArtifact = JSON.parse(body);
 
     // Verify artifact created properly
-    chai.expect(createdArtifact.id).to.equal(artData.id);
-    chai.expect(createdArtifact.branch).to.equal(branchID);
-    chai.expect(createdArtifact.project).to.equal(projID);
-    chai.expect(createdArtifact.org).to.equal(orgID);
-    chai.expect(createdArtifact.location).to.equal(artData.location);
-    chai.expect(createdArtifact.filename).to.equal(artData.filename);
-    chai.expect(createdArtifact.contentType).to.equal(artData.contentType);
-    chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(postedArtifact.id).to.equal(artData.id);
+    chai.expect(postedArtifact.branch).to.equal(branchID);
+    chai.expect(postedArtifact.project).to.equal(projID);
+    chai.expect(postedArtifact.org).to.equal(orgID);
+    chai.expect(postedArtifact.location).to.equal(artData.location);
+    chai.expect(postedArtifact.filename).to.equal(artData.filename);
+    chai.expect(postedArtifact.contentType).to.equal(artData.contentType);
+    chai.expect(postedArtifact.strategy).to.equal(artData.strategy);
 
     // Verify additional properties
-    chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
-    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(createdArtifact.createdOn).to.not.equal(null);
-    chai.expect(createdArtifact.updatedOn).to.not.equal(null);
-    chai.expect(createdArtifact.archived).to.equal(false);
+    chai.expect(postedArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(postedArtifact.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(postedArtifact.createdOn).to.not.equal(null);
+    chai.expect(postedArtifact.updatedOn).to.not.equal(null);
+    chai.expect(postedArtifact.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(postedArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
     done();
   });
