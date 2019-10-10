@@ -1426,16 +1426,17 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     // Emit the event elements-deleted
     EventEmitter.emit('elements-deleted', elementsToDelete);
 
-    // Create query to find all relationships which point to deleted elements
-    const relQuery = {
-      $or: [
-        { source: { $in: uniqueIDs } },
-        { target: { $in: uniqueIDs } }
-      ]
-    };
+    // Find all sources/targets which point to deleted elements
+    const sources = await Element.find({ source: { $in: uniqueIDs } }, null,
+      { lean: true });
+    const targets = await Element.find({ target: { $in: uniqueIDs } }, null,
+      { lean: true });
 
-    // Find all relationships which are now broken
-    const relationships = await Element.find(relQuery, null, { lean: true });
+    // Get only unique elements
+    const sourceIDs = sources.map(e => e._id);
+    const targetsNoTInSource = targets.filter(e => !sourceIDs.includes(e._id));
+    const relationships = sources.concat(targetsNoTInSource);
+
     const bulkArray = [];
     promises = [];
 
