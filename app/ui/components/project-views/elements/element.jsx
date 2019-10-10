@@ -125,7 +125,7 @@ class Element extends Component {
         uniqCrossRefs[xr] = { id: ref };
       });
 
-      // Get a list of IDs from the cross-referencs
+      // Get a list of IDs from the cross-references
       const uniqCrossRefsValues = Object.values(uniqCrossRefs);
       const ids = uniqCrossRefsValues.map(xr => xr.id);
 

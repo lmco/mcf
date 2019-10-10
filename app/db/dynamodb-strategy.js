@@ -106,47 +106,15 @@ class Schema {
     this.definition.methods = [];
     this.definition.statics = [];
 
-    Object.keys(this.definition).forEach((key) => {
-      switch (this.definition[key].type) {
-        case 'String': this.definition[key].type = 'S'; break;
-        case 'Number': this.definition[key].type = 'N'; break;
-        case 'Object': this.definition[key].type = 'M'; break;
-        case 'Date': this.definition[key].type = 'N'; break;
-        case 'Boolean': this.definition[key].type = 'BOOL'; break;
-        default: this.definition[key].type = 'S'; break;
-      }
-
-      // Handle indexes
-      if (this.definition[key].index) {
-        // Create attribute object
-        const attributeObj = {
-          AttributeName: key,
-          AttributeType: this.definition[key].type
-        };
-        this.schema.AttributeDefinitions.push(attributeObj);
-
-        // Create index object
-        const indexObj = {
-          IndexName: `${key}_1`,
-          KeySchema: [
-            {
-              AttributeName: key,
-              KeyType: (this.definition[key].type === 'S') ? 'HASH' : 'RANGE'
-            }
-          ],
-          Projection: {
-            NonKeyAttributes: ['_id'],
-            ProjectionType: 'INCLUDE'
-          }
-        };
-        this.schema.GlobalSecondaryIndexes.push(indexObj);
-      }
-    });
+    this.add(definition);
 
     // Remove GlobalSecondaryIndex array if empty
     if (this.schema.GlobalSecondaryIndexes.length === 0) {
       this.schema.GlobalSecondaryIndexes = undefined;
     }
+
+    console.log('-------- DEFINITION --------');
+    console.log(JSON.stringify(this.definition, null, 2));
   }
 
   /**
@@ -157,7 +125,44 @@ class Schema {
    * @param {string} [prefix] - The optional prefix to add to the paths in obj.
    */
   add(obj, prefix) {
-    // return super.add(obj, prefix);
+    console.log('-------OBJECT-------');
+    console.log(obj);
+    Object.keys(obj).forEach((key) => {
+      switch (obj.type) {
+        case 'String': this.definition[key].type = 'S'; break;
+        case 'Number': this.definition[key].type = 'N'; break;
+        case 'Object': this.definition[key].type = 'M'; break;
+        case 'Date': this.definition[key].type = 'N'; break;
+        case 'Boolean': this.definition[key].type = 'BOOL'; break;
+        default: this.definition[key].type = 'S'; break;
+      }
+
+      // Handle indexes
+      if (obj.index) {
+        // Create attribute object
+        const attributeObj = {
+          AttributeName: key,
+          AttributeType: obj.type
+        };
+        this.schema.AttributeDefinitions.push(attributeObj);
+
+        // Create index object
+        const indexObj = {
+          IndexName: `${key}_1`,
+          KeySchema: [
+            {
+              AttributeName: key,
+              KeyType: (obj.type === 'S') ? 'HASH' : 'RANGE'
+            }
+          ],
+          Projection: {
+            NonKeyAttributes: ['_id'],
+            ProjectionType: 'INCLUDE'
+          }
+        };
+        this.schema.GlobalSecondaryIndexes.push(indexObj);
+      }
+    });
   }
 
   /**
@@ -167,7 +172,9 @@ class Schema {
    * @param {Object} [options] - A object containing options.
    */
   plugin(cb, options) {
-    // return super.plugin(cb, options);
+    this.cb = cb;
+    this.cb();
+    this.cb = undefined;
   }
 
   /**
@@ -387,6 +394,7 @@ class Model {
    * @returns {object} - Modified documents.
    */
   formatDocument(document, options = {}, recurse = false) {
+    console.log(document);
     Object.keys(document).forEach((field) => {
       if (Object.keys(document[field])[0] === 'M') {
         document[field] = this.formatDocument(document[field].M, {}, true);
@@ -419,27 +427,72 @@ class Model {
 
   async batchGetItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      // Make the projection comma separated instead of space separated
-      const projectionString = (projection) ? projection.split(' ').join(',') : undefined;
-
       // Initialize the batch get object
       const batchGetObj = { RequestItems: {} };
       batchGetObj.RequestItems[this.TableName] = {
-        Keys: [],
-        ProjectionExpression: projectionString
+        Keys: []
       };
 
-      batchGetObj.RequestItems[this.TableName].Keys = this.formatObject(filter);
-      console.log(batchGetObj.RequestItems[this.TableName].Keys)
+      // Handle projections
+      if (projection) {
+        const fields = projection.split(' ');
+        let index = 0;
+        // For each field to return
+        fields.forEach((f) => {
+          // If the ExpressionAttributeNames is not defined, define it
+          if (!batchGetObj.RequestItems[this.TableName].ExpressionAttributeNames) {
+            batchGetObj.RequestItems[this.TableName].ExpressionAttributeNames = {};
+          }
+
+          // Create unique key for field
+          batchGetObj.RequestItems[this.TableName]
+          .ExpressionAttributeNames[`#val${index}`] = f;
+
+          // If ProjectionExpression is not defined, init it
+          if (!batchGetObj.RequestItems[this.TableName].ProjectionExpression) {
+            batchGetObj.RequestItems[this.TableName].ProjectionExpression = `#val${index}`;
+          }
+          // Add onto ProjectionExpression with leading comma
+          else {
+            batchGetObj.RequestItems[this.TableName].ProjectionExpression += `,#val${index}`;
+          }
+
+          // Increment index
+          index++;
+        });
+      }
+
+      // Get all queries
+      const queries = this.createQuery(filter);
+      const queriesToMake = [];
+
+      for (let i = 0; i < queries.length / 100; i++) {
+        batchGetObj.RequestItems[this.TableName].Keys = queries.slice(i * 100, i * 100 + 100);
+        queriesToMake.push(batchGetObj);
+      }
 
       // If there are actually query parameters
-      if (batchGetObj.RequestItems[this.TableName].Keys.length > 0) {
-        M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
-        connect()
-        // Make the batchGetItem request
-        .then((conn) => conn.batchGetItem(batchGetObj).promise())
-        .then((foundDocs) => resolve(this.formatDocuments(
-          foundDocs.Responses[this.TableName], options)))
+      if (queriesToMake.length > 0) {
+        let foundDocs = [];
+        const promises = [];
+
+        // For each query
+        queriesToMake.forEach((q) => {
+          // Log the database operation
+          M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
+          // Append operation to promises array
+          promises.push(
+            connect()
+            .then((conn) => conn.batchGetItem(q).promise())
+            .then((found) => {
+              foundDocs = foundDocs.concat(found.Responses[this.TableName]);
+            })
+          );
+        });
+
+        // Wait for completion of all promises, and return formatted docs
+        Promise.all(promises)
+        .then(() => resolve(this.formatDocuments(foundDocs, options)))
         .catch((error) => reject(error));
       }
       else {
@@ -957,12 +1010,15 @@ class Model {
                   Item: {}
                 }
               };
-              Object.keys(doc).forEach((key) => {
-                if (this.definition[key]) {
-                  putObj.PutRequest.Item[key] = {};
-                  putObj.PutRequest.Item[key][this.definition[key].type] = doc[key];
-                }
-              });
+              // Object.keys(doc).forEach((key) => {
+              //   if (this.definition[key]) {
+              //     putObj.PutRequest.Item[key] = {};
+              //     putObj.PutRequest.Item[key][this.definition[key].type] = doc[key];
+              //   }
+              // });
+              putObj.PutRequest.Item = this.formatObject(doc);
+              console.log('------- Formatted Docs -------')
+              console.log(JSON.stringify(putObj.PutRequest.Item, null, 2));
 
               batchWriteObj.RequestItems[this.TableName].push(putObj);
             });
@@ -1043,20 +1099,55 @@ class Model {
    *
    * @param {object} query - The query provided which is to be formatted to work
    * with DynamoDB.
-   * @param {number} [numDocs=10000] - The maximum number of documents that can
-   * be found with the query. Used specifically when arrays are provided in the
-   * query.
    *
    * @returns {object[]} An array of queries to be called.
    */
-  createQuery(query, numDocs = 10000) {
-    // TODO: Mongo specific keys to handle: $in, $text, $search
+  createQuery(query) {
     const returnArray = [];
-    // INPUT: { _id: { $in: ['id1', 'id2', 'id3'...] } }
-    // OUTPUT [{ _id: { S: 'id1' }}, { _id: { S: 'id2' }}, { _id: { S: 'id3' }}]
-    Object.keys(query).forEach((k) => {
+    const base = {};
+    const inVals = {};
 
+    // For each key in the query
+    Object.keys(query).forEach((key) => {
+      switch (typeof query[key]) {
+        case 'string': base[key] = { S: query[key] }; break;
+        case 'number': base[key] = { N: query[key] }; break;
+        case 'boolean': base[key] = { BOOL: query[key] }; break;
+        case 'object': {
+          if (query[key] !== null) {
+            // Handle the $in case
+            if (Object.keys(query[key])[0] === '$in') {
+              inVals[key] = Object.values(query[key])[0];
+            }
+          }
+          break;
+        }
+        default: throw new M.DataFormatError(`Invalid type in query ${typeof query[key]}.`);
+      }
     });
+
+    // If no $in exists in the query, return the base query
+    if (Object.keys(inVals).length === 0) {
+      returnArray.push(base);
+      return returnArray;
+    }
+    else {
+      // For each in_val
+      Object.keys(inVals).forEach((k) => {
+        // For each item in the array to search through
+        inVals[k].forEach((i) => {
+          switch (typeof i) {
+            case 'string': base[k] = { S: i }; break;
+            case 'number': base[k] = { N: i }; break;
+            default: throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
+          }
+
+          returnArray.push(base);
+        });
+      });
+
+      return returnArray;
+    }
   }
 
   /**
