@@ -1434,8 +1434,8 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
 
     // Get only unique elements
     const sourceIDs = sources.map(e => e._id);
-    const targetsNoTInSource = targets.filter(e => !sourceIDs.includes(e._id));
-    const relationships = sources.concat(targetsNoTInSource);
+    const targetsNotInSource = targets.filter(e => !sourceIDs.includes(e._id));
+    const relationships = sources.concat(targetsNotInSource);
 
     const bulkArray = [];
     promises = [];
