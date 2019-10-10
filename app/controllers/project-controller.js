@@ -932,7 +932,7 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // If there are relationships to fix
     if (bulkArray2.length > 0) {
-      return Element.bulkWrite(bulkArray2);
+      return await Element.bulkWrite(bulkArray2);
     }
 
     const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,

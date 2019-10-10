@@ -295,7 +295,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
       // Find elements in batches
       for (let i = 0; i < elementsToFind.length / 50000; i++) {
         // Split elementIDs list into batches of 50000
-        searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
+        searchQuery._id = { $in: elementsToFind.slice(i * 50000, i * 50000 + 50000) };
 
         // Add find operation to array of promises
         promises.push(
@@ -858,7 +858,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     // Find elements in batches
     for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
       // Split elementIDs list into batches of 50000
-      searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
+      searchQuery._id = { $in: elementsToUpdate.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
       promises2.push(Element.find(searchQuery, null, { lean: true })
@@ -1003,7 +1003,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     // Find elements in batches
     for (let i = 0; i < arrIDs.length / 50000; i++) {
       // Split arrIDs list into batches of 50000
-      searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
+      searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
       promises3.push(Element.find(searchQuery, validatedOptions.fieldsString,
@@ -1162,7 +1162,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
     // TODO: Consider changing of loop increment by 50k instead of 1
     for (let i = 0; i < arrIDs.length / 50000; i++) {
       // Split arrIDs list into batches of 50000
-      searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
+      searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
       promises.push(Element.find(searchQuery, null, { lean: true })
@@ -1216,7 +1216,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
     });
 
     // Delete elements from database
-    await Element.deleteMany({ _id: foundElementIDs });
+    await Element.deleteMany({ _id: { $in: foundElementIDs } });
 
     // Emit the event elements-deleted
     EventEmitter.emit('elements-deleted', foundElements);
