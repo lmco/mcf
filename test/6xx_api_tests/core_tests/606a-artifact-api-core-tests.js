@@ -385,7 +385,7 @@ function patchArtifact(done) {
     // Verify response body
     const createdArtifact = JSON.parse(body);
 
-    // Verify artifact created properly
+    // Verify artifact updated properly
     chai.expect(createdArtifact.id).to.equal(artData.id);
     chai.expect(createdArtifact.branch).to.equal(branchID);
     chai.expect(createdArtifact.project).to.equal(projID);
