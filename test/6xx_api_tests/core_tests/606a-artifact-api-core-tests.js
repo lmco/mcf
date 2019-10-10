@@ -350,12 +350,12 @@ function deleteBlob(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
+
     const deletedBlob = JSON.parse(body);
     // Verify artifact created properly
     chai.expect(deletedBlob.project).to.equal(projID);
     chai.expect(deletedBlob.location).to.equal(artData.location);
     chai.expect(deletedBlob.filename).to.equal(artData.filename);
-
     done();
   });
 }
