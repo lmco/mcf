@@ -161,7 +161,7 @@ function build(_args) {
   if (args.includes('--all') || args.includes('--jsdoc')) {
     M.log.info('  + Building jsdoc ...');
     // Create JSDoc build command
-    const jsdoc = `${process.argv[0]} node_modules/jsdoc/jsdoc.js`;
+    const jsdoc = `node ${path.join('node_modules', 'jsdoc', 'jsdoc.js')}`;
     const cmd = `${jsdoc} -c ./config/jsdoc.json`;
 
     // Execute JSDoc build command
