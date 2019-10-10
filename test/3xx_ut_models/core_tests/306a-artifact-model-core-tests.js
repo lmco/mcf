@@ -126,7 +126,6 @@ async function createArtifact() {
     );
     chai.expect(createdArtifact.location).to.equal(artData.location);
     chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
-    chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
       artData.custom
     );

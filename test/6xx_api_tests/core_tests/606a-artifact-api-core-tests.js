@@ -182,8 +182,12 @@ function getArtifact(done) {
     chai.expect(createdArtifact.branch).to.equal(branchID);
     chai.expect(createdArtifact.project).to.equal(projID);
     chai.expect(createdArtifact.org).to.equal(orgID);
+    chai.expect(createdArtifact.name).to.equal(artData.name);
     chai.expect(createdArtifact.contentType).to.equal(artData.contentType);
-    chai.expect(createdArtifact.hash).to.equal(artData.hash);
+    chai.expect(createdArtifact.location).to.equal(artData.location);
+    chai.expect(createdArtifact.filename).to.equal(artData.filename);
+    chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(createdArtifact.custom).to.deep.equal(artData.custom);
 
     // Verify additional properties
     chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
@@ -346,11 +350,11 @@ function deleteBlob(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const postedBlob = JSON.parse(body);
+    const deletedBlob = JSON.parse(body);
     // Verify artifact created properly
-    chai.expect(postedBlob.project).to.equal(projID);
-    chai.expect(postedBlob.location).to.equal(artData.location);
-    chai.expect(postedBlob.filename).to.equal(artData.filename);
+    chai.expect(deletedBlob.project).to.equal(projID);
+    chai.expect(deletedBlob.location).to.equal(artData.location);
+    chai.expect(deletedBlob.filename).to.equal(artData.filename);
 
     done();
   });
@@ -383,27 +387,29 @@ function patchArtifact(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const createdArtifact = JSON.parse(body);
+    const patchedArtifact = JSON.parse(body);
 
     // Verify artifact created properly
-    chai.expect(createdArtifact.id).to.equal(artData.id);
-    chai.expect(createdArtifact.branch).to.equal(branchID);
-    chai.expect(createdArtifact.project).to.equal(projID);
-    chai.expect(createdArtifact.org).to.equal(orgID);
-    chai.expect(createdArtifact.location).to.equal(artData.location);
-    chai.expect(createdArtifact.filename).to.equal(artData.filename);
-    chai.expect(createdArtifact.contentType).to.equal('edited_type');
-    chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(patchedArtifact.id).to.equal(artData.id);
+    chai.expect(patchedArtifact.branch).to.equal(branchID);
+    chai.expect(patchedArtifact.project).to.equal(projID);
+    chai.expect(patchedArtifact.org).to.equal(orgID);
+    chai.expect(patchedArtifact.name).to.equal(artData.name);
+    chai.expect(patchedArtifact.location).to.equal(artData.location);
+    chai.expect(patchedArtifact.filename).to.equal(artData.filename);
+    chai.expect(patchedArtifact.contentType).to.equal('edited_type');
+    chai.expect(patchedArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(patchedArtifact.custom).to.deep.equal(artData.custom);
 
     // Verify additional properties
-    chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
-    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(createdArtifact.createdOn).to.not.equal(null);
-    chai.expect(createdArtifact.updatedOn).to.not.equal(null);
-    chai.expect(createdArtifact.archived).to.equal(false);
+    chai.expect(patchedArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(patchedArtifact.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(patchedArtifact.createdOn).to.not.equal(null);
+    chai.expect(patchedArtifact.updatedOn).to.not.equal(null);
+    chai.expect(patchedArtifact.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(patchedArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
     done();
   });
