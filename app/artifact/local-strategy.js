@@ -22,17 +22,24 @@ module.exports = {
   getBlob,
   postBlob,
   putBlob,
-  deleteBlob
+  deleteBlob,
+  clear
 };
 
 // Node.js Modules
 const path = require('path');    // Find directory paths
 const fs = require('fs');        // Access the filesystem
 const assert = require('assert');
+const { execSync } = require('child_process');
 
 // MBEE modules
 const utils = M.require('lib.utils');
 const errors = M.require('lib.errors');
+
+// Validator regex for this strategy
+module.exports.validatorReg = {
+  location: '[.]'
+};
 
 /**
  * @description This function gets the artifact blob file
@@ -49,7 +56,7 @@ const errors = M.require('lib.errors');
 function getBlob(artMetadata) {
   try {
     // Validate metadata
-    validateBlobMeta(artMetadata)
+    validateBlobMeta(artMetadata);
 
     // Create artifact path
     const filePath = createBlobPath(artMetadata);
@@ -78,7 +85,7 @@ function getBlob(artMetadata) {
  */
 function postBlob(artMetadata, artifactBlob) {
   // Validate metadata
-  validateBlobMeta(artMetadata)
+  validateBlobMeta(artMetadata);
 
   // Create artifact path
   const fullPath = createBlobPath(artMetadata);
@@ -105,7 +112,7 @@ function postBlob(artMetadata, artifactBlob) {
  */
 function putBlob(artMetadata, artifactBlob) {
   // Validate metadata
-  validateBlobMeta(artMetadata)
+  validateBlobMeta(artMetadata);
 
   // Create artifact path
   const fullPath = createBlobPath(artMetadata);
@@ -135,7 +142,7 @@ function putBlob(artMetadata, artifactBlob) {
  */
 function deleteBlob(artMetadata) {
   // Validate metadata
-  validateBlobMeta(artMetadata)
+  validateBlobMeta(artMetadata);
 
   // Create artifact path
   const blobPath = createBlobPath(artMetadata);
@@ -145,7 +152,7 @@ function deleteBlob(artMetadata) {
   fs.unlinkSync(blobPath, (error) => {
     // Check directory NOT exist
     if (error) {
-      M.log.error(error)
+      M.log.error(error);
       // Check for specific error, blob not exist
       if (error.code === 'ENOENT') {
         throw new M.DataFormatError('Artifact blob does not exist.', 'warn');
@@ -179,6 +186,8 @@ function deleteBlob(artMetadata) {
 /**
  * @description This function recursively creates directories based on
  * the input path.
+ *
+ * Note: Creates from root Artifact path defined in config file.
  *
  * @param {string} pathString - The full directory path.
  *
@@ -232,6 +241,23 @@ function createDirectory(pathString) {
 }
 
 /**
+ * @description This function recursively deletes directories based on
+ * the input path.
+ *
+ * Note: Deletes from root Artifact path defined in config file.
+ *
+ * @param {string} pathString - The full directory path.
+ */
+function deleteDirectory(pathString) {
+  // Create the root artifact path
+  const dirToDelete = path.join(M.root, M.config.artifact.path, pathString);
+
+  // Remove artifacts
+  const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
+  execSync(`${rmd} ${dirToDelete}/*`);
+}
+
+/**
  * @description This function creates the blob path using the local
  * storage path, location field, and filename.
  * Handles specific cases to format path and filename consistently
@@ -273,7 +299,8 @@ function validateBlobMeta(artMetadata) {
     const requiredBlobFields = ['location', 'filename'];
 
     if (typeof artMetadata !== 'object') {
-      throw new M.DataFormatError('Artifact metadata must be an object.', 'warn');  }
+      throw new M.DataFormatError('Artifact metadata must be an object.', 'warn');
+    }
 
     requiredBlobFields.forEach((field) => {
       assert.ok(artMetadata.hasOwnProperty(field), 'Artifact metadata requires'
@@ -287,4 +314,30 @@ function validateBlobMeta(artMetadata) {
   catch (error) {
     throw errors.captureError(error);
   }
+}
+
+/**
+ * @description This function deletes multiple blobs.
+ *
+ * @param {object} clearObj - Contains meta data to clear blobs.
+ */
+function clear(clearObj) {
+  let dirPath;
+  // Check if project id is defined
+  if (clearObj.hasOwnProperty('projectID')) {
+    // Create the Project path
+    dirPath = path.join(M.root, M.config.artifact.path,
+      clearObj.orgID, clearObj.projectID);
+  }
+  else if (clearObj.hasOwnProperty('orgID')) {
+    // Create the Org path
+    dirPath = path.join(M.root, M.config.artifact.path, clearObj.orgID);
+  }
+  else {
+    // Skip deletion
+    return;
+  }
+
+  // Delete the org directory
+  deleteDirectory(dirPath);
 }

@@ -178,5 +178,6 @@ async function deleteBlob() {
   // Delete blob
   localStrategy.deleteBlob(artData);
   chai.expect(localStrategy.getBlob.bind(
-    localStrategy,artData)).to.throw('Artifact blob not found.');
+    localStrategy, artData
+  )).to.throw('Artifact blob not found.');
 }

@@ -48,6 +48,7 @@ const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 
 /**
  * @description This function finds one or many organizations. Depending on the
@@ -934,12 +935,23 @@ async function remove(requestingUser, orgs, options) {
 
     // Delete any elements in the org
     await Element.deleteMany(ownedQuery);
+
     // Delete any artifacts in the org
     await Artifact.deleteMany(ownedQuery);
+
+    // Remove all blobs under org
+    foundOrgIDs.forEach((orgID) => {
+      ArtifactStrategy.clear({
+        orgID: orgID
+      });
+    });
+
     // Delete any branches in the org
     await Branch.deleteMany(ownedQuery);
+
     // Delete any projects in the org
     await Project.deleteMany({ org: { $in: saniOrgs } });
+
     // Delete the orgs
     const retQuery = await Organization.deleteMany(searchQuery);
     // Emit the event orgs-deleted

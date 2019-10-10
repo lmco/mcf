@@ -365,16 +365,16 @@ function patchArtifact(done) {
   // Get update artifact data
   const artData = testData.artifacts[0];
 
-  const body = {
+  const reqBody = {
     id: artData.id,
     contentType: 'edited_type'
-  }
+  };
 
   const options = {
     method: 'PATCH',
     url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}`,
     headers: testUtils.getHeaders(),
-    body: JSON.stringify(body)
+    body: JSON.stringify(reqBody)
   };
 
   request(options, (err, response, body) => {

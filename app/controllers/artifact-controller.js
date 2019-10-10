@@ -43,21 +43,25 @@ const validators = M.require('lib.validators');
 const utils = M.require('lib.utils');
 const helper = M.require('lib.controller-utils');
 const jmi = M.require('lib.jmi-conversions');
-const ArtifactModule = M.require(`artifact.${M.config.artifact.strategy}`);
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 const errors = M.require('lib.errors');
 const permissions = M.require('lib.permissions');
 
-// Error Check - Verify ArtifactModule is imported and implements required functions
-if (!ArtifactModule.hasOwnProperty('getBlob')) {
+// Error Check - Verify ArtifactStrategy is imported and implements required functions
+if (!ArtifactStrategy.hasOwnProperty('getBlob')) {
   M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement getBlob.`);
   process.exit(0);
 }
-if (!ArtifactModule.hasOwnProperty('postBlob')) {
+if (!ArtifactStrategy.hasOwnProperty('postBlob')) {
   M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement addBlob.`);
   process.exit(0);
 }
-if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
+if (!ArtifactStrategy.hasOwnProperty('deleteBlob')) {
   M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement deleteBlob.`);
+  process.exit(0);
+}
+if (!ArtifactStrategy.hasOwnProperty('clear')) {
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement clear.`);
   process.exit(0);
 }
 
@@ -67,7 +71,7 @@ if (!ArtifactModule.hasOwnProperty('deleteBlob')) {
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the project belongs to.
  * @param {string} projectID - The project ID of the Project which is being searched for.
-* @param {string} branchID - The branch ID.
+ * @param {string} branchID - The branch ID.
  * @param {(string|string[])} artifacts - The artifacts to find. Can either be
  * an array of artifact ids, a single artifact id, or not provided, which defaults
  * to every artifact in a branch being found.
@@ -137,7 +141,7 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
   if (options) {
     // Create array of valid search options
     const validSearchOptions = ['filename', 'contentType', 'name',
-      'createdBy', 'lastModifiedBy', 'archivedBy'];
+      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
@@ -711,7 +715,7 @@ async function getBlob(requestingUser, organizationID,
   saniArt.org = orgID;
 
   // Include artifact blob in return obj
-  return ArtifactModule.getBlob(saniArt);
+  return ArtifactStrategy.getBlob(saniArt);
 }
 
 /**
@@ -770,11 +774,10 @@ async function postBlob(requestingUser, organizationID,
     saniArt.org = orgID;
 
     // Return artifact object
-    ArtifactModule.postBlob(saniArt, artifactBlob);
+    ArtifactStrategy.postBlob(saniArt, artifactBlob);
 
     // Return artifact object
     return saniArt;
-
   }
   catch (error) {
     throw errors.captureError(error);
@@ -832,7 +835,7 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     saniArt.project = projectID;
     saniArt.org = orgID;
 
-    await ArtifactModule.deleteBlob(saniArt);
+    await ArtifactStrategy.deleteBlob(saniArt);
 
     // Return Artifact obj
     return saniArt;

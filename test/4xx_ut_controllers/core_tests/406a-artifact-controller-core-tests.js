@@ -155,7 +155,6 @@ async function createArtifact() {
     chai.expect(createdArtifact[0].createdOn).to.not.equal(null);
     chai.expect(createdArtifact[0].updatedOn).to.not.equal(null);
     chai.expect(createdArtifact[0].archivedOn).to.equal(null);
-
   }
   catch (error) {
     M.log.error(error);
@@ -392,8 +391,8 @@ async function deleteBlob() {
 
     await ArtifactController.getBlob(adminUser, orgID,
       projectID, artData).should.eventually.be.rejectedWith(
-        'Artifact blob not found.');
-
+      'Artifact blob not found.'
+    );
   }
   catch (error) {
     M.log.error(error);

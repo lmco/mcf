@@ -23,7 +23,6 @@ const fs = require('fs');     // Access the filesystem
 const path = require('path'); // Find directory paths
 
 // MBEE modules
-const ProjController = M.require('controllers.project-controller');
 const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
@@ -319,13 +318,13 @@ function getBlob(done) {
   const params = {
     orgid: orgID,
     projectid: projID,
-    branchid: branchID,
+    branchid: branchID
   };
 
   const query = {
     location: artData.location,
     filename: artData.filename
-  }
+  };
 
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, {}, method, query);
@@ -420,7 +419,7 @@ function deleteBlob(done) {
   const query = {
     location: artData.location,
     filename: artData.filename
-  }
+  };
   // Create request params
   const params = {
     orgid: orgID,

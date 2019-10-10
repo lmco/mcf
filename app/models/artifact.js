@@ -26,7 +26,7 @@ const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
-
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 
 /* -------------------------( Artifact Schema )-------------------------- */
 
@@ -106,7 +106,14 @@ const ArtifactSchema = new db.Schema({
     required: true
   },
   location: {
-    type: 'String'
+    type: 'String',
+    validate: [{
+      validator: function(v) {
+        // If the location is improperly formatted, reject
+        return !RegExp(ArtifactStrategy.validatorReg.location).test(v);
+      },
+      message: props => `Artifact location [${props.value}] is improperly formatted.`
+    }]
   },
   strategy: {
     type: 'String',

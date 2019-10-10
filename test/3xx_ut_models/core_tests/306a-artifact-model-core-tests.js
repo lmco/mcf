@@ -119,14 +119,17 @@ async function createArtifact() {
       path.extname(artData.filename)
     );
     chai.expect(createdArtifact.project).to.equal(
-      utils.createID(org.id, project.id));
+      utils.createID(org.id, project.id)
+    );
     chai.expect(createdArtifact.branch).to.equal(
-      utils.createID(org.id, project.id, branch.id));
+      utils.createID(org.id, project.id, branch.id)
+    );
     chai.expect(createdArtifact.location).to.equal(artData.location);
     chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
     chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
-      artData.custom);
+      artData.custom
+    );
   }
   catch (error) {
     M.log.error(error);
@@ -180,14 +183,16 @@ async function updateArtifact() {
     );
 
     chai.expect(foundArtifact.project).to.equal(
-      utils.createID(org.id, project.id));
+      utils.createID(org.id, project.id)
+    );
     chai.expect(foundArtifact.branch).to.equal(
-      utils.createID(org.id, project.id, branch.id));
+      utils.createID(org.id, project.id, branch.id)
+    );
     chai.expect(foundArtifact.location).to.equal(artData.location);
     chai.expect(foundArtifact.strategy).to.equal(artData.strategy);
     chai.expect(foundArtifact.custom || {}).to.deep.equal(
-      artData.custom);
-
+      artData.custom
+    );
   }
   catch (error) {
     M.log.error(error);

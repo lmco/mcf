@@ -50,6 +50,7 @@ const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -1197,8 +1198,16 @@ async function remove(requestingUser, organizationID, projects, options) {
     // Delete any elements in the project
     await Element.deleteMany(ownedQuery);
 
-    // Delete any artifacts in the project
+    // Delete any artifacts in the projects
     await Artifact.deleteMany(ownedQuery);
+
+    // Remove all blobs under project
+    foundProjectIDs.forEach((p) => {
+      ArtifactStrategy.clear({
+        orgID: orgID,
+        projectID: utils.parseID(p).pop()
+      });
+    });
 
     // Delete any branches in the project
     await Branch.deleteMany(ownedQuery);

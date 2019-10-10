@@ -26,6 +26,31 @@ const zlib = require('zlib');
 // MBEE modules
 const publicData = M.require('lib.get-public-data');
 
+// Define mine type to content type look up table
+const mineTypeTable = {
+  '7z': 'application/x-7z-compressed',
+  pdf: 'application/pdf',
+  bin: 'application/octet-stream',
+  bmp: 'image/bmp',
+  css: 'text/css',
+  csv: 'text/csv',
+  json: 'application/json',
+  jpeg: 'image/jpeg',
+  jpg: 'image/jpeg',
+  xls: 'application/vnd.ms-excel',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ppt: 'application/vnd.ms-powerpoint',
+  mp4: 'video/mp4',
+  png: 'image/x-png',
+  svg: 'image/svg+xml',
+  svd: 'application/vnd.svd',
+  tar: 'application/x-tar',
+  xml: 'application/xml',
+  yaml: 'text/yaml',
+  zip: 'application/zip'
+};
+
 /**
  * @description Provides time unit conversions.
  */
@@ -487,4 +512,30 @@ module.exports.handleGzip = function(dataStream) {
       });
     });
   });
+};
+
+/**
+ * @description Looks up the content type based on the file extension.
+ * Defaults to 'application/octet-stream' if no extension is found.
+ *
+ * @param {string} filename - Name of the file.
+ *
+ * @returns {string} - The content type of the file.
+ */
+module.exports.getContentType = function(filename) {
+  // Initialize content type
+  let contentType = 'application/octet-stream';
+
+  // If filename null or has no extensions
+  if (filename === null || !(filename.includes('.'))) {
+    return contentType;
+  }
+  // Extract extension
+  const ext = filename.split('.').pop();
+
+  // Check ext in lookup table
+  if (ext in mineTypeTable) {
+    contentType = mineTypeTable[ext];
+  }
+  return contentType;
 };

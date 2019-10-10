@@ -143,7 +143,8 @@ function formatJSON(obj, minified = false) {
  * @param {object} res - The response object.
  * @param {string} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
- * @param {string} [contentType = "application/json"] - The content type for the response.
+ * @param {string} [contentType="application/json"] - The content type for
+ * the response.
  *
  * @returns {object} The response object.
  */
@@ -5129,17 +5130,18 @@ async function getBlob(req, res) {
   const artMetadata = {
     location: req.query.location,
     filename: req.query.filename
-  }
+  };
 
   try {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
       req.params.projectid, artMetadata);
 
     // Set filename
-    res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
+    res.header('Content-Disposition', `attachment; filename=${req.query.filename}`);
 
     // Return 200: OK and public artifact data
-    return returnResponse(req, res, artifactBlob, 200, 'application/octet-stream');
+    return returnResponse(req, res, artifactBlob, 200,
+      utils.getContentType(req.query.filename));
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5169,7 +5171,7 @@ async function postBlob(req, res) {
 
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.
-      M.log.error(err)
+      M.log.error(err);
       const error = new M.ServerError('Artifact upload failed.', 'warn');
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
@@ -5226,7 +5228,7 @@ async function deleteBlob(req, res) {
   const artMetadata = {
     location: req.query.location,
     filename: req.query.filename
-  }
+  };
 
   try {
     const artifact = await ArtifactController.deleteBlob(req.user, req.params.orgid,
@@ -5300,20 +5302,20 @@ async function getBlobById(req, res) {
         `More then 1 blob found. [${req.params.artifactid}]`, 'warn'
       );
     }
-    else if (artMetadata.length === 0){
+    else if (artMetadata.length === 0) {
       throw new M.NotFoundError(
         `No artifact blob found. [${req.params.artifactid}]`, 'warn'
       );
     }
-
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
       req.params.projectid, artMetadata[0]);
 
     // Set filename
-    res.header('Content-Disposition', `attachment; filename='${req.body.filename}'`);
+    res.header('Content-Disposition', `attachment; filename=${req.query.filename}`);
 
     // Return 200: OK and public artifact data
-    return returnResponse(req, res, artifactBlob, 200, 'application/octet-stream');
+    return returnResponse(req, res, artifactBlob, 200,
+      utils.getContentType(artMetadata[0].filename));
   }
   catch (error) {
     // If an error was thrown, return it and its status

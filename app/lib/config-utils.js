@@ -193,7 +193,11 @@ module.exports.validate = function(config) {
       throw new Error(`Configuration file: Dockerfile ${Dockerfile} not found in specified directory.`);
     }
   }
-
+  // ----------------------------- Verify Artifact ----------------------------- //
+  if (config.artifact) {
+    test(config, 'artifact.strategy', 'string');
+    test(config, 'artifact.path', 'string');
+  }
 
   // ----------------------------- Verify log ----------------------------- //
   test(config, 'log', 'object');
