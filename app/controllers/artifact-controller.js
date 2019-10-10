@@ -64,6 +64,10 @@ if (!ArtifactStrategy.hasOwnProperty('clear')) {
   M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement clear.`);
   process.exit(0);
 }
+if (!ArtifactStrategy.hasOwnProperty('validatorReg')) {
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement validatorReg.`);
+  process.exit(0);
+}
 
 /**
  * @description This function finds an artifact based on artifact id.

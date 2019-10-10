@@ -27,12 +27,14 @@ const fs = require('fs');
 const chai = require('chai');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
 const utils = M.require('lib.utils');
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 const testData = require(path.join(M.root, 'test', 'test_data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
 
@@ -230,6 +232,13 @@ module.exports.removeTestOrg = async function() {
   const projectsToDelete = await Project.find({ org: testData.orgs[0].id },
     null, { lean: true });
   const projectIDs = projectsToDelete.map(p => p._id);
+
+  // Delete any artifacts in the org
+  await Artifact.deleteMany({ project: { $in: projectIDs } });
+
+  ArtifactStrategy.clear({
+    orgID: testData.orgs[0].id
+  });
 
   // Delete any elements in the found projects
   await Element.deleteMany({ project: { $in: projectIDs } });
