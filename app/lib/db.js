@@ -20,8 +20,8 @@ const events = require('events');
 // MBEE modules
 const DBModule = M.require(`db.${M.config.db.strategy}`);
 
-const requiredFunctions = ['enhancedQueries', 'connect', 'disconnect', 'clear',
-  'sanitize', 'Schema', 'Model', 'Store'];
+const requiredFunctions = ['connect', 'disconnect', 'clear', 'sanitize',
+  'Schema', 'Model', 'Store'];
 
 // Error Check - Verify DBModule is imported and implements required functions/classes
 requiredFunctions.forEach((fxn) => {
@@ -30,29 +30,6 @@ requiredFunctions.forEach((fxn) => {
     process.exit(1);
   }
 });
-
-// Check enhancedQueries for requiredParams
-const requiredParams = ['regex'];
-requiredParams.forEach((param) => {
-  // If the property doesn't exist, throw an error
-  if (!DBModule.enhancedQueries.hasOwnProperty(param)) {
-    M.log.critical(`Error: DB Strategy (${M.config.db.strategy}) does not have`
-      + ` the property enhancedQueries.${param}.`);
-    process.exit(1);
-  }
-
-  // If the property is not a boolean, throw an error
-  if (typeof DBModule.enhancedQueries[param] !== 'boolean') {
-    M.log.critical(`Error: The property enhancedQueries.${param} in the db `
-      + `strategy (${M.config.db.strategy}) is not a boolean.`);
-    process.exit(1);
-  }
-});
-
-// Define enhancedQueries
-const enhancedQueries = {
-  regex: DBModule.enhancedQueries.regex
-};
 
 /**
  * @description Connects to the database.
@@ -703,7 +680,6 @@ class Store extends DBModule.Store {
 
 // Export different classes and functions
 module.exports = {
-  enhancedQueries,
   connect,
   disconnect,
   clear,

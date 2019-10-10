@@ -41,7 +41,6 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
-const db = M.require('lib.db');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -835,59 +834,46 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // Create query to find all elements which reference elements on any
     // projects whose visibility was just lowered to 'private'
-    let foundElements = [];
+    const elemsToFind = [];
+    let length = 50000;
+    let iteration = 0;
+    while (length === 50000) {
+      // Find all elements on the modified projects
+      const elemsOnModifed = await Element.find({ project: { $in: loweredVisibility } }, // eslint-disable-line
+        null, { populate: 'sourceOf targetOf', lean: true, limit: length, skip: iteration });
 
-    // If the selected database supports regex
-    if (db.enhancedQueries.regex) {
-      const relRegex = `^(${loweredVisibility.join(':)|(')}:)`;
-      const relQuery = {
-        project: { $nin: loweredVisibility },
-        $or: [
-          { source: { $regex: relRegex } },
-          { target: { $regex: relRegex } }
-        ]
-      };
-
-      // Find broken relationships
-      foundElements = await Element.find(relQuery, null,
-        { populate: 'source target', lean: true });
-    }
-    else {
-      // Find elements in batches in case too many found
-      let length = 50000;
-      let iteration = 0;
-      while (length === 50000) {
-        // Find all elements on the modified projects
-        const elemsOnModifed = await Element.find({ $in: loweredVisibility }, // eslint-disable-line
-          null, { populate: 'sourceOf targetOf', lean: true, limit: length, skip: iteration });
-
-        // For each of the found elements
-        elemsOnModifed.forEach((e) => {
-          // Loop through sourceOf
-          e.sourceOf.forEach((r) => {
-            // If the relationships project is different, add relationship to list
-            if (r.project !== e.project) {
-              foundElements.push(r);
-            }
-          });
-
-          // Loop through targetOf
-          e.targetOf.forEach((r) => {
-            // If the relationships project is different, add relationship to list
-            if (r.project !== e.project) {
-              foundElements.push(r);
-            }
-          });
+      // For each of the found elements
+      elemsOnModifed.forEach((e) => {
+        // Loop through sourceOf
+        e.sourceOf.forEach((r) => {
+          // If the relationships project is different, add relationship to list
+          if (r.project !== e.project) {
+            elemsToFind.push(r);
+          }
         });
 
-        // Set length and iteration
-        length = elemsOnModifed.length;
-        iteration += length;
-      }
+        // Loop through targetOf
+        e.targetOf.forEach((r) => {
+          // If the relationships project is different, add relationship to list
+          if (r.project !== e.project) {
+            elemsToFind.push(r);
+          }
+        });
+      });
+
+      // Set length and iteration
+      length = elemsOnModifed.length;
+      iteration += length;
     }
 
-    const bulkArray2 = [];
+    // Find the elements, and populate the source and target
+    const relQuery = { _id: { $in: elemsToFind.map(e => e._id) } };
 
+    // Find broken relationships
+    const foundElements = await Element.find(relQuery, null,
+      { populate: 'source target', lean: true });
+
+    const bulkArray2 = [];
     // For each broken relationship
     foundElements.forEach((elem) => {
       // If the source no longer exists, set it to the undefined element
