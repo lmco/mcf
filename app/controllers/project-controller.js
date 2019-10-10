@@ -249,10 +249,13 @@ async function find(requestingUser, organizationID, projects, options) {
       }
     }
 
-    // Run permissions checks on each of the remaining projects
-    foundProjects.forEach((proj) => {
-      permissions.readProject(reqUser, foundOrg, proj);
-    });
+    // If the user is not searching for all projects the have
+    if (orgID !== null) {
+      // Run permissions checks on each of the remaining projects
+      foundProjects.forEach((proj) => {
+        permissions.readProject(reqUser, foundOrg, proj);
+      });
+    }
 
     return foundProjects;
   }
