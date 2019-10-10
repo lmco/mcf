@@ -1050,7 +1050,7 @@ class Model {
    * @returns {object[]} An array of queries to be called.
    */
   createQuery(query, numDocs = 10000) {
-    // TODO: Mongo specific keys to handle: $in, $or, $text, $search, $regex, $nin
+    // TODO: Mongo specific keys to handle: $in, $text, $search
     const returnArray = [];
     // INPUT: { _id: { $in: ['id1', 'id2', 'id3'...] } }
     // OUTPUT [{ _id: { S: 'id1' }}, { _id: { S: 'id2' }}, { _id: { S: 'id3' }}]
