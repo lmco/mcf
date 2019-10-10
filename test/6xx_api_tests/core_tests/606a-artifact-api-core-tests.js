@@ -347,7 +347,7 @@ function deleteBlob(done) {
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
     const postedBlob = JSON.parse(body);
-    // Verify artifact created properly
+    // Verify artifact deleted properly
     chai.expect(postedBlob.project).to.equal(projID);
     chai.expect(postedBlob.location).to.equal(artData.location);
     chai.expect(postedBlob.filename).to.equal(artData.filename);
