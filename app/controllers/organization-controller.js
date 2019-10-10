@@ -886,7 +886,6 @@ async function remove(requestingUser, orgs, options) {
 
     // Define searchQuery and ownedQuery
     const searchQuery = {};
-    const ownedQuery = {};
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs)) {
@@ -913,10 +912,13 @@ async function remove(requestingUser, orgs, options) {
     });
 
     const foundOrgIDs = foundOrgs.map(o => o._id);
+<<<<<<< HEAD
     // Find document ids starting with org ID follow by a colon
     const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
     ownedQuery._id = { $in: regexIDs };
 
+=======
+>>>>>>> develop
     // Check if all orgs were found
     const notFoundIDs = searchedIDs.filter(o => !foundOrgIDs.includes(o));
     // Some orgs not found, throw an error
@@ -933,6 +935,7 @@ async function remove(requestingUser, orgs, options) {
       }
     });
 
+<<<<<<< HEAD
     // Delete any elements in the org
     await Element.deleteMany(ownedQuery);
 
@@ -949,6 +952,18 @@ async function remove(requestingUser, orgs, options) {
     // Delete any branches in the org
     await Branch.deleteMany(ownedQuery);
 
+=======
+    // Find all projects to delete
+    const projectsToDelete = await Project.find({ org: { $in: saniOrgs } },
+      null, { lean: true });
+
+    const projectIDs = projectsToDelete.map(p => p._id);
+
+    // Delete any elements in the found projects
+    await Element.deleteMany({ project: { $in: projectIDs } });
+    // Delete any branches in the found projects
+    await Branch.deleteMany({ project: { $in: projectIDs } });
+>>>>>>> develop
     // Delete any projects in the org
     await Project.deleteMany({ org: { $in: saniOrgs } });
 
