@@ -33,7 +33,7 @@ module.exports = {
 // Disable eslint rule for logic in nested promises
 /* eslint-disable no-loop-func */
 
-// Node Modules
+// Node modules
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
