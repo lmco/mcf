@@ -25,7 +25,7 @@ module.exports = {
   remove
 };
 
-// Node Modules
+// Node modules
 const assert = require('assert');
 
 // MBEE modules
