@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -21,6 +21,8 @@ const ServerData = M.require('models.server-data');
 
 /**
  * @description Handles the database migration from 0.8.2 to 0.8.1.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -46,6 +48,8 @@ module.exports.down = function() {
 /**
  * @description Handles the database migration from 0.8.1 to 0.8.2. Remove the
  * projectReferences field from every project.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -72,6 +76,8 @@ module.exports.up = function() {
 /**
  * @description Helper function for 0.8.1 to 0.8.2 migration. Handles all
  * updates to the project collection.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function projectHelper() {
   return new Promise((resolve, reject) => {

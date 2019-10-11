@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -99,9 +99,12 @@ class StatsList extends Component {
       );
     }
 
+    // Verify if there is a class name
+    const className = (this.props.className) ? this.props.className : 'stats-list';
+
     // Return the stat list
     return (
-      <div className='stats-list' ref={this.ref}>
+      <div className={className} ref={this.ref}>
         {statsItems}
       </div>
     );

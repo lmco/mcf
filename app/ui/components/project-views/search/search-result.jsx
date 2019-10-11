@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner James Eckstein <james.eckstein@lmco.com>
  *
@@ -27,12 +27,12 @@ function SearchResult(props) {
 
   props.keys.forEach((key, index) => {
     // Check if element has value defined for respective key
-    const currentValue = (typeof props.data[key] === 'undefined') ? '' : props.data[key].toString();
+    const currentValue = (typeof props.data[key] === 'undefined' || !props.data[key]) ? '' : props.data[key].toString();
     // Convert Custom data to string
     const displayValue = (key === 'custom') ? JSON.stringify(props.data[key]) : currentValue;
 
     cols.push(
-      <td key={`row-${index}`}>{displayValue}</td>
+      <td className={`search-col-${index}`} key={`col-${index}`}>{displayValue}</td>
     );
   });
 

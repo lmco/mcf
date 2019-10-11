@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -35,6 +35,8 @@ const { spawn, spawnSync } = require('child_process');
  * --clean
  * --build
  * --run
+ *
+ * @param {string} args - Additional options to pass into the docker function.
  */
 function docker(args) {
   // Removes the previous docker build.

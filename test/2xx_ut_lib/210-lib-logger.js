@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -45,6 +45,8 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates a mock request and response object, and calls the
  * logger.logResponse() function. Reads the log file to verify the request was
  * properly logged.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function logMockResponse(done) {
   // Create mock request object

@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -41,7 +41,6 @@ class OrganizationList extends Component {
     this.state = {
       width: null,
       orgs: [],
-      admin: false,
       modalCreate: false,
       modalDelete: false,
       error: null
@@ -69,13 +68,7 @@ class OrganizationList extends Component {
         this.setState({ user: data });
         // Initialize url data
         const base = '/api/orgs';
-        let opt = 'populate=projects&minified=true';
-
-        // Verify if admin console
-        if (this.props.adminPage) {
-          // Update options to grab archived data
-          opt = 'populate=projects&includeArchived=true&minified=true';
-        }
+        const opt = 'populate=projects&includeArchived=true&minified=true';
 
         // Get org data
         $.ajax({
@@ -83,12 +76,6 @@ class OrganizationList extends Component {
           url: `${base}?${opt}`,
           statusCode: {
             200: (orgs) => {
-              // Verify if admin user
-              if (data.admin) {
-                // Set admin state
-                this.setState({ admin: data.admin });
-              }
-
               // Set org state
               this.setState({ orgs: orgs });
 
@@ -160,29 +147,24 @@ class OrganizationList extends Component {
             <h2 className='workspace-title workspace-title-padding'>
               Organizations
             </h2>
-              {/* Verify user is an admin */}
-              {(!this.state.admin)
-                ? ''
-                // Display create and delete buttons
-                : (<div className='workspace-header-button'>
-                    <Button className='btn'
-                            outline color="secondary"
-                            onClick={this.handleCreateToggle}>
-                      {(this.state.width > 600)
-                        ? 'Create'
-                        : (<i className='fas fa-plus add-btn'/>)
-                      }
-                    </Button>
-                    <Button className='btn'
-                            outline color="danger"
-                            onClick={this.handleDeleteToggle}>
-                      {(this.state.width > 600)
-                        ? 'Delete'
-                        : (<i className='fas fa-trash-alt delete-btn'/>)
-                      }
-                    </Button>
-                  </div>)
-              }
+              <div className='workspace-header-button'>
+                <Button className='btn'
+                        outline color="secondary"
+                        onClick={this.handleCreateToggle}>
+                  {(this.state.width > 600)
+                    ? 'Create'
+                    : (<i className='fas fa-plus add-btn'/>)
+                  }
+                </Button>
+                <Button className='btn'
+                        outline color="danger"
+                        onClick={this.handleDeleteToggle}>
+                  {(this.state.width > 600)
+                    ? 'Delete'
+                    : (<i className='fas fa-trash-alt delete-btn'/>)
+                  }
+                </Button>
+              </div>
           </div>
           {/* Verify there are orgs */}
           <div id='workspace-body' className='extra-padding'>

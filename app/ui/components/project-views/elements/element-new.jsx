@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -137,6 +137,8 @@ class ElementNew extends Component {
   /**
    * @description This function is called when the ElementSelector for the parent field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
    */
   parentSelectHandler(_id) {
     this.setState({ parent: _id });
@@ -145,6 +147,9 @@ class ElementNew extends Component {
   /**
    * @description This function is called when the ElementSelector for the source field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
+   * @param {string} project - The current project.
    */
   sourceSelectHandler(_id, project) {
     // Verify if project was provided
@@ -165,6 +170,9 @@ class ElementNew extends Component {
   /**
    * @description This function is called when the ElementSelector for the target field
    * changes.
+   *
+   * @param {string} _id - The selected _id.
+   * @param {object} project - The current project.
    */
   targetSelectHandler(_id, project) {
     // Verify if project was provided

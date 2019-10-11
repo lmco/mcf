@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -74,7 +74,7 @@
 }
 
 .grayed-out {
-  color: #c0c0c0;
+  color: #c0c0c0 !important;
 }
 
 .header-box-depth {
@@ -106,11 +106,6 @@
   font-size: x-small;
   padding-bottom: 10px;
   color: $color-danger;
-}
-
-// TODO: in user list only way to get rid
-.spacing {
-  padding: 0 24px;
 }
 
 .table-width {

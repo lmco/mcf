@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -32,7 +32,7 @@ function SidebarHeader(props) {
   // Return an empty div if not expanded
   // NOTE: this is necessary
   else {
-    return (<div></div>);
+    return (<div/>);
   }
 }
 

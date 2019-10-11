@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -39,7 +39,7 @@ const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
-const helper = M.require('lib.controller-helper');
+const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
 
 /**

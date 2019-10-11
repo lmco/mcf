@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -33,6 +33,8 @@ const User = M.require('models.user');
  * specific version.
  *
  * @param {string[]} args - An array of command line arguments.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 module.exports.migrate = function(args) {
   return new Promise((resolve, reject) => {
@@ -156,6 +158,8 @@ module.exports.migrate = function(args) {
  * @description Prompts the user for approval to migrate the database.
  *
  * @param {string[]} args - Array of command line arguments.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 function prompt(args) {
   return new Promise((resolve) => {
@@ -343,6 +347,8 @@ function runMigrations(from, migrations, move) {
 /**
  * @description Gets the schema version from the database. Runs the migrate
  * function if no schema version exists.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 module.exports.getSchemaVersion = function() {
   return new Promise((resolve, reject) => {

@@ -6,7 +6,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *

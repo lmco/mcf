@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -49,7 +49,7 @@ const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
-const helper = M.require('lib.controller-helper');
+const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
 
 /**
@@ -295,7 +295,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
       // Find elements in batches
       for (let i = 0; i < elementsToFind.length / 50000; i++) {
         // Split elementIDs list into batches of 50000
-        searchQuery._id = elementsToFind.slice(i * 50000, i * 50000 + 50000);
+        searchQuery._id = { $in: elementsToFind.slice(i * 50000, i * 50000 + 50000) };
 
         // Add find operation to array of promises
         promises.push(
@@ -858,7 +858,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     // Find elements in batches
     for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
       // Split elementIDs list into batches of 50000
-      searchQuery._id = elementsToUpdate.slice(i * 50000, i * 50000 + 50000);
+      searchQuery._id = { $in: elementsToUpdate.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
       promises2.push(Element.find(searchQuery, null, { lean: true })
@@ -1003,7 +1003,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     // Find elements in batches
     for (let i = 0; i < arrIDs.length / 50000; i++) {
       // Split arrIDs list into batches of 50000
-      searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
+      searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
       promises3.push(Element.find(searchQuery, validatedOptions.fieldsString,
@@ -1020,7 +1020,6 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
 
     // Emit the event elements-updated
     EventEmitter.emit('elements-updated', foundUpdatedElements);
-
     return foundUpdatedElements;
   }
   catch (error) {
@@ -1163,7 +1162,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
     // TODO: Consider changing of loop increment by 50k instead of 1
     for (let i = 0; i < arrIDs.length / 50000; i++) {
       // Split arrIDs list into batches of 50000
-      searchQuery._id = arrIDs.slice(i * 50000, i * 50000 + 50000);
+      searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
       promises.push(Element.find(searchQuery, null, { lean: true })
@@ -1217,7 +1216,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
     });
 
     // Delete elements from database
-    await Element.deleteMany({ _id: foundElementIDs });
+    await Element.deleteMany({ _id: { $in: foundElementIDs } });
 
     // Emit the event elements-deleted
     EventEmitter.emit('elements-deleted', foundElements);
@@ -1427,16 +1426,17 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     // Emit the event elements-deleted
     EventEmitter.emit('elements-deleted', elementsToDelete);
 
-    // Create query to find all relationships which point to deleted elements
-    const relQuery = {
-      $or: [
-        { source: { $in: uniqueIDs } },
-        { target: { $in: uniqueIDs } }
-      ]
-    };
+    // Find all sources/targets which point to deleted elements
+    const sources = await Element.find({ source: { $in: uniqueIDs } }, null,
+      { lean: true });
+    const targets = await Element.find({ target: { $in: uniqueIDs } }, null,
+      { lean: true });
 
-    // Find all relationships which are now broken
-    const relationships = await Element.find(relQuery, null, { lean: true });
+    // Get only unique elements
+    const sourceIDs = sources.map(e => e._id);
+    const targetsNotInSource = targets.filter(e => !sourceIDs.includes(e._id));
+    const relationships = sources.concat(targetsNotInSource);
+
     const bulkArray = [];
     promises = [];
 
@@ -1846,7 +1846,7 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
   /**
    * @description A nested helper function.  Searches the for parent of the element ID provided.
    *
-   * @param searchID - The ID of the element to search for.
+   * @param {string} searchID - The ID of the element to search for.
    * @returns {Promise<string|string|*>} Returns either a recursive call to itself if the parent of
    * the element also has a parent, an empty string if the parent of the element is the root, or
    * throws an error if a circular reference has been found.

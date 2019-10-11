@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -45,6 +45,8 @@ if (module.parent == null || typeof M === 'undefined') {
  * --all
  *
  * If NO flags are provided, defaults to `--all`
+ *
+ * @param {string} _args - Additional options to pass into the clean function.
  */
 function clean(_args) {
   const root = path.join(__dirname, '..');

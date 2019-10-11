@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -71,7 +71,7 @@ class ProjectListItem extends Component {
     let colorClass;
 
     // Verify if archived
-    if (project.archived) {
+    if (project.archived || this.props.archiveProj) {
       // Gray-out the name
       colorClass = 'archived-link';
     }

@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -28,6 +28,8 @@ const { spawn } = require('child_process');
 
 /**
  * @description Runs ESLint against the primary Javascript directories.
+ *
+ * @param {string} _args - Additional options to pass into the lint function.
  */
 function lint(_args) {
   // Set default lint files and include additional args

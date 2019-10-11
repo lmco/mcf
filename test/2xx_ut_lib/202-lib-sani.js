@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -40,7 +40,7 @@ describe(M.getModuleName(module.filename), () => {
  * Expected to change the html input.
  * Same thing occurring in a test more than once.
  */
-function htmlTest(done) {
+async function htmlTest() {
   const htmlLessThan = sani.html('<script>');
   const htmlQuote = sani.html("'OR 1=1");
   const htmlDoubleQuote = sani.html('"double it up');
@@ -51,13 +51,12 @@ function htmlTest(done) {
   chai.expect(htmlDoubleQuote).to.equal('&quot;double it up');
   chai.expect(htmlNull).to.equal(null);
   chai.expect(htmlBool).to.equal(false);
-  done();
 }
 
 /**
  * @description Test sanitation of a JSON Object.
  */
-function sanitizeHtmlObject(done) {
+async function sanitizeHtmlObject() {
   const data = {
     name: 'First Last',
     fname: '<script>',
@@ -71,27 +70,24 @@ function sanitizeHtmlObject(done) {
   chai.expect(htmlSan.lname).to.equal('&lt;/script&gt;');
   chai.expect(htmlSan.admin).to.equal(true);
   chai.expect(htmlSan.email).to.equal(null);
-  done();
 }
 
 /**
  * @description Should attempt to sanitize &amp; and other allowed exceptions.
  */
-function sanitizeAllowedCharacters(done) {
+async function sanitizeAllowedCharacters() {
   const s = 'this string has &amp;, &lt;, &nbsp; and  but also &sample';
   const expected = 'this string has &amp;, &lt;, &nbsp; and  but also &amp;sample';
   const htmlSan = sani.html(s);
   chai.expect(htmlSan).to.equal(expected);
-  done();
 }
 
 /**
  * @description Should attempt to sanitize ldap special filter chars.
  */
-function sanitizeLDAP(done) {
+async function sanitizeLDAP() {
   const s = 'test1 \\ test2 * test3 ( test4 ) test5 NUL';
   const expected = 'test1 \\2A test2 \\28 test3 \\29 test4 \\5C test5 \\00';
   const ldapSan = sani.ldapFilter(s);
   chai.expect(ldapSan).to.equal(expected);
-  done();
 }

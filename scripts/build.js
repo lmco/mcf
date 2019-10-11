@@ -6,7 +6,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -57,6 +57,10 @@ const validators = M.require('lib.validators');
  * --all
  *
  * If NO arguments given, defaults to `--all`
+ *
+ * @param {string} _args - Additional options to pass into the build function.
+ *
+ * @returns {Promise} - Returns an empty promise upon completion.
  */
 function build(_args) {
   M.log.info('Building MBEE ...');
@@ -157,7 +161,7 @@ function build(_args) {
   if (args.includes('--all') || args.includes('--jsdoc')) {
     M.log.info('  + Building jsdoc ...');
     // Create JSDoc build command
-    const jsdoc = `${process.argv[0]} node_modules/jsdoc/jsdoc.js`;
+    const jsdoc = `node ${path.join('node_modules', 'jsdoc', 'jsdoc.js')}`;
     const cmd = `${jsdoc} -c ./config/jsdoc.json`;
 
     // Execute JSDoc build command
@@ -200,7 +204,7 @@ function build(_args) {
         },
         mode: mode,
         entry: {
-          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav.jsx'),
+          navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav-app.jsx'),
           'home-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'home-app.jsx'),
           'org-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'org-app.jsx'),
           'project-app': path.join(M.root, 'app', 'ui', 'components', 'apps', 'project-app.jsx'),

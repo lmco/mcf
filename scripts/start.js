@@ -6,7 +6,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -42,6 +42,8 @@ const startup = M.require('lib.startup');
 
 /**
  * @description Starts the MBEE server using the configuration file.
+ *
+ * @param {string} args - Additional arguments to pass in when starting the MBEE server.
  */
 function start(args) {
   M.log.debug(`${`+ mbee.js executed as ${process.argv.join(' ')} `
