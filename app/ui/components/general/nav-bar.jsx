@@ -18,7 +18,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Collapse,

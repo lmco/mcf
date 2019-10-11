@@ -15,7 +15,7 @@
  * find, update and delete the branches.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 

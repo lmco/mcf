@@ -14,6 +14,7 @@
  * @description Defines the style for the list and list items.
  */
 
+// MBEE modules
 @import '../utils/_variables';
 
 @mixin grid-list-items($grid_temp, $grid_areas, $just_cont, $align_items) {

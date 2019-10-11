@@ -1,5 +1,5 @@
 /* eslint-disable jsdoc/require-description-complete-sentence */
-// Disabled to allow hmtl in description
+// Disabled to allow html in description
 /**
  * @classification UNCLASSIFIED
  *
@@ -21,7 +21,7 @@
  * the database.</p>
  */
 
-// MBEE Modules
+// MBEE modules
 const db = M.require('lib.db');
 
 /* -------------------------( Server Data Schema )--------------------------- */

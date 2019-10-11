@@ -17,7 +17,7 @@
  * test the max character limit on the ID field.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 

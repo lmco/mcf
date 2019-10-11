@@ -15,7 +15,7 @@
  * of JSON files with comments allowed.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const should = chai.should(); // eslint-disable-line no-unused-vars
 

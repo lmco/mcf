@@ -14,9 +14,11 @@
  * @description Migration script for version 0.6.0.1.
  */
 
-// Node Modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
+
+// NPM modules
 const mongoose = require('mongoose');
 
 // MBEE modules

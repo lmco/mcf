@@ -15,10 +15,10 @@
  * the library.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
-// MBEE Modules
+// MBEE modules
 const convertJMI = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */

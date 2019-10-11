@@ -15,7 +15,8 @@
  * documentation is up. Testing these endpoints also confirms that server has
  * started.
  */
-// NPM Modules
+
+// NPM modules
 const chai = require('chai');
 const request = require('request');
 

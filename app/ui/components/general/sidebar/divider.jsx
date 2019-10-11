@@ -18,6 +18,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsdoc/require-jsdoc */
 
+// React modules
 import React from 'react';
 
 /* eslint-enable no-unused-vars */

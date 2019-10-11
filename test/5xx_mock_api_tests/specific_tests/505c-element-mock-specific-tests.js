@@ -15,11 +15,13 @@
  * GET, POST, PATCH, and DELETE elements.
  */
 
-// NPM modules
-const chai = require('chai');
+// Node modules
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
+
+// NPM modules
+const chai = require('chai');
 
 // MBEE modules
 const ElementController = M.require('controllers.element-controller');

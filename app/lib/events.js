@@ -14,7 +14,7 @@
  * @description Defines the global event emitter.
  */
 
-// Node Modules
+// Node modules
 const EventEmitter = require('events');
 
 // Initialize the event emitter

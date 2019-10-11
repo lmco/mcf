@@ -21,7 +21,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// NPM Modules
+// NPM modules
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);

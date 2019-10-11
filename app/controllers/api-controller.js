@@ -21,13 +21,13 @@
 // Disabling these rules due to the use of headers for api endpoints
 
 
-// Node.js Modules
+// Node modules
 const path = require('path');
 
-// NPM Modules
+// NPM modules
 const swaggerJSDoc = require('swagger-jsdoc');
 
-// MBEE Modules
+// MBEE modules
 const ElementController = M.require('controllers.element-controller');
 const BranchController = M.require('controllers.branch-controller');
 const OrgController = M.require('controllers.organization-controller');

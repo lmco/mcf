@@ -19,10 +19,10 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 
-// MBEE Modules
+// MBEE modules
 import ElementSubtree from './element-subtree.jsx';
 /* eslint-enable no-unused-vars */
 
