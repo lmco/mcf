@@ -805,7 +805,7 @@ async function createOrReplace(requestingUser, orgs, options) {
     });
 
     // Delete orgs from database
-    await Organization.deleteMany({ _id: foundOrgs.map(o => o._id) });
+    await Organization.deleteMany({ _id: { $in: foundOrgs.map(o => o._id) } });
 
     // Emit the event orgs-deleted
     EventEmitter.emit('orgs-deleted', foundOrgs);
@@ -894,7 +894,7 @@ async function remove(requestingUser, orgs, options) {
     else if (typeof saniOrgs === 'string') {
       // A single org id
       searchedIDs = [saniOrgs];
-      searchQuery._id = saniOrgs;
+      searchQuery._id = { $in: saniOrgs };
     }
     else {
       // Invalid parameter, throw an error
