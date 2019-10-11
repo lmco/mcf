@@ -38,7 +38,8 @@ const errors = M.require('lib.errors');
 
 // Validator regex for this strategy
 module.exports.validatorReg = {
-  location: '[.]'
+  location: '[.]',
+  filename: '[\/!\\<>:"\'|?*]'
 };
 
 /**

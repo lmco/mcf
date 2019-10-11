@@ -89,17 +89,36 @@ const ArtifactSchema = new db.Schema({
   project: {
     type: 'String',
     ref: 'Project',
-    required: true
+    required: true,
+    validate: [{
+      validator: function(v) {
+        return RegExp(validators.project.id).test(v);
+      },
+      message: props => `${props.value} is not a valid project ID.`
+    }]
   },
   branch: {
     type: 'String',
     required: true,
     ref: 'Branch',
-    index: true
+    index: true,
+    validate: [{
+      validator: function(v) {
+        return RegExp(validators.branch.id).test(v);
+      },
+      message: props => `${props.value} is not a valid branch ID.`
+    }]
   },
   filename: {
     type: 'String',
-    required: true
+    required: true,
+    validate: [{
+      validator: function(v) {
+        // If the filename is improperly formatted, reject
+        return !RegExp(ArtifactStrategy.validatorReg.filename).test(v);
+      },
+      message: props => `Artifact filename [${props.value}] is improperly formatted.`
+    }]
   },
   contentType: {
     type: 'String',
@@ -107,6 +126,7 @@ const ArtifactSchema = new db.Schema({
   },
   location: {
     type: 'String',
+    required: true,
     validate: [{
       validator: function(v) {
         // If the location is improperly formatted, reject
