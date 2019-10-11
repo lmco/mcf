@@ -17,7 +17,7 @@
 /* eslint-disable jsdoc/require-description-complete-sentence */
 // Rule disabled to allow list in description
 
-// Node.js modules
+// Node modules
 const { execSync } = require('child_process');
 const path = require('path');
 

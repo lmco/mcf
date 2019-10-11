@@ -17,7 +17,7 @@
  * or chai modules.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 /* --------------------( Main )-------------------- */

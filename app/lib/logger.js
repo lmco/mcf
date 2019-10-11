@@ -27,9 +27,11 @@
 // Node modules
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+
+// NPM modules
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
-const { execSync } = require('child_process');
 
 // This defines our log levels
 const levels = {

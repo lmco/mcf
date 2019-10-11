@@ -15,7 +15,7 @@
  * and decrypt functions in the library.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

@@ -15,7 +15,7 @@
  * object. For now, it only tests the version number.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 /* --------------------( Main )-------------------- */

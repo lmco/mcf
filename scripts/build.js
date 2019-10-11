@@ -39,6 +39,8 @@ const sass = require('gulp-sass');
 const markdown = require('gulp-markdown');
 const rename = require('gulp-rename');
 const webpack = require('webpack');
+
+// MBEE modules
 const validators = M.require('lib.validators');
 
 /**

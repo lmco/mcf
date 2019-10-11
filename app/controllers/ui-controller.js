@@ -38,6 +38,8 @@ module.exports = {
 // Node modules
 const fs = require('fs');
 const path = require('path');
+
+// NPM modules
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules

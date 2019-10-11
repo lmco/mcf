@@ -31,12 +31,12 @@ module.exports = {
   search
 };
 
-// Node.js Modules
+// Node Modules
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-// MBEE Modules
+// MBEE modules
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');

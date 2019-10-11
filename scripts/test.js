@@ -18,8 +18,9 @@
 // Node modules
 const fs = require('fs');
 const path = require('path');
-const Mocha = require('mocha');
 
+// NPM modules
+const Mocha = require('mocha');
 require('@babel/register')();        // Transpile react tests to javascript
 require('@babel/polyfill');          // Transpile async await for javascript
 require(path.join(M.root, 'test', '7xx_ui_tests', 'setup.js'));

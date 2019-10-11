@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Form,
@@ -29,7 +29,7 @@ import {
   UncontrolledAlert
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import validators from '../../../../build/json/validators.json';
 
 /* eslint-enable no-unused-vars */

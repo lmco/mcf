@@ -14,7 +14,7 @@
  * @description Tests for expected errors within the user model.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 

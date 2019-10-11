@@ -15,11 +15,13 @@
  * GET, POST, PATCH, and DELETE branches.
  */
 
-// NPM modules
-const chai = require('chai');
+// Node modules
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
+
+// NPM modules
+const chai = require('chai');
 
 // MBEE modules
 const BranchController = M.require('controllers.branch-controller');

@@ -14,7 +14,7 @@
  * @description Tests the sanitization module and each of its functions.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

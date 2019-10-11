@@ -17,11 +17,11 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ProfileEdit from './profile-edit.jsx';
 import PasswordEdit from './password-edit.jsx';
 import CustomData from '../general/custom-data/custom-data.jsx';

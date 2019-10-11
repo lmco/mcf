@@ -16,7 +16,7 @@
  * global M object.
  */
 
-// Node Modules
+// Node modules
 const fs = require('fs');                       // Access the filesystem
 const path = require('path');                   // Find directory paths
 const { execSync } = require('child_process');  // Execute shell commands

@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Row,
@@ -34,7 +34,7 @@ import {
 } from 'reactstrap';
 import classnames from 'classnames';
 
-// MBEE Modules
+// MBEE modules
 import CustomEditRow from './custom-edit-row.jsx';
 /* eslint-enable no-unused-vars */
 
