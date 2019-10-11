@@ -166,73 +166,39 @@ if (!fs.existsSync(path.join(M.root, 'logs'))) {
  * @returns {object} Returns an instance of the winston logger.
  */
 function makeLogger(subcommand) {
-  let logger;
-  if (subcommand === 'test') {
-    logger = winston.createLogger({
-      level: M.config.log.level,
-      levels: levels,
-      format: combine(
-        label({ label: 'MBEE' }),
-        winston.format.colorize(),
-        timestamp(),
-        formatter
-      ),
-      transports: [
-        // The Console transport is not included here for cleaner console output during testing.
-        // error log transport - logs error-level and below to error log file
-        new winston.transports.File({
-          filename: path.join('logs', M.config.log.error_file),
-          level: 'error'
-        }),
-        // combined log transport - logs default-level and below to combined log file
-        // NOTE: Default level specified in config file
-        new winston.transports.File({
-          filename: path.join('logs', M.config.log.file),
-          level: M.config.log.level
-        }),
-        // debug log transport - logs debug-level and below to debug log file
-        new winston.transports.File({
-          filename: path.join('logs', M.config.log.debug_file),
-          level: 'debug'
-        })
-      ],
-      exitOnError: false
-    });
-  }
-  else {
-    logger = winston.createLogger({
-      level: M.config.log.level,
-      levels: levels,
-      format: combine(
-        label({ label: 'MBEE' }),
-        winston.format.colorize(),
-        timestamp(),
-        formatter
-      ),
-      transports: [
-        // console transport - logs to the console.
-        new winston.transports.Console(),
-        // error log transport - logs error-level and below to error log file
-        new winston.transports.File({
-          filename: path.join('logs', M.config.log.error_file),
-          level: 'error'
-        }),
-        // combined log transport - logs default-level and below to combined log file
-        // NOTE: Default level specified in config file
-        new winston.transports.File({
-          filename: path.join('logs', M.config.log.file),
-          level: M.config.log.level
-        }),
-        // debug log transport - logs debug-level and below to debug log file
-        new winston.transports.File({
-          filename: path.join('logs', M.config.log.debug_file),
-          level: 'debug'
-        })
-      ],
-      exitOnError: false
-    });
-  }
-  return logger;
+  const loggerConfig = {
+    level: M.config.log.level,
+    levels: levels,
+    format: combine(
+      label({ label: 'MBEE' }),
+      winston.format.colorize(),
+      timestamp(),
+      formatter
+    ),
+    transports: [
+      // The Console transport is not included here for cleaner console output during testing.
+      // error log transport - logs error-level and below to error log file
+      new winston.transports.File({
+        filename: path.join('logs', M.config.log.error_file),
+        level: 'error'
+      }),
+      // combined log transport - logs default-level and below to combined log file
+      // NOTE: Default level specified in config file
+      new winston.transports.File({
+        filename: path.join('logs', M.config.log.file),
+        level: M.config.log.level
+      }),
+      // debug log transport - logs debug-level and below to debug log file
+      new winston.transports.File({
+        filename: path.join('logs', M.config.log.debug_file),
+        level: 'debug'
+      })
+    ],
+    exitOnError: false
+  };
+  // Add in a transport to log to the console if the mbee is not running tests
+  if (subcommand !== 'test') loggerConfig.transports.push(new winston.transports.Console());
+  return winston.createLogger(loggerConfig);
 }
 
 
