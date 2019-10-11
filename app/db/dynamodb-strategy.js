@@ -508,7 +508,6 @@ class Model {
       if (queriesToMake.length > 0) {
         let foundDocs = [];
         const promises = [];
-
         // For each query
         queriesToMake.forEach((q) => {
           // Log the database operation
