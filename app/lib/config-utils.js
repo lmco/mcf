@@ -271,7 +271,7 @@ module.exports.validate = function(config) {
   test(config, 'test.url', 'string');
 
 
-  // ----------------------------- Verfiy validators ----------------------------- //
+  // ----------------------------- Verify validators ----------------------------- //
   if (config.validators) {
     test(config, 'validators', 'object');
     if (config.validators.id) test(config, 'validators.id', 'string');
