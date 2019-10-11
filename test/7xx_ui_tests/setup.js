@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -27,7 +27,7 @@ const jqueryUI = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery-ui-di
 
 // MBEE modules
 const mbee = fs.readFileSync(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'), { encoding: 'utf-8' });
-const url = 'http://localhost:6233';
+const url = M.config.test.url;
 
 // Simulate window if we're running in Node.js
 if (!global.window && !global.document) {

@@ -6,7 +6,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license  MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -144,8 +144,9 @@ const buildComplete = fs.existsSync(`${M.root}/build`);
 // Check if dependencies are installed
 if (installComplete) {
   // Initialize the MBEE logger/helper functions
+  const logger = M.require('lib.logger');
   Object.defineProperty(M, 'log', {
-    value: M.require('lib.logger').logger,
+    value: logger.makeLogger(process.argv[2]),
     writable: false,
     enumerable: true
   });
