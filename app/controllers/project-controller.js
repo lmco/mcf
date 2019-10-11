@@ -249,7 +249,7 @@ async function find(requestingUser, organizationID, projects, options) {
       }
     }
 
-    // If the user is not searching for all projects the have
+    // If the user is not searching for all projects they have
     if (orgID !== null) {
       // Run permissions checks on each of the remaining projects
       foundProjects.forEach((proj) => {
