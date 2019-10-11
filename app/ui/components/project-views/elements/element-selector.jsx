@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -71,7 +71,8 @@ class ElementSelector extends React.Component {
       this.setState({ selectedElementPreview: this.props.currentSelection });
     }
 
-    if (prevProps.differentProject !== this.props.differentProject) {
+    if ((prevProps.differentProject !== this.props.differentProject)
+      && (this.props.differentProject)) {
       this.setState({ project: this.props.differentProject.project });
     }
   }
@@ -87,6 +88,8 @@ class ElementSelector extends React.Component {
 
   /**
    * @description This is the click handler used to select an element.
+   *
+   * @param {string} id - The id of the selected element.
    */
   selectElementHandler(id) {
     // Verify id is not self
@@ -143,6 +146,8 @@ class ElementSelector extends React.Component {
 
   /**
    * @description Changes the project.
+   *
+   * @param {object} event - The event trigger.
    */
   handleChange(event) {
     this.setState({ project: event.target.value });

@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -35,6 +35,8 @@ describe(M.getModuleName(module.filename), () => {
 /* --------------------( Tests )-------------------- */
 /**
  * @description Runs an empty test case. This show that Mocha is working.
+ *
+ * @param {Function} done - The Mocha callback.
  */
 function emptyTest(done) {
   done();
@@ -43,11 +45,10 @@ function emptyTest(done) {
 /**
  * @description Runs some simple assertions to verify chai is working.
  */
-function assertionsTest(done) {
+async function assertionsTest() {
   chai.expect(2).to.equal(2);
   chai.expect(2).to.not.equal(3);
   chai.expect('0').to.not.equal(0);         // Tests type casting
   chai.expect(0.1 + 0.2).to.not.equal(0.3); // Tests floating point precision
   chai.expect({}).to.not.equal({});         // Tests object reference
-  done();
 }

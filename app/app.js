@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -59,6 +59,8 @@ db.connect()
 
 /**
  * @description Initializes the application and exports app.js.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 function initApp() {
   return new Promise((resolve) => {
@@ -130,6 +132,8 @@ function initApp() {
 
 /**
  * @description Creates a default organization if one does not already exist.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 function createDefaultOrganization() {
   return new Promise((resolve, reject) => {
@@ -194,6 +198,8 @@ function createDefaultOrganization() {
 
 /**
  * @description Creates a default admin if a global admin does not already exist.
+ *
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 function createDefaultAdmin() {
   return new Promise((resolve, reject) => {
@@ -246,7 +252,7 @@ function createDefaultAdmin() {
  * @description Initializes all models asynchronously.
  * @async
  *
- * @returns {Promise<void>} Returns an empty promise upon completion.
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 async function initModels() {
   await Branch.init();

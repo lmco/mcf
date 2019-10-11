@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -41,9 +41,6 @@ class ProjectList extends Component {
     this.state = {
       width: null,
       orgs: [],
-      admin: false,
-      write: false,
-      writePermOrgs: null,
       modalCreate: false,
       modalDelete: false,
       error: null
@@ -72,13 +69,7 @@ class ProjectList extends Component {
         this.setState({ user: data });
         // Initialize url data
         const base = '/api/orgs';
-        let opt = 'populate=projects&minified=true';
-
-        // Verify if admin console
-        if (this.props.adminPage) {
-          // Update url to retrieve archived data
-          opt = 'populate=projects&includeArchived=true&minified=true';
-        }
+        const opt = 'populate=projects&includeArchived=true&minified=true';
 
         // Get project data
         $.ajax({
@@ -105,41 +96,10 @@ class ProjectList extends Component {
   }
 
   setMountedComponentStates(user, orgs) {
-    // Initialize variables
-    const writePermOrgs = [];
-
     // Add event listener for window resizing
     window.addEventListener('resize', this.handleResize);
     // Handle initial size of window
     this.handleResize();
-
-    // Verify not admin console
-    if (!this.props.adminPage) {
-      // Loop through orgs
-      orgs.forEach((org) => {
-        // Initialize variables
-        const perm = org.permissions[user.username];
-
-        // Verify if user has write or admin permissions
-        if ((perm === 'write') || (perm === 'admin')) {
-          // Push the org to the org permissions
-          writePermOrgs.push(org);
-        }
-      });
-
-      // Verify there are orgs
-      if (writePermOrgs.length > 0) {
-        // Set write states
-        this.setState({ write: true });
-        this.setState({ writePermOrgs: writePermOrgs });
-      }
-    }
-
-    // Verify user is admin
-    if (user.admin) {
-      // Set admin state
-      this.setState({ admin: user.admin });
-    }
 
     // Set the org state
     this.setState({ orgs: orgs });
@@ -176,37 +136,25 @@ class ProjectList extends Component {
       const orgId = org.id;
       const projects = org.projects;
       const permProjects = [];
+      const archiveProj = org.archived;
+      let className;
+
+      // Verify if org is archived
+      if (archiveProj) {
+        className = 'archived-link';
+      }
       // Verify there are projects in the org
       if (projects.length < 1) {
-        // If there are not projects skip the org view
-        // rendering
+        // If there are not projects skip view rendering
         return;
       }
 
-      // Verify user is not a global admin
-      if (!this.state.admin) {
-        // Initialize data
-        const username = this.props.user.username;
-
-        // Loop through projects grabbed
-        projects.forEach(project => {
-          // Verify user has permissions on each project
-          if (project.permissions[username]) {
-            // Push the projects to the viewable projects
-            permProjects.push(<ProjectListItem className='hover-darken project-hover'
-                                               key={`proj-key-${project.id}`}
-                                               project={project}
-                                               href={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>);
-          }
-        });
-      }
-      else {
-        // Push all projects to the viewable projects
-        projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
-                                                                      key={`proj-key-${project.id}`}
-                                                                      project={project}
-                                                                      href={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>));
-      }
+      // Push all projects to the viewable projects
+      projects.forEach(project => permProjects.push(<ProjectListItem className='hover-darken project-hover'
+                                                                    archiveProj={archiveProj}
+                                                                    key={`proj-key-${project.id}`}
+                                                                    project={project}
+                                                                    href={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>));
 
       // Verify if projects
       if (permProjects.length > 0) {
@@ -218,7 +166,7 @@ class ProjectList extends Component {
       return (
         <React.Fragment>
             <ListItem key={`org-key-${org.id}`} className='proj-org-header'>
-                <a href={`/orgs/${orgId}`}>{org.name}</a>
+                <a href={`/orgs/${orgId}`} className={className}>{org.name}</a>
             </ListItem>
             <List key={`org-list-key-${org.id}`}>
                 {permProjects}
@@ -233,16 +181,8 @@ class ProjectList extends Component {
         {/* Modal for creating a project */}
         <Modal isOpen={this.state.modalCreate} toggle={this.handleCreateToggle}>
           <ModalBody>
-            {/* Verify user has write and admin permissions */}
-            {(this.state.admin)
-              // Allow access to all orgs
-              ? <Create project={true} orgs={this.state.orgs} toggle={this.handleCreateToggle}/>
-              // Allow access to write orgs only
-              : <Create project={true}
-                        orgs={this.state.writePermOrgs}
-                        toggle={this.handleCreateToggle}/>
-            }
-            </ModalBody>
+            <Create project={true} orgs={this.state.orgs} toggle={this.handleCreateToggle}/>
+          </ModalBody>
         </Modal>
         {/* Modal for deleting a project */}
         <Modal isOpen={this.state.modalDelete} toggle={this.handleDeleteToggle}>
@@ -257,32 +197,22 @@ class ProjectList extends Component {
           <div className='workspace-header header-box-depth'>
             <h2 className='workspace-title'>Projects</h2>
             <div className='workspace-header-button'>
-              {/* Verify user has write permission */}
-              {(!this.state.write)
-                ? ''
-                // Display create button
-                : (<Button className='btn'
+              <Button className='btn'
                             outline color="secondary"
                             onClick={this.handleCreateToggle}>
-                  {(this.state.width > 600)
-                    ? 'Create'
-                    : (<i className='fas fa-plus add-btn'/>)
-                  }
-                  </Button>)
-              }
-              {/* Verify user has admin permissions */}
-              {(!this.state.admin)
-                ? ''
-                // Display delete button
-                : (<Button className='btn'
+                {(this.state.width > 600)
+                  ? 'Create'
+                  : (<i className='fas fa-plus add-btn'/>)
+                }
+              </Button>
+              <Button className='btn'
                             outline color="danger"
                             onClick={this.handleDeleteToggle}>
-                  {(this.state.width > 600)
-                    ? 'Delete'
-                    : (<i className='fas fa-trash-alt delete-btn'/>)
-                  }
-                  </Button>)
-              }
+                {(this.state.width > 600)
+                  ? 'Delete'
+                  : (<i className='fas fa-trash-alt delete-btn'/>)
+                }
+              </Button>
             </div>
           </div>
           <div id='workspace-body' className='extra-padding'>

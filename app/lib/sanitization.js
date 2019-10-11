@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -51,6 +51,8 @@ module.exports.db = db.sanitize;
  * <br>+-------+-----------------+ </p>
  *
  * @param {*} userInput - User input data to be sanitized.
+ *
+ * @returns {string} Sanitized user input.
  */
 module.exports.html = function(userInput) {
   // Check if input is string type
@@ -95,6 +97,8 @@ module.exports.html = function(userInput) {
  * <br>+-------+-----------------+ </p>
  *
  * @param {*} userInput - User input data to be sanitized.
+ *
+ * @returns {string} Sanitized user input.
  */
 module.exports.ldapFilter = function(userInput) {
   // If string, replace special characters

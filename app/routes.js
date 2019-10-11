@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -133,26 +133,6 @@ router.param('username', (req, res, next, username) => {
  * @description This renders the user page for logged in users.
  **/
 router.route('/profile/:username')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.profile
-);
-
-/**
- * @description This renders the user page for logged in users.
- **/
-router.route('/profile/orgs')
-.get(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  UIController.profile
-);
-
-/**
- * @description This renders the user page for logged in users.
- **/
-router.route('/profile/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,

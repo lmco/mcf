@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -34,25 +34,22 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies the environment.
  */
-function environmentCheck(done) {
+async function environmentCheck() {
   // Verify inputted environment is configuration environment
   const processEnv = process.env.MBEE_ENV;
   if (typeof processEnv !== 'undefined') {
     chai.expect(processEnv).to.equal(M.env);
-    done();
   }
   else {
     chai.expect(M.env).to.equal('default');
-    done();
   }
 }
 
 /**
  * @description Verifies the configuration file.
  */
-function configCheck(done) {
+async function configCheck() {
   // Verify config file has properties db and auth
   chai.expect(M.config).hasOwnProperty('db');
   chai.expect(M.config).hasOwnProperty('auth');
-  done();
 }

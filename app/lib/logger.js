@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -158,42 +158,49 @@ if (!fs.existsSync(path.join(M.root, 'logs'))) {
 
 /**
  * @description This creates the logger. Defines log level, log formatting and
- * transports.
- *
- * There are four transports (location which the log is written to):
+ * transports. There are four transports (location which the log is written to):
  * the console, an error file, a combined log, and a debug log.
+ *
+ * @param {string} subcommand - The subcommand used with 'node mbee'.
+ *
+ * @returns {object} Returns an instance of the winston logger.
  */
-const logger = winston.createLogger({
-  level: M.config.log.level,
-  levels: levels,
-  format: combine(
-    label({ label: 'MBEE' }),
-    winston.format.colorize(),
-    timestamp(),
-    formatter
-  ),
-  transports: [
-    // console transport - logs to the console.
-    new winston.transports.Console(),
-    // error log transport - logs error-level and below to error log file
-    new winston.transports.File({
-      filename: path.join('logs', M.config.log.error_file),
-      level: 'error'
-    }),
-    // combined log transport - logs default-level and below to combined log file
-    // NOTE: Default level specified in config file
-    new winston.transports.File({
-      filename: path.join('logs', M.config.log.file),
-      level: M.config.log.level
-    }),
-    // debug log transport - logs debug-level and below to debug log file
-    new winston.transports.File({
-      filename: path.join('logs', M.config.log.debug_file),
-      level: 'debug'
-    })
-  ],
-  exitOnError: false
-});
+function makeLogger(subcommand) {
+  const loggerConfig = {
+    level: M.config.log.level,
+    levels: levels,
+    format: combine(
+      label({ label: 'MBEE' }),
+      winston.format.colorize(),
+      timestamp(),
+      formatter
+    ),
+    transports: [
+      // The Console transport is not included here for cleaner console output during testing.
+      // error log transport - logs error-level and below to error log file
+      new winston.transports.File({
+        filename: path.join('logs', M.config.log.error_file),
+        level: 'error'
+      }),
+      // combined log transport - logs default-level and below to combined log file
+      // NOTE: Default level specified in config file
+      new winston.transports.File({
+        filename: path.join('logs', M.config.log.file),
+        level: M.config.log.level
+      }),
+      // debug log transport - logs debug-level and below to debug log file
+      new winston.transports.File({
+        filename: path.join('logs', M.config.log.debug_file),
+        level: 'debug'
+      })
+    ],
+    exitOnError: false
+  };
+  // Add in a transport to log to the console if the mbee is not running tests
+  if (subcommand !== 'test') loggerConfig.transports.push(new winston.transports.Console());
+  return winston.createLogger(loggerConfig);
+}
+
 
 // Add defined colors to winston logger
 winston.addColors(colors);
@@ -225,6 +232,6 @@ function logResponse(responseLength, req, res) {
 }
 
 module.exports = {
-  logger,
+  makeLogger,
   logResponse
 };

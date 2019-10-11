@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -37,7 +37,7 @@ describe(M.getModuleName(module.filename), () => {
  * @description Tests that the get status code function returns all the proper
  * status codes for all MBEE errors.
  */
-function getStatusCode(done) {
+async function getStatusCode() {
   // Create all types of errors and get their status codes
   const format = errors.getStatusCode(new M.DataFormatError('This is a format error.'));
   const auth = errors.getStatusCode(new M.AuthorizationError('This is an auth error.'));
@@ -55,14 +55,13 @@ function getStatusCode(done) {
   chai.expect(server).to.equal(500);
   chai.expect(database).to.equal(500);
   chai.expect(normal).to.equal(500);
-  done();
 }
 
 /**
  * @description Tests that the captureError function creates a new custom error and preserves
  * the stack trace.
  */
-function capturedError(done) {
+async function capturedError() {
   // Create an error
   const originalError = new Error();
   // Run the error through the captureError function
@@ -72,5 +71,4 @@ function capturedError(done) {
   chai.expect(originalError instanceof errors.CustomError).to.equal(false);
   chai.expect(newError.stack).to.equal(originalError.stack);
   chai.expect(newError instanceof errors.CustomError).to.equal(true);
-  done();
 }

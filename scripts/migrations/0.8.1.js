@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -31,6 +31,8 @@ const utils = M.require('lib.utils');
 
 /**
  * @description Handles the database migration from 0.8.1 to 0.8.0.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
   return new Promise((resolve, reject) => {
@@ -58,6 +60,8 @@ module.exports.down = function() {
  * Modifies element IDs to include the branch ID. New format should look like
  * orgid:projectid:branchid:elementid. Adds a master branch for every project
  * which already exists in the database.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.up = function() {
   return new Promise((resolve, reject) => {
@@ -85,6 +89,8 @@ module.exports.up = function() {
 /**
  * @description Helper function for 0.8.0 to 0.8.1 migration. Handles all
  * updates to the element collection.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function elementHelper() {
   return new Promise((resolve, reject) => {
@@ -121,6 +127,10 @@ function elementHelper() {
 
 /**
  * @description Recursive function for elementHelper().
+ *
+ * @param {string} ids - The ids of elements to search.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function elementHelperRecursive(ids) {
   return new Promise((resolve, reject) => {
@@ -247,6 +257,8 @@ function elementHelperRecursive(ids) {
 /**
  * @description Helper function for 0.8.0 to 0.8.1 migration. Handles all
  * updates to the branch collection.
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 function branchHelper() {
   return new Promise((resolve, reject) => {

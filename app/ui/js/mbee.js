@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -83,7 +83,7 @@ function mbeeWhoAmI(callback) {
 /**
  * @description Given an API parameter string, converts to Proper Case. Conversely, given a Proper
  * Case string will convert to an API parameter string.
- * e.g. createdBy -> Created By, lastModifiedBy -> Last Modified By
+ * e.g. createdBy <-> Created By, lastModifiedBy <-> Last Modified By
  *
  * @param {string} param - API parameter string.
  * @param {string} caseType - Case to convert to e.g 'Proper Case' vs 'API Parameter Format'.

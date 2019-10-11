@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -110,7 +110,7 @@ class UserListItem extends Component {
     }
 
     if (this.props.adminLabel && user.admin) {
-      stats = (<StatsList>
+      stats = (<StatsList className='stats-list-member'>
                 <Stat title='Admin'
                       icon='fas fa-check'
                       className={minimizeClass}
@@ -204,7 +204,7 @@ class UserListItem extends Component {
 
       // Return new stat list
       stats = (
-        <StatsList key='statlist-perms'>
+        <StatsList className='stats-list-member' key='statlist-perms'>
           {permChecks}
         </StatsList>);
     }

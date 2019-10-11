@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -44,7 +44,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Verifies valid and invalid org IDs.
  */
-function verifyOrgID(done) {
+async function verifyOrgID() {
   // Skip this test if a custom validator is defined
   if (customValidators.org_id) this.skip();
 
@@ -58,13 +58,12 @@ function verifyOrgID(done) {
   chai.expect(RegExp(validators.org.id).test('Org3')).to.equal(false);
   chai.expect(RegExp(validators.org.id).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.org.id).test('')).to.equal(false);
-  done();
 }
 
 /**
  * @description Verifies valid and invalid project IDs.
  */
-function verifyProjectID(done) {
+async function verifyProjectID() {
   // Skip this test if a custom validator is defined
   if (customValidators.project_id) this.skip();
 
@@ -76,13 +75,12 @@ function verifyProjectID(done) {
   chai.expect(RegExp(validators.project.id).test('Proj3')).to.equal(false);
   chai.expect(RegExp(validators.project.id).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.project.id).test('')).to.equal(false);
-  done();
 }
 
 /**
  * @description Verifies valid and invalid branch IDs.
  */
-function verifyBranchID(done) {
+async function verifyBranchID() {
   // Skip this test if a custom validator is defined
   if (customValidators.branch_id) this.skip();
 
@@ -94,13 +92,12 @@ function verifyBranchID(done) {
   chai.expect(RegExp(validators.project.id).test('Branch3')).to.equal(false);
   chai.expect(RegExp(validators.project.id).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.project.id).test('')).to.equal(false);
-  done();
 }
 
 /**
  * @description Verifies valid and invalid element ids.
  */
-function verifyElementID(done) {
+async function verifyElementID() {
   // Skip this test if a custom validator is defined
   if (customValidators.element_id) this.skip();
 
@@ -113,13 +110,12 @@ function verifyElementID(done) {
   chai.expect(RegExp(validators.element.id).test('special*')).to.equal(false);
   chai.expect(RegExp(validators.element.id).test('')).to.equal(false);
   chai.expect(RegExp(validators.element.id).test('elem3')).to.equal(false);
-  done();
 }
 
 /**
  * @description Verifies valid and invalid user usernames.
  */
-function verifyUserUsername(done) {
+async function verifyUserUsername() {
   // Skip this test if a custom validator is defined
   if (customValidators.user_username) this.skip();
 
@@ -134,13 +130,12 @@ function verifyUserUsername(done) {
   chai.expect(RegExp(validators.user.username).test('_first')).to.equal(false);
   chai.expect(RegExp(validators.user.username).test('')).to.equal(false);
   chai.expect(RegExp(validators.user.username).test('space middle')).to.equal(false);
-  done();
 }
 
 /**
  * @description Verifies valid and invalid user emails.
  */
-function verifyUserEmail(done) {
+async function verifyUserEmail() {
   // Skip this test if a custom validator is defined
   if (customValidators.user_email) this.skip();
 
@@ -156,13 +151,12 @@ function verifyUserEmail(done) {
   chai.expect(RegExp(validators.user.email).test('missingdot@testcom')).to.equal(false);
   chai.expect(RegExp(validators.user.email).test('@test.com')).to.equal(false);
   chai.expect(RegExp(validators.user.email).test('missingadd@.a')).to.equal(false);
-  done();
 }
 
 /**
  * @description Verifies valid and invalid user first names.
  */
-function verifyUserFName(done) {
+async function verifyUserFName() {
   // Skip this test if a custom validator is defined
   if (customValidators.user_fname) this.skip();
 
@@ -172,13 +166,12 @@ function verifyUserFName(done) {
   // Invalid names
   chai.expect(RegExp(validators.user.fname).test('9first')).to.equal(false);
   chai.expect(RegExp(validators.user.fname).test('-first')).to.equal(false);
-  done();
 }
 
 /**
  * @description Verifies valid and invalid user last names.
  */
-function verifyUserLName(done) {
+async function verifyUserLName() {
   // Skip this test if a custom validator is defined
   if (customValidators.user_lname) this.skip();
 
@@ -187,13 +180,12 @@ function verifyUserLName(done) {
 
   // Invalid names
   chai.expect(RegExp(validators.user.lname).test(' space first')).to.equal(false);
-  done();
 }
 
 /**
  * @description Verifies valid and invalid url paths.
  */
-function verifyURLPath(done) {
+async function verifyURLPath() {
   // Skip this test if a custom validator is defined
   if (customValidators.url_next) this.skip();
 
@@ -203,5 +195,4 @@ function verifyURLPath(done) {
   // Invalid paths
   chai.expect(RegExp(validators.url.next).test('login')).to.equal(false);
   chai.expect(RegExp(validators.url.next).test('//login')).to.equal(false);
-  done();
 }

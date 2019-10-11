@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -47,7 +47,7 @@ const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
-const helper = M.require('lib.controller-helper');
+const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
 
 /**
@@ -184,8 +184,17 @@ async function find(requestingUser, organizationID, projects, options) {
       throw new M.DataFormatError('Invalid input for finding projects.', 'warn');
     }
 
-    // If the user specifies an organization
     let foundOrg;
+    let foundProjects = [];
+    const opts = {
+      limit: validatedOptions.limit,
+      skip: validatedOptions.skip,
+      sort: validatedOptions.sort,
+      populate: validatedOptions.populateString,
+      lean: validatedOptions.lean
+    };
+
+    // If the user specifies an organization
     if (orgID !== null) {
       // Find the organization, validate that it exists and is not archived (unless specified)
       foundOrg = await helper.findAndValidate(Organization, orgID,
@@ -193,6 +202,7 @@ async function find(requestingUser, organizationID, projects, options) {
 
       // Find all projects on the provided org, parse after
       searchQuery.org = orgID;
+      foundProjects = await Project.find(searchQuery, validatedOptions.fieldsString, opts);
     }
     // If orgID is null, find all projects the user has access to
     else {
@@ -200,27 +210,32 @@ async function find(requestingUser, organizationID, projects, options) {
       const orgQuery = {};
       orgQuery[`permissions.${reqUser._id}`] = 'read';
       const readOrgs = await Organization.find(orgQuery);
-
       const orgIDs = readOrgs.map(o => o._id);
+
       // Project must be internal and in an org the user has access to
-      const internalQuery = { $and: [{ visibility: 'internal' }, { org: orgIDs }] };
-      const permissionsQuery = {};
+      // Use JSON.parse, JSON.stringify to remove any undefined values
+      const internalQuery = JSON.parse(JSON.stringify({
+        archived: searchQuery.archived,
+        visibility: 'internal',
+        org: { $in: orgIDs }
+      }));
+      // Find all internal projects
+      const internalProjects = await Project.find(internalQuery,
+        validatedOptions.fieldsString, opts);
+
+      // Find all projects the user has read access to
+      // Use JSON parse/stringify to remove undefined values
+      const permissionsQuery = JSON.parse(JSON.stringify({ archived: searchQuery.archived }));
       permissionsQuery[`permissions.${reqUser._id}`] = 'read';
+      const permissionProjects = await Project.find(permissionsQuery,
+        validatedOptions.fieldsString, opts);
 
-      // Add $or to search query, saying user must have read access or must be
-      // internal project within an organization the user has read access on
-      searchQuery.$or = [internalQuery, permissionsQuery];
+      // Return only unique projects
+      const internalProjectIDs = internalProjects.map(p => p._id);
+      const projectsNotInInternal = permissionProjects
+      .filter(p => !internalProjectIDs.includes(p._id));
+      foundProjects = internalProjects.concat(projectsNotInInternal);
     }
-
-    // Find the projects
-    let foundProjects = await Project.find(searchQuery,
-      validatedOptions.fieldsString,
-      { limit: validatedOptions.limit,
-        skip: validatedOptions.skip,
-        sort: validatedOptions.sort,
-        populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
 
     // If searching specific projects, remove projects not in that list
     if (saniProjects) {
@@ -234,10 +249,13 @@ async function find(requestingUser, organizationID, projects, options) {
       }
     }
 
-    // Run permissions checks on each of the remaining projects
-    foundProjects.forEach((proj) => {
-      permissions.readProject(reqUser, foundOrg, proj);
-    });
+    // If the user is not searching for all projects they have
+    if (orgID !== null) {
+      // Run permissions checks on each of the remaining projects
+      foundProjects.forEach((proj) => {
+        permissions.readProject(reqUser, foundOrg, proj);
+      });
+    }
 
     return foundProjects;
   }
@@ -834,21 +852,46 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // Create query to find all elements which reference elements on any
     // projects whose visibility was just lowered to 'private'
-    const relRegex = `^(${loweredVisibility.join(':)|(')}:)`;
-    const relQuery = {
-      project: { $nin: loweredVisibility },
-      $or: [
-        { source: { $regex: relRegex } },
-        { target: { $regex: relRegex } }
-      ]
-    };
+    const elemsToFind = [];
+    let length = 50000;
+    let iteration = 0;
+    while (length === 50000) {
+      // Find all elements on the modified projects
+      const elemsOnModifed = await Element.find({ project: { $in: loweredVisibility } }, // eslint-disable-line
+        null, { populate: 'sourceOf targetOf', lean: true, limit: length, skip: iteration });
+
+      // For each of the found elements
+      elemsOnModifed.forEach((e) => {
+        // Loop through sourceOf
+        e.sourceOf.forEach((r) => {
+          // If the relationships project is different, add relationship to list
+          if (r.project !== e.project) {
+            elemsToFind.push(r);
+          }
+        });
+
+        // Loop through targetOf
+        e.targetOf.forEach((r) => {
+          // If the relationships project is different, add relationship to list
+          if (r.project !== e.project) {
+            elemsToFind.push(r);
+          }
+        });
+      });
+
+      // Set length and iteration
+      length = elemsOnModifed.length;
+      iteration += length;
+    }
+
+    // Find the elements, and populate the source and target
+    const relQuery = { _id: { $in: elemsToFind.map(e => e._id) } };
 
     // Find broken relationships
     const foundElements = await Element.find(relQuery, null,
       { populate: 'source target', lean: true });
 
     const bulkArray2 = [];
-
     // For each broken relationship
     foundElements.forEach((elem) => {
       // If the source no longer exists, set it to the undefined element
@@ -889,7 +932,7 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // If there are relationships to fix
     if (bulkArray2.length > 0) {
-      return Element.bulkWrite(bulkArray2);
+      return await Element.bulkWrite(bulkArray2);
     }
 
     const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,

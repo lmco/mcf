@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -58,7 +58,7 @@ class ProjList extends Component {
     // Initialize variables
     const project = this.props.project;
     const orgId = this.props.orgid;
-
+    const className = `homeproj-list ${this.props.className}`;
     return (
       <React.Fragment>
         {/* Modal for deleting a project */}
@@ -68,8 +68,9 @@ class ProjList extends Component {
           </ModalBody>
         </Modal>
         <div className='proj-list'>
-          <ProjectListItem className='homeproj-list'
+          <ProjectListItem className={className}
                            divider={true}
+                           archiveProj={this.props.archiveProj}
                            project={project}
                            href={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>
           {(!this.props.admin)

@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -45,7 +45,7 @@ const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
-const helper = M.require('lib.controller-helper');
+const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
 
 /**
@@ -805,7 +805,7 @@ async function createOrReplace(requestingUser, orgs, options) {
     });
 
     // Delete orgs from database
-    await Organization.deleteMany({ _id: foundOrgs.map(o => o._id) });
+    await Organization.deleteMany({ _id: { $in: foundOrgs.map(o => o._id) } });
 
     // Emit the event orgs-deleted
     EventEmitter.emit('orgs-deleted', foundOrgs);
@@ -884,7 +884,6 @@ async function remove(requestingUser, orgs, options) {
 
     // Define searchQuery and ownedQuery
     const searchQuery = {};
-    const ownedQuery = {};
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs)) {
@@ -895,7 +894,7 @@ async function remove(requestingUser, orgs, options) {
     else if (typeof saniOrgs === 'string') {
       // A single org id
       searchedIDs = [saniOrgs];
-      searchQuery._id = saniOrgs;
+      searchQuery._id = { $in: saniOrgs };
     }
     else {
       // Invalid parameter, throw an error
@@ -911,9 +910,6 @@ async function remove(requestingUser, orgs, options) {
     });
 
     const foundOrgIDs = foundOrgs.map(o => o._id);
-    const regexIDs = foundOrgs.map(o => RegExp(`^${o._id}${utils.ID_DELIMITER}`));
-    ownedQuery._id = { $in: regexIDs };
-
     // Check if all orgs were found
     const notFoundIDs = searchedIDs.filter(o => !foundOrgIDs.includes(o));
     // Some orgs not found, throw an error
@@ -930,10 +926,16 @@ async function remove(requestingUser, orgs, options) {
       }
     });
 
-    // Delete any elements in the org
-    await Element.deleteMany(ownedQuery);
-    // Delete any branches in the org
-    await Branch.deleteMany(ownedQuery);
+    // Find all projects to delete
+    const projectsToDelete = await Project.find({ org: { $in: saniOrgs } },
+      null, { lean: true });
+
+    const projectIDs = projectsToDelete.map(p => p._id);
+
+    // Delete any elements in the found projects
+    await Element.deleteMany({ project: { $in: projectIDs } });
+    // Delete any branches in the found projects
+    await Branch.deleteMany({ project: { $in: projectIDs } });
     // Delete any projects in the org
     await Project.deleteMany({ org: { $in: saniOrgs } });
     // Delete the orgs

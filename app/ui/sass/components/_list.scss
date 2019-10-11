@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
 
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -83,27 +83,33 @@
   height: 100%;
   min-width: 100%;
   max-width: 100%;
+}
 
-  .stats-item {
-    @extend %stat-list-template;
-    justify-content: flex-start;
-    padding-left: 1em;
-    padding-right: 1em;
-    i {
-      padding-right: .3em;
-    }
-    p {
-      margin: 0;
-    }
-  }
+.stats-list-member {
+  @extend %stat-list-template;
+  justify-content: space-around;
+}
 
-  .stats-divider {
-    border-right: 1px solid #eee;
-    height: 80%;
-    padding-left: 0;
-    padding-right: 0;
-    width: 1px;
+
+.stats-item {
+  @extend %stat-list-template;
+  justify-content: flex-start;
+  padding-left: 1em;
+  padding-right: 1em;
+  i {
+    padding-right: .3em;
   }
+  p {
+    margin: 0;
+  }
+}
+
+.stats-divider {
+  border-right: 1px solid #eee;
+  height: 80%;
+  padding-left: 0;
+  padding-right: 0;
+  width: 1px;
 }
 
 .stats-list-item {
@@ -118,11 +124,6 @@
     a:hover {
       color:  lighten($mbee-navbar-color, 20);
     }
-  }
-
-  .stats-list {
-    grid-area: stats;
-    justify-self: flex-end;
   }
 }
 

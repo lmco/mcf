@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -54,8 +54,7 @@ class CustomData extends Component {
       // Loop through custom data
       Object.keys(customData).forEach((key) => {
         // Create the key data view
-        /* eslint-disable-next-line no-undef */
-        keys.push(<KeyData key={`key-${key}`} keyName={key} data={decodeHTML(customData[key])}/>);
+        keys.push(<KeyData key={`key-${key}`} keyName={key} data={customData[key]}/>);
       });
     }
     else {

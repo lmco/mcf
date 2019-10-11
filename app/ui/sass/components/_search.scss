@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
 
  * @owner James Eckstein <james.eckstein@lmco.com>
  *
@@ -25,7 +25,7 @@
 
 #adv-card {
   padding: 0;
-  margin-right: 9px;
+  margin-top: 15px;
 }
 
 #adv-card-body {
@@ -38,11 +38,13 @@
 
 #adv-filter-btn {
   margin-left: auto;
-  margin-right: 25px;
+  margin-right: 12px;
 }
 
+// Need to override col class
 .adv-input-field {
   border-radius: 0.25rem !important;
+  width: 97% !important;
 }
 
 #adv-search-header{
@@ -55,7 +57,8 @@
 }
 
 .adv-search-select {
-  padding-right: 10px;
+  width: 100% !important; // Need important or inline style
+  margin-left: 5px;
 }
 
 #adv-separator {
@@ -63,22 +66,21 @@
   margin: 12px;
 }
 
-%btn-adv-row-del {
+%btn-fa-gray {
   background-color: transparent;
   border-color: transparent;
   box-shadow: none;
   color: gray;
   font-size: 1.25rem;
-  margin-left: 5px;
   outline: none !important;
-  padding: 0;
 }
 
 .adv-row-del {
-  @extend %btn-adv-row-del;
+  @extend %btn-fa-gray;
+  padding-top: 7px !important;
 
   &:hover, &:focus, &:active {
-    @extend %btn-adv-row-del;
+    @extend %btn-fa-gray;
   }
 }
 
@@ -100,15 +102,11 @@
 
 #btn-add-adv-row {
   @extend %btn-adv-standard;
-  padding: 6px 0px 0px 0px;
+  padding: 6px 0px 0px 6px;
 }
 
 #btn-adv-search-toggle{
-  @extend %btn-adv-standard;
-
-  &:hover, &:focus, &:active {
-    @extend %btn-adv-standard;
-  }
+  @extend %btn-fa-gray;
 }
 
 #frm-adv-label {
@@ -121,13 +119,22 @@
 /*                       Adv Filter Form Styling                              *
 /******************************************************************************/
 
+.adv-filter-col {
+  padding: 0 !important;
+}
+
 .adv-elem-filters {
-  margin-top: 8px;
+  margin-right: 10px !important;
+  width: auto !important;
 }
 
 #adv-filter-frm {
   margin: 0;
   padding-left: 40px;
+}
+
+.adv-filter-item {
+  display: flex;
 }
 
 #adv-filter-label {
@@ -156,26 +163,45 @@
 /*                           Search Form Styling                              *
 /******************************************************************************/
 
-%btn-page {
+%no-border {
   background-color: Transparent;
   border: none;
   box-shadow: none;
-  color: $color-primary;
-  font-size: 0.875rem;
+  outline: none !important;
+}
+
+%gray-border {
+  border: 1px solid rgba(0,0,0,0.125);
+  border-radius: .25rem;
+}
+
+// Need to override btn-page class
+#btn-back, #btn-next {
+  @extend %no-border;
+  color: black;
+  font-size: small;
+  font-weight: 100;
+
+  &:hover, &:focus, &:active {
+    @extend %no-border;
+    cursor: pointer;
+    color: #cccccc;
+    text-decoration: underline;
+  }
 }
 
 #btn-pagination-grp {
   float: right;
 }
 
-#btn-next-result-page, #btn-prev-result-page {
-  @extend %btn-page;
-}
-
 .no-results {
   display: flex;
   justify-content: center;
   margin: 20px;
+}
+
+.result-row:hover {
+  cursor: pointer;
 }
 
 #search {
@@ -197,11 +223,6 @@
   padding: 80px 80px 0px 60px;
 }
 
-.search-container {
-  padding: 4px 80px;
-  margin-bottom: 20px;
-}
-
 .search-form {
   padding: 0px 80px 1px;
 
@@ -214,6 +235,30 @@
   }
 }
 
+#search-input {
+  margin-left: -20px;
+}
+
+#search-input-box {
+  @extend %gray-border;
+  display: flex;
+}
+
+#search-query-input {
+  @extend %no-border;
+  width: 93%;
+  padding: 2px 0 0 0;
+
+  &:hover, &:focus, &:active {
+    @extend %no-border;
+  }
+}
+
+#btn-search {
+  @extend %btn-fa-gray;
+  padding: 6px;
+}
+
 #search-message {
   font-size: 13px;
   margin-left: 80px;
@@ -221,12 +266,40 @@
 }
 
 #search-results {
-  border: 1px solid rgba(0,0,0,0.125);
-  border-radius: .25rem;
-  padding: 0;
-  width: 82%;
+  @extend %gray-border;
+  margin-top: 20px;
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
+#tbl-elem-info {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  table-layout: fixed;
+
+  th, td {
+    border-top: 0;
+    padding: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  tr {
+    background-color: transparent !important;
+  }
+}
+
+// Alternate table strip color
+#tbl-results tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.0);
+}
+
+#tbl-results tbody tr:nth-of-type(4n+1) {
   background-color: rgba(0,0,0,0.03);
+}
+
+.results-border {
+  padding: 10px;
+  width: 100%;
 }

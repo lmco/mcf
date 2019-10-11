@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
  *
@@ -89,7 +89,7 @@ describe(M.getModuleName(module.filename), () => {
 /**
  * @description Checks that admins can perform all expected actions.
  */
-function verifyAdminPermissions(done) {
+async function verifyAdminPermissions() {
   // Test data
   const user = users[0];
   const org = orgs[0];
@@ -118,15 +118,12 @@ function verifyAdminPermissions(done) {
   chai.expect(can.readUser.bind(can, user)).to.not.throw(M.PermissionError);
   chai.expect(can.updateUser.bind(can, user)).to.not.throw(M.PermissionError);
   chai.expect(can.deleteUser.bind(can, user)).to.not.throw(M.PermissionError);
-
-  // Test is done
-  done();
 }
 
 /**
  * @description Checks that org permissions are handled as expected.
  */
-function verifyOrgPermissions(done) {
+async function verifyOrgPermissions() {
   // Test data
   const user1 = users[1];
   const user2 = users[2];
@@ -147,15 +144,12 @@ function verifyOrgPermissions(done) {
   // User 2 (no access to org2)
   chai.expect(can.readOrg.bind(can, user2, org2)).to.throw(M.PermissionError);
   chai.expect(can.updateOrg.bind(can, user2, org2)).to.throw(M.PermissionError);
-
-  // Test is done
-  done();
 }
 
 /**
  * @description Checks that project permissions are handled as expected.
  */
-function verifyProjectPermissions(done) {
+async function verifyProjectPermissions() {
   // Test data
   const org = orgs[1];
   const project0 = projects[0];
@@ -179,15 +173,12 @@ function verifyProjectPermissions(done) {
   chai.expect(can.createProject.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.updateProject.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.deleteProject.bind(can, user2, org, project2)).to.throw(M.PermissionError);
-
-  // Test is done
-  done();
 }
 
 /**
  * @description Checks that element permissions are handled as expected.
  */
-function verifyElementPermissions(done) {
+async function verifyElementPermissions() {
   // Test data
   const org = orgs[1];
   const project0 = projects[0];
@@ -211,14 +202,12 @@ function verifyElementPermissions(done) {
   chai.expect(can.createElement.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.updateElement.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.deleteElement.bind(can, user2, org, project2)).to.throw(M.PermissionError);
-  // Test is done
-  done();
 }
 
 /**
  * @description Checks that branch permissions are handled as expected.
  */
-function verifyBranchPermissions(done) {
+async function verifyBranchPermissions() {
   // Test data
   const org = orgs[1];
   const project0 = projects[0];
@@ -242,7 +231,4 @@ function verifyBranchPermissions(done) {
   chai.expect(can.createBranch.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.updateBranch.bind(can, user2, org, project2)).to.throw(M.PermissionError);
   chai.expect(can.deleteBranch.bind(can, user2, org, project2)).to.throw(M.PermissionError);
-
-  // Test is done
-  done();
 }

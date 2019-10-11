@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -44,6 +44,9 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
  * @param {object} req - Express request object.
  * @param {object} res - Express response object.
  * @param {Function} next - Callback to express authentication.
+ *
+ * @returns {Function} Either returns an express response render call to notify the
+ * user of an error or calls the next() callback.
  */
 async function authenticate(req, res, next) {
   // Extract authorization metadata
