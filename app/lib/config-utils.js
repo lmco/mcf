@@ -266,7 +266,7 @@ module.exports.validate = function(config) {
   test(config, 'server.secret', 'string');
 
 
-  // ----------------------------- Verfiy test ----------------------------- //
+  // ----------------------------- Verify test ----------------------------- //
   test(config, 'test', 'object');
   test(config, 'test.url', 'string');
 
