@@ -102,19 +102,16 @@ class Schema {
       GlobalSecondaryIndexes: []
     };
     this.definition = definition;
+    this.add(definition);
+
     this.definition.hooks = { pre: [], post: [] };
     this.definition.methods = [];
     this.definition.statics = [];
-
-    this.add(definition);
 
     // Remove GlobalSecondaryIndex array if empty
     if (this.schema.GlobalSecondaryIndexes.length === 0) {
       this.schema.GlobalSecondaryIndexes = undefined;
     }
-
-    console.log('-------- DEFINITION --------');
-    console.log(JSON.stringify(this.definition, null, 2));
   }
 
   /**
@@ -125,24 +122,30 @@ class Schema {
    * @param {string} [prefix] - The optional prefix to add to the paths in obj.
    */
   add(obj, prefix) {
-    console.log('-------OBJECT-------');
-    console.log(obj);
     Object.keys(obj).forEach((key) => {
-      switch (obj.type) {
+      if (!this.definition.hasOwnProperty(key)) {
+        this.definition[key] = obj[key];
+      }
+
+      switch (obj[key].type) {
+        case 'S':
         case 'String': this.definition[key].type = 'S'; break;
+        case 'N':
         case 'Number': this.definition[key].type = 'N'; break;
+        case 'M':
         case 'Object': this.definition[key].type = 'M'; break;
         case 'Date': this.definition[key].type = 'N'; break;
+        case 'BOOL':
         case 'Boolean': this.definition[key].type = 'BOOL'; break;
         default: this.definition[key].type = 'S'; break;
       }
 
       // Handle indexes
-      if (obj.index) {
+      if (obj[key].index) {
         // Create attribute object
         const attributeObj = {
           AttributeName: key,
-          AttributeType: obj.type
+          AttributeType: obj[key].type
         };
         this.schema.AttributeDefinitions.push(attributeObj);
 
@@ -152,7 +155,7 @@ class Schema {
           KeySchema: [
             {
               AttributeName: key,
-              KeyType: (obj.type === 'S') ? 'HASH' : 'RANGE'
+              KeyType: (obj[key].type === 'S') ? 'HASH' : 'RANGE'
             }
           ],
           Projection: {
@@ -173,7 +176,7 @@ class Schema {
    */
   plugin(cb, options) {
     this.cb = cb;
-    this.cb();
+    this.cb(this);
     this.cb = undefined;
   }
 
@@ -294,6 +297,11 @@ class Model {
     this.TableName = collection;
     this.modelName = name;
 
+    // Create a list of indexed fields on the schema, splitting off the _1
+    this.indexes = (schema.schema.GlobalSecondaryIndexes) ? schema.schema.GlobalSecondaryIndexes
+    .map(i => i.IndexName.substr(0, i.IndexName.length - 2)) : [];
+    this.indexes.push('_id');
+
     // Add on methods
     if (Array.isArray(this.definition.statics)) {
       this.definition.statics.forEach((method) => {
@@ -394,10 +402,21 @@ class Model {
    * @returns {object} - Modified documents.
    */
   formatDocument(document, options = {}, recurse = false) {
-    console.log(document);
     Object.keys(document).forEach((field) => {
+      // If the string null, convert to actual value
+      if (Object.values(document[field])[0] === 'null') {
+        document[field][Object.keys(document[field])[0]] = null;
+      }
+
+      // Go through each type
       if (Object.keys(document[field])[0] === 'M') {
         document[field] = this.formatDocument(document[field].M, {}, true);
+      }
+      else if (Object.keys(document[field])[0] === 'N'
+        && Object.values(document[field])[0] !== null) {
+        // Change the value of each key from { type: value} to simply the value
+        // and convert to Number
+        document[field] = Number(Object.values(document[field])[0]);
       }
       else {
         // Change the value of each key from { type: value} to simply the value
@@ -416,6 +435,20 @@ class Model {
         document[field] = null;
       }
     });
+
+    // If the top level
+    if (!recurse) {
+      // Loop through all keys in definition
+      Object.keys(this.definition).forEach((k) => {
+        // If the key is not in the document
+        if (!document.hasOwnProperty(k)) {
+          // If the key has a default
+          if (this.definition[k].hasOwnProperty('default')) {
+            document[k] = this.definition[k].default;
+          }
+        }
+      });
+    }
 
     // If the lean option is NOT supplied, add on document functions
     if (!options.lean && !recurse) {
@@ -493,7 +526,10 @@ class Model {
         // Wait for completion of all promises, and return formatted docs
         Promise.all(promises)
         .then(() => resolve(this.formatDocuments(foundDocs, options)))
-        .catch((error) => reject(error));
+        .catch((error) => {
+          M.log.verbose('Failed in batchGetItem');
+          return reject(error);
+        });
       }
       else {
         return resolve([]);
@@ -583,8 +619,14 @@ class Model {
     Object.keys(def).forEach((param) => {
       // If a default exists and the value isn't set
       if (def[param].default && !Object.keys(doc).includes(param)) {
-        // Set the value equal to th default
-        doc[param] = def[param].default;
+        // If the default is a function, call it
+        if (typeof def[param].default === 'function') {
+          doc[param] = def[param].default();
+        }
+        else {
+          // Set the value equal to th default
+          doc[param] = def[param].default;
+        }
       }
     });
 
@@ -608,9 +650,17 @@ class Model {
       // Loop over each valid parameter
       Object.keys(def).forEach((param) => {
         // If a default exists and the value isn't set
-        if (def[param].default && !keys.includes(param)) {
-          // Set the value equal to th default
-          doc[param] = def[param].default;
+        if (def[param].hasOwnProperty('default') && !keys.includes(param) && !fields) {
+          if (typeof def[param].default === 'function') {
+            doc[param] = def[param].default();
+          }
+          else if (def[param].default === '') {
+            // Do nothing, empty strings cannot be saved in DynamoDB
+          }
+          else {
+            // Set the value equal to th default
+            doc[param] = def[param].default;
+          }
         }
 
         // Parameter was defined on the document
@@ -642,7 +692,7 @@ class Model {
 
           // If not the correct type, throw an error
           if (typeof doc[param] !== shouldBeType // eslint-disable-line valid-typeof
-            && !(shouldBeType === 'string' && doc[param] === null)) {
+            && !(shouldBeType !== 'object' && doc[param] === null)) {
             throw new M.DataFormatError(`${modelName} validation failed: `
               + `${param}: Cast to ${utils.toTitleCase(shouldBeType)} failed `
               + `for value "${JSON.stringify(doc[param])}" at path "${param}"`);
@@ -656,8 +706,8 @@ class Model {
           }
 
           // Handle special case where the field should be a string, and defaults to null
-          if (shouldBeType === 'string' && def[param].hasOwnProperty('default')
-            && def[param].default === null) {
+          if (def[param].hasOwnProperty('default')
+            && def[param].default === null && doc[param] === null) {
             // The string null is a reserved keyword for string fields with null defaults
             if (doc[param] === 'null') {
               throw new M.DataFormatError('The string \'null\' is a reserved '
@@ -828,9 +878,10 @@ class Model {
    * any.
    */
   async find(filter, projection, options, cb) {
-    // Find all documents in the table
-    if (Object.keys(filter).length === 0) {
-      return this.scan({}, projection, options);
+    const params = Object.keys(filter);
+    // Find all documents in the table if there are no keys or not every field is indexed
+    if (Object.keys(filter).length === 0 || !params.every(p => this.indexes.includes(p))) {
+      return this.scan(filter, projection, options);
     }
     else {
       return this.batchGetItem(filter, projection, options);
@@ -937,6 +988,7 @@ class Model {
         }
       })
       .catch((error) => {
+        M.log.verbose('Failed in getItem');
         return reject(error)
       });
     });
@@ -970,7 +1022,8 @@ class Model {
         batchGetObj.RequestItems[this.TableName] = { Keys: [] };
         batch.forEach((doc) => {
           batchGetObj.RequestItems[this.TableName].Keys.push(
-            { _id: { S: doc._id } });
+            { _id: { S: doc._id } }
+          );
         });
         M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
         promises.push(
@@ -995,7 +1048,7 @@ class Model {
         else {
           const promises2 = [];
           // Format and validate documents
-          const formattedDocs = docs.map(d => this.createDocument(d))
+          const formattedDocs = docs.map(d => this.createDocument(d));
           formattedDocs.forEach(d => d.validateSync());
           // Loop through all docs in batches of 25
           for (let i = 0; i < formattedDocs.length / 25; i++) {
@@ -1010,15 +1063,8 @@ class Model {
                   Item: {}
                 }
               };
-              // Object.keys(doc).forEach((key) => {
-              //   if (this.definition[key]) {
-              //     putObj.PutRequest.Item[key] = {};
-              //     putObj.PutRequest.Item[key][this.definition[key].type] = doc[key];
-              //   }
-              // });
+
               putObj.PutRequest.Item = this.formatObject(doc);
-              console.log('------- Formatted Docs -------')
-              console.log(JSON.stringify(putObj.PutRequest.Item, null, 2));
 
               batchWriteObj.RequestItems[this.TableName].push(putObj);
             });
@@ -1065,7 +1111,10 @@ class Model {
         return Promise.all(promises3);
       })
       .then(() => resolve(foundDocuments))
-      .catch((error) => reject(error));
+      .catch((error) => {
+        M.log.verbose('Failed in insertMany');
+        return reject(error);
+      });
     });
   }
 
@@ -1082,15 +1131,17 @@ class Model {
       };
 
       putObj.Item = this.formatObject(doc);
-      console.log(putObj)
 
       M.log.debug(`DB OPERATION: ${this.TableName} putItem`);
       // Save the document
       this.connection.putItem(putObj).promise()
-      .then((createdObj) => {
-        console.log(createdObj);
-      })
-      .catch((error) => reject(error));
+      // .then((createdObj) => {
+      //   console.log(createdObj);
+      // })
+      .catch((error) => {
+        M.log.verbose('Failed in putItem');
+        return reject(error)
+      });
     });
   }
 
@@ -1142,10 +1193,10 @@ class Model {
             default: throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
           }
 
-          returnArray.push(base);
+          // Add on query, using JSON parse/stringify
+          returnArray.push(JSON.parse(JSON.stringify(base)));
         });
       });
-
       return returnArray;
     }
   }
@@ -1163,7 +1214,7 @@ class Model {
     Object.keys(obj).forEach((key) => {
       switch (typeof obj[key]) {
         case 'string': returnObj[key] = { S: obj[key] }; break;
-        case 'number': returnObj[key] = { N: obj[key] }; break;
+        case 'number': returnObj[key] = { N: obj[key].toString() }; break;
         case 'boolean': returnObj[key] = { BOOL: obj[key] }; break;
         case 'object': {
           // If the object is an array, call recursively
@@ -1212,19 +1263,54 @@ class Model {
    */
   async scan(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      // Make the projection comma separated instead of space separated
-      const projectionString = (projection) ? projection.split(' ').join(',') : undefined;
       const scanObj = {
-        ProjectionExpression: projectionString,
         TableName: this.TableName
       };
 
+      // Handle projections
+      if (projection) {
+        const fields = projection.split(' ');
+        // For each field to return
+        fields.forEach((f) => {
+          // If the ExpressionAttributeNames is not defined, define it
+          if (!scanObj.ExpressionAttributeNames) {
+            scanObj.ExpressionAttributeNames = {};
+          }
+
+          const keyName = (f === '_id') ? 'id' : f;
+
+          // Create unique key for field
+          scanObj.ExpressionAttributeNames[`#${keyName}`] = f;
+
+          // If ProjectionExpression is not defined, init it
+          if (!scanObj.ProjectionExpression) {
+            scanObj.ProjectionExpression = `#${keyName}`;
+          }
+          // Add onto ProjectionExpression with leading comma
+          else {
+            scanObj.ProjectionExpression += `,#${keyName}`;
+          }
+        });
+      }
+
       Object.keys(filter).forEach((key) => {
+        // Init ExpressionAttributeValues
         if (!scanObj.ExpressionAttributeValues) {
           scanObj.ExpressionAttributeValues = {};
         }
 
+        // Init ExpressionAttributeNames
+        if (!scanObj.ExpressionAttributeNames) {
+          scanObj.ExpressionAttributeNames = {};
+        }
+
         const value = filter[key];
+        const keyName = (key === '_id') ? 'id' : key;
+
+        if (!scanObj.ExpressionAttributeNames[`#${keyName}`]) {
+          // Create unique key for field
+          scanObj.ExpressionAttributeNames[`#${keyName}`] = key;
+        }
 
         // If the value is a string
         if (typeof value === 'string') {
@@ -1240,17 +1326,21 @@ class Model {
         }
 
         if (!scanObj.FilterExpression) {
-          scanObj.FilterExpression = `${key} = :${key}`;
+          scanObj.FilterExpression = `#${keyName} = :${key}`;
         }
         else {
-          scanObj.FilterExpression += `, ${key} = :${key}`;
+          scanObj.FilterExpression += ` AND #${keyName} = :${key}`;
         }
       });
 
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
-      this.connection.scan(scanObj).promise()
+      connect()
+      .then((conn) => conn.scan(scanObj).promise())
       .then((data) => resolve(this.formatDocuments(data.Items, options)))
-      .catch((error) => reject(error));
+      .catch((error) => {
+        M.log.verbose('Failed in scan');
+        return reject(error);
+      });
     });
   }
 
@@ -1319,7 +1409,10 @@ class Model {
       connect()
       .then((connection) => connection.updateItem(updateObj).promise())
       .then((updatedItem) => resolve(this.formatDocument(updatedItem.Attributes, options)))
-      .catch((error) => reject(error));
+      .catch((error) => {
+        M.log.verbose('Failed in updateItem');
+        return reject(error);
+      });
     });
   }
 
