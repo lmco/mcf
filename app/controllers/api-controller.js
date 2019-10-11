@@ -24,7 +24,7 @@
 // Node modules
 const path = require('path');
 
-// NPM Modules
+// NPM modules
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules
