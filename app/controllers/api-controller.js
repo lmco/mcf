@@ -21,7 +21,7 @@
 // Disabling these rules due to the use of headers for api endpoints
 
 
-// Node Modules
+// Node modules
 const path = require('path');
 
 // NPM Modules
