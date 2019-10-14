@@ -2126,7 +2126,7 @@ async function getUsers(req, res) {
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
 
-    // Verify elements public data array is not empty
+    // Verify users public data array is not empty
     if (publicUserData.length === 0) {
       throw new M.NotFoundError('No users found.', 'warn');
     }
