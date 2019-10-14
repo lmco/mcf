@@ -18,7 +18,7 @@
  * also deleted.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 

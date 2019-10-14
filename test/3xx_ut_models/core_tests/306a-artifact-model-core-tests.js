@@ -16,9 +16,11 @@
  * methods, validators, setters, and getters.
  */
 
+// Node modules
+const path = require('path'); // Find directory paths
+
 // NPM modules
 const chai = require('chai');
-const path = require('path'); // Find directory paths
 const chaiAsPromised = require('chai-as-promised');
 
 // Use async chai

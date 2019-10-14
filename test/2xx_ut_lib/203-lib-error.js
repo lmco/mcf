@@ -14,7 +14,7 @@
  * @description This file tests basic CustomError functionality.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

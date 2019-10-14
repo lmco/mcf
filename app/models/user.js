@@ -47,7 +47,7 @@
 // Node Modules
 const crypto = require('crypto');
 
-// MBEE Modules
+// MBEE modules
 const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');

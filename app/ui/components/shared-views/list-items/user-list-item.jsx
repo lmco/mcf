@@ -17,10 +17,10 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 
-// MBEE Modules
+// MBEE modules
 import StatsList from '../../general/stats/stats-list.jsx';
 import Stat from '../../general/stats/stat.jsx';
 

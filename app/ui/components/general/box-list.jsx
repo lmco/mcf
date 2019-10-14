@@ -18,10 +18,10 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 
-// MBEE Modules
+// MBEE modules
 import { Tooltip } from 'reactstrap';
 import { Link } from 'react-router-dom';
 

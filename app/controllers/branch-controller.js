@@ -25,10 +25,10 @@ module.exports = {
   remove
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 
-// MBEE Modules
+// MBEE modules
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Project = M.require('models.project');

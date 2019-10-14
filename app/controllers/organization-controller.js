@@ -28,12 +28,12 @@ module.exports = {
   remove
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-// MBEE Modules
+// MBEE modules
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');

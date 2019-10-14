@@ -17,11 +17,11 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { Button, Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import BoxList from '../../general/box-list.jsx';
 import CreateBranch from './branch-new.jsx';
 import BranchListItem from '../../shared-views/list-items/branch-list-item.jsx';

@@ -13,17 +13,18 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Jake Ursetta <jake.j.ursetta@lmco.com>
  *
- * @description Provides utilites for handling .cfg files, specifically removing comments and
- * validating the format.
+ * @description Provides utilities for handling .cfg files, specifically
+ * removing comments and validating the format.
  */
 
-// Node Modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
 
 
 /**
- * @description A helper function to simplify testing the existence and types of config keys.
+ * @description A helper function to simplify testing the existence and types of
+ * config keys.
  *
  * @param {object} config - The json object version of the config file.
  * @param {string} key - The key of the config to test.
@@ -67,9 +68,9 @@ function test(config, key, type) {
 }
 
 /**
- * @description This function checks every field in the config to validate that it is formatted
- * properly. It will also search for specified strategy, Dockerfile, and CA files to validate
- * that they exist.
+ * @description This function checks every field in the config to validate that
+ * it is formatted properly. It will also search for specified strategy,
+ * docker file, and CA files to validate that they exist.
  *
  * @param {object} config - The configuration settings object.
  */
@@ -266,12 +267,12 @@ module.exports.validate = function(config) {
   test(config, 'server.secret', 'string');
 
 
-  // ----------------------------- Verfiy test ----------------------------- //
+  // ----------------------------- Verify test ----------------------------- //
   test(config, 'test', 'object');
   test(config, 'test.url', 'string');
 
 
-  // ----------------------------- Verfiy validators ----------------------------- //
+  // --------------------------- Verify validators -------------------------- //
   if (config.validators) {
     test(config, 'validators', 'object');
     if (config.validators.id) test(config, 'validators.id', 'string');

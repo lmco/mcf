@@ -14,7 +14,7 @@
  * @description This file tests the utility functions.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

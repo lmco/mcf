@@ -14,10 +14,10 @@
  * @description Tests the permissions library functions.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
-// MBEE Modules
+// MBEE modules
 const can = M.require('lib.permissions');
 
 /* --------------------( Test Data )-------------------- */

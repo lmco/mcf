@@ -18,7 +18,6 @@
 // Node modules
 const fs = require('fs');
 const path = require('path');
-const process = require('process');
 
 // MBEE modules
 const Artifact = M.require('models.artifact');

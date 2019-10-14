@@ -17,7 +17,7 @@
  * development of custom validators.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

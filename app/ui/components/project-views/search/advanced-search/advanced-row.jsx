@@ -18,7 +18,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsdoc/require-jsdoc */
 
-// React Modules
+// React modules
 import React from 'react';
 import { Button, Container, Row, Col, Input, InputGroup, Form } from 'reactstrap';
 

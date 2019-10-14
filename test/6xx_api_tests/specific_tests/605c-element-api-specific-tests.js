@@ -15,12 +15,14 @@
  * GET, POST, PATCH, and DELETE of an element.
  */
 
-// NPM modules
-const chai = require('chai');
-const request = require('request');
+// Node modules
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
+
+// NPM modules
+const chai = require('chai');
+const request = require('request');
 
 // MBEE modules
 const db = M.require('lib.db');
