@@ -101,7 +101,7 @@ async function createArtifact() {
     branch: utils.createID(org.id, project.id, branch.id),
     location: artData.location,
     custom: artData.custom,
-    strategy: artData.strategy
+    strategy: M.config.artifact.strategy
   });
 
   try {
@@ -125,7 +125,7 @@ async function createArtifact() {
       utils.createID(org.id, project.id, branch.id)
     );
     chai.expect(createdArtifact.location).to.equal(artData.location);
-    chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
@@ -188,7 +188,7 @@ async function updateArtifact() {
       utils.createID(org.id, project.id, branch.id)
     );
     chai.expect(foundArtifact.location).to.equal(artData.location);
-    chai.expect(foundArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(foundArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(foundArtifact.custom || {}).to.deep.equal(
       artData.custom
     );

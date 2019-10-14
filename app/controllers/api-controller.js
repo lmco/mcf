@@ -4953,6 +4953,7 @@ async function postArtifact(req, res) {
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
+    console.log(error)
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
@@ -5042,6 +5043,7 @@ async function patchArtifact(req, res) {
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
+    console.log(error)
     // If an error was thrown, return it and its status
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }

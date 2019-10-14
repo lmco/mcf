@@ -223,8 +223,7 @@
       "contentType": "image/png",
       "custom": {
         "custom_key": "custom_value"
-      },
-      "strategy": "local-strategy"
+      }
     },
     {
       "id": "artifact01",
@@ -234,8 +233,7 @@
       "contentType": "image/png",
       "custom": {
         "custom_key": "custom_value"
-      },
-      "strategy": "local-strategy"
+      }
     },
     {
       "id": "artifact02",
@@ -245,8 +243,7 @@
       "contentType": "txt",
       "custom": {
         "custom_key": "custom_value"
-      },
-      "strategy": "local-strategy"
+      }
     }
 
   ],
