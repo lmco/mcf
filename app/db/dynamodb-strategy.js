@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED
+ * @classification UNCLASSIFIED
  *
  * @module db.dynamodb-strategy
  *
@@ -12,7 +12,7 @@
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This file defines the schema strategy for using MBEE with
- * Amazon's DynamoDB
+ * Amazon's DynamoDB.
  */
 
 // NPM modules
@@ -458,6 +458,17 @@ class Model {
     return document;
   }
 
+  /**
+   * @description Finds multiple documents from the database. Each field being
+   * requested MUST be indexed.
+   *
+   * @param {object} filter - The query to parse and send.
+   * @param {string} projection - A space separated string of fields to return
+   * from the database.
+   * @param {object} options - An object containing valid options.
+   *
+   * @returns {Promise<object[]>} - An array of found documents.
+   */
   async batchGetItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
       // Initialize the batch get object
@@ -466,33 +477,14 @@ class Model {
         Keys: []
       };
 
-      // Handle projections
-      if (projection) {
-        const fields = projection.split(' ');
-        let index = 0;
-        // For each field to return
-        fields.forEach((f) => {
-          // If the ExpressionAttributeNames is not defined, define it
-          if (!batchGetObj.RequestItems[this.TableName].ExpressionAttributeNames) {
-            batchGetObj.RequestItems[this.TableName].ExpressionAttributeNames = {};
-          }
-
-          // Create unique key for field
-          batchGetObj.RequestItems[this.TableName]
-          .ExpressionAttributeNames[`#val${index}`] = f;
-
-          // If ProjectionExpression is not defined, init it
-          if (!batchGetObj.RequestItems[this.TableName].ProjectionExpression) {
-            batchGetObj.RequestItems[this.TableName].ProjectionExpression = `#val${index}`;
-          }
-          // Add onto ProjectionExpression with leading comma
-          else {
-            batchGetObj.RequestItems[this.TableName].ProjectionExpression += `,#val${index}`;
-          }
-
-          // Increment index
-          index++;
-        });
+      // Parse and add-on the projection to the query object
+      const projObj = this.parseProjection(projection);
+      if (projObj.hasOwnProperty('ProjectionExpression')
+        && projObj.hasOwnProperty('ExpressionAttributeNames')) {
+        batchGetObj.RequestItems[this.TableName]
+        .ProjectionExpression = projObj.ProjectionExpression;
+        batchGetObj.RequestItems[this.TableName]
+        .ExpressionAttributeNames = projObj.ExpressionAttributeNames;
       }
 
       // Get all queries
@@ -1118,6 +1110,49 @@ class Model {
   }
 
   /**
+   * @description Parses the projection string and returns an object containing
+   * the ProjectionExpression key/value and the ExpressionAttributeNames object.
+   *
+   * @param {string} projection - A space separated string of specific fields to
+   * of a document.
+   *
+   * @returns {object} - An object containing the ProjectionExpression
+   * and ExpressionAttributeNames object.
+   */
+  parseProjection(projection) { // eslint-disable-line class-methods-use-this
+    const returnObj = {};
+
+    // Handle projections
+    if (projection) {
+      const fields = projection.split(' ');
+      // For each field to return
+      fields.forEach((f) => {
+        // If the ExpressionAttributeNames is not defined, define it
+        if (!returnObj.ExpressionAttributeNames) {
+          returnObj.ExpressionAttributeNames = {};
+        }
+
+        // Handle special case where key name starts with an underscore
+        const keyName = (f === '_id') ? 'id' : f;
+
+        // Create unique key for field
+        returnObj.ExpressionAttributeNames[`#${keyName}`] = f;
+
+        // If ProjectionExpression is not defined, init it
+        if (!returnObj.ProjectionExpression) {
+          returnObj.ProjectionExpression = `#${keyName}`;
+        }
+        // Add onto ProjectionExpression with leading comma
+        else {
+          returnObj.ProjectionExpression += `,#${keyName}`;
+        }
+      });
+    }
+
+    return returnObj;
+  }
+
+  /**
    * @description Creates or replaces a single item in the specified table in
    * the DynamoDB database.
    */
@@ -1262,35 +1297,8 @@ class Model {
    */
   async scan(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      const scanObj = {
-        TableName: this.TableName
-      };
-
-      // Handle projections
-      if (projection) {
-        const fields = projection.split(' ');
-        // For each field to return
-        fields.forEach((f) => {
-          // If the ExpressionAttributeNames is not defined, define it
-          if (!scanObj.ExpressionAttributeNames) {
-            scanObj.ExpressionAttributeNames = {};
-          }
-
-          const keyName = (f === '_id') ? 'id' : f;
-
-          // Create unique key for field
-          scanObj.ExpressionAttributeNames[`#${keyName}`] = f;
-
-          // If ProjectionExpression is not defined, init it
-          if (!scanObj.ProjectionExpression) {
-            scanObj.ProjectionExpression = `#${keyName}`;
-          }
-          // Add onto ProjectionExpression with leading comma
-          else {
-            scanObj.ProjectionExpression += `,#${keyName}`;
-          }
-        });
-      }
+      // Call the helper function to generate the scan object
+      const scanObj = this.scanQueryHelper(filter, projection);
 
       Object.keys(filter).forEach((key) => {
         // Init ExpressionAttributeValues
@@ -1303,8 +1311,12 @@ class Model {
           scanObj.ExpressionAttributeNames = {};
         }
 
+        // Init FilterExpression
+        scanObj.FilterExpression = '';
+
         const value = filter[key];
         const keyName = (key === '_id') ? 'id' : key;
+        let in_val = false;
 
         if (!scanObj.ExpressionAttributeNames[`#${keyName}`]) {
           // Create unique key for field
@@ -1323,14 +1335,39 @@ class Model {
         else if (typeof value === 'boolean') {
           scanObj.ExpressionAttributeValues[`:${key}`] = { BOOL: value };
         }
-
-        if (!scanObj.FilterExpression) {
-          scanObj.FilterExpression = `#${keyName} = :${key}`;
+        // Handle the $in case
+        else if (typeof value === 'object' && value !== null
+          && Object.keys(value)[0] === '$in') {
+          in_val = true;
+          let runningString;
+          const arr = Object.values(value)[0];
+          // Loop through each entry in the array
+          for (let i = 0; i < arr.length; i++) {
+            if (typeof arr[i] === 'string') {
+              scanObj.ExpressionAttributeValues[`:${key}${i}`] = { S: arr[i] };
+              // If runningString has not yet been initialized
+              if (!runningString) {
+                // Append an AND with parenthesis
+                runningString = ``
+              }
+            }
+            else {
+              M.log.critical('We have an array of non-strings...');
+            }
+          }
         }
-        else {
-          scanObj.FilterExpression += ` AND #${keyName} = :${key}`;
+
+        if (!in_val) {
+          if (scanObj.FilterExpression === '') {
+            scanObj.FilterExpression = `#${keyName} = :${key}`;
+          }
+          else {
+            scanObj.FilterExpression += ` AND #${keyName} = :${key}`;
+          }
         }
       });
+
+      console.log(JSON.stringify(scanObj, null, 2));
 
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
       connect()
@@ -1341,6 +1378,28 @@ class Model {
         return reject(error);
       });
     });
+  }
+
+  scanQueryHelper(filter, projection) {
+    const scanObj = {
+      TableName: this.TableName
+    };
+
+    // Parse and add-on the projection to the query object
+    const projObj = this.parseProjection(projection);
+    if (projObj.hasOwnProperty('ProjectionExpression')
+      && projObj.hasOwnProperty('ExpressionAttributeNames')) {
+      scanObj.ProjectionExpression = projObj.ProjectionExpression;
+      scanObj.ExpressionAttributeNames = projObj.ExpressionAttributeNames;
+    }
+
+    // Loop through each key in the filter
+    Object.keys(filter).forEach((k) => {
+      // Initialize
+    });
+
+    // Return the scan object
+    return scanObj;
   }
 
   /**
@@ -1464,6 +1523,62 @@ class Store extends DynamoDBStore {
     super(obj);
   }
 
+}
+
+
+class Query {
+  constructor(functionName, query, projection, options) {
+    this.query = [];
+
+    // Parse the projection
+    const projectionObj = (projection) ? this.parseProjection(projection) : {};
+
+
+  }
+
+
+  /**
+   * @description Parses the projection string and returns an object containing
+   * the ProjectionExpression key/value and the ExpressionAttributeNames object.
+   *
+   * @param {string} projection - A space separated string of specific fields to
+   * of a document.
+   *
+   * @returns {object} - An object containing the ProjectionExpression
+   * and ExpressionAttributeNames object.
+   */
+  parseProjection(projection) { // eslint-disable-line class-methods-use-this
+    const returnObj = {};
+
+    // Handle projections
+    if (projection) {
+      const fields = projection.split(' ');
+      // For each field to return
+      fields.forEach((f) => {
+        // If the ExpressionAttributeNames is not defined, define it
+        if (!returnObj.ExpressionAttributeNames) {
+          returnObj.ExpressionAttributeNames = {};
+        }
+
+        // Handle special case where key name starts with an underscore
+        const keyName = (f === '_id') ? 'id' : f;
+
+        // Create unique key for field
+        returnObj.ExpressionAttributeNames[`#${keyName}`] = f;
+
+        // If ProjectionExpression is not defined, init it
+        if (!returnObj.ProjectionExpression) {
+          returnObj.ProjectionExpression = `#${keyName}`;
+        }
+        // Add onto ProjectionExpression with leading comma
+        else {
+          returnObj.ProjectionExpression += `,#${keyName}`;
+        }
+      });
+    }
+
+    return returnObj;
+  }
 }
 
 // Export different classes and functions

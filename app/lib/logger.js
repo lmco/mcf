@@ -198,8 +198,9 @@ function makeLogger(subcommand) {
     ],
     exitOnError: false
   };
+  // TODO: Change back to test
   // Add in a transport to log to the console if the mbee is not running tests
-  if (subcommand !== 'test') loggerConfig.transports.push(new winston.transports.Console());
+  if (subcommand !== 'tst') loggerConfig.transports.push(new winston.transports.Console());
   return winston.createLogger(loggerConfig);
 }
 
