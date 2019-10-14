@@ -447,7 +447,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
     let artsToUpdate = [];
     const arrIDs = [];
     const validArtKeys = Artifact.getValidUpdateFields();
-    validArtKeys.push('id', 'project', 'branch', 'strategy');
+    validArtKeys.push('id');
 
     // Check parameter type
     if (Array.isArray(saniArtifacts)) {
