@@ -66,6 +66,7 @@ describe(M.getModuleName(module.filename), () => {
     try {
       // Delete test admin
       await testUtils.removeTestAdmin();
+      await testUtils.removeNonAdminUser();
       await db.disconnect();
     }
     catch (error) {
@@ -262,7 +263,8 @@ function notFound(endpoint) {
   // Parse the method
   const method = parseMethod(endpoint);
   // Body must be an array of ids for delete; key-value pair for anything else
-  const body = endpoint === 'deleteUsers' ? ['nonexistentuser'] : { username: 'nonexistentuser' };
+  const body = (endpoint === 'deleteUsers' || endpoint === 'getUsers')
+    ? ['nonexistentuser'] : { username: 'nonexistentuser' };
   // Add in a params field for singular user endpoints
   let params = {};
   if (!endpoint.includes('Users') && endpoint.includes('User')) {
