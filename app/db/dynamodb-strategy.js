@@ -471,30 +471,9 @@ class Model {
    */
   async batchGetItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      // Initialize the batch get object
-      const batchGetObj = { RequestItems: {} };
-      batchGetObj.RequestItems[this.TableName] = {
-        Keys: []
-      };
-
-      // Parse and add-on the projection to the query object
-      const projObj = this.parseProjection(projection);
-      if (projObj.hasOwnProperty('ProjectionExpression')
-        && projObj.hasOwnProperty('ExpressionAttributeNames')) {
-        batchGetObj.RequestItems[this.TableName]
-        .ProjectionExpression = projObj.ProjectionExpression;
-        batchGetObj.RequestItems[this.TableName]
-        .ExpressionAttributeNames = projObj.ExpressionAttributeNames;
-      }
-
-      // Get all queries
-      const queries = this.createQuery(filter);
-      const queriesToMake = [];
-
-      for (let i = 0; i < queries.length / 100; i++) {
-        batchGetObj.RequestItems[this.TableName].Keys = queries.slice(i * 100, i * 100 + 100);
-        queriesToMake.push(batchGetObj);
-      }
+      const query = new Query('batchGetItem', this,
+        filter, projection, options);
+      const queriesToMake = query.query;
 
       // If there are actually query parameters
       if (queriesToMake.length > 0) {
@@ -1180,62 +1159,6 @@ class Model {
   }
 
   /**
-   * @description Creates a query to be used in scan, batchGetItem and getItem.
-   *
-   * @param {object} query - The query provided which is to be formatted to work
-   * with DynamoDB.
-   *
-   * @returns {object[]} An array of queries to be called.
-   */
-  createQuery(query) {
-    const returnArray = [];
-    const base = {};
-    const inVals = {};
-
-    // For each key in the query
-    Object.keys(query).forEach((key) => {
-      switch (typeof query[key]) {
-        case 'string': base[key] = { S: query[key] }; break;
-        case 'number': base[key] = { N: query[key] }; break;
-        case 'boolean': base[key] = { BOOL: query[key] }; break;
-        case 'object': {
-          if (query[key] !== null) {
-            // Handle the $in case
-            if (Object.keys(query[key])[0] === '$in') {
-              inVals[key] = Object.values(query[key])[0];
-            }
-          }
-          break;
-        }
-        default: throw new M.DataFormatError(`Invalid type in query ${typeof query[key]}.`);
-      }
-    });
-
-    // If no $in exists in the query, return the base query
-    if (Object.keys(inVals).length === 0) {
-      returnArray.push(base);
-      return returnArray;
-    }
-    else {
-      // For each in_val
-      Object.keys(inVals).forEach((k) => {
-        // For each item in the array to search through
-        inVals[k].forEach((i) => {
-          switch (typeof i) {
-            case 'string': base[k] = { S: i }; break;
-            case 'number': base[k] = { N: i }; break;
-            default: throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
-          }
-
-          // Add on query, using JSON parse/stringify
-          returnArray.push(JSON.parse(JSON.stringify(base)));
-        });
-      });
-      return returnArray;
-    }
-  }
-
-  /**
    * @description Formats a document or query to support DynamoDB's structure.
    *
    * @param {object} obj - The object to format.
@@ -1297,109 +1220,20 @@ class Model {
    */
   async scan(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      // Call the helper function to generate the scan object
-      const scanObj = this.scanQueryHelper(filter, projection);
+      // Create a new DynamoDB query
+      const query = new Query('scan', this, filter, projection, options);
 
-      Object.keys(filter).forEach((key) => {
-        // Init ExpressionAttributeValues
-        if (!scanObj.ExpressionAttributeValues) {
-          scanObj.ExpressionAttributeValues = {};
-        }
-
-        // Init ExpressionAttributeNames
-        if (!scanObj.ExpressionAttributeNames) {
-          scanObj.ExpressionAttributeNames = {};
-        }
-
-        // Init FilterExpression
-        scanObj.FilterExpression = '';
-
-        const value = filter[key];
-        const keyName = (key === '_id') ? 'id' : key;
-        let in_val = false;
-
-        if (!scanObj.ExpressionAttributeNames[`#${keyName}`]) {
-          // Create unique key for field
-          scanObj.ExpressionAttributeNames[`#${keyName}`] = key;
-        }
-
-        // If the value is a string
-        if (typeof value === 'string') {
-          scanObj.ExpressionAttributeValues[`:${key}`] = { S: value };
-        }
-        // If the value is an array of strings
-        else if (Array.isArray(value) && value.every(v => typeof v === 'string')
-          && value.length !== 0) {
-          scanObj.ExpressionAttributeValues[`:${key}`] = { SS: value };
-        }
-        else if (typeof value === 'boolean') {
-          scanObj.ExpressionAttributeValues[`:${key}`] = { BOOL: value };
-        }
-        // Handle the $in case
-        else if (typeof value === 'object' && value !== null
-          && Object.keys(value)[0] === '$in') {
-          in_val = true;
-          let runningString;
-          const arr = Object.values(value)[0];
-          // Loop through each entry in the array
-          for (let i = 0; i < arr.length; i++) {
-            if (typeof arr[i] === 'string') {
-              scanObj.ExpressionAttributeValues[`:${key}${i}`] = { S: arr[i] };
-              // If runningString has not yet been initialized
-              if (!runningString) {
-                // Append an AND with parenthesis
-                runningString = ``
-              }
-            }
-            else {
-              M.log.critical('We have an array of non-strings...');
-            }
-          }
-        }
-
-        if (!in_val) {
-          if (scanObj.FilterExpression === '') {
-            scanObj.FilterExpression = `#${keyName} = :${key}`;
-          }
-          else {
-            scanObj.FilterExpression += ` AND #${keyName} = :${key}`;
-          }
-        }
-      });
-
-      console.log(JSON.stringify(scanObj, null, 2));
+      const queries = query.query;
 
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
       connect()
-      .then((conn) => conn.scan(scanObj).promise())
+      .then((conn) => conn.scan(queries[0]).promise())
       .then((data) => resolve(this.formatDocuments(data.Items, options)))
       .catch((error) => {
         M.log.verbose('Failed in scan');
         return reject(error);
       });
     });
-  }
-
-  scanQueryHelper(filter, projection) {
-    const scanObj = {
-      TableName: this.TableName
-    };
-
-    // Parse and add-on the projection to the query object
-    const projObj = this.parseProjection(projection);
-    if (projObj.hasOwnProperty('ProjectionExpression')
-      && projObj.hasOwnProperty('ExpressionAttributeNames')) {
-      scanObj.ProjectionExpression = projObj.ProjectionExpression;
-      scanObj.ExpressionAttributeNames = projObj.ExpressionAttributeNames;
-    }
-
-    // Loop through each key in the filter
-    Object.keys(filter).forEach((k) => {
-      // Initialize
-    });
-
-    // Return the scan object
-    return scanObj;
   }
 
   /**
@@ -1527,12 +1361,64 @@ class Store extends DynamoDBStore {
 
 
 class Query {
-  constructor(functionName, query, projection, options) {
+  constructor(functionName, model, query, projection, options) {
+    this.model = model;
+    console.log(this.model.definition)
     this.query = [];
+    this.ExpressionAttributeNames = {};
+    this.ExpressionAttributeValues = {};
+    this.ProjectionExpression = '';
+    this.FilterExpression = '';
+    this.RequestItemsKeys = [];
 
     // Parse the projection
-    const projectionObj = (projection) ? this.parseProjection(projection) : {};
+    this.parseProjection(projection);
 
+    if (functionName === 'scan') {
+      this.parseFilterExpression(query);
+      const baseObj = {
+        TableName: model.TableName
+      };
+
+      // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+      if (this.ProjectionExpression.length) {
+        baseObj.ProjectionExpression = this.ProjectionExpression;
+      }
+      if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+        baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+      }
+
+      // Add on ExpressionAttributeValues and FilterExpression if defined
+      if (this.FilterExpression.length) {
+        baseObj.FilterExpression = this.FilterExpression;
+      }
+      if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
+        baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
+      }
+
+      this.query.push(baseObj);
+    }
+    else if (functionName === 'batchGetItem') {
+      this.parseRequestItemsKeys(query);
+
+      const baseObj = { RequestItems: {} };
+      baseObj.RequestItems[model.TableName] = { Keys: [] };
+
+      // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+      if (this.ProjectionExpression.length) {
+        baseObj.RequestItems[model.TableName].ProjectionExpression = this.ProjectionExpression;
+      }
+      if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+        baseObj.RequestItems[model.TableName]
+        .ExpressionAttributeNames = this.ExpressionAttributeNames;
+      }
+
+      for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
+        baseObj.RequestItems[model.TableName].Keys = this.RequestItemsKeys
+        .slice(i * 25, i * 25 + 25);
+        this.query.push(baseObj);
+      }
+    }
 
   }
 
@@ -1543,41 +1429,157 @@ class Query {
    *
    * @param {string} projection - A space separated string of specific fields to
    * of a document.
-   *
-   * @returns {object} - An object containing the ProjectionExpression
-   * and ExpressionAttributeNames object.
    */
   parseProjection(projection) { // eslint-disable-line class-methods-use-this
-    const returnObj = {};
-
     // Handle projections
     if (projection) {
       const fields = projection.split(' ');
       // For each field to return
       fields.forEach((f) => {
-        // If the ExpressionAttributeNames is not defined, define it
-        if (!returnObj.ExpressionAttributeNames) {
-          returnObj.ExpressionAttributeNames = {};
-        }
-
         // Handle special case where key name starts with an underscore
         const keyName = (f === '_id') ? 'id' : f;
 
         // Create unique key for field
-        returnObj.ExpressionAttributeNames[`#${keyName}`] = f;
+        this.ExpressionAttributeNames[`#${keyName}`] = f;
 
         // If ProjectionExpression is not defined, init it
-        if (!returnObj.ProjectionExpression) {
-          returnObj.ProjectionExpression = `#${keyName}`;
+        if (!this.ProjectionExpression) {
+          this.ProjectionExpression = `#${keyName}`;
         }
         // Add onto ProjectionExpression with leading comma
         else {
-          returnObj.ProjectionExpression += `,#${keyName}`;
+          this.ProjectionExpression += `,#${keyName}`;
         }
       });
     }
+  }
 
-    return returnObj;
+  parseFilterExpression(query) {
+    // Handle filter expression
+    Object.keys(query).forEach((k) => {
+      // Handle special case where key name starts with an underscore
+      let keyName = (k === '_id') ? 'id' : k;
+
+      // Handle case where searching nested object
+      if (keyName.includes('.')) {
+        const split = keyName.split('.');
+        split.forEach((s) => {
+          const kName = (s === '_id') ? 'id' : s;
+          // Add key to ExpressionAttributeNames
+          this.ExpressionAttributeNames[`#${kName}`] = s;
+        });
+        keyName = split.join('.#');
+      }
+      else {
+        // Add key to ExpressionAttributeNames
+        this.ExpressionAttributeNames[`#${keyName}`] = k;
+      }
+
+      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
+
+      // Handle the special $in case
+      if (typeof query[k] === 'object' && query[k] !== null
+        && Object.keys(query[k])[0] === '$in') {
+        // Init the filter string
+        let filterString = '';
+        const arr = Object.values(query[k])[0];
+
+        // Loop over each item in arr
+        for (let i = 0; i < arr.length; i++) {
+          // Add value to ExpressionAttributeValues
+          this.ExpressionAttributeValues[`:${valueKey}${i}`] = { S: arr[i] };
+
+          // If FilterExpression is empty, init it
+          if (!this.FilterExpression && !filterString) {
+            filterString = `( #${keyName} = :${valueKey}${i}`;
+          }
+          else if (!filterString) {
+            filterString = ` AND ( #${keyName} = :${valueKey}${i}`;
+          }
+          else {
+            filterString += ` OR #${keyName} = :${valueKey}${i}`;
+          }
+        }
+
+        filterString += ' )';
+        this.FilterExpression += filterString;
+      }
+      else {
+        switch (typeof query[k]) {
+          case 'string': {
+            // if (this.model.definition[query[k]]) {
+            //   console.log(this.model.definition[query[k]])
+            // }
+            this.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
+          }
+          break;
+          case 'boolean': this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
+          break;
+          case 'number': this.ExpressionAttributeValues[`:${valueKey}`] = { N: query[k] };
+          break;
+          default: throw new M.DatabaseError(
+            `Query param type ${typeof query[k]} is not supported`, 'critical'
+          );
+        }
+
+        // If FilterExpression is not defined yet, define it
+        if (this.FilterExpression === '') {
+          this.FilterExpression = `#${keyName} = :${valueKey}`;
+        }
+        else {
+          // Append on condition
+          this.FilterExpression += ` AND #${keyName} = :${valueKey}`;
+        }
+      }
+    });
+  }
+
+  parseRequestItemsKeys(query) {
+    const returnArray = [];
+    const base = {};
+    const inVals = {};
+
+    // For each key in the query
+    Object.keys(query).forEach((key) => {
+      switch (typeof query[key]) {
+        case 'string': base[key] = { S: query[key] }; break;
+        case 'number': base[key] = { N: query[key] }; break;
+        case 'boolean': base[key] = { BOOL: query[key] }; break;
+        case 'object': {
+          if (query[key] !== null) {
+            // Handle the $in case
+            if (Object.keys(query[key])[0] === '$in') {
+              inVals[key] = Object.values(query[key])[0];
+            }
+          }
+          break;
+        }
+        default: throw new M.DataFormatError(`Invalid type in query ${typeof query[key]}.`);
+      }
+    });
+
+    // If no $in exists in the query, return the base query
+    if (Object.keys(inVals).length === 0) {
+      returnArray.push(base);
+    }
+    else {
+      // For each in_val
+      Object.keys(inVals).forEach((k) => {
+        // For each item in the array to search through
+        inVals[k].forEach((i) => {
+          switch (typeof i) {
+            case 'string': base[k] = { S: i }; break;
+            case 'number': base[k] = { N: i }; break;
+            default: throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
+          }
+
+          // Add on query, using JSON parse/stringify
+          returnArray.push(JSON.parse(JSON.stringify(base)));
+        });
+      });
+    }
+
+    this.RequestItemsKeys = returnArray;
   }
 }
 

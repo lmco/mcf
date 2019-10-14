@@ -144,9 +144,10 @@ const buildComplete = fs.existsSync(`${M.root}/build`);
 // Check if dependencies are installed
 if (installComplete) {
   // Initialize the MBEE logger/helper functions
+  const opts = process.argv[3] ? process.argv.slice(3) : [];
   const logger = M.require('lib.logger');
   Object.defineProperty(M, 'log', {
-    value: logger.makeLogger(process.argv[2]),
+    value: logger.makeLogger(process.argv[2], opts),
     writable: false,
     enumerable: true
   });

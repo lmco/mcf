@@ -164,10 +164,11 @@ if (!fs.existsSync(path.join(M.root, 'logs'))) {
  * the console, an error file, a combined log, and a debug log.
  *
  * @param {string} subcommand - The subcommand used with 'node mbee'.
+ * @param {string} opts - The options used with 'node mbee {subcommand}'.
  *
  * @returns {object} Returns an instance of the winston logger.
  */
-function makeLogger(subcommand) {
+function makeLogger(subcommand, opts) {
   const loggerConfig = {
     level: M.config.log.level,
     levels: levels,
@@ -198,9 +199,10 @@ function makeLogger(subcommand) {
     ],
     exitOnError: false
   };
-  // TODO: Change back to test
   // Add in a transport to log to the console if the mbee is not running tests
-  if (subcommand !== 'tst') loggerConfig.transports.push(new winston.transports.Console());
+  if (!(subcommand === 'test' && opts.includes('--suppress-console'))) {
+    loggerConfig.transports.push(new winston.transports.Console());
+  }
   return winston.createLogger(loggerConfig);
 }
 
