@@ -48,11 +48,11 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
     db.connect()
-      .then(() => done())
-      .catch((error) => {
-        chai.expect(error.message).to.equal(null);
-        done();
-      });
+    .then(() => done())
+    .catch((error) => {
+      chai.expect(error.message).to.equal(null);
+      done();
+    });
   });
 
   /**
@@ -61,11 +61,11 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     db.disconnect()
-      .then(() => done())
-      .catch((error) => {
-        chai.expect(error.message).to.equal(null);
-        done();
-      });
+    .then(() => done())
+    .catch((error) => {
+      chai.expect(error.message).to.equal(null);
+      done();
+    });
   });
 
   /* Execute the tests */
@@ -327,14 +327,15 @@ async function filenameWithNoLocation() {
   artData.project = 'org:proj';
   artData.branch = 'org:proj:branch';
   artData.filename = 'text.txt';
-  delete artData['location'];
+  delete artData.location;
 
   // Create artifact object
   const artObject = Artifact.createDocument(artData);
 
   // Expect save() to fail with specific error message
   await artObject.save().should.eventually.be.rejectedWith(
-    'Path `location` is required.');
+    'Path `location` is required.'
+  );
 }
 /**
  * @description Attempts to create an artifact with a valid location
@@ -346,12 +347,13 @@ async function locationWithNofilename() {
   artData.project = 'org:proj';
   artData.branch = 'org:proj:branch';
   artData.location = '/path/file';
-  delete artData['filename'];
+  delete artData.filename;
 
   // Create artifact object
   const artObject = Artifact.createDocument(artData);
 
   // Expect save() to fail with specific error message
   await artObject.save().should.eventually.be.rejectedWith(
-    'Path `filename` is required.');
+    'Path `filename` is required.'
+  );
 }

@@ -39,7 +39,7 @@ const errors = M.require('lib.errors');
 // Validator regex for this strategy
 module.exports.validatorReg = {
   location: '[.]',
-  filename: '[\/!\\<>:"\'|?*]'
+  filename: '[!\\<>:"\'|?*]'
 };
 
 /**
@@ -142,46 +142,36 @@ function putBlob(artMetadata, artifactBlob) {
  * @param {string} [artMetadata.project] - The project of artifact blob.
  */
 function deleteBlob(artMetadata) {
-  // Validate metadata
-  validateBlobMeta(artMetadata);
+  try {
+    // Validate metadata
+    validateBlobMeta(artMetadata);
 
-  // Create artifact path
-  const blobPath = createBlobPath(artMetadata);
+    // Create directory path
+    const projDirPath = path.join(M.root, M.config.artifact.path,
+      artMetadata.org, artMetadata.project);
 
-  // Remove the artifact file
-  // Note: Use sync to ensure file is removed before advancing
-  fs.unlinkSync(blobPath, (error) => {
-    // Check directory NOT exist
-    if (error) {
-      M.log.error(error);
-      // Check for specific error, blob not exist
-      if (error.code === 'ENOENT') {
-        throw new M.DataFormatError('Artifact blob does not exist.', 'warn');
-      }
-      throw new M.DataFormatError('Could not delete artifact blob.', 'warn');
-    }
-  });
+    // Create artifact path
+    const blobPath = createBlobPath(artMetadata);
 
-  // Create directory path
-  const projDirPath = path.join(M.root, M.config.artifact.path,
-    artMetadata.org, artMetadata.project);
+    // Remove the artifact file
+    // Note: Use sync to ensure file is removed before advancing
+    fs.unlinkSync(blobPath);
 
-  // Check if project directory is empty
-  fs.readdirSync(projDirPath, (err, files) => {
-    if (err) {
-      M.log.warn(err);
-    }
-    // Check if empty directory
+    // Check if project directory is empty
+    const files = fs.readdirSync(projDirPath);
+
+    // Check if no file exist
     if (!files.length) {
-      // Directory empty, remove it
-      fs.rmdir(projDirPath, (error) => {
-        // Check directory NOT exist
-        if (error) {
-          throw new M.DataFormatError(error.message, 'warn');
-        }
-      });
+      // Delete this directory
+      fs.rmdirSync(projDirPath);
     }
-  });
+  }
+  catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new M.OperationError('Artifact Blob not found.', 'warn');
+    }
+    throw new M.OperationError('Could not delete Blob.', 'warn');
+  }
 }
 
 /**

@@ -257,7 +257,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
 
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-    helper.checkParamsDataType('object', artifacts, 'Artifacts');
+    helper.checkParamsDataType(['object', 'array'], artifacts, 'Artifacts');
 
     // Sanitize input parameters and create function-wide variables
     const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
@@ -300,6 +300,12 @@ async function create(requestingUser, organizationID, projectID, branchID,
     // Find the branch and validate that it was found and not archived
     const branch = await helper.findAndValidate(Branch,
       utils.createID(orgID, projID, branID), reqUser);
+
+    // Check that the branch is is not a tag
+    if (branch.tag) {
+      throw new M.OperationError(`[${branID}] is a tag and `
+        + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
+    }
 
     // Permissions check
     permissions.createArtifact(reqUser, organization, project, branch);
@@ -424,7 +430,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
 
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
-    helper.checkParamsDataType('object', artifacts, 'Artifacts');
+    helper.checkParamsDataType(['object', 'update'], artifacts, 'Artifacts');
 
     // Sanitize input parameters and create function-wide variables
     const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
@@ -466,6 +472,12 @@ async function update(requestingUser, organizationID, projectID, branchID,
     // Find the branch and validate that it was found and not archived
     const branch = await helper.findAndValidate(Branch,
       utils.createID(orgID, projID, branID), reqUser);
+
+    // Check that the branch is is not a tag
+    if (branch.tag) {
+      throw new M.OperationError(`[${branID}] is a tag and `
+        + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
+    }
 
     // Permissions check
     permissions.updateArtifact(reqUser, organization, project, branch);
@@ -641,6 +653,12 @@ async function remove(requestingUser, organizationID, projectID, branchID,
     // Find the branch and validate that it was found and not archived
     const branch = await helper.findAndValidate(Branch,
       utils.createID(orgID, projID, branID), reqUser);
+
+    // Check that the branch is is not a tag
+    if (branch.tag) {
+      throw new M.OperationError(`[${branID}] is a tag and `
+        + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
+    }
 
     // Permissions check
     permissions.deleteArtifact(reqUser, organization, project, branch);
