@@ -17,8 +17,11 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
+// React modules
 import React, { Component } from 'react';
 import { Table, Row, Button } from 'reactstrap';
+
+// MBEE modules
 import SearchResult from './search-result.jsx';
 
 /* eslint-enable no-unused-vars */

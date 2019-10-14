@@ -27,6 +27,8 @@ module.exports = {
 // Node modules
 const fs = require('fs');
 const path = require('path');
+
+// NPM modules
 const ldap = require('ldapjs');
 
 // MBEE modules

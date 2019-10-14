@@ -15,7 +15,7 @@
  * and decrypt functions in the library.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules
@@ -50,7 +50,7 @@ async function checkCryptoFunctions() {
  * @description Performs a md5 hash on a string message.
  */
 async function md5HashTest() {
-  const hash = await mbeeCrypto.md5Hash('hello world');
+  const hash = mbeeCrypto.md5Hash('hello world');
   chai.expect(hash).to.equal('5eb63bbbe01eeed093cb22bb8f5acdc3');
 }
 

@@ -19,7 +19,7 @@
  * This will authenticate the user and move to the next function.
  */
 
-// Node modules
+// NPM modules
 const express = require('express');
 const api = express.Router();
 

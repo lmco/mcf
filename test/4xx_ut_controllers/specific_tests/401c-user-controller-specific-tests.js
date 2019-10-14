@@ -16,10 +16,10 @@
  * specific than the core tests.
  */
 
-// NPM Modules
+// NPM modules
 const chai = require('chai');
 
-// MBEE Modules
+// MBEE modules
 const UserController = M.require('controllers.user-controller');
 const User = M.require('models.user');
 const db = M.require('lib.db');

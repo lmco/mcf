@@ -19,7 +19,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Form,
@@ -32,7 +32,7 @@ import {
   Tooltip
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ElementSelector from './element-selector.jsx';
 
 /* eslint-enable no-unused-vars */

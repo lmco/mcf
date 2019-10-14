@@ -15,7 +15,7 @@
  * @description Provides permission lookup capabilities for MBEE actions.
  */
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 
 // MBEE modules

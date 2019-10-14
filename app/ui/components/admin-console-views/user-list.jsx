@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Button,
@@ -25,7 +25,7 @@ import {
   ModalBody, UncontrolledTooltip
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import List from '../general/list/list.jsx';
 import UserListItem from '../shared-views/list-items/user-list-item.jsx';
 import CreateUser from './create-user.jsx';

@@ -17,10 +17,10 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 
-// MBEE Modules
+// MBEE modules
 import { UncontrolledTooltip } from 'reactstrap';
 import MemberEdit from './member-edit.jsx';
 import UserListItem from '../list-items/user-list-item.jsx';

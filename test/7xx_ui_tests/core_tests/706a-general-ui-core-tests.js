@@ -16,6 +16,7 @@
  */
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+
 // NPM modules
 import React from 'react';
 import { shallow } from 'enzyme';

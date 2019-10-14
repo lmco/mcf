@@ -14,7 +14,7 @@
  * @description This file tests the validator functions.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

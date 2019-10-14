@@ -18,11 +18,11 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import List from '../general/list/list.jsx';
 import OrgListItem from '../shared-views/list-items/org-list-item.jsx';
 import Create from '../shared-views/create.jsx';

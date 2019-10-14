@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React from 'react';
 import {
   Button,
@@ -29,7 +29,7 @@ import {
   Input
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ElementTree from './element-tree.jsx';
 
 /* eslint-enable no-unused-vars */

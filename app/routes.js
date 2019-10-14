@@ -15,7 +15,7 @@
  * @description Defines the MBEE routes mounted at '/'.
  */
 
-// Node modules
+// NPM modules
 const express = require('express');
 const router = express.Router();
 

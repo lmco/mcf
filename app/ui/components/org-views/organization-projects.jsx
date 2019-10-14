@@ -19,11 +19,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsdoc/require-jsdoc */
 
-// React Modules
+// React modules
 import React from 'react';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ListItem from '../general/list/list-item.jsx';
 import List from '../general/list/list.jsx';
 import Create from '../shared-views/create.jsx';
