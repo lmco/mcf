@@ -294,7 +294,8 @@ function notFound(endpoint) {
 }
 
 /**
- * @description A constructor for a dynamic mocha-compatible function that can ...
+ * @description A constructor for a dynamic mocha-compatible function that tests singular user api
+ * endpoints given an array of usernames in the body.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
@@ -331,7 +332,8 @@ function noArrays(endpoint) {
 }
 
 /**
- * @description A constructor for a dynamic mocha-compatible function that can ...
+ * @description A constructor for a dynamic mocha-compatible function that tests various error
+ * cases for the PATCH password api endpoint.
  *
  * @param {string} type - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
