@@ -108,7 +108,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PATCH user request with conflicting ids in the body and url', conflictingIDs('patchUser'));
   it('should reject a PUT user request with conflicting ids in the body and url', conflictingIDs('putUser'));
   // ------------- 404 Not Found -------------
-  //it('should return 404 for a GET users request that returned no results', notFound('getUsers'));
+  it('should return 404 for a GET users request that returned no results', notFound('getUsers'));
   it('should return 404 for a GET user request for a nonexistent user', notFound('getUser'));
   it('should return 404 for a PATCH users request for a nonexistent user', notFound('patchUsers'));
   it('should return 404 for a PATCH user request for a nonexistent user', notFound('patchUser'));
