@@ -5311,7 +5311,7 @@ async function getBlobById(req, res) {
       req.params.projectid, artMetadata[0]);
 
     // Set filename
-    res.header('Content-Disposition', `attachment; filename=${req.query.filename}`);
+    res.header('Content-Disposition', `attachment; filename=${artMetadata[0].filename}`);
 
     // Return 200: OK and public artifact data
     return returnResponse(req, res, artifactBlob, 200,
