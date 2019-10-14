@@ -90,6 +90,12 @@ function test(_args) {
     _args.splice(removeInd, 1);
   }
 
+  // Remove --suppress-console
+  if (_args.includes('--suppress-console')) {
+    const removeInd = _args.indexOf('--suppress-console');
+    _args.splice(removeInd, 1);
+  }
+
   // Allocate options variable for mocha
   const opts = {};
 
