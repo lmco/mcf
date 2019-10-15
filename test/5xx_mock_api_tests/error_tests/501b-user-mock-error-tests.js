@@ -65,7 +65,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      // Delete test admin
+      // Delete test admin and test user
       await testUtils.removeTestAdmin();
       await testUtils.removeNonAdminUser();
       await db.disconnect();
