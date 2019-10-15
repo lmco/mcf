@@ -31,6 +31,7 @@ const db = M.require('lib.db');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
+const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 
 /* --------------------( Main )-------------------- */
@@ -143,7 +144,7 @@ describe(M.getModuleName(module.filename), () => {
  */
 function noReqUser(endpoint) {
   // Parse the method
-  const method = parseMethod(endpoint);
+  const method = testUtils.parseMethod(endpoint);
   const params = {};
   const body = {};
 
@@ -159,10 +160,10 @@ function noReqUser(endpoint) {
     // Verifies the response data
     res.send = function send(_data) {
       // Expect an error message
-      chai.expect(_data).to.equal('Request Failed');
+      _data.should.equal('Request Failed');
 
       // Expect the statusCode to be 500
-      chai.expect(res.statusCode).to.equal(500);
+      res.statusCode.should.equal(500);
 
       // Ensure the response was logged correctly
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -182,7 +183,7 @@ function noReqUser(endpoint) {
  */
 function invalidOptions(endpoint) {
   // Parse the method
-  const method = parseMethod(endpoint);
+  const method = testUtils.parseMethod(endpoint);
   const params = {};
   const body = {};
 
@@ -199,10 +200,10 @@ function invalidOptions(endpoint) {
     // Verifies the response data
     res.send = function send(_data) {
       // Expect an error message
-      chai.expect(_data).to.equal('Invalid parameter: invalid');
+      _data.should.equal('Invalid parameter: invalid');
 
       // Expect the statusCode to be 400
-      chai.expect(res.statusCode).to.equal(400);
+      res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -222,7 +223,7 @@ function invalidOptions(endpoint) {
  */
 function conflictingIDs(endpoint) {
   // Parse the method
-  const method = parseMethod(endpoint);
+  const method = testUtils.parseMethod(endpoint);
   const body = { username: 'testuser001' };
   const params = { username: 'testuser01' };
 
@@ -238,10 +239,10 @@ function conflictingIDs(endpoint) {
     // Verifies the response data
     res.send = function send(_data) {
       // Expect an error message
-      chai.expect(_data).to.equal('Username in body does not match username in params.');
+      _data.should.equal('Username in body does not match username in params.');
 
       // Expect the statusCode to be 400
-      chai.expect(res.statusCode).to.equal(400);
+      res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -260,15 +261,17 @@ function conflictingIDs(endpoint) {
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
  */
 function notFound(endpoint) {
+  // Get an unused username
+  const name = testData.users[4].username;
   // Parse the method
-  const method = parseMethod(endpoint);
+  const method = testUtils.parseMethod(endpoint);
   // Body must be an array of ids for delete; key-value pair for anything else
   const body = (endpoint === 'deleteUsers' || endpoint === 'getUsers')
-    ? ['nonexistentuser'] : { username: 'nonexistentuser' };
+    ? [name] : { username: name };
   // Add in a params field for singular user endpoints
   let params = {};
   if (!endpoint.includes('Users') && endpoint.includes('User')) {
-    params = { username: 'nonexistentuser' };
+    params = { username: name };
   }
 
   return function(done) {
@@ -282,7 +285,7 @@ function notFound(endpoint) {
     // Verifies the response data
     res.send = function send(_data) {
       // Expect the statusCode to be 404
-      chai.expect(res.statusCode).to.equal(404);
+      res.statusCode.should.equal(404);
 
       // Ensure the response was logged correctly
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -302,7 +305,7 @@ function notFound(endpoint) {
  */
 function noArrays(endpoint) {
   // Parse the method
-  const method = parseMethod(endpoint);
+  const method = testUtils.parseMethod(endpoint);
   const body = [];
   const params = {};
 
@@ -317,10 +320,10 @@ function noArrays(endpoint) {
     // Verifies the response data
     res.send = function send(_data) {
       // Expect an error message
-      chai.expect(_data).to.equal('Input cannot be an array');
+      _data.should.equal('Input cannot be an array');
 
       // Expect the statusCode to be 400
-      chai.expect(res.statusCode).to.equal(400);
+      res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -341,6 +344,7 @@ function noArrays(endpoint) {
 function badPasswordInput(type) {
   // Parse the method
   const method = 'PATCH';
+  // Set up the body of the request
   const body = {
     oldPassword: 'pass',
     password: 'pass',
@@ -348,17 +352,22 @@ function badPasswordInput(type) {
   };
   const params = {};
   const endpoint = 'patchPassword';
+  // Initialize expected message and status code
   let message = `${type} password not in request body.`;
   let code = 400;
+  // Delete the old password field so that an error is thrown
   if (type === 'Old') {
     delete body.oldPassword;
   }
+  // Delete the new password field so that an error is thrown
   else if (type === 'New') {
     delete body.password;
   }
+  // Delete the confirm password field so that an error is thrown
   else if (type === 'Confirmed') {
     delete body.confirmPassword;
   }
+  // The user error has a different message and status code
   else if (type === 'user') {
     message = 'Cannot change another user\'s password.';
     code = 403;
@@ -375,10 +384,10 @@ function badPasswordInput(type) {
     // Verifies the response data
     res.send = function send(_data) {
       // Expect an error message
-      chai.expect(_data).to.equal(message);
+      _data.should.equal(message);
 
       // Expect a specific status code
-      chai.expect(res.statusCode).to.equal(code);
+      res.statusCode.should.equal(code);
 
       // Ensure the response was logged correctly
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -387,26 +396,4 @@ function badPasswordInput(type) {
     // Sends the mock request
     APIController[endpoint](req, res);
   };
-}
-
-/**
- * @description A helper function to parse the api endpoint string into a http method.
- *
- * @param {string} endpoint - The api endpoint string.
- * @returns {string} Returns a REST method string such as GET or POST.
- */
-function parseMethod(endpoint) {
-  const regex = /[A-Z]/g;
-  // Find the uppercase letter
-  const uppercase = endpoint.match(regex);
-  if (uppercase || endpoint.includes('search')) {
-    // Split the input based on where the uppercase letter is found
-    const segments = endpoint.split(uppercase);
-    // Return the first word of the input in all caps
-    return segments[0].toUpperCase();
-  }
-  else {
-    // The endpoint is for whoami or searchUsers; they use GET requests
-    return 'GET';
-  }
 }
