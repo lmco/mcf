@@ -518,3 +518,25 @@ module.exports.testResponseLogging = function(responseLength, req, res, done) {
 
   done();
 };
+
+/**
+ * @description A helper function to parse the api endpoint string into a http method.
+ *
+ * @param {string} endpoint - The api endpoint string.
+ * @returns {string} Returns a REST method string such as GET or POST.
+ */
+module.exports.parseMethod = function(endpoint) {
+  const regex = /[A-Z]/g;
+  // Find the uppercase letter
+  const uppercase = endpoint.match(regex);
+  if (uppercase || endpoint.includes('search')) {
+    // Split the input based on where the uppercase letter is found
+    const segments = endpoint.split(uppercase);
+    // Return the first word of the input in all caps
+    return segments[0].toUpperCase();
+  }
+  else {
+    // The endpoint is for whoami or searchUsers; they use GET requests
+    return 'GET';
+  }
+};
