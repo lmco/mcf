@@ -26,7 +26,7 @@ module.exports = {
   clear
 };
 
-// Node.js Modules
+// Node modules
 const path = require('path');    // Find directory paths
 const fs = require('fs');        // Access the filesystem
 const assert = require('assert');
