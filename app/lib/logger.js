@@ -7,9 +7,11 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Jake Ursetta
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Defines the MBEE logger. The logger should be used instead of
  * using `console.log`. The logger adds the ability to write to log

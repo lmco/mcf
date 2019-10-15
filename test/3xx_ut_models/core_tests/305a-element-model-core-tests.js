@@ -7,9 +7,8 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests the Element Model functionality. The element

@@ -10,7 +10,6 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This renders a project.
  */

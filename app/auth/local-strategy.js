@@ -9,8 +9,8 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Jake Ursetta
+ * @author Josh Kaplan
  *
  * @description This implements an authentication strategy for local
  * authentication. This should be the default authentication strategy for MBEE.

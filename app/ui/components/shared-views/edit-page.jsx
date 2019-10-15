@@ -10,7 +10,7 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta
  *
  * @description This renders the edit page.
  */
