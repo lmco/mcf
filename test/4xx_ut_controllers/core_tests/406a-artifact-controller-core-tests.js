@@ -116,9 +116,6 @@ async function createArtifact() {
     id: artData.id,
     name: artData.name,
     filename: artData.filename,
-    contentType: path.extname(artData.filename),
-    project: projectID,
-    branch: branchID,
     location: artData.location,
     custom: artData.custom
   };
@@ -133,9 +130,6 @@ async function createArtifact() {
     chai.expect(createdArtifact[0].filename).to.equal(
       artData.filename
     );
-    chai.expect(createdArtifact[0].contentType).to.equal(
-      path.extname(artData.filename)
-    );
     chai.expect(createdArtifact[0].project).to.equal(project._id);
     chai.expect(createdArtifact[0].branch).to.equal(
       utils.createID(orgID, projectID, branchID)
@@ -143,7 +137,7 @@ async function createArtifact() {
     chai.expect(createdArtifact[0].location).to.equal(
       artData.location
     );
-    chai.expect(createdArtifact[0].strategy).to.equal(artData.strategy);
+    chai.expect(createdArtifact[0].strategy).to.equal(M.config.artifact.strategy);
     chai.expect(createdArtifact[0].custom || {}).to.deep.equal(
       artData.custom
     );
@@ -186,9 +180,6 @@ async function getArtifact() {
     chai.expect(foundArtifact[0].filename).to.equal(
       artData.filename
     );
-    chai.expect(foundArtifact[0].contentType).to.equal(
-      path.extname(artData.filename)
-    );
     chai.expect(foundArtifact[0].project).to.equal(project._id);
     chai.expect(foundArtifact[0].branch).to.equal(
       utils.createID(orgID, projectID, branchID)
@@ -196,7 +187,7 @@ async function getArtifact() {
     chai.expect(foundArtifact[0].location).to.equal(
       artData.location
     );
-    chai.expect(foundArtifact[0].strategy).to.equal(artData.strategy);
+    chai.expect(foundArtifact[0].strategy).to.equal(M.config.artifact.strategy);
     chai.expect(foundArtifact[0].custom || {}).to.deep.equal(
       artData.custom
     );
@@ -221,14 +212,12 @@ async function getArtifact() {
  */
 async function updateArtifact() {
   // Define test data
-  const artData = testData.artifacts[0];
   const artUpdateData = testData.artifacts[2];
   // Define test data
   const artObj = {
     id: testData.artifacts[0].id,
     filename: artUpdateData.filename,
     name: artUpdateData.name,
-    contentType: path.extname(artUpdateData.filename),
     location: artUpdateData.location,
     archived: false,
     custom: artUpdateData.custom
@@ -250,15 +239,12 @@ async function updateArtifact() {
     chai.expect(updatedArtifact[0].filename).to.equal(
       artUpdateData.filename
     );
-    chai.expect(updatedArtifact[0].contentType).to.equal(
-      path.extname(artUpdateData.filename)
-    );
     chai.expect(updatedArtifact[0].project).to.equal(project._id);
     chai.expect(updatedArtifact[0].branch).to.equal(
       utils.createID(orgID, projectID, branchID)
     );
     chai.expect(updatedArtifact[0].location).to.equal(artUpdateData.location);
-    chai.expect(updatedArtifact[0].strategy).to.equal(artData.strategy);
+    chai.expect(updatedArtifact[0].strategy).to.equal(M.config.artifact.strategy);
     chai.expect(updatedArtifact[0].custom || {}).to.deep.equal(
       artUpdateData.custom
     );

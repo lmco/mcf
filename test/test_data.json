@@ -220,33 +220,27 @@
       "name": "logo image",
       "filename": "logo.png",
       "location": "/test/test_files/",
-      "contentType": "image/png",
       "custom": {
         "custom_key": "custom_value"
-      },
-      "strategy": "local-strategy"
+      }
     },
     {
       "id": "artifact01",
       "name": "concept image",
       "filename": "mbee-concept.png",
       "location": "/test/test_files/",
-      "contentType": "image/png",
       "custom": {
         "custom_key": "custom_value"
-      },
-      "strategy": "local-strategy"
+      }
     },
     {
       "id": "artifact02",
       "name": "hello world text",
       "filename": "text.txt",
       "location": "/test/test_files/",
-      "contentType": "txt",
       "custom": {
         "custom_key": "custom_value"
-      },
-      "strategy": "local-strategy"
+      }
     }
 
   ],

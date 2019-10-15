@@ -26,7 +26,6 @@ const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
-const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 
 /* -------------------------( Artifact Schema )-------------------------- */
 
@@ -40,7 +39,6 @@ const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
  * @property {string} project - A reference to an artifact's project.
  * @property {string} branch - A reference to an artifact's branch.
  * @property {string} filename - The filename of the artifact.
- * @property {string} contentType - The file type. E.g: 'png', 'dat'
  * @property {string} location - The location of the artifact blob.
  * @property {string} strategy - The strategy used for storing artifact blobs.
  *
@@ -115,14 +113,11 @@ const ArtifactSchema = new db.Schema({
     validate: [{
       validator: function(v) {
         // If the filename is improperly formatted, reject
-        return !RegExp(ArtifactStrategy.validatorReg.filename).test(v);
+        return (RegExp(validators.artifact.filename).test(v)
+          && !RegExp(validators.artifact.extension).test(v));
       },
       message: props => `Artifact filename [${props.value}] is improperly formatted.`
     }]
-  },
-  contentType: {
-    type: 'String',
-    required: true
   },
   location: {
     type: 'String',
@@ -130,7 +125,7 @@ const ArtifactSchema = new db.Schema({
     validate: [{
       validator: function(v) {
         // If the location is improperly formatted, reject
-        return !RegExp(ArtifactStrategy.validatorReg.location).test(v);
+        return RegExp(validators.artifact.location).test(v);
       },
       message: props => `Artifact location [${props.value}] is improperly formatted.`
     }]
@@ -151,10 +146,12 @@ ArtifactSchema.plugin(extensions);
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.method('getValidUpdateFields', function() {
-  return ['filename', 'contentType', 'name', 'custom', 'archived', 'location'];
+  return ['filename', 'name', 'custom', 'archived', 'location',
+    'branch'];
 });
 ArtifactSchema.static('getValidUpdateFields', function() {
-  return ['filename', 'contentType', 'name', 'custom', 'archived', 'location'];
+  return ['filename', 'name', 'custom', 'archived', 'location',
+    'branch'];
 });
 
 /**

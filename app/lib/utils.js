@@ -42,7 +42,7 @@ const mineTypeTable = {
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ppt: 'application/vnd.ms-powerpoint',
   mp4: 'video/mp4',
-  png: 'image/x-png',
+  png: 'image/png',
   svg: 'image/svg+xml',
   svd: 'application/vnd.svd',
   tar: 'application/x-tar',
@@ -293,7 +293,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       validatedOptions.populateString = 'contains sourceOf targetOf ';
       break;
     case 'Artifact':
-      validSearchOptions = ['filename', 'contentType', 'name', 'createdBy',
+      validSearchOptions = ['filename', 'name', 'createdBy',
         'lastModifiedBy', 'archivedBy'];
       break;
     case 'User':
