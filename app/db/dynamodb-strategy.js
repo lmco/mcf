@@ -1222,7 +1222,6 @@ class Model {
     return new Promise((resolve, reject) => {
       // Create a new DynamoDB query
       const query = new Query('scan', this, filter, projection, options);
-
       const queries = query.query;
 
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
@@ -1248,58 +1247,14 @@ class Model {
    */
   async updateItem(filter, doc, options) {
     return new Promise((resolve, reject) => {
-      const updateObj = {
-        ExpressionAttributeNames: {},
-        ExpressionAttributeValues: {},
-        Key: {},
-        TableName: this.TableName,
-        UpdateExpression: 'SET',
-        ReturnValues: 'ALL_NEW'
-      };
-
-      // For each parameter of the document being updated
-      Object.keys(doc).forEach((param) => {
-        // Set attribute name
-        updateObj.ExpressionAttributeNames[`#${param}`] = param;
-
-        const valueObj = {};
-        // Get type of param
-        valueObj[this.definition[param].type] = doc[param];
-        // Set attribute value
-        updateObj.ExpressionAttributeValues[`:${param}`] = valueObj;
-        // if (param !== '$set')
-        // Add the update to the update expression
-        updateObj.UpdateExpression += ` #${param} = :${param},`;
-      });
-
-      // Remove trailing comma from UpdateExpression
-      updateObj.UpdateExpression = updateObj.UpdateExpression.slice(0, -1);
-
-      // For each parameter in the filter
-      Object.keys(filter).forEach((key) => {
-        // If the filter parameter is a field on the schema
-        if (Object.keys(this.definition).includes(key)) {
-          const value = filter[key];
-
-          // If the value is a string
-          if (typeof value === 'string') {
-            updateObj.Key[key] = { S: value };
-          }
-          // If the value is an array of strings
-          else if (Array.isArray(value) && value.every(v => typeof v === 'string')
-            && value.length !== 0) {
-            updateObj.Key[key] = { SS: value };
-          }
-        }
-        else {
-          M.log.error(`Filter param ${key} not a param on ${this.TableName} model.`);
-        }
-      });
+      // Create Query object and retrieve update object
+      const query = new Query('updateItem', this, filter, null, options);
+      const updateObj = query.updateItem(filter, doc);
 
       M.log.debug(`DB OPERATION: ${this.TableName} updateItem`);
       // Update the single item
       connect()
-      .then((connection) => connection.updateItem(updateObj).promise())
+      .then((conn) => conn.updateItem(updateObj).promise())
       .then((updatedItem) => resolve(this.formatDocument(updatedItem.Attributes, options)))
       .catch((error) => {
         M.log.verbose('Failed in updateItem');
@@ -1363,7 +1318,6 @@ class Store extends DynamoDBStore {
 class Query {
   constructor(functionName, model, query, projection, options) {
     this.model = model;
-    console.log(this.model.definition)
     this.query = [];
     this.ExpressionAttributeNames = {};
     this.ExpressionAttributeValues = {};
@@ -1419,6 +1373,30 @@ class Query {
         this.query.push(baseObj);
       }
     }
+    // else if (functionName === 'updateItem') {
+    //   this.parseFilterExpression(query);
+    //   const baseObj = {
+    //     TableName: model.TableName
+    //   };
+    //
+    //   // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+    //   if (this.ProjectionExpression.length) {
+    //     baseObj.ProjectionExpression = this.ProjectionExpression;
+    //   }
+    //   if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+    //     baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+    //   }
+    //
+    //   // Add on ExpressionAttributeValues and UpdateExpression if defined
+    //   if (this.FilterExpression.length) {
+    //     baseObj.UpdateExpression = `SET ${this.FilterExpression}`;
+    //   }
+    //   if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
+    //     baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
+    //   }
+    //
+    //   this.query.push(baseObj);
+    // }
 
   }
 
@@ -1581,6 +1559,36 @@ class Query {
 
     this.RequestItemsKeys = returnArray;
   }
+
+  updateItem(filter, doc) {
+    this.parseFilterExpression(doc);
+    this.parseRequestItemsKeys(filter);
+
+    const baseObj = {
+      TableName: this.model.TableName,
+      ReturnValues: 'ALL_NEW',
+      Key: this.RequestItemsKeys[0]
+    };
+
+    // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+    if (this.ProjectionExpression.length) {
+      baseObj.ProjectionExpression = this.ProjectionExpression;
+    }
+    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+    }
+
+    // Add on ExpressionAttributeValues and UpdateExpression if defined
+    if (this.FilterExpression.length) {
+      baseObj.UpdateExpression = `SET ${this.FilterExpression}`;
+    }
+    if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
+      baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
+    }
+
+    return baseObj;
+  }
+
 }
 
 // Export different classes and functions
