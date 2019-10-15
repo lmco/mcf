@@ -7,9 +7,13 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Jake Ursetta
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Helper function for MBEE test.
  * Used to create users, organizations, projects, elements in the database.

@@ -9,7 +9,7 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This file defines middleware functions which can be used by

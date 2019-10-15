@@ -9,11 +9,10 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
+ * @author Josh Kaplan
+ * @author Jake Ursetta
  * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Project model that
  * implements controller logic and behavior for Projects.

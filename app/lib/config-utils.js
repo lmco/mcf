@@ -10,8 +10,7 @@
  * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Connor Doyle <connor.p.doyle@lmco.com>
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta
  *
  * @description Provides utilities for handling .cfg files, specifically
  * removing comments and validating the format.
