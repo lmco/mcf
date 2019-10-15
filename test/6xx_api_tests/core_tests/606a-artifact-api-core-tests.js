@@ -111,8 +111,6 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postArtifact(done) {
   const artData = testData.artifacts[0];
-  artData.project = projID;
-  artData.branch = branchID;
 
   const options = {
     method: 'POST',
@@ -136,8 +134,7 @@ function postArtifact(done) {
     chai.expect(postedArtifact.org).to.equal(orgID);
     chai.expect(postedArtifact.location).to.equal(artData.location);
     chai.expect(postedArtifact.filename).to.equal(artData.filename);
-    chai.expect(postedArtifact.contentType).to.equal(artData.contentType);
-    chai.expect(postedArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(postedArtifact.strategy).to.equal(M.config.artifact.strategy);
 
     // Verify additional properties
     chai.expect(postedArtifact.createdBy).to.equal(adminUser._id);
@@ -160,8 +157,6 @@ function postArtifact(done) {
  */
 function getArtifact(done) {
   const artData = testData.artifacts[0];
-  artData.project = projID;
-  artData.branch = branchID;
 
   const options = {
     method: 'GET',
@@ -183,10 +178,9 @@ function getArtifact(done) {
     chai.expect(createdArtifact.project).to.equal(projID);
     chai.expect(createdArtifact.org).to.equal(orgID);
     chai.expect(createdArtifact.name).to.equal(artData.name);
-    chai.expect(createdArtifact.contentType).to.equal(artData.contentType);
     chai.expect(createdArtifact.location).to.equal(artData.location);
     chai.expect(createdArtifact.filename).to.equal(artData.filename);
-    chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(createdArtifact.custom).to.deep.equal(artData.custom);
 
     // Verify additional properties
@@ -222,11 +216,11 @@ function postBlob(done) {
     headers: testUtils.getHeaders('multipart/form-data'),
     formData: {
       location: artData.location,
+      filename: artData.filename,
       file: {
         value: fs.createReadStream(artifactPath),
         options: {
-          filename: artifactPath,
-          contentType: null
+          filename: artifactPath
         }
       }
     }
@@ -295,8 +289,6 @@ function getBlob(done) {
  */
 function getBlobById(done) {
   const artData = testData.artifacts[0];
-  artData.project = projID;
-  artData.branch = branchID;
 
   const options = {
     method: 'GET',
@@ -371,7 +363,7 @@ function patchArtifact(done) {
 
   const reqBody = {
     id: artData.id,
-    contentType: 'edited_type'
+    name: 'edited_name'
   };
 
   const options = {
@@ -394,11 +386,10 @@ function patchArtifact(done) {
     chai.expect(patchedArtifact.branch).to.equal(branchID);
     chai.expect(patchedArtifact.project).to.equal(projID);
     chai.expect(patchedArtifact.org).to.equal(orgID);
-    chai.expect(patchedArtifact.name).to.equal(artData.name);
+    chai.expect(patchedArtifact.name).to.equal('edited_name');
     chai.expect(patchedArtifact.location).to.equal(artData.location);
     chai.expect(patchedArtifact.filename).to.equal(artData.filename);
-    chai.expect(patchedArtifact.contentType).to.equal('edited_type');
-    chai.expect(patchedArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(patchedArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(patchedArtifact.custom).to.deep.equal(artData.custom);
 
     // Verify additional properties

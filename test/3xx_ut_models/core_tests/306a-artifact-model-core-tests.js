@@ -20,7 +20,6 @@
 const chai = require('chai');
 
 // Node modules
-const path = require('path'); // Find directory paths
 const chaiAsPromised = require('chai-as-promised');
 
 // Use async chai
@@ -96,12 +95,11 @@ async function createArtifact() {
   const artifact = Artifact.createDocument({
     _id: utils.createID(org.id, project.id, branch.id, artData.id),
     filename: artData.filename,
-    contentType: path.extname(artData.filename),
     project: utils.createID(org.id, project.id),
     branch: utils.createID(org.id, project.id, branch.id),
     location: artData.location,
     custom: artData.custom,
-    strategy: artData.strategy
+    strategy: M.config.artifact.strategy
   });
 
   try {
@@ -115,9 +113,6 @@ async function createArtifact() {
     chai.expect(createdArtifact.filename).to.equal(
       artData.filename
     );
-    chai.expect(createdArtifact.contentType).to.equal(
-      path.extname(artData.filename)
-    );
     chai.expect(createdArtifact.project).to.equal(
       utils.createID(org.id, project.id)
     );
@@ -125,7 +120,7 @@ async function createArtifact() {
       utils.createID(org.id, project.id, branch.id)
     );
     chai.expect(createdArtifact.location).to.equal(artData.location);
-    chai.expect(createdArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
@@ -177,10 +172,6 @@ async function updateArtifact() {
       utils.createID(org.id, project.id, branch.id, artData.id)
     );
     chai.expect(foundArtifact.filename).to.equal('Updated Name');
-    chai.expect(foundArtifact.contentType).to.equal(
-      path.extname(artData.filename)
-    );
-
     chai.expect(foundArtifact.project).to.equal(
       utils.createID(org.id, project.id)
     );
@@ -188,7 +179,7 @@ async function updateArtifact() {
       utils.createID(org.id, project.id, branch.id)
     );
     chai.expect(foundArtifact.location).to.equal(artData.location);
-    chai.expect(foundArtifact.strategy).to.equal(artData.strategy);
+    chai.expect(foundArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(foundArtifact.custom || {}).to.deep.equal(
       artData.custom
     );

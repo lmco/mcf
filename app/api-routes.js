@@ -4194,7 +4194,6 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                      match the artifact ID provided in the path.
  *             name:
  *               type: string
- *             contentType: string
  *             filename:
  *               type: string
  *               description: Blob file name associated with this artifact.

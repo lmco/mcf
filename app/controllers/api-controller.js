@@ -5127,14 +5127,9 @@ async function getBlob(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  const artMetadata = {
-    location: req.query.location,
-    filename: req.query.filename
-  };
-
   try {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
-      req.params.projectid, artMetadata);
+      req.params.projectid, req.query);
 
     // Set filename
     res.header('Content-Disposition', `attachment; filename=${req.query.filename}`);
@@ -5176,22 +5171,15 @@ async function postBlob(req, res) {
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
-    // Sanity Check: originalname/mimitype are required fields
-    if (!req.file
-      || !req.file.hasOwnProperty('originalname')
-      || !req.file.hasOwnProperty('mimetype')) {
+    // Sanity Check: file is required
+    if (!req.file) {
       const error = new M.DataFormatError('Artifact Blob file must be defined.', 'warn');
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
-    // Extract file meta data
-    req.body.filename = req.file.originalname;
-    req.body.contentType = req.file.mimetype;
-
     try {
       const artifact = await ArtifactController.postBlob(req.user, req.params.orgid,
-        req.params.projectid, req.body,
-        req.file.buffer);
+        req.params.projectid, req.body, req.file.buffer);
 
       // Set minified to true
       const minified = true;
@@ -5225,14 +5213,9 @@ async function deleteBlob(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  const artMetadata = {
-    location: req.query.location,
-    filename: req.query.filename
-  };
-
   try {
     const artifact = await ArtifactController.deleteBlob(req.user, req.params.orgid,
-      req.params.projectid, artMetadata);
+      req.params.projectid, req.query);
 
     // Set minified to true
     const minified = true;
@@ -5296,13 +5279,8 @@ async function getBlobById(req, res) {
     const artMetadata = await ArtifactController.find(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.params.artifactid, options);
 
-    // Ensure only a single blob found
-    if (artMetadata.length > 1) {
-      throw new M.DataFormatError(
-        `More then 1 blob found. [${req.params.artifactid}]`, 'warn'
-      );
-    }
-    else if (artMetadata.length === 0) {
+    // Ensure blob found
+    if (artMetadata.length === 0) {
       throw new M.NotFoundError(
         `No artifact blob found. [${req.params.artifactid}]`, 'warn'
       );
