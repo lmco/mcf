@@ -29,7 +29,7 @@ module.exports = {
   deleteBlob
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 
 // MBEE modules
