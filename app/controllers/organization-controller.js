@@ -908,7 +908,7 @@ async function remove(requestingUser, orgs, options) {
       // Invalid parameter, throw an error
       throw new M.DataFormatError('Invalid input for removing organizations.', 'warn');
     }
-    console.log('Finding orgs')
+
     // Find the orgs to delete
     const foundOrgs = await Organization.find(searchQuery, null, { lean: true });
 
