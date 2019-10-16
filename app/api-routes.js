@@ -4383,13 +4383,6 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *             location:
  *               type: string
  *               description: The location of the artifact to delete.
- *       - name: minified
- *         description: If true, the returned JSON is minified. If false, the
- *                      returned JSON is formatted based on the format specified
- *                      in the config. The default value is false.
- *         in: query
- *         type: boolean
- *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifact, returns deleted
@@ -4469,13 +4462,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
  *                      through.
  *         in: query
  *         type: boolean
- *       - name: minified
- *         description: If true, the returned JSON is minified. If false, the
- *                      returned JSON is formatted based on the format specified
- *                      in the config. The default value is false.
- *         in: query
- *         type: boolean
- *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET artifact, returns artifact blob.
