@@ -232,7 +232,6 @@ generated on server startup and will change with each restart of the server.
 This means that a restart of the server will invalidate session tokens.
 
 ### Authentication
-
 MBEE operates on a concept of *modular authentication*. This means that one or
 more authentication modules are defined in the MBEE code. These authentication
 modules are located in the `app/auth` directory.
