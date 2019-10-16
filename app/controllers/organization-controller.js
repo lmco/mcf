@@ -908,7 +908,7 @@ async function remove(requestingUser, orgs, options) {
       // Invalid parameter, throw an error
       throw new M.DataFormatError('Invalid input for removing organizations.', 'warn');
     }
-
+    console.log('Finding orgs')
     // Find the orgs to delete
     const foundOrgs = await Organization.find(searchQuery, null, { lean: true });
 
@@ -933,19 +933,22 @@ async function remove(requestingUser, orgs, options) {
         throw new M.OperationError('The default organization cannot be deleted.', 'warn');
       }
     });
-
+    console.log('Finding projects')
     // Find all projects to delete
     const projectsToDelete = await Project.find({ org: { $in: saniOrgs } },
       null, { lean: true });
 
     const projectIDs = projectsToDelete.map(p => p._id);
-
+    console.log('Delete Elements')
     // Delete any elements in the found projects
     await Element.deleteMany({ project: { $in: projectIDs } });
+    console.log('Delete Branches')
     // Delete any branches in the found projects
     await Branch.deleteMany({ project: { $in: projectIDs } });
+    console.log('Delete Projects')
     // Delete any projects in the org
     await Project.deleteMany({ org: { $in: saniOrgs } });
+    console.log('Delete Orgs')
     // Delete the orgs
     const retQuery = await Organization.deleteMany(searchQuery);
     // Emit the event orgs-deleted

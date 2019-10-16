@@ -471,6 +471,7 @@ class Model {
    */
   async batchGetItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
+      console.log(filter);
       const query = new Query('batchGetItem', this,
         filter, projection, options);
       const queriesToMake = query.query;
