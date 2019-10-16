@@ -752,6 +752,17 @@ class Model {
       });
     };
 
+    doc.__proto__.remove = function() { // eslint-disable-line no-proto
+      return new Promise((resolve, reject) => {
+        model.deleteMany({ _id: this._id })
+        .then(() => resolve())
+        .catch((error) => {
+          M.log.verbose('Failed in doc.remove');
+          return reject(error);
+        });
+      });
+    };
+
     /**
      *
      * @param field
@@ -1482,13 +1493,26 @@ class Query {
           );
         }
 
-        // If FilterExpression is not defined yet, define it
-        if (this.FilterExpression === '') {
-          this.FilterExpression = `#${keyName} = :${valueKey}`;
+        // Handle special case where searching an array of permissions
+        if (keyName.startsWith('permissions.')) {
+          // If FilterExpression is not defined yet, define it
+          if (this.FilterExpression === '') {
+            this.FilterExpression = `contains (#${keyName}, :${valueKey})`;
+          }
+          else {
+            // Append on condition
+            this.FilterExpression += ` AND  contains (#${keyName}, :${valueKey})`;
+          }
         }
         else {
-          // Append on condition
-          this.FilterExpression += ` AND #${keyName} = :${valueKey}`;
+          // If FilterExpression is not defined yet, define it
+          if (this.FilterExpression === '') {
+            this.FilterExpression = `#${keyName} = :${valueKey}`;
+          }
+          else {
+            // Append on condition
+            this.FilterExpression += ` AND #${keyName} = :${valueKey}`;
+          }
         }
       }
     });
