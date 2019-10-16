@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner James Eckstein <james.eckstein@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This file creates a fake virtual DOM
  * and configures the enzyme adaptor for UI testing.

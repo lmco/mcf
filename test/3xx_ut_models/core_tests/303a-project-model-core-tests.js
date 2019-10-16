@@ -7,11 +7,11 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
  * @author Josh Kaplan
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Leah De Laurell
+ * @author Austin Bieber
  *
  * @description This tests the Project Model functionality. The project
  * model tests, create, find, update, and delete projects. THe tests also

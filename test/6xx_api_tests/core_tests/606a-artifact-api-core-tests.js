@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Phillip Lee
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description This tests requests of the API controller functionality:
  * GET, POST, PATCH, and DELETE artifacts.

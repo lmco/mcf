@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle
+ * @author Leah De Laurell
  *
  * @description Tests the parse-json module to verify successful parsing of
  * of JSON files with comments allowed.

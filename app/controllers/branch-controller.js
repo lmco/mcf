@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Leah De Laurell
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description Provides an abstraction layer on top of the Branch model that
  * implements controller logic and behavior for Branches.

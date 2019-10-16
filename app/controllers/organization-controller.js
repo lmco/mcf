@@ -7,12 +7,12 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
  * @author Josh Kaplan
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Austin Bieber
+ * @author Connor Doyle
+ * @author Phillip Lee
  *
  * @description Provides an abstraction layer on top of the Organization model
  * that provides functions implementing controller logic and behavior.

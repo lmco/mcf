@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description Tests the exported functions and classes from the
  * mongoose-mongodb-strategy. If this strategy is NOT selected in the running

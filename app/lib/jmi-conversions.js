@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Austin Bieber
+ * @author Leah De Laurell
  *
  * @description Defines the JMI Type conversion functions.
  */

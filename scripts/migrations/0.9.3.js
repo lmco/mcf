@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  *
  * @description Migration script for version 0.9.3.
  */

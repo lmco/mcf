@@ -7,11 +7,11 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Austin Bieber
+ * @author Connor Doyle
+ * @author Phillip Lee
  *
  * @description This implements the behavior and logic for elements.
  * It also provides function for interacting with elements.

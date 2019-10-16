@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Leah De Laurell
+ * @author Austin Bieber
  *
  * @description Tests the sanitization module and each of its functions.
  */

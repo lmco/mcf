@@ -8,10 +8,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Leah De Laurell
  *
  * @author Josh Kaplan
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description Creates the necessary static assets used by the MBEE UI.
  */

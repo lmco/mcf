@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Austin Bieber
+ * @author Connor Doyle
  *
  * @description These tests test for specific use cases within the element
  * controller. The tests verify that operations can be done that are more

@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Austin Bieber
+ * @author Phillip Lee
  *
  * @description This tests for expected errors within the element controller.
  */
