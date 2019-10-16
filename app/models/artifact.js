@@ -114,7 +114,7 @@ const ArtifactSchema = new db.Schema({
       validator: function(v) {
         // If the filename is improperly formatted, reject
         return (RegExp(validators.artifact.filename).test(v)
-          && !RegExp(validators.artifact.extension).test(v));
+          && RegExp(validators.artifact.extension).test(v));
       },
       message: props => `Artifact filename [${props.value}] is improperly formatted.`
     }]
@@ -146,12 +146,10 @@ ArtifactSchema.plugin(extensions);
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.method('getValidUpdateFields', function() {
-  return ['filename', 'name', 'custom', 'archived', 'location',
-    'branch'];
+  return ['filename', 'name', 'custom', 'archived', 'location'];
 });
 ArtifactSchema.static('getValidUpdateFields', function() {
-  return ['filename', 'name', 'custom', 'archived', 'location',
-    'branch'];
+  return ['filename', 'name', 'custom', 'archived', 'location'];
 });
 
 /**

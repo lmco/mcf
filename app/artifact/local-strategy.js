@@ -48,7 +48,7 @@ const errors = M.require('lib.errors');
  *
  * @returns {Buffer} Artifact binary.
  */
-function  getBlob(artMetadata) {
+function getBlob(artMetadata) {
   try {
     // Validate metadata
     validateBlobMeta(artMetadata);
@@ -312,7 +312,7 @@ function validateBlobMeta(artMetadata) {
     });
 
     assert.ok((RegExp(validator.filename).test(artMetadata.filename)
-      && !RegExp(validator.extension).test(artMetadata.filename)),
+      && RegExp(validator.extension).test(artMetadata.filename)),
     `Artifact filename [${artMetadata.filename}] is improperly formatted.`);
 
     assert.ok(RegExp(validator.location).test(artMetadata.location),
