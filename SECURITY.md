@@ -210,7 +210,7 @@ section of the configuration file:
     "https": {
       "enabled": true,
       "port": 9443,
-      "sslCertName": "dev.mbee.us.lmco.com"
+      "sslCertName": "path/to/your/ssl/cert.crt"
     }
   }
 }
