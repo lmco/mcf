@@ -18,9 +18,6 @@
  * methods, validators, setters, and getters.
  */
 
-// Node modules
-const path = require('path'); // Find directory paths
-
 // NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -92,34 +89,41 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates an artifact via model and save it to the database.
  */
 async function createArtifact() {
-  // Create the full artifact ID
-  const artifactID = testData.artifacts[0].id;
+  const artData = testData.artifacts[0];
 
-  // Upload new artifact
+  // Create new artifact
   const artifact = Artifact.createDocument({
-    _id: utils.createID(org.id, project.id, branch.id, artifactID),
-    filename: testData.artifacts[0].filename,
-    contentType: path.extname(testData.artifacts[0].filename),
+    _id: utils.createID(org.id, project.id, branch.id, artData.id),
+    filename: artData.filename,
     project: utils.createID(org.id, project.id),
     branch: utils.createID(org.id, project.id, branch.id),
-    location: testData.artifacts[0].location
+    location: artData.location,
+    custom: artData.custom,
+    strategy: M.config.artifact.strategy
   });
 
   try {
     // Save artifact object to the database
     const createdArtifact = await artifact.save();
+
+    // Verify output
     chai.expect(createdArtifact._id).to.equal(
-      utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id)
+      utils.createID(org.id, project.id, branch.id, artData.id)
     );
     chai.expect(createdArtifact.filename).to.equal(
-      testData.artifacts[0].filename
+      artData.filename
     );
-    chai.expect(createdArtifact.contentType).to.equal(
-      path.extname(testData.artifacts[0].filename)
+    chai.expect(createdArtifact.project).to.equal(
+      utils.createID(org.id, project.id)
     );
-    chai.expect(createdArtifact.project).to.equal(utils.createID(org.id, project.id));
-    chai.expect(createdArtifact.branch).to.equal(utils.createID(org.id, project.id, branch.id));
-    chai.expect(createdArtifact.location).to.equal(testData.artifacts[0].location);
+    chai.expect(createdArtifact.branch).to.equal(
+      utils.createID(org.id, project.id, branch.id)
+    );
+    chai.expect(createdArtifact.location).to.equal(artData.location);
+    chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
+    chai.expect(createdArtifact.custom || {}).to.deep.equal(
+      artData.custom
+    );
   }
   catch (error) {
     M.log.error(error);
@@ -138,6 +142,7 @@ async function findArtifact() {
       { _id: utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id) }
     );
 
+    // Verify output
     // Check if artifact found
     chai.expect(foundArtifact._id).to.equal(
       utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id)
@@ -164,23 +169,31 @@ async function findArtifact() {
  */
 async function updateArtifact() {
   try {
-    const artID = utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id);
+    const artData = testData.artifacts[0];
+
+    const artID = utils.createID(org.id, project.id, branch.id, artData.id);
     // Update the name of the artifact created in the createArtifact() test
     await Artifact.updateOne({ _id: artID }, { filename: 'Updated Name' });
 
     // Find the updated artifact
     const foundArtifact = await Artifact.findOne({ _id: artID });
 
+    // Verify output
     chai.expect(foundArtifact._id).to.equal(
-      utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id)
+      utils.createID(org.id, project.id, branch.id, artData.id)
     );
     chai.expect(foundArtifact.filename).to.equal('Updated Name');
-    chai.expect(foundArtifact.contentType).to.equal(
-      path.extname(testData.artifacts[0].filename)
+    chai.expect(foundArtifact.project).to.equal(
+      utils.createID(org.id, project.id)
     );
-    chai.expect(foundArtifact.project).to.equal(utils.createID(org.id, project.id));
-    chai.expect(foundArtifact.branch).to.equal(utils.createID(org.id, project.id, branch.id));
-    chai.expect(foundArtifact.location).to.equal(testData.artifacts[0].location);
+    chai.expect(foundArtifact.branch).to.equal(
+      utils.createID(org.id, project.id, branch.id)
+    );
+    chai.expect(foundArtifact.location).to.equal(artData.location);
+    chai.expect(foundArtifact.strategy).to.equal(M.config.artifact.strategy);
+    chai.expect(foundArtifact.custom || {}).to.deep.equal(
+      artData.custom
+    );
   }
   catch (error) {
     M.log.error(error);
@@ -190,7 +203,7 @@ async function updateArtifact() {
 }
 
 /**
- * @description Finds and deletes an artifact.
+ * @description Finds and deletes an existing artifact.
  */
 async function deleteArtifact() {
   const artID = utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id);
@@ -209,9 +222,8 @@ async function deleteArtifact() {
  * @description Get and validate the populated fields for artifacts.
  */
 async function getStaticPopFields() {
-  const validPopulatedFields = ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
-  console.log(validPopulatedFields.length);
-  console.log(Artifact.getValidPopulateFields());
-  // Ensure correct populate fields
+  const validPopulatedFields = ['archivedBy', 'lastModifiedBy', 'createdBy', 'project',
+    'branch'];
+  // Verify output
   chai.expect(validPopulatedFields).to.eql(Artifact.getValidPopulateFields());
 }

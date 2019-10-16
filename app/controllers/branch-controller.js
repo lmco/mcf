@@ -29,6 +29,7 @@ module.exports = {
 const assert = require('assert');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Project = M.require('models.project');
@@ -844,6 +845,10 @@ async function remove(requestingUser, organizationID, projectID, branches, optio
 
     // Delete any elements in the branch
     await Element.deleteMany(ownedQuery);
+
+    // Delete any artifacts in the branch
+    await Artifact.deleteMany(ownedQuery);
+
     // Delete all the branches
     const retQuery = await Branch.deleteMany(searchQuery);
 

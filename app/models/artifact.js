@@ -14,13 +14,11 @@
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description
- * <p>This module defines the artifact data model. Artifacts are objects stored
- * in the database, which point to files stored in another location. Multiple
- * artifact objects can point to the same file, as artifacts are stored on a per
- * branch basis. Artifacts also store a history, which details who and when a
- * user changed the artifact file (not the database object/meta-data).</p>
- *
- * TODO: Phill update this model with changes after completion of artifacts.
+ * <p>This module defines the artifact data model. The artifact data model
+ * represents metadata for Artifact blobs (binary large object).
+ * Filename and Location are two examples of Artifact metadata.
+ * They are used to point and locate artifact blobs.
+ * </p>
  */
 
 // MBEE modules
@@ -28,7 +26,6 @@ const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 const utils = M.require('lib.utils');
-
 
 /* -------------------------( Artifact Schema )-------------------------- */
 
@@ -42,12 +39,8 @@ const utils = M.require('lib.utils');
  * @property {string} project - A reference to an artifact's project.
  * @property {string} branch - A reference to an artifact's branch.
  * @property {string} filename - The filename of the artifact.
- * @property {string} contentType - The file type. E.g: 'png', 'dat'
- * @property {string} location - location of the artifact blob.
- * @property {object} history - An array of object, tracks artifact's history.
- * @property {string} hash [history.hash] - Hash string of the stored artifact.
- * @property {string} user [history.user] - User that updated the artifact.
- * @property {Date} updatedOn [history.updatedOn] - Time of update.
+ * @property {string} location - The location of the artifact blob.
+ * @property {string} strategy - The strategy used for storing artifact blobs.
  *
  */
 const ArtifactSchema = new db.Schema({
@@ -94,24 +87,52 @@ const ArtifactSchema = new db.Schema({
   project: {
     type: 'String',
     ref: 'Project',
-    required: true
+    required: true,
+    validate: [{
+      validator: function(v) {
+        return RegExp(validators.project.id).test(v);
+      },
+      message: props => `${props.value} is not a valid project ID.`
+    }]
   },
   branch: {
     type: 'String',
     required: true,
     ref: 'Branch',
-    index: true
+    index: true,
+    validate: [{
+      validator: function(v) {
+        return RegExp(validators.branch.id).test(v);
+      },
+      message: props => `${props.value} is not a valid branch ID.`
+    }]
   },
   filename: {
     type: 'String',
-    required: true
-  },
-  contentType: {
-    type: 'String',
-    required: true
+    required: true,
+    validate: [{
+      validator: function(v) {
+        // If the filename is improperly formatted, reject
+        return (RegExp(validators.artifact.filename).test(v)
+          && RegExp(validators.artifact.extension).test(v));
+      },
+      message: props => `Artifact filename [${props.value}] is improperly formatted.`
+    }]
   },
   location: {
-    type: 'String'
+    type: 'String',
+    required: true,
+    validate: [{
+      validator: function(v) {
+        // If the location is improperly formatted, reject
+        return RegExp(validators.artifact.location).test(v);
+      },
+      message: props => `Artifact location [${props.value}] is improperly formatted.`
+    }]
+  },
+  strategy: {
+    type: 'String',
+    required: true
   }
 });
 
@@ -125,10 +146,10 @@ ArtifactSchema.plugin(extensions);
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.method('getValidUpdateFields', function() {
-  return ['filename', 'contentType', 'name', 'custom', 'archived'];
+  return ['filename', 'name', 'custom', 'archived', 'location'];
 });
 ArtifactSchema.static('getValidUpdateFields', function() {
-  return ['filename', 'contentType', 'name', 'custom', 'archived'];
+  return ['filename', 'name', 'custom', 'archived', 'location'];
 });
 
 /**
@@ -136,12 +157,11 @@ ArtifactSchema.static('getValidUpdateFields', function() {
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.method('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project', 'branch'];
 });
 ArtifactSchema.static('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project', 'branch'];
 });
-
 
 /* ----------------------( Artifact Schema Export )---------------------- */
 
