@@ -674,11 +674,27 @@ async function update(requestingUser, organizationID, projectID, branches, optio
 
         // Get validator for field if one exists
         if (validators.branch.hasOwnProperty(key)) {
-          // If validation fails, throw error
-          if (!RegExp(validators.branch[key]).test(updateBranch[key])) {
-            throw new M.DataFormatError(
-              `Invalid ${key}: [${updateBranch[key]}]`, 'warn'
-            );
+          // If the validator is a regex string
+          if (typeof validators.branch[key] === 'string') {
+            // If validation fails, throw error
+            if (!RegExp(validators.branch[key]).test(updateBranch[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateBranch[key]}]`, 'warn'
+              );
+            }
+          }
+          // If the validator is a functions
+          else if (typeof validators.branch[key] === 'function') {
+            if (!validators.branch[key](updateBranch[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateBranch[key]}]`, 'warn'
+              );
+            }
+          }
+          // Improperly formatted validator
+          else {
+            throw new M.ServerError(`Branch validator [${key}] is neither a `
+              + 'function not a regex string.');
           }
         }
 
