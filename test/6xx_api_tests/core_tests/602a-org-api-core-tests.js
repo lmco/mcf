@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Leah De Laurell
+ * @author Phillip Lee
  *
  * @description This tests the organization API controller functionality:
  * GET, POST, PATCH, and DELETE of an organization.

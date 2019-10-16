@@ -9,9 +9,9 @@
  *
  * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Phillip Lee
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description
  * <p>This module defines the artifact data model. Artifacts are objects stored

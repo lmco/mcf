@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Phillip Lee
+ * @author Austin Bieber
  *
  * @description Middleware plugin that extends models.
  * Allows field extensions: archivedBy, createBy, lastModifiedBy, createdOn,

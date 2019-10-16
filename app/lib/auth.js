@@ -7,7 +7,7 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
  * @author Josh Kaplan
  * @author Jake Ursetta

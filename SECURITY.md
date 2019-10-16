@@ -14,33 +14,6 @@
 
 
 ## Reporting Vulnerabilities and Bugs
-
-**Lockheed Martin Internal**
-
-If a bug or vulnerability is identified in MBEE, please notify the
-MBEE software team by emailing the
-[dl-SSC, MBEE-Software](mailto:mbee-software.dl-ssc@exch.ems.lmco.com)
-distribution list. This list contains MBEE software engineering POCs who should
-be notified of such an issue. **DO NOT** disclose vulnerabilities on our JIRA
-service desk.
-
-Your email will be acknowledged within 1 business day and a more detailed
-follow-up will be provided within 5 business days.
-
-When disclosing a vulnerability, please provide the following information:
-
-- The server on which the issue was identified (name and IP address)
-- The MBEE version (can be retrieved from the MBEE `/about` page)
-- A detailed description of the issue (the more detail, the better) so our team
-can quickly reproduce the issue
-- Programs/projects affected
-
-**External OpenMBEE**
-
-> This only applies to non-LM users and the open source version of MBEE.
-> Lockheed Martin users (even if using the open source MBEE) should follow the
-> procedures above.
-
 If an issue is identified in the open source version MBEE, please email
 [mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com).
 This will notify the Lockheed Martin MBEE Software Engineering team of the
@@ -110,39 +83,8 @@ gpg -e -r mbee-software file_to_encrypt.txt
 
 
 ## Disclosure and Security Update Policy
-
-**Lockheed Martin Internal**
-
-If and when security-related updates are made to MBEE, the
-[dl-SSC, MBEE-Admins](mailto:mbee-admin.dl-ssc@exch.ems.lmco.com) distribution
-list will be notified first. If you are a system administrator of an MBEE
-instance, please contact the [dl-SSC, MBEE-Software](mailto:mbee-software.dl-ssc@exch.ems.lmco.com)
-distribution list to ensure you are added to the admins distribution list.
-
-Once admins are notified and are able to update their instances, the
-[dl-SSC, MBEE-Users](mailto:mbee-users.dl-ssc@exch.ems.lmco.com) distribution
-list will be notified in the interest of transparency and program communication.
-
-If your program has special needs that may require an alteration to this policy,
-please contact our software team at the [dl-SSC, MBEE-Software](mailto:mbee-software.dl-ssc@exch.ems.lmco.com)
-distribution list so that we may work together to identify an approach to meet
-your program's needs.
-
-Security updates will include a reasonable level of detail about the issue,
-the severity and likelihood of impact, and the MBEE teams' assessment of the
-risk introduced by the issue. Security updates will also specify which versions
-are impacted and how to mitigate the issue.
-
-For a list of MBEE security related updates as well as bug fixes and features,
-refer to `CHANGELOG.md`.
-
-**External OpenMBEE**
-
-> This only applies to non-LM users and the open source version of MBEE.
-
 If and when security-related updates are made to MBEE, refer to `CHANGELOG.md`
 for instructions on how to mitigate the issue.
-
 
 ## Known Gaps and Issues
 
