@@ -97,6 +97,8 @@ if (!ArtifactStrategy.hasOwnProperty('clear')) {
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for artifacts with a
  * specific lastModifiedBy value.
+ * @param {string} [options.archived] - Search only for archived artifacts.  If false,
+ * only returns unarchived artifacts.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - Search for artifacts with a specific
  * archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use
