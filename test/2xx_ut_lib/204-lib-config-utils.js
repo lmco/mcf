@@ -7,8 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Tests the parse-json module to verify successful parsing of
@@ -170,5 +171,14 @@ async function rejectInvalidConfigTest() {
   }
   catch (error) {
     error.message.should.equal('Configuration file: "test" is not defined.');
+  }
+
+  // Test rejection if artifact is not defined
+  invalidConfig.test = M.config.test;
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Configuration file: "artifact" is not defined.');
   }
 }

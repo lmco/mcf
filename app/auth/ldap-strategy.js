@@ -9,7 +9,7 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta
  *
  * @description This file implements authentication using LDAP Active Directory.
  */

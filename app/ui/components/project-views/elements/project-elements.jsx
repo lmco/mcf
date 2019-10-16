@@ -10,8 +10,7 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Josh Kaplan
  *
  * @description This renders a project's element page.
  */

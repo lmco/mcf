@@ -9,8 +9,9 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Organization model
@@ -34,6 +35,7 @@ const fs = require('fs');
 const path = require('path');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
@@ -47,6 +49,7 @@ const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 
 /**
  * @description This function finds one or many organizations. Depending on the
@@ -917,6 +920,7 @@ async function remove(requestingUser, orgs, options) {
     });
 
     const foundOrgIDs = foundOrgs.map(o => o._id);
+
     // Check if all orgs were found
     const notFoundIDs = searchedIDs.filter(o => !foundOrgIDs.includes(o));
     // Some orgs not found, throw an error
@@ -941,8 +945,20 @@ async function remove(requestingUser, orgs, options) {
 
     // Delete any elements in the found projects
     await Element.deleteMany({ project: { $in: projectIDs } });
+
+    // Delete any artifacts in the org
+    await Artifact.deleteMany({ project: { $in: projectIDs } });
+
+    // Remove all blobs under org
+    foundOrgIDs.forEach((orgID) => {
+      ArtifactStrategy.clear({
+        orgID: orgID
+      });
+    });
+
     // Delete any branches in the found projects
     await Branch.deleteMany({ project: { $in: projectIDs } });
+
     // Delete any projects in the org
     await Project.deleteMany({ org: { $in: searchedIDs } });
     // Delete the orgs

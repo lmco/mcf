@@ -7,10 +7,11 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Tests the organization controller functionality: create,
  * delete, update, and find organizations.

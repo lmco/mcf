@@ -9,8 +9,12 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Jake Ursetta
+ * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This file defines the MBEE API routes.
  *
@@ -100,7 +104,6 @@ api.route('/login')
   AuthController.doLogin,
   APIController.login
 );
-
 
 /**
  * @swagger
@@ -2205,7 +2208,6 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
   APIController.deleteBranches
 );
 
-
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}:
@@ -3888,6 +3890,594 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   APIController.deleteElement
 );
 
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/artifacts/blob:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns an artifact Blob. Requesting user must have read access
+ *                  on the project to find an artifact.
+ *     produces:
+ *       - application/octet-stream
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact blob.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: filename
+ *         in: query
+ *         description: Artifact filename.
+ *         required: true
+ *         type: string
+ *       - name: location
+ *         in: query
+ *         description: Artifact Blob storage location.
+ *         required: true
+ *         type: string
+ *       - name: includeArchived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact blob.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ *
+ *   post:
+ *     tags:
+ *       - artifacts
+ *     description: Post an artifact Blob. Requesting user must have read access
+ *                  on the project to post an artifact.
+ *     produces:
+ *       - application/json
+ *     consumes: multipart/form-data
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified artifact.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: file
+ *         in: formData
+ *         description: File blob to upload.
+ *         required: true
+ *         type: file
+ *       - name: filename
+ *         in: formData
+ *         description: Artifact filename.
+ *         required: true
+ *         type: string
+ *       - name: location
+ *         in: formData
+ *         description: Artifact Blob storage location.
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to POST artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to POST artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to POST artifact due to branch, project
+ *                      or org not existing
+ *       500:
+ *         description: Internal Server Error, Failed to POST artifact due to
+ *                      server side issue.
+ *
+ *   delete:
+ *     tags:
+ *       - artifacts
+ *     description: Deletes an artifact Blob. Requesting user must have read access
+ *                  on the project to delete an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified artifact.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: URI
+ *         required: true
+ *         type: string
+ *       - name: filename
+ *         in: query
+ *         description: Artifact filename.
+ *         required: true
+ *         type: string
+ *       - name: location
+ *         in: query
+ *         description: Artifact Blob storage location.
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to DELETE artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to DELETE artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.getBlob
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.postBlob
+).delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  AuthController.doLogin,
+  APIController.deleteBlob
+);
+
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns an artifact public data on a specified branch.
+ *                  Requesting user must have read access on the project to find
+ *                  an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the searched artifact.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: includeArchived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ *
+ *   post:
+ *     tags:
+ *       - artifacts
+ *     description: Creates a new artifact from given data in form data body.
+ *                  Requesting user must have at least write access on the
+ *                  project to create an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the new artifact.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to create.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: body
+ *         description: The object containing the new artifact data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: The ID of the artifact. If provided, it must
+ *                      match the artifact ID provided in the path.
+ *             name:
+ *               type: string
+ *             filename:
+ *               type: string
+ *               description: Blob file name associated with this artifact.
+ *             location:
+ *               type: string
+ *               description: Blob storage location.
+ *             custom:
+ *               type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to POST artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to POST artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to POST artifact due to branch, project
+ *                      or org not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to POST artifact due to
+ *                      server side issue.
+ *   patch:
+ *     tags:
+ *       - artifacts
+ *     description: Updates an existing artifact. Artifacts that are currently
+ *                  archived must first be unarchived before making any other
+ *                  updates. Requesting user must have at least write access
+ *                  on the project to update an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the artifact to be
+ *                      updated.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to update.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: update
+ *         description: The object containing the updated artifact data.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               description: Name of Artifact.
+ *             filename:
+ *               type: string
+ *               description: Filename of Artifact.
+ *             contentType:
+ *               type: string
+ *               description: Content Type of Artifact.
+ *             location:
+ *               type: string
+ *               description: Storage location of Artifact.
+ *             custom:
+ *               type: object
+ *               description: NOTE when updating the custom data, the object
+ *                            is completely replaced.
+ *             archived:
+ *               type: boolean
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name).
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH artifact, returns artifact public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH artifact due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH artifact due to updating an
+ *                      immutable field.
+ *       404:
+ *         description: Not Found, Failed to PATCH artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH artifact due to
+ *                      server side issue.
+ *   delete:
+ *     tags:
+ *       -  artifacts
+ *     description: Deletes the specified artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the artifact to be
+ *                      deleted.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The ID of the artifact to delete.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE artifact, returns deleted
+ *                      artifact's id.
+ *       400:
+ *         description: Bad Request, Failed to DELETE artifact due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to DELETE artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getArtifact
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.postArtifact
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchArtifact
+)
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteArtifact
+);
+
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}/blob:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns an artifact Blob via artifact ID. Requesting user must have
+ *                  read access on the project to find an artifact.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the specified branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch containing the searched artifact.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: artifactid
+ *         description: The artifact ID.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: includeArchived
+ *         description: If true, archived objects will be also be searched
+ *                      through.
+ *         in: query
+ *         type: boolean
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact blob.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET artifact due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET artifact due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid/blob')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getBlobById
+);
 
 /**
  * @swagger

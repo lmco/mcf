@@ -10,7 +10,8 @@
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author James Eckstein <james.eckstein@lmco.com>
  *
  * @description This renders the element tree in the project's page.
  */

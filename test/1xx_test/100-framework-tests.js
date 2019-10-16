@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description These tests are used to ensure that the Mocha test framework and
  * chai assertions library exist and are working as expected. If this test suite

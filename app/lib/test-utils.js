@@ -7,9 +7,13 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Jake Ursetta
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Helper function for MBEE test.
  * Used to create users, organizations, projects, elements in the database.
@@ -27,12 +31,14 @@ const fs = require('fs');
 const chai = require('chai');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
 const utils = M.require('lib.utils');
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 const testData = require(path.join(M.root, 'test', 'test_data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
 
@@ -230,6 +236,13 @@ module.exports.removeTestOrg = async function() {
   const projectsToDelete = await Project.find({ org: testData.orgs[0].id },
     null, { lean: true });
   const projectIDs = projectsToDelete.map(p => p._id);
+
+  // Delete any artifacts in the org
+  await Artifact.deleteMany({ project: { $in: projectIDs } });
+
+  ArtifactStrategy.clear({
+    orgID: testData.orgs[0].id
+  });
 
   // Delete any elements in the found projects
   await Element.deleteMany({ project: { $in: projectIDs } });
@@ -497,7 +510,7 @@ module.exports.readCaFile = function() {
  * @param {object} res - The response object.
  * @param {Function} done - The callback function to mark the end of the test.
  */
-module.exports.testResponseLogging = function(responseLength, req, res, done) {
+module.exports.testResponseLogging = async function(responseLength, req, res, done) {
   // Get the log file path
   const filePath = path.join(M.root, 'logs', M.config.log.file);
 

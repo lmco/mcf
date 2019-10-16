@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This file executes the MBEE test suite with Mocha.

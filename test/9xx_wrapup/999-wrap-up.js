@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  *
  * @description This "test" is used to clear the database after tests.
  * SHOULD NOT run against production databases.
