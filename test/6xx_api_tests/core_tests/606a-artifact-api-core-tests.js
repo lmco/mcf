@@ -94,13 +94,13 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   it('should POST an artifact', postArtifact);
-  // it('should GET an artifact', getArtifact);
-  // it('should POST an artifact blob', postBlob);
-  // it('should GET an artifact blob', getBlob);
-  // it('should GET an artifact blob by ID', getBlobById);
-  // it('should DELETE an artifact', deleteBlob);
-  // it('should PATCH an artifact', patchArtifact);
-  // it('should DELETE an artifact', deleteArtifact);
+  it('should GET an artifact', getArtifact);
+  it('should POST an artifact blob', postBlob);
+  it('should GET an artifact blob', getBlob);
+  it('should GET an artifact blob by ID', getBlobById);
+  it('should DELETE an artifact', deleteBlob);
+  it('should PATCH an artifact', patchArtifact);
+  it('should DELETE an artifact', deleteArtifact);
 });
 
 /* --------------------( Tests )-------------------- */
