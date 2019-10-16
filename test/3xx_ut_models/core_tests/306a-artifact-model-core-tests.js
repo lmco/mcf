@@ -211,7 +211,8 @@ async function deleteArtifact() {
  * @description Get and validate the populated fields for artifacts.
  */
 async function getStaticPopFields() {
-  const validPopulatedFields = ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
+  const validPopulatedFields = ['archivedBy', 'lastModifiedBy', 'createdBy', 'project',
+  'branch'];
   // Verify output
   chai.expect(validPopulatedFields).to.eql(Artifact.getValidPopulateFields());
 }

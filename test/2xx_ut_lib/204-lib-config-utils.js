@@ -172,4 +172,13 @@ async function rejectInvalidConfigTest() {
   catch (error) {
     error.message.should.equal('Configuration file: "test" is not defined.');
   }
+
+  // Test rejection if artifact is not defined
+  invalidConfig.server = M.config.server;
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Configuration file: "artifact" is not defined.');
+  }
 }
