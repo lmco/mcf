@@ -7,6 +7,8 @@
  *
  * @license MIT
  *
+ * @owner Phillip Lee <phillip.lee@lmco.com>
+ *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Tests creating, updating and deleting artifacts through the

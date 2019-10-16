@@ -10,8 +10,10 @@
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Defines the HTTP Rest API interface file. This file tightly
  * couples with the app/api-routes.js file.

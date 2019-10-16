@@ -7,7 +7,7 @@
  *
  * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
  *

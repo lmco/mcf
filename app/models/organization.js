@@ -11,7 +11,7 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description

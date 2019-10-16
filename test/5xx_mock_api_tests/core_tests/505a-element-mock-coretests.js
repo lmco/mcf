@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests mock requests of the API controller functionality:
  * GET, POST, PATCH, and DELETE elements.

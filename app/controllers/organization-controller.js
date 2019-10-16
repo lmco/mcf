@@ -9,8 +9,9 @@
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Organization model

@@ -9,10 +9,11 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Josh Kaplan
+ * @author Jake Ursetta
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description
  * <p>This module defines the user data model. Users are the main operators of
