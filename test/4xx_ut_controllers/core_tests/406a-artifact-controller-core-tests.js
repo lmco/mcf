@@ -116,10 +116,6 @@ async function createArtifact() {
     id: artData.id,
     name: artData.name,
     filename: artData.filename,
-<<<<<<< HEAD
-    contentType: path.extname(artData.filename),
-=======
->>>>>>> 7861b54a038e3b00e3c5828c1f9b9572a96b3851
     location: artData.location,
     custom: artData.custom
   };
