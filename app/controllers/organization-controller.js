@@ -934,7 +934,7 @@ async function remove(requestingUser, orgs, options) {
     });
 
     // Find all projects to delete
-    const projectsToDelete = await Project.find({ org: { $in: saniOrgs } },
+    const projectsToDelete = await Project.find({ org: { $in: searchedIDs } },
       null, { lean: true });
 
     const projectIDs = projectsToDelete.map(p => p._id);
@@ -944,7 +944,7 @@ async function remove(requestingUser, orgs, options) {
     // Delete any branches in the found projects
     await Branch.deleteMany({ project: { $in: projectIDs } });
     // Delete any projects in the org
-    await Project.deleteMany({ org: { $in: saniOrgs } });
+    await Project.deleteMany({ org: { $in: searchedIDs } });
     // Delete the orgs
     const retQuery = await Organization.deleteMany(searchQuery);
     // Emit the event orgs-deleted
