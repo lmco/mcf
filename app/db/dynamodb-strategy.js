@@ -561,11 +561,23 @@ class Model {
    *     }
    *   }
    * ]);
-   *
-   * @returns {Promise<object>} Result of the bulkWrite operation.
    */
   async bulkWrite(ops, options, cb) {
-    // return super.bulkWrite(ops, options, cb);
+    const promises = [];
+
+    // For each operation in the ops array
+    ops.forEach((op) => {
+      // If it is an updateOne operation
+      if (Object.keys(op)[0] === 'updateOne') {
+        const filter = Object.values(op)[0].filter;
+        const update = Object.values(op)[0].update;
+
+        // Perform the updateOne operation
+        promises.push(this.updateItem(filter, update, options));
+      }
+    });
+
+    await Promise.all(promises);
   }
 
   /**
@@ -1238,12 +1250,13 @@ class Model {
   /**
    * @description Updates a single item in the database, matched by the fields
    * in the filter, and updated with the changes in doc.
+   * @async
    *
    * @param {object} filter - The query used to find the document.
    * @param {object} doc - An object containing changes to the found document.
    * @param {object} options - An object containing options.
    *
-   * @returns {Promise<*|Promise<unknown>>}
+   * @returns {Promise<object>} The updated document.
    */
   async updateItem(filter, doc, options) {
     return new Promise((resolve, reject) => {
@@ -1373,31 +1386,6 @@ class Query {
         this.query.push(baseObj);
       }
     }
-    // else if (functionName === 'updateItem') {
-    //   this.parseFilterExpression(query);
-    //   const baseObj = {
-    //     TableName: model.TableName
-    //   };
-    //
-    //   // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    //   if (this.ProjectionExpression.length) {
-    //     baseObj.ProjectionExpression = this.ProjectionExpression;
-    //   }
-    //   if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
-    //     baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
-    //   }
-    //
-    //   // Add on ExpressionAttributeValues and UpdateExpression if defined
-    //   if (this.FilterExpression.length) {
-    //     baseObj.UpdateExpression = `SET ${this.FilterExpression}`;
-    //   }
-    //   if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
-    //     baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
-    //   }
-    //
-    //   this.query.push(baseObj);
-    // }
-
   }
 
 
@@ -1484,17 +1472,14 @@ class Query {
       }
       else {
         switch (typeof query[k]) {
-          case 'string': {
-            // if (this.model.definition[query[k]]) {
-            //   console.log(this.model.definition[query[k]])
-            // }
-            this.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
-          }
-          break;
+          case 'string': this.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
+            break;
           case 'boolean': this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
-          break;
-          case 'number': this.ExpressionAttributeValues[`:${valueKey}`] = { N: query[k] };
-          break;
+            break;
+          case 'number': this.ExpressionAttributeValues[`:${valueKey}`] = {
+            N: query[k].toString()
+          };
+            break;
           default: throw new M.DatabaseError(
             `Query param type ${typeof query[k]} is not supported`, 'critical'
           );
@@ -1521,7 +1506,7 @@ class Query {
     Object.keys(query).forEach((key) => {
       switch (typeof query[key]) {
         case 'string': base[key] = { S: query[key] }; break;
-        case 'number': base[key] = { N: query[key] }; break;
+        case 'number': base[key] = { N: query[key].toString() }; break;
         case 'boolean': base[key] = { BOOL: query[key] }; break;
         case 'object': {
           if (query[key] !== null) {
@@ -1547,7 +1532,7 @@ class Query {
         inVals[k].forEach((i) => {
           switch (typeof i) {
             case 'string': base[k] = { S: i }; break;
-            case 'number': base[k] = { N: i }; break;
+            case 'number': base[k] = { N: i.toString() }; break;
             default: throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
           }
 
@@ -1580,7 +1565,8 @@ class Query {
 
     // Add on ExpressionAttributeValues and UpdateExpression if defined
     if (this.FilterExpression.length) {
-      baseObj.UpdateExpression = `SET ${this.FilterExpression}`;
+      // Append SET and replace the AND with commas
+      baseObj.UpdateExpression = `SET ${this.FilterExpression.replace(/ AND /g, ', ')}`;
     }
     if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
       baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
