@@ -64,7 +64,7 @@ describe(M.getModuleName(module.filename), () => {
       branchID = testData.branches[0].id;
 
       // Add project to array of created projects
-      projIDs.push(utils.parseID(retProj.id).pop());
+      projIDs.push(utils.parseID(retProj._id).pop());
 
       // Create an additional project with visibility of internal to be used
       // for testing the ability to reference elements on another project
@@ -74,7 +74,7 @@ describe(M.getModuleName(module.filename), () => {
       const intProj = await ProjectController.create(adminUser, org._id, internalProject);
 
       // Add project to array of created projects
-      projIDs.push(utils.parseID(intProj[0].id).pop());
+      projIDs.push(utils.parseID(intProj[0]._id).pop());
 
       // Create test elements for the main project
       const elems = testData.elements;

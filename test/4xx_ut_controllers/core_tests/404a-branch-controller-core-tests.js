@@ -66,7 +66,7 @@ describe(M.getModuleName(module.filename), () => {
     .then((retProj) => {
       // Set global project and master branch
       proj = retProj;
-      projID = utils.parseID(proj.id).pop();
+      projID = utils.parseID(proj._id).pop();
       done();
     })
     .catch((error) => {

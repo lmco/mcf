@@ -55,7 +55,7 @@ describe(M.getModuleName(module.filename), () => {
       org = await testUtils.createTestOrg(adminUser);
       proj = await testUtils.createTestProject(adminUser, org._id);
 
-      projID = utils.parseID(proj.id).pop();
+      projID = utils.parseID(proj._id).pop();
 
       // Create additional branches for the tests to utilize
       branches = await BranchController.create(adminUser, org._id, projID,

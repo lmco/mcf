@@ -165,7 +165,7 @@ function createProjects(done) {
   ];
 
   // Create projects via controller
-  ProjController.create(adminUser, org.id, projDataObjects)
+  ProjController.create(adminUser, org._id, projDataObjects)
   .then((createdProjects) => {
     // Expect createdProjects not to be empty
     chai.expect(createdProjects.length).to.equal(projDataObjects.length);
