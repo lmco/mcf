@@ -923,11 +923,27 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
 
         // Get validator for field if one exists
         if (validators.element.hasOwnProperty(key)) {
-          // If validation fails, throw error
-          if (!RegExp(validators.element[key]).test(updateElement[key])) {
-            throw new M.DataFormatError(
-              `Invalid ${key}: [${updateElement[key]}]`, 'warn'
-            );
+          // If the validator is a regex string
+          if (typeof validators.element[key] === 'string') {
+            // If validation fails, throw error
+            if (!RegExp(validators.element[key]).test(updateElement[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateElement[key]}]`, 'warn'
+              );
+            }
+          }
+          // If the validator is a functions
+          else if (typeof validators.element[key] === 'function') {
+            if (!validators.element[key](updateElement[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateElement[key]}]`, 'warn'
+              );
+            }
+          }
+          // Improperly formatted validator
+          else {
+            throw new M.ServerError(`Element validator [${key}] is neither a `
+              + 'function not a regex string.');
           }
         }
 

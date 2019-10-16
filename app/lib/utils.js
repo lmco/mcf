@@ -202,6 +202,9 @@ module.exports.parseOptions = function(options, validOptions) {
       else if (options[option] === 'false') {
         parsedOptions[option] = false;
       }
+      else if (!(typeof options[option] === 'boolean')) {
+        throw new M.DataFormatError(`Option ${option} is not a boolean`, 'warn');
+      }
     }
     // Check array type
     else if (validOptions[option] === 'array') {

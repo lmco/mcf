@@ -501,11 +501,27 @@ async function update(requestingUser, users, options) {
 
         // Get validator for field if one exists
         if (validators.user.hasOwnProperty(key)) {
-          // If validation fails, throw error
-          if (!RegExp(validators.user[key]).test(updateUser[key])) {
-            throw new M.DataFormatError(
-              `Invalid ${key}: [${updateUser[key]}]`, 'warn'
-            );
+          // If the validator is a regex string
+          if (typeof validators.user[key] === 'string') {
+            // If validation fails, throw error
+            if (!RegExp(validators.user[key]).test(updateUser[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateUser[key]}]`, 'warn'
+              );
+            }
+          }
+          // If the validator is a functions
+          else if (typeof validators.user[key] === 'function') {
+            if (!validators.user[key](updateUser[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateUser[key]}]`, 'warn'
+              );
+            }
+          }
+          // Improperly formatted validator
+          else {
+            throw new M.ServerError(`User validator [${key}] is neither a `
+              + 'function not a regex string.');
           }
         }
 
@@ -515,16 +531,8 @@ async function update(requestingUser, users, options) {
             + ' permissions to update the admin field.', 'warn');
         }
 
-        // If the type of field is mixed
-        if (User.schema.obj[key]
-          && User.schema.obj[key].type.schemaName === 'Mixed') {
-          // Only objects should be passed into mixed data
-          if (typeof updateUser !== 'object') {
-            throw new M.DataFormatError(`${key} must be an object`, 'warn');
-          }
-        }
         // Set archivedBy if archived field is being changed
-        else if (key === 'archived') {
+        if (key === 'archived') {
           // User cannot archive or un-archive themselves
           if ((user._id === reqUser._id) && (updateUser[key] !== user.archived)) {
             throw new M.OperationError('User cannot archive or unarchive themselves', 'warn');

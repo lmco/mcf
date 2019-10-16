@@ -111,8 +111,13 @@ const ProjectSchema = new db.Schema({
         + ' be less than 2 characters.'
     }, {
       validator: function(v) {
-        // If the ID is invalid, reject
-        return RegExp(validators.project.id).test(v);
+        if (typeof validators.project.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.project.id).test(v);
+        }
+        else {
+          return validators.project.id(v);
+        }
       },
       message: props => `Invalid project ID [${utils.parseID(props.value).pop()}].`
     }]
@@ -124,7 +129,13 @@ const ProjectSchema = new db.Schema({
     required: true,
     validate: [{
       validator: function(v) {
-        return RegExp(validators.org.id).test(v);
+        if (typeof validators.org.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.org.id).test(v);
+        }
+        else {
+          return validators.org.id(v);
+        }
       },
       message: props => `${props.value} is not a valid org ID.`
     }]

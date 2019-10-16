@@ -96,8 +96,13 @@ const BranchSchema = new db.Schema({
         + ' be less than 2 characters.'
     }, {
       validator: function(v) {
-        // If the ID is invalid, reject
-        return RegExp(validators.branch.id).test(v);
+        if (typeof validators.branch.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.branch.id).test(v);
+        }
+        else {
+          return validators.branch.id(v);
+        }
       },
       message: props => `Invalid branch ID [${utils.parseID(props.value).pop()}].`
     }]
@@ -109,7 +114,13 @@ const BranchSchema = new db.Schema({
     index: true,
     validate: [{
       validator: function(v) {
-        return RegExp(validators.project.id).test(v);
+        if (typeof validators.project.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.project.id).test(v);
+        }
+        else {
+          return validators.project.id(v);
+        }
       },
       message: props => `${props.value} is not a valid project ID.`
     }]
@@ -124,7 +135,13 @@ const BranchSchema = new db.Schema({
     default: null,
     validate: [{
       validator: function(v) {
-        return RegExp(validators.branch.id).test(v) || (v === null);
+        if (typeof validators.branch.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.branch.id).test(v) || (v === null);
+        }
+        else {
+          return validators.branch.id(v) || (v === null);
+        }
       },
       message: props => `${props.value} is not a valid source ID.`
     }]

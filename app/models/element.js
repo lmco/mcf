@@ -119,8 +119,13 @@ const ElementSchema = new db.Schema({
         + ' be less than 2 characters.'
     }, {
       validator: function(v) {
-        // If the ID is invalid, reject
-        return RegExp(validators.element.id).test(v);
+        if (typeof validators.element.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.element.id).test(v);
+        }
+        else {
+          return validators.element.id(v);
+        }
       },
       message: props => `Invalid element ID [${utils.parseID(props.value).pop()}].`
     }]
@@ -135,7 +140,13 @@ const ElementSchema = new db.Schema({
     ref: 'Project',
     validate: [{
       validator: function(v) {
-        return RegExp(validators.project.id).test(v);
+        if (typeof validators.project.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.project.id).test(v);
+        }
+        else {
+          return validators.project.id(v);
+        }
       },
       message: props => `${props.value} is not a valid project ID.`
     }]
@@ -147,7 +158,13 @@ const ElementSchema = new db.Schema({
     index: true,
     validate: [{
       validator: function(v) {
-        return RegExp(validators.branch.id).test(v);
+        if (typeof validators.branch.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.branch.id).test(v);
+        }
+        else {
+          return validators.branch.id(v);
+        }
       },
       message: props => `${props.value} is not a valid branch ID.`
     }]
@@ -159,7 +176,13 @@ const ElementSchema = new db.Schema({
     index: true,
     validate: [{
       validator: function(v) {
-        return RegExp(validators.element.id).test(v) || (v === null);
+        if (typeof validators.element.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.element.id).test(v) || (v === null);
+        }
+        else {
+          return validators.element.id(v) || (v === null);
+        }
       },
       message: props => `${props.value} is not a valid parent ID.`
     }]
@@ -171,7 +194,13 @@ const ElementSchema = new db.Schema({
     index: true,
     validate: [{
       validator: function(v) {
-        return RegExp(validators.element.id).test(v) || (v === null);
+        if (typeof validators.element.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.element.id).test(v) || (v === null);
+        }
+        else {
+          return validators.element.id(v) || (v === null);
+        }
       },
       message: props => `${props.value} is not a valid source ID.`
     }, {
@@ -194,7 +223,13 @@ const ElementSchema = new db.Schema({
     index: true,
     validate: [{
       validator: function(v) {
-        return RegExp(validators.element.id).test(v) || (v === null);
+        if (typeof validators.element.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.element.id).test(v) || (v === null);
+        }
+        else {
+          return validators.element.id(v) || (v === null);
+        }
       },
       message: props => `${props.value} is not a valid target ID.`
     }, {
