@@ -896,12 +896,12 @@ async function remove(requestingUser, orgs, options) {
     if (Array.isArray(saniOrgs)) {
       // An array of org ids, remove all
       searchedIDs = saniOrgs;
-      searchQuery._id = { $in: saniOrgs };
+      searchQuery._id = { $in: searchedIDs };
     }
     else if (typeof saniOrgs === 'string') {
       // A single org id
       searchedIDs = [saniOrgs];
-      searchQuery._id = { $in: saniOrgs };
+      searchQuery._id = { $in: searchedIDs };
     }
     else {
       // Invalid parameter, throw an error
