@@ -4368,21 +4368,13 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         in: path
  *         required: true
  *         type: string
- *       - name: org
- *         description: The object containing the new organization data.
- *         in: body
- *         required: true
- *         schema:
- *           type: object
- *           required:
- *             - name
- *           properties:
- *             filename:
- *               type: string
- *               description: The filename of the artifact to delete.
- *             location:
- *               type: string
- *               description: The location of the artifact to delete.
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifact, returns deleted
