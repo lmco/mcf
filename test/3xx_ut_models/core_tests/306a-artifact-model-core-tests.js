@@ -150,9 +150,6 @@ async function findArtifact() {
     chai.expect(foundArtifact.filename).to.equal(
       testData.artifacts[0].filename
     );
-    chai.expect(foundArtifact.contentType).to.equal(
-      path.extname(testData.artifacts[0].filename)
-    );
     chai.expect(foundArtifact.project).to.equal(utils.createID(org.id, project.id));
     chai.expect(foundArtifact.branch).to.equal(utils.createID(org.id, project.id, branch.id));
     chai.expect(foundArtifact.location).to.equal(testData.artifacts[0].location);
