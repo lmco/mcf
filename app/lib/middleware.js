@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This file defines middleware functions which can be used by

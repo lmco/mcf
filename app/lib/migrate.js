@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -18,7 +18,6 @@
 // Node modules
 const fs = require('fs');
 const path = require('path');
-const process = require('process');
 
 // MBEE modules
 const Artifact = M.require('models.artifact');

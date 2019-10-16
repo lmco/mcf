@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -18,11 +18,11 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { Modal, ModalBody, UncontrolledTooltip } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ProjectListItem from '../shared-views/list-items/project-list-item.jsx';
 import Delete from '../shared-views/delete.jsx';
 

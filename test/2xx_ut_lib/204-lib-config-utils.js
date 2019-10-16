@@ -5,17 +5,18 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Tests the parse-json module to verify successful parsing of
  * of JSON files with comments allowed.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const should = chai.should(); // eslint-disable-line no-unused-vars
 

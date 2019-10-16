@@ -5,11 +5,12 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Builds and runs docker containers.
  */

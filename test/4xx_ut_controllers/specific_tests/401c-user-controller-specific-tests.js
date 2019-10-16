@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
@@ -16,10 +16,10 @@
  * specific than the core tests.
  */
 
-// NPM Modules
+// NPM modules
 const chai = require('chai');
 
-// MBEE Modules
+// MBEE modules
 const UserController = M.require('controllers.user-controller');
 const User = M.require('models.user');
 const db = M.require('lib.db');

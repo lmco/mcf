@@ -5,9 +5,9 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -15,10 +15,10 @@
  * the library.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
-// MBEE Modules
+// MBEE modules
 const convertJMI = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */

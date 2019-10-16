@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This file executes the MBEE test suite with Mocha.
@@ -18,8 +18,9 @@
 // Node modules
 const fs = require('fs');
 const path = require('path');
-const Mocha = require('mocha');
 
+// NPM modules
+const Mocha = require('mocha');
 require('@babel/register')();        // Transpile react tests to javascript
 require('@babel/polyfill');          // Transpile async await for javascript
 require(path.join(M.root, 'test', '7xx_ui_tests', 'setup.js'));
@@ -86,6 +87,12 @@ function test(_args) {
   // Remove --force from args
   if (_args.includes('--force')) {
     const removeInd = _args.indexOf('--force');
+    _args.splice(removeInd, 1);
+  }
+
+  // Remove --suppress-console
+  if (_args.includes('--suppress-console')) {
+    const removeInd = _args.indexOf('--suppress-console');
     _args.splice(removeInd, 1);
   }
 

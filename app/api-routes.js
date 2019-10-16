@@ -5,12 +5,15 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Jake Ursetta
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description This file defines the MBEE API routes.
@@ -20,7 +23,7 @@
  * This will authenticate the user and move to the next function.
  */
 
-// Node modules
+// NPM modules
 const express = require('express');
 const api = express.Router();
 

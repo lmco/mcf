@@ -5,11 +5,13 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description This file defines validators - common regular expressions and
  * helper functions - used to validate data within MBEE.

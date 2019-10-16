@@ -5,11 +5,12 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Defines miscellaneous helper functions.
@@ -226,6 +227,9 @@ module.exports.parseOptions = function(options, validOptions) {
       }
       else if (options[option] === 'false') {
         parsedOptions[option] = false;
+      }
+      else if (!(typeof options[option] === 'boolean')) {
+        throw new M.DataFormatError(`Option ${option} is not a boolean`, 'warn');
       }
     }
     // Check array type

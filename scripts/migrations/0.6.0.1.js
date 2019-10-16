@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -14,9 +14,11 @@
  * @description Migration script for version 0.6.0.1.
  */
 
-// Node Modules
+// Node modules
 const fs = require('fs');
 const path = require('path');
+
+// NPM modules
 const mongoose = require('mongoose');
 
 // MBEE modules

@@ -5,13 +5,15 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Defines the HTTP Rest API interface file. This file tightly
  * couples with the app/api-routes.js file.
@@ -21,16 +23,15 @@
 // Disabling these rules due to the use of headers for api endpoints
 
 
-// Node.js Modules
+// Node modules
 const path = require('path');
 
-// NPM Modules
+// NPM modules
 const swaggerJSDoc = require('swagger-jsdoc');
 const multer = require('multer');
 const upload = multer().single('file');
 
-
-// MBEE Modules
+// MBEE modules
 const ArtifactController = M.require('controllers.artifact-controller');
 const ElementController = M.require('controllers.element-controller');
 const BranchController = M.require('controllers.branch-controller');
@@ -2141,6 +2142,11 @@ async function getUsers(req, res) {
     const publicUserData = sani.html(
       users.map(u => publicData.getPublicData(u, 'user', options))
     );
+
+    // Verify users public data array is not empty
+    if (publicUserData.length === 0) {
+      throw new M.NotFoundError('No users found.', 'warn');
+    }
 
     // Format JSON
     const json = formatJSON(publicUserData, minified);

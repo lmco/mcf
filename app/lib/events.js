@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -14,7 +14,7 @@
  * @description Defines the global event emitter.
  */
 
-// Node Modules
+// Node modules
 const EventEmitter = require('events');
 
 // Initialize the event emitter

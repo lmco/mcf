@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
@@ -25,10 +25,10 @@ module.exports = {
   remove
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 
-// MBEE Modules
+// MBEE modules
 const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');

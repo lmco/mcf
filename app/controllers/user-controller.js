@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  * @author Austin Bieber <austin.j.bieber@lmco.com>
  * @author Connor Doyle <connor.p.doyle@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
@@ -31,12 +31,12 @@ module.exports = {
   search
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-// MBEE Modules
+// MBEE modules
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');

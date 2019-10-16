@@ -5,19 +5,20 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description This tests the Project Model functionality. The project
  * model tests, create, find, update, and delete projects. THe tests also
  * test the max character limit on the ID field.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 

@@ -5,13 +5,13 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author James Eckstein <james.eckstein@lmco.com>
  *
  * @description This renders the element component.
  */
@@ -19,7 +19,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Form,
@@ -32,7 +32,7 @@ import {
   Tooltip
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ElementSelector from './element-selector.jsx';
 
 /* eslint-enable no-unused-vars */

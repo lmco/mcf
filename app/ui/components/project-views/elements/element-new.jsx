@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner James Eckstein <james.eckstein@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  *
  * @description This renders create element component.
  */
@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Form,
@@ -30,7 +30,7 @@ import {
   UncontrolledAlert
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import validators from '../../../../../build/json/validators';
 import ElementSelector from './element-selector.jsx';
 

@@ -6,17 +6,19 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license  MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description This file defines the MBEE CLI commands and sets up the
  * global M object.
  */
 
-// Node Modules
+// Node modules
 const fs = require('fs');                       // Access the filesystem
 const path = require('path');                   // Find directory paths
 const { execSync } = require('child_process');  // Execute shell commands
@@ -144,8 +146,10 @@ const buildComplete = fs.existsSync(`${M.root}/build`);
 // Check if dependencies are installed
 if (installComplete) {
   // Initialize the MBEE logger/helper functions
+  const opts = process.argv[3] ? process.argv.slice(3) : [];
+  const logger = M.require('lib.logger');
   Object.defineProperty(M, 'log', {
-    value: M.require('lib.logger').logger,
+    value: logger.makeLogger(process.argv[2], opts),
     writable: false,
     enumerable: true
   });

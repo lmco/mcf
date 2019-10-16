@@ -7,12 +7,13 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description
  * <p>This module defines the branch data model. Branches contain elements which

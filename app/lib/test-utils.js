@@ -5,11 +5,15 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Jake Ursetta
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Helper function for MBEE test.
  * Used to create users, organizations, projects, elements in the database.
@@ -526,4 +530,26 @@ module.exports.testResponseLogging = async function(responseLength, req, res, do
   chai.expect(content[6]).to.equal(responseLength.toString());
 
   done();
+};
+
+/**
+ * @description A helper function to parse the api endpoint string into a http method.
+ *
+ * @param {string} endpoint - The api endpoint string.
+ * @returns {string} Returns a REST method string such as GET or POST.
+ */
+module.exports.parseMethod = function(endpoint) {
+  const regex = /[A-Z]/g;
+  // Find the uppercase letter
+  const uppercase = endpoint.match(regex);
+  if (uppercase || endpoint.includes('search')) {
+    // Split the input based on where the uppercase letter is found
+    const segments = endpoint.split(uppercase);
+    // Return the first word of the input in all caps
+    return segments[0].toUpperCase();
+  }
+  else {
+    // The endpoint is for whoami or searchUsers; they use GET requests
+    return 'GET';
+  }
 };

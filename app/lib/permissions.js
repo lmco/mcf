@@ -5,18 +5,18 @@
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  * @author James Eckstein <james.eckstein@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides permission lookup capabilities for MBEE actions.
  */
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 
 // MBEE modules

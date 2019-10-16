@@ -5,12 +5,13 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  * @author Phillip Lee <phillip.lee@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Organization model
@@ -28,12 +29,12 @@ module.exports = {
   remove
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-// MBEE Modules
+// MBEE modules
 const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
@@ -807,7 +808,7 @@ async function createOrReplace(requestingUser, orgs, options) {
     });
 
     // Delete orgs from database
-    await Organization.deleteMany({ _id: foundOrgs.map(o => o._id) });
+    await Organization.deleteMany({ _id: { $in: foundOrgs.map(o => o._id) } });
 
     // Emit the event orgs-deleted
     EventEmitter.emit('orgs-deleted', foundOrgs);
@@ -896,7 +897,7 @@ async function remove(requestingUser, orgs, options) {
     else if (typeof saniOrgs === 'string') {
       // A single org id
       searchedIDs = [saniOrgs];
-      searchQuery._id = saniOrgs;
+      searchQuery._id = { $in: saniOrgs };
     }
     else {
       // Invalid parameter, throw an error

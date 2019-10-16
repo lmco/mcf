@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner James Eckstein <james.eckstein@lmco.com>
  *
@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Row,
@@ -34,7 +34,7 @@ import {
 } from 'reactstrap';
 import classnames from 'classnames';
 
-// MBEE Modules
+// MBEE modules
 import CustomEditRow from './custom-edit-row.jsx';
 /* eslint-enable no-unused-vars */
 

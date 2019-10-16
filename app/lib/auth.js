@@ -5,12 +5,12 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Josh Kaplan
+ * @author Jake Ursetta
  *
  * @description This file loads and instantiates the authentication strategy
  * defined in the configuration file.

@@ -1,5 +1,5 @@
 /* eslint-disable jsdoc/require-description-complete-sentence */
-// Disabled to allow hmtl in description
+// Disabled to allow html in description
 /**
  * @classification UNCLASSIFIED
  *
@@ -7,7 +7,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
@@ -21,7 +21,7 @@
  * the database.</p>
  */
 
-// MBEE Modules
+// MBEE modules
 const db = M.require('lib.db');
 
 /* -------------------------( Server Data Schema )--------------------------- */

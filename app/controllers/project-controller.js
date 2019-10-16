@@ -5,15 +5,14 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
+ * @author Josh Kaplan
+ * @author Jake Ursetta
  * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description Provides an abstraction layer on top of the Project model that
  * implements controller logic and behavior for Projects.
@@ -30,12 +29,12 @@ module.exports = {
   remove
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-// MBEE Modules
+// MBEE modules
 const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
@@ -186,8 +185,17 @@ async function find(requestingUser, organizationID, projects, options) {
       throw new M.DataFormatError('Invalid input for finding projects.', 'warn');
     }
 
-    // If the user specifies an organization
     let foundOrg;
+    let foundProjects = [];
+    const opts = {
+      limit: validatedOptions.limit,
+      skip: validatedOptions.skip,
+      sort: validatedOptions.sort,
+      populate: validatedOptions.populateString,
+      lean: validatedOptions.lean
+    };
+
+    // If the user specifies an organization
     if (orgID !== null) {
       // Find the organization, validate that it exists and is not archived (unless specified)
       foundOrg = await helper.findAndValidate(Organization, orgID,
@@ -195,6 +203,7 @@ async function find(requestingUser, organizationID, projects, options) {
 
       // Find all projects on the provided org, parse after
       searchQuery.org = orgID;
+      foundProjects = await Project.find(searchQuery, validatedOptions.fieldsString, opts);
     }
     // If orgID is null, find all projects the user has access to
     else {
@@ -202,27 +211,32 @@ async function find(requestingUser, organizationID, projects, options) {
       const orgQuery = {};
       orgQuery[`permissions.${reqUser._id}`] = 'read';
       const readOrgs = await Organization.find(orgQuery);
-
       const orgIDs = readOrgs.map(o => o._id);
+
       // Project must be internal and in an org the user has access to
-      const internalQuery = { visibility: 'internal', org: { $in: orgIDs } };
-      const permissionsQuery = {};
+      // Use JSON.parse, JSON.stringify to remove any undefined values
+      const internalQuery = JSON.parse(JSON.stringify({
+        archived: searchQuery.archived,
+        visibility: 'internal',
+        org: { $in: orgIDs }
+      }));
+      // Find all internal projects
+      const internalProjects = await Project.find(internalQuery,
+        validatedOptions.fieldsString, opts);
+
+      // Find all projects the user has read access to
+      // Use JSON parse/stringify to remove undefined values
+      const permissionsQuery = JSON.parse(JSON.stringify({ archived: searchQuery.archived }));
       permissionsQuery[`permissions.${reqUser._id}`] = 'read';
+      const permissionProjects = await Project.find(permissionsQuery,
+        validatedOptions.fieldsString, opts);
 
-      // Add $or to search query, saying user must have read access or must be
-      // internal project within an organization the user has read access on
-      searchQuery.$or = [internalQuery, permissionsQuery];
+      // Return only unique projects
+      const internalProjectIDs = internalProjects.map(p => p._id);
+      const projectsNotInInternal = permissionProjects
+      .filter(p => !internalProjectIDs.includes(p._id));
+      foundProjects = internalProjects.concat(projectsNotInInternal);
     }
-
-    // Find the projects
-    let foundProjects = await Project.find(searchQuery,
-      validatedOptions.fieldsString,
-      { limit: validatedOptions.limit,
-        skip: validatedOptions.skip,
-        sort: validatedOptions.sort,
-        populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
 
     // If searching specific projects, remove projects not in that list
     if (saniProjects) {
@@ -236,10 +250,13 @@ async function find(requestingUser, organizationID, projects, options) {
       }
     }
 
-    // Run permissions checks on each of the remaining projects
-    foundProjects.forEach((proj) => {
-      permissions.readProject(reqUser, foundOrg, proj);
-    });
+    // If the user is not searching for all projects they have
+    if (orgID !== null) {
+      // Run permissions checks on each of the remaining projects
+      foundProjects.forEach((proj) => {
+        permissions.readProject(reqUser, foundOrg, proj);
+      });
+    }
 
     return foundProjects;
   }
@@ -916,7 +933,7 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // If there are relationships to fix
     if (bulkArray2.length > 0) {
-      return Element.bulkWrite(bulkArray2);
+      return await Element.bulkWrite(bulkArray2);
     }
 
     const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,

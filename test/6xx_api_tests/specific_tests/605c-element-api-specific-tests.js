@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
@@ -15,12 +15,14 @@
  * GET, POST, PATCH, and DELETE of an element.
  */
 
-// NPM modules
-const chai = require('chai');
-const request = require('request');
+// Node modules
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
+
+// NPM modules
+const chai = require('chai');
+const request = require('request');
 
 // MBEE modules
 const db = M.require('lib.db');

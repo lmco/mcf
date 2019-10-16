@@ -6,11 +6,12 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Creates the necessary static assets used by the MBEE UI.
  */
@@ -39,6 +40,8 @@ const sass = require('gulp-sass');
 const markdown = require('gulp-markdown');
 const rename = require('gulp-rename');
 const webpack = require('webpack');
+
+// MBEE modules
 const validators = M.require('lib.validators');
 
 /**
@@ -161,7 +164,7 @@ function build(_args) {
   if (args.includes('--all') || args.includes('--jsdoc')) {
     M.log.info('  + Building jsdoc ...');
     // Create JSDoc build command
-    const jsdoc = `${process.argv[0]} node_modules/jsdoc/jsdoc.js`;
+    const jsdoc = `node ${path.join('node_modules', 'jsdoc', 'jsdoc.js')}`;
     const cmd = `${jsdoc} -c ./config/jsdoc.json`;
 
     // Execute JSDoc build command

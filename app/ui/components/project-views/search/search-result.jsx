@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner James Eckstein <james.eckstein@lmco.com>
  *
@@ -18,6 +18,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsdoc/require-jsdoc */
 
+// React modules
 import React from 'react';
 
 /* eslint-enable no-unused-vars */

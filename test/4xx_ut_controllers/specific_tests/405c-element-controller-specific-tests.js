@@ -5,11 +5,12 @@
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description These tests test for specific use cases within the element
  * controller. The tests verify that operations can be done that are more

@@ -5,11 +5,12 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Austin Bieber <austin.j.bieber@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Austin Bieber <austin.j.bieber@lmco.com>
  *
  * @description Defines the MBEE App. Allows MBEE app to be imported by other modules.
  * This app is imported by start.js script which then runs the server.

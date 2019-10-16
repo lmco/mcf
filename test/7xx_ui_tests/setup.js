@@ -5,29 +5,30 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein <james.eckstein@lmco.com>
  *
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description This file creates a fake virtual DOM
  * and configures the enzyme adaptor for UI testing.
  */
-// NPM modules
-const { JSDOM } = require('jsdom');
-const fs = require('fs');
-const path = require('path');
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 
 // Node modules
+const fs = require('fs');
+const path = require('path');
+
+// NPM modules
+const { JSDOM } = require('jsdom');
+import { configure } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 const jquery = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery', 'dist', 'jquery.min.js'), { encoding: 'utf-8' });
 const jqueryUI = fs.readFileSync(path.join(M.root, 'node_modules', 'jquery-ui-dist', 'jquery-ui.min.js'), { encoding: 'utf-8' });
 
 // MBEE modules
 const mbee = fs.readFileSync(path.join(M.root, 'app', 'ui', 'js', 'mbee.js'), { encoding: 'utf-8' });
-const url = 'http://localhost:6233';
+const url = M.config.test.url;
 
 // Simulate window if we're running in Node.js
 if (!global.window && !global.document) {

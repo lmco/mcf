@@ -5,17 +5,17 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
  * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Josh Kaplan
  *
  * @description Defines the MBEE routes mounted at '/'.
  */
 
-// Node modules
+// NPM modules
 const express = require('express');
 const router = express.Router();
 

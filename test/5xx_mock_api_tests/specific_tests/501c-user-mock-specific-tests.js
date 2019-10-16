@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
  * @owner Connor Doyle <connor.p.doyle@lmco.com>
  *
@@ -15,11 +15,13 @@
  * GET, POST, PATCH, and DELETE users.
  */
 
-// NPM modules
-const chai = require('chai');
+// Node modules
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
+
+// NPM modules
+const chai = require('chai');
 
 // MBEE modules
 const UserController = M.require('controllers.user-controller');

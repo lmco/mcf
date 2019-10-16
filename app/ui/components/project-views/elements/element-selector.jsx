@@ -5,11 +5,12 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell <leah.p.delaurell@lmco.com>
  *
  * @description Renders an element selector that has two parts: the selected
  * element and the modal to select an element.
@@ -17,7 +18,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React from 'react';
 import {
   Button,
@@ -29,7 +30,7 @@ import {
   Input
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ElementTree from './element-tree.jsx';
 
 /* eslint-enable no-unused-vars */
