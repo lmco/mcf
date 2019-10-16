@@ -174,7 +174,7 @@ async function rejectInvalidConfigTest() {
   }
 
   // Test rejection if artifact is not defined
-  invalidConfig.server = M.config.server;
+  invalidConfig.test = M.config.test;
   try {
     configUtils.validate(invalidConfig);
   }

@@ -194,18 +194,6 @@ module.exports.validate = function(config) {
     }
   }
 
-  // ----------------------------- Verify Artifact ----------------------------- //
-  test(config, 'artifact', 'object');
-  test(config, 'artifact.strategy', 'string');
-  // Check that the strategy file exists
-  const artStratFiles = fs.readdirSync(path.join(M.root, 'app', 'artifact'))
-  .filter((file) => file === `${config.artifact.strategy}.js`);
-  if (artStratFiles.length === 0) {
-    throw new Error(
-      `Configuration file: Artifact strategy file ${config.artifact.strategy} not found in app/auth directory.`
-    );
-  }
-
   // ----------------------------- Verify log ----------------------------- //
   test(config, 'log', 'object');
   test(config, 'log.level', 'string');
@@ -300,6 +288,18 @@ module.exports.validate = function(config) {
     if (config.validators.user_lname) test(config, 'validators', 'string');
     if (config.validators.user_provider) test(config, 'validators', 'string');
     if (config.validators.url_next) test(config, 'validators', 'string');
+  }
+
+  // ----------------------------- Verify Artifact ----------------------------- //
+  test(config, 'artifact', 'object');
+  test(config, 'artifact.strategy', 'string');
+  // Check that the strategy file exists
+  const artStratFiles = fs.readdirSync(path.join(M.root, 'app', 'artifact'))
+    .filter((file) => file === `${config.artifact.strategy}.js`);
+  if (artStratFiles.length === 0) {
+    throw new Error(
+      `Configuration file: Artifact strategy file ${config.artifact.strategy} not found in app/auth directory.`
+    );
   }
 };
 
