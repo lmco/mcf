@@ -194,9 +194,8 @@ module.exports.validate = function(config) {
     }
   }
   // ----------------------------- Verify Artifact ----------------------------- //
-  if (config.artifact) {
-    test(config, 'artifact.strategy', 'string');
-  }
+  test(config, 'artifact', 'object')
+  test(config, 'artifact.strategy', 'string');
 
   // ----------------------------- Verify log ----------------------------- //
   test(config, 'log', 'object');

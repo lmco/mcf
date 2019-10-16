@@ -20,7 +20,7 @@ const validator = {
   location: '^[^.]+$',
   filename: '^[^!\\<>:"\'|?*]+$',
   // Matches filename + extensions
-  extension: '^[\\w]+[.][\\w]+$[\\w]*\\.[^.]+$'
+  extension: '^[\\w]+[.][\\w]+$'
 };
 
 // Define the root storage path for blobs
@@ -48,7 +48,7 @@ const errors = M.require('lib.errors');
  *
  * @returns {Buffer} Artifact binary.
  */
-function getBlob(artMetadata) {
+function  getBlob(artMetadata) {
   try {
     // Validate metadata
     validateBlobMeta(artMetadata);

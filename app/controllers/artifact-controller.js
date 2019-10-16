@@ -721,36 +721,41 @@ async function remove(requestingUser, organizationID, projectID, branchID,
  */
 async function getBlob(requestingUser, organizationID,
   projectID, artifact, options) {
-  // Ensure input parameters are correct type
-  helper.checkParams(requestingUser, options, organizationID, projectID);
-  helper.checkParamsDataType(['object'], artifact, 'Artifacts');
+  try {
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID);
+    helper.checkParamsDataType(['object'], artifact, 'Artifacts');
 
-  // Sanitize input parameters
-  const reqUser = JSON.parse(JSON.stringify(requestingUser));
-  const saniArt = sani.db(JSON.parse(JSON.stringify(artifact)));
-  const orgID = sani.db(organizationID);
-  const projID = sani.db(projectID);
+    // Sanitize input parameters
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const saniArt = sani.db(JSON.parse(JSON.stringify(artifact)));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
 
-  // Initialize and ensure options are valid
-  const validatedOptions = utils.validateOptions(options, [], Artifact);
+    // Initialize and ensure options are valid
+    const validatedOptions = utils.validateOptions(options, [], Artifact);
 
-  // Find the organization
-  const organization = await helper.findAndValidate(Org, orgID, reqUser,
-    validatedOptions.archived);
+    // Find the organization
+    const organization = await helper.findAndValidate(Org, orgID, reqUser,
+      validatedOptions.archived);
 
-  // Find the project
-  const project = await helper.findAndValidate(Project,
-    utils.createID(orgID, projID), reqUser, validatedOptions.archived);
+    // Find the project
+    const project = await helper.findAndValidate(Project,
+      utils.createID(orgID, projID), reqUser, validatedOptions.archived);
 
-  // Permissions check
-  permissions.readBlob(reqUser, organization, project);
+    // Permissions check
+    permissions.readBlob(reqUser, organization, project);
 
-  // Include org and project id
-  saniArt.project = projID;
-  saniArt.org = orgID;
+    // Include org and project id
+    saniArt.project = projID;
+    saniArt.org = orgID;
 
-  // Include artifact blob in return obj
-  return ArtifactStrategy.getBlob(saniArt);
+    // Include artifact blob in return obj
+    return ArtifactStrategy.getBlob(saniArt);
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 /**

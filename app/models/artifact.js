@@ -159,12 +159,11 @@ ArtifactSchema.static('getValidUpdateFields', function() {
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.method('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project', 'branch'];
 });
 ArtifactSchema.static('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project', 'branch'];
 });
-
 
 /* ----------------------( Artifact Schema Export )---------------------- */
 
