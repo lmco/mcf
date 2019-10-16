@@ -298,7 +298,7 @@ module.exports.validate = function(config) {
   .filter((file) => file === `${config.artifact.strategy}.js`);
   if (artStratFiles.length === 0) {
     throw new Error(
-      `Configuration file: Artifact strategy file ${config.artifact.strategy} not found in app/auth directory.`
+      `Configuration file: Artifact strategy file ${config.artifact.strategy} not found in app/artifact directory.`
     );
   }
 };
