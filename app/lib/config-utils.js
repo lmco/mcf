@@ -295,7 +295,7 @@ module.exports.validate = function(config) {
   test(config, 'artifact.strategy', 'string');
   // Check that the strategy file exists
   const artStratFiles = fs.readdirSync(path.join(M.root, 'app', 'artifact'))
-    .filter((file) => file === `${config.artifact.strategy}.js`);
+  .filter((file) => file === `${config.artifact.strategy}.js`);
   if (artStratFiles.length === 0) {
     throw new Error(
       `Configuration file: Artifact strategy file ${config.artifact.strategy} not found in app/auth directory.`

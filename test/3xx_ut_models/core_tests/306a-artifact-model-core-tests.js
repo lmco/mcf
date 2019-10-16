@@ -212,7 +212,7 @@ async function deleteArtifact() {
  */
 async function getStaticPopFields() {
   const validPopulatedFields = ['archivedBy', 'lastModifiedBy', 'createdBy', 'project',
-  'branch'];
+    'branch'];
   // Verify output
   chai.expect(validPopulatedFields).to.eql(Artifact.getValidPopulateFields());
 }
