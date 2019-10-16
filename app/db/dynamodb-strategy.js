@@ -512,7 +512,10 @@ class Model {
       connect()
       .then((conn) => conn.batchWriteItem(params).promise())
       .then(() => resolve())
-      .catch((error) => reject(error));
+      .catch((error) => {
+        M.log.verbose('Failed in batchWriteItem');
+        return reject(error)
+      });
     });
   }
 
@@ -811,17 +814,11 @@ class Model {
    * operation.
    */
   async deleteMany(conditions, options, cb) {
-    // Create batchWriteObj
-    const batchWriteObj = { RequestItems: {} };
-
-    // Set table and DeleteRequest object
-    batchWriteObj.RequestItems[this.TableName] = [{ DeleteRequest: { Key: {} } }];
-
-    // Format the conditions to align with DynamoDB format
-    batchWriteObj.RequestItems[this.TableName][0].DeleteRequest.Key = this.formatObject(conditions);
+    // Create Query object
+    const query = new Query('deleteMany', this, conditions, null, options);
 
     // Call batchWriteItem
-    await this.batchWriteItem(batchWriteObj, options);
+    await this.batchWriteItem(query.deleteMany(conditions), options);
   }
 
   /**
@@ -1571,6 +1568,28 @@ class Query {
     if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
       baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
     }
+
+    return baseObj;
+  }
+
+  deleteMany(filter) {
+    this.parseRequestItemsKeys(filter);
+
+    // Create batchWriteObj
+    const baseObj = { RequestItems: {} };
+
+    // Set table and DeleteRequest object
+    baseObj.RequestItems[this.model.TableName] = [];
+
+    // Loop over each query parameter
+    this.RequestItemsKeys.forEach((k) => {
+      // Create new delete request for each
+      baseObj.RequestItems[this.model.TableName].push({
+        DeleteRequest: {
+          Key: k
+        }
+      });
+    });
 
     return baseObj;
   }
