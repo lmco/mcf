@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description This file defines the schema strategy for using MBEE with
  * Amazon's DynamoDB.
@@ -42,16 +42,6 @@ async function connect() {
       region: 'US'
     });
     return resolve(dynamoDB);
-    // dynamoDB.listTables({}, function(err, tables) {
-    //   if (err) {
-    //     M.log.error(err);
-    //     return reject(err);
-    //   }
-    //   else {
-    //     console.log(tables);
-    //     return resolve();
-    //   }
-    // })
   });
 }
 
@@ -471,7 +461,6 @@ class Model {
    */
   async batchGetItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      console.log(filter);
       const query = new Query('batchGetItem', this,
         filter, projection, options);
       const queriesToMake = query.query;
@@ -491,6 +480,7 @@ class Model {
             .then((found) => {
               foundDocs = foundDocs.concat(found.Responses[this.TableName]);
             })
+            .catch((e) => console.log(e))
           );
         });
 
@@ -514,6 +504,7 @@ class Model {
       .then((conn) => conn.batchWriteItem(params).promise())
       .then(() => resolve())
       .catch((error) => {
+        console.log(error);
         M.log.verbose('Failed in batchWriteItem');
         return reject(error)
       });
@@ -826,11 +817,24 @@ class Model {
    * operation.
    */
   async deleteMany(conditions, options, cb) {
-    // Create Query object
-    const query = new Query('deleteMany', this, conditions, null, options);
+    const docs = await this.scan(conditions, null, options);
 
-    // Call batchWriteItem
-    await this.batchWriteItem(query.deleteMany(conditions), options);
+    const tmpQuery = { _id: { $in: [] } };
+    // For each of the found documents
+    docs.forEach((doc) => {
+      tmpQuery._id.$in.push(doc._id);
+    });
+
+    const query = new Query('deleteMany', this, conditions, null, options);
+    const deleteQuery = query.deleteMany(tmpQuery);
+
+    // If there are items to delete
+    if (deleteQuery.RequestItems[this.TableName].length > 0) {
+      // Call batchWriteItem
+      await this.batchWriteItem(deleteQuery, options);
+    }
+
+    return { n: tmpQuery._id.$in.length, ok: 1 };
   }
 
   /**
@@ -869,13 +873,12 @@ class Model {
    * any.
    */
   async find(filter, projection, options, cb) {
-    const params = Object.keys(filter);
-    // Find all documents in the table if there are no keys or not every field is indexed
-    if (Object.keys(filter).length === 0 || !params.every(p => this.indexes.includes(p))) {
-      return this.scan(filter, projection, options);
+    // Use batchGetItem only if the only parameter being searched is the _id
+    if (Object.keys(filter).length === 1 && Object.keys(filter)[0] === '_id') {
+      return this.batchGetItem(filter, projection, options);
     }
     else {
-      return this.batchGetItem(filter, projection, options);
+      return this.scan(filter, projection, options);
     }
   }
 
@@ -1169,9 +1172,6 @@ class Model {
       M.log.debug(`DB OPERATION: ${this.TableName} putItem`);
       // Save the document
       this.connection.putItem(putObj).promise()
-      // .then((createdObj) => {
-      //   console.log(createdObj);
-      // })
       .catch((error) => {
         M.log.verbose('Failed in putItem');
         return reject(error)
@@ -1243,14 +1243,16 @@ class Model {
     return new Promise((resolve, reject) => {
       // Create a new DynamoDB query
       const query = new Query('scan', this, filter, projection, options);
-      const queries = query.query;
+      const scanObj = query.scan(filter);
 
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
       connect()
-      .then((conn) => conn.scan(queries[0]).promise())
+      .then((conn) => conn.scan(scanObj).promise())
       .then((data) => resolve(this.formatDocuments(data.Items, options)))
       .catch((error) => {
         M.log.verbose('Failed in scan');
+        console.log(error)
+        console.log(JSON.stringify(scanObj, null, 1));
         return reject(error);
       });
     });
@@ -1350,31 +1352,7 @@ class Query {
     // Parse the projection
     this.parseProjection(projection);
 
-    if (functionName === 'scan') {
-      this.parseFilterExpression(query);
-      const baseObj = {
-        TableName: model.TableName
-      };
-
-      // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-      if (this.ProjectionExpression.length) {
-        baseObj.ProjectionExpression = this.ProjectionExpression;
-      }
-      if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
-        baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
-      }
-
-      // Add on ExpressionAttributeValues and FilterExpression if defined
-      if (this.FilterExpression.length) {
-        baseObj.FilterExpression = this.FilterExpression;
-      }
-      if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
-        baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
-      }
-
-      this.query.push(baseObj);
-    }
-    else if (functionName === 'batchGetItem') {
+    if (functionName === 'batchGetItem') {
       this.parseRequestItemsKeys(query);
 
       const baseObj = { RequestItems: {} };
@@ -1459,25 +1437,27 @@ class Query {
         let filterString = '';
         const arr = Object.values(query[k])[0];
 
-        // Loop over each item in arr
-        for (let i = 0; i < arr.length; i++) {
-          // Add value to ExpressionAttributeValues
-          this.ExpressionAttributeValues[`:${valueKey}${i}`] = { S: arr[i] };
+        if (arr.length > 0) {
+          // Loop over each item in arr
+          for (let i = 0; i < arr.length; i++) {
+            // Add value to ExpressionAttributeValues
+            this.ExpressionAttributeValues[`:${valueKey}${i}`] = { S: arr[i] };
 
-          // If FilterExpression is empty, init it
-          if (!this.FilterExpression && !filterString) {
-            filterString = `( #${keyName} = :${valueKey}${i}`;
+            // If FilterExpression is empty, init it
+            if (!this.FilterExpression && !filterString) {
+              filterString = `( #${keyName} = :${valueKey}${i}`;
+            }
+            else if (!filterString) {
+              filterString = ` AND ( #${keyName} = :${valueKey}${i}`;
+            }
+            else {
+              filterString += ` OR #${keyName} = :${valueKey}${i}`;
+            }
           }
-          else if (!filterString) {
-            filterString = ` AND ( #${keyName} = :${valueKey}${i}`;
-          }
-          else {
-            filterString += ` OR #${keyName} = :${valueKey}${i}`;
-          }
+
+          filterString += ' )';
+          this.FilterExpression += filterString;
         }
-
-        filterString += ' )';
-        this.FilterExpression += filterString;
       }
       else {
         switch (typeof query[k]) {
@@ -1615,6 +1595,35 @@ class Query {
         }
       });
     });
+
+    return baseObj;
+  }
+
+  scan(query) {
+    this.parseFilterExpression(query);
+    const baseObj = {
+      TableName: this.model.TableName
+    };
+
+    // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+    if (this.ProjectionExpression.length) {
+      baseObj.ProjectionExpression = this.ProjectionExpression;
+    }
+    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+    }
+
+    // Add on ExpressionAttributeValues and FilterExpression if defined
+    if (this.FilterExpression.length > 0) {
+      baseObj.FilterExpression = this.FilterExpression;
+    }
+    // If not FilterExpression is defined, remove the ExpressionAttributeNames
+    else if (!baseObj.hasOwnProperty('ProjectionExpression')) {
+      delete baseObj.ExpressionAttributeNames;
+    }
+    if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
+      baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
+    }
 
     return baseObj;
   }

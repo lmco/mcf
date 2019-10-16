@@ -933,21 +933,18 @@ async function remove(requestingUser, orgs, options) {
         throw new M.OperationError('The default organization cannot be deleted.', 'warn');
       }
     });
-    console.log('Finding projects')
+
     // Find all projects to delete
     const projectsToDelete = await Project.find({ org: { $in: searchedIDs } },
       null, { lean: true });
 
     const projectIDs = projectsToDelete.map(p => p._id);
-    console.log('Delete Elements')
+
     // Delete any elements in the found projects
     await Element.deleteMany({ project: { $in: projectIDs } });
-    console.log('Delete Branches')
     // Delete any branches in the found projects
     await Branch.deleteMany({ project: { $in: projectIDs } });
-    console.log('Delete Projects')
     // Delete any projects in the org
-    console.log('Delete Orgs')
     await Project.deleteMany({ org: { $in: searchedIDs } });
     // Delete the orgs
     const retQuery = await Organization.deleteMany(searchQuery);
