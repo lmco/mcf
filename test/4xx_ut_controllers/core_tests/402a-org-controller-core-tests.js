@@ -425,7 +425,6 @@ function findAllOrgs(done) {
       }
       // Special case for default org since it has no custom data
       else {
-        chai.expect(foundOrg.id).to.equal(orgDataObject.id);
         chai.expect(foundOrg._id).to.equal(orgDataObject.id);
         chai.expect(foundOrg.name).to.equal(orgDataObject.name);
       }
