@@ -17,3 +17,4 @@ package-lock.json
 .idea/
 build/
 data/
+storage/

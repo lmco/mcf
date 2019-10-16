@@ -35,6 +35,7 @@ const fs = require('fs');
 const path = require('path');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
@@ -48,6 +49,7 @@ const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -721,7 +723,7 @@ async function update(requestingUser, organizationID, projects, options) {
       // Error Check: if proj is currently archived, it must first be unarchived
       if (proj.archived && (updateProj.archived === undefined
         || JSON.parse(updateProj.archived) !== false)) {
-        throw new M.OperationError(`Project [${proj._id}] is archived. `
+        throw new M.OperationError(`Project [${utils.parseID(proj._id).pop()}] is archived. `
           + 'Archived objects cannot be modified.', 'warn');
       }
 
@@ -1237,6 +1239,17 @@ async function remove(requestingUser, organizationID, projects, options) {
 
     // Delete any elements in the project
     await Element.deleteMany(ownedQuery);
+
+    // Delete any artifacts in the projects
+    await Artifact.deleteMany(ownedQuery);
+
+    // Remove all blobs under project
+    foundProjectIDs.forEach((p) => {
+      ArtifactStrategy.clear({
+        orgID: orgID,
+        projectID: utils.parseID(p).pop()
+      });
+    });
 
     // Delete any branches in the project
     await Branch.deleteMany(ownedQuery);
