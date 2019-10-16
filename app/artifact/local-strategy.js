@@ -23,6 +23,9 @@ const validator = {
   extension: '^[\\w]+[.][\\w]+$[\\w]*\\.[^.]+$'
 };
 
+// Define the root storage path for blobs
+const rootStoragePath = '/storage';
+
 // Node modules
 const path = require('path');    // Find directory paths
 const fs = require('fs');        // Access the filesystem
@@ -143,7 +146,7 @@ function deleteBlob(artMetadata) {
     validateBlobMeta(artMetadata);
 
     // Create directory path
-    const projDirPath = path.join(M.root, M.config.artifact.path,
+    const projDirPath = path.join(M.root, rootStoragePath,
       artMetadata.org, artMetadata.project);
 
     // Create artifact path
@@ -197,7 +200,7 @@ function createDirectory(pathString) {
   }
 
   // Create the root artifact path
-  const rootDir = path.join(M.root, M.config.artifact.path);
+  const rootDir = path.join(M.root, rootStoragePath);
   // Define a running path
   let runningPath = '';
 
@@ -237,7 +240,7 @@ function createDirectory(pathString) {
  */
 function deleteDirectory(pathString) {
   // Create the root artifact path
-  const dirToDelete = path.join(M.root, M.config.artifact.path, pathString);
+  const dirToDelete = path.join(M.root, rootStoragePath, pathString);
 
   // Remove artifacts
   const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
@@ -259,7 +262,7 @@ function createBlobPath(artMetadata) {
   let location = artMetadata.location;
 
   // Get root artifact path
-  const artRootPath = path.join(M.root, M.config.artifact.path);
+  const artRootPath = path.join(M.root, rootStoragePath);
 
   // Get org id
   const orgID = utils.parseID(artMetadata.org).pop();

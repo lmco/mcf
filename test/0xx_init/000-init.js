@@ -155,7 +155,7 @@ async function createDefaultOrg() {
  * @description Clears the local artifact storage folder.
  */
 function clearArtifactStorage() {
-  const artifactPath = path.join(M.root, M.config.artifact.path);
+  const artifactPath = path.join(M.root, '/storage');
   // Remove artifacts
   const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
   execSync(`${rmd} ${artifactPath}/*`);

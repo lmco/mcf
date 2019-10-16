@@ -87,7 +87,7 @@ async function postBlob() {
     const concatenName = artData.location.replace(/\//g, '.') + artData.filename;
 
     // Create artifact path
-    const filePath = path.join(M.root, M.config.artifact.path, org.id,
+    const filePath = path.join(M.root, '/storage', org.id,
       project.id, concatenName);
 
     // Check file was posted
