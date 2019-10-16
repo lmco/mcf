@@ -20,7 +20,6 @@
 const chai = require('chai');
 
 // Node modules
-const path = require('path'); // Find directory paths
 const chaiAsPromised = require('chai-as-promised');
 
 // Use async chai
@@ -96,7 +95,6 @@ async function createArtifact() {
   const artifact = Artifact.createDocument({
     _id: utils.createID(org.id, project.id, branch.id, artData.id),
     filename: artData.filename,
-    contentType: path.extname(artData.filename),
     project: utils.createID(org.id, project.id),
     branch: utils.createID(org.id, project.id, branch.id),
     location: artData.location,
@@ -114,9 +112,6 @@ async function createArtifact() {
     );
     chai.expect(createdArtifact.filename).to.equal(
       artData.filename
-    );
-    chai.expect(createdArtifact.contentType).to.equal(
-      path.extname(artData.filename)
     );
     chai.expect(createdArtifact.project).to.equal(
       utils.createID(org.id, project.id)
@@ -177,10 +172,6 @@ async function updateArtifact() {
       utils.createID(org.id, project.id, branch.id, artData.id)
     );
     chai.expect(foundArtifact.filename).to.equal('Updated Name');
-    chai.expect(foundArtifact.contentType).to.equal(
-      path.extname(artData.filename)
-    );
-
     chai.expect(foundArtifact.project).to.equal(
       utils.createID(org.id, project.id)
     );

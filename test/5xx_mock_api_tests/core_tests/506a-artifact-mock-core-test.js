@@ -117,7 +117,10 @@ function postArtifact(done) {
     id: artData.id,
     name: artData.name,
     filename: artData.filename,
+<<<<<<< HEAD
     contentType: artData.contentType,
+=======
+>>>>>>> 7861b54a038e3b00e3c5828c1f9b9572a96b3851
     location: artData.location,
     custom: artData.custom
   };
@@ -151,7 +154,10 @@ function postArtifact(done) {
     chai.expect(createdArtifact.org).to.equal(orgID);
     chai.expect(createdArtifact.location).to.equal(artData.location);
     chai.expect(createdArtifact.filename).to.equal(artData.filename);
+<<<<<<< HEAD
     chai.expect(createdArtifact.contentType).to.equal(artData.contentType);
+=======
+>>>>>>> 7861b54a038e3b00e3c5828c1f9b9572a96b3851
     chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
       artData.custom
@@ -220,7 +226,10 @@ function getArtifact(done) {
     chai.expect(foundArtifact.org).to.equal(orgID);
     chai.expect(foundArtifact.location).to.equal(artData.location);
     chai.expect(foundArtifact.filename).to.equal(artData.filename);
+<<<<<<< HEAD
     chai.expect(foundArtifact.contentType).to.equal(artData.contentType);
+=======
+>>>>>>> 7861b54a038e3b00e3c5828c1f9b9572a96b3851
     chai.expect(foundArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(foundArtifact.custom || {}).to.deep.equal(
       artData.custom
@@ -275,8 +284,6 @@ function postBlob(done) {
   // Attach the file to request
   const artifactPath = path.join(M.root, artData.location, artData.filename);
   req.file = {
-    originalname: artData.filename,
-    mimetype: artData.contentType,
     buffer: fs.readFileSync(artifactPath)
   };
 
@@ -462,7 +469,7 @@ function patchArtifact(done) {
 
   // Create request body
   const body = {
-    contentType: 'edited_type'
+    name: 'edited_name'
   };
 
   // Create request params
@@ -489,13 +496,16 @@ function patchArtifact(done) {
 
     // Verify artifact created properly
     chai.expect(updatedArtifact.id).to.equal(artData.id);
-    chai.expect(updatedArtifact.name).to.equal(artData.name);
+    chai.expect(updatedArtifact.name).to.equal('edited_name');
     chai.expect(updatedArtifact.project).to.equal(projID);
     chai.expect(updatedArtifact.branch).to.equal(branchID);
     chai.expect(updatedArtifact.org).to.equal(orgID);
     chai.expect(updatedArtifact.location).to.equal(artData.location);
     chai.expect(updatedArtifact.filename).to.equal(artData.filename);
+<<<<<<< HEAD
     chai.expect(updatedArtifact.contentType).to.equal('edited_type');
+=======
+>>>>>>> 7861b54a038e3b00e3c5828c1f9b9572a96b3851
     chai.expect(updatedArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(updatedArtifact.custom || {}).to.deep.equal(
       artData.custom

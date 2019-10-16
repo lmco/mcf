@@ -15,18 +15,15 @@
  * artifact storage. This should be the default artifact strategy for MBEE.
  */
 
-// Expose artifact strategy functions
-// Note: The export is being done before the import to solve the issues of
-// circular references.
-module.exports = {
-  getBlob,
-  postBlob,
-  putBlob,
-  deleteBlob,
-  clear
+// Validator regex for this strategy
+const validator = {
+  location: '^[^.]+$',
+  filename: '^[^!\\<>:"\'|?*]+$',
+  // Matches filename + extensions
+  extension: '^[\\w]+[.][\\w]+$[\\w]*\\.[^.]+$'
 };
 
-// Node.js Modules
+// Node modules
 const path = require('path');    // Find directory paths
 const fs = require('fs');        // Access the filesystem
 const assert = require('assert');
@@ -35,12 +32,6 @@ const { execSync } = require('child_process');
 // MBEE modules
 const utils = M.require('lib.utils');
 const errors = M.require('lib.errors');
-
-// Validator regex for this strategy
-module.exports.validatorReg = {
-  location: '[.]',
-  filename: '[!\\<>:"\'|?*]'
-};
 
 /**
  * @description This function gets the artifact blob file
@@ -126,8 +117,13 @@ function putBlob(artMetadata, artifactBlob) {
     fs.writeFileSync(fullPath, artifactBlob);
   }
   catch (error) {
+    M.log.error(error);
+    // If the error is a custom error, throw it
+    if ((error instanceof errors.CustomError)) {
+      throw error;
+    }
     // Error occurred, log it
-    throw new M.DataFormatError('Could not create Artifact blob.', 'warn');
+    throw new M.ServerError('Could not create Artifact blob.', 'warn');
   }
 }
 
@@ -168,7 +164,7 @@ function deleteBlob(artMetadata) {
   }
   catch (error) {
     if (error.code === 'ENOENT') {
-      throw new M.OperationError('Artifact Blob not found.', 'warn');
+      throw new M.NotFoundError('Artifact Blob not found.', 'warn');
     }
     throw new M.OperationError('Could not delete Blob.', 'warn');
   }
@@ -245,7 +241,7 @@ function deleteDirectory(pathString) {
 
   // Remove artifacts
   const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
-  execSync(`${rmd} ${dirToDelete}/*`);
+  execSync(`${rmd} ${dirToDelete}`);
 }
 
 /**
@@ -259,6 +255,9 @@ function deleteDirectory(pathString) {
  * @returns {string} BlobPath - The blob file path.
  */
 function createBlobPath(artMetadata) {
+  // defined blob location
+  let location = artMetadata.location;
+
   // Get root artifact path
   const artRootPath = path.join(M.root, M.config.artifact.path);
 
@@ -268,8 +267,19 @@ function createBlobPath(artMetadata) {
   // Get project id
   const projID = utils.parseID(artMetadata.project).pop();
 
+  // Ensure location ends with separator if not present
+  if (location[location.length - 1] !== path.sep) {
+    // Add separator for location and filename
+    location += path.sep;
+  }
+
+  // Remove os separator with periods
+  const convertedLocation = location.replace(
+    new RegExp(`\\${path.sep}`, 'g'), '.'
+  );
+
   // Form the blob name, location concat with filename
-  const concatenName = artMetadata.location.replace(/\//g, '.') + artMetadata.filename;
+  const concatenName = convertedLocation + artMetadata.filename;
 
   // Form complete path
   const blobPath = path.join(artRootPath, orgID, projID, concatenName);
@@ -298,12 +308,15 @@ function validateBlobMeta(artMetadata) {
         + ` ${field} field.`);
     });
 
-    // Ensure no '.' in location field
-    assert.ok(!artMetadata.location.includes('.'),
-      'Location field cannot include \'.\'.');
+    assert.ok((RegExp(validator.filename).test(artMetadata.filename)
+      && !RegExp(validator.extension).test(artMetadata.filename)),
+    `Artifact filename [${artMetadata.filename}] is improperly formatted.`);
+
+    assert.ok(RegExp(validator.location).test(artMetadata.location),
+      `Artifact location [${artMetadata.location}] is improperly formatted.`);
   }
   catch (error) {
-    throw errors.captureError(error);
+    throw new M.DataFormatError(error.message, 'warn');
   }
 }
 
@@ -317,12 +330,11 @@ function clear(clearObj) {
   // Check if project id is defined
   if (clearObj.hasOwnProperty('projectID')) {
     // Create the Project path
-    dirPath = path.join(M.root, M.config.artifact.path,
-      clearObj.orgID, clearObj.projectID);
+    dirPath = path.join(clearObj.orgID, clearObj.projectID);
   }
   else if (clearObj.hasOwnProperty('orgID')) {
     // Create the Org path
-    dirPath = path.join(M.root, M.config.artifact.path, clearObj.orgID);
+    dirPath = path.join(clearObj.orgID);
   }
   else {
     // Skip deletion
@@ -332,3 +344,13 @@ function clear(clearObj) {
   // Delete the org directory
   deleteDirectory(dirPath);
 }
+
+// Expose artifact strategy functions
+module.exports = {
+  getBlob,
+  postBlob,
+  putBlob,
+  deleteBlob,
+  clear,
+  validator
+};

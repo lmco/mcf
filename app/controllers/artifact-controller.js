@@ -1,5 +1,5 @@
 /**
- * Classification: UNCLASSIFIED.
+ * @classification UNCLASSIFIED
  *
  * @module controllers.artifact-controller
  *
@@ -29,7 +29,7 @@ module.exports = {
   deleteBlob
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 
 // MBEE modules
@@ -62,10 +62,6 @@ if (!ArtifactStrategy.hasOwnProperty('deleteBlob')) {
 }
 if (!ArtifactStrategy.hasOwnProperty('clear')) {
   M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement clear.`);
-  process.exit(0);
-}
-if (!ArtifactStrategy.hasOwnProperty('validatorReg')) {
-  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement validatorReg.`);
   process.exit(0);
 }
 
@@ -144,7 +140,7 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
-    const validSearchOptions = ['filename', 'contentType', 'name',
+    const validSearchOptions = ['filename', 'name',
       'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
@@ -226,7 +222,6 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
  * @param {string} artifacts.id - The ID of the artifact being created.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
- * @param {string} [artifacts.contentType] - File blob type.
  * @param {string} [artifacts.location] - The file blob location.
  * @param {object} [artifacts.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
@@ -324,7 +319,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
         // Ensure each art has an id and that its a string
         assert.ok(artifact.hasOwnProperty('id'), `Artifact #${index} does not have an id.`);
         assert.ok(typeof artifact.id === 'string', `Artifact #${index}'s id is not a string.`);
-        artifact.id = utils.createID(orgID, projID, branchID, artifact.id);
+        artifact.id = utils.createID(orgID, projID, branID, artifact.id);
         // Check if art with same ID is already being created
         assert.ok(!arrIDs.includes(artifact.id), 'Multiple artifacts with the same ID '
           + `[${artifact.id}] cannot be created.`);
@@ -348,7 +343,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
     // Ensure no artifacts were found
     if (existingArtifact.length > 0) {
       // Get array of found artifact's IDs
-      const foundArtifactID = existingArtifact.map(a => a._id);
+      const foundArtifactID = existingArtifact.map(a => utils.parseID(a._id).pop());
 
       throw new M.OperationError('Artifacts with the following IDs already exist'
         + ` [${foundArtifactID.toString()}].`, 'warn');
@@ -363,7 +358,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
       artObj.createdBy = reqUser._id;
       artObj.updatedOn = Date.now();
       artObj.archivedBy = (a.archived) ? reqUser._id : null;
-      artObj.archivedOn = (artObj.archived) ? Date.now() : null;
+      artObj.archivedOn = (a.archived) ? Date.now() : null;
 
       return artObj;
     });
@@ -397,7 +392,6 @@ async function create(requestingUser, organizationID, projectID, branchID,
  * @param {string} artifacts.id - The ID of the artifact being updated.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
- * @param {string} [artifacts.contentType] - File blob type.
  * @param {string} [artifacts.location] - The file blob location.
  * @param {string} [artifacts.archived = false] - The updated archived field. If true,
  * the artifact will not be able to be found until unarchived.
@@ -496,10 +490,10 @@ async function update(requestingUser, organizationID, projectID, branchID,
         // Ensure each art has an id and that its a string
         assert.ok(art.hasOwnProperty('id'), `Artifact #${index} does not have an id.`);
         assert.ok(typeof art.id === 'string', `Artifact #${index}'s id is not a string.`);
+        art.id = utils.createID(orgID, projID, branID, art.id);
         // Check if art with same ID is already being updated
         assert.ok(!arrIDs.includes(art.id), 'Multiple artifacts with the same ID '
           + `[${art.id}] cannot be updated.`);
-        art.id = utils.createID(orgID, projID, branchID, art.id);
         arrIDs.push(art.id);
         // Set the _id equal to the id
         art._id = art.id;
@@ -518,7 +512,8 @@ async function update(requestingUser, organizationID, projectID, branchID,
     // Verify the same number of artifacts are found as desired
     if (foundArtifact.length !== arrIDs.length) {
       const foundIDs = foundArtifact.map(a => a._id);
-      const notFound = arrIDs.filter(a => !foundIDs.includes(a));
+      const notFound = arrIDs.filter(a => !foundIDs.includes(a))
+      .map(a => utils.parseID(a).pop());
       throw new M.NotFoundError(
         `The following artifacts were not found: [${notFound.toString()}].`, 'warn'
       );
@@ -540,7 +535,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
       // Error Check: if artifact currently archived, they must first be unarchived
       if (art.archived && (updateArtifact.archived === undefined
         || JSON.parse(updateArtifact.archived) !== false)) {
-        throw new M.OperationError(`Artifact [${art._id}] is archived. `
+        throw new M.OperationError(`Artifact [${utils.parseID(art._id).pop()}] is archived. `
           + 'Archived objects cannot be modified.', 'warn');
       }
 
@@ -561,7 +556,25 @@ async function update(requestingUser, organizationID, projectID, branchID,
             );
           }
         }
+
+        // Set archivedBy if archived field is being changed
+        if (key === 'archived') {
+          // If the artifact is being archived
+          if (updateArtifact[key] && !art[key]) {
+            updateArtifact.archivedBy = reqUser._id;
+            updateArtifact.archivedOn = Date.now();
+          }
+          // If the artifact is being unarchived
+          else if (!updateArtifact[key] && art[key]) {
+            updateArtifact.archivedBy = null;
+            updateArtifact.archivedOn = null;
+          }
+        }
       });
+
+      // Update lastModifiedBy field and updatedOn
+      updateArtifact.lastModifiedBy = reqUser._id;
+      updateArtifact.updatedOn = Date.now();
 
       // Update the artifact
       bulkArray.push({
@@ -666,23 +679,23 @@ async function remove(requestingUser, organizationID, projectID, branchID,
     // Find the artifacts to delete
     const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } },
       null, { lean: true });
-    const foundArtifactIDs = foundArtifacts.map(e => e._id);
-    await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } });
-    const uniqueIDsObj = {};
+    const foundArtifactIDs = foundArtifacts.map(a => a._id);
 
-    // Parse foundIDs and only return unique ones
-    foundArtifactIDs.forEach((id) => {
-      if (!uniqueIDsObj[id]) {
-        uniqueIDsObj[id] = id;
-      }
-    });
-    const uniqueIDs = Object.keys(uniqueIDsObj);
+    // Check if all artifacts were found
+    const notFoundIDs = artifactsToFind.filter(a => !foundArtifactIDs.includes(a));
+    // Some artifacts not found, throw an error
+    if (notFoundIDs.length > 0) {
+      throw new M.NotFoundError('The following artifacts were not found: '
+        + `[${notFoundIDs.map(a => utils.parseID(a).pop())}].`, 'warn');
+    }
+    // Delete the artifacts
+    await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } });
 
     // Emit the event artifacts-deleted
     EventEmitter.emit('artifacts-deleted', foundArtifacts);
 
-    // Return unique IDs of elements deleted
-    return (uniqueIDs);
+    // Return unique IDs of artifacts deleted
+    return foundArtifactIDs;
   }
   catch (error) {
     throw errors.captureError(error);
@@ -702,12 +715,12 @@ async function remove(requestingUser, organizationID, projectID, branchID,
  * and storing the artifact blob.
  * @param {string} [artifact.filename] - The filename of the artifact.
  * @param {string} [artifact.location] - The location of the artifact.
+ * @param {object} [options] - A parameter that provides supported options.
  *
  * @returns {Promise<Buffer>} Artifact Blob object.
  */
 async function getBlob(requestingUser, organizationID,
-  projectID, artifact) {
-  let options;
+  projectID, artifact, options) {
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID);
   helper.checkParamsDataType(['object'], artifact, 'Artifacts');
@@ -754,14 +767,14 @@ async function getBlob(requestingUser, organizationID,
  * @param {string} [artifact.filename] - The filename of the artifact.
  * @param {string} [artifact.location] - The location of the artifact.
  * @param {Buffer} artifactBlob - A binary large object artifact.
+ * @param {object} [options] - A parameter that provides supported options.
  *
  * @returns {Promise<object>} Artifact object that contains location, filename,
  * and project.
  */
 async function postBlob(requestingUser, organizationID,
-  projectID, artifact, artifactBlob) {
+  projectID, artifact, artifactBlob, options) {
   try {
-    let options;
     // Ensure artifact blob is buffer type
     if (Buffer.isBuffer(artifactBlob) === false) {
       throw new M.DataFormatError('Artifact blob must be a file.', 'warn');
@@ -819,15 +832,14 @@ async function postBlob(requestingUser, organizationID,
  * and storing the artifact blob.
  * @param {string} [artifact.filename] - The filename of the artifact.
  * @param {string} [artifact.location] - The location of the artifact.
+ * @param {object} [options] - A parameter that provides supported options.
  *
  * @returns {Promise<object>} Artifact object that contains location, filename,
  * and project.
  */
 async function deleteBlob(requestingUser, organizationID, projectID,
-  artifact) {
+  artifact, options) {
   try {
-    let options;
-
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options, organizationID, projectID);
     helper.checkParamsDataType('object', artifact, 'Artifacts');
