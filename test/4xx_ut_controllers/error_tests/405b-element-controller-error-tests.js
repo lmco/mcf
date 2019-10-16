@@ -73,13 +73,13 @@ describe(M.getModuleName(module.filename), () => {
     .then((retProj) => {
       // Set global project
       proj = retProj;
-      projID = utils.parseID(proj.id).pop();
+      projID = utils.parseID(proj._id).pop();
       branchID = testData.branches[0].id;
 
       return testUtils.createTag(adminUser, org._id, projID);
     })
     .then((tag) => {
-      tagID = utils.parseID(tag.id).pop();
+      tagID = utils.parseID(tag._id).pop();
 
       const elemDataObjects = [
         testData.elements[1],
