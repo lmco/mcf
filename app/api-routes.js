@@ -4907,6 +4907,33 @@ api.route('/users/:username/password')
   APIController.patchPassword
 );
 
+api.route('/webhooks')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getWebhook
+);
+
+api.route('/webhooks')
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.postWebhook
+);
+
+api.route('/webhooks')
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchWebhook
+);
+
+api.route('/webhooks')
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteWebhook
+);
 
 // Catches any invalid api route not defined above.
 api.use('*', APIController.invalidRoute);

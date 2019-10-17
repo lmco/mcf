@@ -275,6 +275,10 @@ module.exports.validateOptions = function(options, validOptions, model) {
       validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
         'lastModifiedBy', 'archived', 'archivedBy'];
       break;
+    case 'Webhook':
+      validSearchOptions = ['name', 'org', 'project', 'branch', 'createdBy',
+        'lastModifiedBy', 'archived', 'archivedBy'];
+      break;
     default:
       throw new M.DataFormatError('No model provided', 'warn');
   }

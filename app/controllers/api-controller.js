@@ -35,6 +35,7 @@ const BranchController = M.require('controllers.branch-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const WebhookController = M.require('controllers.webhook-controller');
 const errors = M.require('lib.errors');
 const jmi = M.require('lib.jmi-conversions');
 const logger = M.require('lib.logger');
@@ -101,6 +102,10 @@ module.exports = {
   patchBranch,
   postBranch,
   deleteBranch,
+  getWebhook,
+  postWebhook,
+  patchWebhook,
+  deleteWebhook,
   invalidRoute
 };
 
@@ -4781,6 +4786,206 @@ async function deleteBranch(req, res) {
     const json = formatJSON(parsedIDs, minified);
 
     // Return 200: OK and the deleted branch ID
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+async function getWebhook(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  try {
+    const hook = WebhookController.find(req.user, req.body, options);
+
+    // Format JSON
+    const json = formatJSON(hook, minified);
+
+    // Return 200: OK and the found webhook
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+async function postWebhook(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  try {
+    const hook = WebhookController.create(req.user, req.body, options);
+
+    // Format JSON
+    const json = formatJSON(hook, minified);
+
+    // Return 200: OK and the created webhook
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+async function patchWebhook(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  try {
+    const hook = WebhookController.update(req.user, req.body, options);
+
+    // Format JSON
+    const json = formatJSON(hook, minified);
+
+    // Return 200: OK and the updated webhook
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+async function deleteWebhook(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  try {
+    const hook = WebhookController.remove(req.user, req.body, options);
+
+    // Format JSON
+    const json = formatJSON(hook, minified);
+
+    // Return 200: OK and the deleted webhook
     return returnResponse(req, res, json, 200);
   }
   catch (error) {

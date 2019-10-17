@@ -33,7 +33,8 @@ const idLength = customValidators.id_length || 36;
 const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
-  'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous'];
+  'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
+  'server'];
 
 /**
  * @description Regular Expressions to validate organization data.
@@ -162,6 +163,28 @@ const user = {
   }
 };
 
+
+/**
+ * @description Regular Expressions to validate webhook data
+ *
+ * id:
+ *   - MUST start with a lowercase letter, number or '_'
+ *   - MUST only include lowercase letters, numbers, '_' or '-'
+ *   - each segment MUST be of length 1 or more
+ *   Examples:
+ *      - orgid:projid:branchid:webhookid [valid]
+ *      - orgid:projid:branchid:my-webhook [valid]
+ *      - orgid:projid:branchid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *      - orgid:projid:branchid:-webhook [invalid - must start with a letter or a number]
+ *      - orgid:projid:branchid:myWebhook [invalid - cannot use uppercase characters]
+ *      - my-webhook [invalid - must contain org, proj, and branch segments]
+ */
+const webhook = {
+  id: customValidators.webhook_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  idLength: branch.idLength + utils.ID_DELIMITER.length
+    + (customValidators.webhook_id_length ? customValidators.webhook_id_length : idLength)
+};
+
 /**
  * @description Regular Expressions to validate url data
  *
@@ -185,5 +208,6 @@ module.exports = {
   artifact,
   element,
   user,
+  webhook,
   url
 };

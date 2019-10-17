@@ -39,6 +39,7 @@ const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
+const { registerWebhooks } = M.require('lib.register-webhooks');
 
 // Initialize express app and export the object
 const app = express();
@@ -53,6 +54,7 @@ db.connect()
 .then(() => migrate.getSchemaVersion())
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
+.then(() => registerWebhooks())
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);

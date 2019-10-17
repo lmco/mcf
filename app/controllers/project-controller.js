@@ -315,7 +315,6 @@ async function create(requestingUser, organizationID, projects, options) {
     const orgID = sani.db(organizationID);
     const saniProjects = sani.db(JSON.parse(JSON.stringify(projects)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    let projObjects = [];
 
     // Initialize and ensure options are valid
     const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
@@ -352,7 +351,7 @@ async function create(requestingUser, organizationID, projects, options) {
           assert.ok(validProjKeys.includes(k), `Invalid key [${k}].`);
         });
 
-        // Ensure each project has an id and that its a string
+        // Ensure each project has an id and that it's a string
         assert.ok(proj.hasOwnProperty('id'), `Project #${index} does not have an id.`);
         assert.ok(typeof proj.id === 'string', `Project #${index}'s id is not a string.`);
         proj.id = utils.createID(orgID, proj.id);
@@ -404,7 +403,7 @@ async function create(requestingUser, organizationID, projects, options) {
     const foundUsernames = foundUsers.map(u => u._id);
     const promises = [];
     // For each object of project data, create the project object
-    projObjects = projectsToCreate.map((p) => {
+    const projObjects = projectsToCreate.map((p) => {
       const projObj = Project.createDocument(p);
       // Set org
       projObj.org = orgID;
