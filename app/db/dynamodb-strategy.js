@@ -22,10 +22,8 @@ const DynamoDBStore = require('dynamodb-store');
 // MBEE modules
 const utils = M.require('lib.utils');
 
-// Define enhancedQueries
-const enhancedQueries = {
-  regex: true
-};
+// Define a function wide variable models, which stores each model
+const models = {};
 
 /**
  * @description Creates the connection to the DynamoDB instance.
@@ -92,6 +90,7 @@ class Schema {
       GlobalSecondaryIndexes: []
     };
     this.definition = definition;
+    this.definition.populate = {};
     this.add(definition);
 
     this.definition.hooks = { pre: [], post: [] };
@@ -127,7 +126,7 @@ class Schema {
         case 'Date': this.definition[key].type = 'N'; break;
         case 'BOOL':
         case 'Boolean': this.definition[key].type = 'BOOL'; break;
-        default: this.definition[key].type = 'S'; break;
+        default: break;
       }
 
       // Handle indexes
@@ -154,6 +153,17 @@ class Schema {
           }
         };
         this.schema.GlobalSecondaryIndexes.push(indexObj);
+      }
+
+      // Handle references
+      if (obj[key].ref) {
+        // Add reference object to populate
+        this.definition.populate[key] = {
+          ref: obj[key].ref,
+          localField: key,
+          foreignField: '_id',
+          justOne: true
+        };
       }
     });
   }
@@ -228,8 +238,12 @@ class Schema {
    * documents.
    */
   virtual(name, options) {
-    // return super.virtual(name, options);
+    // Add virtual to populate object
+    this.definition.populate[name] = options;
+    // Remove default, it's not needed
+    delete this.definition.populate[name].default;
   }
+
 
   /**
    * @description Adds a static method to the schema. This method should later
@@ -282,6 +296,7 @@ class Model {
    * database, if not provided the name should be used.
    */
   constructor(name, schema, collection) {
+    console.log(schema.definition.populate)
     this.schema = schema.schema;
     this.definition = schema.definition;
     this.TableName = collection;
@@ -303,8 +318,6 @@ class Model {
   /**
    * @description Creates a table if it does not already exist in the database.
    * @async
-   *
-   * @returns {Promise<void>}
    */
   async init() {
     // Create connection to the database
@@ -315,6 +328,9 @@ class Model {
     if (!tables.TableNames.includes(this.TableName)) {
       await this.createTable();
     }
+
+    // Add the model to the file-wide model object
+    models[this.TableName] = this;
   }
 
   /**
@@ -1632,7 +1648,6 @@ class Query {
 
 // Export different classes and functions
 module.exports = {
-  enhancedQueries,
   connect,
   disconnect,
   clear,
