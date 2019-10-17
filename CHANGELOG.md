@@ -19,9 +19,9 @@ All notable changes to this project will be documented in this file.
   
 ### Bug Fixes and Other Changes
 * Added pages for viewing all organizations and projects in the admin console
-* Added rootpath option to GET `/element` which returns all parents of the
-  specified element up through the root
-* Added support for disbaling the patch user password API endpoint
+* Added rootpath option to GET `/elements/:elementid` which returns all parents
+  of the specified element up through the root
+* Added support for disabling the patch user password API endpoint
 * Increased test coverage with addition of 8xx system level tests
 * Added support for locking out local users after 5 failed logins in 15 minutes.
   Users become archived, and must be unarchived by admins
@@ -32,7 +32,7 @@ All notable changes to this project will be documented in this file.
 ### Configuration Changes
 * Added the **required** field `db.strategy` whose value is a string, the name
   of the selected strategy. Please note that each strategy will have its own
-  required fields in the `db` section.
+  required fields in the `db` section
 ```json
 {
   "db": {
@@ -42,7 +42,7 @@ All notable changes to this project will be documented in this file.
 ```
 * Added the **required** section `artifact` which contains a single **required**
   field `artifact.strategy`, whose value is a string, the name of the selected
-  strategy.
+  strategy
 ```json
 {
   "artifact": {
@@ -50,11 +50,11 @@ All notable changes to this project will be documented in this file.
   }
 }
 ```
-* Added the optional validator `artifact_id` to the `validators` section.
+* Added the optional validator `artifact_id` to the `validators` section
 * Changed the name of the optional field `docker.mongo` to `docker.db`. If this
   field exists, it must be changed
 * Added optional length validators to the `validators` sections. These lengths
-  are the MAX length of the ids.
+  are the MAX length of the ids
 ```json
 {
   "validators": {
