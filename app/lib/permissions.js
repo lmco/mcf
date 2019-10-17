@@ -7,11 +7,11 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
  * @author Josh Kaplan
- * @author James Eckstein <james.eckstein@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author James Eckstein
+ * @author Phillip Lee
  *
  * @description Provides permission lookup capabilities for MBEE actions.
  */

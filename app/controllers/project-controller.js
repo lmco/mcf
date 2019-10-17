@@ -7,12 +7,12 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
  * @author Josh Kaplan
  * @author Jake Ursetta
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Austin Bieber
+ * @author Connor Doyle
  *
  * @description Provides an abstraction layer on top of the Project model that
  * implements controller logic and behavior for Projects.

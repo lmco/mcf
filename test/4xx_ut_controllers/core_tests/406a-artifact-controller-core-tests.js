@@ -5,9 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @owner Connor Doyle
+ *
+ * @author Phillip Lee
  *
  * @description This tests the Artifact Controller functionality.
  */

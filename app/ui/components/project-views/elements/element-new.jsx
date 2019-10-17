@@ -7,7 +7,7 @@
  *
  * @license MIT
  *
- * @owner James Eckstein <james.eckstein@lmco.com>
+ * @owner James Eckstein
  *
  * @author Josh Kaplan
  *
