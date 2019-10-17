@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 * Increased linter coverage by adding rules for JSDoc headers
 * Removed usage of $or and $regex in database queries to aid in implementation
   of different database strategies
+* Removed organization and project pages from the profile page on the UI
   
 ### Configuration Changes
 * Added the **required** field `db.strategy` whose value is a string, the name
