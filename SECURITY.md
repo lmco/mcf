@@ -100,12 +100,6 @@ is selected more than once for the advanced search, only the first value is
 searched. For example, if searching by type `class` and by the type `block`,
 only the `class` results would be found.
 
-#### Windows Compatibility
-At this point there are still some compatibility issues with windows. The
-`package.json` includes post/pre install scripts that use linux specific
-commands, as does the plugin loading. It is recommended you run MBEE on a linux
-based device.
-
 #### Internet Explorer
 Internet Explorer does not currently have great support for React applications.
 Because MBEE is written primarily in React, users who attempt to use MBEE on
