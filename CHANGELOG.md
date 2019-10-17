@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [0.10.0] - 2019-10-28
-### Major Feature and Improvements
+### Major Features and Improvements
 * Added basic CRUD operations for artifact documents in the API
 * Added GET, POST and DELETE artifact blob API endpoints
 * Implemented a local artifact storage strategy
@@ -19,12 +19,12 @@ All notable changes to this project will be documented in this file.
   
 ### Bug Fixes and Other Changes
 * Added pages for viewing all organizations and projects in the admin console
-* Added rootpath option to GET `/elements/:elementid` which returns all parents
-  of the specified element up through the root
+* Added `rootpath` option to GET `/elements/:elementid` which returns all
+  parents of the specified element up through the root
 * Added support for disabling the patch user password API endpoint
 * Increased test coverage with addition of 8xx system level tests
-* Added support for locking out local users after 5 failed logins in 15 minutes.
-  Users become archived, and must be unarchived by admins
+* Added support for locking out local users after 5 failed login attempts in 15
+  minutes. Users become archived, and must be unarchived by admins
 * Increased linter coverage by adding rules for JSDoc headers
 * Removed usage of $or and $regex in database queries to aid in implementation
   of different database strategies
@@ -53,7 +53,7 @@ All notable changes to this project will be documented in this file.
 * Added the optional validator `artifact_id` to the `validators` section
 * Changed the name of the optional field `docker.mongo` to `docker.db`. If this
   field exists, it must be changed
-* Added optional length validators to the `validators` sections. These lengths
+* Added optional length validators to the `validators` section. These lengths
   are the MAX length of the ids
 ```json
 {
