@@ -33,7 +33,7 @@ module.exports.sanitize = function(userInput) {
 
 /**
  * @description Sanitizes database queries. Uses the sanitize function defined
- * in the database strategy defined in the running config.
+ * in the database strategy, which is defined in the running config.
  */
 module.exports.db = db.sanitize;
 
