@@ -733,16 +733,11 @@ async function getBlob(requestingUser, organizationID,
     const orgID = sani.db(organizationID);
     const projID = sani.db(projectID);
 
-    // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, [], Artifact);
-
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser,
-      validatedOptions.archived);
+    const organization = await helper.findAndValidate(Org, orgID, reqUser);
 
     // Find the project
-    const project = await helper.findAndValidate(Project,
-      utils.createID(orgID, projID), reqUser, validatedOptions.archived);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
 
     // Permissions check
     permissions.readBlob(reqUser, organization, project);
@@ -766,8 +761,8 @@ async function getBlob(requestingUser, organizationID,
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the
  * project belongs to.
- * @param {string} projectID - The project ID of the Project which is being
- * searched for.
+ * @param {string} projectID - The project ID of the project which will contain
+ * the newly created blob.
  * @param {object} artifact - Metadata containing parameters for creating
  * and storing the artifact blob.
  * @param {string} [artifact.filename] - The filename of the artifact.
@@ -775,7 +770,7 @@ async function getBlob(requestingUser, organizationID,
  * @param {Buffer} artifactBlob - A binary large object artifact.
  * @param {object} [options] - A parameter that provides supported options.
  *
- * @returns {Promise<object>} Artifact object that contains location, filename,
+ * @returns {Promise<object>} Object that contains artifact location, filename,
  * and project.
  */
 async function postBlob(requestingUser, organizationID,
@@ -796,22 +791,17 @@ async function postBlob(requestingUser, organizationID,
     const orgID = sani.db(organizationID);
     const projID = sani.db(projectID);
 
-    // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, [], Artifact);
-
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser,
-      validatedOptions.archived);
+    const organization = await helper.findAndValidate(Org, orgID, reqUser);
 
     // Find the project
-    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-      reqUser, validatedOptions.archived);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
 
     // Permissions check
     permissions.createBlob(reqUser, organization, project);
 
     // Include org and project id
-    saniArt.project = projectID;
+    saniArt.project = projID;
     saniArt.org = orgID;
 
     // Return artifact object
@@ -832,15 +822,13 @@ async function postBlob(requestingUser, organizationID,
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the
  * project belongs to.
- * @param {string} projectID - The project ID of the Project which is being
- * searched for.
- * @param {object[]} artifact - Metadata containing parameters for creating
- * and storing the artifact blob.
- * @param {string} [artifact.filename] - The filename of the artifact.
- * @param {string} [artifact.location] - The location of the artifact.
+ * @param {string} projectID - The project ID of the project which contains
+ * the artifact blob.
+ * @param {object[]} artifact - Metadata containing parameters for finding
+ * the artifact blob.
  * @param {object} [options] - A parameter that provides supported options.
  *
- * @returns {Promise<object>} Artifact object that contains location, filename,
+ * @returns {Promise<object>} Object that contains artifact location, filename,
  * and project.
  */
 async function deleteBlob(requestingUser, organizationID, projectID,
@@ -856,17 +844,12 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     const orgID = sani.db(organizationID);
     const projID = sani.db(projectID);
 
-    // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['archived',
-      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
-
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser,
-      validatedOptions.archived);
+    const organization = await helper.findAndValidate(Org, orgID, reqUser);
 
     // Find the project
     const project = await helper.findAndValidate(Project,
-      utils.createID(orgID, projID), reqUser, validatedOptions.archived);
+      utils.createID(orgID, projID), reqUser);
 
     // Permissions check
     permissions.deleteBlob(reqUser, organization, project);
@@ -875,7 +858,8 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     saniArt.project = projectID;
     saniArt.org = orgID;
 
-    await ArtifactStrategy.deleteBlob(saniArt);
+    // Delete the artifact blob
+    ArtifactStrategy.deleteBlob(saniArt);
 
     // Return Artifact obj
     return saniArt;
