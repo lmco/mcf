@@ -1860,7 +1860,7 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
       }
       // Get the parent id
       const parentID = parent._id;
-      // If it's a circular reference, don't get lost in the sauce
+      // If it's a circular reference, exit
       if (foundElements.includes(parentID)) {
         throw new M.DataFormatError('Circular element parent reference', 'warn');
       }
