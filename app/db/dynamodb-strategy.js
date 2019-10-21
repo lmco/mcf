@@ -270,6 +270,7 @@ class Schema {
     obj[name] = fn;
     this.definition.methods.push(obj);
   }
+
 }
 
 /**
@@ -296,7 +297,6 @@ class Model {
    * database, if not provided the name should be used.
    */
   constructor(name, schema, collection) {
-    console.log(schema.definition.populate)
     this.schema = schema.schema;
     this.definition = schema.definition;
     this.TableName = collection;
@@ -330,7 +330,7 @@ class Model {
     }
 
     // Add the model to the file-wide model object
-    models[this.TableName] = this;
+    models[this.modelName] = this;
   }
 
   /**
@@ -388,10 +388,10 @@ class Model {
    *
    * @returns {object[]} - Modified documents.
    */
-  formatDocuments(documents, options) {
+  async formatDocuments(documents, options) {
     // Loop through each document
     for (let i = 0; i < documents.length; i++) {
-      documents[i] = this.formatDocument(documents[i], options);
+      documents[i] = await this.formatDocument(documents[i], options);
     }
 
     // Return modified documents
@@ -407,7 +407,7 @@ class Model {
    *
    * @returns {object} - Modified documents.
    */
-  formatDocument(document, options = {}, recurse = false) {
+  async formatDocument(document, options = {}, recurse = false) {
     Object.keys(document).forEach((field) => {
       // If the string null, convert to actual value
       if (Object.values(document[field])[0] === 'null') {
@@ -454,6 +454,8 @@ class Model {
           }
         }
       });
+
+      await this.populate(document, options);
     }
 
     // If the lean option is NOT supplied, add on document functions
@@ -502,7 +504,8 @@ class Model {
 
         // Wait for completion of all promises, and return formatted docs
         Promise.all(promises)
-        .then(() => resolve(this.formatDocuments(foundDocs, options)))
+        .then(() => this.formatDocuments(foundDocs, options))
+        .then((docs) => resolve(docs))
         .catch((error) => {
           M.log.verbose('Failed in batchGetItem');
           return reject(error);
@@ -1129,46 +1132,30 @@ class Model {
   }
 
   /**
-   * @description Parses the projection string and returns an object containing
-   * the ProjectionExpression key/value and the ExpressionAttributeNames object.
-   *
-   * @param {string} projection - A space separated string of specific fields to
-   * of a document.
-   *
-   * @returns {object} - An object containing the ProjectionExpression
-   * and ExpressionAttributeNames object.
+   * @description Populates an array of documents
+   * @param docs
+   * @param options
+   * @returns {Promise<void>}
    */
-  parseProjection(projection) { // eslint-disable-line class-methods-use-this
-    const returnObj = {};
-
-    // Handle projections
-    if (projection) {
-      const fields = projection.split(' ');
-      // For each field to return
-      fields.forEach((f) => {
-        // If the ExpressionAttributeNames is not defined, define it
-        if (!returnObj.ExpressionAttributeNames) {
-          returnObj.ExpressionAttributeNames = {};
-        }
-
-        // Handle special case where key name starts with an underscore
-        const keyName = (f === '_id') ? 'id' : f;
-
-        // Create unique key for field
-        returnObj.ExpressionAttributeNames[`#${keyName}`] = f;
-
-        // If ProjectionExpression is not defined, init it
-        if (!returnObj.ProjectionExpression) {
-          returnObj.ProjectionExpression = `#${keyName}`;
-        }
-        // Add onto ProjectionExpression with leading comma
-        else {
-          returnObj.ProjectionExpression += `,#${keyName}`;
-        }
-      });
+  async populate(docs, options) {
+    // If there are no fields to populate, return documents
+    if (!options.populate) {
+      return docs;
     }
+    else {
+      // Get an array of the fields to populate
+      const fieldsToPop = options.populate.split(' ');
 
-    return returnObj;
+      fieldsToPop.forEach((f) => {
+        // Get the populate object, defined in the schema definition
+        const popObj = this.definition.populate[f];
+
+        // If the field to populate is defined
+        if (popObj) {
+          console.log(popObj);
+        }
+      })
+    }
   }
 
   /**
