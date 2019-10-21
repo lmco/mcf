@@ -25,6 +25,10 @@ require('@babel/register')();        // Transpile react tests to javascript
 require('@babel/polyfill');          // Transpile async await for javascript
 require(path.join(M.root, 'test', '7xx_ui_tests', 'setup.js'));
 
+// MBEE modules
+const testUtils = M.require('lib.test-utils');
+
+
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
   // eslint-disable-next-line no-console
@@ -39,7 +43,7 @@ if (module.parent == null) {
  *
  * @param {string} _args - Options from the user for how to run the tests.
  */
-function test(_args) {
+async function test(_args) {
   printHeader();
   M.log.verbose(`Running tests with DB strategy: ${M.config.db.strategy}`);
 
@@ -112,6 +116,12 @@ function test(_args) {
       M.log.error(`invalid argument (${_args[i]})`);
       process.exit(-1);
     }
+  }
+
+
+  // Custom validators - check if custom validators are defined and generate new test data
+  if (M.config.validators) {
+    await testUtils.generateCustomTestData();
   }
 
   // Create mocha object with options

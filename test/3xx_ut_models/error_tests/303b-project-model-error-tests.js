@@ -176,7 +176,7 @@ async function orgNotProvided() {
  * @description Attempts to create a project with an invalid org.
  */
 async function orgInvalid() {
-  if (customValidators.hasOwnProperty('id')) {
+  if (customValidators.hasOwnProperty('org_id') || customValidators.hasOwnProperty('id')) {
     M.log.verbose('Skipping valid project org test due to an existing custom'
       + ' validator.');
     this.skip();

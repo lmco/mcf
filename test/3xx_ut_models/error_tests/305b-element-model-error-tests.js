@@ -110,6 +110,13 @@ async function idTooShort() {
  * @description Attempts to create an element with an id that is too long.
  */
 async function idTooLong() {
+  if (customValidators.hasOwnProperty('element_id') || customValidators.hasOwnProperty('id')
+    || customValidators.hasOwnProperty('element_id_length')
+    || customValidators.hasOwnProperty('id_length')) {
+    M.log.verbose('Skipping valid element id test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
   const elemData = Object.assign({}, testData.elements[0]);
   elemData.project = 'org:proj';
   elemData.branch = 'org:proj:branch';
@@ -252,7 +259,7 @@ async function branchInvalid() {
   elemData.parent = 'org:proj:branch:model';
 
   // Set invalid branch
-  elemData.branch = 'invalid_branch';
+  elemData.branch = '☹☹';
 
   // Create element object
   const elemObject = Element.createDocument(elemData);
@@ -279,7 +286,7 @@ async function parentInvalid() {
   elemData.branch = 'org:proj:branch';
 
   // Set invalid parent
-  elemData.parent = 'invalid_parent';
+  elemData.parent = '☹☹';
 
   // Create element object
   const elemObject = Element.createDocument(elemData);
@@ -307,7 +314,7 @@ async function sourceInvalid() {
   elemData.parent = 'org:proj:branch:model';
 
   // Set invalid source
-  elemData.source = 'invalid_source';
+  elemData.source = '☹☹';
 
   // Create element object
   const elemObject = Element.createDocument(elemData);
@@ -358,7 +365,7 @@ async function targetInvalid() {
   elemData.parent = 'org:proj:branch:model';
 
   // Set invalid target
-  elemData.target = 'invalid_target';
+  elemData.target = '☹☹';
 
   // Create element object
   const elemObject = Element.createDocument(elemData);

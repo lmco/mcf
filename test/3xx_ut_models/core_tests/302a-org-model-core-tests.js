@@ -48,15 +48,15 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests. Opens database connection.
    */
-  before((done) => {
-    db.connect()
-    .then((user) => done())
-    .catch((error) => {
+  before(async () => {
+    try {
+      await db.connect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**

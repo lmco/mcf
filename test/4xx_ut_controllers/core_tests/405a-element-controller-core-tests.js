@@ -133,7 +133,6 @@ function createElement(done) {
     // Expect createdElements array to contain 1 element
     chai.expect(createdElements.length).to.equal(1);
     const createdElem = createdElements[0];
-
     // Verify element created properly
     chai.expect(createdElem.id).to.equal(utils.createID(org.id, projID, branchID, elemData.id));
     chai.expect(createdElem._id).to.equal(utils.createID(org.id, projID, branchID, elemData.id));

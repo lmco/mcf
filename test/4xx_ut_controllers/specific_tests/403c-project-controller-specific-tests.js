@@ -57,6 +57,11 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create projects for the tests to utilize
       projects = await ProjectController.create(adminUser, org._id, testData.projects);
+      // Sort the projects; they will be returned out of order if custom id validators are used
+      projects = projects.sort((a, b) => {
+        if (Number(a.name.slice(-2)) > Number(b.name.slice(-2))) return 1;
+        else return -1;
+      });
     }
     catch (error) {
       M.log.error(error);
@@ -349,28 +354,28 @@ async function optionLeanFind() {
  */
 async function optionSortFind() {
   try {
-    // Create the test project objects
+    // Update the test project objects
     const testProjects = [
       {
-        id: 'testproject000',
+        id: utils.parseID(projects[0].id).pop(),
         name: 'b'
       },
       {
-        id: 'testproject001',
+        id: utils.parseID(projects[1].id).pop(),
         name: 'c'
       },
       {
-        id: 'testproject002',
+        id: utils.parseID(projects[2].id).pop(),
         name: 'a'
       }];
     // Create sort options
     const sortOption = { sort: 'name' };
     const sortOptionReverse = { sort: '-name' };
 
-    // Create the projects
-    const createdProjects = await ProjectController.create(adminUser, org.id, testProjects);
-    // Expect createdProjects array to contain 3 projects
-    chai.expect(createdProjects.length).to.equal(3);
+    // Update the projects
+    const updatedProjects = await ProjectController.update(adminUser, org.id, testProjects);
+    // Expect updatedProjects array to contain 3 projects
+    chai.expect(updatedProjects.length).to.equal(3);
 
     const foundProjects = await ProjectController.find(adminUser, org.id,
       testProjects.map((p) => p.id), sortOption);
@@ -379,11 +384,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(foundProjects[0].name).to.equal('a');
-    chai.expect(foundProjects[0].id).to.equal(utils.createID(org.id, 'testproject002'));
+    chai.expect(foundProjects[0].id).to.equal(projects[2].id);
     chai.expect(foundProjects[1].name).to.equal('b');
-    chai.expect(foundProjects[1].id).to.equal(utils.createID(org.id, 'testproject000'));
+    chai.expect(foundProjects[1].id).to.equal(projects[0].id);
     chai.expect(foundProjects[2].name).to.equal('c');
-    chai.expect(foundProjects[2].id).to.equal(utils.createID(org.id, 'testproject001'));
+    chai.expect(foundProjects[2].id).to.equal(projects[1].id);
 
     // Find the projects and return them sorted in reverse
     const reverseProjects = await ProjectController.find(adminUser, org.id,
@@ -394,13 +399,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(reverseProjects[0].name).to.equal('c');
-    chai.expect(reverseProjects[0].id).to.equal(utils.createID(org.id, 'testproject001'));
+    chai.expect(reverseProjects[0].id).to.equal(projects[1].id);
     chai.expect(reverseProjects[1].name).to.equal('b');
-    chai.expect(reverseProjects[1].id).to.equal(utils.createID(org.id, 'testproject000'));
+    chai.expect(reverseProjects[1].id).to.equal(projects[0].id);
     chai.expect(reverseProjects[2].name).to.equal('a');
-    chai.expect(reverseProjects[2].id).to.equal(utils.createID(org.id, 'testproject002'));
-
-    await ProjectController.remove(adminUser, org.id, testProjects.map((p) => p.id));
+    chai.expect(reverseProjects[2].id).to.equal(projects[2].id);
   }
   catch (error) {
     M.log.error(error.message);

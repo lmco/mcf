@@ -103,6 +103,13 @@ async function idTooShort() {
  * @description Attempts to create a branch with an id that is too long.
  */
 async function idTooLong() {
+  if (customValidators.hasOwnProperty('branch_id') || customValidators.hasOwnProperty('id')
+    || customValidators.hasOwnProperty('branch_id_length')
+    || customValidators.hasOwnProperty('id_length')) {
+    M.log.verbose('Skipping valid branch id test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
   const branchData = Object.assign({}, testData.branches[0]);
   branchData.project = 'org:proj';
 
@@ -213,7 +220,7 @@ async function sourceInvalid() {
   branchData.project = 'org:proj';
 
   // Set invalid source
-  branchData.source = 'invalid_source';
+  branchData.source = '☹☹';
 
   // Create branch object
   const branchObject = Branch.createDocument(branchData);

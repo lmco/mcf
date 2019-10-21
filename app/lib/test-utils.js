@@ -29,6 +29,7 @@ const fs = require('fs');
 
 // NPM modules
 const chai = require('chai');
+const Randexp = require('randexp');
 
 // MBEE modules
 const Artifact = M.require('models.artifact');
@@ -39,8 +40,8 @@ const Project = M.require('models.project');
 const User = M.require('models.user');
 const utils = M.require('lib.utils');
 const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
-const testData = require(path.join(M.root, 'test', 'test_data.json'));
-delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
+const validators = M.require('lib.validators');
+let testData = JSON.parse(fs.readFileSync(path.join(M.root, 'test', 'test_data.json')).toString());
 
 /**
  * @description Helper function to create test non-admin user in MBEE tests.
@@ -103,13 +104,11 @@ module.exports.createTestAdmin = function() {
   return new Promise((resolve, reject) => {
     // Define new user
     let newAdminUser = null;
-
-    // Check any admin exist
+    // Check if the test admin user already exists
     User.findOne({ _id: testData.adminUser.username })
     .then((foundUser) => {
-      // Check user found
       if (foundUser !== null) {
-        // User found, return it
+        // Admin already exists, return it
         return resolve(foundUser);
       }
 
@@ -373,6 +372,8 @@ module.exports.createTag = function(adminUser, orgID, projID) {
  * @returns {object} Returns the imported test data.
  */
 module.exports.importTestData = function(filename) {
+  // eslint-disable-next-line no-param-reassign
+  filename = M.config.validators ? 'custom_test_data.json' : filename;
   // Clear require cache so a new copy is imported
   delete require.cache[require.resolve(path.join(M.root, 'test', filename))];
   // Import a copy of the data.json
@@ -552,4 +553,114 @@ module.exports.parseMethod = function(endpoint) {
     // The endpoint is for whoami or searchUsers; they use GET requests
     return 'GET';
   }
+};
+
+/**
+ * @description A function that generates a new custom_test_data.json file based on custom
+ * id validators if they exist in the config.
+ */
+module.exports.generateCustomTestData = async function() {
+  const testDataRaw = fs.readFileSync(path.join(M.root, 'test', 'test_data.json'));
+  const customTestData = JSON.parse(testDataRaw.toString());
+  const v = M.config.validators;
+
+  if (v.hasOwnProperty('element_id') || v.hasOwnProperty('element_id_length')
+    || v.hasOwnProperty('id') || v.hasOwnProperty('id_length')) {
+    // Set new custom element ids
+    customTestData.elements.forEach((elem) => {
+      // Generate new custom id
+      const customID = generateID(v.element_id || validators.id,
+        v.element_id_length || validators.idLength);
+      // Get all the elements that reference it
+      customTestData.elements.forEach((e) => {
+        if (e.parent && e.parent === elem.id) e.parent = customID;
+        if (e.source && e.source === elem.id) e.source = customID;
+        if (e.target && e.target === elem.id) e.target = customID;
+      });
+      elem.id = customID;
+    });
+  }
+  if (v.hasOwnProperty('branch_id') || v.hasOwnProperty('branch_id_length')
+    || v.hasOwnProperty('id') || v.hasOwnProperty('id_length')) {
+    // Set new custom branch ids
+    customTestData.branches.forEach((branch) => {
+      // Don't modify the master id
+      if (branch.id === 'master') return;
+      // Generate new custom id
+      const customID = generateID(v.branch_id || validators.id,
+        v.branch_id_length || validators.idLength);
+      // Get all the branches that reference it
+      customTestData.branches.forEach((b) => {
+        if (b.source === branch.id) b.source = customID;
+      });
+      branch.id = customID;
+    });
+  }
+  if (v.hasOwnProperty('project_id') || v.hasOwnProperty('project_id_length')
+    || v.hasOwnProperty('id') || v.hasOwnProperty('id_length')) {
+    // Set new custom project ids
+    customTestData.projects.forEach((project) => {
+      // Generate new custom id
+      project.id = generateID(v.project_id || validators.id,
+        v.project_id_length || validators.idLength);
+    });
+  }
+  if (v.hasOwnProperty('org_id') || v.hasOwnProperty('org_id_length')
+    || v.hasOwnProperty('id') || v.hasOwnProperty('id_length')) {
+    // Set new custom org ids
+    customTestData.orgs.forEach((org) => {
+      // Generate new custom id
+      // Only validators is necessary here since org ids are not concatenated ids
+      org.id = generateID(validators.org.id, validators.org.idLength);
+    });
+  }
+  if (v.hasOwnProperty('user_username') || v.hasOwnProperty('user_username_length')
+    || v.hasOwnProperty('id') || v.hasOwnProperty('id_length')) {
+    // Set new custom usernames
+    customTestData.users.forEach((user) => {
+      // Generate new custom id
+      // Only validators is necessary here since usernames are not concatenated ids
+      user.username = generateID(validators.user.username, validators.user.usernameLength, 3);
+    });
+    // Get the admin user too
+    customTestData.adminUser.username = generateID(validators.user.username,
+      validators.user.usernameLength);
+  }
+
+  // Create the custom_test_data.json file
+  if (fs.existsSync(path.join(M.root, 'test', 'custom_test_data.json'))) {
+    fs.unlinkSync(path.join(M.root, 'test', 'custom_test_data.json'));
+  }
+  fs.writeFileSync(path.join(M.root, 'test', 'custom_test_data.json'),
+    JSON.stringify(customTestData, null, 2));
+
+  /**
+   * @description A helper function for generating a custom id that accounts for minimum id length
+   * and custom id length validators.
+   *
+   * @param {string} pattern - The regex patter to match for the custom id.
+   * @param {number} length - The custom validator for specific id length.
+   * @param {number} min - The minimum length for an id. The default is 2, but usernames must be
+   * at least 3 characters long.
+   *
+   * @returns {string} A custom id.
+   */
+  function generateID(pattern, length, min = 2) {
+    // Initialize the generator with the regex pattern
+    const generator = new Randexp(pattern);
+    generator.max = length - 1; // The generator can create strings of length max + 1
+
+    // Generate a new random id
+    let id = generator.gen();
+
+    // Ensure that the id is always at least the minimum length
+    while (id.length < min) {
+      id = generator.gen();
+    }
+
+    return id;
+  }
+
+  // Reset the global testData variable
+  testData = JSON.parse(fs.readFileSync(path.join(M.root, 'test', 'custom_test_data.json')).toString());
 };

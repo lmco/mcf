@@ -51,7 +51,9 @@ const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
  *     - myOrg [invalid - uses uppercase letter]
  */
 const org = {
-  id: customValidators.org_id || `^${id}$`,
+  id: customValidators.org_id
+    ? `^${customValidators.org_id}$`
+    : `^${id}$`,
   idLength: customValidators.org_id_length || idLength
 };
 
@@ -71,7 +73,9 @@ const org = {
  *      - myProject [invalid - cannot use uppercase characters]
  */
 const project = {
-  id: customValidators.project_id || `^${id}${utils.ID_DELIMITER}${id}$`,
+  id: customValidators.project_id
+    ? `${org.id.slice(0, -1)}${utils.ID_DELIMITER}${customValidators.project_id}$`
+    : `${org.id.slice(0, -1)}${utils.ID_DELIMITER}${id}$`,
   idLength: org.idLength + utils.ID_DELIMITER.length
   + (customValidators.project_id_length ? customValidators.project_id_length : idLength)
 };
@@ -92,7 +96,9 @@ const project = {
  *      - my-branch [invalid - must contain org and proj segments]
  */
 const branch = {
-  id: customValidators.branch_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  id: customValidators.branch_id
+    ? `${project.id.slice(0, -1)}${utils.ID_DELIMITER}${customValidators.branch_id}$`
+    : `${project.id.slice(0, -1)}${utils.ID_DELIMITER}${id}$`,
   idLength: project.idLength + utils.ID_DELIMITER.length
     + (customValidators.branch_id_length ? customValidators.branch_id_length : idLength)
 };
@@ -113,7 +119,9 @@ const branch = {
  *      - my-artifact [invalid - must contain org, proj, and branch segments]
  */
 const artifact = {
-  id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  id: customValidators.artifact_id
+    ? `${branch.id.slice(0, -1)}${utils.ID_DELIMITER}${customValidators.artifact_id}$`
+    : `${branch.id.slice(0, -1)}${utils.ID_DELIMITER}${id}$`,
   idLength: branch.idLength + utils.ID_DELIMITER.length
     + (customValidators.artifact_id_length ? customValidators.artifact_id_length : idLength),
   location: (artifactVal.location) ? artifactVal.location : '^[^.]+$',
@@ -137,7 +145,9 @@ const artifact = {
  *      - my-element [invalid - must contain org, proj, and branch segments]
  */
 const element = {
-  id: customValidators.element_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
+  id: customValidators.element_id
+    ? `${branch.id.slice(0, -1)}${utils.ID_DELIMITER}${customValidators.element_id}$`
+    : `${branch.id.slice(0, -1)}${utils.ID_DELIMITER}${id}$`,
   idLength: branch.idLength + utils.ID_DELIMITER.length
   + (customValidators.element_id_length ? customValidators.element_id_length : idLength)
 };
@@ -190,5 +200,7 @@ module.exports = {
   artifact,
   element,
   user,
-  url
+  url,
+  id,
+  idLength
 };

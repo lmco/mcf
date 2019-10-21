@@ -212,6 +212,18 @@
       "name": "Batch Element 9",
       "parent": "model",
       "archived": "true"
+    },
+    {
+      "id": "batchelem10",
+      "name": "Batch Element 10"
+    },
+    {
+      "id": "batchelem11",
+      "name": "Batch Element 11"
+    },
+    {
+      "id": "batchelem12",
+      "name": "Batch Element 12"
     }
   ],
   "artifacts": [

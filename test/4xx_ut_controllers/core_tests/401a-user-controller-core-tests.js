@@ -43,22 +43,18 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Create admin user.
    */
-  before((done) => {
-    // Connect to the database
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((user) => {
-      // Set global admin user
-      adminUser = user;
-      done();
-    })
-    .catch((error) => {
+  before(async () => {
+    try {
+      // Connect to the database
+      await db.connect();
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**

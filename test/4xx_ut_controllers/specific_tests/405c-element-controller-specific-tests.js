@@ -79,6 +79,11 @@ describe(M.getModuleName(module.filename), () => {
       // Create test elements for the main project
       const elems = testData.elements;
       elements = await ElementController.create(adminUser, org.id, projIDs[0], branchID, elems);
+      // Sort the elements; they will be returned out of order if custom id validators are used
+      elements = elements.sort((a, b) => {
+        if (Number(a.name.slice(-2)) > Number(b.name.slice(-2))) return 1;
+        else return -1;
+      });
     }
     catch (error) {
       M.log.error(error);
@@ -156,239 +161,10 @@ describe(M.getModuleName(module.filename), () => {
     + 'from search()', optionSkipSearch);
   it('should return a raw JSON version of an element instead of a document with'
     + ' instance methods from search()', optionLeanSearch);
-  it('should sort find results', optionSortFind);
-  it('should return a raw JSON version of an element instead of a document with'
-    + ' instance methods from search()', optionLeanSearch);
   it('should sort search results', optionSortSearch);
 });
 
 /* --------------------( Tests )-------------------- */
-/**
- * @description Verifies that an element can be archived upon creation.
- */
-async function createArchivedElement() {
-  try {
-    // Create the element object
-    const elemObj = {
-      id: 'archived-element',
-      name: 'Archived Element',
-      archived: true
-    };
-
-    // Create the element
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
-      branchID, elemObj);
-    // Verify that only one element was created
-    chai.expect(createdElements.length).to.equal(1);
-    const elem = createdElements[0];
-
-    // Expect archived to be true, and archivedOn and archivedBy to not be null
-    chai.expect(elem.archived).to.equal(true);
-    chai.expect(elem.archivedBy).to.equal(adminUser._id);
-    chai.expect(elem.archivedOn).to.not.equal(null);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that an element can be archived.
- */
-async function archiveElement() {
-  try {
-    // Get the ID of the element to archive
-    const elemID = utils.parseID(elements[6]._id).pop();
-    // Create the update object
-    const updateObj = {
-      id: elemID,
-      archived: true
-    };
-
-    // Update the element with archived: true
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
-      branchID, updateObj);
-
-    // Verify the array length is exactly 1
-    chai.expect(updatedElements.length).to.equal(1);
-    const elem = updatedElements[0];
-
-    // Expect archived to be true, and archivedOn and archivedBy to not be null
-    chai.expect(elem.archived).to.equal(true);
-    chai.expect(elem.archivedBy).to.equal(adminUser._id);
-    chai.expect(elem.archivedOn).to.not.equal(null);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that an element can be created with a source that is
- * in a referenced project.
- */
-async function createExternalSource() {
-  try {
-  // Create element with sourceNamespace that points to referenced project
-    const newElement = {
-      id: 'external-source',
-      source: 'model',
-      sourceNamespace: {
-        org: org.id,
-        project: projIDs[1],
-        branch: branchID
-      },
-      target: 'model'
-    };
-
-    // Create the element using the element controller
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
-      branchID, newElement);
-    const elem = createdElements[0];
-    // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'model');
-    // Verify the source is equal to the referencedID
-    chai.expect(elem.source).to.equal(referencedID);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that an element can be created with a target that is
- * in a referenced project.
- */
-async function createExternalTarget() {
-  try {
-    // Create element with targetNamespace that points to referenced project
-    const newElement = {
-      id: 'external-target',
-      source: 'model',
-      target: 'model',
-      targetNamespace: {
-        org: org.id,
-        project: projIDs[1],
-        branch: branchID
-      }
-    };
-
-    // Create the element using the element controller
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
-      branchID, newElement);
-    const elem = createdElements[0];
-    // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'model');
-    // Verify the target is equal to the referencedID
-    chai.expect(elem.target).to.equal(referencedID);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that an element can be updated with a source that is in
- * a referenced project.
- */
-async function updateExternalSource() {
-  try {
-    // Create the update object which contains a sourceNamespace
-    const updateObj = {
-      id: 'external-source',
-      source: 'undefined',
-      sourceNamespace: {
-        org: org.id,
-        project: projIDs[1],
-        branch: branchID
-      }
-    };
-
-    // Update the element using the element controller
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
-      branchID, updateObj);
-    const elem = updatedElements[0];
-    // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'undefined');
-    // Verify the source is equal to the referencedID
-    chai.expect(elem.source).to.equal(referencedID);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that an element can be updated with a target that is in
- * a referenced project.
- */
-async function updateExternalTarget() {
-  try {
-    // Create the update object which contains a targetNamespace
-    const updateObj = {
-      id: 'external-target',
-      target: 'undefined',
-      targetNamespace: {
-        org: org.id,
-        project: projIDs[1],
-        branch: branchID
-      }
-    };
-
-    // Update the element using the element controller
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
-      branchID, updateObj);
-    const elem = updatedElements[0];
-    // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'undefined');
-    // Verify the target is equal to the referencedID
-    chai.expect(elem.target).to.equal(referencedID);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that when an element is part of a relationship and gets
- * deleted, the relationship gets updated and is pointed to the 'undefined'
- * element.
- */
-async function deleteRelElement() {
-  try {
-    // Grab element ids from relationship
-    const rel = utils.parseID(elements[7]._id).pop();
-    // Grab deleted element id
-    const delElem = utils.parseID(elements[8]._id).pop();
-
-    // Remove element
-    await ElementController.remove(adminUser, org.id, projIDs[0], branchID, delElem);
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0],
-      branchID, rel);
-    // Verify relationship updated
-    const relationship = foundElements[0];
-    chai.expect(relationship.source).to.equal(utils.createID(relationship.branch, 'undefined'));
-    chai.expect(relationship.target).to.equal(utils.createID(relationship.branch, 'undefined'));
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
 /**
  * @description Verifies that the fields specified in the element model function
  * getValidPopulateFields() can all be populated in the find() function using
@@ -582,8 +358,6 @@ async function optionLimitFind() {
  */
 async function optionSkipFind() {
   try {
-    // Create an array to store first batch of element ids
-    let firstBatchIDs = [];
     // Create the first options object with just a limit
     const firstOptions = { limit: 2 };
     // Create the second options object with a limit and skip
@@ -595,7 +369,7 @@ async function optionSkipFind() {
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
     // Add element ids to the firstBatchIDs array
-    firstBatchIDs = foundElements.map(e => e._id);
+    const firstBatchIDs = foundElements.map(e => e._id);
 
     // Find the next batch of elements
     const secondElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
@@ -652,6 +426,213 @@ async function optionLeanFind() {
 }
 
 /**
+ * @description Validates that the find results can be sorted.
+ */
+async function optionSortFind() {
+  try {
+    // Create element objects
+    const testElems = [{
+      id: utils.parseID(elements[10].id).pop(),
+      name: 'b'
+    },
+    {
+      id: utils.parseID(elements[11].id).pop(),
+      name: 'c'
+    },
+    {
+      id: utils.parseID(elements[12].id).pop(),
+      name: 'a'
+    }];
+
+    // Remove the pre-existing elements
+    await ElementController.remove(adminUser, org.id, projIDs[0], branchID,
+      testElems.map((e) => e.id));
+
+    // Create sort options
+    const sortOption = { sort: 'name' };
+    const sortOptionReverse = { sort: '-name' };
+
+    // Create the test elements
+    const createdElems = await ElementController.create(adminUser, org.id, projIDs[0],
+      branchID, testElems);
+    // Validate that 3 elements were created
+    chai.expect(createdElems.length).to.equal(3);
+
+    // Find the elements and return them sorted
+    const foundElems = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      testElems.map((e) => e.id),
+      sortOption);
+
+    // Expect to find all three elements
+    chai.expect(foundElems.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundElems[0].name).to.equal('a');
+    chai.expect(foundElems[0].id).to.equal(elements[12].id);
+    chai.expect(foundElems[1].name).to.equal('b');
+    chai.expect(foundElems[1].id).to.equal(elements[10].id);
+    chai.expect(foundElems[2].name).to.equal('c');
+    chai.expect(foundElems[2].id).to.equal(elements[11].id);
+
+    // Find the elements and return them sorted in reverse
+    const reverseElems = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      testElems.map((e) => e.id),
+      sortOptionReverse);
+    // Expect to find all three elements
+    chai.expect(foundElems.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(reverseElems[0].name).to.equal('c');
+    chai.expect(reverseElems[0].id).to.equal(elements[11].id);
+    chai.expect(reverseElems[1].name).to.equal('b');
+    chai.expect(reverseElems[1].id).to.equal(elements[10].id);
+    chai.expect(reverseElems[2].name).to.equal('a');
+    chai.expect(reverseElems[2].id).to.equal(elements[12].id);
+
+    await ElementController.remove(adminUser, org.id, projIDs[0], branchID,
+      testElems.map((e) => e.id));
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that findElement function can return every parent up to root.
+ */
+async function optionRootpathFind() {
+  try {
+    const elemID = utils.parseID(elements[4]._id).pop();
+
+    const option = { rootpath: true };
+
+    // Return a search on the furthest nested element with the rootpath option
+    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+      elemID, option);
+
+    // Expect to find 3 elements
+    chai.expect(foundElements.length).to.equal(4);
+
+    const foundIDs = foundElements.map(e => e.id);
+
+    // Expect to find the model element and two test elements
+    chai.expect(foundIDs).to.include(utils.createID(org.id, projIDs[0], branchID, 'model'));
+    chai.expect(foundIDs).to.include(elements[1].id);
+    chai.expect(foundIDs).to.include(elements[2].id);
+    chai.expect(foundIDs).to.include(elements[4].id);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that an element can be archived upon creation.
+ */
+async function createArchivedElement() {
+  try {
+    // Create the element object
+    const elemObj = {
+      id: utils.parseID(elements[9].id).pop(),
+      name: 'Archived Element',
+      archived: true
+    };
+
+    // Delete the element that was already created with that id
+    await ElementController.remove(adminUser, org.id, projIDs[0], branchID, elemObj.id);
+
+    // Create the element
+    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+      branchID, elemObj);
+    // Verify that only one element was created
+    chai.expect(createdElements.length).to.equal(1);
+    const elem = createdElements[0];
+
+    // Expect archived to be true, and archivedOn and archivedBy to not be null
+    chai.expect(elem.archived).to.equal(true);
+    chai.expect(elem.archivedBy).to.equal(adminUser._id);
+    chai.expect(elem.archivedOn).to.not.equal(null);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that an element can be created with a source that is
+ * in a referenced project.
+ */
+async function createExternalSource() {
+  try {
+    // Create element with sourceNamespace that points to referenced project
+    const newElement = {
+      id: utils.parseID(elements[10].id).pop(),
+      source: 'model',
+      sourceNamespace: {
+        org: org.id,
+        project: projIDs[1],
+        branch: branchID
+      },
+      target: 'model'
+    };
+
+    // Create the element using the element controller
+    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+      branchID, newElement);
+    const elem = createdElements[0];
+    // Create the concatenated ID of the referenced element
+    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'model');
+    // Verify the source is equal to the referencedID
+    chai.expect(elem.source).to.equal(referencedID);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that an element can be created with a target that is
+ * in a referenced project.
+ */
+async function createExternalTarget() {
+  try {
+    // Create element with targetNamespace that points to referenced project
+    const newElement = {
+      id: utils.parseID(elements[11].id).pop(),
+      source: 'model',
+      target: 'model',
+      targetNamespace: {
+        org: org.id,
+        project: projIDs[1],
+        branch: branchID
+      }
+    };
+
+    // Create the element using the element controller
+    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+      branchID, newElement);
+    const elem = createdElements[0];
+    // Create the concatenated ID of the referenced element
+    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'model');
+    // Verify the target is equal to the referencedID
+    chai.expect(elem.target).to.equal(referencedID);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
  * @description Verifies that the fields specified in the element model function
  * getValidPopulateFields() can all be populated in the create() function using
  * the option 'populate'.
@@ -664,10 +645,13 @@ async function optionPopulateCreate() {
     const options = { populate: pop };
     // Create the element object
     const elemObj = {
-      id: 'populate-element',
+      id: utils.parseID(elements[10]._id).pop(),
       source: utils.parseID(elements[0]._id).pop(),
       target: utils.parseID(elements[1]._id).pop()
     };
+
+    // Delete the element that already exists with that id
+    await ElementController.remove(adminUser, org.id, projIDs[0], branchID, elemObj.id);
 
     // Create the element
     const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
@@ -702,11 +686,11 @@ async function optionFieldsCreate() {
   try {
     // Create the element objects
     const elemObjFind = {
-      id: 'fields-element',
+      id: utils.parseID(elements[11].id).pop(),
       name: 'Fields Element'
     };
     const elemObjNotFind = {
-      id: 'not-fields-element',
+      id: utils.parseID(elements[12].id).pop(),
       name: 'Not Fields Element'
     };
     // Create the options object with the list of fields specifically find
@@ -715,6 +699,10 @@ async function optionFieldsCreate() {
     const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
     // Create the list of fields which are always provided no matter what
     const fieldsAlwaysProvided = ['_id'];
+
+    // Remove the element that already exists
+    await ElementController.remove(adminUser, org.id, projIDs[0],
+      branchID, elemObjFind.id);
 
     // Create the element only with specific fields returned
     const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
@@ -760,15 +748,19 @@ async function optionFieldsCreate() {
 async function optionLeanCreate() {
   // Create the element object
   const leanElemObj = {
-    id: 'lean-element',
+    id: utils.parseID(elements[11].id).pop(),
     name: 'Lean Element'
   };
   const notLeanElemObj = {
-    id: 'not-lean-element',
+    id: utils.parseID(elements[12].id).pop(),
     name: 'Not Lean Element'
   };
   // Create the options object with lean: true
   const options = { lean: true };
+
+  // Remove the elements that already exist with these ids
+  await ElementController.remove(adminUser, org.id, projIDs[0], branchID,
+    [leanElemObj.id, notLeanElemObj.id]);
 
   try {
     // Create the element without the lean option
@@ -799,6 +791,105 @@ async function optionLeanCreate() {
 }
 
 /**
+ * @description Verifies that an element can be archived.
+ */
+async function archiveElement() {
+  try {
+    // Get the ID of the element to archive
+    const elemID = utils.parseID(elements[6]._id).pop();
+    // Create the update object
+    const updateObj = {
+      id: elemID,
+      archived: true
+    };
+
+    // Update the element with archived: true
+    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+      branchID, updateObj);
+
+    // Verify the array length is exactly 1
+    chai.expect(updatedElements.length).to.equal(1);
+    const elem = updatedElements[0];
+
+    // Expect archived to be true, and archivedOn and archivedBy to not be null
+    chai.expect(elem.archived).to.equal(true);
+    chai.expect(elem.archivedBy).to.equal(adminUser._id);
+    chai.expect(elem.archivedOn).to.not.equal(null);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that an element can be updated with a source that is in
+ * a referenced project.
+ */
+async function updateExternalSource() {
+  try {
+    // Create the update object which contains a sourceNamespace
+    const updateObj = {
+      id: utils.parseID(elements[10].id).pop(),
+      source: 'undefined',
+      sourceNamespace: {
+        org: org.id,
+        project: projIDs[1],
+        branch: branchID
+      }
+    };
+
+    // Update the element using the element controller
+    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+      branchID, updateObj);
+    const elem = updatedElements[0];
+    // Create the concatenated ID of the referenced element
+    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'undefined');
+    // Verify the source is equal to the referencedID
+    chai.expect(elem.source).to.equal(referencedID);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that an element can be updated with a target that is in
+ * a referenced project.
+ */
+async function updateExternalTarget() {
+  try {
+    // Create the update object which contains a targetNamespace
+    const updateObj = {
+      id: utils.parseID(elements[10].id).pop(),
+      target: 'undefined',
+      targetNamespace: {
+        org: org.id,
+        project: projIDs[1],
+        branch: branchID
+      }
+    };
+
+    // Update the element using the element controller
+    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+      branchID, updateObj);
+    const elem = updatedElements[0];
+    // Create the concatenated ID of the referenced element
+    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'undefined');
+    // Verify the target is equal to the referencedID
+    chai.expect(elem.target).to.equal(referencedID);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
  * @description Verifies that the fields specified in the element model function
  * getValidPopulateFields() can all be populated in the update() function using
  * the option 'populate'.
@@ -811,7 +902,7 @@ async function optionPopulateUpdate() {
     const options = { populate: pop };
     // Create the update object
     const updateObj = {
-      id: 'populate-element',
+      id: utils.parseID(elements[11].id).pop(),
       name: 'Update Element'
     };
 
@@ -848,11 +939,11 @@ async function optionFieldsUpdate() {
   try {
     // Create the update objects
     const updateObjFind = {
-      id: 'fields-element',
+      id: utils.parseID(elements[11].id).pop(),
       name: 'Fields Element Updated'
     };
     const updateObjNotFind = {
-      id: 'not-fields-element',
+      id: utils.parseID(elements[12].id).pop(),
       name: 'Not Fields Element Updated'
     };
     // Create the options object with the list of fields specifically find
@@ -961,7 +1052,7 @@ async function optionPopulateReplace() {
     const options = { populate: pop };
     // Create the element object
     const elemObj = {
-      id: 'populate-element',
+      id: utils.parseID(elements[12].id).pop(),
       source: utils.parseID(elements[0]._id).pop(),
       target: utils.parseID(elements[1]._id).pop()
     };
@@ -999,11 +1090,11 @@ async function optionFieldsReplace() {
   try {
     // Create the element objects
     const elemObjFind = {
-      id: 'fields-element',
+      id: utils.parseID(elements[10].id).pop(),
       name: 'Fields Element'
     };
     const elemObjNotFind = {
-      id: 'not-fields-element',
+      id: utils.parseID(elements[11].id).pop(),
       name: 'Not Fields Element'
     };
     // Create the options object with the list of fields specifically find
@@ -1058,11 +1149,11 @@ async function optionLeanReplace() {
   try {
     // Create the element object
     const leanElemObj = {
-      id: 'lean-element',
+      id: utils.parseID(elements[10].id).pop(),
       name: 'Lean Element'
     };
     const notLeanElemObj = {
-      id: 'not-lean-element',
+      id: utils.parseID(elements[11].id).pop(),
       name: 'Not Lean Element'
     };
     // Create the options object with lean: true
@@ -1087,6 +1178,34 @@ async function optionLeanReplace() {
 
     // Expect the instance method getValidUpdateFields to be undefined
     chai.expect(typeof elem2.getValidUpdateFields).to.equal('undefined');
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that when an element is part of a relationship and gets
+ * deleted, the relationship gets updated and is pointed to the 'undefined'
+ * element.
+ */
+async function deleteRelElement() {
+  try {
+    // Grab element ids from relationship
+    const rel = utils.parseID(elements[7]._id).pop();
+    // Grab deleted element id
+    const delElem = utils.parseID(elements[8]._id).pop();
+
+    // Remove element
+    await ElementController.remove(adminUser, org.id, projIDs[0], branchID, delElem);
+    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0],
+      branchID, rel);
+    // Verify relationship updated
+    const relationship = foundElements[0];
+    chai.expect(relationship.source).to.equal(utils.createID(relationship.branch, 'undefined'));
+    chai.expect(relationship.target).to.equal(utils.createID(relationship.branch, 'undefined'));
   }
   catch (error) {
     M.log.error(error);
@@ -1200,8 +1319,6 @@ async function optionLimitSearch() {
  */
 async function optionSkipSearch() {
   try {
-    // Create an array to store first batch of element ids
-    let firstBatchIDs = [];
     // Create the first options object with just a limit
     const firstOptions = { limit: 2 };
     // Create the second options object with a limit and skip
@@ -1215,7 +1332,7 @@ async function optionSkipSearch() {
     // Verify that no more than 2 elements were found
     chai.expect(firstElements).to.have.lengthOf.at.most(2);
     // Add element ids to the firstBatchIDs array
-    firstBatchIDs = firstElements.map(e => e._id);
+    const firstBatchIDs = firstElements.map(e => e._id);
 
     // Search for next batch of elements
     const secondElements = await ElementController.search(adminUser, org.id, projIDs[0], branchID,
@@ -1273,97 +1390,29 @@ async function optionLeanSearch() {
 }
 
 /**
- * @description Validates that the find results can be sorted.
- */
-async function optionSortFind() {
-  try {
-    // Create element objects
-    const testElems = [{
-      id: 'testelem00',
-      name: 'b'
-    },
-    {
-      id: 'testelem01',
-      name: 'c'
-    },
-    {
-      id: 'testelem02',
-      name: 'a'
-    }];
-    // Create sort options
-    const sortOption = { sort: 'name' };
-    const sortOptionReverse = { sort: '-name' };
-
-    // Create the test elements
-    const createdElems = await ElementController.create(adminUser, org.id, projIDs[0],
-      branchID, testElems);
-    // Validate that 3 elements were created
-    chai.expect(createdElems.length).to.equal(3);
-
-    // Find the elements and return them sorted
-    const foundElems = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
-      testElems.map((e) => e.id),
-      sortOption);
-
-    // Expect to find all three elements
-    chai.expect(foundElems.length).to.equal(3);
-
-    // Validate that the sort option is working
-    chai.expect(foundElems[0].name).to.equal('a');
-    chai.expect(foundElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
-    chai.expect(foundElems[1].name).to.equal('b');
-    chai.expect(foundElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
-    chai.expect(foundElems[2].name).to.equal('c');
-    chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
-
-    // Find the elements and return them sorted in reverse
-    const reverseElems = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
-      testElems.map((e) => e.id),
-      sortOptionReverse);
-    // Expect to find all three elements
-    chai.expect(foundElems.length).to.equal(3);
-
-    // Validate that the sort option is working
-    chai.expect(reverseElems[0].name).to.equal('c');
-    chai.expect(reverseElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
-    chai.expect(reverseElems[1].name).to.equal('b');
-    chai.expect(reverseElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
-    chai.expect(reverseElems[2].name).to.equal('a');
-    chai.expect(reverseElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
-
-    await ElementController.remove(adminUser, org.id, projIDs[0], branchID,
-      testElems.map((e) => e.id));
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Validates that the search results can be sorted.
  */
 async function optionSortSearch() {
   try {
     // Create element objects
     const testElems = [{
-      id: 'testelem00',
+      id: utils.parseID(elements[9].id).pop(),
       name: 'b',
-      documentation: 'searchme'
+      documentation: 'searchme',
+      archived: false
     },
     {
-      id: 'testelem01',
+      id: utils.parseID(elements[10].id).pop(),
       name: 'c',
       documentation: 'searchme'
     },
     {
-      id: 'testelem02',
+      id: utils.parseID(elements[11].id).pop(),
       name: 'a',
       documentation: 'searchme'
     },
     {
-      id: 'testelem03',
+      id: utils.parseID(elements[12].id).pop(),
       name: 'd',
       documentation: 'no'
     }];
@@ -1374,11 +1423,11 @@ async function optionSortSearch() {
     // Search term
     const searchQuery = 'searchme';
 
-    // Create the test elements
-    const createdElems = await ElementController.create(adminUser, org.id, projIDs[0],
+    // Update the test elements
+    const updatedElems = await ElementController.update(adminUser, org.id, projIDs[0],
       branchID, testElems);
     // Validate that 4 elements were created
-    chai.expect(createdElems.length).to.equal(4);
+    chai.expect(updatedElems.length).to.equal(4);
 
     // Search the elements and return them sorted
     const sortedElems = await ElementController.search(adminUser, org.id, projIDs[0], branchID,
@@ -1388,11 +1437,11 @@ async function optionSortSearch() {
 
     // Validate that the sort option is working
     chai.expect(sortedElems[0].name).to.equal('a');
-    chai.expect(sortedElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(sortedElems[0].id).to.equal(elements[11].id);
     chai.expect(sortedElems[1].name).to.equal('b');
-    chai.expect(sortedElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(sortedElems[1].id).to.equal(elements[9].id);
     chai.expect(sortedElems[2].name).to.equal('c');
-    chai.expect(sortedElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(sortedElems[2].id).to.equal(elements[10].id);
 
     // Search the elements and return them sorted in reverse
     const reverseElems = await ElementController.search(adminUser, org.id, projIDs[0], branchID,
@@ -1402,45 +1451,11 @@ async function optionSortSearch() {
 
     // Validate that the sort option is working
     chai.expect(reverseElems[0].name).to.equal('c');
-    chai.expect(reverseElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(reverseElems[0].id).to.equal(elements[10].id);
     chai.expect(reverseElems[1].name).to.equal('b');
-    chai.expect(reverseElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(reverseElems[1].id).to.equal(elements[9].id);
     chai.expect(reverseElems[2].name).to.equal('a');
-    chai.expect(reverseElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
-
-    await ElementController.remove(adminUser, org.id, projIDs[0], branchID,
-      testElems.map((e) => e.id));
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that findElement function can return every parent up to root.
- */
-async function optionRootpathFind() {
-  try {
-    const elemID = utils.parseID(elements[4]._id).pop();
-
-    const option = { rootpath: true };
-
-    // Return a search on the furthest nested element with the rootpath option
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
-      elemID, option);
-
-    // Expect to find 3 elements
-    chai.expect(foundElements.length).to.equal(4);
-
-    const foundIDs = foundElements.map(e => e.id);
-
-    // Expect to find the model element and two test elements
-    chai.expect(foundIDs).to.include(utils.createID(org.id, projIDs[0], branchID, 'model'));
-    chai.expect(foundIDs).to.include(elements[1].id);
-    chai.expect(foundIDs).to.include(elements[2].id);
-    chai.expect(foundIDs).to.include(elements[4].id);
+    chai.expect(reverseElems[2].id).to.equal(elements[11].id);
   }
   catch (error) {
     M.log.error(error.message);
