@@ -273,21 +273,21 @@ module.exports.validate = function(config) {
     test(config, 'validators', 'object');
     if (config.validators.id) test(config, 'validators.id', 'string');
     if (config.validators.id_length) test(config, 'validators.id_length', 'string');
-    if (config.validators.org_id) test(config, 'validators', 'string');
-    if (config.validators.org_id_length) test(config, 'validators.id_length', 'string');
-    if (config.validators.project_id) test(config, 'validators', 'string');
-    if (config.validators.project_id_length) test(config, 'validators.id_length', 'string');
-    if (config.validators.branch_id) test(config, 'validators', 'string');
-    if (config.validators.branch_id_length) test(config, 'validators.id_length', 'string');
-    if (config.validators.element_id) test(config, 'validators', 'string');
-    if (config.validators.element_id_length) test(config, 'validators', 'string');
-    if (config.validators.user_username) test(config, 'validators', 'string');
-    if (config.validators.user_username_length) test(config, 'validators', 'string');
-    if (config.validators.user_email) test(config, 'validators', 'string');
-    if (config.validators.user_fname) test(config, 'validators', 'string');
-    if (config.validators.user_lname) test(config, 'validators', 'string');
-    if (config.validators.user_provider) test(config, 'validators', 'string');
-    if (config.validators.url_next) test(config, 'validators', 'string');
+    if (config.validators.org_id) test(config, 'validators.org_id', 'string');
+    if (config.validators.org_id_length) test(config, 'validators.org_id_length', 'string');
+    if (config.validators.project_id) test(config, 'validators.project_id', 'string');
+    if (config.validators.project_id_length) test(config, 'validators.project_id_length', 'string');
+    if (config.validators.branch_id) test(config, 'validators.branch_id', 'string');
+    if (config.validators.branch_id_length) test(config, 'validators.branch_id_length', 'string');
+    if (config.validators.element_id) test(config, 'validators.element_id', 'string');
+    if (config.validators.element_id_length) test(config, 'validators.element_id_length', 'string');
+    if (config.validators.user_username) test(config, 'validators.user_username', 'string');
+    if (config.validators.user_username_length) test(config, 'validators.user_username_length', 'string');
+    if (config.validators.user_email) test(config, 'validators.user_email', 'string');
+    if (config.validators.user_fname) test(config, 'validators.user_fname', 'string');
+    if (config.validators.user_lname) test(config, 'validators.user_lname', 'string');
+    if (config.validators.user_provider) test(config, 'validators.user_provider', 'string');
+    if (config.validators.url_next) test(config, 'validators.url_next', 'string');
   }
 
   // ----------------------------- Verify Artifact ----------------------------- //
