@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.profile-views.project-list
+ * @module ui.components.admin-console-views.project-list
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
