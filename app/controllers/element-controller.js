@@ -580,7 +580,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     const extraElements = await Element.find(findExtraElementsQuery, '_id', { lean: true });
     // Convert extraElements to JMI type 2 for easier lookup
     const extraElementsJMI2 = jmi.convertJMI(1, 2, extraElements);
-    // Loop through each remaining element that does not have it's parent,
+    // Loop through each remaining element that does not have its parent,
     // source, or target set yet
     remainingElements.forEach((element) => {
       // If the element has a parent
@@ -1876,7 +1876,7 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
       }
       // Get the parent id
       const parentID = parent._id;
-      // If it's a circular reference, don't get lost in the sauce
+      // If it's a circular reference, exit
       if (foundElements.includes(parentID)) {
         throw new M.DataFormatError('Circular element parent reference', 'warn');
       }
