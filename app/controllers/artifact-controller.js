@@ -53,7 +53,7 @@ if (!ArtifactStrategy.hasOwnProperty('getBlob')) {
   process.exit(0);
 }
 if (!ArtifactStrategy.hasOwnProperty('postBlob')) {
-  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement addBlob.`);
+  M.log.critical(`Error: Artifact Strategy (${M.config.artifact.strategy}) does not implement postBlob.`);
   process.exit(0);
 }
 if (!ArtifactStrategy.hasOwnProperty('deleteBlob')) {
