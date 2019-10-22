@@ -115,7 +115,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an branch using the branch controller.
+ * @description Validates that the Branch Controller can create a branch.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -155,7 +155,7 @@ function createBranch(done) {
 }
 
 /**
- * @description Creates multiple branches using the branch controller.
+ * @description Validates that the Branch Controller can create multiple branches.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -207,7 +207,7 @@ function createBranches(done) {
 }
 
 /**
- * @description Verifies that a tag can be created.
+ * @description Validates that the Branch Controller can create a tag branch.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -247,7 +247,7 @@ function createTag(done) {
 }
 
 /**
- * @description Finds an branch via the branch controller.
+ * @description Validates that the Branch Controller can find a branch.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -285,7 +285,7 @@ function findBranch(done) {
 }
 
 /**
- * @description Finds multiple branches via the branch controller.
+ * @description Validates that the Branch Controller can find multiple branches.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -340,7 +340,7 @@ function findBranches(done) {
 }
 
 /**
- * @description Finds all branches on a given project using the branch controller.
+ * @description Validates that the Branch Controller can find all the branches on a project.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -396,7 +396,7 @@ function findAllBranches(done) {
 }
 
 /**
- * @description Updates a branch using the branch controller.
+ * @description Validates that the Branch Controller can update a branch.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -441,7 +441,7 @@ function updateBranch(done) {
 }
 
 /**
- * @description Updates multiple branches using the branch controller.
+ * @description Validates that the Branch Controller can update multiple branches.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -499,7 +499,7 @@ function updateBranches(done) {
 }
 
 /**
- * @description Deletes a branch using the branch controller.
+ * @description Validates that the Branch Controller can delete a branch.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -532,7 +532,7 @@ function deleteBranch(done) {
 
 
 /**
- * @description Deletes multiple branches using the branch controller.
+ * @description Validates that the Branch Controller can delete multiple branches.
  *
  * @param {Function} done - The Mocha callback.
  */

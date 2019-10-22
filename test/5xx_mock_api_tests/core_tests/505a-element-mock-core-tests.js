@@ -851,9 +851,9 @@ function patchElements(done) {
   ];
 
   // Create objects to update elements
-  const arrUpdateObjects = elemData.map(p => ({
-    name: `${p.name}_edit`,
-    id: p.id
+  const arrUpdateObjects = elemData.map(e => ({
+    name: `${e.name}_edit`,
+    id: e.id
   }));
 
   const params = { orgid: org.id, projectid: projID, branchid: branchID };

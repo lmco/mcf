@@ -145,7 +145,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results.
+ * @description Validates that the find results can include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -171,7 +171,7 @@ async function optionIncludeArchivedFind() {
     chai.expect(foundOrg.length).to.equal(1);
     chai.expect(foundOrg[0]._id).to.equal(org._id);
 
-    // Perform a find on the orgs
+    // Perform a find on the orgs with the includeArchived option
     const foundOrgs = await OrgController.find(adminUser,
       [orgID, archivedID], options);
     // There should be two orgs
@@ -490,7 +490,7 @@ async function optionArchivedByFind() {
     await OrgController.update(adminUser, update);
 
     // Create archivedBy option
-    const options = { archivedBy: 'test_admin' };
+    const options = { archivedBy: 'test_admin', includeArchived: true };
 
     // Find the org
     const foundOrgs = await OrgController.find(adminUser, options);

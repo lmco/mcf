@@ -275,7 +275,7 @@ async function optionFieldsCreate() {
     const visibleFields2 = Object.keys(notFindUser._doc);
 
     // Check that the keys in the notFindOptions are not in createdUser
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
 
     // Remove the test user
     await UserController.remove(adminUser, [userObjFind.username, userObjNotFind.username]);
@@ -998,7 +998,7 @@ async function optionFieldsReplace() {
     const visibleFields2 = Object.keys(notFindUser._doc);
 
     // Check that the keys in the notFindOptions are not in createdUser
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
     // Remove test user
     await UserController.remove(adminUser, userData.username);
   }
@@ -1094,8 +1094,7 @@ async function optionIncludeArchivedSearch() {
     chai.expect(foundUsers).to.have.lengthOf.at.least(1);
     // Validate search text in found users
     foundUsers.forEach((foundUser) => {
-      chai.expect(foundUser.fname || foundUser.lname
-        || foundUser.preferredName).to.equal(searchQuery);
+      chai.expect(foundUser.fname).to.equal(searchQuery);
     });
 
     // Remove the test user

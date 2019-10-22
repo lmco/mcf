@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.303a-project-model-tests
+ * @module test.303a-project-model-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -156,14 +156,21 @@ async function updateProject() {
  * @description Deletes the project previously created in createProject test.
  */
 async function deleteProject() {
-  const projID = utils.createID(org.id, testData.projects[0].id);
+  try {
+    const projID = utils.createID(org.id, testData.projects[0].id);
 
-  // Remove the project
-  await Project.deleteMany({ _id: projID });
+    // Remove the project
+    await Project.deleteMany({ _id: projID });
 
-  // Attempt to find the project
-  const foundProject = await Project.findOne({ _id: projID });
+    // Attempt to find the project
+    const foundProject = await Project.findOne({ _id: projID });
 
-  // foundProject should be null
-  should.not.exist(foundProject);
+    // foundProject should be null
+    should.not.exist(foundProject);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
